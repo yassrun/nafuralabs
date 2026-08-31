@@ -1,6 +1,11 @@
 package ma.nafura.chantiers.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -76,7 +81,7 @@ class ChantierPortefeuilleServiceTest {
         Chantier enCours = chantier("ch-1", "CH-001", Chantier.STATUS_EN_COURS);
         enCours.setDateFinPrevue(LocalDate.now().minusDays(3));
         enCours.setAvancementPercent(new BigDecimal("37"));
-        when(chantierService.list(null, null, null, null)).thenReturn(List.of(enCours));
+        when(chantierService.list(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class), anyBoolean())).thenReturn(List.of(enCours));
         when(summaryService.getSummary("ch-1"))
                 .thenReturn(summary(new BigDecimal("737106.00"), new BigDecimal("582600.00")));
         when(affectationService.listByChantier("ch-1")).thenReturn(List.of());
@@ -101,7 +106,7 @@ class ChantierPortefeuilleServiceTest {
     void lister_roleTerrain_neRetourneAucunMontantFinancier() {
         UserContext.setPermissions(java.util.Set.of("chantiers.chantiers.portefeuille.read"));
         Chantier c = chantier("ch-1", "CH-001", Chantier.STATUS_EN_COURS);
-        when(chantierService.list(null, null, null, null)).thenReturn(List.of(c));
+        when(chantierService.list(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class), anyBoolean())).thenReturn(List.of(c));
         when(summaryService.getSummary("ch-1"))
                 .thenReturn(summary(new BigDecimal("737106.00"), new BigDecimal("582600.00")));
         when(affectationService.listByChantier("ch-1")).thenReturn(List.of());
@@ -131,7 +136,7 @@ class ChantierPortefeuilleServiceTest {
         Chantier a = chantier("ch-a", "CH-A", Chantier.STATUS_EN_COURS);
         Chantier b = chantier("ch-b", "CH-B", Chantier.STATUS_EN_COURS);
         b.setLabel("Hôpital Ibn Sina");
-        when(chantierService.list(null, null, null, null)).thenReturn(List.of(a, b));
+        when(chantierService.list(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class), anyBoolean())).thenReturn(List.of(a, b));
         when(summaryService.getSummary(org.mockito.ArgumentMatchers.anyString()))
                 .thenReturn(ChantierSummaryDto.builder().build());
         when(affectationService.listByChantier(org.mockito.ArgumentMatchers.anyString())).thenReturn(List.of());
@@ -141,6 +146,7 @@ class ChantierPortefeuilleServiceTest {
                         null, null, null, null, null, "ibn sina", "code", "asc", 0, 20));
 
         assertThat(page.getItems()).extracting(ChantierPortefeuilleRowDto::getId).containsExactly("ch-b");
+        verify(chantierService).list(nullable(String.class), nullable(String.class), nullable(String.class), eq("ibn sina"), eq(false));
     }
 
     @Test
@@ -148,7 +154,7 @@ class ChantierPortefeuilleServiceTest {
         UserContext.setPermissions(java.util.Set.of("chantiers.chantiers.portefeuille.finance.read"));
         Chantier neg = chantier("ch-1", "CH-001", Chantier.STATUS_EN_COURS);
         Chantier pos = chantier("ch-2", "CH-002", Chantier.STATUS_EN_COURS);
-        when(chantierService.list(null, null, null, null)).thenReturn(List.of(neg, pos));
+        when(chantierService.list(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class), anyBoolean())).thenReturn(List.of(neg, pos));
         when(summaryService.getSummary("ch-1")).thenReturn(summary(new BigDecimal("500000.00"), new BigDecimal("582600.00")));
         when(summaryService.getSummary("ch-2")).thenReturn(summary(new BigDecimal("737106.00"), new BigDecimal("582600.00")));
         when(affectationService.listByChantier(org.mockito.ArgumentMatchers.anyString())).thenReturn(List.of());
@@ -170,7 +176,7 @@ class ChantierPortefeuilleServiceTest {
         UserContext.setPermissions(java.util.Set.of("chantiers.chantiers.portefeuille.finance.read"));
         Chantier a = chantier("ch-a", "CH-A", Chantier.STATUS_EN_COURS);
         Chantier b = chantier("ch-b", "CH-B", Chantier.STATUS_EN_COURS);
-        when(chantierService.list(null, null, null, null)).thenReturn(List.of(a, b));
+        when(chantierService.list(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class), anyBoolean())).thenReturn(List.of(a, b));
         when(summaryService.getSummary("ch-a")).thenReturn(summary(new BigDecimal("100000.00"), new BigDecimal("50000.00")));
         when(summaryService.getSummary("ch-b")).thenReturn(summary(new BigDecimal("100000.00"), new BigDecimal("80000.00")));
         when(affectationService.listByChantier(org.mockito.ArgumentMatchers.anyString())).thenReturn(List.of());
@@ -189,7 +195,7 @@ class ChantierPortefeuilleServiceTest {
         Chantier a = chantier("ch-a", "CH-A", Chantier.STATUS_EN_COURS);
         Chantier b = chantier("ch-b", "CH-B", Chantier.STATUS_EN_COURS);
         Chantier sansMarge = chantier("ch-z", "CH-Z", Chantier.STATUS_EN_COURS);
-        when(chantierService.list(null, null, null, null)).thenReturn(List.of(sansMarge, b, a));
+        when(chantierService.list(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class), anyBoolean())).thenReturn(List.of(sansMarge, b, a));
         when(summaryService.getSummary("ch-a")).thenReturn(summary(new BigDecimal("100"), new BigDecimal("10")));
         when(summaryService.getSummary("ch-b")).thenReturn(summary(new BigDecimal("100"), new BigDecimal("80")));
         when(summaryService.getSummary("ch-z")).thenReturn(ChantierSummaryDto.builder().build());
@@ -209,7 +215,7 @@ class ChantierPortefeuilleServiceTest {
         Chantier c = chantier("ch-1", "CH-001", Chantier.STATUS_EN_PREPARATION);
         c.setClientId("client-1");
         c.setDebourseInitialHt(null);
-        when(chantierService.list(null, null, null, null)).thenReturn(List.of(c));
+        when(chantierService.list(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class), anyBoolean())).thenReturn(List.of(c));
         when(summaryService.getSummary("ch-1")).thenReturn(summary(new BigDecimal("100"), new BigDecimal("80")));
         when(affectationService.listByChantier("ch-1")).thenReturn(List.of());
         when(lotRepository.countByTenantIdAndChantierId(TENANT, "ch-1")).thenReturn(0L);
@@ -221,13 +227,13 @@ class ChantierPortefeuilleServiceTest {
 
         assertThat(row.getProchaineAction()).isNotNull();
         assertThat(row.getProchaineAction().getLibelle()).isEqualTo("chantiers.cockpit.action.preparer");
-        assertThat(row.getProchaineAction().getRoute()).isEqualTo("/chantiers/{id}");
+        assertThat(row.getProchaineAction().getRoute()).isEqualTo("/chantiers/ch-1");
     }
 
     @Test
     void lister_sansDates_niMarge_absencePasZero() {
         Chantier prepa = chantier("ch-1", "CH-001", Chantier.STATUS_EN_PREPARATION);
-        when(chantierService.list(null, null, null, null)).thenReturn(List.of(prepa));
+        when(chantierService.list(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class), anyBoolean())).thenReturn(List.of(prepa));
         when(summaryService.getSummary("ch-1")).thenReturn(ChantierSummaryDto.builder().build());
         when(affectationService.listByChantier("ch-1")).thenReturn(List.of());
 
@@ -243,5 +249,48 @@ class ChantierPortefeuilleServiceTest {
         // AC-12 — vente/budget absents → alerte d'intégrité (WARNING), jamais une marge 0 %.
         assertThat(row.getAlerteCode()).isEqualTo("finance_incomplete");
         assertThat(row.getAlerteSeverite()).isEqualTo("WARNING");
+    }
+
+    @Test
+    void lister_triCode_neComposeQueLaPage() {
+        Chantier a = chantier("ch-a", "CH-A", Chantier.STATUS_EN_COURS);
+        Chantier b = chantier("ch-b", "CH-B", Chantier.STATUS_EN_COURS);
+        Chantier c = chantier("ch-c", "CH-C", Chantier.STATUS_EN_COURS);
+        when(chantierService.list(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class), anyBoolean()))
+                .thenReturn(List.of(a, b, c));
+        when(summaryService.getSummary(org.mockito.ArgumentMatchers.anyString()))
+                .thenReturn(ChantierSummaryDto.builder().build());
+        when(affectationService.listByChantier(org.mockito.ArgumentMatchers.anyString())).thenReturn(List.of());
+
+        ChantierPortefeuilleRowDto.Page page = service.lister(
+                new ChantierPortefeuilleService.PortefeuilleQuery(
+                        null, null, null, null, null, "code", "asc", 0, 1));
+
+        assertThat(page.getTotal()).isEqualTo(3);
+        assertThat(page.getItems()).hasSize(1);
+        assertThat(page.getItems().getFirst().getCode()).isEqualTo("CH-A");
+        verify(summaryService, times(1)).getSummary("ch-a");
+        verify(summaryService, times(0)).getSummary("ch-b");
+        verify(summaryService, times(0)).getSummary("ch-c");
+    }
+
+    /** AC-12 — filtre dérivé : compose les candidats status+search, jamais le tenant hors search. */
+    @Test
+    void lister_filtreDerive_composeUniquementCandidatsSearch() {
+        UserContext.setPermissions(java.util.Set.of("chantiers.chantiers.portefeuille.finance.read"));
+        Chantier match = chantier("ch-match", "CH-MATCH", Chantier.STATUS_EN_COURS);
+        when(chantierService.list(nullable(String.class), nullable(String.class), nullable(String.class), eq("MATCH"), eq(false)))
+                .thenReturn(List.of(match));
+        when(summaryService.getSummary("ch-match"))
+                .thenReturn(summary(new BigDecimal("100"), new BigDecimal("200")));
+        when(affectationService.listByChantier("ch-match")).thenReturn(List.of());
+
+        ChantierPortefeuilleRowDto.Page page = service.lister(
+                new ChantierPortefeuilleService.PortefeuilleQuery(
+                        null, null, null, null, true, "MATCH", "marge", "desc", 0, 20));
+
+        assertThat(page.getTotal()).isEqualTo(1);
+        verify(chantierService).list(nullable(String.class), nullable(String.class), nullable(String.class), eq("MATCH"), eq(false));
+        verify(summaryService, times(1)).getSummary("ch-match");
     }
 }

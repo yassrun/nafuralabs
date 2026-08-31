@@ -1,5 +1,6 @@
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { Component, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -9,13 +10,14 @@ import {
   ConfigDrivenDetailPageImports,
   ConfigDrivenDetailPageStyles,
   createDetailFacadeFromCrud,
+  LOOKUP_SEARCHERS,
+  NfSelectComponent,
+  type LookupSearchFn,
 } from '@platform/lib/anatomy';
 import type { DetailActionEvent, LookupItem } from '@platform/lib/anatomy/types';
 import type { BCStatus, BonCommande, BonCommandeCreate, MatchingReception, BCLigne } from '@app/achats/models';
 import type { DemandeAchat } from '@app/achats/models';
 import { MatchingService } from '@app/achats/services/matching.service';
-import type { Location } from '@app/catalogue/models';
-import { ErpLookupService } from '@app/socle/shared/services/erp-lookup.service';
 import { SubmitApprovalButtonComponent } from '@app/socle/approbations/components/submit-approval-button/submit-approval-button.component';
 import { DocScanButtonComponent } from '@app/socle/shared/components/doc-scan-button/doc-scan-button.component';
 import {
@@ -40,7 +42,7 @@ interface ReceptionLineDraft {
 @Component({
   selector: 'app-bc-detail',
   standalone: true,
-  imports: [CommonModule, DecimalPipe, RouterLink, TranslateModule, ButtonComponent, DocScanButtonComponent, ...ConfigDrivenDetailPageImports, SubmitApprovalButtonComponent],
+  imports: [CommonModule, DecimalPipe, FormsModule, RouterLink, TranslateModule, ButtonComponent, NfSelectComponent, DocScanButtonComponent, ...ConfigDrivenDetailPageImports, SubmitApprovalButtonComponent],
   templateUrl: './bc-detail.page.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [ConfigDrivenDetailPageStyles, `
@@ -87,7 +89,8 @@ interface ReceptionLineDraft {
     .bc-rec-form h3 { margin: 0 0 0.75rem; font-size: 0.95rem; }
     .bc-rec-form__row { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem; }
     .bc-rec-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--nf-color-text-secondary); }
-    .bc-rec-form select, .bc-rec-form input { padding: 6px 8px; border: 1px solid var(--nf-color-border); border-radius: 4px; min-width: 180px; }
+    .bc-rec-form input { padding: 6px 8px; border: 1px solid var(--nf-color-border); border-radius: 4px; min-width: 180px; }
+    .bc-rec-form nf-select { min-width: 280px; }
     .bc-rec-qty-input { width: 80px; text-align: right; min-width: 0; }
     .bc-rec-form__actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
     .bc-rec-form button { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-size: 13px; }
@@ -99,13 +102,15 @@ interface ReceptionLineDraft {
 export class BcDetailPage extends ConfigDrivenDetailPage<BonCommande> {
   private readonly crud = inject(BcFacade);
   private readonly matchingSvc = inject(MatchingService);
-  private readonly erpLookup = inject(ErpLookupService);
   private readonly translate = inject(TranslateService);
   private readonly demandeApi = inject(DemandeApiService);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
+
+  readonly searchLocationsDepot: LookupSearchFn = (q) =>
+    this.lookupSearchers?.['locationsDepot']?.(q) ?? Promise.resolve([]);
 
   readonly matchSummary = signal<MatchingReception | null>(null);
   readonly receptions = signal<ApiReceptionAchat[]>([]);
-  readonly locations = signal<Location[]>([]);
   readonly showReceptionForm = signal(false);
   readonly receptionSaving = signal(false);
   readonly destLocationId = signal('');
@@ -202,21 +207,6 @@ export class BcDetailPage extends ConfigDrivenDetailPage<BonCommande> {
     }
   }
 
-  private async ensureLocations(): Promise<void> {
-    if (this.locations().length) return;
-    const rows = await this.erpLookup.locations();
-    this.locations.set(
-      rows
-        .map((row) => row.data as Location | undefined)
-        .filter((l): l is Location => {
-          if (!l) return false;
-          const type = String(l.type);
-          // API returns WAREHOUSE; inventory UI uses ENTREPOT/DEPOT (see location-api.service).
-          return type === 'DEPOT' || type === 'CHANTIER' || type === 'ENTREPOT' || type === 'WAREHOUSE';
-        }),
-    );
-  }
-
   private openReceptionForm(bc: BonCommande): void {
     const lines: ReceptionLineDraft[] = (bc.lignes ?? [])
       .map((l) => {
@@ -234,7 +224,6 @@ export class BcDetailPage extends ConfigDrivenDetailPage<BonCommande> {
     this.destLocationId.set('');
     this.blNumero.set('');
     this.showReceptionForm.set(true);
-    void this.ensureLocations();
   }
 
   updateLineQty(index: number, value: string): void {

@@ -26,6 +26,7 @@ type ViewId =
   | "erreur"
   | "dpu"
   | "stock"
+  | "lookup"
   | "dirty";
 
 const VIEWS: { id: ViewId; label: string }[] = [
@@ -37,6 +38,7 @@ const VIEWS: { id: ViewId; label: string }[] = [
   { id: "erreur", label: "Erreur reseau" },
   { id: "dpu", label: "Pied DPU" },
   { id: "stock", label: "Pied stock" },
+  { id: "lookup", label: "Pied lookup" },
   { id: "dirty", label: "Selection" },
 ];
 
@@ -100,6 +102,7 @@ export default function PickerArticleWireframe() {
       {view === "erreur" && <VueErreur />}
       {view === "dpu" && <VueDpu />}
       {view === "stock" && <VueStock />}
+      {view === "lookup" && <VueLookup />}
       {view === "dirty" && <VueDirty />}
 
       <Spacer />
@@ -127,7 +130,8 @@ export default function PickerArticleWireframe() {
         <Text>
           Pied selon le contexte : DPU = qty + PU tarif + « Ajouter au poste »
           (ouvert depuis le header, pas de nature pré-remplie) ; stock = natures
-          stockables, pick seul ; tarif / solde / lookup items = article seul.
+          stockables, pick seul ; lookup `items` (tarif / solde / tx) = article
+          seul, toutes natures.
         </Text>
         <Text>
           0 hit : message clair. Créer / Extraire restent ailleurs (décompo,
@@ -397,7 +401,7 @@ function VueStock() {
     <Stack gap={12}>
       <Callout tone="info" title="Pied réception / retour / transfert">
         Natures stockables seulement. Pick seul — pas de qty ni tarif dans ce
-        pied. Tarif / solde / lookup items : même pick seul, toutes natures.
+        pied.
       </Callout>
       <DialogShell title="Choisir un article" context="Réception">
         <Stack gap={12}>
@@ -408,6 +412,35 @@ function VueStock() {
             rows={[
               ["ART-CPJ45", "Ciment CPJ 45", "t", "1 180"],
               ["SAB-01", "Sable 0/5 concasse", "m3", "220"],
+            ]}
+            rowTone={["info", undefined]}
+          />
+          <Row gap={8} justify="end">
+            <Button variant="secondary">Annuler</Button>
+            <Button variant="primary">Choisir</Button>
+          </Row>
+        </Stack>
+      </DialogShell>
+    </Stack>
+  );
+}
+
+function VueLookup() {
+  return (
+    <Stack gap={12}>
+      <Callout tone="info" title="Pied lookup items">
+        Tarif / solde / inventory-tx — lookupKey `items`. Pick article seul,
+        toutes natures actives. Pas de qty ni PU tarif dans le pied.
+      </Callout>
+      <DialogShell title="Choisir un article" context="Lookup · tarif">
+        <Stack gap={12}>
+          <SearchBar value="ciment" placeholder="" />
+          <NatureChips natures={NATURES} />
+          <Table
+            headers={["Code", "Désignation", "Unité", "PU"]}
+            rows={[
+              ["ART-CPJ45", "Ciment CPJ 45", "t", "1 180"],
+              ["CIM-32", "Ciment CPJ 32,5", "t", "1 050"],
             ]}
             rowTone={["info", undefined]}
           />

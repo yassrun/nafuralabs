@@ -95,9 +95,9 @@ function assertLoadingWiring() {
   const chantierSrc = read(chantiersListing);
   if (!chantierSrc.includes('readonly chargement = signal(true)')) {
     fail('AC-12', 'signal chargement absent du portefeuille chantiers', 'chargement', 'absent');
-  } else if (!chantierSrc.includes('@if (chargement())')) {
-    fail('AC-12', 'état chargement non rendu dans le tableau chantiers', '@if (chargement())', 'absent');
-  } else if (!chantierSrc.includes('if (this.chargement())')) {
+  } else if (!chantierSrc.includes('@if (chargement()')) {
+    fail('AC-12', 'état chargement non rendu dans le tableau chantiers', '@if (chargement()', 'absent');
+  } else if (!chantierSrc.includes('this.chargement()')) {
     fail('AC-12', 'countLabel ignore le chargement', 'chargement()', 'absent');
   } else {
     pass('AC-12', 'portefeuille chantiers : chargement ≠ vide / compteur');

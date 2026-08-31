@@ -42,30 +42,14 @@ export class TransfertFacade implements CrudStyleFacade<InventoryTx, Partial<Inv
   }
 
   async ensureLookups(): Promise<void> {
-    const [locations, motifs] = await Promise.all([
-      this.lookupsService.loadLocations(),
-      this.motifsApi.listByTxType('TRANSFERT'),
-    ]);
-    this.locationsCache = locations;
+    const motifs = await this.motifsApi.listByTxType('TRANSFERT');
+    this.locationsCache = [];
     this.motifsCache = motifs;
 
-    const allLocations = locations.filter((l) => l.isActive);
-    const chantierLocations = allLocations.filter((l) => l.type === 'CHANTIER');
-
     this.lookupsSignal.set({
-      allLocations: allLocations.map((l) => ({
-        key: l.id,
-        value: l.projectRef ? `${l.name} (${l.projectRef})` : l.name,
-        data: { type: l.type },
-      })),
-      chantierLocations: chantierLocations.map((l) => ({
-        key: l.id,
-        value: l.projectRef ? `${l.name} (${l.projectRef})` : l.name,
-      })),
-      motifsTransfertChantier: motifs.map((m) => ({
-        key: m.id,
-        value: `${m.code} — ${m.name}`,
-      })),
+      allLocations: [],
+      chantierLocations: [],
+      motifsTransfertChantier: [],
       articlesMatCons: [],
     });
   }

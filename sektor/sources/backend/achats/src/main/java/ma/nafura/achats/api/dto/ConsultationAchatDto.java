@@ -13,8 +13,6 @@ public class ConsultationAchatDto {
 
     private UUID id;
     private String numero;
-    private UUID fournisseurId;
-    private String fournisseurNom;
     private List<String> clesStables;
     private UUID dossierEtudeId;
     private String statut;
@@ -22,6 +20,10 @@ public class ConsultationAchatDto {
     private int devisRecus = 0;
     @Builder.Default
     private List<ConsultationDevisDto> devis = new ArrayList<>();
+    @Builder.Default
+    private List<ConsultationDestinataireDto> destinataires = new ArrayList<>();
+    @Builder.Default
+    private List<ConsultationEnvoiDto> envois = new ArrayList<>();
     private OffsetDateTime createdAt;
 
     public static ConsultationAchatDto emptyPanier() {

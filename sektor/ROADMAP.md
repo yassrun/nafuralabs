@@ -5,13 +5,13 @@
 
 ## Ouvert
 
-1. **lookups** — combobox FK (client, fournisseur, …) : recherche serveur, pas de dump ; œil = fiche si id, liste si vide. Enum = select natif. Article = picker déjà gelé. Gel 23/08.
-2. **consultation** — objet Achats · overlay étude = liste liées (pas formulaire) · devis = import magique · flag CONSULTÉ si liée (gel 22/08 + overlay 23/08)
-3. **etudes** — Extraire + parcours QA livrés · raffinement dans `raffinement-etude` · **finition-parcours bouclé** (28/08) · ancien panneau consultation **à remplacer** par le lot `consultation`
+1. **raffinement-ux-pro** — **bouclé 28/08** · combobox FK, picker article, consultations, fournisseur/BC, cockpit, ops chantiers, catalogue lignes/parc · [`raster-src/lots/raffinement-ux-pro/LOT.md`](raster-src/lots/raffinement-ux-pro/LOT.md)
+2. **consultation** — métier + UX chrome bouclés (28/08) · **ouvert** sous-lot `destinataires-envoi-suivi` (RFQ : panier puis N fournisseurs, envoi, statut selon devis)
+3. **etudes** — finition-parcours bouclé · picker-article bouclé (28/08)
 
 4. **chantiers** — raffinement du BC : arbre vendu / interne, avancement en quantité, situation cumulative, budget par nœud, continuité Étude–Devis–Chantier et cockpit décisionnel. 14 gels du 23/08 dans [`raster-src/DECISIONS-PRODUIT-CHANTIER.md`](raster-src/DECISIONS-PRODUIT-CHANTIER.md) · découpe dans [`raster-src/lots/chantiers/LOT.md`](raster-src/lots/chantiers/LOT.md).
    Contrainte qui prime : **le palier 1 marche sans planning** — un chantier converti est facturable le jour même. Le planning (paliers 2 et 3) est la vague 2, pas encore coupée.
-   **Maintenant :** palier 1 chantiers + planning 176–184 + budget 248 + qa-mode-b 189 + raffinement 210 **bouclés** · **finition-parcours 214–219 bouclé** (28/08).
+   **Maintenant :** palier 1 chantiers + planning 176–184 + budget 248 + qa-mode-b 189 + raffinement 210 **bouclés** · **finition-parcours 214–219 bouclé** (28/08) · **raffinement-ux-pro bouclé** (28/08).
 
 <!-- borne -->
 
@@ -19,4 +19,5 @@
 
 5. **qa-mode-b** — contrat agents Mode B (auto-login owner) — docs, pas la fenêtre produit
 6. **plier-archi** — Études consomme Catalogue via `api` (déjà PLAN, tasks balayées)
-7. **stabiliser-sources** / **aligner-arbre** / **monter-angular-*** — lots d’arbre, pas ce cycle
+7. **lookups** — absorbé par **`raffinement-ux-pro/socle-lookups-combobox`** · archive [`raster-src/lots/_archive/lookups/`](raster-src/lots/_archive/lookups/)
+8. **stabiliser-sources** / **aligner-arbre** / **monter-angular-*** — lots d’arbre, pas ce cycle

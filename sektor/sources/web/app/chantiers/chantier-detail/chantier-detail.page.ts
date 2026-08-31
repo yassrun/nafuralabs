@@ -126,25 +126,14 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
         @if (activeTab() === 'overview') {
           <section class="tab-panel">
             <app-pilotage-tab [chantierId]="c.id" />
-            <article class="workflow-card">
-              <h3>{{ 'chantiers.chantier.detail.sections.workflow' | translate }}</h3>
-              <p class="tab-hint">{{ 'chantiers.chantier.detail.workflowHint' | translate }}</p>
-              <dl class="contract-dates">
-                <dt>{{ 'chantiers.chantier.detail.labels.ordreService' | translate }}</dt>
-                <dd>{{ contractDateLabel(c.dateOrdreService) }}</dd>
-                <dt>{{ 'chantiers.chantier.detail.labels.debut' | translate }}</dt>
-                <dd>{{ contractDateLabel(c.dateDebut) }}</dd>
-                <dt>{{ 'chantiers.chantier.detail.labels.finPrevue' | translate }}</dt>
-                <dd>{{ contractDateLabel(c.dateFinPrevue) }}</dd>
-              </dl>
-              <div class="workflow-actions">
-                <nf-button variant="secondary" (clicked)="setTab('lots')">{{ 'chantiers.chantier.detail.workflowActions.arbre' | translate }}</nf-button>
-                <nf-button variant="secondary" (clicked)="openAvancement()">{{ 'chantiers.chantier.detail.workflowActions.avancement' | translate }}</nf-button>
-                <nf-button variant="secondary" (clicked)="openAttachements()">{{ 'chantiers.chantier.detail.workflowActions.attachements' | translate }}</nf-button>
-                <nf-button variant="secondary" (clicked)="setTab('situations')">{{ 'chantiers.chantier.detail.workflowActions.situations' | translate }}</nf-button>
-                <nf-button variant="secondary" (clicked)="openJournal()">{{ 'chantiers.chantier.detail.workflowActions.journal' | translate }}</nf-button>
-              </div>
-            </article>
+            <dl class="contract-dates contract-dates--inline">
+              <dt>{{ 'chantiers.chantier.detail.labels.ordreService' | translate }}</dt>
+              <dd>{{ contractDateLabel(c.dateOrdreService) }}</dd>
+              <dt>{{ 'chantiers.chantier.detail.labels.debut' | translate }}</dt>
+              <dd>{{ contractDateLabel(c.dateDebut) }}</dd>
+              <dt>{{ 'chantiers.chantier.detail.labels.finPrevue' | translate }}</dt>
+              <dd>{{ contractDateLabel(c.dateFinPrevue) }}</dd>
+            </dl>
           </section>
         }
 
@@ -323,17 +312,15 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
     }
     .chantier-meta__link:hover { text-decoration: underline; }
 
-    .workflow-card {
-      margin-top: 1.25rem; padding: 1rem 1.25rem; border: 1px solid var(--nf-color-border-subtle);
-      border-radius: var(--nf-radius-md); background: var(--nf-color-surface-raised);
-    }
-    .workflow-card h3 { margin: 0 0 0.5rem; font-size: 1rem; }
     .contract-dates {
       display: grid; grid-template-columns: auto 1fr; gap: 0.35rem 1rem; margin: 0.75rem 0 1rem;
       font-size: 0.9rem;
     }
+    .contract-dates--inline {
+      margin-top: 1rem; padding: 0.75rem 1rem; border: 1px solid var(--nf-color-border);
+      border-radius: 0.6rem; background: var(--nf-color-surface);
+    }
     .contract-dates dt { color: var(--nf-color-text-secondary); }
-    .workflow-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
     .hero {
       display: grid;
@@ -529,7 +516,10 @@ export class ChantierDetailPage {
     });
   }
 
-  readonly activeTab = signal<DetailTab>(normalizeDetailTab(this.route.snapshot.queryParamMap.get('tab')));
+  readonly activeTab = toSignal(
+    this.route.queryParamMap.pipe(map((q) => normalizeDetailTab(q.get('tab')))),
+    { initialValue: normalizeDetailTab(this.route.snapshot.queryParamMap.get('tab')) },
+  );
 
   readonly marchePourChantier = computed(() => {
     const c = this.chantier();
@@ -629,7 +619,6 @@ export class ChantierDetailPage {
   }));
 
   setTab(tab: DetailTab): void {
-    this.activeTab.set(tab);
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { tab: tab === 'overview' ? null : tab },

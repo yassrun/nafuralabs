@@ -51,6 +51,10 @@ export class MaterielAffectationApiService extends FeatureApiService<
   async clore(id: string, dateFin?: string): Promise<ApiMaterielAffectation> {
     return this.post<ApiMaterielAffectation>(`${this.basePath}/${id}/clore`, dateFin ? { dateFin } : {});
   }
+
+  override async create(body: MaterielAffectationCreateBody): Promise<ApiMaterielAffectation> {
+    return this.post<ApiMaterielAffectation>(this.basePath, body);
+  }
 }
 
 export function apiToAffectationChantier(row: ApiMaterielAffectation): AffectationChantier {

@@ -48,35 +48,27 @@ export class SortieFacade implements CrudStyleFacade<InventoryTx, Partial<Invent
   }
 
   async ensureLookups(): Promise<void> {
-    const [, locations, articles, motifs] = await Promise.all([
+    const [, , articles, motifs] = await Promise.all([
       this.budgetFacade.loadListingFromApi(),
-      this.lookupsService.loadLocations(),
+      Promise.resolve([]),
       this.articleCatalog.loadArticles({ activeOnly: true }),
       this.motifsApi.listByTxType('SORTIE'),
     ]);
-    this.locationsCache = locations;
+    this.locationsCache = [];
     this.motifsCache = motifs;
     this.articlesCache = articles;
-    const sources = locations.filter((l) => l.isActive !== false);
     const matCons = articles.filter(
       (a) => isStockableNature(a.nature),
     );
-    const budgets = this.budgetFacade.budgets();
     this.lookupsSignal.set({
-      sourceLocations: sources.map((l) => ({
-        key: l.id,
-        value: `${l.code} — ${l.name}`,
-      })),
-      chantiersBudget: budgets.map((b) => ({
-        key: b.id,
-        value: `${b.code} — ${b.name}`,
-      })),
+      sourceLocations: [],
+      chantiersBudget: [],
       articlesMatCons: matCons.map((a) => ({
         key: a.id,
         value: `${a.code} — ${a.name}`,
         data: { uomCode: a.uomCode, uomId: a.uomId, prix: a.pmp ?? a.prixUnitaire },
       })),
-      motifsSortie: motifs.map((m) => ({ key: m.id, value: `${m.code} — ${m.name}` })),
+      motifsSortie: [],
     });
   }
 

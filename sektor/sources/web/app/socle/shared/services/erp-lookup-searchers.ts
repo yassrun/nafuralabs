@@ -8,7 +8,8 @@ import {
 } from './erp-lookup.service';
 
 /**
- * Typeahead map for every {@link ERP_LOOKUP_LIST_ROUTES} key except `items` (picker, AC-13).
+ * Typeahead map for every {@link ERP_LOOKUP_LIST_ROUTES} key except `items`
+ * (overlay picker via {@link LOOKUP_PICKERS} / lot picker-article).
  * Queries shorter than 2 characters resolve to [] — no collection GET.
  */
 export function buildErpLookupSearchers(
@@ -41,6 +42,14 @@ export function buildErpLookupSearchers(
       }),
     ),
   );
+  const chantierLocations = typeahead((q) =>
+    erp.locations(q).then((items) =>
+      items.filter((item) => {
+        const type = (item.data as Record<string, unknown> | undefined)?.['type'];
+        return type === 'CHANTIER';
+      }),
+    ),
+  );
   const currencies = typeahead((q) => erp.currencies(q));
   const devis = typeahead((q) => erp.devis(q));
   const factures = typeahead((q) => erp.factures(q));
@@ -50,6 +59,7 @@ export function buildErpLookupSearchers(
   const motifs = typeahead((q) => erp.motifs(q));
   const ouvrages = typeahead((q) => erp.ouvrages(q));
   const inventoryTxes = typeahead((q) => erp.inventoryTxes(q));
+  const materiels = typeahead((q) => erp.materiels(q));
 
   return {
     clients,
@@ -64,7 +74,7 @@ export function buildErpLookupSearchers(
     allLocations: locations,
     location: locations,
     depotLocations,
-    chantierLocations: locations,
+    chantierLocations,
     sourceLocations: locations,
     locationsDepot: depotLocations,
     currencies,
@@ -87,5 +97,8 @@ export function buildErpLookupSearchers(
     conditionPaiementType: typeahead((q) => erp.paymentTerms(q)),
     tauxChangeSource: currencies,
     inventoryTxes,
+    materiels,
+    materielsLookup: materiels,
+    engins: materiels,
   };
 }

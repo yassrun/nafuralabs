@@ -35,21 +35,14 @@ export class InventoryTxPanelFacade {
   }
 
   async ensureLookups(): Promise<void> {
-    const [locations, articles] = await Promise.all([
-      this.lookupsService.loadLocations(),
-      this.articleCatalog.loadArticles({ activeOnly: true }),
-    ]);
+    const articles = await this.articleCatalog.loadArticles({ activeOnly: true });
     this.articlesCache = articles;
-    const activeLocations = locations.filter((l) => l.isActive);
     this.lookupsSignal.set({
       txTypes: TX_TYPES.map((t) => ({
         key: t,
         value: this.translate.instant(`inventory.enums.txType.${t}`),
       })),
-      locations: activeLocations.map((l) => ({
-        key: l.id,
-        value: `${l.code} — ${l.name}`,
-      })),
+      locations: [],
       articlesMatCons: articles.map((a) => ({
         key: a.id,
         value: `${a.code} — ${a.name}`,

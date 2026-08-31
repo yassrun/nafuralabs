@@ -1,176 +1,409 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+
 import { TranslateService } from '@ngx-translate/core';
 
+
+
 import type { CrudStyleFacade } from '@platform/lib/anatomy';
+
 import type { ListResponse, LookupContext } from '@platform/lib/anatomy/types';
+
 import type { InventaireLine, InventaireTx, Location, StockBalance } from '../../../models';
+
 import { InventoryLookupsService } from '../../../services/inventory-lookups.service';
+
 import { InventoryMovementApiService } from '../../../services/inventory-movement-api.service';
+
 import { StockQueryService } from '../../../services/stock-query.service';
+
 import type { ApiInventoryTxRow } from '../../../services/inventory-tx.mapper';
 
+
+
 export interface InventaireListItem extends InventaireTx {
+
   linesCount: number;
+
 }
 
+
+
 @Injectable({ providedIn: 'root' })
+
 export class InventaireFacade implements CrudStyleFacade<InventaireTx, Partial<InventaireTx>> {
+
   private readonly movementApi = inject(InventoryMovementApiService);
+
   private readonly lookupsService = inject(InventoryLookupsService);
+
   private readonly stockQuery = inject(StockQueryService);
 
-  private locationsCache: Location[] = [];
+
+
+  private readonly locationById = new Map<string, Location>();
+
+
 
   private lookupsSignal = signal<LookupContext>({});
+
   private readonly translate = inject(TranslateService);
+
+
 
   readonly lookups = computed(() => this.lookupsSignal());
 
+
+
   private enrichers() {
+
     return {
+
       locationName: (id?: string) => this.locationName(id),
+
     };
+
   }
+
+
 
   async ensureLookups(): Promise<void> {
-    this.locationsCache = await this.lookupsService.loadLocations();
+
     this.lookupsSignal.set({
-      allLocations: this.locationsCache.map((l) => ({
-        key: l.id,
-        value: l.type === 'CHANTIER' && l.projectRef ? `${l.name} (${l.projectRef})` : l.name,
-        data: { type: l.type },
-      })),
+
+      allLocations: [],
+
     });
+
   }
+
+
 
   async loadItems(query?: Record<string, unknown>): Promise<ListResponse<InventaireListItem>> {
+
     await this.ensureLookups();
+
     let rows = await this.movementApi.listHeadersByType('INVENTAIRE', { pageSize: 500 });
+
     rows = this.applyFilters(rows, query);
 
+
+
     const page = Number(query?.['page'] ?? 1);
+
     const pageSize = Number(query?.['pageSize'] ?? 20);
+
     const total = rows.length;
+
     const slice = rows.slice((page - 1) * pageSize, page * pageSize);
 
+
+
     const items: InventaireListItem[] = await Promise.all(
+
       slice.map(async (row) => {
+
         const inv = await this.movementApi.getInventaireDetail(row.id, this.enrichers());
+
+        await this.cacheLocation(inv.destLocationId);
+
         return {
+
           ...inv,
+
+          destLocationName: this.locationName(inv.destLocationId) ?? inv.destLocationName,
+
           linesCount: inv.lines.length,
+
         };
+
       }),
+
     );
+
+
 
     return { items, total };
+
   }
+
+
 
   private applyFilters(rows: ApiInventoryTxRow[], query?: Record<string, unknown>): ApiInventoryTxRow[] {
+
     if (!query) return rows;
+
     let out = [...rows];
 
+
+
     const status = query['status'] as string | undefined;
+
     if (status) {
+
       out = out.filter((r) => r.status === status);
+
     }
+
+
 
     const destLocationId = query['destLocationId'] as string | undefined;
+
     if (destLocationId) {
+
       out = out.filter((r) => r.destLocationId === destLocationId);
+
     }
+
+
 
     const dateFrom = query['dateFrom'] as string | undefined;
+
     const dateTo = query['dateTo'] as string | undefined;
+
     if (dateFrom) {
+
       out = out.filter((r) => r.txDate >= dateFrom);
+
     }
+
     if (dateTo) {
+
       out = out.filter((r) => r.txDate <= dateTo);
+
     }
+
+
 
     const search = query['search'] as string | undefined;
+
     if (search?.trim()) {
+
       const q = search.trim().toLowerCase();
+
       out = out.filter(
+
         (r) =>
+
           r.txNumber.toLowerCase().includes(q) ||
+
           (r.reference ?? '').toLowerCase().includes(q),
+
       );
+
     }
+
+
 
     return out;
+
   }
+
+
 
   async getItem(id: string): Promise<InventaireTx> {
+
     await this.ensureLookups();
-    return this.movementApi.getInventaireDetail(id, this.enrichers());
+
+    const tx = await this.movementApi.getInventaireDetail(id, this.enrichers());
+
+    await this.cacheLocation(tx.destLocationId);
+
+    return {
+
+      ...tx,
+
+      destLocationName: this.locationName(tx.destLocationId) ?? tx.destLocationName,
+
+    };
+
   }
+
+
 
   async createItem(input: Partial<InventaireTx>): Promise<InventaireTx> {
+
     await this.ensureLookups();
+
     const lines = this.normalizeLines(input.lines ?? []);
-    return this.movementApi.createInventaire(
+
+    const created = await this.movementApi.createInventaire(
+
       {
+
         ...input,
+
         txType: 'INVENTAIRE',
+
         txDate: input.txDate ?? new Date().toISOString().slice(0, 10),
+
         destLocationId: input.destLocationId,
+
         status: 'BROUILLON',
+
         lines,
+
         totalVariance: lines.reduce((acc, l) => acc + l.variance, 0),
+
       },
+
       this.enrichers(),
+
     );
+
+    await this.cacheLocation(created.destLocationId);
+
+    return {
+
+      ...created,
+
+      destLocationName: this.locationName(created.destLocationId) ?? created.destLocationName,
+
+    };
+
   }
+
+
 
   async updateItem(id: string, input: Partial<InventaireTx>): Promise<InventaireTx> {
+
     await this.ensureLookups();
+
     const current = await this.movementApi.getInventaireDetail(id, this.enrichers());
+
     if (current.status === 'VALIDE') {
+
       throw new Error(this.translate.instant('inventory.errors.inventaire.cannotModifyValidated'));
+
     }
+
     const lines = this.normalizeLines(input.lines ?? current.lines);
-    return this.movementApi.updateInventaire(
+
+    const updated = await this.movementApi.updateInventaire(
+
       id,
+
       {
+
         ...current,
+
         ...input,
+
         destLocationId: input.destLocationId ?? current.destLocationId,
+
         lines,
+
         totalVariance: lines.reduce((acc, l) => acc + l.variance, 0),
+
       },
+
       this.enrichers(),
+
     );
+
+    await this.cacheLocation(updated.destLocationId);
+
+    return {
+
+      ...updated,
+
+      destLocationName: this.locationName(updated.destLocationId) ?? updated.destLocationName,
+
+    };
+
   }
+
+
 
   async deleteItem(id: string): Promise<void> {
+
     const current = await this.movementApi.getInventaireDetail(id);
+
     if (current.status === 'VALIDE') {
+
       throw new Error(this.translate.instant('inventory.errors.inventaire.cannotDeleteValidated'));
+
     }
+
     await this.movementApi.delete(id);
+
   }
+
+
 
   async validate(id: string): Promise<InventaireTx> {
-    return this.movementApi.validateInventaire(id, this.enrichers());
+
+    const updated = await this.movementApi.validateInventaire(id, this.enrichers());
+
+    await this.cacheLocation(updated.destLocationId);
+
+    return {
+
+      ...updated,
+
+      destLocationName: this.locationName(updated.destLocationId) ?? updated.destLocationName,
+
+    };
+
   }
+
+
 
   async getStockBalancesForLocation(locationId: string): Promise<StockBalance[]> {
+
     return this.stockQuery.getBalancesByLocation(locationId);
+
   }
+
+
+
+  private async cacheLocation(id?: string): Promise<void> {
+
+    const trimmed = id?.trim();
+
+    if (!trimmed || this.locationById.has(trimmed)) return;
+
+    const loc = await this.lookupsService.resolveLocation(trimmed);
+
+    if (loc) {
+
+      this.locationById.set(trimmed, loc);
+
+    }
+
+  }
+
+
 
   private locationName(id?: string): string | undefined {
+
     if (!id) return undefined;
-    return this.locationsCache.find((l) => l.id === id)?.name;
+
+    const loc = this.locationById.get(id);
+
+    if (!loc) return undefined;
+
+    return loc.name;
+
   }
 
+
+
   private normalizeLines(lines: InventaireLine[]): InventaireLine[] {
+
     return lines.map((l, i) => ({
+
       ...l,
+
       lineNumber: i + 1,
+
       variance: l.countedQty - l.theoreticalQty,
+
       quantity: l.countedQty,
+
     }));
+
   }
+
 }
+
+

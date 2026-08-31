@@ -223,7 +223,8 @@ public class EmployeService {
     }
 
     private boolean matchesSearch(Employe employe, String term) {
-        return contains(employe.getMatricule(), term)
+        return contains(employe.getId(), term)
+                || contains(employe.getMatricule(), term)
                 || contains(employe.getNom(), term)
                 || contains(employe.getPrenom(), term)
                 || contains(employe.getPoste(), term)

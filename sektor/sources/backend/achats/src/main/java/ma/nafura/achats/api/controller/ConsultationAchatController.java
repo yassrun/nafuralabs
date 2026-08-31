@@ -7,6 +7,7 @@ import java.util.UUID;
 import ma.nafura.achats.api.dto.ConsultationAchatDto;
 import ma.nafura.achats.api.request.ConsultationAchatCreateDto;
 import ma.nafura.achats.api.request.ConsultationAchatPanierDto;
+import ma.nafura.achats.api.request.ConsultationDestinataireCreateDto;
 import ma.nafura.achats.api.request.ConsultationDevisImportDto;
 import ma.nafura.achats.service.ConsultationAchatService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
@@ -52,11 +53,24 @@ public class ConsultationAchatController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(body));
     }
 
+    @PostMapping("/{id}/destinataires")
+    @RequirePermission("achats.consultation.create")
+    public ResponseEntity<ConsultationAchatDto> addDestinataire(
+            @PathVariable UUID id, @Valid @RequestBody ConsultationDestinataireCreateDto body) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.addDestinataire(id, body));
+    }
+
     @PatchMapping("/{id}/panier")
     @RequirePermission("achats.consultation.create")
     public ResponseEntity<ConsultationAchatDto> addToPanier(
             @PathVariable UUID id, @RequestBody ConsultationAchatPanierDto body) {
         return ResponseEntity.ok(service.addToPanier(id, body));
+    }
+
+    @PostMapping("/{id}/envoyer")
+    @RequirePermission("achats.consultation.create")
+    public ResponseEntity<ConsultationAchatDto> envoyer(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.envoyer(id));
     }
 
     @PostMapping("/{id}/devis")
@@ -69,7 +83,8 @@ public class ConsultationAchatController {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> onBadRequest(IllegalArgumentException ex) {
         String code = ex.getMessage() != null ? ex.getMessage() : "bad_request";
-        HttpStatus status = "consultation.introuvable".equals(code) || "consultation.fournisseur.introuvable".equals(code)
+        HttpStatus status = "consultation.introuvable".equals(code)
+                        || "consultation.fournisseur.introuvable".equals(code)
                 ? HttpStatus.NOT_FOUND
                 : HttpStatus.BAD_REQUEST;
         return ResponseEntity.status(status).body(Map.of("code", code));

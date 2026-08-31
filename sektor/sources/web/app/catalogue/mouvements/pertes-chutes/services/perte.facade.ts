@@ -3,8 +3,6 @@ import { TranslateService } from '@ngx-translate/core';
 import type { CrudStyleFacade } from '@platform/lib/anatomy';
 import type { ListResponse, LookupContext } from '@platform/lib/anatomy/types';
 import type { InventoryTx, InventoryTxLine, Location, MotifMouvement } from '../../../models';
-import { isStockableNature } from '../../../models';
-import { ArticleCatalogService } from '../../../services/article-catalog.service';
 import { InventoryLookupsService } from '../../../services/inventory-lookups.service';
 import { InventoryMovementApiService } from '../../../services/inventory-movement-api.service';
 import {
@@ -28,10 +26,9 @@ export interface PerteListItem extends InventoryTx {
 export class PerteFacade implements CrudStyleFacade<InventoryTx, Partial<InventoryTx>> {
   private readonly movementApi = inject(InventoryMovementApiService);
   private readonly lookupsService = inject(InventoryLookupsService);
-  private readonly articleCatalog = inject(ArticleCatalogService);
   private readonly motifsApi = inject(MotifsApiService);
 
-  private locationsCache: Location[] = [];
+  private readonly locationById = new Map<string, Location>();
   private motifsCache: MotifMouvement[] = [];
 
   private lookupsSignal = signal<LookupContext>({});
@@ -47,28 +44,11 @@ export class PerteFacade implements CrudStyleFacade<InventoryTx, Partial<Invento
   }
 
   async ensureLookups(): Promise<void> {
-    const [locations, articles, motifs] = await Promise.all([
-      this.lookupsService.loadLocations(),
-      this.articleCatalog.loadArticles({ activeOnly: true }),
-      this.motifsApi.listByTxType('PERTE'),
-    ]);
-    this.locationsCache = locations;
+    const motifs = await this.motifsApi.listByTxType('PERTE');
     this.motifsCache = motifs;
-    const chantiers = locations.filter((l) => l.type === 'CHANTIER');
-    const matCons = articles.filter(
-      (a) => isStockableNature(a.nature),
-    );
     this.lookupsSignal.set({
-      chantierLocations: chantiers.map((l) => ({
-        key: l.id,
-        value: l.projectRef ? `${l.name} (${l.projectRef})` : l.name,
-      })),
-      articlesMatCons: matCons.map((a) => ({
-        key: a.id,
-        value: `${a.code} — ${a.name}`,
-        data: { uomCode: a.uomCode, uomId: a.uomId, prix: a.prixUnitaire },
-      })),
-      motifsPerte: motifs.map((m) => ({ key: m.id, value: `${m.code} — ${m.name}` })),
+      chantierLocations: [],
+      motifsPerte: motifs.map((m) => ({ key: m.id, value: m.name })),
       causeDetaillee: [
         { key: 'DECOUPE', value: 'Chute découpe' },
         { key: 'CASSE', value: 'Casse' },
@@ -80,7 +60,7 @@ export class PerteFacade implements CrudStyleFacade<InventoryTx, Partial<Invento
 
   async loadItems(query?: Record<string, unknown>): Promise<ListResponse<PerteListItem>> {
     await this.ensureLookups();
-    return loadMovementPage(
+    const page = await loadMovementPage(
       this.movementApi,
       'PERTE',
       query,
@@ -88,6 +68,14 @@ export class PerteFacade implements CrudStyleFacade<InventoryTx, Partial<Invento
       (tx) => ({ ...tx, totalValue: sumLineTotals(tx.lines) }),
       this.enrichers(),
     );
+    await Promise.all(page.items.map((tx) => this.cacheLocation(tx.chantierLocationId)));
+    return {
+      ...page,
+      items: page.items.map((tx) => ({
+        ...tx,
+        chantierRef: this.chantierRef(tx.chantierLocationId) ?? tx.chantierRef,
+      })),
+    };
   }
 
   private applyFilters(rows: ApiInventoryTxRow[], query?: Record<string, unknown>): ApiInventoryTxRow[] {
@@ -97,6 +85,11 @@ export class PerteFacade implements CrudStyleFacade<InventoryTx, Partial<Invento
     const status = query['status'] as string | undefined;
     if (status) {
       out = out.filter((r) => r.status === status);
+    }
+
+    const chantierLocationId = query['chantierLocationId'] as string | undefined;
+    if (chantierLocationId) {
+      out = out.filter((r) => r.chantierLocationId === chantierLocationId);
     }
 
     const motifId = query['motifId'] as string | undefined;
@@ -128,13 +121,15 @@ export class PerteFacade implements CrudStyleFacade<InventoryTx, Partial<Invento
 
   async getItem(id: string): Promise<InventoryTx> {
     await this.ensureLookups();
-    return this.movementApi.getDetail(id, this.enrichers());
+    const tx = await this.movementApi.getDetail(id, this.enrichers());
+    await this.cacheLocation(tx.chantierLocationId);
+    return this.withChantierMeta(tx);
   }
 
   async createItem(input: Partial<InventoryTx>): Promise<InventoryTx> {
     await this.ensureLookups();
-    const merged = this.applyChantierMeta(input);
-    return this.movementApi.create(
+    const merged = await this.applyChantierMeta(input);
+    const created = await this.movementApi.create(
       {
         ...merged,
         txType: 'PERTE',
@@ -144,6 +139,8 @@ export class PerteFacade implements CrudStyleFacade<InventoryTx, Partial<Invento
       },
       this.enrichers(),
     );
+    await this.cacheLocation(created.chantierLocationId);
+    return this.withChantierMeta(created);
   }
 
   async updateItem(id: string, input: Partial<InventoryTx>): Promise<InventoryTx> {
@@ -152,12 +149,14 @@ export class PerteFacade implements CrudStyleFacade<InventoryTx, Partial<Invento
     if (current.status === 'VALIDE') {
       throw new Error(this.translate.instant('inventory.errors.perte.cannotModifyValidated'));
     }
-    const merged = this.applyChantierMeta({ ...current, ...input });
-    return this.movementApi.update(
+    const merged = await this.applyChantierMeta({ ...current, ...input });
+    const updated = await this.movementApi.update(
       id,
       { ...merged, lines: input.lines ?? current.lines },
       this.enrichers(),
     );
+    await this.cacheLocation(updated.chantierLocationId);
+    return this.withChantierMeta(updated);
   }
 
   async deleteItem(id: string): Promise<void> {
@@ -169,7 +168,9 @@ export class PerteFacade implements CrudStyleFacade<InventoryTx, Partial<Invento
   }
 
   async validate(id: string): Promise<InventoryTx> {
-    return this.movementApi.validate(id, this.enrichers());
+    const updated = await this.movementApi.validate(id, this.enrichers());
+    await this.cacheLocation(updated.chantierLocationId);
+    return this.withChantierMeta(updated);
   }
 
   async getKpis(): Promise<{ totalMonth: number; totalChantier: number }> {
@@ -192,25 +193,38 @@ export class PerteFacade implements CrudStyleFacade<InventoryTx, Partial<Invento
     return { totalMonth, totalChantier };
   }
 
-  private applyChantierMeta(tx: Partial<InventoryTx>): Partial<InventoryTx> {
+  private async applyChantierMeta(tx: Partial<InventoryTx>): Promise<Partial<InventoryTx>> {
     const cid = tx.chantierLocationId;
     if (!cid) {
       return tx;
     }
-    const loc = this.locationsCache.find((l) => l.id === cid);
-    const chantierRef = loc
-      ? loc.projectRef
-        ? `${loc.name} (${loc.projectRef})`
-        : loc.name
-      : tx.chantierRef;
+    await this.cacheLocation(cid);
+    const chantierRef = this.chantierRef(cid) ?? tx.chantierRef;
     return { ...tx, chantierRef };
   }
 
-  private locationName(id?: string): string | undefined {
-    if (!id) return undefined;
-    const loc = this.locationsCache.find((l) => l.id === id);
+  private withChantierMeta(tx: InventoryTx): InventoryTx {
+    const ref = this.chantierRef(tx.chantierLocationId) ?? tx.chantierRef;
+    return ref === tx.chantierRef ? tx : { ...tx, chantierRef: ref };
+  }
+
+  private async cacheLocation(id?: string): Promise<void> {
+    const trimmed = id?.trim();
+    if (!trimmed || this.locationById.has(trimmed)) return;
+    const loc = await this.lookupsService.resolveLocation(trimmed);
+    if (loc) {
+      this.locationById.set(trimmed, loc);
+    }
+  }
+
+  private chantierRef(id?: string): string | undefined {
+    const loc = id ? this.locationById.get(id) : undefined;
     if (!loc) return undefined;
     return loc.projectRef ? `${loc.name} (${loc.projectRef})` : loc.name;
+  }
+
+  private locationName(id?: string): string | undefined {
+    return this.chantierRef(id);
   }
 
   private motifName(id?: string): string | undefined {

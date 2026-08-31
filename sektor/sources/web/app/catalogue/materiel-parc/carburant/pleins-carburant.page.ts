@@ -2,46 +2,86 @@
 import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@platform/lib/anatomy';
+import {
+  ButtonComponent,
+  LOOKUP_SEARCHERS,
+  NfSelectComponent,
+  type LookupSearchFn,
+  PageHeaderComponent,
+  PageShellComponent,
+} from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 
-import type { CarnetCarburant, PleinCarburant } from '@app/catalogue/models';
+import type { PleinCarburant } from '@app/catalogue/models';
 import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao-facade.service';
 
 @Component({
   selector: 'app-pleins-carburant',
   standalone: true,
-  imports: [FormsModule, RouterModule, TranslateModule, PageShellComponent, PageHeaderComponent, MadCurrencyPipe, ButtonComponent],
+  imports: [
+    FormsModule,
+    RouterModule,
+    TranslateModule,
+    PageShellComponent,
+    PageHeaderComponent,
+    MadCurrencyPipe,
+    ButtonComponent,
+    NfSelectComponent,
+  ],
   template: `
     <nf-page-shell [scroll]="true">
       <nf-page-header [config]="header()"></nf-page-header>
 
-      <section class="form-card">
+      <section class="form-card" data-testid="pleins-carburant-form">
         <h3>{{ 'materielGmao.fuel.quickAdd' | translate }}</h3>
         <div class="row">
-          <label>{{ 'materielGmao.table.carnet' | translate }}</label>
-          <select [(ngModel)]="draft.carnetId">
-            @for (c of carnets(); track c.id) {
-              <option [value]="c.id">{{ c.engineId }} ({{ c.capaciteReservoir }} L)</option>
-            }
-          </select>
+          <nf-select
+            class="fld"
+            [label]="'materielGmao.table.engine' | translate"
+            lookupKey="materiels"
+            placeholder="Taper ≥ 2 car. — engin…"
+            [lookupSearch]="searchMateriels"
+            [(ngModel)]="draft.engineId"
+            (ngModelChange)="onEngineChange($event)"
+            name="engineId"
+            [selectedLabel]="draft.engineLabel"
+            data-testid="pleins-engin-combobox"
+          />
+        </div>
+        @if (draft.engineId) {
+          <div class="row">
+            <label for="plein-carnet">{{ 'materielGmao.table.carnet' | translate }}</label>
+            <select
+              id="plein-carnet"
+              [(ngModel)]="draft.carnetId"
+              name="carnetId"
+              data-testid="pleins-carnet-select"
+            >
+              @for (c of carnetsForEngine(); track c.id) {
+                <option [value]="c.id">{{ c.capaciteReservoir }} L · {{ c.typeCarburant }}</option>
+              }
+            </select>
+          </div>
+        } @else {
+          <p class="hint">{{ 'materielGmao.fuel.selectEngineFirst' | translate }}</p>
+        }
+        <div class="row">
+          <label for="plein-litres">{{ 'materielGmao.fuel.litres' | translate }}</label>
+          <input id="plein-litres" type="number" [(ngModel)]="draft.litres" name="litres" min="1" step="1" />
         </div>
         <div class="row">
-          <label>{{ 'materielGmao.fuel.litres' | translate }}</label>
-          <input type="number" [(ngModel)]="draft.litres" min="1" step="1" />
+          <label for="plein-jauge">{{ 'materielGmao.fuel.jaugeDebut' | translate }}</label>
+          <input id="plein-jauge" type="number" [(ngModel)]="draft.jaugeDebut" name="jaugeDebut" min="0" step="1" />
         </div>
         <div class="row">
-          <label>{{ 'materielGmao.fuel.jaugeDebut' | translate }}</label>
-          <input type="number" [(ngModel)]="draft.jaugeDebut" min="0" step="1" />
+          <label for="plein-prix">{{ 'materielGmao.fuel.prixLitre' | translate }}</label>
+          <input id="plein-prix" type="number" [(ngModel)]="draft.prixLitre" name="prixLitre" min="0" step="0.01" />
         </div>
-        <div class="row">
-          <label>{{ 'materielGmao.fuel.prixLitre' | translate }}</label>
-          <input type="number" [(ngModel)]="draft.prixLitre" min="0" step="0.01" />
-        </div>
-        <nf-button type="button" class="btn" (clicked)="submit()" variant="secondary">{{ 'materielGmao.actions.save' | translate }}</nf-button>
+        <nf-button type="button" class="btn" (clicked)="submit()" variant="secondary">
+          {{ 'materielGmao.actions.save' | translate }}
+        </nf-button>
         @if (lastMsg()) {
           <p class="msg">{{ lastMsg() }}</p>
         }
@@ -77,7 +117,7 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
       </nf-button>
     </nf-page-shell>
   `,
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [
     `
       .form-card {
@@ -94,6 +134,10 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
         align-items: center;
         margin-bottom: 0.5rem;
       }
+      .fld {
+        flex: 1;
+        min-width: 14rem;
+      }
       label {
         min-width: 8rem;
         color: var(--nf-color-text-secondary);
@@ -107,20 +151,15 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
         border: 1px solid var(--nf-color-border);
         border-radius: 0.35rem;
       }
+      .hint {
+        margin: 0 0 0.5rem;
+        color: var(--nf-color-text-secondary);
+        font-size: 0.85rem;
+      }
       .btn {
         margin-top: 0.35rem;
-        padding: 0.45rem 0.85rem;
-        border-radius: 0.4rem;
-        border: none;
-        background: var(--nf-color-primary-700);
-        color: var(--nf-color-surface);
-        font-weight: 600;
-        cursor: pointer;
       }
       .btn.secondary {
-        background: var(--nf-color-bg-muted);
-        color: var(--nf-text-primary);
-        border: 1px solid var(--nf-color-border);
         margin-top: 0.75rem;
       }
       .msg {
@@ -159,12 +198,22 @@ export class PleinsCarburantPage {
   private readonly gmao = inject(MaterielGmaoFacadeService);
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
-
-  readonly carnets = toSignal(this.gmao.getCarnets(), { initialValue: [] as CarnetCarburant[] });
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
 
   readonly pleins = signal<PleinCarburant[]>([]);
+  readonly carnetsRevision = signal(0);
+
+  readonly searchMateriels: LookupSearchFn = async (q) => {
+    const hits = await (this.lookupSearchers?.['materiels']?.(q) ?? Promise.resolve([]));
+    this.materielHits = hits;
+    return hits;
+  };
+
+  private materielHits: Array<{ value: string; label: string }> = [];
 
   readonly draft = {
+    engineId: '',
+    engineLabel: '',
     carnetId: '',
     litres: 120,
     jaugeDebut: 40,
@@ -183,12 +232,36 @@ export class PleinsCarburantPage {
     ],
   }));
 
+  readonly carnetsForEngine = computed(() => {
+    this.carnetsRevision();
+    return this.gmao.getCarnetsForEngine(this.draft.engineId);
+  });
+
   constructor() {
-    const qp = this.route.snapshot.queryParamMap.get('carnet');
-    this.gmao.getCarnets().subscribe((c) => {
-      this.draft.carnetId = qp ?? c[0]?.id ?? '';
-    });
+    const qpCarnet = this.route.snapshot.queryParamMap.get('carnet');
+    if (qpCarnet) {
+      this.gmao.getCarnets().subscribe((all) => {
+        const hit = all.find((c) => c.id === qpCarnet);
+        if (hit) {
+          this.draft.engineId = hit.engineId;
+          this.draft.carnetId = hit.id;
+          this.carnetsRevision.update((n) => n + 1);
+        }
+      });
+    }
     this.reloadPleins();
+  }
+
+  onEngineChange(engineId: string): void {
+    this.draft.engineId = engineId ?? '';
+    const hit = this.materielHits.find((h) => h.value === engineId);
+    this.draft.engineLabel = hit?.label ?? '';
+    this.draft.carnetId = '';
+    if (this.draft.engineId) {
+      const carnet = this.gmao.ensureDefaultCarnet(this.draft.engineId);
+      this.draft.carnetId = carnet.id;
+    }
+    this.carnetsRevision.update((n) => n + 1);
   }
 
   private reloadPleins(): void {
@@ -196,13 +269,17 @@ export class PleinsCarburantPage {
   }
 
   submit(): void {
-    const carnetId = this.draft.carnetId || this.carnets()[0]?.id;
+    const carnetId = this.draft.carnetId || this.carnetsForEngine()[0]?.id;
+    if (!this.draft.engineId.trim()) {
+      this.lastMsg.set(this.translate.instant('materielGmao.fuel.selectEngineFirst'));
+      return;
+    }
     if (!carnetId) {
       this.lastMsg.set(this.translate.instant('materielGmao.fuel.noCarnet'));
       return;
     }
-    const carnet = this.carnets().find((c) => c.id === carnetId);
-    const engineId = carnet?.engineId ?? '';
+    const carnet = this.carnetsForEngine().find((c) => c.id === carnetId);
+    const engineId = this.draft.engineId;
     const jFin = Math.min(
       (carnet?.capaciteReservoir ?? 0) - 1,
       this.draft.jaugeDebut + this.draft.litres,

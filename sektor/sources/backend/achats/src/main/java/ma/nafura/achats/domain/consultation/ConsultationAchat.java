@@ -22,7 +22,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Demande de prix fournisseur. Vit dans Achats. Lien étude optionnel.
+ * Demande de prix. 1 panier + N destinataires. Lien étude optionnel.
  * Pas une DA chantier, pas un AO, pas {@code consultations_etudes}.
  */
 @Entity
@@ -33,7 +33,14 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ConsultationAchat {
 
-    public static final String STATUT_DEMANDE = "DEMANDE";
+    public static final String STATUT_PREPARATION = "PREPARATION";
+    /** ≥ 1 ligne journal, 0 devis qui compte (AC-12). */
+    public static final String STATUT_OUVERTE = "OUVERTE";
+    /** ≥ 1 devis qui compte et ≥ 1 destinataire EN_ATTENTE. */
+    public static final String STATUT_PARTIELLE = "PARTIELLE";
+    /** ≥ 1 destinataire et tous en DEVIS_RECU. */
+    public static final String STATUT_COMPLETE = "COMPLETE";
+    /** Obsolète comme vérité consultation — conservé pour lectures héritées. */
     public static final String STATUT_DEVIS_RECU = "DEVIS_RECU";
 
     @Id
@@ -46,15 +53,12 @@ public class ConsultationAchat {
     @Column(name = "numero", nullable = false, length = 50)
     private String numero;
 
-    @Column(name = "fournisseur_id", nullable = false)
-    private UUID fournisseurId;
-
     @Column(name = "dossier_etude_id")
     private UUID dossierEtudeId;
 
     @Column(name = "statut", nullable = false, length = 20)
     @Builder.Default
-    private String statut = STATUT_DEMANDE;
+    private String statut = STATUT_PREPARATION;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
@@ -78,7 +82,7 @@ public class ConsultationAchat {
         }
         updatedAt = now;
         if (statut == null) {
-            statut = STATUT_DEMANDE;
+            statut = STATUT_PREPARATION;
         }
         if (clesStables == null) {
             clesStables = new HashSet<>();

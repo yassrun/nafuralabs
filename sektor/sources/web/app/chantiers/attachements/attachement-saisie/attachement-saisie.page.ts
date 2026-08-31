@@ -3,8 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@platform/lib/anatomy';
-import type { Chantier } from '../../models';
+import {
+  ButtonComponent,
+  LOOKUP_SEARCHERS,
+  NfSelectComponent,
+  PageHeaderComponent,
+  PageShellComponent,
+  type LookupSearchFn,
+} from '@platform/lib/anatomy';
 import { ChantierApiService } from '../../services/chantier-api.service';
 import { AttachementApiService, type LienSignature } from '../attachement-api.service';
 import type { Attachement, MeteoCode, ZoneChantier } from '../attachement.models';
@@ -22,7 +28,15 @@ const STATUTS_FIGES = new Set([
   selector: 'app-attachement-saisie',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, PageShellComponent, PageHeaderComponent, ButtonComponent, TranslateModule],
+  imports: [
+    FormsModule,
+    RouterLink,
+    PageShellComponent,
+    PageHeaderComponent,
+    ButtonComponent,
+    NfSelectComponent,
+    TranslateModule,
+  ],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="pageHeaderConfig"></nf-page-header>
@@ -34,11 +48,14 @@ const STATUTS_FIGES = new Set([
       @if (!result()) {
         <div class="form-grid">
           <label>Chantier
-            <select class="ctrl" [value]="chantierId()" (change)="chantierId.set($any($event.target).value)">
-              @for (c of chantiers(); track c.id) {
-                <option [value]="c.id">{{ c.code }} — {{ c.name }}</option>
-              }
-            </select>
+            <nf-select
+              lookupKey="chantiers"
+              [lookupSearch]="searchChantiers"
+              [ngModel]="chantierId()"
+              (ngModelChange)="onChantierChange($event)"
+              [selectedLabel]="chantierSelectedLabel()"
+              [placeholder]="'chantiers.common.fields.chantier' | translate"
+            />
           </label>
           <label>{{ 'chantiers.attachement.saisie.periodeDebut' | translate }}
             <input class="ctrl" type="date" [value]="dateDebut()" (change)="dateDebut.set($any($event.target).value)" />
@@ -156,6 +173,7 @@ export class AttachementSaisiePage {
   private readonly attachementApi = inject(AttachementApiService);
   private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
 
   readonly pageHeaderConfig = {
     title: this.translate.instant('chantiers.attachement.saisie.title'),
@@ -167,10 +185,11 @@ export class AttachementSaisiePage {
     ],
   };
 
-  private readonly chantiersList = signal<Chantier[]>([]);
-  readonly chantiers = computed(() => this.chantiersList());
+  readonly searchChantiers: LookupSearchFn = (q) =>
+    this.lookupSearchers?.['chantiers']?.(q) ?? Promise.resolve([]);
 
   readonly chantierId = signal('');
+  readonly chantierSelectedLabel = signal('');
   readonly dateDebut = signal(new Date().toISOString().slice(0, 10));
   readonly dateFin = signal(new Date().toISOString().slice(0, 10));
   readonly meteo = signal<MeteoCode>('SOLEIL');
@@ -196,15 +215,28 @@ export class AttachementSaisiePage {
 
   constructor() {
     const requestedChantierId = this.route.snapshot.queryParamMap.get('chantierId')?.trim() ?? '';
-    void this.chantierApi.getAll().then(({ items }) => {
-      const active = items.filter((c) => c.status === 'EN_COURS');
-      this.chantiersList.set(active);
-      if (requestedChantierId && active.some((chantier) => chantier.id === requestedChantierId)) {
-        this.chantierId.set(requestedChantierId);
-      } else if (active.length) {
-        this.chantierId.set(active[0].id);
-      }
-    });
+    if (requestedChantierId) {
+      this.chantierId.set(requestedChantierId);
+      void this.resolveChantierLabel(requestedChantierId);
+    }
+  }
+
+  onChantierChange(id: string): void {
+    this.chantierId.set(id ?? '');
+    if (!id) {
+      this.chantierSelectedLabel.set('');
+      return;
+    }
+    void this.resolveChantierLabel(id);
+  }
+
+  private async resolveChantierLabel(id: string): Promise<void> {
+    try {
+      const c = await this.chantierApi.getById(id);
+      this.chantierSelectedLabel.set(`${c.code} — ${c.name}`);
+    } catch {
+      this.chantierSelectedLabel.set(id);
+    }
   }
 
   async monter(): Promise<void> {

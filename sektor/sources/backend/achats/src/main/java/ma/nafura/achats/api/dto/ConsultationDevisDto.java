@@ -12,6 +12,7 @@ import lombok.Data;
 public class ConsultationDevisDto {
 
     private UUID id;
+    private UUID destinataireId;
     private String fichierNom;
     private OffsetDateTime createdAt;
     @Builder.Default

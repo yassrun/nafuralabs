@@ -1,55 +1,12 @@
 <nf-page-shell>
   <nf-page-header [config]="headerConfig"></nf-page-header>
 
-  <div class="cs-toolbar">
-    <div class="chips-row">
-      @for (chip of chips; track chip.id) {
-        <nf-button
-          type="button"
-          size="sm"
-          [variant]="filter() === chip.id ? 'primary' : 'secondary'"
-          (clicked)="selectFilter(chip.id)">
-          {{ chip.label }}
-        </nf-button>
-      }
-    </div>
-    <nf-button type="button" variant="primary" (clicked)="goNew()">
-      + Consultation
-    </nf-button>
-  </div>
-
-  @if (erreur(); as err) {
-    <p class="cs-error">{{ err }}</p>
-  }
-
-  <div class="cs-list" data-testid="consultation-achat-list">
-    @if (chargement()) {
-      <p>Chargement…</p>
-    } @else if (rows().length === 0) {
-      <p class="cs-empty">Aucune consultation. Créer hors étude — le lien dossier reste vide.</p>
-    } @else {
-      <table>
-        <thead>
-          <tr>
-            <th>N°</th>
-            <th>Fournisseur</th>
-            <th>Panier</th>
-            <th>Statut</th>
-            <th>Lien</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of rows(); track row.id) {
-            <tr class="cs-row" (click)="goFiche(row.id)">
-              <td>{{ row.numero }}</td>
-              <td>{{ row.fournisseurNom || '—' }}</td>
-              <td>{{ panierLabel(row) }}</td>
-              <td>{{ statutLabel(row) }}</td>
-              <td>{{ lienLabel(row) }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    }
+  <div data-testid="consultation-achat-list">
+    <nf-entity-listing
+      #listing
+      [config]="config"
+      [facade]="facade"
+      (action)="onAction($event)">
+    </nf-entity-listing>
   </div>
 </nf-page-shell>

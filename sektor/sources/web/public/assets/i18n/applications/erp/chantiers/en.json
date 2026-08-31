@@ -42,6 +42,7 @@
         "backToList": "Back to list",
         "save": "Save",
         "cancel": "Cancel",
+        "remove": "Remove",
         "delete": "Delete",
         "print": "Print",
         "export": "Export to Excel",
@@ -1160,12 +1161,16 @@
       "module": {
         "arbre": "Tree",
         "arbreResume": "Structure and amounts by lot",
+        "equipe": "Team",
+        "equipeResume": "Supervisor, site manager and assignments",
         "budget": "Budget",
         "budgetResume": "Planned, revised and actual debourse",
         "planning": "Schedule",
         "planningResume": "Activities and deadlines",
         "situations": "Situations",
-        "situationsResume": "Works by period and revisions"
+        "situationsResume": "Works by period and revisions",
+        "journal": "Log",
+        "journalResume": "Site events and notes"
       },
       "activite": {
         "titre": "Recent activity"
@@ -1256,6 +1261,9 @@
     "ouvrir": "Open",
     "gerer": "Manage",
     "voir": "View",
+    "nav": {
+      "titre": "Go to"
+    },
     "suspendu": "Site suspended — only compatible actions are available.",
     "kpi": {
       "venteActive": "Active sale excl. VAT",
@@ -1332,10 +1340,12 @@
       "notifierMarche": "Notify the contract",
       "reprendre": "Resume the chantier"
     },
-    "module": {
-      "arbre": "Tree",
-      "arbreResume": "Sold / internal, quote link",
-      "budget": "Budget & margin",
+      "module": {
+        "arbre": "Tree",
+        "arbreResume": "Sold / internal, quote link",
+        "equipe": "Team",
+        "equipeResume": "Supervisor, site manager and assignments",
+        "budget": "Budget & margin",
       "budgetResume": "Direct cost, revisions, variances",
       "planning": "Schedule",
       "planningResume": "Activities and deadlines",
@@ -1352,6 +1362,8 @@
       "receptionBlResume": "Site DNs, direct delivery",
       "documents": "Documents",
       "documentsResume": "WO, drawings, minutes on the site",
+      "journal": "Log",
+      "journalResume": "Site events and notes",
       "sousTraitance": "Subcontracting",
       "sousTraitanceResume": "ST contract on a node",
       "attachement": "Measurement book",

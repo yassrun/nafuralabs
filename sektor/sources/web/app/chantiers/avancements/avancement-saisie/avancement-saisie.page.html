@@ -25,14 +25,15 @@
       <section class="saisie-page__meta">
         <label>
           <span>{{ 'chantiers.avancement.saisie.chantierRequired' | translate }}</span>
-          <select
+          <nf-select
+            lookupKey="chantiers"
+            [lookupSearch]="searchChantiers"
             [ngModel]="facade.selectedChantierId()"
             (ngModelChange)="facade.selectChantier($event)"
-            [disabled]="isEditing()">
-            @for (chantier of chantiers(); track chantier.id) {
-              <option [ngValue]="chantier.id">{{ chantier.code }} - {{ chantier.name }}</option>
-            }
-          </select>
+            [disabled]="isEditing()"
+            [selectedLabel]="chantierSelectedLabel()"
+            [placeholder]="'chantiers.avancement.saisie.chantierRequired' | translate"
+          />
         </label>
 
         <label>

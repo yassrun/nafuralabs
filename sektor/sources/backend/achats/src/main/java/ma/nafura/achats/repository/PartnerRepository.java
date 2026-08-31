@@ -36,7 +36,6 @@ public interface PartnerRepository extends TenantScopedRepository<Partner, UUID>
                         LOWER(p.code) LIKE LOWER(CONCAT('%', :q, '%'))
                         OR LOWER(p.raisonSociale) LIKE LOWER(CONCAT('%', :q, '%'))
                       )
-                    ORDER BY CASE WHEN LOWER(p.code) = LOWER(:q) THEN 0 ELSE 1 END, p.raisonSociale
                     """,
             countQuery =
                     """

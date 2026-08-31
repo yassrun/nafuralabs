@@ -136,6 +136,9 @@ const LOT_LABEL: Record<UsageLot, string> = {
         } @else if (armed() && !items().length && !erreur()) {
           <li class="ap__hint">Aucun article ne correspond. Affiner la saisie ou les filtres.</li>
         } @else {
+          <li class="ap__cols" aria-hidden="true">
+            <span>Code</span><span>Désignation</span><span>Unité</span><span>PU</span>
+          </li>
           @for (item of items(); track item.id; let i = $index) {
             <li>
               <button
@@ -161,27 +164,52 @@ const LOT_LABEL: Record<UsageLot, string> = {
         }
       </ul>
 
-      @if (context() === 'dpu' && selected(); as item) {
-        <div class="ap__dpu">
+      @if (context() === 'dpu' && selected()) {
+        <div class="ap__dpu" data-testid="article-picker-dpu-pied">
           <label class="ap__field">
             <span>Quantité *</span>
-            <input name="quantite" type="number" min="0" step="any" [(ngModel)]="quantite" />
+            <input
+              name="quantite"
+              type="number"
+              min="0"
+              step="any"
+              [(ngModel)]="quantite"
+              data-testid="article-picker-qty"
+            />
           </label>
-          <p class="ap__prix" aria-live="polite">
-            Tarif
-            <strong>{{ prixUnitaire() | number: '1.2-2' }} MAD / {{ unite() }}</strong>
-          </p>
+          <label class="ap__field">
+            <span>PU tarif ({{ unite() }})</span>
+            <input
+              name="prixUnitaire"
+              type="number"
+              min="0"
+              step="any"
+              [ngModel]="prixUnitaire()"
+              (ngModelChange)="onPrixChange($event)"
+              data-testid="article-picker-pu"
+            />
+          </label>
         </div>
       }
 
       <footer class="ap__footer">
         <nf-button variant="secondary" (clicked)="cancelled.emit()">Annuler</nf-button>
         @if (context() === 'dpu') {
-          <nf-button variant="primary" [disabled]="!canAddDpu()" (clicked)="confirm()">
+          <nf-button
+            variant="primary"
+            data-testid="article-picker-add-dpu"
+            [disabled]="!canAddDpu()"
+            (clicked)="confirm()"
+          >
             Ajouter au poste
           </nf-button>
         } @else {
-          <nf-button variant="primary" [disabled]="!selected()" (clicked)="confirm()">
+          <nf-button
+            variant="primary"
+            data-testid="article-picker-choose"
+            [disabled]="!selected()"
+            (clicked)="confirm()"
+          >
             Choisir
           </nf-button>
         }
@@ -228,6 +256,20 @@ const LOT_LABEL: Record<UsageLot, string> = {
       color: var(--nf-color-text-secondary, #6b7280);
       font-size: 0.875rem;
     }
+    .ap__cols {
+      display: grid;
+      grid-template-columns: 7rem 1fr 3rem 5rem;
+      gap: 0.5rem;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--nf-color-text-secondary, #6b7280);
+      border-bottom: 1px solid var(--nf-color-border, #e5e7eb);
+    }
+    .ap__cols span:nth-child(3),
+    .ap__cols span:nth-child(4) { text-align: right; }
     .ap__hit {
       display: grid;
       grid-template-columns: 7rem 1fr 3rem 5rem;
@@ -246,7 +288,6 @@ const LOT_LABEL: Record<UsageLot, string> = {
     .ap__hit-uom, .ap__hit-pu { font-size: 0.75rem; color: var(--nf-color-text-secondary, #6b7280); text-align: right; }
     .ap__hit--on { background: color-mix(in srgb, var(--nf-color-primary-600, #0b6e7a) 10%, transparent); }
     .ap__dpu { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; align-items: end; }
-    .ap__prix { margin: 0; font-size: 0.875rem; display: flex; flex-direction: column; gap: 0.2rem; }
     .ap__error { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; color: var(--nf-color-danger, #b91c1c); font-size: 0.875rem; }
     .ap__error p { margin: 0; }
     .ap__footer { display: flex; justify-content: flex-end; gap: 0.75rem; }
@@ -355,6 +396,11 @@ export class ArticlePickerComponent implements OnInit, OnDestroy {
     this.unite.set(this.uniteOf(item));
     this.prixUnitaire.set(this.puOf(item));
     void this.enrichSelection(item);
+  }
+
+  onPrixChange(raw: string | number): void {
+    const n = Number.parseFloat(String(raw).replace(',', '.'));
+    this.prixUnitaire.set(Number.isFinite(n) && n >= 0 ? n : 0);
   }
 
   canAddDpu(): boolean {

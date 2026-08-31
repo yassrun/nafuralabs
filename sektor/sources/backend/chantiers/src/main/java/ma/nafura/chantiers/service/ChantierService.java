@@ -60,6 +60,12 @@ public class ChantierService {
 
     @Transactional(readOnly = true)
     public List<Chantier> list(String status, String clientId, String societeId, String search) {
+        return list(status, clientId, societeId, search, true);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Chantier> list(
+            String status, String clientId, String societeId, String search, boolean hydrateAvancement) {
         seedService.seedIfEmpty();
         UUID tenantId = tenantId();
         List<Chantier> rows = loadRows(tenantId, status, clientId, societeId);
@@ -72,13 +78,15 @@ public class ChantierService {
             String term = search.trim().toLowerCase(Locale.ROOT);
             rows = rows.stream().filter(c -> matchesSearch(c, term)).toList();
         }
-        rows.forEach(this::hydrateAvancement);
+        if (hydrateAvancement) {
+            rows.forEach(this::hydrateAvancement);
+        }
         return rows;
     }
 
     @Transactional(readOnly = true)
     public List<ChantierLookupDto> lookup(String search) {
-        return list(null, null, null, search).stream()
+        return list(null, null, null, search, false).stream()
                 .map(c -> ChantierLookupDto.builder()
                         .id(c.getId())
                         .code(c.getCode())

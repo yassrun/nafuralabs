@@ -1,13 +1,23 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@platform/lib/anatomy';
+import {
+  ButtonComponent,
+  PageHeaderComponent,
+  PageShellComponent,
+} from '@platform/lib/anatomy';
 import type { PageHeaderConfig } from '@platform/lib/anatomy';
 
-import { FournisseurApiService } from '../../fournisseurs/services/fournisseur-api.service';
-import type { Fournisseur } from '../../models';
+import { openCatalogItemPicker } from '@app/etudes/dossiers/components/catalog-item-pick-dialog/catalog-item-pick-dialog.component';
 import { ConsultationAchatApiService } from '../services/consultation-achat-api.service';
+
+export interface ConsultationPanierLigne {
+  cleStable: string;
+  code: string;
+  name: string;
+}
 
 @Component({
   selector: 'app-consultation-create',
@@ -24,47 +34,61 @@ import { ConsultationAchatApiService } from '../services/consultation-achat-api.
 })
 export class ConsultationCreatePage {
   private readonly api = inject(ConsultationAchatApiService);
-  private readonly fournisseursApi = inject(FournisseurApiService);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
   readonly headerConfig: PageHeaderConfig = {
     title: 'Nouvelle consultation',
-    subtitle: 'Hors étude — un fournisseur + panier d’identités',
+    subtitle: 'Hors étude — panier d’articles catalogue',
   };
 
-  readonly fournisseurs = signal<Fournisseur[]>([]);
-  readonly fournisseurId = signal('');
-  readonly clesText = signal('');
+  readonly panier = signal<ConsultationPanierLigne[]>([]);
   readonly saving = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
 
-  constructor() {
-    void this.loadFournisseurs();
+  async addArticle(): Promise<void> {
+    this.erreur.set(undefined);
+    const result = await openCatalogItemPicker(this.dialog, {
+      context: 'lookup',
+      uniteOptions: [],
+    });
+    if (!result?.itemId) return;
+    const cleStable = (result.cleStable || result.code || '').trim();
+    if (!cleStable) {
+      this.erreur.set('Article sans identité catalogue (cle_stable).');
+      return;
+    }
+    if (this.panier().some((l) => l.cleStable === cleStable)) {
+      this.erreur.set('Cet article est déjà dans le panier.');
+      return;
+    }
+    this.panier.update((rows) => [
+      ...rows,
+      {
+        cleStable,
+        code: result.code?.trim() || cleStable,
+        name: result.name?.trim() || cleStable,
+      },
+    ]);
   }
 
-  async loadFournisseurs(): Promise<void> {
-    try {
-      const res = await this.fournisseursApi.getAll({ page: 0, pageSize: 200 });
-      this.fournisseurs.set(res.items ?? []);
-    } catch {
-      this.erreur.set('Impossible de charger les fiches fournisseurs.');
-    }
+  removeArticle(index: number): void {
+    this.panier.update((rows) => rows.filter((_, i) => i !== index));
+    this.erreur.set(undefined);
   }
 
   async submit(): Promise<void> {
-    const fournisseurId = this.fournisseurId().trim();
-    if (!fournisseurId) {
-      this.erreur.set('Choisir un fournisseur (fiche Achats).');
+    const clesStables = this.panier()
+      .map((l) => l.cleStable.trim())
+      .filter(Boolean);
+    if (!clesStables.length) {
+      this.erreur.set('Ajoutez au moins un article au panier.');
       return;
     }
-    const clesStables = this.clesText()
-      .split(/[\n,;]+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
     this.saving.set(true);
     this.erreur.set(undefined);
     try {
-      const created = await this.api.create({ fournisseurId, clesStables });
+      const created = await this.api.create({ clesStables });
       await this.router.navigateByUrl(`/achats/consultations/${created.id}`);
     } catch {
       this.erreur.set('Création impossible.');

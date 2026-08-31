@@ -23,6 +23,8 @@ export interface CatalogItemPickDialogResult {
   itemId: string;
   name: string;
   code?: string;
+  /** Identité catalogue (panier consultation / matching devis). */
+  cleStable?: string;
   type: DpuComposantType;
   unite: string;
   unitOfMeasureId?: string;
@@ -38,7 +40,7 @@ export interface CatalogItemPickDialogResult {
   template: `
     <div class="dialog-shell">
       <header>
-        <h2>Depuis le catalogue</h2>
+        <h2>Choisir un article</h2>
         <nf-button variant="ghost" (clicked)="close()" aria-label="Fermer">✕</nf-button>
       </header>
       <app-article-picker
@@ -82,6 +84,7 @@ export class CatalogItemPickDialogComponent {
       itemId: result.item.id,
       name: result.item.name,
       code: result.item.code,
+      cleStable: result.item.cleStable || result.item.code,
       type: NATURE_TYPE_DPU[normalizeNature(result.item.nature)],
       unite: result.unite,
       unitOfMeasureId: result.item.unitOfMeasureId,

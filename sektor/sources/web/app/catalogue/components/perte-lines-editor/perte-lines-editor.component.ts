@@ -1,13 +1,14 @@
 import { Component, OnDestroy, computed, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
 
 import { ButtonComponent, NfInputComponent, NfSelectComponent } from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
-import type { Article, InventoryTxLine } from '../../models';
-import { ArticleCatalogService } from '../../services/article-catalog.service';
+import type { InventoryTxLine } from '../../models';
+import { openCatalogItemPicker } from '@app/etudes/dossiers/components/catalog-item-pick-dialog/catalog-item-pick-dialog.component';
 
 export type CauseDetaillee = 'DECOUPE' | 'CASSE' | 'DETERIORATION' | 'AUTRE';
 
@@ -27,7 +28,7 @@ const CAUSE_OPTIONS: { value: CauseDetaillee; labelKey: string }[] = [
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, TranslateModule, MadCurrencyPipe, ButtonComponent, NfInputComponent, NfSelectComponent],
   template: `
-    <div class="ple" [class.ple--readonly]="linesControl().disabled">
+    <div class="ple" data-testid="ple-picker-ready" [class.ple--readonly]="linesControl().disabled">
       <div class="ple__toolbar">
         <nf-button variant="secondary" icon="plus" iconLibrary="lucide" [disabled]="linesControl().disabled" (clicked)="addLine()">
           {{ 'inventory.components.linesEditor.addLine' | translate }}
@@ -54,13 +55,15 @@ const CAUSE_OPTIONS: { value: CauseDetaillee; labelKey: string }[] = [
             @for (line of lines(); track line.id; let i = $index) {
               <tr>
                 <td>
-                  <nf-select
-                    class="ple__field"
-                    [options]="articleSelectOptions()"
-                    [ngModel]="line.articleId"
-                    (ngModelChange)="onArticleChange(i, $event)"
+                  <button
+                    type="button"
+                    class="ple__pick"
+                    data-testid="article-picker-open"
                     [disabled]="linesControl().disabled"
-                    [ngModelOptions]="{ standalone: true }" />
+                    (click)="pickArticle(i)"
+                  >
+                    {{ line.articleCode ? (line.articleCode + ' — ' + line.articleName) : 'Choisir un article' }}
+                  </button>
                 </td>
                 <td class="ple__muted">{{ line.articleName || ('inventory.common.dash' | translate) }}</td>
                 <td>
@@ -77,6 +80,7 @@ const CAUSE_OPTIONS: { value: CauseDetaillee; labelKey: string }[] = [
                   <td>
                     <nf-select
                       class="ple__field ple__field--cause"
+                      data-testid="perte-cause-select"
                       [options]="causeOptions()"
                       [ngModel]="line.causeDetaillee || 'AUTRE'"
                       (ngModelChange)="patchLine(i, { causeDetaillee: $event, notes: $event })"
@@ -155,6 +159,21 @@ const CAUSE_OPTIONS: { value: CauseDetaillee; labelKey: string }[] = [
       min-width: 140px;
       max-width: 160px;
     }
+    .ple__pick {
+      width: 100%;
+      min-width: 140px;
+      text-align: left;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid var(--nf-border-default);
+      border-radius: 8px;
+      background: var(--nf-color-surface, #fff);
+      font: inherit;
+      cursor: pointer;
+    }
+    .ple__pick:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
     .ple__muted {
       color: var(--nf-text-secondary, var(--nf-text-muted));
     }
@@ -179,18 +198,14 @@ const CAUSE_OPTIONS: { value: CauseDetaillee; labelKey: string }[] = [
   `,
 })
 export class PerteLinesEditorComponent implements OnDestroy {
-  private readonly articleCatalog = inject(ArticleCatalogService);
+  private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
 
   readonly linesControl = input.required<FormControl<PerteLine[] | null>>();
   /** `sortie` masque la colonne « cause » (réutilisation pour sorties stock). */
   readonly variant = input<'perte' | 'sortie'>('perte');
 
-  readonly articles = signal<Article[]>([]);
   readonly lines = signal<PerteLine[]>([]);
-  readonly articleSelectOptions = computed(() =>
-    this.articles().map((a) => ({ value: a.id, label: `${a.code} — ${a.name}` })),
-  );
   readonly causeOptions = computed(() =>
     CAUSE_OPTIONS.map((opt) => ({
       value: opt.value,
@@ -219,10 +234,6 @@ export class PerteLinesEditorComponent implements OnDestroy {
         this.computeTotal();
       });
     });
-
-    effect(() => {
-      void this.loadArticles();
-    });
   }
 
   ngOnDestroy(): void {
@@ -230,9 +241,11 @@ export class PerteLinesEditorComponent implements OnDestroy {
     this.destroy$.complete();
   }
 
-  private async loadArticles(): Promise<void> {
-    const list = await this.articleCatalog.loadArticles({ activeOnly: true });
-    this.articles.set(list);
+  async pickArticle(index: number): Promise<void> {
+    if (this.linesControl().disabled) return;
+    const result = await openCatalogItemPicker(this.dialog, { context: 'stock', uniteOptions: [] });
+    if (!result?.itemId) return;
+    this.onArticlePicked(index, result);
   }
 
   private computeTotal(): void {
@@ -265,21 +278,19 @@ export class PerteLinesEditorComponent implements OnDestroy {
     this.commit(next.map((l, i) => ({ ...l, lineNumber: i + 1 })));
   }
 
-  onArticleChange(index: number, articleId: string): void {
-    const art = this.articles().find((a) => a.id === articleId);
-    if (!art) {
-      this.patchLine(index, { articleId });
-      return;
-    }
+  onArticlePicked(
+    index: number,
+    result: { itemId: string; name: string; code?: string; unite: string; unitOfMeasureId?: string; prixUnitaire: number },
+  ): void {
+    const unitPrice = result.prixUnitaire ?? 0;
     const line = this.lines()[index];
-    const unitPrice = art.pmp ?? art.prixUnitaire;
-    const totalPrice = unitPrice != null ? Math.round(line.quantity * unitPrice * 100) / 100 : undefined;
+    const totalPrice = Math.round(line.quantity * unitPrice * 100) / 100;
     this.patchLine(index, {
-      articleId,
-      articleCode: art.code,
-      articleName: art.name,
-      uomId: art.uomId,
-      uomCode: art.uomCode,
+      articleId: result.itemId,
+      articleCode: result.code ?? '',
+      articleName: result.name,
+      uomId: result.unitOfMeasureId ?? '',
+      uomCode: result.unite,
       unitPrice,
       totalPrice,
     });

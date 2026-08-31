@@ -86,7 +86,7 @@ import { formatPercentDisplay } from '@app/socle/shared/utils/percent-display.ut
         </div>
       }
 
-      <div class="table-wrap">
+      <div class="table-wrap" [class.table-wrap--reloading]="rechargement()">
         <table>
           <thead>
             <tr>
@@ -107,7 +107,7 @@ import { formatPercentDisplay } from '@app/socle/shared/utils/percent-display.ut
             </tr>
           </thead>
           <tbody>
-            @if (chargement()) {
+            @if (chargement() && rows().length === 0) {
               <tr>
                 <td [attr.colspan]="financeAutorisee() ? 12 : 9" class="loading">
                   {{ 'Loading' | translate }}…
@@ -204,6 +204,7 @@ import { formatPercentDisplay } from '@app/socle/shared/utils/percent-display.ut
     .count { font-size: 13px; color: var(--nf-color-text-secondary); }
 
     .table-wrap { background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 8px; overflow: auto; max-height: calc(100vh - 330px); }
+    .table-wrap--reloading { opacity: 0.7; }
     /* AC-21 — 390 px : scroll horizontal explicite (table non compressible), cibles ≥ 44 px. */
     @media (max-width: 480px) {
       .table-wrap { max-width: 100%; }
@@ -274,6 +275,8 @@ export class ChantiersListingPage {
   readonly financeAutorisee = signal(false);
   /** AC-12 — chargement distinct du vide et de l'erreur. */
   readonly chargement = signal(true);
+  /** Recherche/filtre : on garde les lignes affichées pendant le fetch. */
+  readonly rechargement = signal(false);
   /** P1-21 — erreur de chargement distincte d'une liste vide. */
   readonly erreur = signal<string | null>(null);
 
@@ -337,7 +340,12 @@ export class ChantiersListingPage {
     if (options?.sync !== false) this.syncUrl();
     const f = this.filters();
     const recherche = this.search().trim();
-    this.chargement.set(true);
+    const silent = this.rows().length > 0;
+    if (silent) {
+      this.rechargement.set(true);
+    } else {
+      this.chargement.set(true);
+    }
     this.erreur.set(null);
     this.portefeuilleApi
       .lister({
@@ -357,11 +365,13 @@ export class ChantiersListingPage {
         this.total.set(p.total);
         this.financeAutorisee.set(p.financeAutorisee);
         this.chargement.set(false);
+        this.rechargement.set(false);
       })
       // P1-21 — une erreur API n'est jamais confondue avec une liste vide.
       .catch(() => {
         this.erreur.set('chantiers.portefeuille.erreurChargement');
         this.chargement.set(false);
+        this.rechargement.set(false);
       });
   }
 
@@ -383,7 +393,7 @@ export class ChantiersListingPage {
   readonly pages = computed(() => Math.max(1, Math.ceil(this.total() / this.pageSize())));
 
   readonly countLabel = computed(() => {
-    if (this.chargement()) {
+    if (this.chargement() && this.rows().length === 0) {
       return `${this.translate.instant('Loading')}…`;
     }
     const n = this.total();

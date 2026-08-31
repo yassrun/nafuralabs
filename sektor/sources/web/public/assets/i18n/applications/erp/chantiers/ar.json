@@ -42,6 +42,7 @@
         "backToList": "الرجوع إلى القائمة",
         "save": "حفظ",
         "cancel": "إلغاء",
+        "remove": "إزالة",
         "delete": "حذف",
         "print": "طباعة",
         "export": "تصدير Excel",
@@ -1065,6 +1066,9 @@
     "ouvrir": "فتح",
     "gerer": "إدارة",
     "voir": "عرض",
+    "nav": {
+      "titre": "الذهاب إلى"
+    },
     "suspendu": "الورش موقوف — تتوفر الإجراءات المتوافقة فقط.",
     "kpi": {
       "venteActive": "البيع النشط بدون الضريبة",
@@ -1131,12 +1135,16 @@
     "module": {
       "arbre": "الشجرة",
       "arbreResume": "مباع / داخلي، رابط إلى عرض السعر",
+      "equipe": "الفريق",
+      "equipeResume": "المشرف ورئيس الورش",
       "budget": "الميزانية والهامش",
       "budgetResume": "التكلفة المباشرة، المراجعات، الفروقات",
       "planning": "الجدولة",
       "planningResume": "الأنشطة والآجال",
       "situations": "الكشوف",
       "situationsResume": "الحسابات والاستقطاعات",
+      "journal": "اليومية",
+      "journalResume": "أحداث وملاحظات الورش",
       "demandeAchatCount": "{{count}} طلب شراء",
       "indisponible": "غير متاح"
     },

@@ -82,7 +82,9 @@
       "consultationsListTitle": "الاستشارات",
       "consultationsListCrumb": "الاستشارات",
       "consultationNewTitle": "استشارة جديدة",
-      "consultationNewCrumb": "جديدة"
+      "consultationNewCrumb": "جديدة",
+      "consultationDetailTitle": "تفاصيل الاستشارة",
+      "consultationDetailCrumb": "التفاصيل"
     },
     "rubrique": {
       "MATERIAUX": "مواد",
@@ -645,6 +647,110 @@
       "deleteConfirm": {
         "title": "حذف المورد",
         "message": "حذف {name}؟"
+      }
+    },
+    "consultation": {
+      "entityName": "استشارة",
+      "entityNamePlural": "الاستشارات",
+      "headerTitle": "الاستشارات",
+      "detailTitle": "استشارة",
+      "loadError": "تعذر تحميل الاستشارة.",
+      "statut": {
+        "demande": "طلب",
+        "preparation": "تحضير",
+        "ouverte": "في انتظار الردود",
+        "partielle": "جزئية",
+        "complete": "مكتملة",
+        "devisRecus": "{{count}} عروض"
+      },
+      "lien": {
+        "liee": "مرتبطة",
+        "hors": "خارج الدراسة"
+      },
+      "list": {
+        "columns": {
+          "numero": "الرقم",
+          "fournisseur": "المورد",
+          "destinataires": "المرسل إليهم",
+          "panier": "السلة",
+          "avancement": "التقدم",
+          "statut": "الحالة",
+          "lien": "الربط"
+        },
+        "filters": {
+          "lien": "ربط الدراسة",
+          "lienAll": "الكل",
+          "lienHors": "خارج الدراسة",
+          "lienLiee": "مرتبطة"
+        },
+        "emptyState": {
+          "title": "لا توجد استشارات",
+          "message": "أنشئ خارج الدراسة — يبقى ربط المجلد فارغًا. يمكن لواجهة الدراسة الربط لاحقًا.",
+          "actionLabel": "+ استشارة"
+        }
+      },
+      "form": {
+        "sections": {
+          "identite": "الهوية",
+          "panier": "السلة"
+        },
+        "fields": {
+          "numero": "الرقم",
+          "fournisseur": "المورد",
+          "statut": "الحالة",
+          "lien": "ربط الدراسة",
+          "panier": "المواد"
+        }
+      },
+      "destinataires": {
+        "title": "المرسل إليهم",
+        "empty": "لا يوجد مرسل إليهم.",
+        "add": "إضافة",
+        "fournisseur": "المورد",
+        "email": "البريد",
+        "statut": "الحالة",
+        "enAttente": "قيد الانتظار",
+        "devisRecu": "عرض مستلم",
+        "devis": "عرض",
+        "placeholder": "اكتب حرفين على الأقل — ابحث عن مورد…",
+        "contactPlaceholder": "اختر جهة الاتصال بالبريد…",
+        "contactRequis": "اختر جهة الاتصال بالبريد.",
+        "sansEmail": "تعذر إضافة هذا المورد: لا توجد جهة اتصال ببريد إلكتروني في البطاقة. أضف جهة اتصال ثم أعد المحاولة.",
+        "ouvrirFiche": "فتح بطاقة المورد",
+        "doublon": "هذا المورد مرسل إليه مسبقاً في هذه الاستشارة.",
+        "error": "تعذر إضافة المرسل إليه."
+      },
+      "envoyer": "إرسال الاستشارة",
+      "envoyerError": "تعذر الإرسال.",
+      "journal": {
+        "title": "سجل الإرسال",
+        "empty": "لا إرسال بعد.",
+        "destinataire": "المرسل إليه",
+        "email": "البريد",
+        "date": "التاريخ"
+      },
+      "panier": {
+        "empty": "السلة فارغة.",
+        "fige": "السلة مجمّدة. لا يمكن تعديل المواد. ما زال بإمكانك إضافة مرسل إليه.",
+        "columns": {
+          "code": "الرمز",
+          "libelle": "التسمية"
+        }
+      },
+      "import": {
+        "callout": "نستورد الملف. الاستيراد الذكي يستخرج الأسطر. بدون إدخال يدوي للأسعار.",
+        "depositTitle": "إيداع العرض",
+        "extraitTitle": "المستخرج (مراجعة مؤكدة)",
+        "extraitEmpty": "لا أسطر — ملف بلا استخراج مؤكد ليس عرضًا مستلمًا.",
+        "emptyHint": "لا أسطر مستخرجة — الملف ليس عرضًا مستلمًا.",
+        "error": "تعذر الاستيراد.",
+        "columns": {
+          "identite": "الهوية",
+          "libelle": "التسمية",
+          "qte": "الكمية",
+          "unite": "الوحدة",
+          "pu": "سعر الوحدة"
+        }
       }
     },
     "smartImport": {

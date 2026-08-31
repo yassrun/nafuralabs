@@ -203,6 +203,7 @@
       "anomaly": "Anomaly",
       "saved": "Refuel saved.",
       "noCarnet": "Select a logbook.",
+      "selectEngineFirst": "Select an engine first.",
       "exportCsv": "Export CSV",
       "totalLitres": "Total litres",
       "fillCount": "Refuel count"

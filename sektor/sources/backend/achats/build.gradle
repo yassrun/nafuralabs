@@ -7,6 +7,7 @@ dependencies {
     implementation project(':sektor:finance')
     implementation 'ma.nafuralabs:framework:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:authorization:0.1.0-SNAPSHOT'
+    implementation 'ma.nafuralabs:notification:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:ai-agent-api:0.1.0-SNAPSHOT'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'

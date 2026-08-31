@@ -71,11 +71,15 @@ export class DevisConsultationImportService {
     consultationId: string,
     data: Record<string, unknown>,
     fichierNom?: string,
+    destinataireId?: string,
   ): Promise<ConsultationAchat | null> {
     const lignes = mapDevisConsultationLignes(data);
     if (!lignes.length) {
       return null;
     }
-    return this.api.importDevis(consultationId, { fichierNom, lignes });
+    if (!destinataireId) {
+      return null;
+    }
+    return this.api.importDevis(consultationId, { destinataireId, fichierNom, lignes });
   }
 }

@@ -70,14 +70,17 @@ function assertChromeOverlay() {
     throw new Error('VU ROUGE overlay : consultation-decompo-dialog absent');
   }
   const dialogSrc = readFileSync(dialogTs, 'utf8');
-  if (!/fournisseur/i.test(dialogSrc) || !/<select/.test(dialogSrc)) {
-    throw new Error('VU ROUGE overlay : dropdown fournisseur (fiches achats) absent');
+  if (!/nf-select/.test(dialogSrc) || !/lookupKey="fournisseurs"/.test(dialogSrc)) {
+    throw new Error('VU ROUGE overlay : combobox fournisseur (lookup Achats) absent');
   }
-  if (!/Créer une consultation|creerConsultation/i.test(dialogSrc)) {
+  if (/<select[\s\S]{0,240}name="fournisseurId"/.test(dialogSrc) || /pageSize:\s*200/.test(dialogSrc)) {
+    throw new Error('VU ROUGE overlay : encore dump <select> fournisseur');
+  }
+  if (!/creerConsultation/i.test(dialogSrc)) {
     throw new Error('VU ROUGE overlay : action Créer une consultation absente');
   }
-  if (!/Ajouter à|ajouterAConsultation/i.test(dialogSrc)) {
-    throw new Error('VU ROUGE overlay : action Ajouter à une consultation absente');
+  if (!/ajouterArticleCourant/.test(dialogSrc)) {
+    throw new Error('VU ROUGE overlay : action Ajouter article courant absente');
   }
   if (/type="text"[\s\S]{0,80}fournisseurId|UUID collé|coller un UUID/i.test(dialogSrc)) {
     throw new Error('overlay : saisie UUID fournisseur (interdit)');

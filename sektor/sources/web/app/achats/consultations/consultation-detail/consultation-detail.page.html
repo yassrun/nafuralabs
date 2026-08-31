@@ -1,69 +1,217 @@
 <nf-page-shell>
   <nf-page-header [config]="headerConfig"></nf-page-header>
 
-  @if (chargement()) {
-    <p>Chargement…</p>
-  } @else if (item(); as row) {
-    <div class="cs-fiche" data-testid="consultation-achat-fiche">
-      <div class="cs-pills">
-        <span class="pill">{{ row.numero }}</span>
-        <span class="pill">{{ row.fournisseurNom || '—' }}</span>
-        <span class="pill" [class.pill-warn]="!row.devisRecus">{{ statutLabel() }}</span>
-      </div>
+  <div data-testid="consultation-achat-fiche">
+    <nf-entity-detail
+      #detail
+      [config]="config"
+      [mode]="mode()"
+      [item]="item()"
+      [lookups]="lookups()"
+      [loading]="isLoading()"
+      [saving]="isSaving()"
+      (action)="onAction($event)">
 
-      <p class="cs-callout">
-        On importe le fichier. Import magique extrait les lignes. Pas de saisie manuelle des prix.
-      </p>
-
-      <div class="cs-import">
-        <h2>Déposer le devis</h2>
-        <nf-smart-import-trigger
-          [definition]="importDefinition"
-          (completed)="onSmartImportComplete($event)" />
-      </div>
-
-      @if (importHint(); as hint) {
-        <p class="cs-hint">{{ hint }}</p>
-      }
-
-      <h2>Extrait (revue confirmée)</h2>
-      @if (lignes().length === 0) {
-        <p class="cs-empty">Aucune ligne — un fichier sans extraction confirmée n’est pas un devis reçu.</p>
-      } @else {
-        <table data-testid="consultation-devis-lignes">
-          <thead>
-            <tr>
-              <th>Identité</th>
-              <th>Libellé</th>
-              <th>Qté</th>
-              <th>Unité</th>
-              <th>PU</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (ligne of lignes(); track $index) {
+      <ng-template nfField="panier">
+        @if (panierFige()) {
+          <p class="cs-callout" data-testid="consultation-panier-fige">
+            {{ 'achats.consultation.panier.fige' | translate }}
+          </p>
+        }
+        @if (panierCles().length === 0) {
+          <p class="cs-empty">{{ 'achats.consultation.panier.empty' | translate }}</p>
+        } @else {
+          <table class="cs-panier-table" data-testid="consultation-panier-lignes">
+            <thead>
               <tr>
-                <td>{{ ligne.identite || '—' }}</td>
-                <td>{{ ligne.libelle || '—' }}</td>
-                <td>{{ ligne.quantite ?? '—' }}</td>
-                <td>{{ ligne.unite || '—' }}</td>
-                <td>{{ ligne.prixUnitaire ?? '—' }}</td>
+                <th>{{ 'achats.consultation.panier.columns.code' | translate }}</th>
+                <th>{{ 'achats.consultation.panier.columns.libelle' | translate }}</th>
               </tr>
-            }
-          </tbody>
-        </table>
-      }
+            </thead>
+            <tbody>
+              @for (cle of panierCles(); track cle) {
+                <tr>
+                  <td>{{ cle }}</td>
+                  <td>{{ cle }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </ng-template>
+    </nf-entity-detail>
 
-      @if (erreur(); as err) {
-        <p class="cs-error">{{ err }}</p>
-      }
+    @if (mode() === 'view' && item()) {
+      <section class="cs-dest-block" data-testid="consultation-destinataires">
+        <h2>{{ 'achats.consultation.destinataires.title' | translate }}</h2>
 
-      <div class="cs-actions">
-        <nf-button type="button" variant="secondary" (clicked)="back()">Retour à la liste</nf-button>
-      </div>
-    </div>
-  } @else {
-    <p class="cs-error">{{ erreur() || 'Consultation introuvable.' }}</p>
-    <nf-button type="button" variant="secondary" (clicked)="back()">Retour à la liste</nf-button>
-  }
+        @if (destinataires().length === 0) {
+          <p class="cs-empty">{{ 'achats.consultation.destinataires.empty' | translate }}</p>
+        } @else {
+          <table class="cs-dest-table" data-testid="consultation-destinataires-table">
+            <thead>
+              <tr>
+                <th>{{ 'achats.consultation.destinataires.fournisseur' | translate }}</th>
+                <th>{{ 'achats.consultation.destinataires.email' | translate }}</th>
+                <th>{{ 'achats.consultation.destinataires.statut' | translate }}</th>
+                <th>{{ 'achats.consultation.destinataires.devis' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of destinataires(); track row.id) {
+                <tr [attr.data-testid]="'consultation-destinataire-row'">
+                  <td>{{ row.fournisseurNom }}</td>
+                  <td>{{ row.contactEmail }}</td>
+                  <td>{{ statutDestinataire(row) }}</td>
+                  <td
+                    data-testid="consultation-destinataire-import"
+                    [attr.data-destinataire-id]="row.id"
+                  >
+                    <nf-smart-import-trigger
+                      [definition]="importDefinition"
+                      (completed)="onSmartImportComplete($event, row.id)" />
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        <div class="cs-dest-add">
+          <nf-select
+            [label]="'achats.consultation.destinataires.fournisseur' | translate"
+            lookupKey="fournisseurs"
+            [placeholder]="'achats.consultation.destinataires.placeholder' | translate"
+            [lookupSearch]="searchFournisseurs"
+            [ngModel]="draftFournisseurId()"
+            (ngModelChange)="onFournisseurChange($event)"
+            [selectedLabel]="draftFournisseurLabel()"
+            name="destinataireFournisseurId"
+            data-testid="consultation-destinataire-fournisseur"
+          />
+
+          @if (contactsEmail().length > 1) {
+            <select
+              data-testid="consultation-destinataire-contact"
+              [ngModel]="draftContactId()"
+              (ngModelChange)="draftContactId.set($event)"
+              name="destinataireContactId"
+            >
+              <option value="">{{ 'achats.consultation.destinataires.contactPlaceholder' | translate }}</option>
+              @for (c of contactsEmail(); track c.id) {
+                <option [value]="c.id">{{ c.nom }} — {{ c.email }}</option>
+              }
+            </select>
+          }
+
+          <nf-button
+            type="button"
+            variant="secondary"
+            data-testid="consultation-destinataire-add"
+            [disabled]="destSaving() || !draftFournisseurId()"
+            (clicked)="addDestinataire()"
+          >
+            {{ 'achats.consultation.destinataires.add' | translate }}
+          </nf-button>
+        </div>
+
+        @if (sansEmailFournisseurId(); as frnId) {
+          <p
+            class="cs-error"
+            role="alert"
+            data-testid="consultation-destinataire-sans-email"
+          >
+            {{ 'achats.consultation.destinataires.sansEmail' | translate }}
+          </p>
+          <a
+            [routerLink]="['/achats/fournisseurs', frnId]"
+            data-testid="consultation-destinataire-fiche-fournisseur"
+          >
+            {{ 'achats.consultation.destinataires.ouvrirFiche' | translate }}
+          </a>
+        }
+
+        @if (destErreur(); as err) {
+          <p class="cs-error" role="alert" data-testid="consultation-destinataire-error">{{ err }}</p>
+        }
+
+        <div class="cs-dest-actions">
+          <nf-button
+            type="button"
+            variant="primary"
+            data-testid="consultation-envoyer"
+            [disabled]="envoyerSaving() || destSaving() || !canEnvoyer()"
+            (clicked)="envoyer()"
+          >
+            {{ 'achats.consultation.envoyer' | translate }}
+          </nf-button>
+        </div>
+        @if (envoyerErreur(); as err) {
+          <p class="cs-error" role="alert" data-testid="consultation-envoyer-error">{{ err }}</p>
+        }
+      </section>
+
+      <section class="cs-dest-block" data-testid="consultation-journal">
+        <h2>{{ 'achats.consultation.journal.title' | translate }}</h2>
+        @if (envois().length === 0) {
+          <p class="cs-empty">{{ 'achats.consultation.journal.empty' | translate }}</p>
+        } @else {
+          <table class="cs-journal-table" data-testid="consultation-journal-table">
+            <thead>
+              <tr>
+                <th>{{ 'achats.consultation.journal.destinataire' | translate }}</th>
+                <th>{{ 'achats.consultation.journal.email' | translate }}</th>
+                <th>{{ 'achats.consultation.journal.date' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of envois(); track row.id) {
+                <tr data-testid="consultation-journal-row">
+                  <td>{{ row.destinataireNom }}</td>
+                  <td>{{ row.email }}</td>
+                  <td>{{ row.sentAt | date:'short' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </section>
+
+      <section class="cs-import-block" data-testid="consultation-achat-import">
+        <h2>{{ 'achats.consultation.import.extraitTitle' | translate }}</h2>
+        @if (lignes().length === 0) {
+          <p class="cs-empty">{{ 'achats.consultation.import.extraitEmpty' | translate }}</p>
+        } @else {
+          <table data-testid="consultation-devis-lignes">
+            <thead>
+              <tr>
+                <th>{{ 'achats.consultation.import.columns.identite' | translate }}</th>
+                <th>{{ 'achats.consultation.import.columns.libelle' | translate }}</th>
+                <th>{{ 'achats.consultation.import.columns.qte' | translate }}</th>
+                <th>{{ 'achats.consultation.import.columns.unite' | translate }}</th>
+                <th>{{ 'achats.consultation.import.columns.pu' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ligne of lignes(); track $index) {
+                <tr>
+                  <td>{{ ligne.identite || '—' }}</td>
+                  <td>{{ ligne.libelle || '—' }}</td>
+                  <td>{{ ligne.quantite ?? '—' }}</td>
+                  <td>{{ ligne.unite || '—' }}</td>
+                  <td>{{ ligne.prixUnitaire ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+        @if (importHint(); as hint) {
+          <p class="cs-hint">{{ hint }}</p>
+        }
+        @if (importErreur(); as err) {
+          <p class="cs-error">{{ err }}</p>
+        }
+      </section>
+    }
+  </div>
 </nf-page-shell>

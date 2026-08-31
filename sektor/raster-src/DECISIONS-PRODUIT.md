@@ -7,7 +7,7 @@
 >
 > Comment continuer : ajouter une entrée datée sous **Gelé** ou **Ouvert**. Une fois gelé, on ne rejoue pas le débat dans le chat — on amende ce fichier.
 
-Dernière passe : 23/08/2026 (lookup combobox partagé — pas un picker ; œil fiche si id).
+Dernière passe : 28/08/2026 (consultation RFQ : 1 panier + N destinataires — casse « un fournisseur » du 22/08).
 
 ---
 
@@ -188,6 +188,8 @@ Interdit dans l’overlay : deux selects + checkboxes de toutes les identités +
 
 Une consultation = **un fournisseur + un paquet** d’identités (`cle_stable`) prises sur **plusieurs postes**. Pas une consultation par ligne DPU / par poste. Ciment sur 3 postes = une ligne de panier.
 
+> **Cassé 28/08** sur « un fournisseur » — voir gel 28/08 (1 panier + N destinataires). Le paquet d’identités (panier) reste.
+
 ### Lien étude (la seule diff)
 
 Sans lien étude : la consultation vit dans Achats, pas de flag sur un arbre.
@@ -273,8 +275,8 @@ SKU / `cleStable` dans la barre · filtre fournisseur · filtre unité · listin
 
 **Casse le dump actuel** (selects client / fournisseur / chantier qui chargent 200–500 partenaires ; `searchable` = filtre local ; œil = toujours la liste).
 
-Ancrage QA : [`lots/lookups/CONTRAT.md`](lots/lookups/CONTRAT.md) (`AC-1`…`AC-14`).
-Canvas : [`lots/lookups/ux/lookup-combobox-wireframe.canvas.tsx`](lots/lookups/ux/lookup-combobox-wireframe.canvas.tsx).
+Ancrage QA : [`lots/_archive/lookups/CONTRAT.md`](lots/_archive/lookups/CONTRAT.md) (`AC-1`…`AC-14`).
+Canvas : [`lots/_archive/lookups/ux/lookup-combobox-wireframe.canvas.tsx`](lots/_archive/lookups/ux/lookup-combobox-wireframe.canvas.tsx).
 Ne pas recoller le picker article ici.
 
 ### Trois gestes
@@ -303,6 +305,43 @@ Ne pas recoller le picker article ici.
 ### Hors v1
 
 CTA + / créer depuis le champ · ICE comme axe dédié · `partnerContacts` · `nf-form` custom sans `lookupKey`.
+
+---
+
+## Gelé (28/08/2026) — consultation = 1 panier + N destinataires
+
+**Casse le gel 22/08** sur « une consultation = **un** fournisseur ». Le reste du 22/08 tient : objet **Achats**, pas DA, pas AO, pas collé au dossier ; devis = **import magique** ; lien étude / flag CONSULTÉ / overlay 139 **hors ce sous-lot**.
+
+Ancrage QA : [`lots/consultation/destinataires-envoi-suivi/CONTRAT.md`](lots/consultation/destinataires-envoi-suivi/CONTRAT.md).
+Canvas : [`lots/consultation/destinataires-envoi-suivi/ux/destinataires-envoi-suivi-wireframe.canvas.tsx`](lots/consultation/destinataires-envoi-suivi/ux/destinataires-envoi-suivi-wireframe.canvas.tsx).
+
+### Grain
+
+| Objet | Grain | Rôle |
+|--------|--------|------|
+| **Consultation** | 1 panier + N destinataires | Grouper, envoyer, suivre |
+| **Destinataire** | 1 fournisseur + contact mail | Qui reçoit |
+| **Devis** | 1 fournisseur, sur cette consult | Réponse (import magique) |
+
+Ordre des gestes : **panier d’abord** → **destinataires ensuite** (contacts) → envoyer (action) → import **par destinataire**.
+
+Create `/achats/consultations/new` = panier seulement. Pas de wizard. Fiche = destinataires + CTA Envoyer + suivi.
+
+Ajouter un fournisseur **refuse** s’il n’a aucun `PartnerContact` avec e-mail. Pas de mail collé. Pas de fallback `partners.email`.
+
+### Statut (dérivé des devis, pas de l’envoi)
+
+- Destinataire : `EN_ATTENTE` | `DEVIS_RECU` (import confirmé). L’envoi est un **journal**, pas le statut principal.
+- Consultation : `PREPARATION` → `OUVERTE` (envoyée, 0 devis) → `PARTIELLE` (≥ 1 devis, pas tous) → `COMPLETE` (tous les destinataires ont un devis qui compte).
+
+Listing : résumé N fournisseurs + avancement k/n — plus « le » fournisseur unique.
+
+Après le 1er envoi : panier **figé** ; on peut encore ajouter un destinataire et renvoyer aux nouveaux.
+
+### Interdit (inchangé + ce gel)
+
+- Overlay étude, flag CONSULTÉ, gate N devis, portail invité, attribution / BC, scoring AO, saisie manuelle PU — pas dans ce tour.
+- Réintroduire `fournisseur_id` unique sur la consultation.
 
 ---
 
@@ -349,10 +388,11 @@ Cocher / amender ici, ne pas re-débattre à l’aveugle.
 - [x] Binding : **tranché 20/08** — 1 Item tenant **par** `cle_stable` (1–1). Tiny spec (couleur, RAL) ≠ 2ᵉ Item. Variante d’achat sous l’identité, plus tard, si SKU/stock l’exigent.
 - [x] Tiny spec Extraire : **tranché 26/08** — conservée en note d'emploi sur le composant DPU dès v1 ; elle ne crée jamais une identité. Contrat `raffinement-etude` AC-17.
 - [x] Consultation : **retranché 22/08** — objet **Achats** (pas DA, pas AO, pas collé au dossier). Menu Achats. Popup décompo. Devis = **import magique**. Lien étude → flag CONSULTÉ sur l’article après N devis. Pas une consult par ligne.
+- [x] Consultation RFQ : **retranché 28/08** — **casse** « un fournisseur ». 1 panier + N destinataires (contact mail obligatoire). Envoyer = action + journal. Statut dérivé des devis (1 par fournisseur). Overlay / flag / portail hors tour.
 - [x] Consultation obligatoire : **tranché 20/08, inchangé** — min **N devis reçus**. On n’oblige pas 100 % des articles décomposés.
 - [x] Devis reçu : **tranché 22/08** — on **importe** le fichier ; Import magique **extrait** les lignes. Fichier sans extraction n’identifie pas / ne flague pas.
 - [x] Picker article : **tranché 23/08** — composant **partagé** (pas un dialog études). Pas de dump à l’ouverture. Recherche code + désignation. Filtres serveur nature / famille / lot d’usage. 3 pieds (DPU, stock, lookup). Extraire reste le chemin IA.
-- [x] Lookups FK : **tranché 23/08** — **combobox** anatomy (pas un picker, pas un `<select>` natif). Pas de dump. Recherche serveur ≥ 2 car. Œil → fiche si id, liste si vide. Enums = select natif sans œil. Article reste le picker. Ancrage [`lots/lookups/CONTRAT.md`](lots/lookups/CONTRAT.md).
+- [x] Lookups FK : **tranché 23/08** — **combobox** anatomy (pas un picker, pas un `<select>` natif). Pas de dump. Recherche serveur ≥ 2 car. Œil → fiche si id, liste si vide. Enums = select natif sans œil. Article reste le picker. Ancrage [`lots/_archive/lookups/CONTRAT.md`](lots/_archive/lookups/CONTRAT.md). **Sous-lot retiré de la fenêtre** (28/08).
 
 ---
 

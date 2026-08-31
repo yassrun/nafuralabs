@@ -12,10 +12,10 @@ function buildPerteFilters(t: TranslateService): FilterFieldConfig[] {
   const tr = (k: string) => t.instant(k);
   return [
     {
-      key: 'chantierContains',
-      label: tr('inventory.mouvement.perte.list.filters.chantierContains'),
-      type: 'text',
-      placeholder: tr('inventory.mouvement.perte.list.filters.chantierPlaceholder'),
+      key: 'chantierLocationId',
+      label: tr('inventory.mouvement.perte.fields.chantierLocationId'),
+      type: 'select',
+      lookupKey: 'chantierLocations',
     },
     {
       key: 'status',

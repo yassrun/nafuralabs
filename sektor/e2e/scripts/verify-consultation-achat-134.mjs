@@ -106,14 +106,32 @@ async function main() {
   if (created.body.dossierEtudeId != null) {
     throw new Error(`attendu hors étude (dossier null), reçu ${created.body.dossierEtudeId}`);
   }
-  if (created.body.fournisseurId !== partner.body.id) {
-    throw new Error(`fournisseurId ${created.body.fournisseurId}`);
+  if (String(created.body.statut || '') !== 'PREPARATION') {
+    throw new Error(`statut ${created.body.statut} (attendu PREPARATION)`);
+  }
+  const destsIgnore = Array.isArray(created.body.destinataires) ? created.body.destinataires : [];
+  if (destsIgnore.length) {
+    throw new Error(`AC-3 : fournisseurId posté a créé un destinataire ${JSON.stringify(destsIgnore)}`);
   }
   if (!Array.isArray(created.body.clesStables) || !created.body.clesStables.includes('ciment-cpj-45')) {
     throw new Error(`panier ${JSON.stringify(created.body.clesStables)}`);
   }
   if (!String(created.body.numero || '').startsWith('CS-')) {
     throw new Error(`numero ${created.body.numero}`);
+  }
+
+  const createdSansFrn = await json(
+    await fetch(`${API_BASE}/api/v1/consultations-achat`, {
+      method: 'POST',
+      headers: h,
+      body: JSON.stringify({ clesStables: ['sable-de-dune'] }),
+    }),
+  );
+  if (createdSansFrn.status !== 201) {
+    throw new Error(`create sans fournisseurId ${createdSansFrn.status} ${createdSansFrn.text}`);
+  }
+  if ((createdSansFrn.body.destinataires ?? []).length) {
+    throw new Error('create sans fournisseurId : destinataires non vides');
   }
 
   const listAfter = await json(await fetch(`${API_BASE}/api/v1/consultations-achat`, { headers: h }));
@@ -142,9 +160,12 @@ async function main() {
 
   const listAfterDa = await json(await fetch(`${API_BASE}/api/v1/consultations-achat`, { headers: h }));
   if (!listAfterDa.ok) throw new Error(`liste après DA ${listAfterDa.status}`);
-  const extra = listAfterDa.body.filter((r) => r.id !== created.body.id && !listBefore.body.some((b) => b.id === r.id));
-  if (listAfterDa.body.length !== countBefore + 1 || extra.length) {
-    throw new Error(`DA chantier a créé une consultation (${listAfterDa.body.length} vs ${countBefore + 1})`);
+  const knownIds = new Set([created.body.id, createdSansFrn.body.id]);
+  const extra = listAfterDa.body.filter(
+    (r) => !knownIds.has(r.id) && !listBefore.body.some((b) => b.id === r.id),
+  );
+  if (listAfterDa.body.length !== countBefore + 2 || extra.length) {
+    throw new Error(`DA chantier a créé une consultation (${listAfterDa.body.length} vs ${countBefore + 2})`);
   }
 
   const front = await fetch(`${FRONT_BASE}/achats/consultations`, {

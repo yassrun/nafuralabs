@@ -199,7 +199,11 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "include": ["app/**/*.spec.ts", "src/**/*.spec.ts"],
+            "include": [
+              "app/**/*.spec.ts",
+              "src/**/*.spec.ts",
+              "../../../nafura-platform/sources/web/lib/anatomy/components/atoms/select/**/*.spec.ts"
+            ],
             "exclude": ["tests/**"],
             "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",

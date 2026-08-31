@@ -10,9 +10,14 @@ import {
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { ButtonComponent, EmptyStateComponent } from '@platform/lib/anatomy/components';
-import { ToastService } from '@platform/lib/anatomy';
-import { ErpLookupService } from '@app/socle/shared/services/erp-lookup.service';
+import {
+  ButtonComponent,
+  EmptyStateComponent,
+  LOOKUP_SEARCHERS,
+  NfSelectComponent,
+  ToastService,
+  type LookupSearchFn,
+} from '@platform/lib/anatomy';
 
 import {
   ChantierAffectationApiService,
@@ -33,7 +38,13 @@ const ROLE_LABELS: Record<string, string> = {
   selector: 'app-chantier-equipe-tab',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslateModule, ButtonComponent, EmptyStateComponent],
+  imports: [
+    FormsModule,
+    TranslateModule,
+    ButtonComponent,
+    EmptyStateComponent,
+    NfSelectComponent,
+  ],
   template: `
     <section class="equipe">
       <header class="equipe__header">
@@ -47,12 +58,15 @@ const ROLE_LABELS: Record<string, string> = {
         <form class="equipe__form" (ngSubmit)="submit()">
           <label>
             <span>{{ 'chantiers.chantier.detail.equipe.employe' | translate }}</span>
-            <select [(ngModel)]="draft.employeId" name="employeId" required>
-              <option value="">—</option>
-              @for (e of employees(); track e.id) {
-                <option [value]="e.id">{{ e.name }} ({{ e.matricule }})</option>
-              }
-            </select>
+            <nf-select
+              name="employeId"
+              lookupKey="employes"
+              [lookupSearch]="searchEmployes"
+              [(ngModel)]="draft.employeId"
+              [selectedLabel]="draft.employeLabel"
+              [placeholder]="'chantiers.chantier.detail.equipe.employe' | translate"
+              [required]="true"
+            />
           </label>
           <label>
             <span>{{ 'chantiers.chantier.detail.equipe.role' | translate }}</span>
@@ -72,10 +86,16 @@ const ROLE_LABELS: Record<string, string> = {
           </label>
           <div class="equipe__actions">
             <nf-button type="button" variant="ghost" size="sm" (click)="showForm.set(false)">
-              {{ 'common.cancel' | translate }}
+              {{ 'chantiers.common.actions.cancel' | translate }}
             </nf-button>
-            <nf-button type="submit" variant="primary" size="sm" [disabled]="saving()">
-              {{ 'common.save' | translate }}
+            <nf-button
+              type="submit"
+              variant="primary"
+              size="sm"
+              [disabled]="saving()"
+              (clicked)="submit()"
+            >
+              {{ 'chantiers.common.actions.save' | translate }}
             </nf-button>
           </div>
         </form>
@@ -111,7 +131,7 @@ const ROLE_LABELS: Record<string, string> = {
                 <td>{{ row.dateDebut }}{{ row.dateFin ? ' → ' + row.dateFin : '' }}</td>
                 <td>
                   <nf-button variant="ghost" size="sm" (click)="remove(row)">
-                    {{ 'common.remove' | translate }}
+                    {{ 'chantiers.common.actions.remove' | translate }}
                   </nf-button>
                 </td>
               </tr>
@@ -140,22 +160,25 @@ export class ChantierEquipeTabComponent {
   readonly chantierId = input.required<string>();
 
   private readonly api = inject(ChantierAffectationApiService);
-  private readonly erpLookup = inject(ErpLookupService);
   private readonly toast = inject(ToastService);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
 
   readonly rows = signal<ChantierAffectation[]>([]);
   readonly roles = signal<string[]>(Object.keys(ROLE_LABELS));
-  readonly employees = signal<{ id: string; name: string; matricule: string }[]>([]);
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly showForm = signal(false);
 
   draft = {
     employeId: '',
+    employeLabel: '',
     roleCode: 'BTP_CHEF_CHANTIER',
     dateDebut: new Date().toISOString().slice(0, 10),
     dateFin: '',
   };
+
+  readonly searchEmployes: LookupSearchFn = (q) =>
+    this.lookupSearchers?.['employes']?.(q) ?? Promise.resolve([]);
 
   constructor() {
     effect(() => {
@@ -175,20 +198,12 @@ export class ChantierEquipeTabComponent {
     if (!id) return;
     this.loading.set(true);
     try {
-      const [rows, roles, emps] = await Promise.all([
+      const [rows, roles] = await Promise.all([
         this.api.listByChantier(id),
         this.api.affectableRoles(id).catch(() => Object.keys(ROLE_LABELS)),
-        this.erpLookup.employes('ACTIF'),
       ]);
       this.rows.set(rows ?? []);
       this.roles.set(roles?.length ? roles : Object.keys(ROLE_LABELS));
-      this.employees.set(
-        emps.map((e) => ({
-          id: String(e.key),
-          name: e.value,
-          matricule: String((e.data as Record<string, unknown> | undefined)?.['matricule'] ?? ''),
-        })),
-      );
     } catch {
       this.rows.set([]);
       this.toast.error('Impossible de charger les affectations');
@@ -198,6 +213,7 @@ export class ChantierEquipeTabComponent {
   }
 
   async submit(): Promise<void> {
+    if (this.saving()) return;
     const id = this.chantierId();
     if (!id || !this.draft.employeId || !this.draft.roleCode || !this.draft.dateDebut) {
       this.toast.warning('Employé, rôle et date de début sont requis');
@@ -214,6 +230,7 @@ export class ChantierEquipeTabComponent {
       this.showForm.set(false);
       this.draft = {
         employeId: '',
+        employeLabel: '',
         roleCode: 'BTP_CHEF_CHANTIER',
         dateDebut: new Date().toISOString().slice(0, 10),
         dateFin: '',

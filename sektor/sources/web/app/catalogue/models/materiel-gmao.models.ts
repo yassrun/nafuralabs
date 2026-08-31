@@ -125,6 +125,7 @@ export interface ControleReglementaire {
 export interface PointageEngin {
   id: string;
   engineId: string;
+  engineLabel?: string;
   chantierId: string;
   chantierRef?: string;
   date: string;

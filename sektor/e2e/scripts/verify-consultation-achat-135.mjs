@@ -6,6 +6,9 @@
  *   POST /api/v1/consultations-achat/{id}/devis → 404
  *   GET  fiche : devisRecus reste 0, pas de lignes
  *   chrome : pas de nf-smart-import-trigger devis-consultation sur la fiche
+ *
+ * SEKTOR-281 : destinataireId requis ; statut consultation = PARTIELLE/COMPLETE
+ * (plus DEVIS_RECU comme vérité unique). Trigger import par ligne destinataire.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -54,6 +57,15 @@ function assertChromeFiche() {
   const src = `${html}\n${ts}`;
   if (!src.includes('nf-smart-import-trigger')) {
     throw new Error('VU ROUGE chrome : nf-smart-import-trigger absent de la fiche');
+  }
+  if (!src.includes('consultation-destinataire-import')) {
+    throw new Error('VU ROUGE chrome : trigger import absent par ligne destinataire');
+  }
+  const importBlock = html.match(
+    /<section[^>]*data-testid="consultation-achat-import"[\s\S]*?<\/section>/,
+  );
+  if (importBlock && /nf-smart-import-trigger/.test(importBlock[0])) {
+    throw new Error('chrome : import magique orphelin encore sur le bloc global');
   }
   if (!existsSync(handler)) {
     throw new Error('VU ROUGE chrome : ExtractionDefinition devis-consultation absente');
@@ -105,6 +117,20 @@ async function main() {
     }),
   );
   if (partner.status !== 201) throw new Error(`partner ${partner.status} ${partner.text}`);
+  const contact = await json(
+    await fetch(`${API_BASE}/api/v1/partner-contacts`, {
+      method: 'POST',
+      headers: h,
+      body: JSON.stringify({
+        partnerId: partner.body.id,
+        nom: 'A. Benali',
+        email: `achat-135-${suffix}@lafarge.example`,
+      }),
+    }),
+  );
+  if (contact.status !== 201 && contact.status !== 200) {
+    throw new Error(`contact ${contact.status} ${contact.text}`);
+  }
 
   const created = await json(
     await fetch(`${API_BASE}/api/v1/consultations-achat`, {
@@ -122,6 +148,17 @@ async function main() {
     throw new Error(`create : devisRecus ${created.body.devisRecus} (attendu 0)`);
   }
 
+  const destRes = await json(
+    await fetch(`${API_BASE}/api/v1/consultations-achat/${id}/destinataires`, {
+      method: 'POST',
+      headers: h,
+      body: JSON.stringify({ fournisseurId: partner.body.id }),
+    }),
+  );
+  if (destRes.status !== 201) throw new Error(`destinataire ${destRes.status} ${destRes.text}`);
+  const destId = (destRes.body.destinataires ?? [])[0]?.id;
+  if (!destId) throw new Error(`destinataire id absent ${JSON.stringify(destRes.body)}`);
+
   const before = await json(await fetch(`${API_BASE}/api/v1/consultations-achat/${id}`, { headers: h }));
   if (!before.ok) throw new Error(`GET fiche ${before.status} ${before.text}`);
   if ((before.body.devisRecus ?? 0) !== 0) {
@@ -131,22 +168,36 @@ async function main() {
     throw new Error('GET avant import : devis déjà présents');
   }
 
+  const orphan = await json(
+    await fetch(`${API_BASE}/api/v1/consultations-achat/${id}/devis`, {
+      method: 'POST',
+      headers: h,
+      body: JSON.stringify({
+        fichierNom: 'orphelin.pdf',
+        lignes: [{ identite: 'ciment-cpj-45', libelle: 'Ciment', prixUnitaire: 1 }],
+      }),
+    }),
+  );
+  if (orphan.status === 404) {
+    throw new Error('VU ROUGE import absent : POST /devis → 404');
+  }
+  if (orphan.status < 400 || orphan.status >= 500) {
+    throw new Error(`POST devis sans destinataireId ${orphan.status} ${orphan.text} (attendu 4xx)`);
+  }
+
   const empty = await json(
     await fetch(`${API_BASE}/api/v1/consultations-achat/${id}/devis`, {
       method: 'POST',
       headers: h,
-      body: JSON.stringify({ fichierNom: 'vide.pdf', lignes: [] }),
+      body: JSON.stringify({ destinataireId: destId, fichierNom: 'vide.pdf', lignes: [] }),
     }),
   );
-  if (empty.status === 404) {
-    throw new Error('VU ROUGE import absent : POST /devis → 404');
-  }
   if (empty.status !== 400) {
     throw new Error(`POST devis vide ${empty.status} ${empty.text} (attendu 400)`);
   }
 
   const afterEmpty = await json(await fetch(`${API_BASE}/api/v1/consultations-achat/${id}`, { headers: h }));
-  if ((afterEmpty.body.devisRecus ?? 0) !== 0 || afterEmpty.body.statut !== 'DEMANDE') {
+  if ((afterEmpty.body.devisRecus ?? 0) !== 0 || afterEmpty.body.statut !== 'PREPARATION') {
     throw new Error(
       `fichier sans extraction a incrémenté : devisRecus=${afterEmpty.body.devisRecus} statut=${afterEmpty.body.statut}`,
     );
@@ -157,6 +208,7 @@ async function main() {
       method: 'POST',
       headers: h,
       body: JSON.stringify({
+        destinataireId: destId,
         fichierNom: 'devis-lafarge.pdf',
         lignes: [
           {
@@ -184,8 +236,12 @@ async function main() {
   if (imported.body.devisRecus !== 1) {
     throw new Error(`devisRecus après confirm ${imported.body.devisRecus}`);
   }
-  if (imported.body.statut !== 'DEVIS_RECU') {
-    throw new Error(`statut ${imported.body.statut} (attendu DEVIS_RECU)`);
+  if (imported.body.statut !== 'COMPLETE') {
+    throw new Error(`statut ${imported.body.statut} (attendu COMPLETE, 1 destinataire)`);
+  }
+  const destStatut = (imported.body.destinataires ?? []).find((d) => d.id === destId)?.statut;
+  if (destStatut !== 'DEVIS_RECU') {
+    throw new Error(`destinataire statut ${destStatut}`);
   }
   const lignes = (imported.body.devis ?? []).flatMap((d) => d.lignes ?? []);
   if (lignes.length < 2) {

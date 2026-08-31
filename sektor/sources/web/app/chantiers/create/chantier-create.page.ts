@@ -17,7 +17,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
   ButtonComponent,
   ConfirmDialogService,
+  LOOKUP_SEARCHERS,
   NfSelectComponent,
+  type LookupSearchFn,
   type NfSelectOption,
   PageHeaderComponent,
   PageShellComponent,
@@ -36,12 +38,6 @@ import { ChantierAffectationApiService } from '../services/chantier-affectation-
 interface CreateClientOption {
   id: string;
   code: string;
-  name: string;
-}
-
-interface CreateEmployeeOption {
-  id: string;
-  matricule: string;
   name: string;
 }
 
@@ -182,27 +178,38 @@ function addMonthsIso(from: Date, months: number): string {
       <!-- Étape 5 : équipe (affectations titulaires) -->
       @if (step() === 4) {
         <section class="panel">
-          <label for="cc-chef">{{ 'chantiers.create.fields.chef' | translate }}</label>
-          <select id="cc-chef" [(ngModel)]="draft.chefEmployeId" name="chef" class="fld">
-            <option value="">—</option>
-            @for (e of employees(); track e.id) {
-              <option [value]="e.id">{{ e.name }} ({{ e.matricule }})</option>
-            }
-          </select>
-          <label for="cc-cond">{{ 'chantiers.create.fields.conducteur' | translate }}</label>
-          <select id="cc-cond" [(ngModel)]="draft.conducteurEmployeId" name="cond" class="fld">
-            <option value="">—</option>
-            @for (e of employees(); track e.id) {
-              <option [value]="e.id">{{ e.name }} ({{ e.matricule }})</option>
-            }
-          </select>
-          <label>{{ 'chantiers.create.fields.ingenieur' | translate }}</label>
-          <select [(ngModel)]="draft.ingenieurEmployeId" name="ing" class="fld">
-            <option value="">—</option>
-            @for (e of employees(); track e.id) {
-              <option [value]="e.id">{{ e.name }} ({{ e.matricule }})</option>
-            }
-          </select>
+          <nf-select
+            id="cc-chef"
+            name="chef"
+            lookupKey="employes"
+            [lookupSearch]="searchEmployes"
+            [(ngModel)]="draft.chefEmployeId"
+            [selectedLabel]="draft.chefEmployeLabel"
+            [label]="'chantiers.create.fields.chef' | translate"
+            [placeholder]="'chantiers.create.fields.chef' | translate"
+            [required]="true"
+          />
+          <nf-select
+            id="cc-cond"
+            name="cond"
+            lookupKey="employes"
+            [lookupSearch]="searchEmployes"
+            [(ngModel)]="draft.conducteurEmployeId"
+            [selectedLabel]="draft.conducteurEmployeLabel"
+            [label]="'chantiers.create.fields.conducteur' | translate"
+            [placeholder]="'chantiers.create.fields.conducteur' | translate"
+            [required]="true"
+          />
+          <nf-select
+            id="cc-ing"
+            name="ing"
+            lookupKey="employes"
+            [lookupSearch]="searchEmployes"
+            [(ngModel)]="draft.ingenieurEmployeId"
+            [selectedLabel]="draft.ingenieurEmployeLabel"
+            [label]="'chantiers.create.fields.ingenieur' | translate"
+            [placeholder]="'chantiers.create.fields.ingenieur' | translate"
+          />
           <label class="chk"><input type="checkbox" [(ngModel)]="draft.cautionsSoumission" name="c1" />{{ 'chantiers.create.fields.cautionSoumission' | translate }}</label>
           <label class="chk"><input type="checkbox" [(ngModel)]="draft.cautionsBonneFin" name="c2" />{{ 'chantiers.create.fields.cautionBonneFin' | translate }}</label>
           <label class="chk"><input type="checkbox" [(ngModel)]="draft.cautionsRestitutionAvance" name="c3" />{{ 'chantiers.create.fields.cautionRestitution' | translate }}</label>
@@ -254,6 +261,7 @@ export class ChantierCreatePage {
   private readonly toast = inject(ToastService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
 
   readonly onboardingMode = input(false);
   readonly created = output<{ name: string }>();
@@ -262,11 +270,12 @@ export class ChantierCreatePage {
   readonly validationMessage = signal<string | null>(null);
 
   private readonly _clients = signal<CreateClientOption[]>([]);
-  private readonly _employees = signal<CreateEmployeeOption[]>([]);
   private readonly _chantiers = signal<Chantier[]>([]);
 
   readonly clients = this._clients.asReadonly();
-  readonly employees = this._employees.asReadonly();
+
+  readonly searchEmployes: LookupSearchFn = (q) =>
+    this.lookupSearchers?.['employes']?.(q) ?? Promise.resolve([]);
 
   readonly clientOptions = computed<NfSelectOption[]>(() => {
     const opts = this._clients().map((c) => ({
@@ -308,8 +317,11 @@ export class ChantierCreatePage {
     retenueSourceActive: false,
     avancePercent: 10,
     chefEmployeId: '',
+    chefEmployeLabel: '',
     conducteurEmployeId: '',
+    conducteurEmployeLabel: '',
     ingenieurEmployeId: '',
+    ingenieurEmployeLabel: '',
     cautionsSoumission: true,
     cautionsBonneFin: true,
     cautionsRestitutionAvance: false,
@@ -353,17 +365,7 @@ export class ChantierCreatePage {
   }
 
   private async loadLookups(): Promise<void> {
-    const [employees, chantiersRes] = await Promise.all([
-      this.erpLookup.employes('ACTIF'),
-      this.chantierApi.getAll(),
-    ]);
-    this._employees.set(
-      employees.map((e) => ({
-        id: String(e.key),
-        matricule: String((e.data as Record<string, unknown> | undefined)?.['matricule'] ?? ''),
-        name: e.value,
-      })),
-    );
+    const chantiersRes = await this.chantierApi.getAll();
     this._chantiers.set(chantiersRes.items);
     await this.applyDevisPrefill();
   }

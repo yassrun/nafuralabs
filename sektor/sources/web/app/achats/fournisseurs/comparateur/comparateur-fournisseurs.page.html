@@ -3,15 +3,22 @@
 
   <section class="comparateur">
     <div class="comparateur__filters">
-      <label class="field">
-        <span>Article (UUID)</span>
-        <input
-          type="text"
-          [ngModel]="articleId()"
-          (ngModelChange)="articleId.set($event)"
-          placeholder="UUID item tenant"
-        />
-      </label>
+      <div class="field field--article">
+        <span>Article</span>
+        <div class="article-pick">
+          @if (pickedArticleLabel()) {
+            <span class="article-pick__label" data-testid="cmp-article-label">{{ pickedArticleLabel() }}</span>
+          }
+          <nf-button
+            type="button"
+            variant="secondary"
+            data-testid="cmp-article-picker-open"
+            (clicked)="openArticlePicker()"
+          >
+            {{ articleId() ? 'Changer l\'article' : 'Choisir un article' }}
+          </nf-button>
+        </div>
+      </div>
       <label class="field">
         <span>Date de référence</span>
         <input type="date" [ngModel]="dateRef()" (ngModelChange)="dateRef.set($event)" />
@@ -52,8 +59,10 @@
             <tr [class.comparateur__row--best]="i === 0 && row.prixNormalise != null" [class.comparateur__row--perime]="row.perime">
               <td>
                 <div class="comparateur__fourn">
-                  <strong>{{ row.designation }}</strong>
-                  <span class="meta">{{ row.fournisseurId }}</span>
+                  <strong>{{ fournisseurLabel(row) }}</strong>
+                  @if (row.refFournisseur) {
+                    <span class="meta">Réf. {{ row.refFournisseur }}</span>
+                  }
                   @if (i === 0 && row.prixNormalise != null) {
                     <span class="pill">meilleur comparable</span>
                   }

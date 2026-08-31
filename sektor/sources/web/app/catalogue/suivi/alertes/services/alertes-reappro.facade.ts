@@ -22,8 +22,7 @@ export class AlertesReapproFacade {
   readonly lookups = computed(() => this.lookupsSignal());
 
   async ensureLookups(): Promise<void> {
-    const locations = await this.lookupsService.loadLocations();
-    this.locationsCache = locations;
+    this.locationsCache = [];
 
     const balances = await this.stockEnrichment.loadEnrichedBalances();
     const famillesMap = new Map<string, string>();
@@ -35,10 +34,7 @@ export class AlertesReapproFacade {
     this.famillesCache = Array.from(famillesMap.entries()).map(([id, name]) => ({ id, name }));
 
     this.lookupsSignal.set({
-      locations: locations.map((l) => ({
-        key: l.id,
-        value: l.type === 'CHANTIER' && l.projectRef ? `${l.name} (${l.projectRef})` : l.name,
-      })),
+      locations: [],
       familles: this.famillesCache.map((f) => ({ key: f.id, value: f.name })),
       urgences: [
         { key: '', value: 'Tous' },

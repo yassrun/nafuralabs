@@ -20,15 +20,16 @@
       <section class="bc-rec-form">
         <h3>Nouvelle réception</h3>
         <div class="bc-rec-form__row">
-          <label>
-            Dépôt / magasin (optionnel)
-            <select [value]="destLocationId()" (change)="destLocationId.set($any($event.target).value)">
-              <option value="">Livraison directe chantier — sans magasin</option>
-              @for (loc of locations(); track loc.id) {
-                <option [value]="loc.id">{{ loc.code }} — {{ loc.name }} ({{ loc.type }})</option>
-              }
-            </select>
-          </label>
+          <nf-select
+            label="Dépôt / magasin (optionnel)"
+            lookupKey="locationsDepot"
+            placeholder="Livraison directe chantier — sans magasin"
+            [lookupSearch]="searchLocationsDepot"
+            [ngModel]="destLocationId()"
+            (ngModelChange)="destLocationId.set($event)"
+            name="bcRecDestLocation"
+            data-testid="bc-rec-depot"
+          />
           <label>
             N° BL fournisseur
             <input type="text" [value]="blNumero()" (input)="blNumero.set($any($event.target).value)" placeholder="BL-…" />

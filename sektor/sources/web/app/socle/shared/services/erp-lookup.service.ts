@@ -38,10 +38,14 @@ export class ErpLookupService {
   }
 
   chantiers(search?: string): Promise<LookupItem[]> {
+    const q = search?.trim() ?? '';
+    if (q.length < 2) {
+      return Promise.resolve([]);
+    }
     return this.fetch({
-      key: search ? `chantiers:${search}` : 'chantiers',
+      key: `chantiers:${q}`,
       endpoint: '/api/v1/chantiers/lookup',
-      params: search ? { search } : { size: 200 },
+      params: { search: q },
       displayField: 'label',
       valueField: 'id',
     });
@@ -49,10 +53,14 @@ export class ErpLookupService {
 
   /** Full location rows (needed to filter by `type`). */
   locations(search?: string): Promise<LookupItem[]> {
+    const q = search?.trim() ?? '';
+    if (q.length < 2) {
+      return Promise.resolve([]);
+    }
     return this.fetch({
-      key: search ? `locations:${search}` : 'locations',
+      key: `locations:${q}`,
       endpoint: '/api/v1/locations',
-      params: { page: 0, size: 200, ...(search ? { q: search } : {}) },
+      params: { page: 0, size: 50, q },
       displayField: 'name',
       valueField: 'id',
     });
@@ -68,21 +76,21 @@ export class ErpLookupService {
 
   partnersByRole(role: PartnerRoleType, search?: string): Promise<LookupItem[]> {
     const q = search?.trim() ?? '';
-    if (search !== undefined && q.length < 2) {
+    if (q.length < 2) {
       return Promise.resolve([]);
     }
     return this.fetch({
-      key: q ? `partners:${role}:${q}` : `partners:${role}`,
+      key: `partners:${role}:${q}`,
       endpoint: '/api/v1/partners',
       params: {
         role,
         page: 0,
-        size: q ? 50 : 200,
-        ...(q ? { q } : {}),
+        size: 50,
+        q,
       },
       displayField: 'raisonSociale',
       valueField: 'id',
-    }).then((items) => (q ? exactCodeFirst(items, q) : items));
+    }).then((items) => exactCodeFirst(items, q));
   }
 
   async partnerById(id: string): Promise<LookupItem | null> {
@@ -99,25 +107,39 @@ export class ErpLookupService {
   }
 
   employes(statut?: string, search?: string): Promise<LookupItem[]> {
-    const key = ['employes', statut ?? 'all', search ?? ''].filter(Boolean).join(':');
-    return this.lookup.get({
-      key,
-      endpoint: '/api/v1/rh/employes',
-      params: {
-        ...(statut ? { statut } : {}),
-        ...(search ? { q: search } : {}),
-      },
-      transform: (response) => {
-        const rows = extractRecords(response);
-        return rows.map((row) => {
-          const id = row['id'] ?? '';
-          const prenom = String(row['prenom'] ?? '').trim();
-          const nom = String(row['nom'] ?? '').trim();
-          const label = `${prenom} ${nom}`.trim() || String(row['matricule'] ?? id);
-          return { key: id as string | number, value: label, data: row };
-        });
-      },
-    });
+    const q = search?.trim() ?? '';
+    if (search !== undefined && q.length < 2) {
+      return Promise.resolve([]);
+    }
+    if (!q) {
+      return Promise.resolve([]);
+    }
+    const key = ['employes', statut ?? 'all', q].filter(Boolean).join(':');
+    return this.lookup
+      .get({
+        key,
+        endpoint: '/api/v1/rh/employes',
+        params: {
+          ...(statut ? { statut } : {}),
+          q,
+        },
+        transform: (response) => {
+          const rows = extractRecords(response);
+          return rows.map((row) => {
+            const id = row['id'] ?? '';
+            const prenom = String(row['prenom'] ?? '').trim();
+            const nom = String(row['nom'] ?? '').trim();
+            const matricule = String(row['matricule'] ?? '').trim();
+            const name = `${prenom} ${nom}`.trim();
+            const label =
+              name && matricule
+                ? `${name} · ${matricule}`
+                : name || matricule || String(id);
+            return { key: id as string | number, value: label, data: row };
+          });
+        },
+      })
+      .then((items) => exactMatriculeFirst(items, q));
   }
 
   /** Full item rows for catalogue / line editors (uom, price, type). */
@@ -152,10 +174,14 @@ export class ErpLookupService {
   }
 
   devis(search?: string): Promise<LookupItem[]> {
+    const q = search?.trim() ?? '';
+    if (q.length < 2) {
+      return Promise.resolve([]);
+    }
     return this.lookup.get({
-      key: search ? `devis:${search}` : 'devis',
+      key: `devis:${q}`,
       endpoint: '/api/v1/etudes/devis',
-      params: { page: 0, size: 50, ...(search ? { q: search } : {}) },
+      params: { page: 0, size: 50, q },
       transform: (response) =>
         extractRecords(response).map((row) => {
           const numero = String(row['numero'] ?? '').trim();
@@ -167,10 +193,14 @@ export class ErpLookupService {
   }
 
   factures(search?: string): Promise<LookupItem[]> {
+    const q = search?.trim() ?? '';
+    if (q.length < 2) {
+      return Promise.resolve([]);
+    }
     return this.lookup.get({
-      key: search ? `factures:${search}` : 'factures',
+      key: `factures:${q}`,
       endpoint: '/api/v1/factures-client',
-      params: { page: 0, size: 50, ...(search ? { q: search } : {}) },
+      params: { page: 0, size: 50, q },
       transform: (response) =>
         extractRecords(response).map((row) => {
           const numero = String(row['numero'] ?? '').trim();
@@ -231,6 +261,31 @@ export class ErpLookupService {
     });
   }
 
+  /** Engins / matériels parc — typeahead ≥ 2 car. (AC-13, AC-16). */
+  materiels(search?: string): Promise<LookupItem[]> {
+    const q = search?.trim() ?? '';
+    if (q.length < 2) {
+      return Promise.resolve([]);
+    }
+    return this.lookup
+      .get({
+        key: `materiels:${q}`,
+        endpoint: '/api/v1/materiels',
+        params: { page: 0, size: 50, search: q },
+        transform: (response) =>
+          extractRecords(response).map((row) => {
+            const id = String(row['id'] ?? '');
+            const code = String(row['code'] ?? '').trim();
+            const name = String(row['name'] ?? '').trim();
+            const serie = String(row['numeroSerie'] ?? '').trim();
+            const primary = code && name ? `${code} — ${name}` : name || code || id;
+            const label = serie ? `${primary} · ${serie}` : primary;
+            return { key: id, value: label, data: row };
+          }),
+      })
+      .then((items) => exactCodeFirst(items, q));
+  }
+
   paymentTerms(search?: string): Promise<LookupItem[]> {
     return this.fetch({
       key: search ? `paymentTerms:${search}` : 'paymentTerms',
@@ -288,5 +343,15 @@ function exactCodeFirst(items: LookupItem[], query: string): LookupItem[] {
     const ac = String((a.data as Record<string, unknown> | undefined)?.['code'] ?? '').toLowerCase();
     const bc = String((b.data as Record<string, unknown> | undefined)?.['code'] ?? '').toLowerCase();
     return (ac === needle ? 0 : 1) - (bc === needle ? 0 : 1);
+  });
+}
+
+function exactMatriculeFirst(items: LookupItem[], query: string): LookupItem[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return items;
+  return [...items].sort((a, b) => {
+    const am = String((a.data as Record<string, unknown> | undefined)?.['matricule'] ?? '').toLowerCase();
+    const bm = String((b.data as Record<string, unknown> | undefined)?.['matricule'] ?? '').toLowerCase();
+    return (am === needle ? 0 : 1) - (bm === needle ? 0 : 1);
   });
 }

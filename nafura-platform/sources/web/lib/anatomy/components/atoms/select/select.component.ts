@@ -211,6 +211,7 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
     this.focused.set(false);
     this.touched.set(true);
     this.onTouched();
+    this.commitExactComboHit();
     if (this.blurHandle) clearTimeout(this.blurHandle);
     this.blurHandle = setTimeout(() => {
       this.comboOpen.set(false);
@@ -260,7 +261,31 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
     this.comboOpen.set(false);
     this.comboEditing.set(false);
     this.comboQuery.set('');
+    const opts = this.options ?? [];
+    if (!opts.some((o) => o.value === opt.value)) {
+      this.displayOptions.set([{ value: opt.value, label: opt.label }, ...opts]);
+      this.cdr.markForCheck();
+      return;
+    }
     this.syncDisplayOptions();
+  }
+
+  /** If the typed query matches one hit exactly (id or label), commit it on blur. */
+  private commitExactComboHit(): void {
+    if (!this.comboEditing()) return;
+    const q = this.comboQuery().trim().toLowerCase();
+    if (!q) return;
+    const hits = this.comboHits().filter((h) => !h.disabled);
+    const exact = hits.find(
+      (h) => h.value.toLowerCase() === q || h.label.toLowerCase() === q,
+    );
+    if (exact) {
+      this.pickCombo(exact);
+      return;
+    }
+    if (hits.length === 1) {
+      this.pickCombo(hits[0]);
+    }
   }
 
   comboEmptyHint(): boolean {
@@ -382,7 +407,12 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
     const opts = this.options ?? [];
     const current = this.value();
     if (current && !opts.some((o) => o.value === current)) {
-      const fallbackLabel = lookupDisplayLabel(current, opts, this.selectedLabel);
+      const fromHits = this.comboHits().find((o) => o.value === current);
+      const fromDisplay = this.displayOptions().find((o) => o.value === current);
+      const knownLabel = fromHits?.label || fromDisplay?.label;
+      const fallbackLabel =
+        (knownLabel && knownLabel !== current ? knownLabel : undefined) ||
+        lookupDisplayLabel(current, opts, this.selectedLabel);
       this.displayOptions.set([{ value: current, label: fallbackLabel }, ...opts]);
     } else {
       this.displayOptions.set(opts);

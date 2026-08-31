@@ -38,7 +38,7 @@ export class ReceptionFacade implements CrudStyleFacade<InventoryTx, Partial<Inv
   }
 
   async ensureLookups(): Promise<void> {
-    this.locationsCache = await this.lookupsService.loadLocations();
+    this.locationsCache = [];
     this.lookupsSignal.set(await this.lookupsService.buildReceptionLookups());
     if (this.bcNumeroById.size === 0) {
       try {

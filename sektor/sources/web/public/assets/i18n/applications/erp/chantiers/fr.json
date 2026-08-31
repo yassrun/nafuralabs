@@ -42,6 +42,7 @@
         "backToList": "Retour à la liste",
         "save": "Enregistrer",
         "cancel": "Annuler",
+        "remove": "Retirer",
         "delete": "Supprimer",
         "print": "Imprimer",
         "export": "Exporter Excel",
@@ -1092,6 +1093,9 @@
       "ouvrir": "Ouvrir",
       "gerer": "Gérer",
       "voir": "Voir",
+      "nav": {
+        "titre": "Aller à"
+      },
       "kpi": {
         "venteActive": "Vente active HT",
         "budgetRevise": "Budget révisé HT",
@@ -1163,6 +1167,8 @@
       "module": {
         "arbre": "Arbre",
         "arbreResume": "Structure et montants par lot",
+        "equipe": "Équipe",
+        "equipeResume": "Conducteur, chef et affectations",
         "budget": "Budget",
         "budgetResume": "Déboursé prévu, révisé et réel",
         "planning": "Planning",
@@ -1180,6 +1186,8 @@
         "receptionBlResume": "BL du chantier, livraison directe",
         "documents": "Documents",
         "documentsResume": "OS, plans, PV rattachés au chantier",
+        "journal": "Journal",
+        "journalResume": "Événements et notes du chantier",
         "sousTraitance": "Sous-traitance",
         "sousTraitanceResume": "Contrat ST sur un poste",
         "attachement": "Attachement",

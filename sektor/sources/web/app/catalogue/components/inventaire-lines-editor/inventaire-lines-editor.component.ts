@@ -1,20 +1,22 @@
-import { Component, OnDestroy, computed, effect, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, effect, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
 
-import { ButtonComponent, NfInputComponent, NfSelectComponent } from '@platform/lib/anatomy';
-import type { Article, InventaireLine, StockBalance } from '../../models';
-import { ArticleCatalogService } from '../../services/article-catalog.service';
+import { ButtonComponent, NfInputComponent } from '@platform/lib/anatomy';
+import type { InventaireLine, StockBalance } from '../../models';
+import { ItemsApiService } from '../../services/items-api.service';
 import { StockQueryService } from '../../services/stock-query.service';
+import { openCatalogItemPicker } from '@app/etudes/dossiers/components/catalog-item-pick-dialog/catalog-item-pick-dialog.component';
 
 @Component({
   selector: 'app-inventaire-lines-editor',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, TranslateModule, ButtonComponent, NfInputComponent, NfSelectComponent],
+  imports: [FormsModule, ReactiveFormsModule, TranslateModule, ButtonComponent, NfInputComponent],
   template: `
-    <div class="inv" [class.inv--readonly]="linesControl().disabled">
+    <div class="inv" data-testid="inv-picker-ready" [class.inv--readonly]="linesControl().disabled">
       <div class="inv__toolbar">
         <nf-button
           variant="secondary"
@@ -61,13 +63,15 @@ import { StockQueryService } from '../../services/stock-query.service';
                   @if (line.articleId && line.articleCode) {
                     <span class="inv__article-code">{{ line.articleCode }}</span>
                   } @else {
-                    <nf-select
-                      class="inv__field"
-                      [options]="articleSelectOptions()"
-                      [ngModel]="line.articleId"
-                      (ngModelChange)="onArticleChange(i, $event)"
+                    <button
+                      type="button"
+                      class="inv__pick"
+                      data-testid="article-picker-open"
                       [disabled]="linesControl().disabled"
-                      [ngModelOptions]="{ standalone: true }" />
+                      (click)="pickArticle(i)"
+                    >
+                      {{ 'Choisir un article' }}
+                    </button>
                   }
                 </td>
                 <td class="inv__muted">{{ line.articleName || ('inventory.common.dash' | translate) }}</td>
@@ -168,6 +172,21 @@ import { StockQueryService } from '../../services/stock-query.service';
     .inv__field--qty {
       max-width: 120px;
     }
+    .inv__pick {
+      width: 100%;
+      min-width: 140px;
+      text-align: left;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid var(--nf-border-default);
+      border-radius: 8px;
+      background: var(--nf-color-surface, #fff);
+      font: inherit;
+      cursor: pointer;
+    }
+    .inv__pick:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
     .inv__muted {
       color: var(--nf-text-secondary, var(--nf-text-muted));
     }
@@ -209,18 +228,15 @@ import { StockQueryService } from '../../services/stock-query.service';
 })
 export class InventaireLinesEditorComponent implements OnDestroy {
   private readonly stockQuery = inject(StockQueryService);
-  private readonly articleCatalog = inject(ArticleCatalogService);
+  private readonly itemsApi = inject(ItemsApiService);
+  private readonly dialog = inject(MatDialog);
 
   readonly linesControl = input.required<FormControl<InventaireLine[] | null>>();
   readonly headerForm = input<FormGroup | null>(null);
 
   readonly prefillRequested = output<void>();
 
-  readonly articles = signal<Article[]>([]);
   readonly lines = signal<InventaireLine[]>([]);
-  readonly articleSelectOptions = computed(() =>
-    this.articles().map((a) => ({ value: a.id, label: `${a.code} — ${a.name}` })),
-  );
 
   readonly totalVariance = signal<number>(0);
 
@@ -258,20 +274,11 @@ export class InventaireLinesEditorComponent implements OnDestroy {
           this.commit([]);
         });
     });
-
-    effect(() => {
-      void this.loadArticles();
-    });
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  private async loadArticles(): Promise<void> {
-    const list = await this.articleCatalog.loadArticles({ activeOnly: true });
-    this.articles.set(list);
   }
 
   locationId(): string | null {
@@ -284,28 +291,37 @@ export class InventaireLinesEditorComponent implements OnDestroy {
     return v > 0 ? `+${v}` : String(v);
   }
 
+  async pickArticle(index: number): Promise<void> {
+    if (this.linesControl().disabled) return;
+    const result = await openCatalogItemPicker(this.dialog, { context: 'stock', uniteOptions: [] });
+    if (!result?.itemId) return;
+    await this.onArticlePicked(index, result);
+  }
+
   async prefillFromStock(): Promise<void> {
     const locId = this.locationId();
     if (!locId) return;
 
     await this.stockQuery.loadAllBalances();
     const balances: StockBalance[] = this.stockQuery.getByWarehouse(locId);
-    const artMap = new Map(this.articles().map((a) => [a.id, a]));
+    const uniqueIds = [...new Set(balances.map((b) => b.articleId))];
+    const itemMap = await this.resolveItems(uniqueIds);
+
     const newLines: InventaireLine[] = balances.map((sb, i) => {
-      const art = artMap.get(sb.articleId);
+      const item = itemMap.get(sb.articleId);
       return {
         id: crypto.randomUUID(),
         txId: '',
         lineNumber: i + 1,
         articleId: sb.articleId,
-        articleCode: sb.articleCode ?? art?.code ?? '',
-        articleName: sb.articleName ?? art?.name ?? '',
+        articleCode: sb.articleCode ?? item?.code ?? '',
+        articleName: sb.articleName ?? item?.name ?? '',
         quantity: sb.quantity,
         theoreticalQty: sb.quantity,
         countedQty: sb.quantity,
         variance: 0,
-        uomId: art?.uomId ?? '',
-        uomCode: art?.uomCode ?? '',
+        uomId: item?.unitOfMeasureId ?? '',
+        uomCode: '',
         notes: '',
       };
     });
@@ -340,26 +356,24 @@ export class InventaireLinesEditorComponent implements OnDestroy {
     this.commit(next.map((l, i) => ({ ...l, lineNumber: i + 1 })));
   }
 
-  async onArticleChange(index: number, articleId: string): Promise<void> {
-    const art = this.articles().find((a) => a.id === articleId);
-    if (!art) {
-      this.patchLine(index, { articleId });
-      return;
-    }
+  async onArticlePicked(
+    index: number,
+    result: { itemId: string; name: string; code?: string; unite: string; unitOfMeasureId?: string },
+  ): Promise<void> {
     const locId = this.locationId();
+    let theoreticalQty = 0;
     if (locId) {
       await this.stockQuery.loadAllBalances();
+      const balances = this.stockQuery.getByWarehouse(locId);
+      theoreticalQty = balances.find((b) => b.articleId === result.itemId)?.quantity ?? 0;
     }
-    const balances = locId ? this.stockQuery.getByWarehouse(locId) : [];
-    const sb = balances.find((b) => b.articleId === articleId);
-    const theoreticalQty = sb?.quantity ?? 0;
 
     this.patchLine(index, {
-      articleId,
-      articleCode: art.code,
-      articleName: art.name,
-      uomId: art.uomId,
-      uomCode: art.uomCode,
+      articleId: result.itemId,
+      articleCode: result.code ?? '',
+      articleName: result.name,
+      uomId: result.unitOfMeasureId ?? '',
+      uomCode: result.unite,
       theoreticalQty,
       countedQty: theoreticalQty,
       variance: 0,
@@ -369,6 +383,21 @@ export class InventaireLinesEditorComponent implements OnDestroy {
   patchLine(index: number, patch: Partial<InventaireLine>): void {
     const next = this.lines().map((l, i) => (i === index ? this.mergeLine(l, patch) : l));
     this.commit(next);
+  }
+
+  private async resolveItems(itemIds: string[]): Promise<Map<string, Awaited<ReturnType<ItemsApiService['getById']>>>> {
+    const map = new Map<string, Awaited<ReturnType<ItemsApiService['getById']>>>();
+    await Promise.all(
+      itemIds.map(async (id) => {
+        try {
+          const item = await this.itemsApi.getById(id);
+          map.set(id, item);
+        } catch {
+          /* ligne préremplie sans métadonnée article */
+        }
+      }),
+    );
+    return map;
   }
 
   private mergeLine(line: InventaireLine, patch: Partial<InventaireLine>): InventaireLine {

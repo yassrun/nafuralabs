@@ -3,7 +3,14 @@ import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@a
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@platform/lib/anatomy';
+import {
+  ButtonComponent,
+  LOOKUP_SEARCHERS,
+  NfSelectComponent,
+  type LookupSearchFn,
+  PageHeaderComponent,
+  PageShellComponent,
+} from '@platform/lib/anatomy';
 
 import type { PointageEngin } from '@app/catalogue/models';
 import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao-facade.service';
@@ -11,26 +18,55 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
 @Component({
   selector: 'app-pointage-engin',
   standalone: true,
-  imports: [FormsModule, TranslateModule, PageShellComponent, PageHeaderComponent, ButtonComponent],
+  imports: [
+    FormsModule,
+    TranslateModule,
+    PageShellComponent,
+    PageHeaderComponent,
+    ButtonComponent,
+    NfSelectComponent,
+  ],
   template: `
     <nf-page-shell [scroll]="true">
       <nf-page-header [config]="header()"></nf-page-header>
 
-      <section class="form-card">
+      <section class="form-card" data-testid="pointage-engin-form">
         <h3>{{ 'materielGmao.pointage.quick' | translate }}</h3>
         <div class="row">
-          <label>{{ 'materielGmao.table.engine' | translate }}</label>
-          <input type="text" [(ngModel)]="draft.engineId" />
+          <nf-select
+            class="fld"
+            [label]="'materielGmao.table.engine' | translate"
+            lookupKey="materiels"
+            placeholder="Taper ≥ 2 car. — code / nom…"
+            [lookupSearch]="searchMateriels"
+            [(ngModel)]="draft.engineId"
+            (ngModelChange)="onEngineChange($event)"
+            name="engineId"
+            [selectedLabel]="draft.engineLabel"
+            data-testid="pointage-engin-combobox"
+          />
         </div>
         <div class="row">
-          <label>{{ 'materielGmao.table.chantier' | translate }}</label>
-          <input type="text" [(ngModel)]="draft.chantierRef" />
+          <nf-select
+            class="fld"
+            [label]="'materielGmao.table.chantier' | translate"
+            lookupKey="chantiers"
+            placeholder="Taper ≥ 2 car. — chantier…"
+            [lookupSearch]="searchChantiers"
+            [(ngModel)]="draft.chantierId"
+            (ngModelChange)="onChantierChange($event)"
+            name="chantierId"
+            [selectedLabel]="draft.chantierLabel"
+            data-testid="pointage-chantier-combobox"
+          />
         </div>
         <div class="row">
-          <label>{{ 'materielGmao.pointage.heures' | translate }}</label>
-          <input type="number" [(ngModel)]="draft.heures" min="0.5" step="0.5" />
+          <label for="pe-heures">{{ 'materielGmao.pointage.heures' | translate }}</label>
+          <input id="pe-heures" type="number" [(ngModel)]="draft.heures" name="heures" min="0.5" step="0.5" />
         </div>
-        <nf-button type="button" class="btn" (clicked)="save()" variant="secondary">{{ 'materielGmao.actions.save' | translate }}</nf-button>
+        <nf-button type="button" class="btn" (clicked)="save()" variant="secondary">
+          {{ 'materielGmao.actions.save' | translate }}
+        </nf-button>
       </section>
 
       <div class="card">
@@ -47,8 +83,8 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
             @for (p of rows(); track p.id) {
               <tr>
                 <td>{{ p.date }}</td>
-                <td>{{ p.engineId }}</td>
-                <td>{{ p.chantierRef }}</td>
+                <td>{{ p.engineLabel || p.engineId }}</td>
+                <td>{{ p.chantierRef || p.chantierId }}</td>
                 <td>{{ p.heuresFonctionnement }}</td>
               </tr>
             }
@@ -57,7 +93,7 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
       </div>
     </nf-page-shell>
   `,
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [
     `
       .form-card {
@@ -74,6 +110,10 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
         align-items: center;
         margin-bottom: 0.5rem;
       }
+      .fld {
+        flex: 1;
+        min-width: 14rem;
+      }
       label {
         min-width: 7rem;
         color: var(--nf-color-text-secondary);
@@ -88,13 +128,6 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
       }
       .btn {
         margin-top: 0.35rem;
-        padding: 0.45rem 0.85rem;
-        border-radius: 0.4rem;
-        border: none;
-        background: var(--nf-color-primary-700);
-        color: var(--nf-color-surface);
-        font-weight: 600;
-        cursor: pointer;
       }
       .card {
         border: 1px solid var(--nf-color-border);
@@ -123,12 +156,30 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
 export class PointageEnginPage {
   private readonly gmao = inject(MaterielGmaoFacadeService);
   private readonly translate = inject(TranslateService);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
 
   readonly rows = signal<PointageEngin[]>([]);
 
+  readonly searchMateriels: LookupSearchFn = async (q) => {
+    const hits = await (this.lookupSearchers?.['materiels']?.(q) ?? Promise.resolve([]));
+    this.materielHits = hits;
+    return hits;
+  };
+
+  readonly searchChantiers: LookupSearchFn = async (q) => {
+    const hits = await (this.lookupSearchers?.['chantiers']?.(q) ?? Promise.resolve([]));
+    this.chantierHits = hits;
+    return hits;
+  };
+
+  private materielHits: Array<{ value: string; label: string }> = [];
+  private chantierHits: Array<{ value: string; label: string }> = [];
+
   readonly draft = {
-    engineId: 'mat-001',
-    chantierRef: 'PROJ-2024-001',
+    engineId: '',
+    engineLabel: '',
+    chantierId: '',
+    chantierLabel: '',
     heures: 8,
   };
 
@@ -146,12 +197,28 @@ export class PointageEnginPage {
     this.gmao.getPointages().subscribe((p) => this.rows.set(p));
   }
 
+  onEngineChange(value: string): void {
+    this.draft.engineId = value ?? '';
+    const hit = this.materielHits.find((h) => h.value === value);
+    this.draft.engineLabel = hit?.label ?? '';
+  }
+
+  onChantierChange(value: string): void {
+    this.draft.chantierId = value ?? '';
+    const hit = this.chantierHits.find((h) => h.value === value);
+    this.draft.chantierLabel = hit?.label ?? '';
+  }
+
   save(): void {
+    if (!this.draft.engineId.trim() || !this.draft.chantierId.trim()) {
+      return;
+    }
     const row: PointageEngin = {
       id: `pe-${Date.now()}`,
-      engineId: this.draft.engineId,
-      chantierId: 'ch-001',
-      chantierRef: this.draft.chantierRef,
+      engineId: this.draft.engineId.trim(),
+      engineLabel: this.draft.engineLabel.trim() || undefined,
+      chantierId: this.draft.chantierId.trim(),
+      chantierRef: this.draft.chantierLabel.trim() || undefined,
       date: new Date().toISOString().slice(0, 10),
       heuresFonctionnement: this.draft.heures,
     };

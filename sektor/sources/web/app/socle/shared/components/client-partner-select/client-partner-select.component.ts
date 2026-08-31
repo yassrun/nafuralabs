@@ -2,8 +2,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  HostListener,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -15,7 +15,7 @@ import { NfSelectComponent, type NfSelectOption } from '@platform/lib/anatomy';
 
 import {
   ErpLookupService,
-  partnerLookupLabel,
+  partnerSelectOptions,
 } from '@app/socle/shared/services/erp-lookup.service';
 
 export interface ClientPartnerSelection {
@@ -42,6 +42,8 @@ export interface ClientPartnerSelection {
       [disabled]="disabled()"
       lookupKey="clients"
       [listShortcut]="{ label: 'Voir la liste des clients' }"
+      [lookupSearch]="searchClients"
+      [selectedLabel]="clientNom() ?? undefined"
       [ngModel]="clientId()"
       (ngModelChange)="onChange($event)"
     />
@@ -70,7 +72,6 @@ export class ClientPartnerSelectComponent {
   readonly selectionChange = output<ClientPartnerSelection>();
 
   private readonly partners = signal<NfSelectOption[]>([]);
-  private readonly loaded = signal(false);
 
   readonly options = computed(() => {
     const list = [...this.partners()];
@@ -86,27 +87,25 @@ export class ClientPartnerSelectComponent {
   });
 
   constructor() {
-    void this.reload();
+    effect(() => {
+      const id = this.clientId()?.trim();
+      if (id) {
+        void this.resolvePartnerLabel(id);
+      }
+    });
   }
 
-  @HostListener('window:focus')
-  onWindowFocus(): void {
-    void this.reload();
-  }
+  searchClients = (q: string) =>
+    this.erpLookup.partnersByRole('CLIENT', q).then((items) => {
+      const opts = partnerSelectOptions(items);
+      this.partners.set(opts);
+      return opts;
+    });
 
-  async reload(): Promise<void> {
-    try {
-      const items = await this.erpLookup.partnersByRole('CLIENT');
-      this.partners.set(
-        items.map((item) => ({
-          value: String(item.key),
-          label: partnerLookupLabel(item),
-        })),
-      );
-      this.loaded.set(true);
-    } catch {
-      this.partners.set([]);
-      this.loaded.set(true);
+  private async resolvePartnerLabel(id: string): Promise<void> {
+    const item = await this.erpLookup.partnerById(id);
+    if (item) {
+      this.partners.set(partnerSelectOptions([item]));
     }
   }
 

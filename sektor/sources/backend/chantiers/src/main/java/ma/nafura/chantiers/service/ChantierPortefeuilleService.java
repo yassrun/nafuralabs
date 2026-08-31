@@ -1,11 +1,9 @@
 package ma.nafura.chantiers.service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import ma.nafura.chantiers.api.dto.ChantierAffectationDto;
 import ma.nafura.chantiers.api.dto.ChantierPortefeuilleRowDto;
 import ma.nafura.chantiers.api.dto.ChantierSummaryDto;
@@ -67,8 +65,31 @@ public class ChantierPortefeuilleService {
 
     @Transactional(readOnly = true)
     public ChantierPortefeuilleRowDto.Page lister(PortefeuilleQuery q) {
-        List<Chantier> tous = chantierService.list(null, null, null, null);
-        List<ChantierPortefeuilleRowDto> lignes = tous.stream()
+        List<Chantier> candidats = chantierService.list(q.status(), null, null, q.search(), false);
+        if (StringUtils.hasText(q.status())) {
+            candidats = candidats.stream().filter(c -> q.status().equals(c.getStatus())).toList();
+        }
+        if (StringUtils.hasText(q.search())) {
+            String term = q.search().trim().toLowerCase(Locale.ROOT);
+            candidats = candidats.stream()
+                    .filter(c -> contains(c.getCode(), term)
+                            || contains(c.getLabel(), term)
+                            || contains(c.getClientName(), term))
+                    .toList();
+        }
+        boolean composeAll = needsFullCompose(q);
+        List<ChantierPortefeuilleRowDto> lignes;
+        if (!composeAll) {
+            List<Chantier> tries = sortedByCode(candidats, "desc".equalsIgnoreCase(q.sens()));
+            int debut = q.page() * q.size();
+            int fin = Math.min(debut + q.size(), tries.size());
+            List<Chantier> page = debut >= tries.size() ? List.of() : tries.subList(debut, fin);
+            lignes = page.stream().map(this::composer).toList();
+            return new ChantierPortefeuilleRowDto.Page(
+                    lignes, tries.size(), q.page(), q.size(),
+                    ChantierFinanceAccess.peutVoirFinance());
+        }
+        lignes = candidats.stream()
                 .map(this::composer)
                 .filter(l -> filtrer(l, q))
                 .sorted(tri(q))
@@ -82,6 +103,29 @@ public class ChantierPortefeuilleService {
         return new ChantierPortefeuilleRowDto.Page(
                 page, lignes.size(), q.page(), q.size(),
                 ChantierFinanceAccess.peutVoirFinance());
+    }
+
+    /** Faits calculés (alerte, marge, retard, responsable, tris dérivés) exigent de composer tout le candidat. */
+    private static boolean needsFullCompose(PortefeuilleQuery q) {
+        if (StringUtils.hasText(q.severiteAlerte()) || StringUtils.hasText(q.responsable())) {
+            return true;
+        }
+        if (Boolean.TRUE.equals(q.enRetard()) || Boolean.TRUE.equals(q.margeNegative())) {
+            return true;
+        }
+        String t = q.tri() == null ? "" : q.tri();
+        return "alerte".equals(t) || "echeance".equals(t) || "marge".equals(t) || "avancement".equals(t);
+    }
+
+    private static List<Chantier> sortedByCode(List<Chantier> rows, boolean desc) {
+        Comparator<Chantier> byCode = Comparator.comparing(
+                Chantier::getCode, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+        if (desc) {
+            byCode = byCode.reversed();
+        }
+        return rows.stream()
+                .sorted(byCode.thenComparing(Chantier::getId))
+                .toList();
     }
 
     private ChantierPortefeuilleRowDto composer(Chantier c) {
@@ -106,8 +150,9 @@ public class ChantierPortefeuilleService {
                 .client(c.getClientName())
                 .status(c.getStatus())
                 .responsable(responsable)
-                .avancementPercent(c.getAvancementPercent() != null
-                        ? c.getAvancementPercent() : null)
+                .avancementPercent(s.getAvancementPercent() != null
+                        ? s.getAvancementPercent()
+                        : c.getAvancementPercent())
                 .joursRestantsOuRetard(jours)
                 .enRetard(estEnRetard(c))
                 .montantVenteActifHt(financeAutorisee ? s.getMontantVenteActifHt() : null)

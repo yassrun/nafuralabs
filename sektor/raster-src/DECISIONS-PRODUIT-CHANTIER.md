@@ -407,6 +407,14 @@ Un ouvrier qui tourne sur trois chantiers dans le mois n'aurait plus de feuille 
 
 ---
 
+## Gelé (28/08/2026) — Affectation employé = combobox, pas picker
+
+L’onglet Équipe et l’étape create ne reçoivent **pas** un overlay « employee picker » (le picker reste l’article). Champ employé = combobox `lookupKey: employes` (recherche serveur ≥ 2 car., œil fiche RH). Rôle chantier = enum natif.
+
+Cause du select vide : après le socle lookups, `employes()` sans `q` rend `[]`. Les employés QA existent (`QaLocalEmployeProvisioner`). Ancrage : [`lots/raffinement-ux-pro/chantiers-ops-coquilles/CONTRAT.md`](lots/raffinement-ux-pro/chantiers-ops-coquilles/CONTRAT.md).
+
+---
+
 ## Gelé (23/08/2026) — Frontière ST : le contrat à Achats, l'exécution au chantier
 
 ### Le partage

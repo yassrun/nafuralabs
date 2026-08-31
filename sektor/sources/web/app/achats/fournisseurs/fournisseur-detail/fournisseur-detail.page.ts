@@ -8,12 +8,19 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 
 import {ConfigDrivenDetailPage,
   ConfigDrivenDetailPageImports,
   ConfigDrivenDetailPageStyles,
-  createDetailFacadeFromCrud, ButtonComponent} from '@platform/lib/anatomy';
+  createDetailFacadeFromCrud,
+  ButtonComponent,
+  LOOKUP_SEARCHERS,
+  NfSelectComponent,
+  type LookupSearchFn} from '@platform/lib/anatomy';
+import { ItemsApiService } from '@app/catalogue/services/items-api.service';
+import { openCatalogItemPicker } from '@app/etudes/dossiers/components/catalog-item-pick-dialog/catalog-item-pick-dialog.component';
 import type { PageHeaderConfig } from '@platform/lib/anatomy/components/molecules/page-header/page-header.component';
 import type {
   AttestationFournisseur,
@@ -115,7 +122,12 @@ function emptyCatalogueDraft(): CatalogueDraft {
   selector: 'app-fournisseur-detail',
   standalone: true,
   imports: [
-    ButtonComponent,CommonModule, FormsModule, ...ConfigDrivenDetailPageImports],
+    ButtonComponent,
+    CommonModule,
+    FormsModule,
+    NfSelectComponent,
+    ...ConfigDrivenDetailPageImports,
+  ],
   templateUrl: './fournisseur-detail.page.html',
   styles: [
     ConfigDrivenDetailPageStyles,
@@ -273,6 +285,24 @@ function emptyCatalogueDraft(): CatalogueDraft {
       }
       .row-actions { display: flex; gap: 0.35rem; justify-content: flex-end; }
       .loading-inline { color: var(--nf-color-text-secondary); font-size: 0.85rem; padding: 0.5rem 0; }
+
+      .article-pick {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .article-pick__label {
+        flex: 1;
+        min-width: 10rem;
+        padding: 0.4rem 0.55rem;
+        border-radius: 6px;
+        background: var(--nf-color-surface);
+        border: 1px solid var(--nf-color-border);
+        font-size: 0.85rem;
+        color: var(--nf-text-primary);
+      }
+      .field--wide { grid-column: 1 / -1; }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -283,6 +313,12 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
   private readonly attestationsApi = inject(AttestationsFournisseurApiService);
   private readonly catalogueApi = inject(CatalogueFournisseurApiService);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
+  private readonly itemsApi = inject(ItemsApiService);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
+
+  readonly searchUnitOfMeasures: LookupSearchFn = (q) =>
+    this.lookupSearchers?.['unitOfMeasures']?.(q) ?? Promise.resolve([]);
 
   readonly facade = createDetailFacadeFromCrud<Fournisseur, FournisseurCreate>({
     crud: this.crud,
@@ -303,6 +339,8 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
   catalogueDraft: CatalogueDraft = emptyCatalogueDraft();
   readonly editingAttestationId = signal<string | null>(null);
   readonly editingCatalogueId = signal<string | null>(null);
+  readonly pickedArticleLabel = signal('');
+  readonly articleLabels = signal<Record<string, string>>({});
 
   readonly headerConfigOverride = computed((): PageHeaderConfig => {
     const base = super.headerConfig;
@@ -467,6 +505,31 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
     }
   }
 
+  articleLabel(row: CatalogueFournisseurLigne): string {
+    const resolved = this.articleLabels()[row.articleId];
+    if (resolved && !this.looksLikeUuid(resolved)) return resolved;
+    if (row.designation?.trim()) return row.designation.trim();
+    return resolved ?? '—';
+  }
+
+  async openArticlePicker(): Promise<void> {
+    const result = await openCatalogItemPicker(this.dialog, {
+      context: 'lookup',
+      uniteOptions: [],
+    });
+    if (!result?.itemId) return;
+    this.catalogueDraft.articleId = result.itemId;
+    const label = [result.code, result.name].filter(Boolean).join(' — ') || result.name;
+    this.pickedArticleLabel.set(label);
+    this.articleLabels.update((map) => ({ ...map, [result.itemId]: label }));
+    if (!this.catalogueDraft.designation.trim() && result.name) {
+      this.catalogueDraft.designation = result.name.trim();
+    }
+    if (result.unitOfMeasureId && !this.catalogueDraft.uomId.trim()) {
+      this.catalogueDraft.uomId = result.unitOfMeasureId;
+    }
+  }
+
   startEditCatalogue(row: CatalogueFournisseurLigne): void {
     this.editingCatalogueId.set(row.id);
     this.catalogueDraft = {
@@ -479,11 +542,13 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
       conditionnementUomId: row.conditionnementUomId ?? '',
       actif: row.actif,
     };
+    void this.resolvePickedArticleLabel(row.articleId);
   }
 
   cancelCatalogueForm(): void {
     this.editingCatalogueId.set(null);
     this.catalogueDraft = emptyCatalogueDraft();
+    this.pickedArticleLabel.set('');
   }
 
   async saveCatalogue(): Promise<void> {
@@ -560,11 +625,54 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
       const res = await this.catalogueApi.getAll({ page: 0, pageSize: 500, fournisseurId });
       const rows = res.items;
       this.catalogue.set(rows);
+      void this.resolveArticleLabels(rows);
     } catch {
       this.catalogue.set([]);
       this.showError('Chargement catalogue impossible');
     } finally {
       this.catalogueLoading.set(false);
     }
+  }
+
+  private looksLikeUuid(value: string): boolean {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+  }
+
+  private async resolvePickedArticleLabel(articleId: string): Promise<void> {
+    if (!articleId) {
+      this.pickedArticleLabel.set('');
+      return;
+    }
+    const cached = this.articleLabels()[articleId];
+    if (cached) {
+      this.pickedArticleLabel.set(cached);
+      return;
+    }
+    try {
+      const item = await this.itemsApi.getById(articleId);
+      const label = [item.code, item.name].filter(Boolean).join(' — ') || item.name;
+      this.pickedArticleLabel.set(label);
+      this.articleLabels.update((map) => ({ ...map, [articleId]: label }));
+    } catch {
+      this.pickedArticleLabel.set('');
+    }
+  }
+
+  private async resolveArticleLabels(rows: CatalogueFournisseurLigne[]): Promise<void> {
+    const ids = [...new Set(rows.map((row) => row.articleId).filter(Boolean))];
+    if (!ids.length) return;
+    const next: Record<string, string> = { ...this.articleLabels() };
+    await Promise.all(
+      ids.map(async (id) => {
+        if (next[id]) return;
+        try {
+          const item = await this.itemsApi.getById(id);
+          next[id] = [item.code, item.name].filter(Boolean).join(' — ') || item.name || id;
+        } catch {
+          /* articleLabel() falls back to row designation */
+        }
+      }),
+    );
+    this.articleLabels.set(next);
   }
 }

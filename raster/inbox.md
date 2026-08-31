@@ -1,14 +1,14 @@
 # INBOX
 
 <!-- Capture globale Raster — task draft : une ligne = description, @tag optionnel, pas d'ID. -->
-sektor picker-article : sorties / pertes / inventaire / inventory-tx-panel / etat-stock encore `loadArticles` dump GET /items — hors SEKTOR-144 (réception/retour/transfert seulement) @sektor
+sektor picker-article : sorties / pertes / inventaire / inventory-tx-panel / etat-stock encore `loadArticles` dump GET /items — hors SEKTOR-261 (réception/retour/transfert + lookups CRUD) @sektor
 sektor chantiers vague 2 : couper planning-activites / capacite-et-engagement / baseline-et-os / pointage-impute / matiere-et-magasin depuis DECISIONS-PRODUIT-CHANTIER (gels planning) — amorçage SEKTOR-175 @sektor
 sektor chantiers vague 2 : mode humain — contrats écrits par toi (gels déjà figés) ; 1 agent exec/code par sous-lot ; pas de spec agent ; QA seulement si argent (pas sur planning/Gantt) @sektor
 sektor picker-article : import BL réception résolvait les lignes via dump `articlesAll` (GET /items size 500) — dump retiré pour AC-10 ; matching code à rebrancher sur `/items/search` @sektor
-sektor picker-article : filtres listing stock-balances / inventory-tx-lines encore `lookupKey: items` — pas le détail tarif/solde ; listing articles hors v1 @sektor
 sektor e2e completer-parcours / parcours-qa : specs attendent encore `app-consultation-etude-panel` (retiré SEKTOR-136). Preuve 136 = `verify-consultation-achat-136.mjs`. @sektor
 sektor e2e parcours-qa-*.spec.ts : `npx playwright test` crash « Requiring @playwright/test second time » (chemins C:/ vs c:/). Preuves 115/119–123 = Mode B 20/08. Specs non réécrits. @sektor
 sektor e2e SEKTOR-137 : spec Playwright optionnelle (même crash C:/ vs c:/). Preuve = `node sektor/e2e/scripts/verify-consultation-achat-137.mjs`. SEKTOR-110 e2e compte encore `consultations_etudes` — gate 137 ne les voit plus. @sektor
+sektor e2e SEKTOR-137 / agrégat 249 : POST /consultations-achat/{id}/devis sans destinataireId → 4xx après SEKTOR-281. Étendre le graphe (destinataire + contact) dans SEKTOR-282. @sektor
 sektor e2e SEKTOR-136 : chrome overlay assert encore le formulaire select+cases+deux CTA (cassé par SEKTOR-139). Preuve overlay = `node sektor/e2e/scripts/verify-consultation-achat-139.mjs`. Spec Playwright 139 non écrite (C:/ vs c:/). @sektor
 sektor : portail invité chrome-less (lien email+token, vue client + dépôt devis fournisseur) — vérifier puis rattacher au lot concerné @sektor
 document-extraction : colonnes JPA `extracted_record.workflow_status` / `doc_type_definition.builder_state` encore en base alors que compose/décider ne sont plus exposés — drop lab à trancher @platform

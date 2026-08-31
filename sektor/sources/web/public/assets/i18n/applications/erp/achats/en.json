@@ -82,7 +82,9 @@
       "consultationsListTitle": "Consultations",
       "consultationsListCrumb": "Consultations",
       "consultationNewTitle": "New consultation",
-      "consultationNewCrumb": "New"
+      "consultationNewCrumb": "New",
+      "consultationDetailTitle": "Consultation details",
+      "consultationDetailCrumb": "Details"
     },
     "rubrique": {
       "MATERIAUX": "Materials",
@@ -652,6 +654,110 @@
       "deleteConfirm": {
         "title": "Delete supplier",
         "message": "Delete {name}?"
+      }
+    },
+    "consultation": {
+      "entityName": "Consultation",
+      "entityNamePlural": "Consultations",
+      "headerTitle": "Consultations",
+      "detailTitle": "Consultation",
+      "loadError": "Unable to load the consultation.",
+      "statut": {
+        "demande": "Request",
+        "preparation": "Preparation",
+        "ouverte": "Awaiting replies",
+        "partielle": "Partial",
+        "complete": "Complete",
+        "devisRecus": "{{count}} quotes"
+      },
+      "lien": {
+        "liee": "Linked",
+        "hors": "Standalone"
+      },
+      "list": {
+        "columns": {
+          "numero": "No.",
+          "fournisseur": "Supplier",
+          "destinataires": "Recipients",
+          "panier": "Basket",
+          "avancement": "Progress",
+          "statut": "Status",
+          "lien": "Link"
+        },
+        "filters": {
+          "lien": "Study link",
+          "lienAll": "All",
+          "lienHors": "Standalone",
+          "lienLiee": "Linked"
+        },
+        "emptyState": {
+          "title": "No consultations",
+          "message": "Create standalone — study folder link stays empty. Study overlay can attach later.",
+          "actionLabel": "+ Consultation"
+        }
+      },
+      "form": {
+        "sections": {
+          "identite": "Identity",
+          "panier": "Basket"
+        },
+        "fields": {
+          "numero": "No.",
+          "fournisseur": "Supplier",
+          "statut": "Status",
+          "lien": "Study link",
+          "panier": "Items"
+        }
+      },
+      "destinataires": {
+        "title": "Recipients",
+        "empty": "No recipients.",
+        "add": "Add",
+        "fournisseur": "Supplier",
+        "email": "Email",
+        "statut": "Status",
+        "enAttente": "Pending",
+        "devisRecu": "Quote received",
+        "devis": "Quote",
+        "placeholder": "Type ≥ 2 chars — search a supplier…",
+        "contactPlaceholder": "Choose the email contact…",
+        "contactRequis": "Choose the email contact.",
+        "sansEmail": "Cannot add this supplier: no contact with an email on the record. Add a contact, then retry.",
+        "ouvrirFiche": "Open supplier record",
+        "doublon": "This supplier is already a recipient of this consultation.",
+        "error": "Could not add the recipient."
+      },
+      "envoyer": "Send the consultation",
+      "envoyerError": "Could not send.",
+      "journal": {
+        "title": "Send log",
+        "empty": "No sends yet.",
+        "destinataire": "Recipient",
+        "email": "Email",
+        "date": "Date"
+      },
+      "panier": {
+        "empty": "Empty basket.",
+        "fige": "Basket locked. Items can no longer be changed. You can still add a recipient.",
+        "columns": {
+          "code": "Code",
+          "libelle": "Description"
+        }
+      },
+      "import": {
+        "callout": "Import the file. Smart import extracts lines. No manual price entry.",
+        "depositTitle": "Drop quote",
+        "extraitTitle": "Extract (confirmed review)",
+        "extraitEmpty": "No lines — a file without confirmed extraction is not a received quote.",
+        "emptyHint": "No lines extracted — the file is not a received quote.",
+        "error": "Import failed.",
+        "columns": {
+          "identite": "Identity",
+          "libelle": "Label",
+          "qte": "Qty",
+          "unite": "Unit",
+          "pu": "Unit price"
+        }
       }
     },
     "smartImport": {

@@ -3,10 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 
-import { ButtonComponent, ToastService } from '@platform/lib/anatomy';
+import {
+  ButtonComponent,
+  LOOKUP_SEARCHERS,
+  NfSelectComponent,
+  ToastService,
+  type LookupSearchFn,
+} from '@platform/lib/anatomy';
 import { AuthFacade } from '@platform/core/security/services/auth.facade';
-import { FournisseurApiService } from '@app/achats/fournisseurs/services/fournisseur-api.service';
-import type { Fournisseur } from '@app/achats/models';
 import {
   ConsultationAchatApiService,
   type ConsultationAchat,
@@ -25,7 +29,7 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
   selector: 'app-consultation-decompo-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, MatDialogModule, ButtonComponent],
+  imports: [FormsModule, MatDialogModule, ButtonComponent, NfSelectComponent],
   template: `
     <div class="cs-overlay" data-cs-overlay role="dialog" aria-labelledby="cs-overlay-title">
       <header>
@@ -140,19 +144,17 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
           <p class="cs-hint">
             Article de départ : {{ articleLibelle() }} — déjà posé, pas tout l’arbre à cocher.
           </p>
-          <label>
-            Fournisseur
-            <select
-              [ngModel]="fournisseurId()"
-              (ngModelChange)="fournisseurId.set($event)"
-              name="fournisseurId"
-            >
-              <option value="">— fiche Achats —</option>
-              @for (f of fournisseurs(); track f.id) {
-                <option [value]="f.id">{{ f.raisonSociale }} ({{ f.code }})</option>
-              }
-            </select>
-          </label>
+          <nf-select
+            label="Fournisseur"
+            lookupKey="fournisseurs"
+            placeholder="Taper ≥ 2 car. — recherche serveur…"
+            [lookupSearch]="searchFournisseurs"
+            [ngModel]="fournisseurId()"
+            (ngModelChange)="fournisseurId.set($event)"
+            name="fournisseurId"
+            [required]="true"
+            data-testid="consultation-decompo-fournisseur"
+          />
         </div>
       }
 
@@ -220,15 +222,6 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
     h3 {
       font-size: 0.9rem;
     }
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      margin: 0;
-    }
-    select {
-      padding: 0.45rem 0.6rem;
-    }
     .cs-pane {
       display: flex;
       flex-direction: column;
@@ -236,6 +229,9 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
       min-height: 0;
       overflow: auto;
       overflow-x: hidden;
+    }
+    .cs-pane[data-cs-pane='creer'] {
+      overflow: visible;
     }
     .cs-liees,
     .cs-panier {
@@ -349,14 +345,16 @@ export class ConsultationDecompoDialogComponent {
   readonly data = inject<ConsultationDecompoDialogData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<ConsultationDecompoDialogComponent, boolean>);
   private readonly api = inject(ConsultationAchatApiService);
-  private readonly fournisseursApi = inject(FournisseurApiService);
   private readonly toast = inject(ToastService);
   private readonly auth = inject(AuthFacade);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
+
+  readonly searchFournisseurs: LookupSearchFn = (q) =>
+    this.lookupSearchers?.['fournisseurs']?.(q) ?? Promise.resolve([]);
 
   readonly pane = signal<OverlayPane>('liste');
   readonly liees = signal<ConsultationAchat[]>([]);
   readonly selected = signal<ConsultationAchat | null>(null);
-  readonly fournisseurs = signal<Fournisseur[]>([]);
   readonly fournisseurId = signal('');
   readonly chargement = signal(true);
   readonly saving = signal(false);
@@ -428,18 +426,11 @@ export class ConsultationDecompoDialogComponent {
     this.pane.set('liste');
   }
 
-  async ouvrirCreer(): Promise<void> {
+  ouvrirCreer(): void {
     if (!this.articleCle()) return;
     this.erreur.set(undefined);
+    this.fournisseurId.set('');
     this.pane.set('creer');
-    if (this.fournisseurs().length === 0) {
-      try {
-        const frn = await this.fournisseursApi.getAll({ page: 0, pageSize: 200 });
-        this.fournisseurs.set(frn.items ?? []);
-      } catch {
-        this.erreur.set('Impossible de charger les fournisseurs.');
-      }
-    }
   }
 
   async ajouterArticleCourant(): Promise<void> {

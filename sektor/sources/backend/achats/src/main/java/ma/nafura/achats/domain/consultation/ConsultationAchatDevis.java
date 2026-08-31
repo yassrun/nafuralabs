@@ -41,6 +41,9 @@ public class ConsultationAchatDevis {
     @Column(name = "consultation_id", nullable = false)
     private UUID consultationId;
 
+    @Column(name = "destinataire_id", nullable = false)
+    private UUID destinataireId;
+
     @Column(name = "fichier_nom", length = 255)
     private String fichierNom;
 

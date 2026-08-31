@@ -101,6 +101,7 @@
       "anomaly": "شذوذ",
       "saved": "تم حفظ التعبئة.",
       "noCarnet": "اختر دفتراً.",
+      "selectEngineFirst": "اختر آلة أولاً.",
       "exportCsv": "تصدير CSV (للمحاسبة)",
       "totalLitres": "اللترات التراكمية",
       "fillCount": "عدد التعبئات"

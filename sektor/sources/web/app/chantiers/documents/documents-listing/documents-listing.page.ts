@@ -17,7 +17,7 @@ import { AuthFacade } from '@platform/core/security/services/auth.facade';
 import { ERP_ATTACHMENT_ENTITY_TYPES } from '@app/socle/shared/config/attachment-detail.config';
 import { DOCUMENT_CHANTIER_TYPE_KEYS } from '@app/socle/shell/i18n-labels';
 import type { Chantier } from '@app/chantiers/models';
-import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@platform/lib/anatomy';
+import { ButtonComponent, LOOKUP_SEARCHERS, NfSelectComponent, PageHeaderComponent, PageShellComponent, ToastService, type LookupSearchFn } from '@platform/lib/anatomy';
 import { FilterResetComponent } from '@platform/lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 import { AttachmentApiService } from '@platform/features/collaboration/doc-manager/services/attachment-api.service';
 import { ChantierApiService } from '../../services/chantier-api.service';
@@ -102,6 +102,7 @@ function todayIso(): string {
     PageHeaderComponent,
     FilterResetComponent,
     ButtonComponent,
+    NfSelectComponent,
     TranslateModule,
   ],
   template: `
@@ -139,12 +140,16 @@ function todayIso(): string {
       <section class="filters" [attr.aria-label]="'chantiers.documents.filters.label' | translate">
         <input class="search" type="search" [placeholder]="'chantiers.documents.filters.search' | translate"
           [value]="search()" (input)="onSearch($any($event.target).value)" />
-        <select [value]="filterChantierId()" (change)="setChantierFilter($any($event.target).value)">
-          <option value="">{{ 'chantiers.documents.filters.allChantiers' | translate }}</option>
-          @for (chantier of chantiers(); track chantier.id) {
-            <option [value]="chantier.id">{{ chantier.code }} — {{ chantier.name }}</option>
-          }
-        </select>
+        <nf-select
+          class="filter-chantier"
+          lookupKey="chantiers"
+          [lookupSearch]="searchChantiers"
+          [ngModel]="filterChantierId()"
+          (ngModelChange)="setChantierFilter($event)"
+          [selectedLabel]="filterChantierLabel()"
+          [placeholder]="'chantiers.documents.filters.allChantiers' | translate"
+          [disabled]="!!routeChantierId()"
+        />
         <select [value]="filterCategory()" (change)="setCategoryFilter($any($event.target).value)">
           <option value="">{{ 'chantiers.documents.filters.allCategories' | translate }}</option>
           @for (category of categories; track category) {
@@ -171,13 +176,16 @@ function todayIso(): string {
           <div class="form-grid">
             <label>
               <span>{{ 'chantiers.documents.create.fields.chantier' | translate }}</span>
-              <select class="field" [(ngModel)]="uploadDraft.chantierId" name="chantierId"
-                [disabled]="!!routeChantierId()" required (ngModelChange)="onUploadChantierChange($event)">
-                <option value="">{{ 'chantiers.documents.create.fields.chantierPlaceholder' | translate }}</option>
-                @for (chantier of chantiers(); track chantier.id) {
-                  <option [value]="chantier.id">{{ chantier.code }} — {{ chantier.name }}</option>
-                }
-              </select>
+              <nf-select
+                lookupKey="chantiers"
+                [lookupSearch]="searchChantiers"
+                [(ngModel)]="uploadDraft.chantierId"
+                name="chantierId"
+                [disabled]="!!routeChantierId()"
+                [selectedLabel]="uploadChantierLabel()"
+                [placeholder]="'chantiers.documents.create.fields.chantierPlaceholder' | translate"
+                (ngModelChange)="onUploadChantierChange($event)"
+              />
             </label>
             <label>
               <span>{{ 'chantiers.documents.create.fields.type' | translate }}</span>
@@ -441,6 +449,7 @@ export class DocumentsListingPage implements OnInit {
   private readonly auth = inject(AuthFacade);
   private readonly route = inject(ActivatedRoute);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
   private searchTimer: ReturnType<typeof setTimeout> | undefined;
   private uploaderTimer: ReturnType<typeof setTimeout> | undefined;
   private selectedFile: File | null = null;
@@ -449,7 +458,7 @@ export class DocumentsListingPage implements OnInit {
   readonly palierTypes = DOCUMENT_CHANTIER_PALIER_TYPES;
 
   readonly documents = signal<DocumentChantier[]>([]);
-  readonly chantiers = signal<Chantier[]>([]);
+  readonly scopedChantier = signal<Chantier | null>(null);
   readonly loading = signal(true);
   readonly total = signal(0);
   readonly page = signal(1);
@@ -457,6 +466,8 @@ export class DocumentsListingPage implements OnInit {
   readonly viewMode = signal<ViewMode>('chantiers');
   readonly routeChantierId = signal('');
   readonly filterChantierId = signal('');
+  readonly filterChantierLabel = signal('');
+  readonly uploadChantierLabel = signal('');
   readonly filterCategory = signal<DocumentCategory | ''>('');
   readonly search = signal('');
   readonly uploadedBy = signal('');
@@ -474,6 +485,9 @@ export class DocumentsListingPage implements OnInit {
     noeudId: '',
   };
 
+  readonly searchChantiers: LookupSearchFn = (q) =>
+    this.lookupSearchers?.['chantiers']?.(q) ?? Promise.resolve([]);
+
   readonly headerConfig = {
     title: this.translate.instant('chantiers.documents.title'),
     subtitle: this.translate.instant('chantiers.documents.subtitle'),
@@ -483,9 +497,7 @@ export class DocumentsListingPage implements OnInit {
     ],
   };
 
-  readonly selectedChantier = computed(() =>
-    this.chantiers().find((chantier) => chantier.id === this.routeChantierId()),
-  );
+  readonly selectedChantier = computed(() => this.scopedChantier());
 
   readonly groups = computed<ChantierDocumentGroup[]>(() => {
     const byChantier = new Map<string, DocumentChantier[]>();
@@ -495,11 +507,19 @@ export class DocumentsListingPage implements OnInit {
       byChantier.set(document.chantierId, rows);
     }
     return [...byChantier.entries()].map(([chantierId, documents]) => {
-      const chantier = this.chantiers().find((item) => item.id === chantierId);
+      const scoped = this.scopedChantier();
+      const code =
+        (scoped?.id === chantierId ? scoped.code : undefined)
+        ?? documents[0]?.chantierCode
+        ?? chantierId;
+      const name =
+        (scoped?.id === chantierId ? scoped.name : undefined)
+        ?? documents[0]?.chantierCode
+        ?? chantierId;
       return {
         chantierId,
-        code: chantier?.code ?? documents[0]?.chantierCode ?? chantierId,
-        name: chantier?.name ?? documents[0]?.chantierCode ?? chantierId,
+        code,
+        name,
         documents,
         previewDocuments: documents.slice(0, 4),
         categoryCounts: countByCategory(documents),
@@ -524,37 +544,53 @@ export class DocumentsListingPage implements OnInit {
     const chantierId = this.route.snapshot.queryParamMap.get('chantierId')?.trim() ?? '';
     this.routeChantierId.set(chantierId);
     this.filterChantierId.set(chantierId);
-    if (chantierId) this.viewMode.set('documents');
+    if (chantierId) {
+      this.viewMode.set('documents');
+      void this.resolveChantierLabel(chantierId, 'filter');
+    }
     void this.load();
   }
 
   private async load(): Promise<void> {
     this.loading.set(true);
     try {
-      const [response, chantiers] = await Promise.all([
-        this.api.list({
-          page: this.page(),
-          pageSize: this.pageSize,
-          search: this.search(),
-          chantierId: this.filterChantierId(),
-          types: typesForCategory(this.filterCategory()),
-          uploadedBy: this.uploadedBy(),
-          dateFrom: this.dateFrom(),
-          dateTo: this.dateTo(),
-        }),
-        this.chantiers().length
-          ? Promise.resolve({ items: this.chantiers(), total: this.chantiers().length })
-          : this.chantierApi.getAll({ page: 1, pageSize: 500 }),
-      ]);
+      const response = await this.api.list({
+        page: this.page(),
+        pageSize: this.pageSize,
+        search: this.search(),
+        chantierId: this.filterChantierId(),
+        types: typesForCategory(this.filterCategory()),
+        uploadedBy: this.uploadedBy(),
+        dateFrom: this.dateFrom(),
+        dateTo: this.dateTo(),
+      });
       this.documents.set(response.items);
       this.total.set(response.total);
-      this.chantiers.set(chantiers.items);
     } catch {
       this.documents.set([]);
       this.total.set(0);
       this.toast.error(this.translate.instant('chantiers.documents.errors.loadFailed'));
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  private async resolveChantierLabel(id: string, target: 'filter' | 'upload' | 'both'): Promise<void> {
+    if (!id) {
+      if (target === 'filter' || target === 'both') this.filterChantierLabel.set('');
+      if (target === 'upload' || target === 'both') this.uploadChantierLabel.set('');
+      if (target !== 'upload') this.scopedChantier.set(null);
+      return;
+    }
+    try {
+      const c = await this.chantierApi.getById(id);
+      const label = `${c.code} — ${c.name}`;
+      if (target === 'filter' || target === 'both') this.filterChantierLabel.set(label);
+      if (target === 'upload' || target === 'both') this.uploadChantierLabel.set(label);
+      if (id === this.routeChantierId()) this.scopedChantier.set(c);
+    } catch {
+      if (target === 'filter' || target === 'both') this.filterChantierLabel.set(id);
+      if (target === 'upload' || target === 'both') this.uploadChantierLabel.set(id);
     }
   }
 
@@ -571,7 +607,9 @@ export class DocumentsListingPage implements OnInit {
   }
 
   setChantierFilter(chantierId: string): void {
-    this.filterChantierId.set(chantierId);
+    this.filterChantierId.set(chantierId ?? '');
+    if (chantierId) void this.resolveChantierLabel(chantierId, 'filter');
+    else this.filterChantierLabel.set('');
     this.applyFilters();
   }
 
@@ -592,17 +630,22 @@ export class DocumentsListingPage implements OnInit {
     this.dateFrom.set('');
     this.dateTo.set('');
     this.filterChantierId.set(this.routeChantierId());
+    if (this.routeChantierId()) void this.resolveChantierLabel(this.routeChantierId(), 'filter');
+    else this.filterChantierLabel.set('');
     this.applyFilters();
   }
 
   leaveChantierScope(): void {
     this.routeChantierId.set('');
     this.filterChantierId.set('');
+    this.filterChantierLabel.set('');
+    this.scopedChantier.set(null);
     this.applyFilters();
   }
 
   showChantierDocuments(chantierId: string): void {
     this.filterChantierId.set(chantierId);
+    void this.resolveChantierLabel(chantierId, 'filter');
     this.filterCategory.set('');
     this.viewMode.set('documents');
     this.applyFilters();
@@ -610,6 +653,7 @@ export class DocumentsListingPage implements OnInit {
 
   openCategory(chantierId: string, category: DocumentCategory): void {
     this.filterChantierId.set(chantierId);
+    void this.resolveChantierLabel(chantierId, 'filter');
     this.filterCategory.set(category);
     this.viewMode.set('documents');
     this.applyFilters();
@@ -622,19 +666,35 @@ export class DocumentsListingPage implements OnInit {
   }
 
   openUploadForm(): void {
+    const chantierId = this.routeChantierId() || this.filterChantierId() || '';
     this.uploadDraft = {
-      chantierId: this.routeChantierId() || this.filterChantierId() || '',
+      chantierId,
       type: 'OS',
       titre: '',
       noeudId: '',
     };
     this.selectedFile = null;
     this.showUploadForm.set(true);
+    if (chantierId) {
+      const scoped = this.scopedChantier();
+      if (scoped?.id === chantierId) {
+        this.uploadChantierLabel.set(`${scoped.code} — ${scoped.name}`);
+      } else if (this.filterChantierLabel() && this.filterChantierId() === chantierId) {
+        this.uploadChantierLabel.set(this.filterChantierLabel());
+      } else {
+        void this.resolveChantierLabel(chantierId, 'upload');
+      }
+    } else {
+      this.uploadChantierLabel.set('');
+    }
     void this.loadUploadPostes(this.uploadDraft.chantierId);
   }
 
   onUploadChantierChange(chantierId: string): void {
+    this.uploadDraft.chantierId = chantierId ?? '';
     this.uploadDraft.noeudId = '';
+    if (chantierId) void this.resolveChantierLabel(chantierId, 'upload');
+    else this.uploadChantierLabel.set('');
     void this.loadUploadPostes(chantierId);
   }
 

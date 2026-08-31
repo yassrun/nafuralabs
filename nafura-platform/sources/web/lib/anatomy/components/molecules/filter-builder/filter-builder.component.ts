@@ -11,6 +11,8 @@ import { ButtonComponent } from '../../atoms/button';
 import { NfSelectComponent } from '../../atoms/select';
 import { LOOKUP_SEARCHERS } from '../../../tokens/lookup-searchers.token';
 import type { LookupSearchFn } from '../../../tokens/lookup-searchers.token';
+import { LOOKUP_PICKERS } from '../../../tokens/lookup-pickers.token';
+import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
 
 /**
  * Filter Builder Component (nf-filter-builder)
@@ -41,7 +43,24 @@ import type { LookupSearchFn } from '../../../tokens/lookup-searchers.token';
           <div class="nf-filter-builder__field">
             @switch (filter.type) {
               @case ('select') {
-                @if (isLookupCombobox(filter)) {
+                @if (isLookupPicker(filter)) {
+                  <div class="nf-filter-builder__picker">
+                    <span class="nf-filter-builder__picker-label">{{ filter.label | translate }}</span>
+                    <div class="nf-filter-builder__picker-row">
+                      <button
+                        type="button"
+                        class="nf-filter-builder__picker-btn"
+                        data-testid="article-picker-open"
+                        (click)="openLookupPicker(filter)"
+                      >
+                        {{ pickerLabel(filter) || ((filter.placeholder ?? 'All') | translate) }}
+                      </button>
+                      @if (getValue(filter.key)) {
+                        <nf-button variant="ghost" size="sm" (clicked)="clearPicker(filter)">{{ 'Clear' | translate }}</nf-button>
+                      }
+                    </div>
+                  </div>
+                } @else if (isLookupCombobox(filter)) {
                   <nf-select
                     [label]="filter.label | translate"
                     [placeholder]="(filter.placeholder ?? 'All') | translate"
@@ -90,7 +109,24 @@ import type { LookupSearchFn } from '../../../tokens/lookup-searchers.token';
                 </mat-form-field>
               }
               @default {
-                @if (isLookupCombobox(filter)) {
+                @if (isLookupPicker(filter)) {
+                  <div class="nf-filter-builder__picker">
+                    <span class="nf-filter-builder__picker-label">{{ filter.label | translate }}</span>
+                    <div class="nf-filter-builder__picker-row">
+                      <button
+                        type="button"
+                        class="nf-filter-builder__picker-btn"
+                        data-testid="article-picker-open"
+                        (click)="openLookupPicker(filter)"
+                      >
+                        {{ pickerLabel(filter) || ((filter.placeholder ?? 'All') | translate) }}
+                      </button>
+                      @if (getValue(filter.key)) {
+                        <nf-button variant="ghost" size="sm" (clicked)="clearPicker(filter)">{{ 'Clear' | translate }}</nf-button>
+                      }
+                    </div>
+                  </div>
+                } @else if (isLookupCombobox(filter)) {
                   <nf-select
                     [label]="filter.label | translate"
                     [placeholder]="(filter.placeholder ?? 'All') | translate"
@@ -160,6 +196,33 @@ import type { LookupSearchFn } from '../../../tokens/lookup-searchers.token';
       display: block;
     }
 
+    .nf-filter-builder__picker {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      width: 100%;
+    }
+    .nf-filter-builder__picker-label {
+      font-size: var(--nf-font-size-sm, 0.875rem);
+      color: var(--nf-text-secondary, #6b7280);
+    }
+    .nf-filter-builder__picker-row {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .nf-filter-builder__picker-btn {
+      flex: 1;
+      min-width: 0;
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--nf-border-default, #d1d5db);
+      border-radius: 8px;
+      background: var(--nf-color-surface, #fff);
+      font: inherit;
+      cursor: pointer;
+    }
+
     .nf-filter-builder__actions {
       display: flex;
       justify-content: flex-end;
@@ -172,6 +235,7 @@ import type { LookupSearchFn } from '../../../tokens/lookup-searchers.token';
 })
 export class FilterBuilderComponent {
   private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
+  private readonly lookupPickers = inject(LOOKUP_PICKERS, { optional: true });
 
   filters = input.required<FilterFieldConfig[]>();
   values = input<Record<string, unknown>>({});
@@ -183,6 +247,7 @@ export class FilterBuilderComponent {
   clear = output<void>();
 
   private readonly pending = signal<Record<string, unknown>>({});
+  private readonly pickerLabels = signal<Record<string, string>>({});
 
   constructor() {
     effect(() => {
@@ -202,15 +267,54 @@ export class FilterBuilderComponent {
     }));
   }
 
+  isLookupPicker(filter: FilterFieldConfig): boolean {
+    const key = filter.lookupKey?.trim();
+    return !!key && !!this.lookupPickers?.[key];
+  }
+
   isLookupCombobox(filter: FilterFieldConfig): boolean {
     const key = filter.lookupKey?.trim();
-    return !!key && key !== 'items';
+    if (!key || this.isLookupPicker(filter)) return false;
+    // Article = overlay picker (LOOKUP_PICKERS). Never typeahead dump.
+    if (key === 'items') return false;
+    return true;
   }
 
   lookupSearchFn(filter: FilterFieldConfig): LookupSearchFn | undefined {
     const key = filter.lookupKey?.trim();
     if (!key || !this.lookupSearchers) return undefined;
     return this.lookupSearchers[key];
+  }
+
+  lookupPickerFn(filter: FilterFieldConfig): LookupPickerFn | undefined {
+    const key = filter.lookupKey?.trim();
+    if (!key || !this.lookupPickers) return undefined;
+    return this.lookupPickers[key];
+  }
+
+  pickerLabel(filter: FilterFieldConfig): string {
+    const value = this.getValue(filter.key);
+    if (value == null || value === '') return '';
+    return this.pickerLabels()[filter.key] || String(value);
+  }
+
+  async openLookupPicker(filter: FilterFieldConfig): Promise<void> {
+    const pick = this.lookupPickerFn(filter);
+    if (!pick) return;
+    const current = this.getValue(filter.key);
+    const result = await pick(current == null ? null : String(current));
+    if (!result) return;
+    this.setValue(filter.key, result.value);
+    this.pickerLabels.update((prev) => ({ ...prev, [filter.key]: result.label }));
+  }
+
+  clearPicker(filter: FilterFieldConfig): void {
+    this.setValue(filter.key, null);
+    this.pickerLabels.update((prev) => {
+      const next = { ...prev };
+      delete next[filter.key];
+      return next;
+    });
   }
 
   comboValue(key: string): string {
@@ -241,6 +345,7 @@ export class FilterBuilderComponent {
 
   onClear(): void {
     this.pending.set({});
+    this.pickerLabels.set({});
     this.clear.emit();
   }
 }

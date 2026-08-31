@@ -4,8 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@platform/lib/anatomy';
-import type { Chantier } from '@app/chantiers/models';
+import {
+  ButtonComponent,
+  LOOKUP_SEARCHERS,
+  NfSelectComponent,
+  PageHeaderComponent,
+  PageShellComponent,
+  ToastService,
+  type LookupSearchFn,
+} from '@platform/lib/anatomy';
 import { ChantierApiService } from '../../services/chantier-api.service';
 import { BudgetApiService } from '../../budget/services/budget-api.service';
 import type { BudgetNoeud } from '../../budget/models';
@@ -39,21 +46,25 @@ function addMonthsIso(from: string, months: number): string {
     PageShellComponent,
     PageHeaderComponent,
     ButtonComponent,
-    TranslateModule
-],
+    NfSelectComponent,
+    TranslateModule,
+  ],
   template: `
     <nf-page-shell scroll>
       <nf-page-header [config]="headerConfig"></nf-page-header>
 
       <div class="panel">
         <label>{{ 'chantiers.sousTraitance.create.fields.chantier' | translate }}</label>
-        <select class="fld" [(ngModel)]="draft.chantierId" name="chantierId" required
-          [disabled]="!!routeChantierId" (ngModelChange)="onChantierChange($event)">
-          <option value="">{{ 'chantiers.sousTraitance.create.fields.chantierPlaceholder' | translate }}</option>
-          @for (c of chantiers(); track c.id) {
-            <option [value]="c.id">{{ c.code }} — {{ c.name }}</option>
-          }
-        </select>
+        <nf-select
+          lookupKey="chantiers"
+          [lookupSearch]="searchChantiers"
+          [(ngModel)]="draft.chantierId"
+          name="chantierId"
+          [disabled]="!!routeChantierId"
+          [selectedLabel]="chantierSelectedLabel()"
+          [placeholder]="'chantiers.sousTraitance.create.fields.chantierPlaceholder' | translate"
+          (ngModelChange)="onChantierChange($event)"
+        />
 
         <label>{{ 'chantiers.sousTraitance.create.fields.noeud' | translate }}</label>
         <select class="fld" [(ngModel)]="draft.noeudId" name="noeudId" required>
@@ -64,7 +75,15 @@ function addMonthsIso(from: string, months: number): string {
         </select>
 
         <label>{{ 'chantiers.sousTraitance.create.fields.sousTraitant' | translate }}</label>
-        <input class="fld" type="text" [(ngModel)]="draft.sousTraitantNom" name="sousTraitantNom" required />
+        <nf-select
+          lookupKey="fournisseurs"
+          [lookupSearch]="searchFournisseurs"
+          [(ngModel)]="draft.sousTraitantId"
+          name="sousTraitantId"
+          [selectedLabel]="fournisseurSelectedLabel()"
+          [placeholder]="'chantiers.sousTraitance.create.fields.sousTraitant' | translate"
+          (ngModelChange)="onFournisseurChange($event)"
+        />
 
         <label>{{ 'chantiers.sousTraitance.create.fields.objet' | translate }}</label>
         <input class="fld" type="text" [(ngModel)]="draft.objet" name="objet" required />
@@ -118,15 +137,21 @@ export class SousTraitanceCreatePage implements OnInit {
   private readonly budgetApi = inject(BudgetApiService);
   private readonly api = inject(SousTraitanceApiService);
   private readonly toast = inject(ToastService);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
 
-  readonly chantiers = signal<Chantier[]>([]);
+  private chantierHits: Array<{ value: string; label: string }> = [];
+  private fournisseurHits: Array<{ value: string; label: string }> = [];
+
   readonly postes = signal<BudgetNoeud[]>([]);
   readonly saving = signal(false);
+  readonly chantierSelectedLabel = signal('');
+  readonly fournisseurSelectedLabel = signal('');
   routeChantierId = '';
 
   draft = {
     chantierId: '',
     noeudId: '',
+    sousTraitantId: '',
     sousTraitantNom: '',
     objet: '',
     montantHt: 0,
@@ -145,6 +170,18 @@ export class SousTraitanceCreatePage implements OnInit {
     ],
   };
 
+  readonly searchChantiers: LookupSearchFn = async (q) => {
+    const hits = await (this.lookupSearchers?.['chantiers']?.(q) ?? Promise.resolve([]));
+    this.chantierHits = hits;
+    return hits;
+  };
+
+  readonly searchFournisseurs: LookupSearchFn = async (q) => {
+    const hits = await (this.lookupSearchers?.['fournisseurs']?.(q) ?? Promise.resolve([]));
+    this.fournisseurHits = hits;
+    return hits;
+  };
+
   ngOnInit(): void {
     const fromRoute = this.route.snapshot.queryParamMap.get('chantierId')?.trim() ?? '';
     const noeudFromRoute = this.route.snapshot.queryParamMap.get('noeudId')?.trim() ?? '';
@@ -152,17 +189,40 @@ export class SousTraitanceCreatePage implements OnInit {
       this.routeChantierId = fromRoute;
       this.draft.chantierId = fromRoute;
       this.draft.noeudId = noeudFromRoute;
+      void this.resolveChantierLabel(fromRoute);
       void this.loadPostes(fromRoute);
     }
-    void this.chantierApi.getAll().then(
-      (res) => this.chantiers.set(res.items),
-      () => this.chantiers.set([]),
-    );
   }
 
   onChantierChange(chantierId: string): void {
+    this.draft.chantierId = chantierId ?? '';
     this.draft.noeudId = '';
+    const hit = this.chantierHits.find((h) => h.value === chantierId);
+    if (hit) this.chantierSelectedLabel.set(hit.label);
+    else if (chantierId) void this.resolveChantierLabel(chantierId);
+    else this.chantierSelectedLabel.set('');
     void this.loadPostes(chantierId);
+  }
+
+  onFournisseurChange(fournisseurId: string): void {
+    this.draft.sousTraitantId = fournisseurId ?? '';
+    const hit = this.fournisseurHits.find((h) => h.value === fournisseurId);
+    if (hit) {
+      this.fournisseurSelectedLabel.set(hit.label);
+      this.draft.sousTraitantNom = hit.label;
+    } else if (!fournisseurId) {
+      this.fournisseurSelectedLabel.set('');
+      this.draft.sousTraitantNom = '';
+    }
+  }
+
+  private async resolveChantierLabel(id: string): Promise<void> {
+    try {
+      const c = await this.chantierApi.getById(id);
+      this.chantierSelectedLabel.set(`${c.code} — ${c.name}`);
+    } catch {
+      this.chantierSelectedLabel.set(id);
+    }
   }
 
   private async loadPostes(chantierId: string): Promise<void> {
@@ -183,16 +243,26 @@ export class SousTraitanceCreatePage implements OnInit {
   }
 
   async submit(): Promise<void> {
-    const { chantierId, noeudId, sousTraitantNom, objet, montantHt, bpuFichier, dateDebut, dateFin } = this.draft;
-    if (!chantierId || !noeudId || !sousTraitantNom.trim() || !objet.trim() || montantHt <= 0) {
+    const {
+      chantierId,
+      noeudId,
+      sousTraitantId,
+      sousTraitantNom,
+      objet,
+      montantHt,
+      bpuFichier,
+      dateDebut,
+      dateFin,
+    } = this.draft;
+    if (!chantierId || !noeudId || !sousTraitantId.trim() || !objet.trim() || montantHt <= 0) {
       this.toast.error(this.translate.instant('chantiers.sousTraitance.create.errors.required'));
       return;
     }
     this.saving.set(true);
     try {
       await this.api.createForChantier(chantierId, {
-        sousTraitantId: `st-${Date.now()}`,
-        sousTraitantNom: sousTraitantNom.trim(),
+        sousTraitantId: sousTraitantId.trim(),
+        sousTraitantNom: (sousTraitantNom || this.fournisseurSelectedLabel()).trim() || sousTraitantId.trim(),
         objet: objet.trim(),
         montantHt,
         retenueGarantieTaux: 7,

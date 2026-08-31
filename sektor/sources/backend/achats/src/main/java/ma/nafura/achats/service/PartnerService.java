@@ -1,5 +1,6 @@
 package ma.nafura.achats.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.achats.api.request.PartnerCreateDto;
@@ -13,6 +14,7 @@ import ma.nafura.achats.repository.PartnerRoleRepository;
 import ma.nafura.achats.service.base.PartnerServiceBase;
 import ma.nafura.achats.validation.IceValidation;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -56,8 +58,11 @@ public class PartnerService extends PartnerServiceBase {
     public Page<Partner> listByRole(PartnerRoleType role, int page, int size, Sort sort, String q) {
         String query = q == null ? null : q.trim();
         if (query != null && !query.isEmpty()) {
-            Pageable pageable = PageRequest.of(page, size);
-            return partnerRepository.findByTenantIdAndRoleAndQuery(tenantId(), role, query, pageable);
+            Pageable pageable = PageRequest.of(page, size, Sort.by("raisonSociale"));
+            Page<Partner> pageResult =
+                    partnerRepository.findByTenantIdAndRoleAndQuery(tenantId(), role, query, pageable);
+            List<Partner> ranked = rankExactCodeFirst(pageResult.getContent(), query);
+            return new PageImpl<>(ranked, pageable, pageResult.getTotalElements());
         }
         Pageable pageable = sort != null ? PageRequest.of(page, size, sort) : PageRequest.of(page, size);
         return partnerRepository.findByTenantIdAndRole(tenantId(), role, pageable);
@@ -103,5 +108,13 @@ public class PartnerService extends PartnerServiceBase {
                         .build());
             }
         }
+    }
+
+    private static List<Partner> rankExactCodeFirst(List<Partner> partners, String query) {
+        String needle = query.trim().toLowerCase();
+        return partners.stream()
+                .sorted(Comparator.comparing(
+                        (Partner p) -> !needle.equals(p.getCode() == null ? "" : p.getCode().toLowerCase())))
+                .toList();
     }
 }

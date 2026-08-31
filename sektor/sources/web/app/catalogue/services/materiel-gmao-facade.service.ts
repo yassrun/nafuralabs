@@ -66,6 +66,28 @@ export class MaterielGmaoFacadeService {
     return of([...this.carnets]);
   }
 
+  getCarnetsForEngine(engineId: string): CarnetCarburant[] {
+    if (!engineId.trim()) return [];
+    return this.carnets.filter((c) => c.engineId === engineId);
+  }
+
+  /** Lab MVP — one default carnet per engin when none exists (pleins AC-15). */
+  ensureDefaultCarnet(engineId: string): CarnetCarburant {
+    const existing = this.getCarnetsForEngine(engineId)[0];
+    if (existing) return existing;
+    const row: CarnetCarburant = {
+      id: `cr-${engineId.slice(0, 8)}-${Date.now()}`,
+      engineId,
+      capaciteReservoir: 400,
+      typeCarburant: 'GAZOLE',
+      consommationCible: 18,
+      ouverturePar: 'lab',
+      dateOuverture: new Date().toISOString().slice(0, 10),
+    };
+    this.carnets = [...this.carnets, row];
+    return row;
+  }
+
   getPleins(): Observable<PleinCarburant[]> {
     return of([...this.pleins]);
   }

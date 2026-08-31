@@ -163,7 +163,7 @@
       </div>
 
       @if (catalogueLoading()) {
-        <p class="loading-inline">Chargement du catalogue…</p>
+        <p class="loading-inline" data-testid="cat-loading">Chargement du catalogue…</p>
       } @else if (catalogue().length) {
         <table class="data-table">
           <thead>
@@ -181,7 +181,7 @@
           <tbody>
             @for (row of catalogue(); track row.id) {
               <tr>
-                <td>{{ row.articleId }}</td>
+                <td data-testid="cat-row-article">{{ articleLabel(row) }}</td>
                 <td>{{ row.refFournisseur ?? '—' }}</td>
                 <td>{{ row.designation }}</td>
                 <td class="num">{{ fmtPrice(row.prixUnitaireHt) }}</td>
@@ -215,15 +215,27 @@
           </tbody>
         </table>
       } @else if (!catalogueLoading()) {
-        <div class="empty">Aucune ligne catalogue pour ce fournisseur.</div>
+        <div class="empty" data-testid="cat-empty">Aucune ligne catalogue pour ce fournisseur.</div>
       }
 
-      <article class="form-card">
+      <article class="form-card" data-testid="cat-form">
         <h4>{{ editingCatalogueId() ? 'Modifier ligne' : 'Nouvelle ligne catalogue' }}</h4>
         <div class="form-grid">
-          <div class="field">
-            <label for="cat-article">Article ID</label>
-            <input id="cat-article" [(ngModel)]="catalogueDraft.articleId" placeholder="UUID article" />
+          <div class="field field--wide">
+            <label>Article</label>
+            <div class="article-pick">
+              @if (pickedArticleLabel()) {
+                <span class="article-pick__label" data-testid="cat-article-label">{{ pickedArticleLabel() }}</span>
+              }
+              <nf-button
+                type="button"
+                variant="secondary"
+                data-testid="cat-article-picker-open"
+                (clicked)="openArticlePicker()"
+              >
+                {{ catalogueDraft.articleId ? 'Changer l\'article' : 'Choisir un article' }}
+              </nf-button>
+            </div>
           </div>
           <div class="field">
             <label for="cat-ref">Réf. fournisseur</label>
@@ -237,10 +249,16 @@
             <label for="cat-prix">Prix commercial HT</label>
             <input id="cat-prix" type="number" min="0" step="0.01" [(ngModel)]="catalogueDraft.prixUnitaireHt" />
           </div>
-          <div class="field">
-            <label for="cat-uom">UOM commerciale (UUID)</label>
-            <input id="cat-uom" [(ngModel)]="catalogueDraft.uomId" placeholder="UUID unit_of_measure" />
-          </div>
+          <nf-select
+            label="UOM commerciale"
+            lookupKey="unitOfMeasures"
+            placeholder="Taper ≥ 2 car. — recherche serveur…"
+            [lookupSearch]="searchUnitOfMeasures"
+            [ngModel]="catalogueDraft.uomId"
+            (ngModelChange)="catalogueDraft.uomId = $event"
+            name="catUomId"
+            data-testid="cat-uom"
+          />
           <div class="field">
             <label for="cat-cond-qty">Conditionnement (qtté)</label>
             <input
@@ -252,14 +270,16 @@
               (ngModelChange)="catalogueDraft.conditionnementQuantite = $event === '' ? null : +$event"
             />
           </div>
-          <div class="field">
-            <label for="cat-cond-uom">Conditionnement UOM (UUID)</label>
-            <input
-              id="cat-cond-uom"
-              [(ngModel)]="catalogueDraft.conditionnementUomId"
-              placeholder="ex. litre"
-            />
-          </div>
+          <nf-select
+            label="Conditionnement UOM"
+            lookupKey="unitOfMeasures"
+            placeholder="Taper ≥ 2 car. — recherche serveur…"
+            [lookupSearch]="searchUnitOfMeasures"
+            [ngModel]="catalogueDraft.conditionnementUomId"
+            (ngModelChange)="catalogueDraft.conditionnementUomId = $event"
+            name="catCondUomId"
+            data-testid="cat-cond-uom"
+          />
           <div class="field field--check">
             <input id="cat-actif" type="checkbox" [(ngModel)]="catalogueDraft.actif" />
             <label for="cat-actif">Actif</label>

@@ -65,7 +65,7 @@ const LUCIDE_ICON_NAME_ALIASES: Record<string, string> = {
   },
   template: `
     <button
-      type="button"
+      [attr.type]="type()"
       mat-button
       [class]="buttonClasses()"
       [disabled]="disabled() || loading()"
@@ -389,6 +389,8 @@ export class ButtonComponent implements AfterViewInit {
   @ViewChild('contentRef') private contentRef?: ElementRef<HTMLElement>;
 
   // Inputs
+  /** Native type. Parent `(ngSubmit)` only fires when this is `submit`. */
+  type = input<'button' | 'submit' | 'reset'>('button');
   variant = input<ButtonVariant>('primary');
   size = input<ButtonSize>('md');
   icon = input<string | undefined>(undefined);

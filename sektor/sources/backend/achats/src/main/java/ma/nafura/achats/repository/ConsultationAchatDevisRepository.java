@@ -2,6 +2,7 @@ package ma.nafura.achats.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.achats.domain.consultation.ConsultationAchatDevis;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Repository;
 public interface ConsultationAchatDevisRepository extends JpaRepository<ConsultationAchatDevis, UUID> {
 
     List<ConsultationAchatDevis> findByConsultationIdOrderByCreatedAtAsc(UUID consultationId);
+
+    Optional<ConsultationAchatDevis> findByDestinataireId(UUID destinataireId);
 
     long countByConsultationId(UUID consultationId);
 

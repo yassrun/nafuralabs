@@ -65,6 +65,17 @@ class EmployeServiceTest {
     }
 
     @Test
+    void list_filtersByIdPrefix() {
+        Employe match = sampleEmploye("qa-emp-chef-chantier", "QA-CHEFCH", "Chef Chantier", "QA");
+        Employe other = sampleEmploye("qa-emp-daf", "QA-DAF", "Daf", "QA");
+        when(repository.findByTenantIdOrderByNomAscPrenomAsc(TENANT_ID)).thenReturn(List.of(match, other));
+
+        List<Employe> rows = service.list(null, null, null, "qa-emp-chef");
+
+        assertThat(rows).extracting(Employe::getId).containsExactly("qa-emp-chef-chantier");
+    }
+
+    @Test
     void list_filtersByStatut() {
         when(repository.findByTenantIdAndStatutOrderByNomAscPrenomAsc(TENANT_ID, Employe.STATUT_ACTIF))
                 .thenReturn(List.of(sampleEmploye("emp-001", "MAT-001", "Alami", "Karim")));

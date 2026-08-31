@@ -1,35 +1,70 @@
 <nf-page-shell>
   <nf-page-header [config]="headerConfig"></nf-page-header>
 
-  <form class="cs-form" (ngSubmit)="submit()">
-    <label>
-      Fournisseur
-      <select [ngModel]="fournisseurId()" (ngModelChange)="fournisseurId.set($event)" name="fournisseurId" required>
-        <option value="">— fiche Achats —</option>
-        @for (f of fournisseurs(); track f.id) {
-          <option [value]="f.id">{{ f.raisonSociale }} ({{ f.code }})</option>
-        }
-      </select>
-    </label>
+  <form class="cs-form" data-testid="consultation-create-form">
+    <section class="cs-panier" data-testid="consultation-create-panier" aria-labelledby="cs-panier-title">
+      <div class="cs-panier__head">
+        <h2 id="cs-panier-title">Panier *</h2>
+        <nf-button
+          type="button"
+          variant="secondary"
+          data-testid="consultation-create-add-article"
+          (clicked)="addArticle()"
+        >
+          + Ajouter un article
+        </nf-button>
+      </div>
 
-    <label>
-      Panier (cle_stable, une par ligne)
-      <textarea
-        [ngModel]="clesText()"
-        (ngModelChange)="clesText.set($event)"
-        name="clesStables"
-        rows="5"
-        placeholder="ciment-cpj-45"></textarea>
-    </label>
+      @if (panier().length === 0) {
+        <p class="cs-panier__empty">Aucun article. Ouvrir le picker pour en ajouter.</p>
+      } @else {
+        <table class="cs-panier__table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Désignation</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ligne of panier(); track ligne.cleStable; let i = $index) {
+              <tr data-testid="consultation-create-panier-line">
+                <td class="cs-panier__code">{{ ligne.code }}</td>
+                <td>{{ ligne.name }}</td>
+                <td class="cs-panier__actions">
+                  <nf-button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    [attr.data-testid]="'consultation-create-remove-' + i"
+                    (clicked)="removeArticle(i)"
+                  >
+                    Retirer
+                  </nf-button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
 
-    <p class="cs-hint">Lien étude : aucun. La consultation vit dans Achats.</p>
+    <p class="cs-hint">Lien étude : aucun. La consultation vit dans Achats. Destinataires : sur la fiche.</p>
 
     @if (erreur(); as err) {
-      <p class="cs-error">{{ err }}</p>
+      <p class="cs-error" role="alert" data-testid="consultation-create-error">{{ err }}</p>
     }
 
     <div class="cs-actions">
-      <nf-button type="submit" variant="primary" [disabled]="saving()">Créer</nf-button>
+      <nf-button
+        type="button"
+        variant="primary"
+        data-testid="consultation-create-submit"
+        [disabled]="saving()"
+        (clicked)="submit()"
+      >
+        Créer
+      </nf-button>
       <nf-button type="button" variant="secondary" (clicked)="cancel()">Annuler</nf-button>
     </div>
   </form>

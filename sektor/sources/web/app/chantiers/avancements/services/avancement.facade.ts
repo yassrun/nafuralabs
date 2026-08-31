@@ -14,6 +14,7 @@ import type {
   AvancementQuery,
   AvancementSaisieSummary,
   AvancementStatus,
+  ChantierAvancement,
   LotSaisieDraft,
   SaisieLineDefinition,
   SaisieLineViewModel,
@@ -44,8 +45,9 @@ export class AvancementFacade extends GridFacade<
   override readonly lookups = computed(() => this.lookupsSignal());
 
   readonly currentUser = computed(() => this.context.getCurrentUser());
-  readonly chantiers = computed(() => this.context.getChantiers());
   readonly employees = computed(() => this.context.getEmployees());
+
+  private readonly selectedChantierMeta = signal<ChantierAvancement | null>(null);
 
   readonly selectedChantierId = signal<string | null>(null);
   readonly selectedDate = signal<string>(todayIso());
@@ -55,10 +57,7 @@ export class AvancementFacade extends GridFacade<
   private readonly selectedLineKeys = signal<string[]>([]);
   private readonly dernierByLineKey = signal<Record<string, AvancementListItem>>({});
 
-  readonly chantier = computed(() => {
-    const chantierId = this.selectedChantierId();
-    return chantierId ? this.chantiers().find((item) => item.id === chantierId) ?? null : null;
-  });
+  readonly chantier = computed(() => this.selectedChantierMeta());
 
   readonly allSaisieLines = computed(() => {
     const chantierId = this.selectedChantierId();
@@ -230,8 +229,8 @@ export class AvancementFacade extends GridFacade<
     }
 
     if (chantierId) {
-      const exists = this.chantiers().some((chantier) => chantier.id === chantierId);
-      if (!exists) {
+      const meta = await this.context.loadChantierById(chantierId);
+      if (!meta) {
         return 'chantier-not-found';
       }
       this.selectChantier(chantierId);
@@ -239,11 +238,16 @@ export class AvancementFacade extends GridFacade<
       return 'ok';
     }
 
-    const fallbackChantierId = this.currentUser().preferredChantierIds.find((id) => this.chantiers().some((chantier) => chantier.id === id))
-      ?? this.chantiers().find((item) => item.status === 'EN_COURS')?.id
-      ?? null;
+    for (const preferredId of this.currentUser().preferredChantierIds) {
+      const meta = await this.context.loadChantierById(preferredId);
+      if (meta) {
+        this.selectChantier(preferredId);
+        this.selectedDate.set(todayIso());
+        return 'ok';
+      }
+    }
 
-    this.selectChantier(fallbackChantierId);
+    this.selectChantier(null);
     this.selectedDate.set(todayIso());
     return 'ok';
   }
@@ -255,13 +259,20 @@ export class AvancementFacade extends GridFacade<
   selectChantier(chantierId: string | null): void {
     this.selectedChantierId.set(chantierId);
     if (!chantierId) {
+      this.selectedChantierMeta.set(null);
       this.selectedLineKeys.set([]);
       this.draftByLineKey.set({});
       this.dernierByLineKey.set({});
       return;
     }
 
+    void this.loadChantierMeta(chantierId);
     void this.loadLinesAndDefaults(chantierId);
+  }
+
+  private async loadChantierMeta(chantierId: string): Promise<void> {
+    const meta = await this.context.loadChantierById(chantierId);
+    this.selectedChantierMeta.set(meta);
   }
 
   private async loadLinesAndDefaults(chantierId: string): Promise<void> {

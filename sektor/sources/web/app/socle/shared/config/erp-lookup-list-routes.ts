@@ -39,6 +39,9 @@ export const ERP_LOOKUP_LIST_ROUTES: Readonly<Record<string, string>> = {
   conditionPaiementType: '/finance/conditions-paiement',
   tauxChangeSource: '/finance/taux-change',
   inventoryTxes: '/inventory/mouvements/inventory-txes',
+  materiels: '/materiel/parc',
+  materielsLookup: '/materiel/parc',
+  engins: '/materiel/parc',
 };
 
 export function resolveErpLookupListRoute(

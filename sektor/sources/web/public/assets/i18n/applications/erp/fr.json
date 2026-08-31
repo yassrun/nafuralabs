@@ -101,6 +101,7 @@
       "anomaly": "Anomalie",
       "saved": "Plein enregistré.",
       "noCarnet": "Sélectionnez un carnet.",
+      "selectEngineFirst": "Choisissez d'abord un engin.",
       "exportCsv": "Exporter CSV (compta)",
       "totalLitres": "Litres cumulés",
       "fillCount": "Nombre de pleins"

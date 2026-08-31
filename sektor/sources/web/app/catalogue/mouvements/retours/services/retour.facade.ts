@@ -41,22 +41,14 @@ export class RetourFacade implements CrudStyleFacade<InventoryTx, Partial<Invent
   }
 
   async ensureLookups(): Promise<void> {
-    const [locations, motifs] = await Promise.all([
-      this.lookupsService.loadLocations(),
-      this.motifsApi.listByTxType('RETOUR'),
-    ]);
-    this.locationsCache = locations;
+    const motifs = await this.motifsApi.listByTxType('RETOUR');
+    this.locationsCache = [];
     this.motifsCache = motifs;
-    const chantiers = locations.filter((l) => l.type === 'CHANTIER');
-    const depots = locations.filter((l) => l.type === 'DEPOT' || l.type === 'ENTREPOT');
     this.lookupsSignal.set({
-      chantierLocations: chantiers.map((l) => ({
-        key: l.id,
-        value: l.projectRef ? `${l.name} (${l.projectRef})` : l.name,
-      })),
-      depotLocations: depots.map((l) => ({ key: l.id, value: l.name })),
+      chantierLocations: [],
+      depotLocations: [],
       articlesMatCons: [],
-      motifsRetour: motifs.map((m) => ({ key: m.id, value: `${m.code} — ${m.name}` })),
+      motifsRetour: [],
       retourTypes: [
         { key: 'RETOUR_CHANTIER', value: 'Retour chantier' },
         { key: 'RETOUR_FOURNISSEUR', value: 'Retour fournisseur' },

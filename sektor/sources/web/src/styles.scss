@@ -367,3 +367,12 @@ html .mat-mdc-slide-toggle.mat-warn {
     flex-direction: row-reverse;
   }
 }
+
+/* Overlay étude : combobox fournisseur (liste absolute) ne doit pas être clipée. */
+.consultation-decompo-overlay.cdk-overlay-pane,
+.consultation-decompo-overlay .mat-mdc-dialog-container,
+.consultation-decompo-overlay .mdc-dialog__container,
+.consultation-decompo-overlay .mdc-dialog__surface,
+.consultation-decompo-overlay .mat-mdc-dialog-surface {
+  overflow: visible !important;
+}

@@ -5,7 +5,6 @@ import type { LotChantier as ApiLotChantier, PosteBudgetaire } from '@app/chanti
 import { ChantierApiService } from '../../services/chantier-api.service';
 import { ChantierLotApiService } from '../../services/chantier-lot-api.service';
 import { PosteBudgetaireApiService } from '../../services/poste-budgetaire-api.service';
-import { EmployeApiService } from '../../../rh/employes/services/employe-api.service';
 
 import type {
   AvancementListItem,
@@ -70,7 +69,6 @@ export class AvancementContextService {
   private readonly chantierApi = inject(ChantierApiService);
   private readonly lotApi = inject(ChantierLotApiService);
   private readonly posteApi = inject(PosteBudgetaireApiService);
-  private readonly employeApi = inject(EmployeApiService);
   private readonly auth = inject(AuthFacade);
 
   private readonly chantiersSignal = signal<ChantierAvancement[]>([]);
@@ -138,20 +136,16 @@ export class AvancementContextService {
 
   async ensureBaseData(): Promise<void> {
     if (this.loaded) return;
-    const [chantiersRes, employesRes] = await Promise.all([
-      this.chantierApi.getAll({ page: 0, pageSize: 500 }),
-      this.employeApi.getAll({ page: 0, pageSize: 500 }),
-    ]);
-    this.chantiersSignal.set(chantiersRes.items.map(chantierToAvancement));
-    this.employeesSignal.set(
-      employesRes.items.map((e) => ({
-        id: e.id,
-        name: `${e.prenom} ${e.nom}`.trim(),
-        role: e.poste ?? '',
-        preferredChantierIds: [],
-      })),
-    );
     this.loaded = true;
+  }
+
+  async loadChantierById(id: string): Promise<ChantierAvancement | null> {
+    try {
+      const c = await this.chantierApi.getById(id);
+      return chantierToAvancement(c);
+    } catch {
+      return null;
+    }
   }
 
   async loadLotsForChantier(chantierId: string, dernierByLotId: Record<string, AvancementListItem>): Promise<void> {

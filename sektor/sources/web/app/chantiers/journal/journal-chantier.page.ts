@@ -5,7 +5,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@platform/lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent, ToastService } from '@platform/lib/anatomy';
+import {
+  ButtonComponent,
+  LOOKUP_SEARCHERS,
+  NfSelectComponent,
+  PageHeaderComponent,
+  PageShellComponent,
+  ToastService,
+  type LookupSearchFn,
+} from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 import { AuthFacade } from '@platform/core/security/services/auth.facade';
 import { JOURNAL_EVENT_TYPE_KEYS } from '@app/socle/shell/i18n-labels';
@@ -82,6 +90,7 @@ function todayIso(): string {
     MadCurrencyPipe,
     FilterResetComponent,
     ButtonComponent,
+    NfSelectComponent,
     TranslateModule,
   ],
   template: `
@@ -110,12 +119,15 @@ function todayIso(): string {
         <div class="create-panel">
           <h3>{{ 'chantiers.journal.create.title' | translate }}</h3>
           <label>{{ 'chantiers.journal.create.fields.chantier' | translate }}</label>
-          <select class="fld" [(ngModel)]="createDraft.chantierId" name="chantierId" required>
-            <option value="">{{ 'chantiers.journal.create.fields.chantierPlaceholder' | translate }}</option>
-            @for (c of chantiers(); track c.id) {
-              <option [value]="c.id">{{ c.code }} — {{ c.name }}</option>
-            }
-          </select>
+          <nf-select
+            lookupKey="chantiers"
+            [lookupSearch]="searchChantiers"
+            [(ngModel)]="createDraft.chantierId"
+            name="chantierId"
+            [selectedLabel]="createChantierLabel()"
+            [placeholder]="'chantiers.journal.create.fields.chantierPlaceholder' | translate"
+            (ngModelChange)="onCreateChantierChange($event)"
+          />
           <label>{{ 'chantiers.journal.create.fields.type' | translate }}</label>
           <select class="fld" [(ngModel)]="createDraft.type" name="type">
             @for (t of typeEntries(); track t[0]) {
@@ -230,6 +242,7 @@ export class JournalChantierPage implements OnInit {
   private readonly auth = inject(AuthFacade);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
 
   readonly search = signal('');
   readonly filterType = signal<JournalEventType | ''>('');
@@ -237,6 +250,7 @@ export class JournalChantierPage implements OnInit {
   readonly loading = signal(true);
   readonly showCreateForm = signal(false);
   readonly creating = signal(false);
+  readonly createChantierLabel = signal('');
   readonly chantiers = signal<Chantier[]>([]);
   private readonly all = signal<JournalEntry[]>([]);
   readonly filteredChantierCode = computed(() => {
@@ -246,6 +260,9 @@ export class JournalChantierPage implements OnInit {
       ?? this.all().find((entry) => entry.chantierId === chantierId)?.chantierCode
       ?? chantierId;
   });
+
+  readonly searchChantiers: LookupSearchFn = (q) =>
+    this.lookupSearchers?.['chantiers']?.(q) ?? Promise.resolve([]);
 
   createDraft = {
     chantierId: '',
@@ -298,13 +315,35 @@ export class JournalChantierPage implements OnInit {
   }
 
   openCreateForm(): void {
+    const chantierId = this.filteredChantierId() || '';
     this.createDraft = {
-      chantierId: this.filteredChantierId() || (this.chantiers()[0]?.id ?? ''),
+      chantierId,
       type: 'AUTRE',
       date: todayIso(),
       contenu: '',
     };
+    const known = chantierId ? this.chantiers().find((c) => c.id === chantierId) : undefined;
+    this.createChantierLabel.set(
+      known ? `${known.code} — ${known.name}` : (chantierId ? this.filteredChantierCode() : ''),
+    );
     this.showCreateForm.set(true);
+  }
+
+  onCreateChantierChange(chantierId: string): void {
+    this.createDraft.chantierId = chantierId ?? '';
+    if (!chantierId) {
+      this.createChantierLabel.set('');
+      return;
+    }
+    const known = this.chantiers().find((c) => c.id === chantierId);
+    if (known) {
+      this.createChantierLabel.set(`${known.code} — ${known.name}`);
+      return;
+    }
+    void this.chantierApi.getById(chantierId).then(
+      (c) => this.createChantierLabel.set(`${c.code} — ${c.name}`),
+      () => this.createChantierLabel.set(chantierId),
+    );
   }
 
   closeCreateForm(): void {

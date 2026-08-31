@@ -19,12 +19,11 @@ import { ChantierApiService } from '../../services/chantier-api.service';
 import type {
   CockpitAlerte,
   CockpitChantier,
-  CockpitCompteur,
   CockpitMontant,
   CockpitNextAction,
   CockpitPreparation,
 } from '../../services/cockpit.model';
-import { cockpitModuleRoutes, resolveCockpitRoute, type CockpitModuleRoute } from './cockpit-routes';
+import { cockpitNavShortcuts, isCockpitAppRoute, resolveAlertRoute, resolveCockpitRoute, resolvePreparationRoute } from './cockpit-routes';
 
 /**
  * Cockpit chantier (SEKTOR-197) — surface de décision qui consomme strictement le read model
@@ -125,9 +124,9 @@ import { cockpitModuleRoutes, resolveCockpitRoute, type CockpitModuleRoute } fro
                 <li class="alerte alerte--{{ severiteCss(a.severite) }}">
                   <span class="alerte__dot" aria-hidden="true"></span>
                   <span class="alerte__msg">{{ a.message | translate }}</span>
-                  @if (a.action) {
-                    <button type="button" class="alerte__action" (click)="ouvrirRoute(a.action!)">
-                      {{ 'chantiers.cockpit.ouvrir' | translate }}
+                  @if (alerteActionnable(a)) {
+                    <button type="button" class="alerte__action" (click)="ouvrirAlerte(a)">
+                      {{ alerteActionLabel(a) | translate }}
                     </button>
                   }
                 </li>
@@ -159,9 +158,9 @@ import { cockpitModuleRoutes, resolveCockpitRoute, type CockpitModuleRoute } fro
                   @if (p.categorie === 'RECOMMANDE') {
                     <span class="check-badge">{{ 'chantiers.cockpit.preparation.badgeRecommande' | translate }}</span>
                   }
-                  @if (p.etat === 'BLOQUANT' || p.etat === 'A_FAIRE') {
-                    <button type="button" class="check-action" (click)="ouvrirRoute(p.action)">
-                      {{ 'chantiers.cockpit.gerer' | translate }}
+                  @if (preparationActionnable(p)) {
+                    <button type="button" class="check-action" (click)="ouvrirPreparation(p)">
+                      {{ p.action | translate }}
                     </button>
                   }
                 </li>
@@ -174,7 +173,7 @@ import { cockpitModuleRoutes, resolveCockpitRoute, type CockpitModuleRoute } fro
         <section class="panel panel--flux">
           <h3>{{ 'chantiers.cockpit.flux.titre' | translate }} <span class="muted">{{ c.progress?.fluxMois?.periode }}</span></h3>
           <p class="flux-step">{{ 'chantiers.cockpit.flux.etape' | translate }} : {{ fluxEtape(c) | translate }}</p>
-          @if (c.progress?.fluxMois?.actionnable && c.progress?.fluxMois?.premiereAction) {
+          @if (c.progress?.fluxMois?.actionnable && isCockpitAppRoute(c.progress?.fluxMois?.premiereAction)) {
             <nf-button variant="primary" size="sm" (clicked)="ouvrirRoute(c.progress!.fluxMois!.premiereAction!)">
               {{ 'chantiers.cockpit.flux.action' | translate }}
             </nf-button>
@@ -182,23 +181,18 @@ import { cockpitModuleRoutes, resolveCockpitRoute, type CockpitModuleRoute } fro
         </section>
       </div>
 
-      <!-- Résumés spécialisés — AC-14 -->
-      <div class="cockpit__modules">
-        @for (m of modules(); track m.route) {
-          <article class="module-card">
-            <h4>{{ m.titre | translate }}</h4>
-            @if (m.compteur) {
-              <p class="module-compteur" [class.module-compteur--indispo]="m.compteur.etat === 'NOT_AVAILABLE'">
-                {{ afficheCompteur(m.compteur) }}
-              </p>
-            }
-            <p class="muted">{{ m.resume | translate }}</p>
-            <nf-button variant="secondary" size="sm" (clicked)="ouvrirRoute(m.route)">
-              {{ 'chantiers.cockpit.voir' | translate }}
-            </nf-button>
-          </article>
-        }
-      </div>
+      <!-- Navigation stable — AC raccourcis : toujours visible, pas filtrée par nextActions -->
+      <nav class="cockpit__nav" [attr.aria-label]="'chantiers.cockpit.nav.titre' | translate">
+        <h3>{{ 'chantiers.cockpit.nav.titre' | translate }}</h3>
+        <div class="nav-chips">
+          @for (m of shortcuts(); track m.route) {
+            <button type="button" class="nav-chip" (click)="ouvrirRoute(m.route)">
+              <span class="nav-chip__title">{{ m.titre | translate }}</span>
+              <span class="nav-chip__hint">{{ m.resume | translate }}</span>
+            </button>
+          }
+        </div>
+      </nav>
 
       <!-- Activité récente — AC-9 -->
       @if (c.activityFeed?.length) {
@@ -230,7 +224,7 @@ import { cockpitModuleRoutes, resolveCockpitRoute, type CockpitModuleRoute } fro
       .kpi { padding: 0.6rem 0.85rem; }
       .action-primaire, .action-secondaire, .check-action, .alerte__action, .os-form nf-button { min-height: 44px; }
     }
-    .kpi { background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 0.75rem; padding: 0.75rem 1rem; }
+    .kpi { background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-left: 3px solid var(--nf-color-primary-500); border-radius: 0.75rem; padding: 0.75rem 1rem; }
     .kpi__label { display: block; font-size: 0.72rem; color: var(--nf-color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
     .kpi__value { display: block; margin-top: 0.3rem; font-size: 1.05rem; font-weight: 700; }
     .kpi__src { font-size: 0.7rem; color: var(--nf-color-text-muted); }
@@ -289,12 +283,18 @@ import { cockpitModuleRoutes, resolveCockpitRoute, type CockpitModuleRoute } fro
 
     .flux-step { font-size: 0.9rem; }
 
-    .cockpit__modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem; }
-    .module-card { background: var(--nf-color-surface); border: 1px solid var(--nf-color-border); border-radius: 0.75rem; padding: 1rem 1.25rem; }
-    .module-card h4 { margin: 0 0 0.4rem; font-size: 0.95rem; }
-    .module-compteur { margin: 0 0 0.35rem; font-size: 1rem; font-weight: 700; }
-    .module-compteur--indispo { color: var(--nf-color-text-muted); font-weight: 600; font-style: italic; }
-    .module-card p { margin: 0 0 0.75rem; font-size: 0.82rem; }
+    .cockpit__nav { margin-top: 1.25rem; }
+    .cockpit__nav h3 { margin: 0 0 0.6rem; font-size: 0.85rem; color: var(--nf-color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .nav-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 0.5rem; }
+    .nav-chip {
+      display: flex; flex-direction: column; gap: 0.15rem; align-items: flex-start; text-align: left;
+      padding: 0.7rem 0.85rem; border: 1px solid var(--nf-color-border); border-radius: 0.6rem;
+      background: var(--nf-color-surface); cursor: pointer; min-height: 44px;
+    }
+    .nav-chip:hover { border-color: var(--nf-color-primary-400); background: var(--nf-color-bg-subtle); }
+    .nav-chip__title { font-size: 0.86rem; font-weight: 600; color: var(--nf-color-text-primary); }
+    .nav-chip__hint { font-size: 0.72rem; color: var(--nf-color-text-muted); line-height: 1.3; }
+    @media (max-width: 480px) { .nav-chip { min-height: 44px; } }
 
     .feed { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.85rem; }
     .feed-item { display: flex; gap: 0.6rem; }
@@ -412,28 +412,30 @@ export class PilotageTabComponent {
     }
   }
 
-  /** P1-10 — routes canoniques vérifiées (cockpit-routes.spec) : aucune route morte. */
-  readonly modules = computed((): Array<CockpitModuleRoute & { compteur?: CockpitCompteur | null }> => {
-    const c = this.cockpit();
-    if (!c) return [];
-    return cockpitModuleRoutes(
-      this.chantierId(),
-      c.identity?.status,
-      (c.nextActions ?? []).map((a) => a.libelle),
-    ).map((m) => {
-      if (m.moduleKey === 'demandeAchat' && c.ops?.demandesAchat) {
-        return { ...m, compteur: c.ops.demandesAchat };
-      }
-      return m;
-    });
-  });
+  readonly shortcuts = computed(() => cockpitNavShortcuts(this.chantierId()));
 
-  afficheCompteur(c: CockpitCompteur): string {
-    if (c.etat === 'NOT_AVAILABLE') {
-      return this.translate.instant('chantiers.cockpit.module.indisponible');
+  /** Exposé au template — AC-7 (flux) / garde ouvrirRoute. */
+  readonly isCockpitAppRoute = isCockpitAppRoute;
+
+  /** AC-1 / AC-8 — CTA prep seulement si `code` mappe vers une route `/…`. */
+  preparationActionnable(p: CockpitPreparation): boolean {
+    if (p.etat !== 'BLOQUANT' && p.etat !== 'A_FAIRE') return false;
+    if (p.code === 'ordre_service') return false;
+    return resolvePreparationRoute(p.code, this.chantierId()) != null;
+  }
+
+  /** AC-2 — CTA alerte si mapping route, ou reload pour `source_indisponible`. */
+  alerteActionnable(a: CockpitAlerte): boolean {
+    if (a.code === 'source_indisponible') return true;
+    return resolveAlertRoute(a.code, this.chantierId()) != null;
+  }
+
+  alerteActionLabel(a: CockpitAlerte): string {
+    if (a.code === 'source_indisponible') {
+      return a.action?.startsWith('chantiers.') ? a.action : 'chantiers.cockpit.alerte.action.reessayer';
     }
-    const count = c.valeur ?? 0;
-    return this.translate.instant('chantiers.cockpit.module.demandeAchatCount', { count });
+    if (a.action?.startsWith('chantiers.')) return a.action;
+    return 'chantiers.cockpit.ouvrir';
   }
 
   afficheMontant(m: CockpitMontant | null | undefined): string {
@@ -486,10 +488,36 @@ export class PilotageTabComponent {
   }
 
   executerAction(a: CockpitNextAction): void {
+    if (a.libelle === 'chantiers.cockpit.action.preparer') {
+      const bloquant = this.preparation().find((p) => p.etat === 'BLOQUANT');
+      const mapped = bloquant ? resolvePreparationRoute(bloquant.code, this.chantierId()) : null;
+      if (mapped) {
+        this.ouvrirRoute(mapped);
+        return;
+      }
+    }
     this.ouvrirRoute(a.route);
   }
 
-  ouvrirRoute(route: string): void {
-    void this.router.navigateByUrl(resolveCockpitRoute(route, this.chantierId()));
+  ouvrirPreparation(p: CockpitPreparation): void {
+    if (p.code === 'ordre_service') {
+      return;
+    }
+    this.ouvrirRoute(resolvePreparationRoute(p.code, this.chantierId()));
+  }
+
+  ouvrirAlerte(a: CockpitAlerte): void {
+    if (a.code === 'source_indisponible') {
+      this.recharger();
+      return;
+    }
+    this.ouvrirRoute(resolveAlertRoute(a.code, this.chantierId()));
+  }
+
+  ouvrirRoute(route: string | null | undefined): void {
+    if (!isCockpitAppRoute(route)) {
+      return;
+    }
+    void this.router.navigateByUrl(resolveCockpitRoute(route!, this.chantierId()));
   }
 }

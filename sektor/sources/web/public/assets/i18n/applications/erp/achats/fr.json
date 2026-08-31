@@ -82,7 +82,9 @@
       "consultationsListTitle": "Consultations",
       "consultationsListCrumb": "Consultations",
       "consultationNewTitle": "Nouvelle consultation",
-      "consultationNewCrumb": "Nouvelle"
+      "consultationNewCrumb": "Nouvelle",
+      "consultationDetailTitle": "Détail consultation",
+      "consultationDetailCrumb": "Détail"
     },
     "rubrique": {
       "MATERIAUX": "Matériaux",
@@ -652,6 +654,110 @@
       "deleteConfirm": {
         "title": "Supprimer le fournisseur",
         "message": "Supprimer {name} ?"
+      }
+    },
+    "consultation": {
+      "entityName": "Consultation",
+      "entityNamePlural": "Consultations",
+      "headerTitle": "Consultations",
+      "detailTitle": "Consultation",
+      "loadError": "Impossible de charger la consultation.",
+      "statut": {
+        "demande": "Demande",
+        "preparation": "Préparation",
+        "ouverte": "En attente de réponses",
+        "partielle": "Partielle",
+        "complete": "Complète",
+        "devisRecus": "{{count}} devis"
+      },
+      "lien": {
+        "liee": "Liée",
+        "hors": "Hors étude"
+      },
+      "list": {
+        "columns": {
+          "numero": "N°",
+          "fournisseur": "Fournisseur",
+          "destinataires": "Destinataires",
+          "panier": "Panier",
+          "avancement": "Avancement",
+          "statut": "Statut",
+          "lien": "Lien"
+        },
+        "filters": {
+          "lien": "Lien étude",
+          "lienAll": "Toutes",
+          "lienHors": "Hors étude",
+          "lienLiee": "Liée"
+        },
+        "emptyState": {
+          "title": "Aucune consultation",
+          "message": "Créer hors étude — le lien dossier reste vide. Overlay étude peut rattacher plus tard.",
+          "actionLabel": "+ Consultation"
+        }
+      },
+      "form": {
+        "sections": {
+          "identite": "Identité",
+          "panier": "Panier"
+        },
+        "fields": {
+          "numero": "N°",
+          "fournisseur": "Fournisseur",
+          "statut": "Statut",
+          "lien": "Lien étude",
+          "panier": "Articles"
+        }
+      },
+      "destinataires": {
+        "title": "Destinataires",
+        "empty": "Aucun destinataire.",
+        "add": "Ajouter",
+        "fournisseur": "Fournisseur",
+        "email": "E-mail",
+        "statut": "Statut",
+        "enAttente": "En attente",
+        "devisRecu": "Devis reçu",
+        "devis": "Devis",
+        "placeholder": "Taper ≥ 2 car. — rechercher un fournisseur…",
+        "contactPlaceholder": "Choisir le contact e-mail…",
+        "contactRequis": "Choisissez le contact e-mail.",
+        "sansEmail": "Impossible d’ajouter ce fournisseur : aucun contact avec e-mail sur la fiche. Ajoutez un contact, puis réessayez.",
+        "ouvrirFiche": "Ouvrir la fiche fournisseur",
+        "doublon": "Ce fournisseur est déjà destinataire de cette consultation.",
+        "error": "Ajout du destinataire impossible."
+      },
+      "envoyer": "Envoyer la consultation",
+      "envoyerError": "Envoi impossible.",
+      "journal": {
+        "title": "Journal d’envoi",
+        "empty": "Aucun envoi.",
+        "destinataire": "Destinataire",
+        "email": "E-mail",
+        "date": "Date"
+      },
+      "panier": {
+        "empty": "Panier vide.",
+        "fige": "Panier figé. Les articles ne peuvent plus être modifiés. Vous pouvez encore ajouter un destinataire.",
+        "columns": {
+          "code": "Code",
+          "libelle": "Désignation"
+        }
+      },
+      "import": {
+        "callout": "On importe le fichier. Import magique extrait les lignes. Pas de saisie manuelle des prix.",
+        "depositTitle": "Déposer le devis",
+        "extraitTitle": "Extrait (revue confirmée)",
+        "extraitEmpty": "Aucune ligne — un fichier sans extraction confirmée n’est pas un devis reçu.",
+        "emptyHint": "Aucune ligne extraite — le fichier n’est pas un devis reçu.",
+        "error": "Import impossible.",
+        "columns": {
+          "identite": "Identité",
+          "libelle": "Libellé",
+          "qte": "Qté",
+          "unite": "Unité",
+          "pu": "PU"
+        }
       }
     },
     "smartImport": {

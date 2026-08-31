@@ -86,6 +86,12 @@ function assertChromeOverlay139() {
   if (!/data-cs-fiche|Voir la fiche/.test(src)) {
     throw new Error('VU ROUGE : lien fiche (œil) absent');
   }
+  if (!/lookupKey="fournisseurs"/.test(src) || !/\[lookupSearch\]/.test(src)) {
+    throw new Error('VU ROUGE overlay create : fournisseur n’est pas le combobox lookup');
+  }
+  if (/<select[\s\S]{0,240}name="fournisseurId"/.test(src) || /pageSize:\s*200/.test(src)) {
+    throw new Error('VU ROUGE overlay : encore dump <select> fournisseur');
+  }
 }
 
 async function createItem(h, name, cleStable) {
@@ -159,6 +165,7 @@ async function proveBrowserOverlay(
   numeroPasEncore,
   articleLabel,
   posteLibelle,
+  fournisseurQuery,
 ) {
   let chromium;
   try {
@@ -226,20 +233,39 @@ async function proveBrowserOverlay(
     try {
       await addBtn.waitFor({ timeout: 8000 });
       await addBtn.click({ force: true });
-      const overlayArticle = page.locator('[data-cs-overlay]').first();
-      await waitListeLiees(overlayArticle);
-      const articleText = ((await overlayArticle.innerText()) ?? '').replace(/\s+/g, ' ');
-      if (!/déjà dedans/i.test(articleText) || !/pas encore/i.test(articleText)) {
-        throw new Error(
-          `browser : déjà-dedans / pas encore absents depuis le composant — ${articleText.slice(0, 400)}`,
-        );
-      }
-      console.log('ok browser déjà-dedans depuis le composant');
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      if (/déjà-dedans|pas encore absents/.test(msg)) throw err;
       console.log('browser composant skip (liste+panier déjà vus):', msg.split('\n')[0]);
+      return;
     }
+    const overlayArticle = page.locator('[data-cs-overlay]').first();
+    await waitListeLiees(overlayArticle);
+    const articleText = ((await overlayArticle.innerText()) ?? '').replace(/\s+/g, ' ');
+    if (!/déjà dedans/i.test(articleText) || !/pas encore/i.test(articleText)) {
+      throw new Error(
+        `browser : déjà-dedans / pas encore absents depuis le composant — ${articleText.slice(0, 400)}`,
+      );
+    }
+    await overlayArticle.getByRole('button', { name: 'Nouvelle consultation' }).click();
+    const creer = overlayArticle.locator('[data-cs-pane="creer"]');
+    await creer.waitFor({ timeout: 8000 });
+    if ((await creer.locator('select[name="fournisseurId"]').count()) > 0) {
+      throw new Error('browser create : encore <select> natif fournisseur');
+    }
+    const input = creer.locator('input[role="combobox"]').first();
+    await input.waitFor({ timeout: 5000 });
+    await input.click();
+    const placeholder = (await input.getAttribute('placeholder')) ?? '';
+    if (!/2/.test(placeholder)) {
+      throw new Error(`browser create : placeholder 2 car. absent — ${placeholder}`);
+    }
+    const q = (fournisseurQuery ?? 'La').slice(0, 2);
+    await input.fill(q);
+    await overlayArticle.locator('[role="option"]').first().waitFor({ timeout: 10000 });
+    if ((await overlayArticle.locator('button.nf-select-list').count()) < 1) {
+      throw new Error('browser create : œil liste fournisseurs absent');
+    }
+    console.log('ok browser déjà-dedans + combobox fournisseur ≥ 2 car.');
   } finally {
     await browser.close();
   }
@@ -449,6 +475,7 @@ async function main() {
     lieePasEncore.body.numero,
     'Ciment',
     `Ciment 139 ${suffix}`,
+    partner.body.raisonSociale ?? 'Lafarge',
   );
 
   const patched = await json(

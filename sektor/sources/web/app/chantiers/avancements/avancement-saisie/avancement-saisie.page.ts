@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { ButtonComponent, EmptyStateComponent } from '@platform/lib/anatomy/components';
+import { ButtonComponent, EmptyStateComponent, NfSelectComponent } from '@platform/lib/anatomy/components';
+import { LOOKUP_SEARCHERS, type LookupSearchFn } from '@platform/lib/anatomy';
 import { ConfirmDialogService, ToastService } from '@platform/lib/anatomy';
 import { AvancementFacade } from '../services';
 import { LotSaisieCardComponent } from './components/lot-saisie-card/lot-saisie-card.component';
@@ -12,7 +13,7 @@ import { LotSaisieCardComponent } from './components/lot-saisie-card/lot-saisie-
 @Component({
   selector: 'app-avancement-saisie',
   standalone: true,
-  imports: [FormsModule, RouterLink, TranslateModule, ButtonComponent, EmptyStateComponent, LotSaisieCardComponent],
+  imports: [FormsModule, RouterLink, TranslateModule, ButtonComponent, EmptyStateComponent, NfSelectComponent, LotSaisieCardComponent],
   templateUrl: './avancement-saisie.page.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./avancement-saisie.page.scss'],
@@ -23,9 +24,9 @@ export class AvancementSaisiePage {
   private readonly translate = inject(TranslateService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toast = inject(ToastService);
+  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
 
   readonly facade = inject(AvancementFacade);
-  readonly chantiers = this.facade.chantiers;
   readonly currentUser = this.facade.currentUser;
   readonly chantier = this.facade.chantier;
   readonly lines = this.facade.selectedLines;
@@ -37,6 +38,14 @@ export class AvancementSaisiePage {
   readonly formTitle = computed(() => this.isEditing()
     ? this.translate.instant('chantiers.avancement.editTitle')
     : this.translate.instant('chantiers.avancement.title'));
+
+  readonly chantierSelectedLabel = computed(() => {
+    const c = this.chantier();
+    return c ? `${c.code} - ${c.name}` : '';
+  });
+
+  readonly searchChantiers: LookupSearchFn = (q) =>
+    this.lookupSearchers?.['chantiers']?.(q) ?? Promise.resolve([]);
 
   constructor() {
     const chantierId = this.route.snapshot.paramMap.get('chantierId');
