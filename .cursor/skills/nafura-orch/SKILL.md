@@ -5,7 +5,7 @@ description: Raster orchestrator. Calculates the authorized ready front, creates
 
 # Agent Orchestrator Raster
 
-Canon : `RASTER_BLUEPRINT.md` et `raster/AGENTS.md`.
+Canon : `RASTER_BLUEPRINT.md`, `raster/AGENTS.md` et `raster/HARNESS.md`.
 
 Orchestrator est un rôle de Run, jamais un `agent_type` de Task.
 

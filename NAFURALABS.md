@@ -3,7 +3,7 @@
 **Statut :** à remplir  
 **Raster :** [`RASTER_BLUEPRINT.md`](RASTER_BLUEPRINT.md)  
 **Ops :** [`OPS_BLUEPRINT.md`](OPS_BLUEPRINT.md)  
-**Archi :** [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md)
+**Pact** (coupe du code) : [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md)
 
 Agents : [`raster/AGENTS.md`](raster/AGENTS.md) · Ops K8s : [`nafura-platform/ops/AGENTS.md`](nafura-platform/ops/AGENTS.md)
 

@@ -2,6 +2,7 @@
 
 > Raster est le système autonome de travail du dépôt : projet · lot · sous-lot · task · Run · livraison.
 > Blueprint : [`RASTER_BLUEPRINT.md`](../RASTER_BLUEPRINT.md).
+> Harness Spec / Code / QA (session, statuts, boucle NOK) : [`HARNESS.md`](HARNESS.md).
 
 **Actors :** `me` | `agent`.
 **Priorité :** capture rapide, état mécanique fiable, autonomie bornée, rapport lisible.

@@ -6,9 +6,44 @@
 > Produit études (cycle poste / articles / ouvrages, chrome) : [`DECISIONS-PRODUIT.md`](DECISIONS-PRODUIT.md) — avant SPEC.
 > Produit chantier (arbre du chantier, planning, ressources) : [`DECISIONS-PRODUIT-CHANTIER.md`](DECISIONS-PRODUIT-CHANTIER.md) — avant SPEC.
 
-Gelé 14/08/2026.
+Gelé 14/08/2026. Coupe platform / app / lots Raster : gel 27/08/2026.
 
 **Web suit le backend.** `sources/web/app/<nom>` = `sources/backend/<nom>`. Pas de `modules/`, pas de `business-context/`. Pas de dossier web sans jar, pas de jar sans dossier web. `app/` backend = boot Spring seulement.
+
+## Coupe — Pact (platform, app, socle, BC)
+
+**Pact** décrit cette coupe. Raster organise le travail. Canon : [`ARCHI_BLUEPRINT.md`](../../ARCHI_BLUEPRINT.md).
+
+```text
+nafura-platform          ← projet platform (SDK, identité, docs, mail, infra partagée)
+        ↓ consommée
+sektor                   ← l’app
+        ├── socle        ← transverse de CETTE app (pas un BC métier)
+        ├── catalogue
+        ├── etudes
+        ├── chantiers
+        └── …            ← un dossier = un BC (même nom back et web)
+```
+
+- **Platform** n’est pas un dossier dans Sektor. Travail platform → `nafura-platform/raster-src/`.
+- **Socle** : capacités, politiques, chrome d’app. Pas d’objets métier (étude, chantier, article).
+- **BC** : livre sans un autre BC ; seule dépendance dure = socle. Parole à un pair = son `api` seulement.
+
+## Raster — un BC = un lot permanent
+
+Convention Sektor, pas une règle du moteur Raster.
+
+| Objet Pact | Objet Raster |
+|---|---|
+| BC d’app (`etudes`, `chantiers`, `catalogue`, …) | lot **permanent** `sektor/raster-src/lots/<bc>/` |
+| Vague / tranche livrable dans ce BC | sous-lot + `00-PLAN.md` |
+| Bug / dette du BC | task dans le sous-lot concerné (si le lot a des sous-lots : **pas** `lots/<bc>/tasks/`) |
+| Socle / chrome transversal | autre lot (`lookups`, …), pas un faux BC |
+| Platform | lots dans `nafura-platform/`, jamais un lot Sektor |
+
+Le dossier du lot BC reste. La ROADMAP ouvre ou referme le chapitre avec la borne. On ne recrée pas un lot à chaque cycle.
+
+Exceptions déjà dans l’arbre : `consultation` (objet Achats avec sa propre borne), `lookups` (geste chrome), `plier-archi` / `aligner-arbre` / `monter-angular-*` (arbre, pas métier).
 
 ## Arbre cible (identique)
 

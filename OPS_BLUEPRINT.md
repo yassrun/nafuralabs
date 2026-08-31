@@ -2,7 +2,7 @@
 
 **Statut :** figé (dossier · envs) · **reste à détailler**  
 **Ops** = comment on **fait tourner** un projet logiciel (deploy, env, secrets, runbooks).
-Raster : [`RASTER_BLUEPRINT.md`](RASTER_BLUEPRINT.md) · Archi : [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md).
+Raster : [`RASTER_BLUEPRINT.md`](RASTER_BLUEPRINT.md) · Pact : [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md).
 
 ---
 

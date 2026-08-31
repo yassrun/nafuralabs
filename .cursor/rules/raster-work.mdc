@@ -5,7 +5,9 @@ alwaysApply: true
 
 # Où écrire quoi
 
-Canon : `RASTER_BLUEPRINT.md`, `raster/AGENTS.md`, `OPS_BLUEPRINT.md` et `ARCHI_BLUEPRINT.md`.
+Canon : `RASTER_BLUEPRINT.md`, `raster/AGENTS.md`, `raster/HARNESS.md`, `OPS_BLUEPRINT.md` et `ARCHI_BLUEPRINT.md` (**Pact**).
+
+**Pact** = platform → app → socle + BC. Sektor : **un BC = un lot Raster permanent** (`sektor/raster-src/DECISIONS.md`). Platform ≠ lot Sektor. Socle / chrome transversal ≠ faux BC.
 
 | Élément | Chemin |
 |---|---|
@@ -18,6 +20,8 @@ Canon : `RASTER_BLUEPRINT.md`, `raster/AGENTS.md`, `OPS_BLUEPRINT.md` et `ARCHI_
 | Tasks | `<lot-ou-sous-lot>/tasks/{ID}-{slug}.md` |
 | Preuves e2e | `<projet>/e2e/` |
 | Code | `<projet>/sources/` |
+| Harness Spec/Code/QA | `raster/HARNESS.md` |
+| Décisions coupe Sektor | `sektor/raster-src/DECISIONS.md` |
 
 Lot et sous-lot sont des dossiers. Task est le seul ticket.
 Le CLI crée les Tasks et possède leur frontmatter.

@@ -5,9 +5,9 @@ Tu opères dans le monorepo **nafuralabs**. Les règles sont les **mêmes** que 
 ## Lire en premier (ordre)
 
 1. [`NAFURALABS.md`](NAFURALABS.md) — porte du workspace
-2. [`raster/AGENTS.md`](raster/AGENTS.md) — travail, Plan et Session
+2. [`raster/AGENTS.md`](raster/AGENTS.md) — travail, Plan et Session · harness : [`raster/HARNESS.md`](raster/HARNESS.md)
 3. [`nafura-platform/ops/AGENTS.md`](nafura-platform/ops/AGENTS.md) — Ops K8s
-4. [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md) — coupe du code (socle, BC, APIs)
+4. [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md) — **Pact** (platform → app → socle + BC)
 
 ## Rules Cursor (mêmes contraintes — à respecter aussi)
 
@@ -29,7 +29,8 @@ Ces fichiers sous `.cursor/rules/` sont `alwaysApply` pour Cursor ; **Claude doi
 | Tickets / bugs | `…/lots/…/tasks/{ID}-{slug}.md` · Raster possède le frontmatter et les statuts |
 | Métier | peer du produit (`sektor/`, …) — jamais dans `nafura-platform/` |
 | Code qui tourne | `<projet>/sources/` (`backend/` · `web/` · …) — [`NAFURALABS.md`](NAFURALABS.md) § Intérieur |
-| Coupe du code | [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md) |
+| Pact (coupe) | [`ARCHI_BLUEPRINT.md`](ARCHI_BLUEPRINT.md) |
+| Décisions Sektor (BC = lot) | [`sektor/raster-src/DECISIONS.md`](sektor/raster-src/DECISIONS.md) |
 | Template PLAN | `raster/templates/00-PLAN.md` |
 
 ## Interdits rapides

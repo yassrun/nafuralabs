@@ -4,6 +4,7 @@
 Il fonctionne seul pour tout type de projet.
 
 Canon opérationnel : [`raster/AGENTS.md`](raster/AGENTS.md).
+Harness (enchaînement agents, QA NOK) : [`raster/HARNESS.md`](raster/HARNESS.md).
 
 ---
 
@@ -71,6 +72,8 @@ Un lot qui contient déjà des sous-lots ne reçoit plus de tasks directes.
 Un sous-lot vide n’existe pas : sa création et celle de sa première task sont atomiques via le CLI.
 
 > Un sous-lot est la plus petite tranche livrable qui mérite son propre plan.
+
+Une app métier peut coller **lot permanent = BC** (chapitre stable). Ce n’est pas une règle Raster : c’est Pact + une décision du projet. Sektor : [`sektor/raster-src/DECISIONS.md`](sektor/raster-src/DECISIONS.md). Platform et socle ne sont pas des BC métier ; leur travail n’entre pas dans un lot BC par défaut.
 
 ---
 

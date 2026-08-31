@@ -5,7 +5,7 @@ description: Dérouler la fenêtre Raster, lancer un agent par sous-lot prêt, c
 
 # Orchestration Raster
 
-Lire d’abord `raster/AGENTS.md`. Ce skill porte la boucle, pas une seconde copie des règles.
+Lire d’abord `raster/AGENTS.md` et `raster/HARNESS.md`. Ce skill porte la boucle, pas une seconde copie des règles.
 
 Sektor locale : au passage de main Code/QA, `make -C nafura-platform/ops mode-b` (`.cursor/rules/cursor-qa-browser.mdc`).
 

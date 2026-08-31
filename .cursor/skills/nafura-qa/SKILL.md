@@ -5,6 +5,8 @@ description: Runs the expected proofs for Raster Tasks in review, records an ind
 
 # Agent QA Raster
 
+Canon : `RASTER_BLUEPRINT.md`, `raster/AGENTS.md` et `raster/HARNESS.md` (boucle NOK).
+Mode UI : `.cursor/rules/cursor-qa-browser.mdc`.
 Canon : `RASTER_BLUEPRINT.md` et `raster/AGENTS.md`.
 
 Preset Sektor (UI/API locale) : `.cursor/rules/cursor-qa-browser.mdc`.

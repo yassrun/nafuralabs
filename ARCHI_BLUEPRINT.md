@@ -1,13 +1,28 @@
-# Blueprint — Archi
+# Blueprint — Pact
 
-**Statut :** figé (2026-08-14)  
-**Archi** = comment on **coupe le code** d’une app (packages, dépendances, APIs).
-Archi décrit la forme du code et les frontières publiées.
+**Statut :** figé (2026-08-14) · nom **Pact** gelé 27/08/2026  
+**Pact** = le framework de coupe : platform → app → socle + BC (packages, dépendances, APIs, frontières publiées).
+Fichier : `ARCHI_BLUEPRINT.md` (ancien titre « Archi »).
 Ops : [`OPS_BLUEPRINT.md`](OPS_BLUEPRINT.md). Raster : [`RASTER_BLUEPRINT.md`](RASTER_BLUEPRINT.md).
 
 Pas dans un `00-PLAN.md`. Les décisions durables de découpage vivent dans `DECISIONS.md` du projet.
 
 ---
+
+## Deux projets, une app
+
+```text
+nafura-platform          ← platform (SDK + BCs partagés : identité, docs, mail, …)
+        ↓ consommée
+<app>                    ← ex. sektor
+        ├── socle        ← transverse de cette app
+        ├── BC1
+        ├── BC2
+        └── …
+```
+
+Platform n’est pas un dossier dans l’app. Socle n’est pas un BC métier.
+Raster Sektor : un BC d’app = un lot permanent — [`sektor/raster-src/DECISIONS.md`](sektor/raster-src/DECISIONS.md).
 
 ## Topologie d’une app
 

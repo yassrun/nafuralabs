@@ -5,7 +5,7 @@ description: Plans a Raster sub-lot, writes 00-PLAN and UX wireframes, creates T
 
 # Agent Spec Raster
 
-Canon : `RASTER_BLUEPRINT.md` et `raster/AGENTS.md`.
+Canon : `RASTER_BLUEPRINT.md`, `raster/AGENTS.md` et `raster/HARNESS.md` (`spec.md` BC puis plan du sous-lot).
 
 Preuves Sektor : preset Mode B (`.cursor/rules/cursor-qa-browser.mdc`) — one-shot `make -C nafura-platform/ops mode-b`.
 Si la preuve discrimine un rôle, nommer l’alias (`magasinier`, `dg`, …). Le graphe métier se fabrique dans la preuve.

@@ -5,7 +5,7 @@ description: Implements Raster feature, bug and tech Tasks in one sub-lot worktr
 
 # Agent Code Raster
 
-Canon : `RASTER_BLUEPRINT.md` et `raster/AGENTS.md`.
+Canon : `RASTER_BLUEPRINT.md`, `raster/AGENTS.md` et `raster/HARNESS.md` (retour QA → `doing`).
 
 UI/API Sektor locale : `.cursor/rules/cursor-qa-browser.mdc`.
 One-shot : `make -C nafura-platform/ops mode-b` (stop : `mode-b-stop`).
