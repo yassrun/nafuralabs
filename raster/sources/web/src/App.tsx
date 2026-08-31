@@ -13,6 +13,7 @@ import {
 type Group = { key: string; project: string; lot: string; souslot: string; tasks: Task[] };
 
 const NAV: Array<{ id: ViewId; label: string; icon: string }> = [
+  { id: "captures", label: "Captures", icon: "▣" },
   { id: "session", label: "Session", icon: "⌁" },
   { id: "plan", label: "Plan", icon: "◇" },
   { id: "sublot", label: "Sous-lots", icon: "▱" },
@@ -37,6 +38,7 @@ export default function App() {
   const [project, setProject] = useState("");
   const [selectedKey, setSelectedKey] = useState("");
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [captureFilter, setCaptureFilter] = useState<string>("all");
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -74,6 +76,18 @@ export default function App() {
 
   const groups = useMemo(() => groupTasks(tasks), [tasks]);
   const projectGroups = useMemo(() => groups.filter((group) => group.project === project), [groups, project]);
+  const captureEntries = useMemo(
+    () =>
+      inboxLines.map((line) => ({
+        line: line.trim(),
+        project: resolveCaptureProject(line, project || projects[0] || "global", projects),
+      })),
+    [inboxLines, project, projects]
+  );
+  const visibleCaptureEntries = useMemo(
+    () => (captureFilter === "all" ? captureEntries : captureEntries.filter((entry) => entry.project === captureFilter)),
+    [captureEntries, captureFilter]
+  );
   const readyByKey = useMemo(() => new Map(ready.map((row) => [row.key, row])), [ready]);
   const projectWindow = windows.find((row) => row.project === project);
   const authorizedKeys = useMemo(
@@ -88,6 +102,12 @@ export default function App() {
   useEffect(() => {
     if (selectedGroup && selectedGroup.key !== selectedKey) setSelectedKey(selectedGroup.key);
   }, [selectedGroup, selectedKey]);
+
+  useEffect(() => {
+    if (captureFilter !== "all" && !projects.includes(captureFilter)) {
+      setCaptureFilter("all");
+    }
+  }, [captureFilter, projects]);
 
   const mutate = async (action: () => Promise<unknown>) => {
     setBusy(true); setError("");
@@ -117,7 +137,15 @@ export default function App() {
     <div className="rf-shell">
       <aside className="rf-sidebar">
         <nav className="rf-nav" aria-label="Navigation Raster">{NAV.map((item) => {
-          const count = item.id === "session" ? sessionGroups.length : item.id === "sublot" ? projectGroups.length : item.id === "deliveries" ? reports.length : 0;
+          const count = item.id === "session"
+            ? sessionGroups.length
+            : item.id === "sublot"
+              ? projectGroups.length
+              : item.id === "captures"
+                ? captureEntries.length
+                : item.id === "deliveries"
+                  ? reports.length
+                  : 0;
           return <button key={item.id} aria-selected={view === item.id} onClick={() => setView(item.id)}><span className="rf-nav-icon">{item.icon}</span><span>{item.label}</span>{count ? <span className="rf-nav-count">{count}</span> : null}</button>;
         })}</nav>
         <p className="rf-sidebar-label">Projets actifs</p>
@@ -129,6 +157,7 @@ export default function App() {
         {view === "session" ? <SessionView groups={sessionGroups} selected={selectedGroup} running={running} decisions={decisions} spawnPret={spawnPret} busy={busy} onSelect={setSelectedKey} onOpenPlan={() => setView("plan")} onApprove={(id) => void mutate(() => api.approve(id))} onRun={(group) => void mutate(() => api.run(group.project, group.lot, group.souslot))} /> : null}
         {view === "plan" ? <PlanView project={project} windowData={projectWindow} groups={projectGroups} onOpen={(key) => { setSelectedKey(key); setView("sublot"); }} /> : null}
         {view === "sublot" ? <SubLotView groups={projectGroups} selected={selectedGroup} readyByKey={readyByKey} running={running} busy={busy} spawnPret={spawnPret} onSelect={setSelectedKey} onApprove={(id) => void mutate(() => api.approve(id))} onRun={(group) => void mutate(() => api.run(group.project, group.lot, group.souslot))} /> : null}
+        {view === "captures" ? <CaptureView entries={visibleCaptureEntries} projects={projects} filter={captureFilter} onFilter={setCaptureFilter} /> : null}
         {view === "deliveries" ? <DeliveriesView tasks={reports} recent={recent} /> : null}
       </main>
     </div>
@@ -157,6 +186,11 @@ function SubLotView({ groups, selected, readyByKey, running, busy, spawnPret, on
   if (!selected) return <><PageHead kicker="Sous-lot" title="Aucun travail actif" subtitle="Ce projet ne contient aucune Task active." /><Empty text="Les livraisons closes vivent dans Git." /></>;
   const readiness = readyByKey.get(selected.key); const isRunning = running.some((run) => run.project === selected.project && run.lot === selected.lot);
   return <><PageHead kicker={`${selected.lot} / sous-lot`} title={humanize(selected.souslot || selected.lot)} subtitle="Une tranche livrable, un plan, plusieurs compétences exécutantes."><GroupPicker groups={groups} selected={selected} onSelect={onSelect} /></PageHead><div className="rf-sub-grid"><aside className="rf-plan-card"><h3>Intention du plan</h3><p>{selected.tasks[0]?.title || "Plan du sous-lot"}</p><dl><div><dt>Orchestrator</dt><dd>{isRunning ? "Run active" : "Disponible"}</dd></div><div><dt>Readiness</dt><dd className={readiness?.lancable ? "good" : "warn"}>{readiness?.lancable ? "Prêt" : readiness?.raisons[0] || "Clos"}</dd></div><div><dt>Dépend de</dt><dd>{[...new Set(selected.tasks.flatMap((task) => task.blocked_by))].length || "aucun"}</dd></div><div><dt>Gate</dt><dd>{selected.tasks.some((task) => task.gate === "me") ? "me" : "aucune"}</dd></div></dl><button className="rf-primary wide" disabled={busy || !readiness?.lancable || isRunning} onClick={() => spawnPret ? onRun(selected) : void copyCursorBrief(selected)}>{isRunning ? "● Run active" : spawnPret ? "▶ Lancer le sous-lot" : "Copier le brief Cursor"}</button></aside><section className="rf-task-list"><header><strong>Tasks du plan</strong><span>{selected.tasks.length}</span></header>{selected.tasks.map((task, index) => <article key={task.id}><span className="rf-step">{index + 1}</span><code>{task.id}</code><div><strong>{task.title}</strong><small>{STATUS_LABEL[task.status] || task.status}{task.blocked_by.length ? ` · après ${task.blocked_by.join(", ")}` : ""}</small></div><span className={`rf-agent rf-${taskAgentType(task)}`}>{agentName(task)}</span>{task.status === "done-agent" && task.gate === "me" ? <button className="rf-approve" disabled={busy} onClick={() => onApprove(task.id)}>Approuver</button> : null}</article>)}</section></div></>;
+}
+
+function CaptureView({ entries, projects, filter, onFilter }: { entries: Array<{ project: string; line: string }>; projects: string[]; filter: string; onFilter: (value: string) => void }) {
+  const chips = ["all", ...projects];
+  return <><PageHead kicker="Inbox" title="Captures" subtitle="Demande, idée, blocage ou tâche à réinjecter dans le bon projet." /><div className="rf-capture-panel"><div className="rf-capture-toolbar"><label>Projet</label><div className="rf-chip-group">{chips.map((project) => <button key={project} className={filter === project ? "rf-chip rf-chip-active" : "rf-chip"} onClick={() => onFilter(project)}>{project === "all" ? "All" : project}</button>)}</div></div>{entries.length ? <div className="rf-capture-list">{entries.map((entry, index) => <article key={`${entry.project}-${index}`}><span className="rf-capture-tag">{entry.project}</span><p>{entry.line}</p></article>)}</div> : <Empty text="Aucune capture pour ce filtre." />}</div></>;
 }
 
 function DeliveriesView({ tasks, recent }: { tasks: Task[]; recent: Lance[] }) {
@@ -189,4 +223,12 @@ export function projetPorteur(projects: string[], tasks: Task[]): string {
     (a, b) => (counts.get(b) || 0) - (counts.get(a) || 0)
   )[0] || "";
 }
+
+function resolveCaptureProject(line: string, fallback: string, projects: string[]) {
+  const tags = [...line.matchAll(/(?:^|\s)@([a-zA-Z0-9_-]+)/g)].map((match) => match[1].toLowerCase());
+  const match = tags.find((tag) => projects.some((project) => project.toLowerCase() === tag));
+  if (match) return projects.find((project) => project.toLowerCase() === match) || match;
+  return fallback || "global";
+}
+
 function groupTasks(tasks: Task[]): Group[] { const map = new Map<string, Group>(); for (const task of tasks) { const key = `${task.project}//${task.lot}//${task.souslot}`; if (!map.has(key)) map.set(key, { key, project: task.project, lot: task.lot, souslot: task.souslot, tasks: [] }); map.get(key)!.tasks.push(task); } for (const group of map.values()) group.tasks.sort((a, b) => Number(a.id.split("-").pop()) - Number(b.id.split("-").pop())); return [...map.values()].sort((a, b) => a.key.localeCompare(b.key)); }

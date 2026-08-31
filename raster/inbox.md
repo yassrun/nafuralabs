@@ -1,50 +1,6 @@
 # INBOX
 
-<!-- Capture globale Raster — task draft : une ligne = description, @tag optionnel, pas d'ID. -->
-sektor picker-article : sorties / pertes / inventaire / inventory-tx-panel / etat-stock encore `loadArticles` dump GET /items — hors SEKTOR-261 (réception/retour/transfert + lookups CRUD) @sektor
-sektor chantiers vague 2 : couper planning-activites / capacite-et-engagement / baseline-et-os / pointage-impute / matiere-et-magasin depuis DECISIONS-PRODUIT-CHANTIER (gels planning) — amorçage SEKTOR-175 @sektor
-sektor chantiers vague 2 : mode humain — contrats écrits par toi (gels déjà figés) ; 1 agent exec/code par sous-lot ; pas de spec agent ; QA seulement si argent (pas sur planning/Gantt) @sektor
-sektor picker-article : import BL réception résolvait les lignes via dump `articlesAll` (GET /items size 500) — dump retiré pour AC-10 ; matching code à rebrancher sur `/items/search` @sektor
-sektor e2e completer-parcours / parcours-qa : specs attendent encore `app-consultation-etude-panel` (retiré SEKTOR-136). Preuve 136 = `verify-consultation-achat-136.mjs`. @sektor
-sektor e2e parcours-qa-*.spec.ts : `npx playwright test` crash « Requiring @playwright/test second time » (chemins C:/ vs c:/). Preuves 115/119–123 = Mode B 20/08. Specs non réécrits. @sektor
-sektor e2e SEKTOR-137 : spec Playwright optionnelle (même crash C:/ vs c:/). Preuve = `node sektor/e2e/scripts/verify-consultation-achat-137.mjs`. SEKTOR-110 e2e compte encore `consultations_etudes` — gate 137 ne les voit plus. @sektor
-sektor e2e SEKTOR-137 / agrégat 249 : POST /consultations-achat/{id}/devis sans destinataireId → 4xx après SEKTOR-281. Étendre le graphe (destinataire + contact) dans SEKTOR-282. @sektor
-sektor e2e SEKTOR-136 : chrome overlay assert encore le formulaire select+cases+deux CTA (cassé par SEKTOR-139). Preuve overlay = `node sektor/e2e/scripts/verify-consultation-achat-139.mjs`. Spec Playwright 139 non écrite (C:/ vs c:/). @sektor
-sektor : portail invité chrome-less (lien email+token, vue client + dépôt devis fournisseur) — vérifier puis rattacher au lot concerné @sektor
-document-extraction : colonnes JPA `extracted_record.workflow_status` / `doc_type_definition.builder_state` encore en base alors que compose/décider ne sont plus exposés — drop lab à trancher @platform
-document-extraction : libellés i18n validate/workflow encore présents alors que l'action décider n'est plus exposée @platform
-impression CH-03 : canvas « Proposer » (IA) — aucune capacité conversation/IA consommable ici ; livré le fallback manuel (textarea). Brancher Proposer quand le BC conversation sera consommable. @platform
-sektor études Extraire : match **incertain** (2+ identités) — faire trancher l’humain, ou meilleur score IA ? ouvert DECISIONS-PRODUIT ; SEKTOR-107 ne doit pas inventer @sektor
-sektor études Extraire : tiny spec couleur en **note d’emploi** dès v1, ou seulement le lien identité ? ouvert DECISIONS-PRODUIT @sektor
-sektor études Extraire : L9 `createAllege` / `contribuer` encore hors Extraire (SEKTOR-108 non touché) @sektor
-sektor e2e Extraire : `npx playwright test` depuis `sektor/sources/web` ne résout pas `@playwright/test` pour les specs sous `sektor/e2e/` (CJS require hors package). Preuve 118 lancée via `node sektor/e2e/scripts/verify-extraire-rattachement-118.mjs`. @sektor
-sektor : console `/catalogue` G2 hors chrome tenant — **hors menu** 20/08 ; Extraire publie l’identité sans ouvrir la console — SEKTOR-108 @sektor
-sektor chrome : sidebar regroupée par BC (cycle Études→…→HSE, Catalogue = articles+stock+ouvrages+matériel, Ventes sorti de Marchés) — livré 20/08, routes inchangées ; gelé raster-src/DECISIONS.md @sektor
-sektor études : `:sektor:etudes:test` 21 échecs Mockito/gates/capitalisation (hors blast mètres SEKTOR-111) @sektor
-sektor études : Liquibase v1.0 crée encore `metrees` puis 023 drop — nettoyage changelog lab à trancher @sektor
-sektor études : clés i18n `etudesDpu.generateDpgf` / `createDevis` orphelines (SEKTOR-111) @sektor
-commentaire : CommentServiceImplTest utilise entityType dpgf_noeud (mot produit) — hors scan main de la baseline INIT @platform
-commentaire : erreurs exposées = message / statut HTTP, pas de code — POL-ERREUR-CODE @platform
-approbation : `getEntityTypes` fuit un catalogue produit (Invoice, Quote, Receipt, Order, PurchaseOrder, Contract, Document) — POL-PAS-METIER-PRODUIT @platform
-approbation : refus — commentaire obligatoire au front (`rejectCommentRequired` défaut true), optionnel au back (null accepté) @platform
-approbation : `timeoutHours` / escalation stockés sur la chaîne, jamais joués par WorkflowEngine @platform
-approbation : exceptions métier (CrudNotFound, IllegalArgument, IllegalState) = message seule, pas de code — POL-ERREUR-CODE @platform
-conversation : erreurs exposées = HTTP + texte, pas de code — POL-ERREUR-CODE @platform
-conversation : statuts ARCHIVED/CLOSED dans l'enum, aucune transition exposée @platform
-conversation : actions d'une session nouvelle non listées via l'API agent (baseline sans tour, R-3) @platform
-identite : erreurs invite / retrait / jeton = message (IllegalArgumentException ; parfois INVALID_OR_EXPIRED_INVITATION) — pas un code métier — POL-ERREUR-CODE @platform
-identite : relancer l'invitation échoue si le courrier n'est pas parti alors que l'invite initiale crée quand même l'appartenance invitée @platform
-raster app : après CH-04, `setSprint` n'existe plus dans write.mjs — raster-api.ts / api.ts / e2e socle api-delegue importent encore commit-sprint → CH-03 RAS-105/106
-CADRE Raster : owns encore « vues dérivées INDEX, BACKLOG, SPRINT » et vocabulaire Sprint / unité sprintable — EVOL CADRE après clôture CH-03 chrome, pas un gate de ce sous-lot @raster
-sektor e2e dpgf-noeuds-libelle-utf8.spec.ts : TDZ `const chargeEtudeUserId = await chargeEtudeUserId(...)` — crash avant le POST ; preuve 126 = curl Mode B + MockMvc, spec non réécrit @sektor
-sektor : HttpMessageNotReadableException (JSON illisible) → 500 INTERNAL_ERROR via GlobalExceptionHandler, pas 400 ; filtre UTF-8 SEKTOR-116 borné à /api/v1/etudes/dpgf* @sektor
-sektor études : `etudes/build.gradle` garde `implementation project(':sektor:marches')` alors que plus une classe `ma.nafura.marches` n'est importée depuis AC-10 (sortie du ContratMarche) — dépendance à retirer, non vérifiable ici (Gradle HS) @sektor
-sektor chantiers : la situation de travaux se calcule sur les **lots** seuls (`quantite × prixUnitaireHt`), jamais sur les postes — un poste vendu sous un lot d'accueil interne (AC-12) n'est donc pas facturable en l'état @sektor
-sektor chantiers : `AttachementLigne.posteCode` chaîne libre — **résolu par SEKTOR-153** (24/08) : `AttachementLigne` porte désormais `noeudId`, filtré aux `VENDU` (AC-13 du contrat avancement-et-attachement). @sektor
-sektor chantiers : un **SOUS_LOT** du devis dont le parent n'est pas identifiable est remonté à la racine **en silence** par `ChainageAvalAdapter` (le `if (hasText(parentCode) && lotIdByCode.containsKey(...))` retombe sans parent). `placerPostesOrphelins` ne regarde que les `ARTICLE` : AC-12 amendé ne nomme que les **postes**, donc l'AC n'est pas faux — c'est le contrat qui ne couvre pas ce cas. Hiérarchie changée sans que personne ne le voie. @sektor
-sektor études : le DPGF **refuse** un `ARTICLE` sans parent (`DpgfService.validateTypeParent`, « ARTICLE nodes require a SOUS_LOT parent ») mais **accepte** un `ARTICLE` sous un `ARTICLE`. C'est la seule porte d'API par laquelle l'étude piège d'AC-12 se fabrique — les e2e SEKTOR-150 passent par là. Si la validation se resserre un jour, ces scénarios n'auront plus de jeu de données. @sektor
-sektor e2e : la ligne « `npx playwright test` ne résout pas `@playwright/test` pour les specs sous `sektor/e2e/` » est **périmée** — `npx playwright test --list chantiers-arbre-et-conversion` depuis `sektor/sources/web` découvre les 11 tests sans broncher (24/08). @sektor
-sektor chantiers : `SignaturePublicController` (`/api/v1/sign/{token}`) n'a **aucune page front qui le consomme** — ni avant ni après SEKTOR-174 (jeton durci). Il n'existe nulle part dans le repo d'écran où le MOE dessine et dépose sa signature. AC-15/AC-19 du contrat avancement-et-attachement sont vérifiables en API/unitaire, pas de bout en bout au navigateur. @sektor
-sektor chantiers : le référentiel `ZoneChantier` (AC-14, avancement-et-attachement) n'a que son CRUD API (`/api/v1/chantiers/{id}/zones`) — aucun écran pour créer/organiser les zones (bâtiment › niveau › zone). La page d'attachement ne fait que lire la liste dans un `<select>`. @sektor
-sektor planning-activites : rejouer `node sektor/e2e/scripts/verify-planning-activites-20260825.mjs` + smoke UI `/chantiers/planning` après boot lab (8082/4200 down le 25/08 à la livraison SEKTOR-176/177/178) @sektor
-sektor planning-activites : e2e scénario 8 `node sektor/e2e/scripts/verify-planning-chantier-planifie-20260825.mjs` prêt — 8082 et 4200 down le 25/08 à la livraison SEKTOR-179/180, pas de vert inventé. Rejouer après boot lab (+ Playwright si `start:erp:cursor`). @sektor
+<!-- Capture globale Raster — une ligne, @tag optionnel, pas d'ID. -->
+<!-- Promote → <projet>/raster-src/lots/<lot>/<sous-lot?>/tasks/ -->
+
+- some test of capture

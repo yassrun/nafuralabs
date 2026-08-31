@@ -52,6 +52,7 @@ export type ViewId =
   | "session"
   | "plan"
   | "sublot"
+  | "captures"
   | "deliveries";
 
 export type WindowLot = {
