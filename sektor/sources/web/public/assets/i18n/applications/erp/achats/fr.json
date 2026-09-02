@@ -685,15 +685,20 @@
           "lien": "Lien"
         },
         "filters": {
+          "statut": "Statut",
+          "fournisseur": "Fournisseur",
+          "article": "Article",
+          "articlePlaceholder": "Choisir un article…",
           "lien": "Lien étude",
           "lienAll": "Toutes",
           "lienHors": "Hors étude",
           "lienLiee": "Liée"
         },
+        "cta": "Nouvelle consultation",
         "emptyState": {
           "title": "Aucune consultation",
           "message": "Créer hors étude — le lien dossier reste vide. Overlay étude peut rattacher plus tard.",
-          "actionLabel": "+ Consultation"
+          "actionLabel": "Nouvelle consultation"
         }
       },
       "form": {

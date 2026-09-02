@@ -115,6 +115,32 @@ class ConsultationAchatServiceTest {
     }
 
     @Test
+    void listFiltreFournisseurEtArticle() {
+        ConsultationAchat withDest = consultationPrep();
+        ConsultationAchat other = ConsultationAchat.builder()
+                .id(UUID.fromString("44444444-4444-4444-4444-444444444444"))
+                .tenantId(TENANT)
+                .numero("CS-2026-0002")
+                .statut(ConsultationAchat.STATUT_PREPARATION)
+                .clesStables(new java.util.LinkedHashSet<>(List.of("peinture")))
+                .build();
+        when(repository.findByTenantIdOrderByCreatedAtDesc(TENANT)).thenReturn(List.of(withDest, other));
+        when(destinataireRepository.findByConsultationIdInOrderByCreatedAtAsc(any()))
+                .thenReturn(List.of(destRow(DEST_A, FOURNISSEUR, CONTACT_A)));
+        when(envoiRepository.findByConsultationIdInOrderBySentAtAsc(any())).thenReturn(List.of());
+        when(partnerRepository.findByIdAndTenantId(FOURNISSEUR, TENANT))
+                .thenReturn(Optional.of(Partner.builder().id(FOURNISSEUR).raisonSociale("Lafarge").build()));
+        when(contactRepository.findByIdAndTenantId(CONTACT_A, TENANT))
+                .thenReturn(Optional.of(contact(CONTACT_A, FOURNISSEUR, "A", "a@lafarge.example")));
+
+        List<ConsultationAchatDto> byFrn = service.list("all", null, FOURNISSEUR, null, null);
+        assertThat(byFrn).extracting(ConsultationAchatDto::getNumero).containsExactly("CS-2026-0001");
+
+        List<ConsultationAchatDto> byPanier = service.list("all", null, null, null, "peinture");
+        assertThat(byPanier).extracting(ConsultationAchatDto::getNumero).containsExactly("CS-2026-0002");
+    }
+
+    @Test
     void createSansFournisseur_panierSeulement() {
         stubCreateSave();
         when(destinataireRepository.findByConsultationIdOrderByCreatedAtAsc(any())).thenReturn(List.of());

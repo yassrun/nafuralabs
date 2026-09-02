@@ -1,15 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 
-import {
-  ButtonComponent,
-  LOOKUP_SEARCHERS,
-  NfSelectComponent,
-  ToastService,
-  type LookupSearchFn,
-} from '@platform/lib/anatomy';
+import { ButtonComponent, ToastService } from '@platform/lib/anatomy';
 import { AuthFacade } from '@platform/core/security/services/auth.facade';
 import {
   ConsultationAchatApiService,
@@ -29,7 +22,7 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
   selector: 'app-consultation-decompo-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, MatDialogModule, ButtonComponent, NfSelectComponent],
+  imports: [MatDialogModule, ButtonComponent],
   template: `
     <div class="cs-overlay" data-cs-overlay role="dialog" aria-labelledby="cs-overlay-title">
       <header>
@@ -69,12 +62,14 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
                   >
                     <span class="cs-liee-main">
                       <strong>{{ row.numero }}</strong>
-                      <span>{{ row.fournisseurNom }}</span>
+                      <span>{{ destinatairesLabel(row) }}</span>
                     </span>
                     <span class="cs-liee-meta">
                       <span class="cs-statut" [attr.data-cs-statut]="row.statut">{{
                         statutLabel(row)
                       }}</span>
+                      {{ avancementLabel(row) }}
+                      ·
                       {{ row.clesStables.length }}
                       article{{ row.clesStables.length > 1 ? 's' : '' }}
                       @if (articleCle()) {
@@ -111,12 +106,9 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
         <div data-cs-pane="detail" class="cs-pane">
           <p class="cs-hint">
             <span class="cs-statut" [attr.data-cs-statut]="sel.statut">{{ statutLabel(sel) }}</span>
+            · {{ destinatairesLabel(sel) }}
+            · {{ avancementLabel(sel) }}
             · liée à cette étude.
-            @if (sel.devisRecus) {
-              Devis : {{ sel.devisRecus }}.
-            } @else {
-              Devis : 0.
-            }
           </p>
           <h3>Articles du panier</h3>
           <ul class="cs-panier" data-cs-panier>
@@ -143,18 +135,8 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
         <div data-cs-pane="creer" class="cs-pane">
           <p class="cs-hint">
             Article de départ : {{ articleLibelle() }} — déjà posé, pas tout l’arbre à cocher.
+            Les destinataires se saisissent ensuite sur la fiche Achats.
           </p>
-          <nf-select
-            label="Fournisseur"
-            lookupKey="fournisseurs"
-            placeholder="Taper ≥ 2 car. — recherche serveur…"
-            [lookupSearch]="searchFournisseurs"
-            [ngModel]="fournisseurId()"
-            (ngModelChange)="fournisseurId.set($event)"
-            name="fournisseurId"
-            [required]="true"
-            data-testid="consultation-decompo-fournisseur"
-          />
         </div>
       }
 
@@ -180,7 +162,12 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
           </nf-button>
         }
         @if (pane() === 'creer') {
-          <nf-button variant="primary" [disabled]="saving() || !articleCle()" (clicked)="creerConsultation()">
+          <nf-button
+            variant="primary"
+            data-testid="consultation-decompo-creer"
+            [disabled]="saving() || !articleCle()"
+            (clicked)="creerConsultation()"
+          >
             Créer et y mettre {{ articleLibelle() }}
           </nf-button>
           <nf-button variant="secondary" [disabled]="saving()" (clicked)="retourListe()">
@@ -347,15 +334,10 @@ export class ConsultationDecompoDialogComponent {
   private readonly api = inject(ConsultationAchatApiService);
   private readonly toast = inject(ToastService);
   private readonly auth = inject(AuthFacade);
-  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
-
-  readonly searchFournisseurs: LookupSearchFn = (q) =>
-    this.lookupSearchers?.['fournisseurs']?.(q) ?? Promise.resolve([]);
 
   readonly pane = signal<OverlayPane>('liste');
   readonly liees = signal<ConsultationAchat[]>([]);
   readonly selected = signal<ConsultationAchat | null>(null);
-  readonly fournisseurId = signal('');
   readonly chargement = signal(true);
   readonly saving = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
@@ -374,7 +356,7 @@ export class ConsultationDecompoDialogComponent {
   readonly titre = computed(() => {
     if (this.pane() === 'detail' && this.selected()) {
       const s = this.selected()!;
-      return `${s.numero} — ${s.fournisseurNom}`;
+      return `${s.numero} — ${this.destinatairesLabel(s)}`;
     }
     if (this.pane() === 'creer') return 'Nouvelle consultation';
     return 'Consultations de cette étude';
@@ -394,13 +376,38 @@ export class ConsultationDecompoDialogComponent {
     return (row.clesStables ?? []).includes(cle);
   }
 
+  destinatairesLabel(row: ConsultationAchat): string {
+    const names = (row.destinataires ?? [])
+      .map((d) => (d.fournisseurNom || '').trim())
+      .filter(Boolean);
+    if (names.length) {
+      return `${names.join(', ')} (${names.length})`;
+    }
+    return (row.fournisseurNom || '').trim() || 'Aucun destinataire';
+  }
+
+  avancementLabel(row: ConsultationAchat): string {
+    const n = (row.destinataires ?? []).length;
+    const k = row.devisRecus ?? 0;
+    return `${k}/${n} devis`;
+  }
+
   statutLabel(row: ConsultationAchat): string {
     const code = (row.statut ?? '').toUpperCase();
-    const n = row.devisRecus ?? 0;
-    if (code === 'DEVIS_RECU' || n > 0) {
-      return n > 1 ? `${n} devis reçus` : 'Devis reçu';
+    switch (code) {
+      case 'COMPLETE':
+        return 'Complète';
+      case 'PARTIELLE':
+        return 'Partielle';
+      case 'OUVERTE':
+        return 'En attente de réponses';
+      case 'PREPARATION':
+        return 'Préparation';
+      case 'DEVIS_RECU':
+        return (row.devisRecus ?? 0) > 1 ? `${row.devisRecus} devis reçus` : 'Devis reçu';
+      default:
+        return code || 'Préparation';
     }
-    return 'Demande';
   }
 
   ouvrirFiche(row: ConsultationAchat, event?: Event): void {
@@ -429,7 +436,6 @@ export class ConsultationDecompoDialogComponent {
   ouvrirCreer(): void {
     if (!this.articleCle()) return;
     this.erreur.set(undefined);
-    this.fournisseurId.set('');
     this.pane.set('creer');
   }
 
@@ -457,12 +463,7 @@ export class ConsultationDecompoDialogComponent {
   }
 
   async creerConsultation(): Promise<void> {
-    const fournisseurId = this.fournisseurId().trim();
     const cle = this.articleCle();
-    if (!fournisseurId) {
-      this.erreur.set('Choisir un fournisseur (fiche Achats).');
-      return;
-    }
     if (!cle) {
       this.erreur.set('Ouvrir depuis un article / composant pour créer.');
       return;
@@ -471,7 +472,6 @@ export class ConsultationDecompoDialogComponent {
     this.erreur.set(undefined);
     try {
       const created = await this.api.create({
-        fournisseurId,
         clesStables: [cle],
         dossierEtudeId: this.data.dossierId,
       });

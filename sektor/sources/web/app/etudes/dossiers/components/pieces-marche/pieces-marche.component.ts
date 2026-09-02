@@ -49,7 +49,7 @@ export function slotMatchesMode(type: string | undefined, mode: PiecesMarcheMode
 }
 
 /**
- * Étape 1 — CPS optionnel (préremplit le cadrage).
+ * Étape 1 — CPS optionnel (propositions d’identité dans le panneau cadrage).
  * Étape 2 — dépôt BDP + construction de l'arbre.
  * Étape 4 — pièces de destination (caution, plans…) détectées par le CPS.
  */
@@ -189,7 +189,7 @@ export class PiecesMarcheComponent {
       case 'destination':
         return 'Documents détectés dans le CPS (règlement, plans, caution…). À joindre ici, y compris après soumission, avant la validation N+1.';
       default:
-        return 'Optionnel — préremplit le cadrage. Remplaçable tant que le dossier est en brouillon.';
+        return 'Optionnel — propose les champs du cadrage à revoir. Remplaçable tant que le dossier est en brouillon.';
     }
   });
 
@@ -457,11 +457,12 @@ export class PiecesMarcheComponent {
           slotMatchesMode(p.type, 'destination'),
         );
         if (!hasMeta && dest.length === 0) continue;
-        await this.api.appliquerPropositionMarche(this.dossierId(), {
-          metadonnees: hasMeta ? meta : undefined,
-          piecesAttendues: dest.length ? dest : undefined,
-        });
-        this.slotsAttendus.set(await this.api.listerPiecesAttendues(this.dossierId()));
+        if (dest.length) {
+          await this.api.appliquerPropositionMarche(this.dossierId(), {
+            piecesAttendues: dest,
+          });
+          this.slotsAttendus.set(await this.api.listerPiecesAttendues(this.dossierId()));
+        }
         this.change.emit();
         return;
       } catch {

@@ -678,15 +678,20 @@
           "lien": "الربط"
         },
         "filters": {
+          "statut": "الحالة",
+          "fournisseur": "المورد",
+          "article": "المادة",
+          "articlePlaceholder": "اختيار مادة…",
           "lien": "ربط الدراسة",
           "lienAll": "الكل",
           "lienHors": "خارج الدراسة",
           "lienLiee": "مرتبطة"
         },
+        "cta": "استشارة جديدة",
         "emptyState": {
           "title": "لا توجد استشارات",
           "message": "أنشئ خارج الدراسة — يبقى ربط المجلد فارغًا. يمكن لواجهة الدراسة الربط لاحقًا.",
-          "actionLabel": "+ استشارة"
+          "actionLabel": "استشارة جديدة"
         }
       },
       "form": {

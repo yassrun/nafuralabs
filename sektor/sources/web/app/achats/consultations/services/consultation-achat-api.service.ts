@@ -109,26 +109,50 @@ export class ConsultationAchatApiService extends FeatureApiService<
   Partial<ConsultationAchatCreate>
 > {
   protected override basePath = '/api/v1/consultations-achat';
-  protected override searchFields = ['numero', 'destinatairesLabel'];
+  protected override searchFields = ['numero', 'destinatairesLabel', 'clesStables'];
 
   override async getAll(query?: ListQuery): Promise<ListResponse<ConsultationAchat>> {
     const q = (query ?? {}) as ConsultationQuery;
     const lienRaw = String(q.lien ?? q.quick ?? 'all');
     const lien: ConsultationLienFilter =
       lienRaw === 'hors' || lienRaw === 'liee' ? lienRaw : 'all';
+    const statut = String(q['statut'] ?? '').trim();
+    const fournisseurId = String(q['fournisseurId'] ?? '').trim();
+    const articleId = String(q['articleId'] ?? '').trim();
 
     let params = this.buildQueryParams({
       ...q,
       search: q['search'] as string | undefined,
     });
-    // Drop chip/filter aliases that the backend does not understand.
-    params = params.delete('lien').delete('quick');
+    params = params
+      .delete('lien')
+      .delete('quick')
+      .delete('statut')
+      .delete('fournisseurId')
+      .delete('articleId');
     if (lien !== 'all') {
       params = params.set('lien', lien);
+    }
+    if (statut && statut !== 'all') {
+      params = params.set('statut', statut);
+    }
+    if (fournisseurId) {
+      params = params.set('fournisseurId', fournisseurId);
+    }
+    if (articleId) {
+      params = params.set('articleId', articleId);
     }
 
     const rows = await this.get<ConsultationAchat[]>(this.basePath, params);
     const items = rows ?? [];
+    const pageRaw = q.page;
+    const pageSizeRaw = q.pageSize;
+    if (pageRaw !== undefined && pageSizeRaw !== undefined) {
+      const page = Math.max(1, Number(pageRaw) || 1);
+      const pageSize = Math.max(1, Number(pageSizeRaw) || 20);
+      const start = (page - 1) * pageSize;
+      return { items: items.slice(start, start + pageSize), total: items.length };
+    }
     return { items, total: items.length };
   }
 

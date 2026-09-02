@@ -86,8 +86,14 @@ function assertChromeOverlay139() {
   if (!/data-cs-fiche|Voir la fiche/.test(src)) {
     throw new Error('VU ROUGE : lien fiche (œil) absent');
   }
-  if (!/lookupKey="fournisseurs"/.test(src) || !/\[lookupSearch\]/.test(src)) {
-    throw new Error('VU ROUGE overlay create : fournisseur n’est pas le combobox lookup');
+  if (!/destinatairesLabel/.test(src)) {
+    throw new Error('VU ROUGE overlay : destinataires (N fournisseurs) absents des lignes');
+  }
+  if (/lookupKey="fournisseurs"/.test(src) && /data-cs-pane="creer"/.test(src)) {
+    const creerBlock = src.match(/data-cs-pane="creer"[\s\S]{0,800}/);
+    if (creerBlock && /lookupKey="fournisseurs"/.test(creerBlock[0])) {
+      throw new Error('VU ROUGE overlay create : encore un fournisseur unique obligatoire');
+    }
   }
   if (/<select[\s\S]{0,240}name="fournisseurId"/.test(src) || /pageSize:\s*200/.test(src)) {
     throw new Error('VU ROUGE overlay : encore dump <select> fournisseur');
@@ -252,20 +258,13 @@ async function proveBrowserOverlay(
     if ((await creer.locator('select[name="fournisseurId"]').count()) > 0) {
       throw new Error('browser create : encore <select> natif fournisseur');
     }
-    const input = creer.locator('input[role="combobox"]').first();
-    await input.waitFor({ timeout: 5000 });
-    await input.click();
-    const placeholder = (await input.getAttribute('placeholder')) ?? '';
-    if (!/2/.test(placeholder)) {
-      throw new Error(`browser create : placeholder 2 car. absent — ${placeholder}`);
+    if ((await creer.locator('input[role="combobox"]').count()) > 0) {
+      throw new Error('browser create : encore combobox fournisseur unique');
     }
-    const q = (fournisseurQuery ?? 'La').slice(0, 2);
-    await input.fill(q);
-    await overlayArticle.locator('[role="option"]').first().waitFor({ timeout: 10000 });
-    if ((await overlayArticle.locator('button.nf-select-list').count()) < 1) {
-      throw new Error('browser create : œil liste fournisseurs absent');
+    if ((await overlayArticle.getByTestId('consultation-decompo-creer').count()) < 1) {
+      throw new Error('browser create : CTA Créer overlay absent');
     }
-    console.log('ok browser déjà-dedans + combobox fournisseur ≥ 2 car.');
+    console.log('ok browser déjà-dedans + create overlay sans fournisseur unique');
   } finally {
     await browser.close();
   }

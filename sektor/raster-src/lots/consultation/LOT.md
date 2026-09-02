@@ -2,8 +2,8 @@
 
 > Prix fournisseur. Liste Achats. Popup étude. Pas une DA, pas un devis client.
 
-Chrome objet + import + overlay (134–139, 249) et UX pro listing / détail / create panier (263–265) : **livrés**.
+**Actif — UX listing / create / overlay RFQ :** sous-lot [`ux-listing-create-etude/`](ux-listing-create-etude/) — CTA, filtres fournisseur/article/statut, create `nf-action-bar`, overlay N destinataires.
 
-**Actif — RFQ :** sous-lot [`destinataires-envoi-suivi/`](destinataires-envoi-suivi/) — 1 panier puis N destinataires, envoi, statut selon devis. Gel 28/08. Contrat + canvas dans le sous-lot.
+Chrome objet + import (134–139, 249), UX pro (263–265) et RFQ destinataires-envoi-suivi (278–282) : **livrés**.
 
-Gel 22/08 (objet Achats) : [`DECISIONS-PRODUIT.md`](../../DECISIONS-PRODUIT.md) — le grain « un fournisseur » y est **cassé** par le gel 28/08. Overlay 139 / flag CONSULTÉ : hors ce sous-lot.
+Gel 22/08 (objet Achats) : [`DECISIONS-PRODUIT.md`](../../DECISIONS-PRODUIT.md) — grain « un fournisseur » **cassé** 28/08. Overlay étude aligné dans `ux-listing-create-etude`. Flag CONSULTÉ hors.
