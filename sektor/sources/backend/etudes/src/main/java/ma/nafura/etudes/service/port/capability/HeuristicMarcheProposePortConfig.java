@@ -169,17 +169,11 @@ public class HeuristicMarcheProposePortConfig {
                 }
 
                 Map<String, MarcheProposeDto.PieceProposee> pieces = new LinkedHashMap<>();
-                pieces.put(
-                        DossierDocument.TYPE_BORDEREAU,
-                        piece(DossierDocument.TYPE_BORDEREAU, "Bordereau des prix", true));
-                pieces.put(
-                        DossierDocument.TYPE_CPS,
-                        piece(DossierDocument.TYPE_CPS, "Cahier des clauses (CPS / CCTP)", true));
                 addIfMention(pieces, lower, "règlement", DossierDocument.TYPE_REGLEMENT,
-                        "Règlement de consultation", true);
+                        "Règlement de consultation", false);
                 addIfMention(pieces, lower, "reglement", DossierDocument.TYPE_REGLEMENT,
-                        "Règlement de consultation", true);
-                addIfMention(pieces, lower, "plan", DossierDocument.TYPE_PLAN, "Plans", true);
+                        "Règlement de consultation", false);
+                addIfMention(pieces, lower, "plan", DossierDocument.TYPE_PLAN, "Plans", false);
                 addIfMention(pieces, lower, "cpt", DossierDocument.TYPE_CPT, "CPT", false);
                 addIfMention(pieces, lower, "caution", "CAUTION", "Acte de caution", false);
                 addIfMention(pieces, lower, "attestation", "ATTESTATION", "Attestations", false);

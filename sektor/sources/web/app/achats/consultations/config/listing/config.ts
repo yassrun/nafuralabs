@@ -24,7 +24,6 @@ export function buildConsultationListingConfig(t: TranslateService) {
         search: true,
         filters: true,
         columnToggle: true,
-        selectionMode: 'none',
         refresh: true,
         importExport: false,
       },

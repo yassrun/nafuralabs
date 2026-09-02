@@ -2,16 +2,16 @@
  * Mapping entre étapes métier UI (4) et étapes techniques backend (5).
  *
  * Backend conserve 1..5 pour éviter une migration des dossiers existants.
- * UI : Documents → Bordereau → Coût → Synthèse.
+ * UI : Cadrage → Bordereau → Chiffrage → Synthèse.
  * Correspondance : 1→1, 2→2, 3|4→3, 5→4.
  */
 
 export const ETAPES_UI_DOSSIER = [
-  { ui: 1, libelle: 'Documents du marché', nextLabel: 'Continuer vers le bordereau' },
-  { ui: 2, libelle: 'Bordereau', nextLabel: 'Continuer vers le coût' },
+  { ui: 1, libelle: 'Cadrage & documents', nextLabel: 'Continuer vers le bordereau' },
+  { ui: 2, libelle: 'Bordereau', nextLabel: 'Continuer vers le chiffrage' },
   {
     ui: 3,
-    libelle: 'Coût',
+    libelle: 'Chiffrage',
     nextLabel: 'Voir la synthèse',
   },
   {
@@ -74,7 +74,7 @@ export function backendGateEtapesForUi(uiStep: number): number[] {
       BACKEND_ETAPE.CHIFFRAGE,
     ];
   }
-  return [BACKEND_ETAPE.CHIFFRAGE];
+  return [BACKEND_ETAPE.DECOMPOSITION, BACKEND_ETAPE.CHIFFRAGE];
 }
 
 export function libelleUiEtape(backendStep: number): string {
@@ -101,4 +101,70 @@ export function uiEtapePourGate(backendGateEtape: number): number {
 export function estAlerteQualiteChiffrage(message: string | null | undefined): boolean {
   const m = (message ?? '').trim();
   return m.includes('part_couts_estimes');
+}
+
+const TYPES_PIECE_DESTINATION = new Set([
+  'REGLEMENT',
+  'PLAN',
+  'CPT',
+  'CAUTION',
+  'ATTESTATION',
+  'AUTRE',
+]);
+
+/**
+ * Pièces CPS / destination : rappel en synthèse (N+1), jamais un blocage du cadrage.
+ * Couvre aussi une JVM encore sur l’ancienne GateDocuments.
+ */
+export function estAnomaliePieceHorsCadrage(probleme: {
+  message?: string | null;
+  codeArticle?: string | null;
+}): boolean {
+  const m = (probleme.message ?? '').toLowerCase();
+  if (
+    m.includes('piece_obligatoire')
+    || m.includes('pièce obligatoire')
+    || m.includes('cps_manquant')
+    || m.includes('bordereau_manquant')
+  ) {
+    return true;
+  }
+  return TYPES_PIECE_DESTINATION.has((probleme.codeArticle ?? '').toUpperCase());
+}
+
+type GateIssueSlice = {
+  etape: number;
+  problemes: readonly { message?: string | null }[];
+};
+
+/** True when a visited UI step still has gate problems (not quality-only alerts). */
+export function uiStepHasGateIssues(
+  uiStep: number,
+  gates: readonly GateIssueSlice[],
+): boolean {
+  const backendEtapes = backendGateEtapesForUi(uiStep);
+  for (const g of gates) {
+    if (!backendEtapes.includes(g.etape)) continue;
+    for (const p of g.problemes) {
+      if (uiStep === 3 && estAlerteQualiteChiffrage(p.message)) continue;
+      if (uiStep === 1 && estAnomaliePieceHorsCadrage(p)) continue;
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * 0-based wizard indexes for steps already left that still have issues.
+ * Current and upcoming steps are never incomplete.
+ */
+export function incompleteUiStepIndexes(
+  currentUi: number,
+  gates: readonly GateIssueSlice[],
+): number[] {
+  const indexes: number[] = [];
+  for (let ui = 1; ui < currentUi; ui++) {
+    if (uiStepHasGateIssues(ui, gates)) indexes.push(ui - 1);
+  }
+  return indexes;
 }

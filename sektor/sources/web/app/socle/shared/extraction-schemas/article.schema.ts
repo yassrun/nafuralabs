@@ -2,16 +2,18 @@ import type { ExtractionSchemaBundle } from './extraction-schema.types';
 
 export const ARTICLE_EXTRACTION_SCHEMA: ExtractionSchemaBundle = {
   name: 'Import articles',
-  description: 'Bulk import of catalogue articles from Excel, CSV or PDF lists.',
+  description:
+    'Import en masse depuis Excel, CSV ou PDF. Liste ou fiche unitaire — détection automatique.',
   arrayPath: 'articles',
   instructions: `You are a document extraction assistant. Extract catalogue article / product records from the uploaded file.
 Return ONLY valid JSON matching the provided JSON Schema.
 
 CRITICAL INSTRUCTIONS:
-- Output a single JSON object with an "articles" array.
-- Map column headers (Code, Référence, Nom, Désignation, Unité, Famille, Prix, etc.) to schema fields.
-- Use null when a field is not present — do NOT invent values.
-- code and name are required per row.`,
+- Output a single JSON object with an "articles" array (one element for a single product sheet).
+- Map column headers (Code, Référence, Désignation, Nom, Unité, UoM, Famille, Prix, Prix cat., etc.) to schema fields.
+- code and name (designation) are required on each row when visible in the source.
+- When famille or unité is absent from the file, you MAY infer a reasonable value from the product designation or category context; use null only if no reasonable guess exists.
+- Do NOT invent a code. Do NOT invent prices.`,
   dataSchema: {
     type: 'object',
     required: ['articles'],
@@ -23,14 +25,41 @@ CRITICAL INSTRUCTIONS:
           type: 'object',
           required: ['code', 'name'],
           properties: {
-            code: { type: ['string', 'null'], title: 'Code' },
-            name: { type: ['string', 'null'], title: 'Nom' },
-            nature: { type: ['string', 'null'], title: 'Nature' },
-            articleType: { type: ['string', 'null'], title: 'Type (legacy)' },
-            uomCode: { type: ['string', 'null'], title: 'Unité' },
-            familleName: { type: ['string', 'null'], title: 'Famille' },
-            prixUnitaire: { type: ['number', 'null'], title: 'Prix unitaire' },
-            stockMin: { type: ['number', 'null'], title: 'Stock min' },
+            code: {
+              type: ['string', 'null'],
+              title: 'Code',
+              xNafura: { presence: 'extract' },
+            },
+            name: {
+              type: ['string', 'null'],
+              title: 'Désignation',
+              xNafura: { presence: 'extract' },
+            },
+            nature: {
+              type: ['string', 'null'],
+              title: 'Nature',
+              xNafura: { presence: 'infer' },
+            },
+            uomCode: {
+              type: ['string', 'null'],
+              title: 'Unité',
+              xNafura: { presence: 'infer' },
+            },
+            familleName: {
+              type: ['string', 'null'],
+              title: 'Famille',
+              xNafura: { presence: 'infer' },
+            },
+            prixUnitaire: {
+              type: ['number', 'null'],
+              title: 'Prix catalogue',
+              xNafura: { presence: 'optional' },
+            },
+            stockMin: {
+              type: ['number', 'null'],
+              title: 'Stock min',
+              xNafura: { presence: 'optional' },
+            },
           },
         },
       },
@@ -46,10 +75,10 @@ CRITICAL INSTRUCTIONS:
         title: 'Articles',
         columns: [
           { path: 'code', label: 'Code', widthPx: 100 },
-          { path: 'name', label: 'Nom' },
-          { path: 'uomCode', label: 'UoM', widthPx: 80 },
+          { path: 'name', label: 'Désignation' },
+          { path: 'uomCode', label: 'Unité', widthPx: 80 },
           { path: 'familleName', label: 'Famille' },
-          { path: 'prixUnitaire', label: 'Prix', widthPx: 100 },
+          { path: 'prixUnitaire', label: 'Prix cat.', widthPx: 100 },
         ],
       },
     ],

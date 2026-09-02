@@ -5,32 +5,33 @@
   <div class="nf-entity-listing__toolbar">
     <div class="nf-entity-listing__toolbar-stack">
       <div class="nf-entity-listing__toolbar-inner">
-        <!-- Left: Listing Controls (includes View Mode Switcher) -->
-        <nf-listing-controls
-          [showSelectionToggle]="config().features.selectionMode === 'toggleable'"
-          [selectionModeActive]="selectionMode() === 'multiple'"
-          [columns]="listingColumns()"
-          [hiddenColumnsCount]="hiddenColumnsCount()"
-          [filterActive]="hasActiveFilters()"
-          [filterFields]="config().filters"
-          [filterValues]="filterValues()"
-          [lookups]="listingLookups()"
-          [showSortButton]="false"
-          [search]="searchTerm()"
-          [showViewModeSwitcher]="config().features.viewModeToggle"
-          [viewModes]="config().viewModes.available"
-          [currentViewMode]="viewMode()"
-          (selectionToggleClick)="onToggleSelectionMode()"
-          (columnsChange)="onColumnsChange($event)"
-          (filterChange)="onFilterChange($event)"
-          (searchChange)="onSearchChange($event)"
-          (viewModeChange)="onViewModeChange($event)">
-        </nf-listing-controls>
+        <div class="nf-entity-listing__toolbar-query">
+          <nf-listing-controls
+            [showSelectionToggle]="config().features.selectionMode === 'toggleable'"
+            [selectionModeActive]="selectionMode() === 'multiple'"
+            [columns]="listingColumns()"
+            [hiddenColumnsCount]="hiddenColumnsCount()"
+            [filterActive]="hasActiveFilters()"
+            [filterFields]="config().filters"
+            [filterValues]="filterValues()"
+            [lookups]="listingLookups()"
+            [showSortButton]="false"
+            [search]="searchTerm()"
+            [showViewModeSwitcher]="config().features.viewModeToggle"
+            [viewModes]="config().viewModes.available"
+            [currentViewMode]="viewMode()"
+            (selectionToggleClick)="onToggleSelectionMode()"
+            (columnsChange)="onColumnsChange($event)"
+            (filterChange)="onFilterChange($event)"
+            (searchChange)="onSearchChange($event)"
+            (viewModeChange)="onViewModeChange($event)">
+          </nf-listing-controls>
 
-        <nf-filter-reset
-          [active]="hasActiveFilters()"
-          (reset)="onResetFilters()"
-        />
+          <nf-filter-reset
+            [active]="hasActiveFilters()"
+            (reset)="onResetFilters()"
+          />
+        </div>
 
         <!-- Center: Selection Count (only when 2+ items selected) -->
         @if (selectionCount() > 1) {
@@ -42,6 +43,13 @@
 
         <!-- Right: Actions -->
         <div class="nf-entity-listing__toolbar-actions">
+          @if (smartImportVisible()) {
+            <nf-smart-import-action
+              [definition]="$any(config().smartImport!.definition)"
+              [accept]="config().smartImport!.accept ?? '.xlsx,.xls,.csv,.pdf'"
+              (completed)="onSmartImportCompleted($event)" />
+          }
+
           <!-- Selection Actions (Edit, Duplicate, Delete) -->
           @if (selectionActions().length > 0) {
             <nf-button-list

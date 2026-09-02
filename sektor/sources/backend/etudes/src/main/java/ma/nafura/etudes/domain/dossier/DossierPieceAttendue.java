@@ -55,7 +55,7 @@ public class DossierPieceAttendue implements AuditableEtude {
 
     @Column(name = "obligatoire", nullable = false)
     @Builder.Default
-    private Boolean obligatoire = true;
+    private Boolean obligatoire = false;
 
     @Column(name = "source", nullable = false, length = 20)
     private String source;
@@ -85,7 +85,7 @@ public class DossierPieceAttendue implements AuditableEtude {
         this.createdAt = now;
         this.updatedAt = now;
         if (this.obligatoire == null) {
-            this.obligatoire = true;
+            this.obligatoire = false;
         }
     }
 

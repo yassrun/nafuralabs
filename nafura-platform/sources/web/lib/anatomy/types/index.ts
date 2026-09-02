@@ -1464,6 +1464,29 @@ export interface ImportExportConfig {
   enableSelectionExport?: boolean;
 }
 
+/**
+ * Smart Import (Import magique) in listing toolbar — wired to document-extraction.
+ * The page handles `(smartImportCompleted)` on `nf-entity-listing`.
+ */
+export interface SmartImportListingConfig {
+  /** Matches ExtractionDefinition.key (e2e: nf-smart-import-action[entitykey]). */
+  entityKey: string;
+  /** Full extraction definition from document-extraction smart-import. */
+  definition: {
+    key: string;
+    name: string;
+    arrayPath: string;
+    dataSchema: unknown;
+    presentationSchema: unknown;
+    description?: string;
+    instructions?: string;
+    config?: { acceptedExtensions?: string[]; acceptedMimeTypes?: string[]; maxFileSizeBytes?: number };
+  };
+  accept?: string;
+  /** Permission gate (e.g. inventory.article.create). */
+  permission?: string;
+}
+
 /** Single import error (row-level). */
 export interface ImportResultError {
   row: number;
@@ -1589,7 +1612,11 @@ export interface ListingFeatures {
   /** Enable column visibility toggle */
   columnToggle: boolean;
 
-  /** Selection mode configuration */
+  /**
+   * Selection mode. Default (builder): `toggleable`.
+   * Single click selects; double-click opens `routes.detail`.
+   * `none` disables selection — it does not open on first click.
+   */
   selectionMode: 'none' | 'single' | 'multiple' | 'toggleable';
 
   /** Enable view mode toggle (table/cards/grid) */
@@ -1957,6 +1984,9 @@ export interface ListingPageConfig<TItem = unknown> {
   // === Import/Export ===
   /** Import/export configuration */
   importExport?: ImportExportConfig;
+
+  /** Magic import (document-extraction) — toolbar action before New. */
+  smartImport?: SmartImportListingConfig;
 
   // === Empty State ===
   /** Empty state configuration */

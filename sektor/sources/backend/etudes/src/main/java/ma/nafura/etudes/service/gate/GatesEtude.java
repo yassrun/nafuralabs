@@ -36,10 +36,9 @@ public final class GatesEtude {
     }
 
     /**
-     * Étape 1 — les pièces du marché sont déposées.
-     *
-     * <p>Le CPS et le BDP entrent ici tous les deux : le CPS est ensuite découpé en sections et
-     * interrogé à la demande pendant la décomposition ; le BDP alimente l'arbre à l'étape 2.
+     * Étape 1 — cadrage. CPS, BDP et pièces de destination (caution, plans…)
+     * sont optionnels : le cadrage n'attend pas de PDF pour avancer (AC-4).
+     * L'arbre bordereau reste exigé à l'étape 2.
      */
     @Component
     public static class GateDocuments implements EtapeGate {
@@ -50,35 +49,7 @@ public final class GatesEtude {
 
         @Override
         public ResultatGate evaluer(ContexteGate contexte) {
-            List<ProblemeGate> pbs = new ArrayList<>();
-            if (!contexte.hasBordereau()) {
-                pbs.add(new ProblemeGate(
-                        null, null, null, "etudes.gate.documents.bordereau_manquant"));
-            }
-            if (!contexte.hasCps()) {
-                pbs.add(new ProblemeGate(null, null, null, "etudes.gate.documents.cps_manquant"));
-            }
-            if (contexte.piecesAttendues() != null) {
-                for (var piece : contexte.piecesAttendues()) {
-                    if (!Boolean.TRUE.equals(piece.getObligatoire()) || piece.estLiee()) {
-                        continue;
-                    }
-                    // BDP/CPS déjà couverts ci-dessus
-                    String type = piece.getType();
-                    if ("BORDEREAU".equals(type) || "CPS".equals(type)) {
-                        continue;
-                    }
-                    pbs.add(new ProblemeGate(
-                            piece.getId(),
-                            type,
-                            piece.getLibelle(),
-                            "etudes.gate.documents.piece_obligatoire_manquante"));
-                }
-            }
-            if (pbs.isEmpty()) {
-                return ResultatGate.ok(etape());
-            }
-            return new ResultatGate(etape(), true, pbs);
+            return ResultatGate.ok(etape());
         }
     }
 

@@ -18,6 +18,9 @@ export type SmartImportRowStatus =
 
 export type SmartImportPolicy = 'PARTIAL' | 'STRICT';
 
+/** Listing import intent — bulk table vs single fiche (same pipeline). */
+export type SmartImportMode = 'bulk' | 'single';
+
 export interface SmartImportConfig {
   importPolicy: SmartImportPolicy;
   acceptedExtensions: string[];

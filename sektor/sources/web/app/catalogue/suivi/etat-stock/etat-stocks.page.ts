@@ -263,7 +263,6 @@ export class EtatStocksPage implements OnInit {
         search: false,
         filters: true,
         columnToggle: true,
-        selectionMode: 'none',
         viewModeToggle: false,
       },
       defaultSort: {

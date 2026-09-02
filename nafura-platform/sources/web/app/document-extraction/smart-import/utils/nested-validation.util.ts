@@ -1,5 +1,6 @@
 import type { FieldIssue, FieldIssueKind } from '../../models/extraction.model';
 import type { JsonSchema, JsonSchemaObject } from '../../models/json-schema.model';
+import { shouldBlockImportOnMissing } from './field-presence.util';
 
 function primaryType(schema: JsonSchema | null | undefined): string | null {
   if (!schema) return null;
@@ -60,11 +61,14 @@ function validateObject(
   for (const fieldName of required) {
     const fieldPath = path ? `${path}.${fieldName}` : fieldName;
     const value = obj?.[fieldName];
+    const fieldSchema = properties[fieldName];
     if (isMissing(value)) {
+      if (!shouldBlockImportOnMissing(fieldSchema, fieldName, new Set(required))) {
+        continue;
+      }
       issues.push(issue(fieldPath, rowIndex, 'MISSING_REQUIRED', `Required field missing: ${fieldPath}`));
       continue;
     }
-    const fieldSchema = properties[fieldName];
     if (fieldSchema) {
       validateValue(value, fieldSchema, fieldPath, rowIndex, issues);
     }

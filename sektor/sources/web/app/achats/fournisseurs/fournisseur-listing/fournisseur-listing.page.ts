@@ -7,12 +7,8 @@ import {ConfigDrivenListingPage,
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles, ButtonComponent, ToastService} from '@platform/lib/anatomy';
 import type { Fournisseur } from '@app/achats/models';
+import type { ReviewedExtraction } from '@platform/app/document-extraction/smart-import';
 import {
-  SmartImportTriggerComponent,
-  type ReviewedExtraction,
-} from '@platform/app/document-extraction/smart-import';
-import {
-  FOURNISSEUR_IMPORT_DEFINITION,
   FournisseurImportService,
 } from '@app/socle/shared/smart-import/handlers/fournisseur-import.handler';
 
@@ -28,7 +24,6 @@ type QuickFilter = 'ALL' | 'ACTIFS' | 'INACTIFS' | 'TOP_NOTES';
     ButtonComponent,
     RouterLink,
     TranslateModule,
-    SmartImportTriggerComponent,
     ...ConfigDrivenListingPageImports
 ],
   templateUrl: './fournisseur-listing.page.html',
@@ -40,7 +35,6 @@ export class FournisseurListingPage extends ConfigDrivenListingPage<Fournisseur>
   private readonly translate = inject(TranslateService);
   private readonly importer = inject(FournisseurImportService);
   private readonly smartImportToast = inject(ToastService);
-  readonly importDefinition = FOURNISSEUR_IMPORT_DEFINITION;
   readonly config = buildFournisseursListingConfig(this.translate);
   readonly headerTitle = this.translate.instant('achats.fournisseur.headerTitle');
 

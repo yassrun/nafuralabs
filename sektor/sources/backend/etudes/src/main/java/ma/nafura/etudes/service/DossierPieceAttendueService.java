@@ -51,6 +51,8 @@ public class DossierPieceAttendueService {
     public void seedMinimalSiAbsent(UUID dossierId) {
         UUID tenant = tenantId();
         requireDossier(dossierId);
+        // BDP et CPS optionnels (AC-4). Les slots historiques encore marqués
+        // obligatoires sont assouplis à la lecture.
         if (!repository.existsByTenantIdAndDossierEtudeIdAndType(
                 tenant, dossierId, DossierDocument.TYPE_BORDEREAU)) {
             repository.save(slot(
@@ -58,8 +60,10 @@ public class DossierPieceAttendueService {
                     dossierId,
                     DossierDocument.TYPE_BORDEREAU,
                     "Bordereau des prix",
-                    true,
+                    false,
                     DossierPieceAttendue.SOURCE_MANUEL));
+        } else {
+            assouplirSlotHistorique(tenant, dossierId, DossierDocument.TYPE_BORDEREAU);
         }
         if (!repository.existsByTenantIdAndDossierEtudeIdAndType(
                 tenant, dossierId, DossierDocument.TYPE_CPS)) {
@@ -68,9 +72,31 @@ public class DossierPieceAttendueService {
                     dossierId,
                     DossierDocument.TYPE_CPS,
                     "Cahier des clauses (CPS / CCTP)",
-                    true,
+                    false,
                     DossierPieceAttendue.SOURCE_MANUEL));
+        } else {
+            assouplirSlotHistorique(tenant, dossierId, DossierDocument.TYPE_CPS);
         }
+        assouplirToutesLesPiecesHistoriques(tenant, dossierId);
+    }
+
+    private void assouplirToutesLesPiecesHistoriques(UUID tenant, UUID dossierId) {
+        for (DossierPieceAttendue s :
+                repository.findByTenantIdAndDossierEtudeIdOrderByCreatedAtAsc(tenant, dossierId)) {
+            if (Boolean.TRUE.equals(s.getObligatoire())) {
+                s.setObligatoire(false);
+                repository.save(s);
+            }
+        }
+    }
+
+    private void assouplirSlotHistorique(UUID tenant, UUID dossierId, String type) {
+        repository.findByTenantIdAndDossierEtudeIdAndType(tenant, dossierId, type)
+                .filter(s -> Boolean.TRUE.equals(s.getObligatoire()))
+                .ifPresent(s -> {
+                    s.setObligatoire(false);
+                    repository.save(s);
+                });
     }
 
     @Transactional
@@ -87,7 +113,7 @@ public class DossierPieceAttendueService {
                 dossierId,
                 type,
                 dto.getLibelle().trim(),
-                dto.getObligatoire() == null || dto.getObligatoire(),
+                Boolean.TRUE.equals(dto.getObligatoire()),
                 DossierPieceAttendue.SOURCE_MANUEL));
     }
 
@@ -186,10 +212,12 @@ public class DossierPieceAttendueService {
     }
 
     private void appliquerMetadonnees(DossierEtude dossier, MarcheProposeApplyDto.Metadonnees meta) {
-        if (StringUtils.hasText(meta.getObjet())) {
+        if (placeholderIdentite(dossier.getObjet()) && StringUtils.hasText(meta.getObjet())) {
             dossier.setObjet(meta.getObjet().trim());
         }
-        if (StringUtils.hasText(meta.getDonneurOrdre()) && !StringUtils.hasText(dossier.getClientId())) {
+        if (placeholderIdentite(dossier.getClientNom())
+                && StringUtils.hasText(meta.getDonneurOrdre())
+                && !StringUtils.hasText(dossier.getClientId())) {
             dossier.setClientNom(meta.getDonneurOrdre().trim());
         }
         AppelOffreClient aoc = null;
@@ -201,43 +229,79 @@ public class DossierPieceAttendueService {
         if (aoc == null) {
             return;
         }
-        if (StringUtils.hasText(meta.getObjet())) {
+        if (placeholderIdentite(aoc.getObjet()) && StringUtils.hasText(meta.getObjet())) {
             aoc.setObjet(meta.getObjet().trim());
         }
-        if (StringUtils.hasText(meta.getReference())) {
+        if (!StringUtils.hasText(aoc.getReference()) && StringUtils.hasText(meta.getReference())) {
             aoc.setReference(meta.getReference().trim());
         }
-        if (StringUtils.hasText(meta.getType())) {
+        if (!StringUtils.hasText(aoc.getType()) && StringUtils.hasText(meta.getType())) {
             String t = meta.getType().trim().toUpperCase(Locale.ROOT);
             if (AppelOffreClient.TYPE_PUBLIC.equals(t) || AppelOffreClient.TYPE_PRIVE.equals(t)) {
                 aoc.setType(t);
             }
         }
-        if (meta.getDateLimiteDepot() != null) {
+        if (aoc.getDateLimiteDepot() == null && meta.getDateLimiteDepot() != null) {
             aoc.setDateLimiteDepot(meta.getDateLimiteDepot());
         }
-        if (StringUtils.hasText(meta.getDonneurOrdre())) {
+        if (!StringUtils.hasText(aoc.getDonneurOrdre()) && StringUtils.hasText(meta.getDonneurOrdre())) {
             aoc.setDonneurOrdre(meta.getDonneurOrdre().trim());
         }
-        if (meta.getVille() != null) {
-            aoc.setVille(StringUtils.hasText(meta.getVille()) ? meta.getVille().trim() : null);
+        if (!StringUtils.hasText(aoc.getVille()) && StringUtils.hasText(meta.getVille())) {
+            aoc.setVille(meta.getVille().trim());
         }
-        if (meta.getDelaiExecutionJours() != null) {
+        if (aoc.getDelaiExecutionJours() == null && meta.getDelaiExecutionJours() != null) {
             aoc.setDelaiExecutionJours(meta.getDelaiExecutionJours());
         }
-        if (meta.getEstimationMoaHt() != null) {
+        if (aoc.getEstimationMoaHt() == null && meta.getEstimationMoaHt() != null) {
             aoc.setEstimationMoaHt(meta.getEstimationMoaHt());
         }
-        if (meta.getDateOuverturePlis() != null) {
+        if (aoc.getDateOuverturePlis() == null && meta.getDateOuverturePlis() != null) {
             aoc.setDateOuverturePlis(meta.getDateOuverturePlis());
         }
-        if (meta.getCautionProvisoire() != null) {
+        if (aoc.getCautionProvisoire() == null && meta.getCautionProvisoire() != null) {
             aoc.setCautionProvisoire(meta.getCautionProvisoire());
         }
-        if (meta.getCautionDefinitive() != null) {
+        if (aoc.getCautionDefinitive() == null && meta.getCautionDefinitive() != null) {
             aoc.setCautionDefinitive(meta.getCautionDefinitive());
         }
         aocRepository.save(aoc);
+    }
+
+    private static boolean placeholderIdentite(String value) {
+        if (!StringUtils.hasText(value)) {
+            return true;
+        }
+        String v = value.trim();
+        return "Nouvelle étude".equalsIgnoreCase(v) || "À préciser".equalsIgnoreCase(v);
+    }
+
+    /**
+     * Checklist de fin de parcours (synthèse / N+1) : slots optionnels détectés
+     * dans le CPS, hors BDP et CPS eux-mêmes.
+     */
+    @Transactional
+    public void capturerPiecesDestination(UUID dossierId, List<MarcheProposeDto.PieceProposee> props) {
+        if (props == null || props.isEmpty()) {
+            return;
+        }
+        requireDossier(dossierId);
+        for (MarcheProposeDto.PieceProposee prop : props) {
+            if (prop == null || !estDestination(prop.getType())) {
+                continue;
+            }
+            upsertDepuisIa(dossierId, prop);
+        }
+    }
+
+    private static boolean estDestination(String type) {
+        if (!StringUtils.hasText(type)) {
+            return false;
+        }
+        String t = type.trim().toUpperCase(Locale.ROOT);
+        return !DossierDocument.TYPE_BORDEREAU.equals(t)
+                && !DossierDocument.TYPE_CPS.equals(t)
+                && !DossierDocument.TYPE_CPS_ET_BORDEREAU.equals(t);
     }
 
     private void upsertDepuisIa(UUID dossierId, MarcheProposeDto.PieceProposee prop) {
@@ -245,6 +309,9 @@ public class DossierPieceAttendueService {
             return;
         }
         String type = prop.getType().trim().toUpperCase(Locale.ROOT);
+        if (!estDestination(type)) {
+            return;
+        }
         String libelle = StringUtils.hasText(prop.getLibelle())
                 ? prop.getLibelle().trim()
                 : type;
@@ -257,7 +324,7 @@ public class DossierPieceAttendueService {
                                 existing.setLibelle(libelle);
                             }
                             if (!existing.estLiee()) {
-                                existing.setObligatoire(prop.isObligatoire());
+                                existing.setObligatoire(false);
                             }
                             if (DossierPieceAttendue.SOURCE_IA.equals(existing.getSource())
                                     || !existing.estLiee()) {
@@ -270,7 +337,7 @@ public class DossierPieceAttendueService {
                                 dossierId,
                                 type,
                                 libelle,
-                                prop.isObligatoire(),
+                                false,
                                 DossierPieceAttendue.SOURCE_IA)));
     }
 

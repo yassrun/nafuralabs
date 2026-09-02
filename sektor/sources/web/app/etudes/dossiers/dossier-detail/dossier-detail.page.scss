@@ -92,39 +92,6 @@
   color: var(--nf-color-text-secondary);
 }
 
-.dossier__verrou {
-  margin: 0 0 12px;
-  padding: 0.65rem 0.85rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  color: var(--nf-color-text-secondary);
-  background: var(--nf-color-bg-subtle);
-  border: 1px solid var(--nf-color-border);
-  flex-shrink: 0;
-
-  &[data-statut='EN_VALIDATION'] {
-    color: var(--nf-color-warning-700, #92400e);
-    border-color: color-mix(in srgb, var(--nf-color-warning-600, #d97706) 35%, transparent);
-    background: color-mix(in srgb, var(--nf-color-warning-600, #d97706) 10%, transparent);
-  }
-}
-
-.dossier__erreur {
-  border: 1px solid var(--nf-color-danger-600);
-  border-radius: 6px;
-  background: var(--nf-color-bg-subtle);
-  color: var(--nf-color-text-primary);
-  padding: 10px 14px;
-  margin: 0 0 12px;
-  flex-shrink: 0;
-}
-
-.dossier__blocage-hint {
-  margin: 0 0 8px;
-  font-size: 0.8125rem;
-  color: var(--nf-color-danger-600, #c0392b);
-}
-
 .dossier__wizard {
   flex: 1 1 0;
   min-height: 0;
@@ -153,7 +120,7 @@
 }
 
 :host ::ng-deep .dossier__wizard--fill app-gate-blocage,
-:host ::ng-deep .dossier__wizard--fill .dossier__blocage-hint {
+:host ::ng-deep .dossier__wizard--fill app-etude-banner {
   flex-shrink: 0;
 }
 

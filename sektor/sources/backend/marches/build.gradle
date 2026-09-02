@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    implementation project(':sektor:socle')
     implementation 'ma.nafuralabs:framework:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:authorization:0.1.0-SNAPSHOT'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

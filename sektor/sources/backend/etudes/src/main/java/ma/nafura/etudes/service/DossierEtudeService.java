@@ -170,7 +170,9 @@ public class DossierEtudeService {
     /** En-tête seul — l'arbre se charge à part, il peut compter des milliers de nœuds. */
     @Transactional(readOnly = true)
     public DossierEtude getById(UUID id) {
-        return requireDossier(id);
+        DossierEtude dossier = requireDossier(id);
+        enrichirAoListing(List.of(dossier));
+        return dossier;
     }
 
     // ── Écriture ─────────────────────────────────────────────────────────────
@@ -293,7 +295,9 @@ public class DossierEtudeService {
         } else if (dossier.getAppelOffreClientId() != null) {
             enrichirAocExistant(dossier, dto);
         }
-        return repository.save(dossier);
+        DossierEtude saved = repository.save(dossier);
+        enrichirAoListing(List.of(saved));
+        return saved;
     }
 
     @Transactional
@@ -337,6 +341,10 @@ public class DossierEtudeService {
         if (etape > courante) {
             ContexteGate contexte = chargerContexte(dossier);
             for (int e = courante; e < etape; e++) {
+                // Cadrage : pièces de destination / CPS ne bloquent jamais l’avance.
+                if (e == DossierEtude.ETAPE_DOCUMENTS) {
+                    continue;
+                }
                 assertGateFranchie(e, contexte);
             }
             // Entrée en synthèse : tous les postes doivent être chiffrés (PU > 0, taux si DPU).
@@ -357,6 +365,9 @@ public class DossierEtudeService {
         DossierEtude dossier = requireModifiable(id);
         ContexteGate contexte = chargerContexte(dossier);
         for (int e = DossierEtude.ETAPE_PREMIERE; e <= DossierEtude.ETAPE_CHIFFRAGE; e++) {
+            if (e == DossierEtude.ETAPE_DOCUMENTS) {
+                continue;
+            }
             assertGateFranchie(e, contexte);
         }
         dossier.setMotifRefus(null);
@@ -1238,6 +1249,12 @@ public class DossierEtudeService {
             }
             d.setAoType(aoc.getType());
             d.setAoDateLimiteDepot(aoc.getDateLimiteDepot());
+            d.setAoReference(aoc.getReference());
+            d.setAoVille(aoc.getVille());
+            d.setAoDateOuverturePlis(aoc.getDateOuverturePlis());
+            d.setAoDelaiExecutionJours(aoc.getDelaiExecutionJours());
+            d.setAoEstimationMoaHt(aoc.getEstimationMoaHt());
+            d.setAoCautionProvisoire(aoc.getCautionProvisoire());
         }
     }
 

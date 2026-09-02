@@ -12,9 +12,6 @@
         {{ chip.labelKey | translate }}
       </nf-button>
     }
-    <nf-smart-import-trigger
-      [definition]="importDefinition"
-      (completed)="onSmartImportComplete($event)" />
     <nf-button type="button" class="chip-btn" size="sm" variant="secondary" routerLink="comparateur">
       Comparateur
     </nf-button>
@@ -24,6 +21,7 @@
     #listing
     [config]="config"
     [facade]="facade"
-    (action)="onAction($event)">
+    (action)="onAction($event)"
+    (smartImportCompleted)="onSmartImportComplete($event)">
   </nf-entity-listing>
 </nf-page-shell>

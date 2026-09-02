@@ -6,8 +6,9 @@
 
   <div class="nf-select-row">
     <ng-container *ngIf="isCombobox(); else nativeSelect">
-      <div class="nf-combobox">
+      <div class="nf-combobox" [class.nf-combobox--filled]="comboShowsClear()">
         <input
+          #comboInput
           [id]="id"
           type="text"
           role="combobox"
@@ -18,15 +19,27 @@
           [attr.aria-invalid]="shouldShowError()"
           [attr.aria-required]="required"
           [attr.aria-describedby]="shouldShowError() ? id + '-error' : null"
+          [attr.aria-readonly]="comboLocked()"
           class="nf-select-field nf-combobox__input"
           [value]="comboInputValue()"
           [placeholder]="comboPlaceholder()"
           [disabled]="disabled"
+          [readonly]="comboLocked()"
           (focus)="onComboFocus()"
           (input)="onComboInput($event)"
           (keydown)="onComboKeydown($event)"
           (blur)="onComboBlur()"
         />
+        <button
+          *ngIf="comboShowsClear()"
+          type="button"
+          class="nf-combobox__clear"
+          aria-label="Effacer"
+          title="Effacer"
+          (mousedown)="$event.preventDefault(); clearCombo($event)"
+        >
+          ×
+        </button>
         <ul
           *ngIf="comboOpen()"
           [id]="id + '-list'"

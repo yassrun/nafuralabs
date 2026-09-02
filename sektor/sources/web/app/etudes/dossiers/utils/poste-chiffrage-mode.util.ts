@@ -100,3 +100,17 @@ export function ecartEstimationPercent(repere: number, decompo: number): number 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
+
+/** Prix de vente HT d’une saisie simple, ou null si rien n’est encore chiffré. */
+export function puVenteSimple(opts: {
+  cout: number | null | undefined;
+  fgPercent: number;
+  margePercent: number;
+  venteDirecte?: number | null;
+}): number | null {
+  const vente = opts.venteDirecte;
+  if (vente != null && Number.isFinite(vente) && vente > 0) return round2(vente);
+  const cout = opts.cout;
+  if (cout == null || !Number.isFinite(cout) || cout <= 0) return null;
+  return computePrixVenteDepuisCout(cout, opts.fgPercent, opts.margePercent);
+}

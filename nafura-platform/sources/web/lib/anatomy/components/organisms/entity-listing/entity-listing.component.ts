@@ -73,6 +73,8 @@ import type {
   ImportResult,
   EntityActionConfig,
 } from '../../../types';
+import { SmartImportActionComponent } from '@platform/app/document-extraction/smart-import';
+import type { ReviewedExtraction } from '@platform/app/document-extraction/smart-import';
 
 @Component({
   selector: 'nf-entity-listing',
@@ -89,6 +91,7 @@ import type {
     CardViewComponent,
     GridViewComponent,
     ListViewComponent,
+    SmartImportActionComponent,
   ],
   templateUrl: './entity-listing.component.html',
   styleUrl: './entity-listing.component.scss',
@@ -140,6 +143,9 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
 
   /** Emitted right after a successful export (CSV/XLSX). Hook for audit logging. */
   exported = output<{ format: 'csv' | 'xlsx'; filename: string; rowCount: number; selectionOnly: boolean }>();
+
+  /** Emitted when magic import completes on a listing with `config.smartImport`. */
+  smartImportCompleted = output<ReviewedExtraction>();
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Content Children (Custom Templates)
@@ -446,6 +452,15 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
     return [...this.selectionActions(), ...this.globalActions()];
   });
 
+  readonly smartImportVisible = computed(() => {
+    const smartImport = this.config().smartImport;
+    if (!smartImport) return false;
+    if (smartImport.permission && !this.permissionService.hasPermission(smartImport.permission)) {
+      return false;
+    }
+    return true;
+  });
+
   /** Selection mode for data table */
   readonly selectableMode = computed<boolean | 'single' | 'multiple'>(() => {
     const mode = this._selectionMode();
@@ -681,31 +696,22 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
       this.rowOpen.emit(item);
       return;
     }
-    const routes = this.config().routes;
-    // M-TRA-02: config `selectionMode: 'none'` → single click opens detail.
-    if (this.config().features.selectionMode === 'none' && routes?.detail) {
-      void this.router.navigate(routes.detail(item));
-      return;
-    }
     const mode = this._selectionMode();
-    if (mode !== 'none') {
-      const current = this._selection();
-      const index = current.indexOf(item);
-      if (mode === 'single') {
-        this._selection.set(index >= 0 ? [] : [item]);
-      } else {
-        if (index >= 0) {
-          this._selection.set(current.filter((i) => i !== item));
-        } else {
-          this._selection.set([...current, item]);
-        }
-      }
-      this.selectionChange.emit(this._selection());
+    if (mode === 'none') {
       return;
     }
-    if (routes?.detail) {
-      void this.router.navigate(routes.detail(item));
+    const current = this._selection();
+    const index = current.indexOf(item);
+    if (mode === 'single') {
+      this._selection.set(index >= 0 ? [] : [item]);
+    } else {
+      if (index >= 0) {
+        this._selection.set(current.filter((i) => i !== item));
+      } else {
+        this._selection.set([...current, item]);
+      }
     }
+    this.selectionChange.emit(this._selection());
   }
 
   onRowDblClick(item: TItem): void {
@@ -800,6 +806,10 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
       selection: isSelectionAction && selection.length > 0 ? selection : undefined,
       item: selection.length === 1 ? selection[0] : undefined,
     });
+  }
+
+  onSmartImportCompleted(result: ReviewedExtraction): void {
+    this.smartImportCompleted.emit(result);
   }
 
   onEmptyStateAction(): void {

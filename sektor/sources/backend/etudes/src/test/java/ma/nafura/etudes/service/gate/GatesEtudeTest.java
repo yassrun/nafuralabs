@@ -44,61 +44,35 @@ class GatesEtudeTest {
     // â”€â”€ Ã‰tape 1 â€” piÃ¨ces du marchÃ© â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @Test
-    void sans_bdp_ni_cps_est_bloquant() {
+    void cadrage_passe_sans_bdp_ni_cps() {
         ResultatGate r = new GatesEtude.GateDocuments().evaluer(ContexteGate.documents(false, false));
 
-        assertThat(r.passe()).isFalse();
-        assertThat(r.bloquant()).isTrue();
-        assertThat(r.problemes()).extracting(ResultatGate.ProblemeGate::message)
-                .containsExactly(
-                        "etudes.gate.documents.bordereau_manquant",
-                        "etudes.gate.documents.cps_manquant");
-    }
-
-    @Test
-    void bordereau_seul_ne_suffit_pas() {
-        ResultatGate r = new GatesEtude.GateDocuments().evaluer(ContexteGate.documents(true, false));
-
-        assertThat(r.passe()).isFalse();
-        assertThat(r.problemes()).singleElement()
-                .extracting(ResultatGate.ProblemeGate::message)
-                .isEqualTo("etudes.gate.documents.cps_manquant");
-    }
-
-    @Test
-    void cps_seul_ne_suffit_pas() {
-        ResultatGate r = new GatesEtude.GateDocuments().evaluer(ContexteGate.documents(false, true));
-
-        assertThat(r.passe()).isFalse();
-        assertThat(r.problemes()).singleElement()
-                .extracting(ResultatGate.ProblemeGate::message)
-                .isEqualTo("etudes.gate.documents.bordereau_manquant");
-    }
-
-    @Test
-    void bdp_et_cps_franchissent_l_etape_documents() {
-        ResultatGate r = new GatesEtude.GateDocuments().evaluer(ContexteGate.documents(true, true));
-
         assertThat(r.passe()).isTrue();
+        assertThat(r.problemes()).isEmpty();
     }
 
     @Test
-    void piece_obligatoire_non_liee_bloque() {
+    void cadrage_passe_avec_bdp_seul_ou_cps_seul() {
+        assertThat(new GatesEtude.GateDocuments().evaluer(ContexteGate.documents(true, false)).passe())
+                .isTrue();
+        assertThat(new GatesEtude.GateDocuments().evaluer(ContexteGate.documents(false, true)).passe())
+                .isTrue();
+    }
+
+    @Test
+    void piece_de_destination_non_liee_ne_bloque_pas_le_cadrage() {
         var piece = ma.nafura.etudes.domain.dossier.DossierPieceAttendue.builder()
                 .id(UUID.randomUUID())
                 .type("REGLEMENT")
-                .libelle("RÃ¨glement")
+                .libelle("Règlement")
                 .obligatoire(true)
                 .source("IA")
                 .build();
         ResultatGate r = new GatesEtude.GateDocuments()
                 .evaluer(ContexteGate.documents(true, true, List.of(piece)));
 
-        assertThat(r.passe()).isFalse();
-        assertThat(r.problemes()).singleElement()
-                .extracting(ResultatGate.ProblemeGate::message)
-                .isEqualTo("etudes.gate.documents.piece_obligatoire_manquante");
-        assertThat(r.problemes().get(0).noeudId()).isEqualTo(piece.getId());
+        assertThat(r.passe()).isTrue();
+        assertThat(r.problemes()).isEmpty();
     }
 
     // â”€â”€ Ã‰tape 2 â€” bordereau â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

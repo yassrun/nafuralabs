@@ -25,7 +25,10 @@ Exec fichier par fichier ; grep gate en fin de sous-lot.
 | 2 | pieces / bordereau / summary / decomposition nf-* | exec | 1 |
 | 3 | devis-from-dpgf + selects dialogs restants | exec | 2 |
 | 4 | Preuves études | qa | 3 |
+| 5 | arbre bordereau icônes Lucide manquantes | exec | — |
 
 ## Preuves attendues
 
 `node sektor/e2e/scripts/verify-homog-etudes.mjs` — Mode B owner.
+
+`node sektor/e2e/scripts/verify-arbre-icones-304.mjs` — chevrons Lucide, 0 icône manquante.

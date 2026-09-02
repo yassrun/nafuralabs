@@ -3,15 +3,18 @@
     @if (modifiable()) {
       Contrôlez les totaux et la couverture des consultations, puis soumettez le dossier.
     } @else if (statut() === 'EN_VALIDATION') {
-      Chiffrage transmis — en attente de validation. Les montants ci-dessous sont figés.
+      Chiffrage transmis — en attente de validation N+1. Joignez les pièces de destination encore manquantes, s’il y en a.
     } @else {
       Synthèse en consultation seule.
     }
   </p>
 
-  @if (erreur(); as message) {
-    <p class="synthese__erreur" role="alert">{{ message }}</p>
-  }
+  <app-pieces-marche
+    [dossierId]="dossier().id"
+    [modifiable]="piecesDestinationModifiables()"
+    mode="destination"
+    (change)="change.emit()"
+  />
 
   @if (chargement()) {
     <p class="synthese__etat">Chargement de la synthèse…</p>
@@ -201,23 +204,5 @@
         }
       </article>
     </div>
-
-    @if (modifiable()) {
-      <app-gate-blocage [resultat]="problemesFinaux()" (corriger)="corriger.emit($event)" />
-    }
-
-    @if (statut() === 'EN_VALIDATION') {
-      <p class="synthese__status synthese__status--attente" role="status">
-        En attente de validation.
-      </p>
-    } @else if (statut() === 'VALIDEE' || statut() === 'DEVIS_GENERE') {
-      <p class="synthese__status synthese__status--valide" role="status">
-        Dossier validé.
-      </p>
-    } @else if (pretASoumettre()) {
-      <p class="synthese__ok synthese__ok--final" role="status">
-        Le chiffrage est prêt. Utilisez « Soumettre à validation » en bas de page.
-      </p>
-    }
   }
 </section>

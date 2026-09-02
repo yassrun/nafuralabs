@@ -2,6 +2,7 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@platform/lib/anatomy';
 import type { Ouvrage } from '@app/etudes/models';
+import { OUVRAGE_IMPORT_DEFINITION } from '@app/socle/shared/smart-import/handlers/ouvrage-import.handler';
 
 import { buildOuvrageColumns } from './columns';
 import { FILTERS } from './filters';
@@ -23,7 +24,6 @@ export function buildOuvrageListingConfig(t: TranslateService) {
         search: true,
         filters: true,
         columnToggle: true,
-        selectionMode: 'none',
         viewModeToggle: false,
         refresh: true,
       },
@@ -33,6 +33,11 @@ export function buildOuvrageListingConfig(t: TranslateService) {
         message: 'Créez un nouvel ouvrage pour démarrer votre bordereau de prix.',
         actionLabel: 'Nouvel ouvrage',
         actionId: 'create',
+      },
+      smartImport: {
+        entityKey: 'ouvrage',
+        definition: OUVRAGE_IMPORT_DEFINITION,
+        permission: 'etudes.ouvrage.create',
       },
     },
   );

@@ -24,7 +24,6 @@ export function buildTauxChangeListingConfig(t: TranslateService) {
         search: true,
         filters: true,
         columnToggle: false,
-        selectionMode: 'none',
         viewModeToggle: false,
         importExport: true,
         refresh: true,

@@ -20,7 +20,7 @@ export function buildContratsListingConfig(t: TranslateService) {
     {
       filters: buildContratFilters(t),
       defaultSort: { column: 'dateDebut', direction: 'desc' },
-      features: { search: true, filters: true, columnToggle: true, selectionMode: 'none', refresh: true },
+      features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {
         icon: 'file-check',
         title: tr('achats.contrat.list.emptyState.title'),

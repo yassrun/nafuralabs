@@ -6,7 +6,6 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -48,8 +47,8 @@ interface IaFieldProposal {
 type CpsPhase = 'idle' | 'uploading' | 'indexing' | 'ready' | 'partial' | 'error';
 
 /**
- * Création unifiée dossier d'étude + AO (ERP-10) :
- * CPS optionnel → propositions IA champ/champ → MOA texte (pas Partner).
+ * Création minimale : objet + MOA + chargé. CPS optionnel (préremplit).
+ * Le détail AO se saisit au cadrage.
  */
 @Component({
   selector: 'app-dossier-create',
@@ -57,7 +56,6 @@ type CpsPhase = 'idle' | 'uploading' | 'indexing' | 'ready' | 'partial' | 'error
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    DecimalPipe,
     ActionBarComponent,
     ButtonComponent,
     NfSelectComponent,
@@ -339,23 +337,20 @@ export class DossierCreatePage implements OnInit {
   private applyProposition(prop: MarchePropose): void {
     this.iaConfiance.set(prop.confiance ?? 0.55);
     const meta = prop.metadonnees ?? {};
-    const next: Partial<Record<IaFieldKey, IaFieldProposal>> = {};
-    const put = (key: IaFieldKey, raw: string | number | null | undefined) => {
-      if (!this.isSuggestionValue(raw)) return;
-      next[key] = { value: raw as string | number, status: 'proposed' };
+    const applyIf = (key: IaFieldKey, raw: string | number | null | undefined) => {
+      if (this.isSuggestionValue(raw)) this.applyValue(key, raw as string | number);
     };
-    put('objet', meta.objet ?? undefined);
-    put('clientNom', meta.donneurOrdre ?? undefined);
-    put('dateLimiteDepot', this.asDateInput(meta.dateLimiteDepot));
-    put('aoReference', meta.reference ?? undefined);
-    put('aoType', meta.type === 'PRIVE' || meta.type === 'PUBLIC' ? meta.type : undefined);
-    put('ville', meta.ville ?? undefined);
-    put('dateOuverturePlis', this.asDateInput(meta.dateOuverturePlis));
-    put('delaiExecutionJours', meta.delaiExecutionJours ?? undefined);
-    put('estimationMoaHt', meta.estimationMoaHt ?? undefined);
-    put('cautionProvisoire', meta.cautionProvisoire ?? undefined);
-    put('cautionDefinitive', meta.cautionDefinitive ?? undefined);
-    this.iaFields.set(next);
+    applyIf('objet', meta.objet);
+    applyIf('clientNom', meta.donneurOrdre);
+    applyIf('dateLimiteDepot', this.asDateInput(meta.dateLimiteDepot));
+    applyIf('aoReference', meta.reference);
+    applyIf('aoType', meta.type === 'PRIVE' || meta.type === 'PUBLIC' ? meta.type : undefined);
+    applyIf('ville', meta.ville);
+    applyIf('dateOuverturePlis', this.asDateInput(meta.dateOuverturePlis));
+    applyIf('delaiExecutionJours', meta.delaiExecutionJours);
+    applyIf('estimationMoaHt', meta.estimationMoaHt);
+    applyIf('cautionProvisoire', meta.cautionProvisoire);
+    applyIf('cautionDefinitive', meta.cautionDefinitive);
   }
 
   private isSuggestionValue(raw: string | number | null | undefined): boolean {

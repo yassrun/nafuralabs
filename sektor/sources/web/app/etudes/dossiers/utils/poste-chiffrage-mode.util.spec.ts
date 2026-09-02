@@ -5,6 +5,7 @@ import {
   ecartEstimationPercent,
   origineUi,
   prixVenteHtActif,
+  puVenteSimple,
   resolveOrigineCout,
   resolvePosteChiffrageMode,
 } from './poste-chiffrage-mode.util';
@@ -81,6 +82,19 @@ describe('poste-chiffrage-mode.util', () => {
           prixPoste: 1212,
         }),
       ).toBe(980);
+    });
+  });
+
+  describe('puVenteSimple', () => {
+    it('retourne null tant que rien n’est saisi', () => {
+      expect(puVenteSimple({ cout: null, fgPercent: 10, margePercent: 17.5 })).toBeNull();
+      expect(puVenteSimple({ cout: 0, fgPercent: 10, margePercent: 17.5 })).toBeNull();
+    });
+
+    it('priorise une vente saisie directement', () => {
+      expect(
+        puVenteSimple({ cout: 100, fgPercent: 10, margePercent: 10, venteDirecte: 250 }),
+      ).toBe(250);
     });
   });
 });

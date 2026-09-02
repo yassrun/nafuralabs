@@ -18,6 +18,18 @@ export type JsonSchemaType =
   | 'boolean'
   | 'null';
 
+/**
+ * Field handling for Smart Import review and help UI.
+ * - extract: must come from the file (blocks import if missing after review)
+ * - infer: may be absent on the file; LIA or the ERP handler may complete it
+ * - optional: not required for import
+ */
+export type NafuraFieldPresence = 'extract' | 'infer' | 'optional';
+
+export interface NafuraFieldMeta {
+  presence?: NafuraFieldPresence;
+}
+
 export interface JsonSchemaBase {
   type?: JsonSchemaType | JsonSchemaType[];
   title?: string;
@@ -26,6 +38,8 @@ export interface JsonSchemaBase {
   enum?: unknown[];
   format?: string; // e.g. 'date'
   readOnly?: boolean;
+  /** Smart Import: extract / infer / optional semantics for help + validation. */
+  xNafura?: NafuraFieldMeta;
 }
 
 export interface JsonSchemaObject extends JsonSchemaBase {

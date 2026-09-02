@@ -23,14 +23,41 @@ export function filterLookupHits(
   if (q.length < LOOKUP_COMBO_MIN_CHARS) {
     return [];
   }
-  const hits = options.filter(
-    (o) =>
-      !o.disabled &&
-      (o.label.toLowerCase().includes(q) || o.value.toLowerCase().includes(q))
-  );
-  const exact = hits.filter((o) => o.value.toLowerCase() === q);
-  const rest = hits.filter((o) => o.value.toLowerCase() !== q);
+  const hits = options.filter((o) => {
+    if (o.disabled) return false;
+    const label = String(o.label ?? '').toLowerCase();
+    const value = String(o.value ?? '').toLowerCase();
+    return label.includes(q) || value.includes(q);
+  });
+  const exact = hits.filter((o) => String(o.value ?? '').toLowerCase() === q);
+  const rest = hits.filter((o) => String(o.value ?? '').toLowerCase() !== q);
   return [...exact, ...rest];
+}
+
+/**
+ * Parent templates often bind a fresh `options[]` every change-detection cycle
+ * (`toNfSelectOptions(field)`). Server typeahead owns `comboHits` — re-searching
+ * on that identity churn loops HTTP and freezes the form.
+ */
+export function comboHitsComeFromServer(lookupSearch: unknown): boolean {
+  return typeof lookupSearch === 'function';
+}
+
+/** Filled combobox: typing is locked until the value is cleared (AC-15). */
+export function comboTypingLocked(value: string | undefined | null): boolean {
+  return String(value ?? '').trim().length > 0;
+}
+
+export function lookupOptionsEqual(
+  a: readonly LookupComboOption[],
+  b: readonly LookupComboOption[],
+): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].value !== b[i].value || a[i].label !== b[i].label) return false;
+  }
+  return true;
 }
 
 /** Empty → listing. Value set → `{list}/{id}` (AC-6 / AC-7). */

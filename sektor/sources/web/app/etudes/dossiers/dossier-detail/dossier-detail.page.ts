@@ -7,6 +7,7 @@ import {
   signal,
   untracked,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,6 +19,7 @@ import {
   ConfirmDialogService,
   PrintDialogService,
   WizardShellComponent,
+  type ButtonListItem,
 } from '@platform/lib/anatomy';
 import type { WizardStepConfig } from '@platform/lib/anatomy';
 
@@ -32,10 +34,15 @@ import {
 import { openGateProblemesDialog } from '../components/gate-blocage/gate-problemes-dialog.component';
 import { DecompositionWorkspaceComponent } from '../components/decomposition-workspace/decomposition-workspace.component';
 import { DossierSummaryHeaderComponent } from '../components/dossier-summary-header/dossier-summary-header.component';
+import { DossierIdentitePanelComponent } from '../components/dossier-identite-panel/dossier-identite-panel.component';
 import { ShareGuestLinkDialogComponent } from '../components/share-guest-link-dialog/share-guest-link-dialog.component';
 import { PiecesMarcheComponent } from '../components/pieces-marche/pieces-marche.component';
 import { SyntheseValidationPanelComponent } from '../components/synthese-validation-panel/synthese-validation-panel.component';
 import { DossierAgentPanelComponent } from '../components/dossier-agent-panel/dossier-agent-panel.component';
+import {
+  EtudeBannerComponent,
+  type EtudeBannerTone,
+} from '../components/etude-banner/etude-banner.component';
 import {
   DossierEtudeApiService,
   PostesOrphelinsError,
@@ -52,7 +59,9 @@ import {
   backendGateEtapesForUi,
   backendToUiEtape,
   estAlerteQualiteChiffrage,
+  estAnomaliePieceHorsCadrage,
   ETAPES_UI_DOSSIER,
+  incompleteUiStepIndexes,
   nextBackendEtape,
   prevBackendEtape,
   uiEtapePourGate,
@@ -77,7 +86,9 @@ import { labelStatutDossier } from '../utils/dossier-status.util';
     DecompositionWorkspaceComponent,
     SyntheseValidationPanelComponent,
     DossierSummaryHeaderComponent,
+    DossierIdentitePanelComponent,
     DossierAgentPanelComponent,
+    EtudeBannerComponent,
   ],
   templateUrl: './dossier-detail.page.html',
   styleUrl: './dossier-detail.page.scss',
@@ -92,6 +103,9 @@ export class DossierDetailPage {
   private readonly translate = inject(TranslateService);
   private readonly partnersApi = inject(PartnersApiService);
   private readonly decomposition = viewChild(DecompositionWorkspaceComponent);
+  private readonly identite = viewChild(DossierIdentitePanelComponent);
+  private readonly piecesPanels = viewChildren(PiecesMarcheComponent);
+  private readonly synthesePanel = viewChild(SyntheseValidationPanelComponent);
 
   readonly dossier = signal<DossierEtude | undefined>(undefined);
   readonly synthese = signal<DossierEtudeSynthese | undefined>(undefined);
@@ -105,9 +119,12 @@ export class DossierDetailPage {
     this.route.queryParamMap.pipe(map((params) => params.get('noeudId'))),
     { initialValue: this.route.snapshot.queryParamMap.get('noeudId') },
   );
-  /** Incrémente pour forcer le mode Manuel sur l’étape Bordereau. */
-  readonly forceVoieManuelToken = signal(0);
-  readonly bordereauVoie = signal<'auto' | 'manuel'>('auto');
+  readonly focusNoeudCode = toSignal(
+    this.route.queryParamMap.pipe(map((params) => params.get('noeudCode'))),
+    { initialValue: this.route.snapshot.queryParamMap.get('noeudCode') },
+  );
+  /** Incrémenté à chaque « Voir dans l’arbre » pour re-scroller le même nœud. */
+  readonly focusTick = signal(0);
   /**
    * Étape Coût : soft par défaut ; passe en hard après Continuer / Vérifier.
    * Reset au changement d’étape ou quand plus aucun problème.
@@ -131,13 +148,12 @@ export class DossierDetailPage {
   });
   readonly indexCourant = computed(() => this.etapeUi() - 1);
 
-  /** Arbre validé en mode Auto (lecture seule structure). */
-  readonly structureAutoReadOnly = computed(
-    () =>
-      this.bordereauVoie() === 'auto' &&
-      !!this.dossier()?.dpgfId &&
-      !(this.synthese()?.structureVerrouillee ?? false),
+  readonly incompleteStepIndexes = computed(() =>
+    incompleteUiStepIndexes(this.etapeUi(), this.gates()),
   );
+
+  /** L’arbre bordereau est toujours éditable à cette étape. */
+  readonly structureAutoReadOnly = computed(() => false);
 
   /** Anomalies bloquantes de l’étape UI courante (pas le total multi-gates). */
   readonly anomaliesEtapeCourante = computed(() => {
@@ -163,6 +179,9 @@ export class DossierDetailPage {
         if (ui === 3 && estAlerteQualiteChiffrage(p.message)) {
           continue;
         }
+        if (ui === 1 && estAnomaliePieceHorsCadrage(p)) {
+          continue;
+        }
         // Un nœud = une ligne (évite cout_unitaire + prix_absent en double).
         const key =
           p.noeudId != null && String(p.noeudId).length > 0
@@ -173,7 +192,7 @@ export class DossierDetailPage {
         problemes.push({ ...p, etape: g.etape });
       }
     }
-    const bloquant = relevant.some((g) => g.bloquant && g.problemes.length > 0);
+    const bloquant = problemes.length > 0 && relevant.some((g) => g.bloquant);
     return {
       etape: uiToBackendEtape(ui),
       bloquant,
@@ -247,12 +266,45 @@ export class DossierDetailPage {
 
   readonly backLabel = computed(() => 'Précédent');
 
-  /**
-   * Hint complémentaire — les gates s’affichent déjà en une ligne compacte.
-   * Ne jamais afficher le dirty poste ici : ça décale l’arbre à chaque frappe dans le drawer.
-   * Le dirty est géré par confirm à la navigation (suivant / quitter).
-   */
-  readonly blocageHint = computed(() => undefined);
+  /** Bas de wizard : Enregistrer (cadrage) — les gestes hors formulaire restent en en-tête. */
+  readonly wizardExtraActions = computed((): ButtonListItem[] => {
+    if (this.etapeUi() !== 1 || !this.modifiable()) return [];
+    const saving = this.identite()?.saving() ?? false;
+    return [
+      {
+        id: 'save-identite',
+        label: 'Enregistrer',
+        variant: 'secondary',
+        disabled: saving,
+        loading: saving,
+      },
+    ];
+  });
+
+  readonly wizardBanners = computed((): { tone: EtudeBannerTone; message: string }[] => {
+    const banners: { tone: EtudeBannerTone; message: string }[] = [];
+    const seen = new Set<string>();
+    const add = (tone: EtudeBannerTone, message?: string | null) => {
+      const m = (message ?? '').trim();
+      if (!m || seen.has(m)) return;
+      seen.add(m);
+      banners.push({ tone, message: m });
+    };
+    add('error', this.erreur());
+    if (!this.modifiable()) add('info', this.messageVerrou());
+    const identite = this.identite()?.banner();
+    if (identite) add(identite.tone, identite.message);
+    for (const panel of this.piecesPanels()) {
+      const b = panel.banner();
+      if (b) add(b.tone, b.message);
+    }
+    add('error', this.decomposition()?.arbreErreur());
+    const syn = this.synthesePanel()?.banner();
+    if (syn && (syn.tone === 'error' || this.modifiable())) {
+      add(syn.tone, syn.message);
+    }
+    return banners;
+  });
 
   onPosteDirty(dirty: boolean): void {
     this.posteDirty.set(dirty);
@@ -306,6 +358,10 @@ export class DossierDetailPage {
     if (this.etapeUi() === 3 && !this.peutContinuer()) {
       this.gateHardReveal.set(true);
       return;
+    }
+    if (this.etapeUi() === 1) {
+      const ok = await this.identite()?.enregistrer();
+      if (ok === false) return;
     }
     const cible = nextBackendEtape(this.etapeUi());
     if (cible == null) return;
@@ -583,12 +639,25 @@ export class DossierDetailPage {
     const dossier = this.dossier();
 
     const goFocus = () => {
-      if (!probleme.noeudId) return;
-      void this.nav.navigate(['.'], {
-        relativeTo: this.route,
-        queryParams: { noeudId: probleme.noeudId },
-        queryParamsHandling: 'merge',
-      });
+      if (!probleme.noeudId && !probleme.codeArticle) return;
+      this.focusTick.update((n) => n + 1);
+      void this.nav
+        .navigate(['.'], {
+          relativeTo: this.route,
+          queryParams: {
+            ...(probleme.noeudId ? { noeudId: probleme.noeudId } : {}),
+            ...(probleme.codeArticle ? { noeudCode: probleme.codeArticle } : {}),
+          },
+          queryParamsHandling: 'merge',
+        })
+        .then(() => {
+          setTimeout(() => {
+            for (const panel of this.piecesPanels()) {
+              panel.revelerNoeud(probleme.noeudId, probleme.codeArticle);
+            }
+            this.decomposition()?.revelerNoeud(probleme.noeudId, probleme.codeArticle);
+          }, 0);
+        });
     };
 
     if (dossier && backendToUiEtape(dossier.currentStep) !== uiCible) {
@@ -599,12 +668,19 @@ export class DossierDetailPage {
   }
 
   passerBordereauManuel(): void {
-    this.forceVoieManuelToken.update((n) => n + 1);
-    this.bordereauVoie.set('manuel');
+    /* L’arbre est toujours éditable — plus de bascule Auto / Manuel. */
   }
 
-  onBordereauVoieChange(voie: 'auto' | 'manuel'): void {
-    this.bordereauVoie.set(voie);
+  onIdentiteSaved(maj: DossierEtude): void {
+    this.dossier.set(maj);
+    const id = maj.id;
+    void this.refreshSynthese(id);
+  }
+
+  onWizardAction(actionId: string): void {
+    if (actionId === 'save-identite') {
+      void this.identite()?.enregistrer();
+    }
   }
 
   focusPremierProblemeGate(): void {
@@ -767,15 +843,26 @@ export class DossierDetailPage {
         ...gate,
         problemes: gate.problemes.map((p) => ({ ...p, etape: gate.etape })),
       };
+      const destOnlyCadrage =
+        tagged.etape === 1 &&
+        tagged.problemes.length > 0 &&
+        tagged.problemes.every((p) => estAnomaliePieceHorsCadrage(p));
+      if (destOnlyCadrage) {
+        this.erreur.set(undefined);
+        return;
+      }
       this.gates.update((all) => {
         const others = all.filter((g) => g.etape !== tagged.etape);
         return [...others, tagged];
       });
-      this.erreur.set(
-        tagged.problemes.length > 0
-          ? `${tagged.problemes.length} point(s) empêchent de continuer — voir la liste ci-dessous.`
-          : (err.error.code ?? 'Étape non franchie.'),
-      );
+      this.erreur.set(undefined);
+      const visibles =
+        tagged.etape === 1
+          ? tagged.problemes.filter((p) => !estAnomaliePieceHorsCadrage(p))
+          : tagged.problemes;
+      if (visibles.length > 0) {
+        void openGateProblemesDialog(this.dialog, visibles);
+      }
       return;
     }
     // AC-3 — l'attribution diffère du total devis : montrer les deux montants, ne rien réécrire.

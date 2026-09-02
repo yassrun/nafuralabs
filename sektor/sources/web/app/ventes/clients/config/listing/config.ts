@@ -1,5 +1,6 @@
 import { buildListingConfig } from '@platform/lib/anatomy';
 import type { ClientVenteListItem } from '../../models';
+import { CLIENT_IMPORT_DEFINITION } from '@app/socle/shared/smart-import/handlers/client-import.handler';
 
 import { COLUMNS } from './columns';
 import { FILTERS } from './filters';
@@ -20,7 +21,6 @@ export const CLIENT_LISTING_CONFIG = buildListingConfig<ClientVenteListItem>(
       search: true,
       filters: true,
       columnToggle: true,
-      selectionMode: 'none',
       refresh: true,
     },
     emptyState: {
@@ -29,6 +29,11 @@ export const CLIENT_LISTING_CONFIG = buildListingConfig<ClientVenteListItem>(
       message: 'Ajoutez vos clients pour commencer à facturer.',
       actionLabel: 'Nouveau client',
       actionId: 'create',
+    },
+    smartImport: {
+      entityKey: 'client',
+      definition: CLIENT_IMPORT_DEFINITION,
+      permission: 'ventes.clients.create',
     },
   },
 );

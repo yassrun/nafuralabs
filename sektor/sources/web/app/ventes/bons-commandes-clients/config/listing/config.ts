@@ -16,7 +16,7 @@ export const BCC_LISTING_CONFIG = buildListingConfig<BonCommandeClient>(
   {
     filters: FILTERS,
     defaultSort: { column: 'dateReception', direction: 'desc' },
-    features: { search: true, filters: true, columnToggle: true, selectionMode: 'none', refresh: true },
+    features: { search: true, filters: true, columnToggle: true, refresh: true },
     emptyState: {
       icon: 'shopping-bag',
       title: 'Aucun bon de commande client',

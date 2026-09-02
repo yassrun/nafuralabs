@@ -6,14 +6,8 @@ import {
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles,
 } from '@platform/lib/anatomy';
-import {
-  SmartImportTriggerComponent,
-  type ReviewedExtraction,
-} from '@platform/app/document-extraction/smart-import';
-import {
-  CLIENT_IMPORT_DEFINITION,
-  ClientImportService,
-} from '@app/socle/shared/smart-import/handlers/client-import.handler';
+import type { ReviewedExtraction } from '@platform/app/document-extraction/smart-import';
+import { ClientImportService } from '@app/socle/shared/smart-import/handlers/client-import.handler';
 import type { ClientVenteListItem } from '../models';
 
 import { ClientVenteFacade } from '../services';
@@ -22,7 +16,7 @@ import { CLIENT_LISTING_CONFIG } from '../config';
 @Component({
   selector: 'app-client-listing',
   standalone: true,
-  imports: [SmartImportTriggerComponent, ...ConfigDrivenListingPageImports],
+  imports: [...ConfigDrivenListingPageImports],
   templateUrl: './client-listing.page.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [ConfigDrivenListingPageStyles],
@@ -30,7 +24,6 @@ import { CLIENT_LISTING_CONFIG } from '../config';
 export class ClientListingPage extends ConfigDrivenListingPage<ClientVenteListItem> {
   readonly facade = inject(ClientVenteFacade);
   private readonly importer = inject(ClientImportService);
-  readonly importDefinition = CLIENT_IMPORT_DEFINITION;
   readonly config = CLIENT_LISTING_CONFIG;
   readonly headerTitle = 'Clients';
 

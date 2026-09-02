@@ -20,7 +20,7 @@ export function buildCongesListingConfig(t: TranslateService) {
     {
       filters: buildCongeFilters(t),
       defaultSort: { column: 'dateDebut', direction: 'desc' },
-      features: { search: true, filters: true, columnToggle: true, selectionMode: 'none', refresh: true },
+      features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {
         icon: 'calendar-off',
         title: tr('rh.conge.listing.emptyState.title'),

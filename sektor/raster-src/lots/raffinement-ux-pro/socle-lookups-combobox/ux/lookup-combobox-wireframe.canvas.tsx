@@ -105,6 +105,11 @@ export default function LookupComboboxWireframe() {
           carte n’a pas de route.
         </Text>
         <Text>
+          Valeur posee : libelle en lecture seule + croix dans le champ. Clic
+          croix = champ vide, la saisie redevient possible. Pas de frappe tant
+          qu’un id est pose.
+        </Text>
+        <Text>
           0 hit : message. Pas de CTA Creer dans le combobox v1. Article =
           picker deja tranche, pas ce champ.
         </Text>
@@ -119,9 +124,10 @@ function FakeField(props: {
   placeholder?: string;
   open?: boolean;
   eye?: "fiche" | "liste" | false;
+  clear?: boolean;
   children?: import("react").ReactNode;
 }) {
-  const { label, value, placeholder, open, eye, children } = props;
+  const { label, value, placeholder, open, eye, clear, children } = props;
   const theme = useHostTheme();
   return (
     <Stack gap={6} style={{ maxWidth: 420 }}>
@@ -135,6 +141,10 @@ function FakeField(props: {
             background: theme.bg.elevated,
             padding: "8px 12px",
             minHeight: 36,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 8,
           }}
         >
           {value ? (
@@ -142,6 +152,11 @@ function FakeField(props: {
           ) : (
             <Text tone="secondary">{placeholder ?? "Taper pour chercher…"}</Text>
           )}
+          {clear && value ? (
+            <Pill size="sm" title="Effacer">
+              ×
+            </Pill>
+          ) : null}
         </div>
         {eye === "fiche" && (
           <Pill active size="sm" title="Ouvrir la fiche">
@@ -266,12 +281,15 @@ function VueChoisi() {
             label="Client"
             value="CLI-0041 — Residence Atlas"
             eye="fiche"
+            clear
           />
         </CardBody>
       </Card>
-      <Callout tone="info" title="AC-6">
+      <Callout tone="info" title="AC-6 + AC-15">
         Clic oeil → nouvel onglet /ventes/clients/&lt;id&gt;. Pas la liste. La
-        session est conservee (comme l’oeil liste aujourd’hui).
+        session est conservee (comme l’oeil liste aujourd’hui). Croix dans le
+        champ : | Residence Atlas  × | → champ vide, puis on retape. Pas de
+        frappe tant qu’une valeur est posee.
       </Callout>
     </Stack>
   );

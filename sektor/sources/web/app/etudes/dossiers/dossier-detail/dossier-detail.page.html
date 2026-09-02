@@ -6,6 +6,7 @@
     @if (synthese(); as syn) {
       <app-dossier-summary-header
         [synthese]="syn"
+        [dossier]="dossier()!"
         [hasDpgf]="!!dossier()?.dpgfId"
         [anomaliesEtape]="anomaliesEtapeCourante()"
         [etapeUi]="etapeUi()"
@@ -27,30 +28,23 @@
       </header>
     }
 
-    @if (erreur(); as message) {
-      <p class="dossier__erreur" role="alert">{{ message }}</p>
-    }
-
-    @if (!modifiable()) {
-      <p class="dossier__verrou" role="status" [attr.data-statut]="dossier()?.status">
-        {{ messageVerrou() }}
-      </p>
-    }
-
     <nf-wizard-shell
       class="dossier__wizard"
       [class.dossier__wizard--fill]="etapeUi() === 2 || etapeUi() === 3"
       [steps]="etapes"
       [currentStepIndex]="indexCourant()"
+      [incompleteStepIndexes]="incompleteStepIndexes()"
       [canProceed]="modifiable() ? peutContinuerUi() : true"
       [allowStepNavigation]="true"
       [backLabel]="backLabel()"
       [nextLabel]="nextLabel()"
       submitLabel="Soumettre le chiffrage"
       [showSubmit]="peutSoumettre()"
+      [extraActions]="wizardExtraActions()"
       (back)="precedent()"
       (next)="suivant()"
       (submit)="soumettre()"
+      (action)="onWizardAction($event)"
       (stepSelect)="allerAEtapeUi($event)"
     >
       <app-gate-blocage
@@ -62,9 +56,8 @@
         (verifier)="revealGateHard()"
         (focusResume)="focusPremierProblemeGate()"
       />
-
-      @if (blocageHint(); as hint) {
-        <p class="dossier__blocage-hint" role="status">{{ hint }}</p>
+      @for (banner of wizardBanners(); track banner.message) {
+        <app-etude-banner [tone]="banner.tone" [message]="banner.message" />
       }
 
       <section class="dossier__etape">
@@ -73,8 +66,14 @@
             [dossierId]="dossier()!.id"
             [dpgfId]="$safeNavigationMigration(dossier()?.dpgfId)"
             [modifiable]="modifiable()"
+            [figeFichiersDeposes]="dossier()?.status !== 'BROUILLON'"
             mode="documents"
             (change)="rechargerApresPieces()"
+          />
+          <app-dossier-identite-panel
+            [dossier]="dossier()!"
+            [modifiable]="modifiable()"
+            (saved)="onIdentiteSaved($event)"
           />
         } @else if (etapeUi() === 2) {
           <app-pieces-marche
@@ -84,10 +83,10 @@
             [modifiable]="modifiable()"
             [structureVerrouillee]="synthese()?.structureVerrouillee ?? false"
             [focusNoeudId]="focusNoeudId()"
-            [forceVoieManuelToken]="forceVoieManuelToken()"
+            [focusCode]="focusNoeudCode()"
+            [focusToken]="focusTick()"
             mode="bordereau"
             (change)="rechargerApresPieces()"
-            (voieChange)="onBordereauVoieChange($event)"
           />
         } @else if (etapeUi() === 3) {
           <div class="dossier__etape3">
@@ -101,6 +100,8 @@
                 [margeDefaut]="dossier()?.margePercentDefaut ?? 17.5"
                 [tvaDefaut]="dossier()?.tvaTauxDefaut ?? 20"
                 [focusNoeudId]="focusNoeudId()"
+                [focusCode]="focusNoeudCode()"
+                [focusToken]="focusTick()"
                 [consultationGate]="gateCourant()"
                 (change)="rechargerApresPieces()"
                 (dirtyChange)="onPosteDirty($event)"
@@ -131,5 +132,5 @@
     />
   </div>
 } @else {
-  <p class="dossier__erreur" role="alert">{{ erreur() ?? 'Dossier introuvable.' }}</p>
+  <app-etude-banner tone="error" [message]="erreur() ?? 'Dossier introuvable.'" />
 }

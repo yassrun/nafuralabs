@@ -2,6 +2,7 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@platform/lib/anatomy';
 import type { ArticleListItem } from '../../models';
+import { ARTICLE_IMPORT_DEFINITION } from '@app/socle/shared/smart-import/handlers/article-import.handler';
 
 import { buildArticleColumns } from './columns';
 import { ROUTES } from './routes';
@@ -26,6 +27,11 @@ export function buildArticleListingConfig(t: TranslateService) {
       features: {},
       emptyState: {
         icon: 'package',
+      },
+      smartImport: {
+        entityKey: 'article',
+        definition: ARTICLE_IMPORT_DEFINITION,
+        permission: 'inventory.article.create',
       },
     }
   );

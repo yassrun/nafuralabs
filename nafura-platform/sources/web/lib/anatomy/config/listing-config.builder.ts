@@ -54,6 +54,7 @@ import type {
   ListingRouteConfig,
   DeleteConfig,
   ImportExportConfig,
+  SmartImportListingConfig,
   EmptyStateConfig,
   PaginationConfig,
   ViewModesConfig,
@@ -100,7 +101,7 @@ export const DEFAULT_VIEW_MODES: ViewModesConfig = {
  * | search | true | Search input |
  * | filters | true | Filter panel |
  * | columnToggle | true | Column visibility menu |
- * | selectionMode | 'toggleable' | Row selection |
+ * | selectionMode | 'toggleable' | Row selection (click = select, dblclick = detail) |
  * | viewModeToggle | false | Table/Card/Grid switcher |
  * | importExport | false | Import/Export buttons |
  * | refresh | true | Refresh button |
@@ -491,6 +492,9 @@ export interface ListingConfigOverrides<TItem> {
    */
   delete?: DeleteConfig<TItem>;
 
+  /** Magic import (Import magique) in listing toolbar. */
+  smartImport?: SmartImportListingConfig;
+
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -649,6 +653,7 @@ export function buildListingConfig<TItem>(
     delete: deleteConfig,
     emptyState,
     importExport: importExportConfig,
+    smartImport: overrides.smartImport,
 
     // Optional (no defaults)
     defaultSort: overrides.defaultSort,

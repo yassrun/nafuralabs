@@ -9,14 +9,8 @@ import {
   ButtonComponent,
 } from '@platform/lib/anatomy';
 import type { Employe } from '@app/rh/models';
-import {
-  SmartImportTriggerComponent,
-  type ReviewedExtraction,
-} from '@platform/app/document-extraction/smart-import';
-import {
-  EMPLOYE_IMPORT_DEFINITION,
-  EmployeImportService,
-} from '@app/socle/shared/smart-import/handlers/employe-import.handler';
+import type { ReviewedExtraction } from '@platform/app/document-extraction/smart-import';
+import { EmployeImportService } from '@app/socle/shared/smart-import/handlers/employe-import.handler';
 
 import { EmployeFacade } from '../services';
 import { buildEmployesListingConfig } from '../config';
@@ -26,7 +20,7 @@ type QuickFilter = 'ALL' | 'ACTIF' | 'SUSPENDU';
 @Component({
   selector: 'app-employe-listing',
   standalone: true,
-  imports: [ButtonComponent, SmartImportTriggerComponent, ...ConfigDrivenListingPageImports],
+  imports: [ButtonComponent, ...ConfigDrivenListingPageImports],
   templateUrl: './employe-listing.page.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [ConfigDrivenListingPageStyles],
@@ -35,7 +29,6 @@ export class EmployeListingPage extends ConfigDrivenListingPage<Employe> {
   private readonly translate = inject(TranslateService);
   readonly facade = inject(EmployeFacade);
   private readonly importer = inject(EmployeImportService);
-  readonly importDefinition = EMPLOYE_IMPORT_DEFINITION;
   readonly config = buildEmployesListingConfig(this.translate);
   readonly headerTitle = this.translate.instant('rh.employe.listing.headerTitle');
 

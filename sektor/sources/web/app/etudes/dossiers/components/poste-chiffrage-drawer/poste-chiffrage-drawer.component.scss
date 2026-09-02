@@ -108,13 +108,24 @@
 .poste-drawer__toggle {
   border: 0;
   background: transparent;
-  padding: 0.45rem 0.5rem;
+  padding: 0.4rem 0.5rem 0.45rem;
   font: inherit;
   font-size: 0.8125rem;
   color: var(--nf-color-text-secondary);
   cursor: pointer;
   text-align: center;
   min-width: 0;
+  display: grid;
+  gap: 0.05rem;
+  justify-items: center;
+
+  small {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.9;
+  }
 }
 
 .poste-drawer__toggle:disabled {

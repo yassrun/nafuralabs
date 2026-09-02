@@ -381,7 +381,7 @@ export type StatutDossierEtude =
  * Les numéros backend restent 1..5 ; voir `dossier-etape.util.ts` pour le mapping.
  */
 export const ETAPES_DOSSIER_ETUDE = [
-  { etape: 1, libelle: 'Documents du marché' },
+  { etape: 1, libelle: 'Cadrage & documents' },
   { etape: 2, libelle: 'Bordereau' },
   { etape: 3, libelle: 'Décomposition et consultations' },
   { etape: 4, libelle: 'Synthèse et validation' },
@@ -425,6 +425,12 @@ export interface DossierEtude {
   /** Enrichissement listing (AOC lié). */
   aoType?: string | null;
   aoDateLimiteDepot?: string | null;
+  aoReference?: string | null;
+  aoVille?: string | null;
+  aoDateOuverturePlis?: string | null;
+  aoDelaiExecutionJours?: number | null;
+  aoEstimationMoaHt?: number | null;
+  aoCautionProvisoire?: number | null;
   dpgfId?: string;
   currentStep: number;
   status: StatutDossierEtude;

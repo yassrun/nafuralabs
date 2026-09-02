@@ -8,13 +8,15 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { ActionBarComponent, ButtonComponent } from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
-import { ButtonComponent } from '@platform/lib/anatomy';
 
+import { headerCtaSlot } from '../../utils/dossier-header-cta.util';
+
+import type { DossierEtude } from '@app/etudes/models';
 import type { DossierEtudeSynthese } from '../../services/dossier-etude-api.service';
 import {
   DOSSIER_STATUT_VARIANTS,
-  labelPhase,
   labelStatutDossier,
 } from '../../utils/dossier-status.util';
 
@@ -22,7 +24,7 @@ import {
   selector: 'app-dossier-summary-header',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, MadCurrencyPipe, ButtonComponent],
+  imports: [CommonModule, RouterLink, MadCurrencyPipe, ButtonComponent, ActionBarComponent],
   templateUrl: './dossier-summary-header.component.html',
   styleUrl: './dossier-summary-header.component.scss',
   host: {
@@ -31,7 +33,9 @@ import {
 })
 export class DossierSummaryHeaderComponent {
   readonly synthese = input.required<DossierEtudeSynthese>();
-  /** True when the dossier has a linked DPGF (bordereau printable). */
+  /** Identité dossier (délai AO, MOA à jour après enregistrement). */
+  readonly dossier = input<DossierEtude | undefined>(undefined);
+  /** DPGF lié — conservé pour le retour des actions Imprimer. */
   readonly hasDpgf = input(false);
   /**
    * Anomalies de l’étape UI courante (prioritaire sur le total multi-gates backend).
@@ -47,20 +51,31 @@ export class DossierSummaryHeaderComponent {
   readonly focusAnomalies = output<void>();
 
   readonly statutLabel = computed(() => labelStatutDossier(this.synthese().status));
-  readonly phaseLabel = computed(() => labelPhase(this.synthese().phase));
   readonly statutVariant = computed(
     () => DOSSIER_STATUT_VARIANTS[this.synthese().status] ?? 'default',
   );
 
-  /** Client vraiment absent — pas seulement un id Partner manquant si le nom est là. */
-  readonly clientMissing = computed(() => {
-    const s = this.synthese();
-    return !s.clientId && !s.clientNom?.trim();
+  readonly moaNom = computed(() => {
+    const d = this.dossier();
+    return (d?.clientNom ?? this.synthese().clientNom ?? '').trim();
   });
 
-  readonly clientALier = computed(() => {
-    const s = this.synthese();
-    return !s.clientId && !!s.clientNom?.trim();
+  readonly chargeNom = computed(() => {
+    const d = this.dossier();
+    return (
+      d?.chargeEtudeNom
+      ?? this.synthese().chargeEtudeNom
+      ?? d?.chargeEtudeUserId
+      ?? this.synthese().chargeEtudeUserId
+      ?? ''
+    ).trim();
+  });
+
+  readonly delaiJours = computed(() => this.dossier()?.aoDelaiExecutionJours ?? null);
+
+  readonly delaiLabel = computed(() => {
+    const n = this.delaiJours();
+    return n == null ? '—' : `${n} j`;
   });
 
   readonly anomaliesAffichees = computed(() => {
@@ -113,7 +128,21 @@ export class DossierSummaryHeaderComponent {
     }
   });
 
-  readonly showCta = computed(() => !!this.ctaLabel());
+  readonly ctaSlot = computed(() => {
+    if (!this.ctaLabel()) return 'hidden' as const;
+    return headerCtaSlot(this.actionEffective());
+  });
+
+  readonly showCta = computed(() => this.ctaSlot() !== 'hidden');
+
+  readonly showActionBar = computed(
+    () =>
+      this.showPartager() ||
+      this.showReouvrir() ||
+      this.showRefuser() ||
+      this.showMarquerPerdu() ||
+      this.showCta(),
+  );
 
   readonly showReouvrir = computed(() => {
     const s = this.synthese();
@@ -128,8 +157,6 @@ export class DossierSummaryHeaderComponent {
   /** L13 — issue commerciale : perdu en secondaire quand devis généré. */
   readonly showMarquerPerdu = computed(() => this.synthese().status === 'DEVIS_GENERE');
 
-  readonly showPrintBordereau = computed(() => this.hasDpgf());
-  readonly showPrintSynthese = computed(() => true);
   readonly showPartager = computed(() => true);
 
   emitAction(code?: string): void {

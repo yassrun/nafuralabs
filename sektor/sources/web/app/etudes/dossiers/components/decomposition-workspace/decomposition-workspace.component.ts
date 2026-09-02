@@ -56,6 +56,8 @@ export class DecompositionWorkspaceComponent {
   readonly margeDefaut = input(17.5);
   readonly tvaDefaut = input(20);
   readonly focusNoeudId = input<string | null>(null);
+  readonly focusCode = input<string | null>(null);
+  readonly focusToken = input(0);
   /** Gate fusionnée (décomposition + consultation) pour afficher la couverture. */
   readonly consultationGate = input<ResultatGate | undefined>(undefined);
 
@@ -72,6 +74,8 @@ export class DecompositionWorkspaceComponent {
   readonly drawerDirty = signal(false);
 
   private readonly arbre = viewChild(BordereauArbreComponent);
+
+  readonly arbreErreur = computed(() => this.arbre()?.erreur());
 
   private drawerRef: MatDialogRef<
     PosteChiffrageDrawerComponent,
@@ -143,9 +147,15 @@ export class DecompositionWorkspaceComponent {
 
   ouvrirDetailsAlertes(): void {
     void openGateProblemesDialog(this.dialog, this.alertesConsultation()).then((picked) => {
-      if (!picked?.noeudId) return;
-      this.alerteFocusId.set(picked.noeudId);
+      if (!picked?.noeudId && !picked?.codeArticle) return;
+      if (picked.noeudId) this.alerteFocusId.set(picked.noeudId);
+      this.arbre()?.revelerNoeud(picked.noeudId, picked.codeArticle);
     });
+  }
+
+  revelerNoeud(id?: string | null, code?: string | null): void {
+    if (id) this.alerteFocusId.set(id);
+    this.arbre()?.revelerNoeud(id, code);
   }
 
   async onSelectPoste(row: BordereauTreeRow | null): Promise<void> {

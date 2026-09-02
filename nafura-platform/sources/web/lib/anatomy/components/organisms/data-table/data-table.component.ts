@@ -538,11 +538,6 @@ export class DataTableComponent<T = unknown> {
     if (target?.closest('[data-no-click="true"]')) {
       return;
     }
-    // No selection UX: open detail on first click (skip dblclick guard delay).
-    if (!this.selectable()) {
-      this.rowClick.emit(row);
-      return;
-    }
     if (this._rowClickTimeoutId) clearTimeout(this._rowClickTimeoutId);
     this._rowClickTimeoutId = setTimeout(() => {
       this._rowClickTimeoutId = null;

@@ -1,7 +1,10 @@
 import {
   LOOKUP_ORPHAN_LABEL,
+  comboHitsComeFromServer,
   filterLookupHits,
   lookupDisplayLabel,
+  comboTypingLocked,
+  lookupOptionsEqual,
   resolveLookupEyeRoute,
 } from './lookup-combobox.util';
 
@@ -25,6 +28,14 @@ describe('filterLookupHits', () => {
     expect(hits[0].value).toBe('at');
     expect(hits.some((h) => h.label.includes('Atlas'))).toBe(true);
   });
+
+  it('does not throw when a hit has no label', () => {
+    const hits = filterLookupHits(
+      [{ value: 'xx-id', label: undefined as unknown as string }],
+      'ad'
+    );
+    expect(hits).toEqual([]);
+  });
 });
 
 describe('resolveLookupEyeRoute', () => {
@@ -42,6 +53,30 @@ describe('resolveLookupEyeRoute', () => {
 
   it('AC-8 no route when list is missing', () => {
     expect(resolveLookupEyeRoute(undefined, 'abc')).toBeUndefined();
+  });
+});
+
+describe('comboHitsComeFromServer', () => {
+  it('skips options-driven refresh when a server searcher is bound', () => {
+    const search = (_q: string) => Promise.resolve([]);
+    expect(comboHitsComeFromServer(search)).toBe(true);
+    expect(comboHitsComeFromServer(undefined)).toBe(false);
+  });
+});
+
+describe('comboTypingLocked', () => {
+  it('locks typing when a value is set and unlocks when empty', () => {
+    expect(comboTypingLocked('id-a')).toBe(true);
+    expect(comboTypingLocked('  ')).toBe(false);
+    expect(comboTypingLocked('')).toBe(false);
+    expect(comboTypingLocked(null)).toBe(false);
+  });
+});
+
+describe('lookupOptionsEqual', () => {
+  it('treats equal content as stable even when the array identity differs', () => {
+    expect(lookupOptionsEqual(OPTS, [...OPTS])).toBe(true);
+    expect(lookupOptionsEqual(OPTS, OPTS.slice(0, 1))).toBe(false);
   });
 });
 

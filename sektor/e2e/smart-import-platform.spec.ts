@@ -14,7 +14,7 @@ test.describe('Magic Import platform', () => {
       await page.goto(listing.path, { waitUntil: 'domcontentloaded' });
       await expect(page).toHaveURL(new RegExp(listing.path.replace(/\//g, '\\/')));
       await expect(
-        page.locator(`nf-smart-import-trigger[entitykey="${listing.entityKey}"]`),
+        page.locator(`nf-smart-import-action[entitykey="${listing.entityKey}"], nf-smart-import-trigger[entitykey="${listing.entityKey}"]`),
       ).toBeVisible({ timeout: 20_000 });
     });
   }
@@ -38,7 +38,9 @@ test.describe('Magic Import platform', () => {
 
   test('rejects an empty file before any extraction request', async ({ page }) => {
     await page.goto('/achats/fournisseurs', { waitUntil: 'domcontentloaded' });
-    const trigger = page.locator('nf-smart-import-trigger[entitykey="fournisseur"]');
+    const trigger = page.locator(
+      'nf-smart-import-action[entitykey="fournisseur"], nf-smart-import-trigger[entitykey="fournisseur"]',
+    );
     await expect(trigger).toBeVisible({ timeout: 20_000 });
 
     let extractionCalled = false;

@@ -24,7 +24,6 @@ export function buildOffreListingConfig(t: TranslateService) {
         search: true,
         filters: true,
         columnToggle: true,
-        selectionMode: 'none',
         refresh: true,
       },
       emptyState: {

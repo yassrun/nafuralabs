@@ -109,6 +109,36 @@
   background-image: none;
   cursor: text;
   padding-right: var(--nf-space-3, 0.75rem);
+
+  &[readonly] {
+    cursor: default;
+  }
+}
+
+.nf-combobox--filled .nf-combobox__input {
+  padding-right: 2rem;
+}
+
+.nf-combobox__clear {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--nf-color-text-muted, #6b7280);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: var(--nf-border-radius, 0.375rem);
+
+  &:hover {
+    color: var(--nf-color-text, #1a1a1a);
+    background: var(--nf-color-disabled-bg, #f3f4f6);
+  }
 }
 
 .nf-combobox__list {

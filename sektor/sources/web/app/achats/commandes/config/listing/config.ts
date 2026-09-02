@@ -20,7 +20,7 @@ export function buildBcListingConfig(t: TranslateService) {
     {
       filters: buildBcFilters(t),
       defaultSort: { column: 'dateCreation', direction: 'desc' },
-      features: { search: true, filters: true, columnToggle: true, selectionMode: 'none', refresh: true },
+      features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {
         icon: 'file-text',
         title: tr('achats.commande.list.emptyState.title'),

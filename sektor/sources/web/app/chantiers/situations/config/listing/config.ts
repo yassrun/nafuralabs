@@ -23,7 +23,6 @@ export function buildSituationsListingConfig(t: TranslateService) {
         search: true,
         filters: true,
         columnToggle: true,
-        selectionMode: 'none',
         viewModeToggle: false,
         importExport: true,
         refresh: true,

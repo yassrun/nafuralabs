@@ -67,7 +67,6 @@ export function buildTransfertListingConfig(t: TranslateService) {
         search: true,
         filters: true,
         columnToggle: true,
-        selectionMode: 'none',
         viewModeToggle: false,
         refresh: true,
       },

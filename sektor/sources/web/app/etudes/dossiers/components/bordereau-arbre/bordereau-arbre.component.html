@@ -1,5 +1,27 @@
 <section class="arbre" aria-label="Arbre du bordereau">
   <header class="arbre__entete">
+    <div class="arbre__fold" role="group" aria-label="Déplier ou replier">
+      <nf-button
+        type="button"
+        variant="ghost"
+        size="sm"
+        icon="unfold-vertical"
+        iconLibrary="lucide"
+        tooltip="Tout déplier"
+        aria-label="Tout déplier"
+        (clicked)="expandAll()"
+      ></nf-button>
+      <nf-button
+        type="button"
+        variant="ghost"
+        size="sm"
+        icon="fold-vertical"
+        iconLibrary="lucide"
+        tooltip="Tout replier"
+        aria-label="Tout replier"
+        (clicked)="collapseAll()"
+      ></nf-button>
+    </div>
     <h4 class="arbre__titre">
       Arbre du bordereau
       @if (!chargement()) {
@@ -21,24 +43,6 @@
       }
     </h4>
     <div class="arbre__actions">
-      <nf-button
-        type="button"
-        variant="ghost"
-        size="sm"
-        icon="unfold_more"
-        tooltip="Tout déplier"
-        aria-label="Tout déplier"
-        (clicked)="expandAll()"
-      ></nf-button>
-      <nf-button
-        type="button"
-        variant="ghost"
-        size="sm"
-        icon="unfold_less"
-        tooltip="Tout replier"
-        aria-label="Tout replier"
-        (clicked)="collapseAll()"
-      ></nf-button>
       @if (showStructureActions()) {
         <nf-button type="button" variant="secondary" size="sm" (clicked)="ajouterLot()">
           Ajouter un lot
@@ -47,8 +51,8 @@
     </div>
   </header>
 
-  @if (erreur(); as message) {
-    <p class="arbre__erreur" role="alert">{{ message }}</p>
+  @if (inlineBanner() && erreur(); as message) {
+    <app-etude-banner tone="error" [message]="message" />
   }
 
   <div class="arbre__table">
@@ -61,7 +65,7 @@
       [expandedKeys]="expandedKeys()"
       (expandedKeysChange)="expandedKeys.set($event)"
       [rowClickable]="selectionEnabled() || openOnClick()"
-      [rowClass]="rowClass"
+      [rowClass]="rowClass()"
       [rowTitle]="rowTitle"
       (rowClick)="onRowClick($event)"
       (rowDblClick)="onRowDblClick($event)"
@@ -77,8 +81,9 @@
           @case ('code') {
             <span class="arbre__code" [attr.title]="row.code || null">{{ row.code }}</span>
           }
+          @case ('spacer') {}
           @case ('libelle') {
-            <span class="arbre__libelle" [attr.title]="row.libelle || null">
+            <span class="arbre__libelle" [nfTooltip]="row.libelle || ''" position="bottom">
               <span class="arbre__libelle-text">{{ row.libelle }}</span>
               @if (row.nonExploitable) {
                 <span class="arbre__warn-tag">incomplet</span>
@@ -148,7 +153,8 @@
                   type="button"
                   variant="ghost"
                   size="sm"
-                  icon="subdirectory_arrow_right"
+                  icon="corner-down-right"
+                  iconLibrary="lucide"
                   tooltip="Ajouter un enfant"
                   aria-label="Ajouter un enfant"
                   (clicked)="ajouterEnfant(row)"

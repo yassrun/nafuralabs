@@ -23,7 +23,6 @@ import { TYPES_DOSSIER_DOCUMENT } from '@app/etudes/models';
 import type {
   DossierDocument,
   DossierPieceAttendue,
-  MarchePropose,
   TypeDossierDocument,
 } from '@app/etudes/models';
 
@@ -39,12 +38,20 @@ import {
   type ImportNoeudPreview,
 } from '../../utils/bordereau-tree.util';
 
-export type PiecesMarcheMode = 'documents' | 'bordereau';
+export type PiecesMarcheMode = 'documents' | 'bordereau' | 'destination';
 export type ExtractionPhase = 'idle' | 'running' | 'review' | 'saving' | 'error';
 
+export function slotMatchesMode(type: string | undefined, mode: PiecesMarcheMode): boolean {
+  const t = (type ?? '').toUpperCase();
+  if (mode === 'documents') return t === 'CPS' || t === 'CPS_ET_BORDEREAU';
+  if (mode === 'bordereau') return t === 'BORDEREAU' || t === 'CPS_ET_BORDEREAU';
+  return t !== 'CPS' && t !== 'BORDEREAU' && t !== 'CPS_ET_BORDEREAU';
+}
+
 /**
- * Étape 1 — slots dynamiques (pièces attendues) + dépôt.
- * Étape 2 — choix manuel / auto pour construire l'arbre bordereau.
+ * Étape 1 — CPS optionnel (préremplit le cadrage).
+ * Étape 2 — dépôt BDP + construction de l'arbre.
+ * Étape 4 — pièces de destination (caution, plans…) détectées par le CPS.
  */
 @Component({
   selector: 'app-pieces-marche',
@@ -74,11 +81,15 @@ export class PiecesMarcheComponent {
   readonly structureVerrouillee = input(false);
   /** Focus nœud (gate « Voir dans l’arbre »). */
   readonly focusNoeudId = input<string | null>(null);
-  /** Incrémente pour forcer le passage en mode Manuel (CTA gate). */
-  readonly forceVoieManuelToken = input(0);
+  readonly focusCode = input<string | null>(null);
+  readonly focusToken = input(0);
+  /**
+   * CPS déjà déposé : plus de remplacement une fois le cadrage quitté
+   * (statut autre que BROUILLON).
+   */
+  readonly figeFichiersDeposes = input(false);
 
   readonly change = output<void>();
-  readonly voieChange = output<'auto' | 'manuel'>();
 
   private readonly arbre = viewChild(BordereauArbreComponent);
 
@@ -90,7 +101,9 @@ export class PiecesMarcheComponent {
   );
 
   readonly ajoutTypeOptions: NfSelectOption[] = [
-    ...this.typesAjout.map((t) => ({ value: t.value, label: t.label })),
+    ...this.typesAjout
+      .filter((t) => t.value !== 'BORDEREAU' && t.value !== 'CPS')
+      .map((t) => ({ value: t.value, label: t.label })),
     { value: 'CAUTION', label: 'Caution' },
     { value: 'ATTESTATION', label: 'Attestation' },
   ];
@@ -103,9 +116,17 @@ export class PiecesMarcheComponent {
   readonly initManuel = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
   readonly info = signal<string | undefined>(undefined);
-  readonly voie = signal<'auto' | 'manuel'>('auto');
+
+  readonly banner = computed(
+    (): { tone: 'error' | 'info'; message: string } | undefined => {
+      if (this.erreur()) return { tone: 'error', message: this.erreur()! };
+      if (this.info()) return { tone: 'info', message: this.info()! };
+      const arbreErr = this.arbre()?.erreur();
+      if (arbreErr) return { tone: 'error', message: arbreErr };
+      return undefined;
+    },
+  );
   readonly dpgfIdLocal = signal<string | undefined>(undefined);
-  readonly voieInitialisee = signal(false);
 
   readonly phase = signal<ExtractionPhase>('idle');
   readonly jobCourant = signal<ExtractionJobDto | null>(null);
@@ -115,12 +136,11 @@ export class PiecesMarcheComponent {
   readonly progressPercent = signal(0);
   readonly progressStep = signal<string | null>(null);
 
-  readonly proposition = signal<MarchePropose | null>(null);
   readonly propositionBusy = signal(false);
   readonly ajoutOuvert = signal(false);
   readonly ajoutType = signal<string>('REGLEMENT');
   readonly ajoutLibelle = signal('');
-  readonly ajoutObligatoire = signal(true);
+  readonly ajoutObligatoire = signal(false);
 
   readonly dpgfEffectif = computed(() => this.dpgfIdLocal() ?? this.dpgfId());
 
@@ -142,15 +162,36 @@ export class PiecesMarcheComponent {
     return map;
   });
 
-  readonly titre = computed(() =>
-    this.mode() === 'bordereau' ? 'Bordereau' : 'Pièces du marché',
+  readonly slotsVisibles = computed(() =>
+    this.slotsAttendus().filter((s) => slotMatchesMode(s.type, this.mode())),
   );
 
-  readonly aide = computed(() =>
-    this.mode() === 'bordereau'
-      ? 'Construisez l’arbre du bordereau : extraction automatique depuis le BDP déjà déposé, ou saisie manuelle.'
-      : 'Déposez chaque pièce attendue. BDP et CPS alimentent l’IA ; sans PDF, utilisez Bordereau manuel.',
-  );
+  readonly montreZones = computed(() => {
+    const m = this.mode();
+    return m === 'documents' || m === 'destination' || m === 'bordereau';
+  });
+
+  readonly titre = computed(() => {
+    switch (this.mode()) {
+      case 'bordereau':
+        return 'Bordereau';
+      case 'destination':
+        return 'Pièces de destination — rappel N+1';
+      default:
+        return 'Importer le CPS';
+    }
+  });
+
+  readonly aide = computed(() => {
+    switch (this.mode()) {
+      case 'bordereau':
+        return 'Déposez un BDP pour extraire l’arbre, ou construisez-le à la main.';
+      case 'destination':
+        return 'Documents détectés dans le CPS (règlement, plans, caution…). À joindre ici, y compris après soumission, avant la validation N+1.';
+      default:
+        return 'Optionnel — préremplit le cadrage. Remplaçable tant que le dossier est en brouillon.';
+    }
+  });
 
   readonly enRevue = computed(() => this.phase() === 'review' || this.phase() === 'saving');
   readonly extractionEnCours = computed(() => this.phase() === 'running');
@@ -177,10 +218,36 @@ export class PiecesMarcheComponent {
 
   readonly sourceBordereauPiece = computed(() => this.piecesBordereau()[0] ?? null);
 
-  /** Édition structurelle seulement en mode manuel et structure non figée. */
+  readonly aDejaUnArbre = computed(() => {
+    if (this.enRevue()) return true;
+    if (this.bordereauDocumentId()) return true;
+    const arbre = this.arbre();
+    if (!arbre) return false;
+    return arbre.nodes().length > 0 || arbre.compteArticles() > 0;
+  });
+
+  revelerNoeud(id?: string | null, code?: string | null): void {
+    this.arbre()?.revelerNoeud(id, code);
+  }
+
+  readonly peutExtraire = computed(
+    () =>
+      this.mode() === 'bordereau' &&
+      this.modifiable() &&
+      !this.structureVerrouillee() &&
+      !this.enRevue() &&
+      !!this.sourceBordereauPiece(),
+  );
+
+  readonly labelExtraction = computed(() => (this.aDejaUnArbre() ? 'Ré-extraire' : 'Extraire'));
+
+  fichierDeposeFige(piece: DossierDocument | undefined): boolean {
+    return this.mode() === 'documents' && this.figeFichiersDeposes() && !!piece;
+  }
+
+  /** Arbre toujours éditable, sauf structure figée après chiffrage. */
   readonly editionStructure = computed(
     () =>
-      this.voie() === 'manuel' &&
       !this.enRevue() &&
       !this.extractionEnCours() &&
       !this.structureVerrouillee(),
@@ -189,8 +256,6 @@ export class PiecesMarcheComponent {
   private readonly labelsParType = Object.fromEntries(
     TYPES_DOSSIER_DOCUMENT.map((t) => [t.value, t.label]),
   ) as Record<string, string>;
-
-  private proposeTentePour = '';
 
   constructor() {
     effect(() => {
@@ -201,23 +266,6 @@ export class PiecesMarcheComponent {
       const fromParent = this.dpgfId();
       if (fromParent) this.dpgfIdLocal.set(fromParent);
     });
-    effect(() => {
-      if (this.mode() !== 'bordereau' || this.voieInitialisee()) return;
-      const dpgf = this.dpgfId() ?? this.dpgfIdLocal();
-      const source = this.bordereauDocumentId();
-      if (dpgf && !source) {
-        this.voie.set('manuel');
-      } else {
-        this.voie.set('auto');
-      }
-      this.voieInitialisee.set(true);
-      this.voieChange.emit(this.voie());
-    });
-    effect(() => {
-      const token = this.forceVoieManuelToken();
-      if (token <= 0 || this.mode() !== 'bordereau') return;
-      void this.setVoie('manuel');
-    });
   }
 
   libelleType(type: string): string {
@@ -227,17 +275,19 @@ export class PiecesMarcheComponent {
   /** Corrige le mojibake fréquent UTF-8 lu en Latin-1 (ex. NÂ° → N°). */
   nomFichierAffiche(nom: string | null | undefined): string {
     if (!nom) return '';
-    if (!/Â.|Ã./.test(nom)) return nom;
+    const patched = nom
+      .normalize('NFC')
+      .replace(/Â°/g, '°')
+      .replace(/A\u0302°/g, '°')
+      .replace(/Ã©/g, 'é')
+      .replace(/Ã¨/g, 'è');
+    if (!/Â.|Ã./.test(patched)) return patched;
     try {
-      const bytes = Uint8Array.from(nom, (c) => c.charCodeAt(0));
+      const bytes = Uint8Array.from(patched, (c) => c.charCodeAt(0) & 0xff);
       return new TextDecoder('utf-8').decode(bytes);
     } catch {
-      return nom;
+      return patched;
     }
-  }
-
-  confiancePct(c: number): number {
-    return Math.round(c * 100);
   }
 
   badgeSlot(slot: DossierPieceAttendue): string {
@@ -255,27 +305,10 @@ export class PiecesMarcheComponent {
     return this.pieces().find((p) => p.type === slot.type);
   }
 
-  async setVoie(next: 'auto' | 'manuel'): Promise<void> {
-    if (next === this.voie()) return;
-    if (this.enRevue() || this.extractionEnCours()) {
-      const ok = await this.confirmDialog.confirm({
-        title: 'Changer de mode',
-        message:
-          'Une extraction est en cours ou en revue. Abandonner le brouillon et changer de mode ?',
-        variant: 'danger',
-        confirmLabel: 'Changer de mode',
-      });
-      if (!ok) return;
-      this.resetExtractionState();
-    }
-    this.voie.set(next);
-    this.erreur.set(undefined);
-    this.info.set(undefined);
-    this.voieChange.emit(next);
-  }
-
   onDragOver(event: DragEvent, slotKey: string): void {
     if (!this.modifiable() || this.envoiSlot()) return;
+    const slot = this.slotsAttendus().find((s) => s.id === slotKey);
+    if (slot && this.fichierDeposeFige(this.documentPourSlot(slot))) return;
     event.preventDefault();
     event.stopPropagation();
     this.dragOverSlot.set(slotKey);
@@ -306,6 +339,7 @@ export class PiecesMarcheComponent {
     if (!this.modifiable() || this.envoiSlot()) return;
 
     const existante = this.documentPourSlot(slot);
+    if (this.fichierDeposeFige(existante)) return;
     if (existante) {
       const ok = await this.confirmDialog.confirm({
         title: 'Remplacer le fichier',
@@ -336,7 +370,7 @@ export class PiecesMarcheComponent {
       await this.charger(this.dossierId());
       this.change.emit();
       if (slot.type === 'CPS' || typeDepot === 'CPS') {
-        void this.essayerPropositionApresCps();
+        void this.capturerDestinationSilencieux();
       }
     } catch (e) {
       this.erreur.set(this.messageErreur(e));
@@ -404,67 +438,43 @@ export class PiecesMarcheComponent {
     }
   }
 
-  discardProposition(): void {
-    this.proposition.set(null);
-  }
+  private capturedForCps = '';
 
-  async applyProposition(): Promise<void> {
-    const prop = this.proposition();
-    if (!prop || this.propositionBusy()) return;
-    this.propositionBusy.set(true);
-    this.erreur.set(undefined);
-    try {
-      await this.api.appliquerPropositionMarche(this.dossierId(), {
-        metadonnees: prop.metadonnees ?? undefined,
-        piecesAttendues: prop.piecesAttendues,
-      });
-      this.proposition.set(null);
-      this.info.set('Propositions CPS appliquées — vérifiez les slots et les métadonnées.');
-      await this.charger(this.dossierId());
-      this.change.emit();
-    } catch (e) {
-      this.erreur.set(this.messageErreur(e));
-    } finally {
-      this.propositionBusy.set(false);
-    }
-  }
-
-  private async essayerPropositionApresCps(): Promise<void> {
+  private async capturerDestinationSilencieux(): Promise<void> {
+    if (this.mode() !== 'documents') return;
     const cps = this.pieceCps();
-    if (!cps?.id || this.proposition()) return;
-    // Index CPS async : quelques tentatives espacées.
-    for (const delay of [1500, 3000, 5000]) {
-      await this.sleep(delay);
+    if (!cps?.id || this.capturedForCps === cps.id) return;
+    this.capturedForCps = cps.id;
+    for (const delay of [0, 2500, 5000, 8000]) {
+      if (delay) await this.sleep(delay);
+      if (this.pieceCps()?.id !== cps.id) return;
       try {
         const prop = await this.api.proposerMarche(this.dossierId(), cps.id);
-        if (prop?.piecesAttendues?.length) {
-          this.proposition.set(prop);
-          return;
-        }
+        const meta = prop?.metadonnees;
+        const hasMeta =
+          !!meta && Object.values(meta).some((v) => v != null && String(v).trim() !== '');
+        const dest = (prop?.piecesAttendues ?? []).filter((p) =>
+          slotMatchesMode(p.type, 'destination'),
+        );
+        if (!hasMeta && dest.length === 0) continue;
+        await this.api.appliquerPropositionMarche(this.dossierId(), {
+          metadonnees: hasMeta ? meta : undefined,
+          piecesAttendues: dest.length ? dest : undefined,
+        });
+        this.slotsAttendus.set(await this.api.listerPiecesAttendues(this.dossierId()));
+        this.change.emit();
+        return;
       } catch {
-        /* retry */
+        /* index CPS async — retry silencieux */
       }
     }
-  }
-
-  private async tenterPropositionSiCps(): Promise<void> {
-    const cps = this.pieceCps();
-    if (!cps?.id || this.proposition() || this.proposeTentePour === cps.id) return;
-    this.proposeTentePour = cps.id;
-    try {
-      const prop = await this.api.proposerMarche(this.dossierId(), cps.id);
-      if (prop?.piecesAttendues?.length) {
-        this.proposition.set(prop);
-      }
-    } catch {
-      /* fallback manuel silencieux */
-    }
+    this.capturedForCps = '';
   }
 
   async extraire(piece?: DossierDocument): Promise<void> {
     if (!this.modifiable() || !piece || this.extractionEnCours()) return;
 
-    if (this.dpgfEffectif()) {
+    if (this.dpgfEffectif() && this.aDejaUnArbre()) {
       const ok = await this.confirmDialog.confirm({
         title: 'Remplacer le bordereau',
         message:
@@ -542,16 +552,6 @@ export class PiecesMarcheComponent {
     }
 
     const hasExisting = !!(this.dpgfIdLocal() || this.dpgfId());
-    if (hasExisting) {
-      const ok = await this.confirmDialog.confirm({
-        title: 'Remplacer le bordereau existant',
-        message:
-          'L’arbre actuel et le chiffrage associé seront supprimés, puis remplacés par l’extraction. Cette action est irréversible.',
-        variant: 'danger',
-        confirmLabel: 'Remplacer',
-      });
-      if (!ok) return;
-    }
 
     this.phase.set('saving');
     this.erreur.set(undefined);
@@ -565,8 +565,6 @@ export class PiecesMarcheComponent {
       this.dpgfIdLocal.set(saved.dpgfId);
       this.resetExtractionState();
       if (saved.articlesIgnores > 0) {
-        this.voie.set('manuel');
-        this.voieChange.emit('manuel');
         this.info.set(
           `${saved.articlesAcceptes} article${saved.articlesAcceptes > 1 ? 's' : ''} importé${
             saved.articlesAcceptes > 1 ? 's' : ''
@@ -703,7 +701,6 @@ export class PiecesMarcheComponent {
     try {
       const res = await this.api.initBordereauManuel(this.dossierId());
       this.dpgfIdLocal.set(res.dpgfId);
-      this.voie.set('manuel');
       this.change.emit();
     } catch (e) {
       this.erreur.set(this.messageErreur(e));
@@ -712,8 +709,16 @@ export class PiecesMarcheComponent {
     }
   }
 
+  private async assurerArbreVide(): Promise<void> {
+    if (!this.modifiable() || this.structureVerrouillee()) return;
+    if (this.dpgfEffectif() || this.initManuel()) return;
+    if (this.enRevue() || this.extractionEnCours()) return;
+    await this.demarrerManuel();
+  }
+
   async supprimer(piece: DossierDocument): Promise<void> {
     if (!this.modifiable() || this.envoiSlot()) return;
+    if (this.fichierDeposeFige(piece)) return;
     this.erreur.set(undefined);
     try {
       await this.api.supprimerDocument(this.dossierId(), piece.id);
@@ -734,7 +739,10 @@ export class PiecesMarcheComponent {
       this.pieces.set(docs);
       this.slotsAttendus.set(slots);
       if (this.mode() === 'documents') {
-        void this.tenterPropositionSiCps();
+        void this.capturerDestinationSilencieux();
+      }
+      if (this.mode() === 'bordereau') {
+        void this.assurerArbreVide();
       }
     } catch (e) {
       this.erreur.set(this.messageErreur(e));
@@ -782,7 +790,7 @@ export class PiecesMarcheComponent {
     }
     const code = domain ?? fromBody;
     if (code === 'etudes.bordereau.aucune_piece_stockee') {
-      return 'Aucun BDP stocké à l’étape Documents. Revenez en arrière et déposez le bordereau.';
+      return 'Aucun BDP déposé à l’étape Bordereau. Déposez le fichier ici, ou passez en saisie manuelle.';
     }
     if (code === 'etudes.document.telechargement_impossible') {
       return 'Le fichier n’a pas pu être relu dans le stockage. Retirez-le et déposez-le à nouveau.';

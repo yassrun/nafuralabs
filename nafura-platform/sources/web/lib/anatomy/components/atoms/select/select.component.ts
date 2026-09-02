@@ -9,6 +9,7 @@ import {
   OnDestroy,
   OnInit,
   SimpleChanges,
+  ViewChild,
   inject,
   forwardRef,
   signal,
@@ -27,6 +28,8 @@ import type { LookupSearchFn } from '../../../tokens/lookup-searchers.token';
 import {
   LOOKUP_COMBO_MIN_CHARS,
   type LookupComboOption,
+  comboHitsComeFromServer,
+  comboTypingLocked,
   filterLookupHits,
   lookupDisplayLabel,
   resolveLookupEyeRoute,
@@ -67,6 +70,7 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
   private readonly lookupRefNav = inject(LookupReferenceNavigationService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly host = inject(ElementRef<HTMLElement>);
+  @ViewChild('comboInput') private comboInput?: ElementRef<HTMLInputElement>;
 
   @Input() label?: string;
   @Input() placeholder?: string;
@@ -118,7 +122,10 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['options'] || changes['selectedLabel']) {
       this.syncDisplayOptions();
-      this.refreshComboHits();
+      // Do not re-fire server typeahead when the parent passes a new options[].
+      if (!comboHitsComeFromServer(this.lookupSearch)) {
+        this.refreshComboHits();
+      }
     }
   }
 
@@ -158,6 +165,14 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
     return !!this.lookupKey?.trim();
   }
 
+  comboLocked(): boolean {
+    return comboTypingLocked(this.value());
+  }
+
+  comboShowsClear(): boolean {
+    return this.comboLocked() && !this.disabled;
+  }
+
   comboInputValue(): string {
     if (this.comboEditing()) {
       return this.comboQuery();
@@ -189,17 +204,15 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
   onComboFocus(): void {
     if (this.disabled) return;
     this.focused.set(true);
-    this.comboEditing.set(true);
-    if (!this.value()) {
-      this.comboQuery.set('');
-    } else {
-      this.comboQuery.set(
-        lookupDisplayLabel(this.value(), this.displayOptions(), this.selectedLabel)
-      );
+    if (this.comboLocked()) {
+      return;
     }
+    this.comboEditing.set(true);
+    this.comboQuery.set('');
   }
 
   onComboInput(event: Event): void {
+    if (this.comboLocked()) return;
     const next = (event.target as HTMLInputElement).value ?? '';
     this.comboEditing.set(true);
     this.comboQuery.set(next);
@@ -222,7 +235,7 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
   }
 
   onComboKeydown(event: KeyboardEvent): void {
-    if (this.disabled) return;
+    if (this.disabled || this.comboLocked()) return;
     const hits = this.comboHits();
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -270,6 +283,22 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
     this.syncDisplayOptions();
   }
 
+  clearCombo(event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    if (this.disabled) return;
+    this.value.set('');
+    this.onChange('');
+    this.comboOpen.set(false);
+    this.comboEditing.set(false);
+    this.comboQuery.set('');
+    this.comboHits.set([]);
+    this.touched.set(true);
+    this.onTouched();
+    this.cdr.markForCheck();
+    queueMicrotask(() => this.comboInput?.nativeElement.focus());
+  }
+
   /** If the typed query matches one hit exactly (id or label), commit it on blur. */
   private commitExactComboHit(): void {
     if (!this.comboEditing()) return;
@@ -277,7 +306,9 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
     if (!q) return;
     const hits = this.comboHits().filter((h) => !h.disabled);
     const exact = hits.find(
-      (h) => h.value.toLowerCase() === q || h.label.toLowerCase() === q,
+      (h) =>
+        String(h.value ?? '').toLowerCase() === q ||
+        String(h.label ?? '').toLowerCase() === q,
     );
     if (exact) {
       this.pickCombo(exact);

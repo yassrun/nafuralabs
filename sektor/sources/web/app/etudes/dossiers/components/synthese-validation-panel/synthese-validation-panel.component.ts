@@ -26,10 +26,10 @@ import {
 } from '../../services/dossier-etude-api.service';
 import { DpgfApiService, type DpgfLotTotal } from '../../../services/dpgf-api.service';
 import { DpuApiService } from '@app/catalogue/bibliotheque-prix/services/dpu-api.service';
-import { GateBlocageComponent } from '../gate-blocage/gate-blocage.component';
 import { openGateProblemesDialog } from '../gate-blocage/gate-problemes-dialog.component';
 import { RattrapagePanelComponent } from '../rattrapage-panel/rattrapage-panel.component';
 import { CapitalisationPanelComponent } from '../capitalisation-panel/capitalisation-panel.component';
+import { PiecesMarcheComponent } from '../pieces-marche/pieces-marche.component';
 
 const ORIGINE_LABELS: Record<string, string> = {
   DECOMPOSE: 'décomposé',
@@ -47,9 +47,9 @@ const ORIGINE_LABELS: Record<string, string> = {
     RouterLink,
     MadCurrencyPipe,
     TranslateModule,
-    GateBlocageComponent,
     RattrapagePanelComponent,
     CapitalisationPanelComponent,
+    PiecesMarcheComponent,
   ],
   templateUrl: './synthese-validation-panel.component.html',
   styleUrl: './synthese-validation-panel.component.scss',
@@ -231,4 +231,30 @@ export class SyntheseValidationPanelComponent {
     () =>
       this.modifiable() && (this.problemesFinaux()?.problemes.length ?? 0) === 0,
   );
+
+  readonly banner = computed(
+    (): { tone: 'error' | 'info' | 'success'; message: string } | undefined => {
+      if (this.erreur()) return { tone: 'error', message: this.erreur()! };
+      const s = this.statut();
+      if (s === 'EN_VALIDATION') {
+        return { tone: 'info', message: 'En attente de validation.' };
+      }
+      if (s === 'VALIDEE' || s === 'DEVIS_GENERE') {
+        return { tone: 'success', message: 'Dossier validé.' };
+      }
+      if (this.pretASoumettre()) {
+        return {
+          tone: 'success',
+          message: 'Le chiffrage est prêt. Utilisez « Soumettre à validation » en bas de page.',
+        };
+      }
+      return undefined;
+    },
+  );
+
+  /** Destination : dépôt possible jusqu’au devis, pas après gain/conversion. */
+  readonly piecesDestinationModifiables = computed(() => {
+    const s = this.statut();
+    return s !== 'ANNULE' && s !== 'GAGNE' && s !== 'CONVERTIE';
+  });
 }

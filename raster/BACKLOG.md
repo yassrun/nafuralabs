@@ -8,6 +8,9 @@
 
 ## sektor
 
+- `etudes` lot
+  - · `raffinement-etude` sous-lot
+    - ◐ `SEKTOR-303` feature — chrome etude: stepper etats + action bar
 - `homogenisation-ux` lot
   - · `achats-residuel` sous-lot
     - ▸ `SEKTOR-296` feature — selects detail et bc-detail action-bar
@@ -16,6 +19,8 @@
     - ▸ `SEKTOR-293` feature — etat-stocks tree console line-editors nf-chrome
     - ◐ `SEKTOR-294` feature — dumps residuels vers search picker
     - · `SEKTOR-295` qa — Preuves homog catalogue
+    - ◐ `SEKTOR-299` bug — nf-select lookup freeze on typeahead
+    - ◐ `SEKTOR-300` feature — nf-select lookup clear X when value set
   - · `chantiers-chrome` sous-lot
     - ◐ `SEKTOR-289` feature — documents-listing rewrite nf-chrome
     - ◐ `SEKTOR-290` feature — listings et toolbars selects vers nf-select
@@ -26,6 +31,8 @@
     - ◐ `SEKTOR-286` feature — pieces bordereau summary decomposition nf-chrome
     - ◐ `SEKTOR-287` feature — devis-from-dpgf et selects dialogs restants
     - · `SEKTOR-288` qa — Preuves homog etudes
+    - ◐ `SEKTOR-302` bug — Listing: double-clic ouvre le détail partout
+    - ◐ `SEKTOR-304` bug — arbre bordereau icones lucide manquantes
   - · `preuves-homog` sous-lot
     - · `SEKTOR-298` qa — Scripts verify-homog Mode B et gates rg
 
@@ -44,4 +51,4 @@
 
 ---
 
-**20 live · 2 projets**
+**25 live · 2 projets**

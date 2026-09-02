@@ -1,147 +1,131 @@
 @if (synthese(); as s) {
   <header class="dsh">
-    <div class="dsh__top">
+    <div class="dsh__infos">
       <div class="dsh__identity">
-        <div class="dsh__title-row">
-          <h1 class="dsh__titre" [attr.title]="s.numero + ' — ' + s.objet">{{ s.numero }} — {{ s.objet }}</h1>
-          <div class="dsh__badges">
-            <span class="dsh__pill" [attr.data-variant]="statutVariant()">{{ statutLabel() }}</span>
-            <span class="dsh__pill dsh__pill--phase">{{ phaseLabel() }}</span>
-            @if (s.structureVerrouillee) {
-              <span class="dsh__pill dsh__pill--lock">Structure figée</span>
+        <h1 class="dsh__titre" [attr.title]="s.numero + ' — ' + s.objet">{{ s.numero }} — {{ s.objet }}</h1>
+        <div class="dsh__meta" role="list">
+          <span class="dsh__pill" [attr.data-variant]="statutVariant()">{{ statutLabel() }}</span>
+          @if (s.structureVerrouillee) {
+            <span class="dsh__pipe" aria-hidden="true">|</span>
+            <span class="dsh__pill dsh__pill--lock">Structure figée</span>
+          }
+          <span class="dsh__pipe" aria-hidden="true">|</span>
+          <span class="dsh__meta-item" role="listitem">
+            <span class="dsh__k">MOA</span>
+            @if (s.clientId && moaNom()) {
+              <a class="dsh__client-link" [routerLink]="['/ventes/clients', s.clientId]">{{ moaNom() }}</a>
+            } @else {
+              <span [class.dsh__empty]="!moaNom()">{{ moaNom() || '—' }}</span>
             }
-            @if (clientMissing()) {
-              <span class="dsh__pill dsh__pill--warn">Client à renseigner</span>
-            } @else if (clientALier()) {
-              <span class="dsh__pill dsh__pill--warn">Client à lier au devis</span>
-            }
-          </div>
-        </div>
-        <div class="dsh__meta">
-          @if (s.clientId && s.clientNom) {
-            <a class="dsh__client-link" [routerLink]="['/ventes/clients', s.clientId]">
-              {{ s.clientNom }}
-            </a>
-          } @else if (s.clientNom) {
-            <span>{{ s.clientNom }}</span>
-          } @else {
-            <span class="dsh__client-missing">Client non renseigné</span>
-          }
-          @if (s.chargeEtudeNom || s.chargeEtudeUserId) {
-            <span class="dsh__sep" aria-hidden="true">·</span>
-            <span>Chargé d’étude {{ s.chargeEtudeNom || s.chargeEtudeUserId }}</span>
-          }
-          <span class="dsh__sep" aria-hidden="true">·</span>
-          <span>Rév. {{ s.bordereauRevision }}</span>
-          @if (s.updatedAt) {
-            <span class="dsh__sep" aria-hidden="true">·</span>
-            <span>Maj {{ s.updatedAt | date: 'short' }}</span>
-          }
+          </span>
+          <span class="dsh__pipe" aria-hidden="true">|</span>
+          <span class="dsh__meta-item" role="listitem">
+            <span class="dsh__k">Chargé</span>
+            <span [class.dsh__empty]="!chargeNom()">{{ chargeNom() || '—' }}</span>
+          </span>
+          <span class="dsh__pipe" aria-hidden="true">|</span>
+          <span class="dsh__meta-item" role="listitem">
+            <span class="dsh__k">Durée d’exéc.</span>
+            <span [class.dsh__empty]="delaiJours() == null">{{ delaiLabel() }}</span>
+          </span>
           @if (s.devisNumero && s.devisGenereId) {
-            <span class="dsh__sep" aria-hidden="true">·</span>
-            <a class="dsh__client-link" [routerLink]="['/etudes/devis', s.devisGenereId]">
-              {{ s.devisNumero }}
-            </a>
+            <span class="dsh__pipe" aria-hidden="true">|</span>
+            <a class="dsh__client-link" [routerLink]="['/etudes/devis', s.devisGenereId]">{{ s.devisNumero }}</a>
           } @else if (s.devisNumero) {
-            <span class="dsh__sep" aria-hidden="true">·</span>
+            <span class="dsh__pipe" aria-hidden="true">|</span>
             <span>Devis {{ s.devisNumero }}</span>
           }
           @if (s.chantierGenereId) {
-            <span class="dsh__sep" aria-hidden="true">·</span>
-            <a class="dsh__client-link" [routerLink]="['/chantiers', s.chantierGenereId]">
-              Chantier
-            </a>
+            <span class="dsh__pipe" aria-hidden="true">|</span>
+            <a class="dsh__client-link" [routerLink]="['/chantiers', s.chantierGenereId]">Chantier</a>
           }
           @if (s.prochainApprobateurNom || s.prochainApprobateurRole) {
-            <span class="dsh__sep" aria-hidden="true">·</span>
+            <span class="dsh__pipe" aria-hidden="true">|</span>
             <span>{{ s.prochainApprobateurNom || s.prochainApprobateurRole }}</span>
           }
         </div>
       </div>
 
-      <div class="dsh__aside">
-        <div class="dsh__kpis">
-          <div class="dsh__kpi">
-            <span class="dsh__kpi-label">Total HT</span>
-            <span class="dsh__kpi-value">{{ s.totalHt | mad }}</span>
-          </div>
-          <div class="dsh__kpi">
-            <span class="dsh__kpi-label">Postes</span>
-            <span class="dsh__kpi-value">{{ s.nombreArticles }}</span>
-          </div>
-          <div
-            class="dsh__kpi"
-            [class.dsh__kpi--warn]="anomaliesAffichees() > 0"
-            [class.dsh__kpi--clickable]="true"
-            role="button"
-            tabindex="0"
-            [attr.title]="'Voir les anomalies de l’étape ' + etapeUi()"
-            (click)="focusAnomalies.emit()"
-            (keydown.enter)="focusAnomalies.emit()"
-          >
-            <span class="dsh__kpi-label">Anomalies étape {{ etapeUi() }}</span>
-            <span class="dsh__kpi-value">{{ anomaliesAffichees() }}</span>
-          </div>
+      <div class="dsh__kpis">
+        <div class="dsh__kpi">
+          <span class="dsh__kpi-label">Total HT</span>
+          <span class="dsh__kpi-value">{{ s.totalHt | mad }}</span>
         </div>
-
-        @if (showPartager() || showPrintBordereau() || showPrintSynthese() || showReouvrir() || showRefuser() || showMarquerPerdu() || showCta()) {
-          <div class="dsh__actions">
-            @if (showPartager()) {
-              <nf-button
-                type="button"
-                variant="ghost"
-                size="sm"
-                [disabled]="!canShare()"
-                [attr.title]="
-                  canShare()
-                    ? 'Créer un lien invité (24 h)'
-                    : 'Partage indisponible pour ce dossier'
-                "
-                (clicked)="canShare() && emitAction('PARTAGER')"
-              >
-                Partager
-              </nf-button>
-            }
-            @if (showPrintBordereau()) {
-              <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('IMPRIMER_BORDEREAU')">
-                Imprimer bordereau
-              </nf-button>
-            }
-            @if (showPrintSynthese()) {
-              <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('IMPRIMER_SYNTHESE')">
-                Imprimer synthèse
-              </nf-button>
-            }
-            @if (showReouvrir()) {
-              <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REOUVRIR_BORDEREAU')">
-                Réouvrir le bordereau
-              </nf-button>
-            }
-            @if (showRefuser()) {
-              <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REFUSER')">
-                Refuser
-              </nf-button>
-            }
-            @if (showMarquerPerdu()) {
-              <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('MARQUER_PERDU')">
-                Marquer perdu
-              </nf-button>
-            }
-            @if (showCta()) {
-              <nf-button
-                type="button"
-                variant="primary"
-                size="sm"
-                [attr.data-testid]="actionEffective() === 'GENERER_DEVIS' ? 'dossier-cta-generer-devis' : null"
-                (clicked)="emitAction()"
-              >
-                {{ ctaLabel() }}
-              </nf-button>
-            }
-          </div>
-        }
+        <div class="dsh__kpi">
+          <span class="dsh__kpi-label">Postes</span>
+          <span class="dsh__kpi-value">{{ s.nombreArticles }}</span>
+        </div>
+        <div
+          class="dsh__kpi"
+          [class.dsh__kpi--warn]="anomaliesAffichees() > 0"
+          [class.dsh__kpi--clickable]="true"
+          role="button"
+          tabindex="0"
+          [attr.title]="'Voir les anomalies de l’étape ' + etapeUi()"
+          (click)="focusAnomalies.emit()"
+          (keydown.enter)="focusAnomalies.emit()"
+        >
+          <span class="dsh__kpi-label">Anomalies étape {{ etapeUi() }}</span>
+          <span class="dsh__kpi-value">{{ anomaliesAffichees() }}</span>
+        </div>
       </div>
     </div>
+
+    @if (showActionBar()) {
+      <nf-action-bar class="dsh__bar" align="between" spacing="sm">
+        <div class="dsh__bar-left">
+          @if (showPartager()) {
+            <nf-button
+              type="button"
+              variant="ghost"
+              size="sm"
+              [disabled]="!canShare()"
+              [attr.title]="
+                canShare()
+                  ? 'Créer un lien invité (24 h)'
+                  : 'Partage indisponible pour ce dossier'
+              "
+              (clicked)="canShare() && emitAction('PARTAGER')"
+            >
+              Partager
+            </nf-button>
+          }
+          @if (showReouvrir()) {
+            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REOUVRIR_BORDEREAU')">
+              Réouvrir le bordereau
+            </nf-button>
+          }
+          @if (showRefuser()) {
+            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REFUSER')">
+              Refuser
+            </nf-button>
+          }
+          @if (showMarquerPerdu()) {
+            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('MARQUER_PERDU')">
+              Marquer perdu
+            </nf-button>
+          }
+        </div>
+        <div class="dsh__bar-right">
+          @if (ctaSlot() === 'jump') {
+            <nf-button type="button" variant="secondary" size="sm" (clicked)="emitAction()">
+              {{ ctaLabel() }}
+            </nf-button>
+          }
+          @if (ctaSlot() === 'primary') {
+            <nf-button
+              type="button"
+              variant="primary"
+              size="sm"
+              [attr.data-testid]="actionEffective() === 'GENERER_DEVIS' ? 'dossier-cta-generer-devis' : null"
+              (clicked)="emitAction()"
+            >
+              {{ ctaLabel() }}
+            </nf-button>
+          }
+        </div>
+      </nf-action-bar>
+    }
 
     @if (s.motifRefus) {
       <p class="dsh__refus" role="status">Refus : {{ s.motifRefus }}</p>

@@ -43,6 +43,7 @@ import {
   deduceCoutDepuisPrixVente,
   ecartEstimationPercent,
   origineUi,
+  puVenteSimple,
   resolveOrigineCout,
   type EstimationSaisieEnUi,
   type OrigineCoutUi,
@@ -160,6 +161,9 @@ export class PosteDecompositionPanelComponent {
   ];
   /** Repère conservé lors du passage ESTIME → DECOMPOSE. */
   readonly estimationRepere = signal<number | null>(null);
+  /** Coûts saisis par voie — indépendants pour le comparatif. */
+  readonly coutForfait = signal<number | null>(null);
+  readonly coutEstime = signal<number | null>(null);
   readonly forfaitPartnerId = signal<string | null>(null);
   readonly forfaitOffreId = signal<string | null>(null);
   readonly fgFourniLocal = signal<number | null>(null);
@@ -325,6 +329,68 @@ export class PosteDecompositionPanelComponent {
     () => Math.round((this.prixVenteHt() - this.coutRevient()) * 100) / 100,
   );
 
+  readonly puDecompose = computed(() => {
+    if (!this.hasComposants()) return null;
+    const cout = this.dpuMath.computeDeboursSec(this.composants());
+    if (cout <= 0) return null;
+    return this.dpuMath.computePrixVenteHt(
+      cout,
+      this.fgDecomposeBrouillon() ?? this.fgDefaut(),
+      this.margeDecomposeBrouillon() ?? this.margeDefaut(),
+    );
+  });
+
+  readonly puForfait = computed(() =>
+    puVenteSimple({
+      cout: this.coutForfait(),
+      fgPercent: this.fgFourniLocal() ?? this.fgDefaut(),
+      margePercent: this.margeFourniLocal() ?? this.margeDefaut(),
+    }),
+  );
+
+  readonly puEstime = computed(() =>
+    puVenteSimple({
+      cout: this.coutEstime(),
+      fgPercent: this.fgFourniLocal() ?? this.fgDefaut(),
+      margePercent: this.margeFourniLocal() ?? this.margeDefaut(),
+      venteDirecte:
+        this.estimationSaisieEn() === 'VENTE' ? this.venteSaisie() : null,
+    }),
+  );
+
+  readonly comparatifLignes = computed(() => {
+    const retenu = this.origineActif();
+    const lignes = [
+      {
+        origine: 'DECOMPOSE' as const,
+        label: 'Décomposé',
+        hint: this.hasComposants()
+          ? `${this.composants().length} composant${this.composants().length > 1 ? 's' : ''}`
+          : 'Pas encore de composants',
+        pu: this.puDecompose(),
+      },
+      {
+        origine: 'FORFAIT' as const,
+        label: 'Forfait',
+        hint: this.puForfait() != null ? 'Coût saisi' : 'Pas encore saisi',
+        pu: this.puForfait(),
+      },
+      {
+        origine: 'ESTIME' as const,
+        label: 'Estimé',
+        hint: this.puEstime() != null ? 'Coût saisi' : 'Pas encore saisi',
+        pu: this.puEstime(),
+      },
+    ];
+    const avecPrix = lignes.filter((l) => l.pu != null && l.pu > 0);
+    const minPu = avecPrix.length ? Math.min(...avecPrix.map((l) => l.pu!)) : null;
+    return lignes.map((l) => ({
+      ...l,
+      retenu: l.origine === retenu,
+      plusBas: minPu != null && l.pu === minPu && avecPrix.length > 1,
+    }));
+  });
+
   constructor() {
     effect(() => {
       if (this.guestReadOnly() || this.externalDpu()) return;
@@ -365,10 +431,20 @@ export class PosteDecompositionPanelComponent {
       this.estimationSaisieEn.set(
         poste.estimationSaisieEn === 'VENTE' ? 'VENTE' : 'COUT',
       );
+      const origineChargee = resolveOrigineCout({
+        origineCout: poste.origineCout,
+        mode: poste.mode,
+        prixUnitaire: poste.prixUnitaire,
+      });
+      const coutSimple = poste.coutUnitaire ?? poste.prixFourniBase ?? null;
+      this.coutForfait.set(origineChargee === 'FORFAIT' ? coutSimple : null);
+      this.coutEstime.set(
+        origineChargee === 'ESTIME' || poste.estimationSaisieEn
+          ? coutSimple
+          : null,
+      );
       this.estimationRepere.set(
-        poste.origineCout === 'ESTIME' || poste.estimationSaisieEn
-          ? (poste.coutUnitaire ?? poste.prixFourniBase ?? null)
-          : (poste.coutUnitaire ?? null),
+        origineChargee === 'ESTIME' || poste.estimationSaisieEn ? coutSimple : null,
       );
       this.forfaitPartnerId.set(poste.forfaitPartnerId ?? null);
       this.forfaitOffreId.set(poste.forfaitOffreId ?? null);
@@ -382,13 +458,7 @@ export class PosteDecompositionPanelComponent {
       this.composantsLabels.set(new Map());
       this.fgDecomposeBrouillon.set(null);
       this.margeDecomposeBrouillon.set(null);
-      this.origineLocal.set(
-        resolveOrigineCout({
-          origineCout: poste.origineCout,
-          mode: poste.mode,
-          prixUnitaire: poste.prixUnitaire,
-        }),
-      );
+      this.origineLocal.set(origineChargee);
       this.propositionCps.set(false);
       this.extractionComposants.set(false);
       this.rafraichissementPrix.set(false);
@@ -400,6 +470,8 @@ export class PosteDecompositionPanelComponent {
       this.venteSaisie.set(null);
       this.estimationSaisieEn.set('COUT');
       this.estimationRepere.set(null);
+      this.coutForfait.set(null);
+      this.coutEstime.set(null);
       this.forfaitPartnerId.set(null);
       this.forfaitOffreId.set(null);
       this.fgFourniLocal.set(null);
@@ -444,7 +516,11 @@ export class PosteDecompositionPanelComponent {
     if (!this.canMutate() || !this.estSaisieSimple()) return;
     const value = typeof raw === 'number' ? raw : Number.parseFloat(String(raw).replace(',', '.'));
     this.prixFourni.set(Number.isFinite(value) ? Math.max(0, value) : 0);
-    if (this.estEstime()) this.estimationRepere.set(this.prixFourni());
+    if (this.estForfait()) this.coutForfait.set(this.prixFourni());
+    if (this.estEstime()) {
+      this.coutEstime.set(this.prixFourni());
+      this.estimationRepere.set(this.prixFourni());
+    }
     this.markDpuDirty();
   }
 
@@ -497,13 +573,13 @@ export class PosteDecompositionPanelComponent {
     this.markDpuDirty();
   }
 
-  /** Switch origine depuis le toggle drawer. */
+  /** Switch origine depuis le toggle drawer ou le comparatif. */
   async setOrigineUi(target: OrigineCoutUi): Promise<boolean> {
     if (!this.canMutate()) return false;
     if (this.origineActif() === target) return true;
-    if (target === 'DECOMPOSE') return this.passerEnDecomposition();
-    if (target === 'FORFAIT') return this.passerEnForfait();
-    return this.passerEnEstime();
+    if (target === 'DECOMPOSE') return this.passerEnDecomposition({ skipConfirm: true });
+    if (target === 'FORFAIT') return this.passerEnForfait({ skipConfirm: true });
+    return this.passerEnEstime({ skipConfirm: true });
   }
 
   /** @deprecated compat — mappe FOURNI → ESTIME */
@@ -803,12 +879,12 @@ export class PosteDecompositionPanelComponent {
     }
   }
 
-  private async passerEnEstime(): Promise<boolean> {
+  private async passerEnEstime(opts?: { skipConfirm?: boolean }): Promise<boolean> {
     if (!this.canMutate()) return false;
     const poste = this.poste();
     if (!poste?.id) return false;
 
-    if (this.estDecompose() && this.hasComposants()) {
+    if (!opts?.skipConfirm && this.estDecompose() && this.hasComposants()) {
       const confirmed = await this.confirmDialog.confirm({
         title: 'Passer en estimation',
         message:
@@ -818,24 +894,25 @@ export class PosteDecompositionPanelComponent {
       if (!confirmed) return false;
     }
 
-    if (this.prixFourni() == null) {
-      this.prixFourni.set(poste.coutUnitaire ?? poste.prixFourniBase ?? poste.prixUnitaire ?? 0);
+    if (this.estEstime() && this.prixFourni() != null) {
+      this.coutEstime.set(this.prixFourni());
     }
     if (this.fgFourniLocal() == null) this.fgFourniLocal.set(this.fgDefaut());
     if (this.margeFourniLocal() == null) this.margeFourniLocal.set(this.margeDefaut());
-    this.estimationSaisieEn.set('COUT');
-    this.estimationRepere.set(this.prixFourni());
+    this.estimationSaisieEn.set(this.venteSaisie() != null && this.venteSaisie()! > 0 ? 'VENTE' : 'COUT');
+    this.prixFourni.set(this.coutEstime());
+    this.estimationRepere.set(this.coutEstime());
     this.origineLocal.set('ESTIME');
     this.markDpuDirty();
     return true;
   }
 
-  private async passerEnForfait(): Promise<boolean> {
+  private async passerEnForfait(opts?: { skipConfirm?: boolean }): Promise<boolean> {
     if (!this.canMutate()) return false;
     const poste = this.poste();
     if (!poste?.id) return false;
 
-    if (this.estDecompose() && this.hasComposants()) {
+    if (!opts?.skipConfirm && this.estDecompose() && this.hasComposants()) {
       const confirmed = await this.confirmDialog.confirm({
         title: 'Passer en forfait',
         message:
@@ -845,11 +922,12 @@ export class PosteDecompositionPanelComponent {
       if (!confirmed) return false;
     }
 
-    if (this.prixFourni() == null) {
-      this.prixFourni.set(poste.coutUnitaire ?? poste.prixFourniBase ?? poste.prixUnitaire ?? 0);
+    if (this.estForfait() && this.prixFourni() != null) {
+      this.coutForfait.set(this.prixFourni());
     }
     if (this.fgFourniLocal() == null) this.fgFourniLocal.set(this.fgDefaut());
     if (this.margeFourniLocal() == null) this.margeFourniLocal.set(this.margeDefaut());
+    this.prixFourni.set(this.coutForfait());
     this.origineLocal.set('FORFAIT');
     this.markDpuDirty();
     return true;
@@ -872,7 +950,11 @@ export class PosteDecompositionPanelComponent {
     }
 
     if (this.estEstime() && this.prixFourni() != null) {
+      this.coutEstime.set(this.prixFourni());
       this.estimationRepere.set(this.coutUnitaireActif());
+    }
+    if (this.estForfait() && this.prixFourni() != null) {
+      this.coutForfait.set(this.prixFourni());
     }
     this.origineLocal.set('DECOMPOSE');
     if (this.fgDecomposeBrouillon() == null) this.fgDecomposeBrouillon.set(this.fgPct());
@@ -1231,6 +1313,8 @@ export class PosteDecompositionPanelComponent {
       origine: this.origineActif(),
       saisieEn: this.estimationSaisieEn(),
       prixFourni: this.prixFourni(),
+      coutForfait: this.coutForfait(),
+      coutEstime: this.coutEstime(),
       venteSaisie: this.venteSaisie(),
       forfaitPartnerId: this.forfaitPartnerId(),
       forfaitOffreId: this.forfaitOffreId(),

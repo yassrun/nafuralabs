@@ -9,7 +9,8 @@
     "src/**/*.d.ts",
     "app/**/*.spec.ts",
     "../../../nafura-platform/sources/web/app/impression/templates/**/*.spec.ts",
-    "../../../nafura-platform/sources/web/lib/anatomy/components/atoms/select/**/*.spec.ts"
+    "../../../nafura-platform/sources/web/lib/anatomy/components/atoms/select/**/*.spec.ts",
+    "../../../nafura-platform/sources/web/lib/anatomy/components/organisms/wizard-shell/**/*.spec.ts"
   ],
   "angularCompilerOptions": {
     "extendedDiagnostics": {

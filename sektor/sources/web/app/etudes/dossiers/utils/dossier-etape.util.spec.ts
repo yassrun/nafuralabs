@@ -1,6 +1,8 @@
 import {
   backendGateEtapesForUi,
   backendToUiEtape,
+  estAnomaliePieceHorsCadrage,
+  incompleteUiStepIndexes,
   libelleUiEtape,
   nextBackendEtape,
   prevBackendEtape,
@@ -31,7 +33,7 @@ describe('dossier-etape.util', () => {
 
   it('regroupe décomposition + consultation + chiffrage sur l’étape UI 3', () => {
     expect(backendGateEtapesForUi(3)).toEqual([3, 4, 5]);
-    expect(backendGateEtapesForUi(4)).toEqual([5]);
+    expect(backendGateEtapesForUi(4)).toEqual([3, 5]);
   });
 
   it('route la correction vers la bonne étape UI', () => {
@@ -43,8 +45,52 @@ describe('dossier-etape.util', () => {
   });
 
   it('expose un libellé métier pour le listing', () => {
-    expect(libelleUiEtape(4)).toContain('Décomposition');
+    expect(libelleUiEtape(1)).toContain('Cadrage');
+    expect(libelleUiEtape(3)).toContain('Chiffrage');
+    expect(libelleUiEtape(4)).toContain('Chiffrage');
     expect(libelleUiEtape(5)).toContain('Synthèse');
     expect(uiToBackendEtape(4)).toBe(5);
+  });
+
+  it('marque Coût incomplet à la Synthèse si des prix restent manuels', () => {
+    expect(
+      incompleteUiStepIndexes(4, [
+        { etape: 5, problemes: [{ message: 'prix_manuel' }] },
+      ]),
+    ).toEqual([2]);
+  });
+
+  it('n’utilise pas l’alerte qualité comme incomplet de Coût', () => {
+    expect(
+      incompleteUiStepIndexes(4, [
+        { etape: 5, problemes: [{ message: 'part_couts_estimes 26%' }] },
+      ]),
+    ).toEqual([]);
+  });
+
+  it('ne marque pas l’étape courante ni les étapes à venir', () => {
+    expect(
+      incompleteUiStepIndexes(2, [
+        { etape: 2, problemes: [{ message: 'arbre' }] },
+        { etape: 3, problemes: [{ message: 'poste' }] },
+      ]),
+    ).toEqual([]);
+  });
+
+  it('ne bloque pas le cadrage sur les pièces de destination CPS', () => {
+    expect(
+      estAnomaliePieceHorsCadrage({
+        message: 'etudes.gate.documents.piece_obligatoire_manquante',
+        codeArticle: 'REGLEMENT',
+      }),
+    ).toBe(true);
+    expect(
+      incompleteUiStepIndexes(2, [
+        {
+          etape: 1,
+          problemes: [{ message: 'etudes.gate.documents.piece_obligatoire_manquante' }],
+        },
+      ]),
+    ).toEqual([]);
   });
 });

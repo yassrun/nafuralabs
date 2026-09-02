@@ -4,6 +4,9 @@
  * Step-based flow: stepper (labels + current) + projected step body + action bar (Back / Next or Submit).
  * Dedicated stepper semantics (progression + validation); not nf-tabs.
  *
+ * Visual states: completed = check, current = filled number, upcoming = ghost,
+ * incomplete = check + badge on a visited step.
+ *
  * @example
  * <nf-wizard-shell
  *   [steps]="steps"
@@ -19,8 +22,12 @@
 import { Component, input, output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { ButtonListComponent } from '../../molecules/button-list';
+import { ButtonListComponent, type ButtonListItem } from '../../molecules/button-list';
 import type { WizardStepConfig } from './wizard-step.interface';
+import {
+  wizardStepVisualState,
+  type WizardStepVisualState,
+} from './wizard-step-state.util';
 
 @Component({
   selector: 'nf-wizard-shell',
@@ -33,15 +40,40 @@ import type { WizardStepConfig } from './wizard-step.interface';
           @for (step of steps(); track step.id; let i = $index) {
             <li
               class="nf-wizard-shell__step"
-              [class.nf-wizard-shell__step--current]="i === currentStepIndex()"
-              [class.nf-wizard-shell__step--completed]="i < currentStepIndex()"
-              [class.nf-wizard-shell__step--clickable]="allowStepNavigation() && i <= currentStepIndex()"
-              [attr.aria-current]="i === currentStepIndex() ? 'step' : null"
-              [attr.role]="allowStepNavigation() && i <= currentStepIndex() ? 'button' : null"
-              [attr.tabindex]="allowStepNavigation() && i <= currentStepIndex() ? 0 : null"
+              [attr.data-state]="stepState(i)"
+              [class.nf-wizard-shell__step--current]="stepState(i) === 'current'"
+              [class.nf-wizard-shell__step--completed]="stepState(i) === 'completed'"
+              [class.nf-wizard-shell__step--incomplete]="stepState(i) === 'incomplete'"
+              [class.nf-wizard-shell__step--upcoming]="stepState(i) === 'upcoming'"
+              [class.nf-wizard-shell__step--clickable]="isStepClickable(i)"
+              [attr.aria-current]="stepState(i) === 'current' ? 'step' : null"
+              [attr.aria-label]="stepAriaLabel(step, i)"
+              [attr.role]="isStepClickable(i) ? 'button' : null"
+              [attr.tabindex]="isStepClickable(i) ? 0 : null"
               (click)="onStepClick(i)"
               (keydown.enter)="onStepClick(i)">
-              <span class="nf-wizard-shell__step-indicator">{{ i + 1 }}</span>
+              <span class="nf-wizard-shell__step-indicator">
+                @if (stepState(i) === 'completed' || stepState(i) === 'incomplete') {
+                  <svg
+                    class="nf-wizard-shell__check"
+                    viewBox="0 0 12 12"
+                    aria-hidden="true"
+                    focusable="false">
+                    <path
+                      d="M2.2 6.2 L4.6 8.6 L9.8 3.4"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                } @else {
+                  {{ i + 1 }}
+                }
+                @if (stepState(i) === 'incomplete') {
+                  <span class="nf-wizard-shell__incomplete-badge" aria-hidden="true">!</span>
+                }
+              </span>
               @if (step.icon) {
                 <mat-icon class="nf-wizard-shell__step-icon">{{ step.icon }}</mat-icon>
               }
@@ -78,6 +110,12 @@ export class WizardShellComponent {
   /** Current step index (0-based) */
   currentStepIndex = input<number>(0);
 
+  /**
+   * 0-based indexes of visited steps that still have issues.
+   * Never applied to the current or upcoming steps.
+   */
+  incompleteStepIndexes = input<readonly number[]>([]);
+
   /** Whether the current step is valid (enables Next/Submit) */
   canProceed = input<boolean>(true);
 
@@ -105,6 +143,12 @@ export class WizardShellComponent {
   /** Submit button icon */
   submitIcon = input<string>('check');
 
+  /**
+   * Actions de bas de parcours (Enregistrer, Annuler…) — à gauche du Suivant.
+   * Les gestes hors formulaire restent dans l’en-tête.
+   */
+  extraActions = input<ButtonListItem[]>([]);
+
   /** Emitted when Back is clicked */
   back = output<void>();
 
@@ -113,6 +157,9 @@ export class WizardShellComponent {
 
   /** Emitted when Submit is clicked (last step) */
   submit = output<void>();
+
+  /** Emitted for `extraActions` ids (save, cancel, …). */
+  action = output<string>();
 
   /** Emitted when a navigable step is clicked (0-based index). */
   stepSelect = output<number>();
@@ -143,7 +190,8 @@ export class WizardShellComponent {
   });
 
   rightActions = computed(() => {
-    const actions: { id: string; label: string; icon?: string; variant?: 'primary' | 'secondary'; disabled?: boolean }[] = [];
+    const extras = this.extraActions().filter((a) => a.visible !== false);
+    const actions: ButtonListItem[] = [...extras];
     if (this.isLastStep()) {
       if (this.showSubmit()) {
         actions.push({
@@ -166,6 +214,22 @@ export class WizardShellComponent {
     return actions;
   });
 
+  stepState(index: number): WizardStepVisualState {
+    return wizardStepVisualState(index, this.currentStepIndex(), this.incompleteStepIndexes());
+  }
+
+  isStepClickable(index: number): boolean {
+    return this.allowStepNavigation() && index <= this.currentStepIndex();
+  }
+
+  stepAriaLabel(step: WizardStepConfig, index: number): string {
+    const state = this.stepState(index);
+    if (state === 'completed') return `${step.label}, terminé`;
+    if (state === 'incomplete') return `${step.label}, incomplet`;
+    if (state === 'current') return `${step.label}, en cours`;
+    return step.label;
+  }
+
   onActionClick(actionId: string): void {
     switch (actionId) {
       case 'back':
@@ -177,6 +241,8 @@ export class WizardShellComponent {
       case 'submit':
         this.submit.emit();
         break;
+      default:
+        this.action.emit(actionId);
     }
   }
 

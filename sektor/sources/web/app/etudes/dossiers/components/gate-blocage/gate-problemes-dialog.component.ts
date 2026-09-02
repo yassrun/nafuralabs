@@ -30,7 +30,7 @@ export interface GateProblemesDialogData {
               <span class="code">{{ p.codeArticle }}</span>
             }
             <span class="libelle">{{ p.libelle || (p.message | translate) }}</span>
-            @if (p.noeudId) {
+            @if (p.noeudId || p.codeArticle) {
               <button type="button" class="link" (click)="voirDansArbre(p)">
                 {{ 'etudes.gate.voir_dans_arbre' | translate }}
               </button>

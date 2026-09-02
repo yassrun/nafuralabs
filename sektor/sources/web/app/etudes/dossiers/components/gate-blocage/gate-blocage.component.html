@@ -1,48 +1,30 @@
 @if (visible()) {
-  <div
-    class="gate-blocage"
-    [class.gate-blocage--bloquant]="mode() === 'hard'"
-    [class.gate-blocage--soft]="mode() === 'soft'"
-    [class.gate-blocage--ok]="mode() === 'ok'"
-    [attr.role]="mode() === 'hard' ? 'alert' : 'status'"
+  <app-etude-banner
+    [tone]="bannerTone()"
+    [title]="mode() === 'ok' ? undefined : resumeCount()"
+    [message]="resumeMessage() | translate"
   >
-    <div class="gate-blocage__head">
-      <span class="gate-blocage__icone" aria-hidden="true">
-        @if (mode() === 'ok') {
-          ✓
-        } @else if (mode() === 'hard') {
-          ⚠
-        } @else {
-          ℹ
-        }
-      </span>
-      @if (mode() !== 'ok') {
-        <strong class="gate-blocage__count">{{ resumeCount() }}</strong>
-      }
-      <span class="gate-blocage__msg">{{ resumeMessage() | translate }}</span>
-
-      @if (mode() === 'soft') {
-        @if (hasPosteIncomplet()) {
-          <button type="button" class="gate-blocage__link" (click)="onFocusResume()">
-            {{ 'etudes.gate.voir_dans_arbre' | translate }}
-          </button>
-          <button type="button" class="gate-blocage__cta" (click)="onVerifier()">
-            {{ 'etudes.gate.verifier' | translate }}
-          </button>
-        }
-      }
-
-      @if (mode() !== 'ok' && aDesProblemes()) {
-        <button type="button" class="gate-blocage__more" (click)="openDetails()">
-          {{ 'etudes.gate.voir_details' | translate }}
+    @if (mode() === 'soft') {
+      @if (hasPosteIncomplet()) {
+        <button type="button" class="gate-blocage__link" (click)="onFocusResume()">
+          {{ 'etudes.gate.voir_dans_arbre' | translate }}
+        </button>
+        <button type="button" class="gate-blocage__cta" (click)="onVerifier()">
+          {{ 'etudes.gate.verifier' | translate }}
         </button>
       }
+    }
 
-      @if (showPasserManuel()) {
-        <button type="button" class="gate-blocage__cta" (click)="onPasserManuel()">
-          {{ 'etudes.gate.passer_manuel' | translate }}
-        </button>
-      }
-    </div>
-  </div>
+    @if (mode() !== 'ok' && aDesProblemes()) {
+      <button type="button" class="gate-blocage__more" (click)="openDetails()">
+        {{ 'etudes.gate.voir_details' | translate }}
+      </button>
+    }
+
+    @if (showPasserManuel()) {
+      <button type="button" class="gate-blocage__cta" (click)="onPasserManuel()">
+        {{ 'etudes.gate.passer_manuel' | translate }}
+      </button>
+    }
+  </app-etude-banner>
 }

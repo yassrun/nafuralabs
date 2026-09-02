@@ -1,5 +1,8 @@
 /**
  * Wizard Shell — Stepper + content + sticky actions
+ *
+ * Step states: current (accent fill + number), completed (neutral check),
+ * upcoming (ghost number), incomplete (check + badge on a visited step).
  */
 
 .nf-wizard-shell {
@@ -39,8 +42,13 @@
   font-weight: var(--nf-font-weight-medium, 500);
 }
 
-.nf-wizard-shell__step--completed {
+.nf-wizard-shell__step--completed,
+.nf-wizard-shell__step--incomplete {
   color: var(--nf-text-primary, #111827);
+}
+
+.nf-wizard-shell__step--upcoming {
+  color: var(--nf-text-tertiary, var(--nf-text-secondary, #9ca3af));
 }
 
 .nf-wizard-shell__step--clickable {
@@ -63,26 +71,68 @@
   margin-left: var(--nf-space-1, 4px);
 }
 
+.nf-wizard-shell__step--completed:not(:last-child)::after,
+.nf-wizard-shell__step--incomplete:not(:last-child)::after {
+  background: var(--nf-text-secondary, #6b7280);
+}
+
 .nf-wizard-shell__step-indicator {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: var(--nf-surface-hover, #f3f4f6);
+  background: transparent;
+  border: 1px solid var(--nf-color-border, #e5e7eb);
   font-size: var(--nf-font-size-xs, 0.75rem);
   font-weight: var(--nf-font-weight-medium, 500);
+  flex-shrink: 0;
+}
+
+.nf-wizard-shell__step--upcoming .nf-wizard-shell__step-indicator {
+  color: var(--nf-text-tertiary, #9ca3af);
+  border-color: var(--nf-color-border, #e5e7eb);
+  background: transparent;
 }
 
 .nf-wizard-shell__step--current .nf-wizard-shell__step-indicator {
   background: var(--nf-primary, #2563eb);
+  border-color: var(--nf-primary, #2563eb);
   color: #fff;
 }
 
-.nf-wizard-shell__step--completed .nf-wizard-shell__step-indicator {
-  background: var(--nf-success, #059669);
-  color: #fff;
+.nf-wizard-shell__step--completed .nf-wizard-shell__step-indicator,
+.nf-wizard-shell__step--incomplete .nf-wizard-shell__step-indicator {
+  background: var(--nf-surface-hover, #f3f4f6);
+  border-color: var(--nf-color-border, #e5e7eb);
+  color: var(--nf-text-primary, #111827);
+}
+
+.nf-wizard-shell__check {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
+.nf-wizard-shell__incomplete-badge {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--nf-color-surface, #fff);
+  border: 1px solid var(--nf-color-border, #e5e7eb);
+  color: var(--nf-text-primary, #111827);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nf-wizard-shell__step-icon {

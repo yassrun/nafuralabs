@@ -202,6 +202,62 @@ export function collectNonExploitableArticleKeys(
   return keys;
 }
 
+function normalizeArticleCode(code: string | null | undefined): string {
+  return (code ?? '').trim().toLowerCase();
+}
+
+export function findRowById(
+  nodes: NfTreeNode<BordereauTreeRow>[],
+  id: string,
+): BordereauTreeRow | null {
+  for (const node of nodes) {
+    if (node.data.id === id) return node.data;
+    if (node.children?.length) {
+      const found = findRowById(node.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+/** Premier nœud dont le code article correspond (insensible à la casse). */
+export function findRowByCode(
+  nodes: NfTreeNode<BordereauTreeRow>[],
+  code: string,
+): BordereauTreeRow | null {
+  const wanted = normalizeArticleCode(code);
+  if (!wanted) return null;
+  let fallback: BordereauTreeRow | null = null;
+  const walk = (list: NfTreeNode<BordereauTreeRow>[]): BordereauTreeRow | null => {
+    for (const node of list) {
+      if (normalizeArticleCode(node.data.code) === wanted) {
+        if (node.data.type === 'ARTICLE') return node.data;
+        fallback ??= node.data;
+      }
+      if (node.children?.length) {
+        const found = walk(node.children);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+  return walk(nodes) ?? fallback;
+}
+
+/** UUID persisté, sinon code affiché (brouillon d’extraction sans id). */
+export function findFocusRow(
+  nodes: NfTreeNode<BordereauTreeRow>[],
+  id?: string | null,
+  code?: string | null,
+): BordereauTreeRow | null {
+  if (id) {
+    const byId = findRowById(nodes, id);
+    if (byId) return byId;
+  }
+  if (code) return findRowByCode(nodes, code);
+  return null;
+}
+
 /** Ancêtres à déplier pour rendre `targetKey` visible. */
 export function expandAncestors(
   nodes: NfTreeNode<BordereauTreeRow>[],
@@ -340,4 +396,19 @@ export function getImportNoeudAt(
     list = node.enfants ?? [];
   }
   return node;
+}
+
+/**
+ * Plancher CSS de l’arbre : colonnes fixes + libellé (60 % de 12 rem).
+ * Au-dessus, le libellé s’ellipse ; en-dessous, scroll H + sticky à droite.
+ */
+export function bordereauTableMinWidth(opts: {
+  selection: boolean;
+  structureActions: boolean;
+}): string {
+  const typeW = opts.selection ? 3.75 : 4.25;
+  const codeW = opts.selection ? 5 : 5.5;
+  const extraMetrics = opts.selection ? 10.75 : 4.5;
+  const actionsW = opts.structureActions ? 8.5 : 0;
+  return `${typeW + codeW + 7.2 + 4.25 + 4.5 + extraMetrics + actionsW}rem`;
 }

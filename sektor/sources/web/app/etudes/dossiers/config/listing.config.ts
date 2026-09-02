@@ -102,7 +102,6 @@ export function buildDossierListingConfig() {
         search: true,
         filters: false,
         columnToggle: true,
-        selectionMode: 'none',
         viewModeToggle: false,
         refresh: true,
       },

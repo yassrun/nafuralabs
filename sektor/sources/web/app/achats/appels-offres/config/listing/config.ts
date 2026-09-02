@@ -20,7 +20,7 @@ export function buildAoListingConfig(t: TranslateService) {
     {
       filters: buildAoFilters(t),
       defaultSort: { column: 'createdAt', direction: 'desc' },
-      features: { search: true, filters: true, columnToggle: true, selectionMode: 'none', refresh: true },
+      features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {
         icon: 'clipboard-list',
         title: tr('achats.appelOffre.list.emptyState.title'),

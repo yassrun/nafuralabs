@@ -43,10 +43,16 @@ const LUCIDE_ICON_NAME_ALIASES: Record<string, string> = {
   launch: 'external-link',
   today: 'calendar',
   table: 'table-2',
+  refresh: 'refresh-cw',
   // Material icon names still used on legacy pages
   arrow_back: 'arrow-left',
   arrow_forward: 'arrow-right',
   delete: 'trash-2',
+  unfold_more: 'unfold-vertical',
+  unfold_less: 'fold-vertical',
+  subdirectory_arrow_right: 'corner-down-right',
+  expand_more: 'chevron-down',
+  chevron_right: 'chevron-right',
 };
 
 @Component({

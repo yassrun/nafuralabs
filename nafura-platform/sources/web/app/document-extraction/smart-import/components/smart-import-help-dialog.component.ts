@@ -5,7 +5,10 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { ButtonComponent } from '@lib/anatomy';
 import type { UiHierarchyHint } from '../../models/ui-schema.model';
+import type { JsonSchema } from '../../models/json-schema.model';
+import type { NafuraFieldPresence } from '../../models/json-schema.model';
 import type { SmartImportConfig, SmartImportSchemaView } from '../models/smart-import.model';
+import { fieldPresence } from '../utils/field-presence.util';
 
 interface HelpDialogData {
   schema: SmartImportSchemaView;
@@ -61,15 +64,13 @@ interface HelpDialogData {
       }
 
       <section>
-        <h3>{{ 'platform.smartImport.help.expectedFields' | translate }}</h3>
+        <h3>{{ expectedFieldsTitle() | translate }}</h3>
         <div class="fields">
           @for (field of fields(); track field.key) {
             <div class="field">
               <span>{{ field.title }}</span>
-              <span class="badge" [class.required]="field.required">
-                {{ (field.required
-                  ? 'platform.smartImport.help.required'
-                  : 'platform.smartImport.help.optional') | translate }}
+              <span class="badge" [class]="'badge--' + field.presence">
+                {{ presenceLabel(field.presence) | translate }}
               </span>
             </div>
           }
@@ -88,7 +89,7 @@ interface HelpDialogData {
 
       <footer>
         <nf-button variant="primary" (clicked)="close()">
-          {{ 'common.close' | translate }}
+          {{ 'platform.smartImport.help.close' | translate }}
         </nf-button>
       </footer>
     </div>
@@ -105,7 +106,9 @@ interface HelpDialogData {
       background: var(--nf-color-bg-subtle);
       font-size: .75rem;
     }
-    .badge.required { color: var(--nf-color-danger-700); }
+    .badge--extract { color: var(--nf-color-danger-700); }
+    .badge--infer { color: var(--nf-color-info-700, var(--nf-color-text-secondary)); }
+    .badge--optional { color: var(--nf-color-text-secondary); }
     .fields { border: 1px solid var(--nf-color-border); border-radius: .5rem; }
     .field { display: flex; justify-content: space-between; padding: .55rem .75rem; }
     .field + .field { border-top: 1px solid var(--nf-color-border); }
@@ -122,25 +125,46 @@ export class SmartImportHelpDialogComponent {
     return this.data.schema.uiSchema?.hierarchyHint ?? [];
   }
 
-  fields(): Array<{ key: string; title: string; required: boolean }> {
+  expectedFieldsTitle(): string {
+    if (this.hierarchy().length > 0) {
+      return 'platform.smartImport.help.expectedFieldsHierarchy';
+    }
+    if (this.data.schema.uiSchema?.rootView === 'RECORD_TABLE') {
+      return 'platform.smartImport.help.expectedFieldsRecord';
+    }
+    return 'platform.smartImport.help.expectedFieldsFlat';
+  }
+
+  presenceLabel(presence: NafuraFieldPresence): string {
+    switch (presence) {
+      case 'extract':
+        return 'platform.smartImport.help.extractRequired';
+      case 'infer':
+        return 'platform.smartImport.help.infer';
+      default:
+        return 'platform.smartImport.help.optional';
+    }
+  }
+
+  fields(): Array<{ key: string; title: string; presence: NafuraFieldPresence }> {
     const schema = this.data.schema.jsonSchema as unknown as Record<string, unknown>;
     const rootProperties = schema['properties'] as Record<string, unknown> | undefined;
     const arraySchema = rootProperties?.[this.data.arrayPath] as Record<string, unknown> | undefined;
     const itemSchema = arraySchema?.['items'] as Record<string, unknown> | undefined;
-    const properties = itemSchema?.['properties'] as Record<string, Record<string, unknown>> | undefined;
+    const properties = itemSchema?.['properties'] as Record<string, JsonSchema> | undefined;
     const required = new Set(
       Array.isArray(itemSchema?.['required']) ? (itemSchema?.['required'] as string[]) : [],
     );
     return Object.entries(properties ?? {})
       .filter(([, value]) => {
-        const type = value['type'];
+        const type = value.type;
         const primary = Array.isArray(type) ? type[0] : type;
         return primary !== 'array' && primary !== 'object';
       })
       .map(([key, value]) => ({
         key,
-        title: typeof value['title'] === 'string' ? value['title'] : key,
-        required: required.has(key),
+        title: typeof value.title === 'string' ? value.title : key,
+        presence: fieldPresence(value, key, required),
       }));
   }
 

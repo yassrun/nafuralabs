@@ -15,6 +15,6 @@ public class DossierPieceAttendueCreateDto {
     @Size(max = 255)
     private String libelle;
 
-    /** Défaut true si absent. */
+    /** Défaut false si absent (pièces de destination optionnelles). */
     private Boolean obligatoire;
 }

@@ -126,10 +126,10 @@ async function main() {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   try {
     await page.goto(`${APP_BASE}/etudes/dossiers/${id}`, { waitUntil: 'domcontentloaded' });
-    await page.getByRole('button', { name: /Bordereau manuel/i }).waitFor({ timeout: 20000 });
-    await page.getByRole('button', { name: /Bordereau manuel/i }).click();
-
+    await page.getByText(/Identité de l’étude|CPS/i).first().waitFor({ timeout: 20000 });
     await clickWizard(page, /Continuer vers le bordereau/i);
+    await page.getByRole('button', { name: /^Manuel$/i }).click();
+    await page.getByRole('button', { name: /Créer l’arbre vide|Creer l'arbre vide/i }).click();
     await page.getByRole('heading', { name: /Arbre du bordereau/i }).waitFor({ timeout: 20000 });
     const afterDocs = await currentStep(h, id);
     if (afterDocs !== 2) throw new Error(`après footer Continuer docs: currentStep=${afterDocs} (attendu 2)`);

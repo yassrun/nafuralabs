@@ -3,6 +3,7 @@ import type { NfTreeNode } from '@platform/lib/anatomy/components';
 import {
   applyTreeRollupPostes,
   applyTreeRollupTotals,
+  bordereauTableMinWidth,
   countExploitableArticles,
   countExploitableInNodes,
   countIgnoredArticles,
@@ -10,6 +11,7 @@ import {
   collectAllExpandableKeys,
   expandAncestorsOfNonExploitable,
   filterTreeByArticleIds,
+  findFocusRow,
   importArbreToTreeNodes,
   importKeyToPath,
   isArticleExploitable,
@@ -176,6 +178,28 @@ describe('article exploitable (aligné backend)', () => {
     expect(expanded.has(nodes[1].children![0].key)).toBe(true);
   });
 
+  it('cible un nœud d’extraction par code quand l’id persisté est absent', () => {
+    const nodes = importArbreToTreeNodes([
+      {
+        type: 'LOT',
+        code: 'a',
+        libelle: 'Terrassement',
+        enfants: [
+          {
+            type: 'ARTICLE',
+            code: 'a/1',
+            libelle: 'Déblais en masse terrain meuble',
+            unite: 'm3',
+            quantite: 0,
+          },
+        ],
+      },
+    ]);
+    expect(findFocusRow(nodes, 'uuid-persiste', 'a/1')?.code).toBe('a/1');
+    expect(findFocusRow(nodes, null, 'A/1')?.libelle).toContain('Déblais');
+    expect(findFocusRow(nodes, 'uuid-persiste', null)).toBeNull();
+  });
+
   it('récupère le chemin depuis une clé import', () => {
     expect(importKeyToPath('/0-0-1/1-2-ART')).toEqual([0, 2]);
     expect(importKeyToPath('invalid')).toBeNull();
@@ -234,5 +258,14 @@ describe('filtre arbre Coût', () => {
     expect(keys.has('lot6')).toBe(true);
     expect(keys.has('sl61')).toBe(true);
     expect(keys.has('a611')).toBe(false);
+  });
+});
+
+describe('bordereauTableMinWidth', () => {
+  it('réserve le libellé et les métriques sans forcer 100%', () => {
+    expect(bordereauTableMinWidth({ selection: false, structureActions: false }))
+      .toBe('30.2rem');
+    expect(bordereauTableMinWidth({ selection: false, structureActions: true }))
+      .toBe('38.7rem');
   });
 });

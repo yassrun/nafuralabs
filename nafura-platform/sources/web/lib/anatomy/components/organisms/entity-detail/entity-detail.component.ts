@@ -83,6 +83,7 @@ import { RibInputComponent } from '../../atoms/rib-input/rib-input.component';
 import { PhoneMaInputComponent } from '../../atoms/phone-ma-input/phone-ma-input.component';
 import { MoneyInputComponent } from '../../atoms/money-input/money-input.component';
 import { NfSelectComponent, type NfSelectOption } from '../../atoms/select';
+import { lookupOptionsEqual } from '../../atoms/select/lookup-combobox.util';
 import { PermissionService } from '../../../../../core/security/services/permission.service';
 import { FieldTemplateDirective } from './field-template.directive';
 import { AuditTimelineComponent } from '../../../../../features/collaboration/audit';
@@ -229,6 +230,14 @@ export class EntityDetailComponent<TItem = Record<string, unknown>>
   readonly formReady = signal(false);
   /** Per-field search term used for searchable select lookups. */
   readonly lookupSearchTerms = signal<Record<string, string>>({});
+
+  /** Stable options identity so nf-select OnPush does not see a new [] every CD. */
+  private readonly nfSelectOptionsByField = new Map<string, NfSelectOption[]>();
+  /** Stable searcher wrappers — `lookupSearchFn(field)` in the template would otherwise be new every CD. */
+  private readonly lookupSearchFnByKey = new Map<
+    string,
+    (query: string) => Promise<NfSelectOption[]>
+  >();
 
   /** Form dirty state */
   private readonly _isDirty = signal(false);
@@ -901,10 +910,16 @@ export class EntityDetailComponent<TItem = Record<string, unknown>>
   }
 
   toNfSelectOptions(field: DetailFieldConfig<TItem>): NfSelectOption[] {
-    return this.getOptions(field).map((opt) => ({
+    const next = this.getOptions(field).map((opt) => ({
       value: opt.value == null ? '' : String(opt.value),
       label: String(opt.label ?? ''),
     }));
+    const prev = this.nfSelectOptionsByField.get(field.key);
+    if (prev && lookupOptionsEqual(prev, next)) {
+      return prev;
+    }
+    this.nfSelectOptionsByField.set(field.key, next);
+    return next;
   }
 
   lookupSearchFn(
@@ -912,8 +927,13 @@ export class EntityDetailComponent<TItem = Record<string, unknown>>
   ): ((query: string) => Promise<NfSelectOption[]>) | undefined {
     const key = field.lookupKey?.trim();
     if (!key || !this.lookupSearchers) return undefined;
+    const cached = this.lookupSearchFnByKey.get(key);
+    if (cached) return cached;
     const fn = this.lookupSearchers[key];
-    return fn ? (query) => fn(query) : undefined;
+    if (!fn) return undefined;
+    const wrapped = (query: string) => fn(query);
+    this.lookupSearchFnByKey.set(key, wrapped);
+    return wrapped;
   }
 
   lookupSelectedLabel(field: DetailFieldConfig<TItem>): string | undefined {

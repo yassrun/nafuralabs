@@ -22,11 +22,13 @@ import ma.nafura.etudes.repository.DossierDocumentRepository;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.service.BordereauImportService;
 import ma.nafura.etudes.service.DossierDocumentService;
+import ma.nafura.etudes.service.DossierPieceAttendueService;
 import ma.nafura.etudes.service.cps.CpsService;
 import ma.nafura.etudes.service.port.capability.BordereauExtractionPort;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +54,7 @@ public class DocumentExtractionJobService {
     private final DossierDocumentService documentService;
     private final BordereauExtractionPort bordereauExtractionPort;
     private final CpsService cpsService;
+    private final DossierPieceAttendueService pieceAttendueService;
     private final ObjectMapper objectMapper;
     private final TransactionTemplate transactionTemplate;
 
@@ -62,6 +65,7 @@ public class DocumentExtractionJobService {
             DossierDocumentService documentService,
             BordereauExtractionPort bordereauExtractionPort,
             CpsService cpsService,
+            @Lazy DossierPieceAttendueService pieceAttendueService,
             ObjectMapper objectMapper,
             PlatformTransactionManager transactionManager) {
         this.jobRepository = jobRepository;
@@ -70,6 +74,7 @@ public class DocumentExtractionJobService {
         this.documentService = documentService;
         this.bordereauExtractionPort = bordereauExtractionPort;
         this.cpsService = cpsService;
+        this.pieceAttendueService = pieceAttendueService;
         this.objectMapper = objectMapper;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
@@ -313,6 +318,17 @@ public class DocumentExtractionJobService {
                 dossierEtudeRepository.save(dossier);
             }
         });
+
+        try {
+            cpsService.proposerMarche(piece.getId()).ifPresent(prop ->
+                    pieceAttendueService.capturerPiecesDestination(
+                            job.getDossierEtudeId(), prop.getPiecesAttendues()));
+        } catch (RuntimeException ex) {
+            log.warn(
+                    "Checklist destination CPS non capturée dossier={} : {}",
+                    job.getDossierEtudeId(),
+                    ex.getMessage());
+        }
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("cpsDocumentId", cps.getId() != null ? cps.getId().toString() : null);

@@ -1,125 +1,26 @@
 <section
   class="pieces"
   [class.pieces--bordereau]="mode() === 'bordereau'"
+  [class.pieces--cps]="mode() === 'documents'"
+  [class.pieces--inline-doc]="mode() === 'documents' || mode() === 'bordereau'"
   [class.pieces--arbre]="showPersistedTree() || enRevue()"
+  [class.pieces--hidden]="mode() === 'destination' && slotsVisibles().length === 0"
   [attr.aria-label]="titre()"
 >
-  <header class="pieces__entete" [class.pieces__entete--compact]="showPersistedTree() || enRevue()">
+  <header class="pieces__entete" [class.pieces__entete--compact]="mode() === 'bordereau'">
     <div class="pieces__entete-main">
       <h3 class="pieces__titre">{{ titre() }}</h3>
-      @if (showPersistedTree() || enRevue()) {
-        @if (voie() === 'auto' && sourceBordereauNom()) {
-          <p class="pieces__provenance" role="status">
-            Arbre généré automatiquement depuis
-            <span
-              class="pieces__provenance-fichier"
-              [attr.title]="sourceBordereauNom()"
-            >{{ sourceBordereauNom() }}</span>
-          </p>
-        } @else if (voie() === 'manuel' && sourceBordereauNom()) {
-          <p class="pieces__provenance" role="status">
-            Édition manuelle · source
-            <span
-              class="pieces__provenance-fichier"
-              [attr.title]="sourceBordereauNom()"
-            >{{ sourceBordereauNom() }}</span>
-          </p>
-        } @else if (voie() === 'manuel') {
-          <p class="pieces__provenance" role="status">Édition manuelle de l’arbre</p>
-        }
-      } @else {
-        <p class="pieces__aide">{{ aide() }}</p>
-      }
+      <p class="pieces__aide">{{ aide() }}</p>
     </div>
-    @if (mode() === 'bordereau' && (showPersistedTree() || enRevue())) {
-        <div class="pieces__toolbar">
-        <div class="pieces__voies pieces__voies--inline" role="group" aria-label="Mode de construction">
-          <nf-button
-            type="button"
-            [variant]="voie() === 'auto' ? 'primary' : 'secondary'"
-            size="sm"
-            [disabled]="extractionEnCours() || phase() === 'saving'"
-            (clicked)="setVoie('auto')"
-          >
-            Automatique
-          </nf-button>
-          <nf-button
-            type="button"
-            [variant]="voie() === 'manuel' ? 'primary' : 'secondary'"
-            size="sm"
-            [disabled]="extractionEnCours() || phase() === 'saving'"
-            (clicked)="setVoie('manuel')"
-          >
-            Manuel
-          </nf-button>
-        </div>
-        @if (voie() === 'auto' && !enRevue() && sourceBordereauPiece(); as piece) {
-          @if (modifiable()) {
-            <nf-button
-              type="button"
-              variant="secondary"
-              size="sm"
-              [disabled]="extractionEnCours()"
-              [loading]="extractionEnCours() && pieceExtraction()?.id === piece.id"
-              (clicked)="extraire(piece)"
-            >
-              Ré-extraire
-            </nf-button>
-          }
-        }
-      </div>
-    }
   </header>
 
-  @if (erreur(); as message) {
-    <p class="pieces__erreur" role="alert">{{ message }}</p>
-  }
-  @if (info(); as message) {
-    <p class="pieces__info" role="status">{{ message }}</p>
-  }
 
-  @if (mode() === 'documents') {
-    @if (proposition(); as prop) {
-      <aside class="pieces__prop" role="region" aria-label="Propositions CPS">
-        <div class="pieces__prop-body">
-          <strong>Propositions depuis le CPS</strong>
-          <p>
-            {{ prop.piecesAttendues.length }} pièce(s) suggérée(s)
-            @if (prop.metadonnees?.objet) {
-              — objet : {{ prop.metadonnees!.objet }}
-            }
-            @if (prop.confiance != null) {
-              <span class="pieces__prop-conf">(confiance {{ confiancePct(prop.confiance) }} %)</span>
-            }
-          </p>
-        </div>
-        <div class="pieces__prop-actions">
-          <nf-button
-            type="button"
-            variant="secondary"
-            [disabled]="propositionBusy()"
-            (clicked)="discardProposition()"
-          >
-            Ignorer
-          </nf-button>
-          <nf-button
-            type="button"
-            variant="primary"
-            [disabled]="propositionBusy()"
-            [loading]="propositionBusy()"
-            (clicked)="applyProposition()"
-          >
-            Appliquer
-          </nf-button>
-        </div>
-      </aside>
-    }
-
+  @if (montreZones()) {
     @if (chargement()) {
       <p class="pieces__etat">Chargement des pièces…</p>
     } @else {
       <div class="pieces__zones" role="group" aria-label="Pièces attendues">
-        @for (slot of slotsAttendus(); track slot.id) {
+        @for (slot of slotsVisibles(); track slot.id) {
           @let piece = documentPourSlot(slot);
           @let busy = envoiSlot() === slot.id;
           @let over = dragOverSlot() === slot.id;
@@ -135,8 +36,12 @@
           >
             <div class="pieces__zone-head">
               <span class="pieces__zone-badge">{{ badgeSlot(slot) }}</span>
-              @if (slot.obligatoire) {
-                <span class="pieces__zone-req" aria-hidden="true">Obligatoire</span>
+              @if (mode() === 'destination') {
+                @if (slot.obligatoire) {
+                  <span class="pieces__zone-req" aria-hidden="true">Obligatoire</span>
+                } @else {
+                  <span class="pieces__zone-opt">Optionnel</span>
+                }
               } @else {
                 <span class="pieces__zone-opt">Optionnel</span>
               }
@@ -144,14 +49,16 @@
                 <span class="pieces__zone-ia">IA</span>
               }
             </div>
-            <h4 class="pieces__zone-titre">{{ slot.libelle }}</h4>
-            <p class="pieces__zone-aide">{{ libelleType(slot.type) }}</p>
+            @if (mode() === 'destination') {
+              <h4 class="pieces__zone-titre">{{ slot.libelle }}</h4>
+              <p class="pieces__zone-aide">{{ libelleType(slot.type) }}</p>
+            }
 
             @if (piece) {
               <div class="pieces__zone-fichier">
                 <nf-icon name="description" class="pieces__zone-icone" aria-hidden="true"></nf-icon>
                 <span class="pieces__nom">{{ nomFichierAffiche(piece.nomFichier) || piece.documentId }}</span>
-                @if (modifiable()) {
+                @if (modifiable() && !fichierDeposeFige(piece)) {
                   <nf-button
                     type="button"
                     variant="danger"
@@ -165,7 +72,20 @@
                   ></nf-button>
                 }
               </div>
-              @if (modifiable()) {
+              @if (mode() === 'bordereau' && modifiable() && peutExtraire()) {
+                <nf-button
+                  type="button"
+                  class="pieces__extract"
+                  variant="primary"
+                  size="sm"
+                  [disabled]="extractionEnCours() || phase() === 'saving'"
+                  [loading]="extractionEnCours() && pieceExtraction()?.id === piece.id"
+                  (clicked)="extraire(piece)"
+                >
+                  {{ labelExtraction() }}
+                </nf-button>
+              }
+              @if (modifiable() && !fichierDeposeFige(piece)) {
                 <label class="pieces__zone-replace">
                   <span>{{ busy ? 'Remplacement…' : 'Remplacer' }}</span>
                   <input
@@ -175,12 +95,22 @@
                     (change)="onFichierChoisi($event, slot)"
                   />
                 </label>
+              } @else if (fichierDeposeFige(piece)) {
+                <span class="pieces__zone-lock">Figé après cadrage</span>
               }
             } @else if (modifiable()) {
               <label class="pieces__zone-drop">
                 <nf-icon name="upload_file" aria-hidden="true"></nf-icon>
                 <span class="pieces__zone-drop-main">
-                  {{ busy ? 'Envoi…' : 'Glissez-déposez le fichier ici' }}
+                  {{
+                    busy
+                      ? 'Envoi…'
+                      : mode() === 'documents'
+                        ? 'Déposer un PDF'
+                        : mode() === 'bordereau'
+                          ? 'Déposer un BDP'
+                          : 'Glissez-déposez le fichier ici'
+                  }}
                 </span>
                 <span class="pieces__zone-drop-sub">ou cliquez pour parcourir</span>
                 <input
@@ -194,7 +124,7 @@
               <p class="pieces__vide">Non déposé</p>
             }
 
-            @if (modifiable() && slot.type !== 'BORDEREAU' && slot.type !== 'CPS') {
+            @if (modifiable() && mode() === 'destination') {
               <div class="pieces__zone-meta">
                 <nf-button type="button" variant="ghost" size="sm" (clicked)="basculerObligatoire(slot)">
                   {{ slot.obligatoire ? 'Rendre optionnel' : 'Rendre obligatoire' }}
@@ -213,7 +143,7 @@
         }
       </div>
 
-      @if (modifiable()) {
+      @if (modifiable() && mode() === 'destination') {
         <div class="pieces__ajout">
           @if (!ajoutOuvert()) {
             <nf-button type="button" variant="secondary" (clicked)="ajoutOuvert.set(true)">
@@ -236,14 +166,6 @@
                   placeholder="Ex. Règlement de consultation"
                 />
               </label>
-              <label class="pieces__ajout-check">
-                <input
-                  type="checkbox"
-                  [ngModel]="ajoutObligatoire()"
-                  (ngModelChange)="ajoutObligatoire.set($event)"
-                />
-                Obligatoire
-              </label>
               <div class="pieces__ajout-actions">
                 <nf-button type="button" variant="secondary" (clicked)="ajoutOuvert.set(false)">
                   Annuler
@@ -261,194 +183,110 @@
           }
         </div>
       }
-
-      @if (modifiable()) {
-        <div class="pieces__manuel-fallback">
-          <p class="pieces__aide pieces__aide--suite">
-            Pas de BDP ni de CPS ? Construisez le bordereau à la main.
-          </p>
-          <nf-button variant="secondary" [disabled]="initManuel()" (clicked)="demarrerManuel()">
-            {{ initManuel() ? 'Préparation…' : 'Bordereau manuel' }}
-          </nf-button>
-        </div>
-      }
     }
-  } @else {
-    @if (!(showPersistedTree() || enRevue())) {
-      <div class="pieces__voies" role="group" aria-label="Mode de construction">
-        <nf-button
-          type="button"
-          [variant]="voie() === 'auto' ? 'primary' : 'secondary'"
-          size="sm"
-          [disabled]="extractionEnCours() || phase() === 'saving'"
-          (clicked)="setVoie('auto')"
-        >
-          Automatique
+  }
+
+  @if (mode() === 'bordereau') {
+    @if (extractionEnCours()) {
+      <div class="pieces__progress" role="status" aria-live="polite">
+        <div class="pieces__progress-bar">
+          <div
+            class="pieces__progress-fill"
+            [style.width.%]="progressPercent()"
+          ></div>
+        </div>
+        <p class="pieces__progress-label">
+          {{ progressStep() || 'Extraction en cours…' }}
+          @if (progressPercent() > 0) {
+            <span> — {{ progressPercent() }} %</span>
+          }
+        </p>
+      </div>
+    }
+
+    @if (phase() === 'error') {
+      <div class="pieces__review-actions">
+        <nf-button variant="secondary" size="sm" (clicked)="relancerExtraction()">
+          Relancer
         </nf-button>
-        <nf-button
-          type="button"
-          [variant]="voie() === 'manuel' ? 'primary' : 'secondary'"
-          size="sm"
-          [disabled]="extractionEnCours() || phase() === 'saving'"
-          (clicked)="setVoie('manuel')"
-        >
-          Manuel
+        <nf-button variant="ghost" size="sm" (clicked)="annulerExtraction()">
+          Annuler
         </nf-button>
       </div>
     }
 
-    @if (voie() === 'auto') {
-      @if (!(showPersistedTree() || enRevue())) {
-        <p class="pieces__aide pieces__aide--suite">
-          On extrait le BDP déjà stocké à l’étape Documents (pas besoin de re-uploader). La revue se
-          fait dans le même arbre avant validation.
-        </p>
-      }
-
-      @if (chargement()) {
-        <p class="pieces__etat">Chargement…</p>
-      } @else if (piecesBordereau().length === 0) {
-        <p class="pieces__vide">
-          Aucun BDP trouvé. Revenez à « Documents du marché » et déposez le bordereau
-          (type Bordereau ou CPS + bordereau).
-        </p>
-      } @else if (!enRevue() && !dpgfEffectif()) {
-        <ul class="pieces__liste">
-          @for (piece of piecesBordereau(); track piece.id) {
-            <li class="pieces__ligne">
-              <span class="pieces__type">{{ libelleType(piece.type) }}</span>
-              <span class="pieces__nom">{{ nomFichierAffiche(piece.nomFichier) || piece.documentId }}</span>
-              @if (modifiable()) {
-                <nf-button
-                  [variant]="'primary'"
-                  size="sm"
-                  [disabled]="extractionEnCours()"
-                  (clicked)="extraire(piece)"
-                >
-                  {{
-                    extractionEnCours() && pieceExtraction()?.id === piece.id
-                      ? 'Extraction…'
-                      : 'Extraire'
-                  }}
-                </nf-button>
-              }
-            </li>
-          }
-        </ul>
-      }
-
-      @if (extractionEnCours()) {
-        <div class="pieces__progress" role="status" aria-live="polite">
-          <div class="pieces__progress-bar">
-            <div
-              class="pieces__progress-fill"
-              [style.width.%]="progressPercent()"
-            ></div>
-          </div>
-          <p class="pieces__progress-label">
-            {{ progressStep() || 'Extraction en cours…' }}
-            @if (progressPercent() > 0) {
-              <span> — {{ progressPercent() }} %</span>
-            }
-          </p>
-        </div>
-      }
-
-      @if (phase() === 'error') {
-        <div class="pieces__review-actions">
-          <nf-button variant="secondary" size="sm" (clicked)="relancerExtraction()">
-            Relancer
-          </nf-button>
-          <nf-button variant="ghost" size="sm" (clicked)="annulerExtraction()">
-            Annuler
-          </nf-button>
-        </div>
-      }
-
-      @if (enRevue() && draftArbre(); as arbre) {
-        <div class="pieces__review" role="region" aria-label="Revue de l’extraction">
-          <div class="pieces__review-banner">
-            <div>
-              <strong>Revue de l’extraction</strong>
-              <p>
-                {{ articlesExploitables() }} article{{ articlesExploitables() === 1 ? '' : 's' }}
-                exploitable{{ articlesExploitables() === 1 ? '' : 's' }}
-                @if (articlesIgnores() > 0) {
-                  — {{ articlesIgnores() }} à corriger (unité / quantité). Les lignes sont dépliées et marquées « incomplet ».
-                }
-                @if (pieceExtraction()?.nomFichier; as nom) {
-                  · {{ nom }}
-                }
-              </p>
-            </div>
-            <div class="pieces__review-actions">
-              <nf-button
-                variant="ghost"
-                size="sm"
-                [disabled]="phase() === 'saving'"
-                (clicked)="annulerExtraction()"
-              >
-                Annuler
-              </nf-button>
+    @if (enRevue() && draftArbre(); as arbre) {
+      <div class="pieces__review" role="region" aria-label="Revue de l’extraction">
+        <div class="pieces__review-banner">
+          <div>
+            <strong>Revue de l’extraction</strong>
+            <p>
+              {{ articlesExploitables() }} article{{ articlesExploitables() === 1 ? '' : 's' }}
+              exploitable{{ articlesExploitables() === 1 ? '' : 's' }}
               @if (articlesIgnores() > 0) {
-                <nf-button
-                  variant="secondary"
-                  size="sm"
-                  [disabled]="phase() === 'saving'"
-                  (clicked)="voirLignesACorriger()"
-                >
-                  Voir les {{ articlesIgnores() }} à corriger
-                </nf-button>
+                — {{ articlesIgnores() }} à corriger (unité / quantité). Les lignes sont dépliées et marquées « incomplet ».
               }
+            </p>
+          </div>
+          <div class="pieces__review-actions">
+            <nf-button
+              variant="ghost"
+              size="sm"
+              [disabled]="phase() === 'saving'"
+              (clicked)="annulerExtraction()"
+            >
+              Annuler
+            </nf-button>
+            @if (articlesIgnores() > 0) {
               <nf-button
                 variant="secondary"
                 size="sm"
                 [disabled]="phase() === 'saving'"
-                (clicked)="relancerExtraction()"
+                (clicked)="voirLignesACorriger()"
               >
-                Relancer
+                Voir les {{ articlesIgnores() }} à corriger
               </nf-button>
-              <nf-button
-                variant="primary"
-                size="sm"
-                [disabled]="phase() === 'saving' || articlesExploitables() === 0"
-                (clicked)="validerExtraction()"
-              >
-                {{ phase() === 'saving' ? 'Validation…' : 'Valider l’extraction' }}
-              </nf-button>
-            </div>
+            }
+            <nf-button
+              variant="secondary"
+              size="sm"
+              [disabled]="phase() === 'saving'"
+              (clicked)="relancerExtraction()"
+            >
+              Relancer
+            </nf-button>
+            <nf-button
+              variant="primary"
+              size="sm"
+              [disabled]="phase() === 'saving' || articlesExploitables() === 0"
+              (clicked)="validerExtraction()"
+            >
+              {{ phase() === 'saving' ? 'Validation…' : 'Valider l’extraction' }}
+            </nf-button>
           </div>
-
-          <app-bordereau-arbre
-            [draftArbre]="arbre"
-            [draftToken]="draftToken()"
-            [modifiable]="modifiable()"
-            [editionStructure]="true"
-            (draftChange)="onDraftChange($event)"
-          />
         </div>
-      }
-    } @else if (!(showPersistedTree() || enRevue())) {
-      <p class="pieces__aide pieces__aide--suite">
-        Construisez lots et articles à la main. Chaque article doit avoir une unité et une
-        quantité &gt; 0. L’extraction automatique est désactivée dans ce mode.
-      </p>
-      @if (!dpgfEffectif() && modifiable()) {
-        <div class="pieces__actions">
-          <nf-button variant="primary" [disabled]="initManuel()" (clicked)="demarrerManuel()">
-            {{ initManuel() ? 'Préparation…' : 'Créer l’arbre vide' }}
-          </nf-button>
-        </div>
-      }
-    }
 
-    @if (showPersistedTree()) {
+        <app-bordereau-arbre
+          [draftArbre]="arbre"
+          [draftToken]="draftToken()"
+          [modifiable]="modifiable()"
+          [editionStructure]="true"
+          [inlineBanner]="false"
+          [focusNoeudId]="focusNoeudId()"
+          [focusCode]="focusCode()"
+          [focusToken]="focusToken()"
+          (draftChange)="onDraftChange($event)"
+        />
+      </div>
+    } @else if (showPersistedTree()) {
       <app-bordereau-arbre
         [dpgfId]="dpgfEffectif()!"
         [modifiable]="modifiable()"
         [editionStructure]="editionStructure()"
         [focusNoeudId]="focusNoeudId()"
-        [selectedKey]="focusNoeudId()"
+        [focusCode]="focusCode()"
+        [focusToken]="focusToken()"
+        [inlineBanner]="false"
         (change)="change.emit()"
       />
     }

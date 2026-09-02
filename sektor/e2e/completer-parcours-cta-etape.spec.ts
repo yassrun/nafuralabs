@@ -133,15 +133,13 @@ test.describe('SEKTOR-129 — CTA avancent l’étape', () => {
     const id = await createDossier(request, session, suffix);
 
     await page.goto(`/etudes/dossiers/${id}`, { waitUntil: 'domcontentloaded' });
-    await expect(page.getByText(/Pièces du marché|Documents/i).first()).toBeVisible({
+    await expect(page.getByText(/Identité de l’étude|CPS/i).first()).toBeVisible({
       timeout: 20000,
     });
 
-    const manuel = page.getByRole('button', { name: /Bordereau manuel/i });
-    await expect(manuel).toBeVisible({ timeout: 10000 });
-    await manuel.click();
-
     await clickWizardNext(page, /Continuer vers le bordereau/i);
+    await page.getByRole('button', { name: /^Manuel$/i }).click();
+    await page.getByRole('button', { name: /Créer l’arbre vide|Creer l'arbre vide/i }).click();
     await expect(page.getByRole('heading', { name: /Arbre du bordereau/i })).toBeVisible({
       timeout: 20000,
     });

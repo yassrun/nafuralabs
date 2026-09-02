@@ -20,7 +20,7 @@ export function buildInspectionsListingConfig(t: TranslateService) {
     {
       filters: buildInspectionFilters(t),
       defaultSort: { column: 'dateInspection', direction: 'desc' },
-      features: { search: true, filters: true, columnToggle: true, selectionMode: 'none', refresh: true },
+      features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {
         icon: 'clipboard-check',
         title: tr('hse.inspection.list.emptyState.title'),

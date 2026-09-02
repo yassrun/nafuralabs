@@ -1,11 +1,11 @@
 
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { AuthFacade } from '@platform/core/security/services/auth.facade';
 import { environment } from '@env';
-import { OnboardingApiService, type CompletenessResult, type CompletenessSection } from '../../services/onboarding-api.service';
+import { ErpChromeSnapshotService } from '../../../shell/erp-chrome-snapshot.service';
+import type { CompletenessSection } from '../../services/onboarding-api.service';
 
 const SECTION_ROUTES: Record<string, string> = {
   identity: '/administration/societe',
@@ -102,18 +102,13 @@ import { ButtonComponent } from '@platform/lib/anatomy';
     .meter-panel__demo:hover { text-decoration: underline; }
   `],
 })
-export class CompletenessMeterComponent implements OnInit {
+export class CompletenessMeterComponent {
   readonly environment = environment;
-  private readonly api = inject(OnboardingApiService);
-  private readonly auth = inject(AuthFacade);
+  private readonly chrome = inject(ErpChromeSnapshotService);
 
-  readonly score = signal<number | null>(null);
-  readonly sections = signal<CompletenessSection[]>([]);
+  readonly score = computed(() => this.chrome.completeness()?.score ?? null);
+  readonly sections = computed(() => this.chrome.completeness()?.sections ?? []);
   readonly panelOpen = signal(false);
-
-  ngOnInit(): void {
-    void this.refresh();
-  }
 
   togglePanel(): void {
     this.panelOpen.update((v) => !v);
@@ -124,20 +119,5 @@ export class CompletenessMeterComponent implements OnInit {
       return null;
     }
     return SECTION_ROUTES[section.id] ?? null;
-  }
-
-  private async refresh(): Promise<void> {
-    const tenantId = this.auth.currentTenant()?.tenant.id;
-    if (!tenantId || tenantId === 'pending-tenant') {
-      return;
-    }
-    try {
-      const result: CompletenessResult = await this.api.getCompleteness(tenantId);
-      this.score.set(result.score);
-      this.sections.set(result.sections);
-    } catch {
-      this.score.set(null);
-      this.sections.set([]);
-    }
   }
 }

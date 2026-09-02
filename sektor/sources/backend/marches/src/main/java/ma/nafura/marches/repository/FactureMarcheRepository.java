@@ -1,5 +1,7 @@
 package ma.nafura.marches.repository;
 
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import ma.nafura.marches.domain.facture.FactureMarche;
@@ -15,4 +17,7 @@ public interface FactureMarcheRepository extends TenantScopedRepository<FactureM
             UUID tenantId, String contratMarcheId);
 
     long countByTenantId(UUID tenantId);
+
+    List<FactureMarche> findByTenantIdAndStatusNotInAndDateEcheanceLessThan(
+            UUID tenantId, Collection<String> statuses, LocalDate date);
 }

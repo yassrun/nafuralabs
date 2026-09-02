@@ -55,6 +55,8 @@ Ce lot livre la **ligne 2**. Pas un dialog. Pas un second picker.
 
 **AC-14 — Orphelin.** Id posé absent des hits (partenaire archivé, id cassé) : le champ affiche un libellé de repli, pas un UUID nu ; l’œil fiche s’ouvre quand même si la route existe.
 
+**AC-15 — Effacer.** Valeur posée : libellé en lecture seule + croix **dans** le champ (`| acier  × |`). Clic croix → champ vide, la saisie redevient possible. Pas de frappe tant qu’une valeur est posée. La croix reste sur un champ requis (sinon on ne peut plus changer).
+
 ---
 
 ## Hors v1 (dette nommée, pas AC)
@@ -85,5 +87,6 @@ L’exec implémente ; le QA joue. Ne pas choisir des valeurs qui passent toutes
 | `lookup-fournisseur-bc` | AC-11 |
 | `lookup-filtre-listing` | AC-12 |
 | `lookup-orphelin` | AC-14 |
+| `lookup-effacer` | AC-15 |
 
 **État initial requis :** tenant `qa-local` ; **≥ 25** clients actifs et **≥ 25** fournisseurs actifs ; **1 code exact** client `CLI-…` et **1** fournisseur `FRN-…` ; au moins **1** inactif par rôle ; un devis et un BC brouillon pour brancher les champs ; un enum (type contrat ou mode règlement) sur le même écran qu’un FK pour AC-8.

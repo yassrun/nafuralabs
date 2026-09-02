@@ -19,6 +19,7 @@ const paths = [
   'sektor/sources/web/app/etudes/dossiers/components/pieces-marche/pieces-marche.component.html',
   'sektor/sources/web/app/etudes/dossiers/components/bordereau-arbre/bordereau-arbre.component.html',
   'sektor/sources/web/app/etudes/dossiers/components/dossier-summary-header/dossier-summary-header.component.html',
+  'sektor/sources/web/app/etudes/dossiers/components/dossier-identite-panel/dossier-identite-panel.component.html',
   'sektor/sources/web/app/etudes/dossiers/components/poste-decomposition-panel/poste-decomposition-panel.component.html',
   'sektor/sources/web/app/etudes/devis/devis-from-dpgf/devis-from-dpgf.page.ts',
 ];

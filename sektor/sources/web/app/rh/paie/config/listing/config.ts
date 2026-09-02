@@ -20,7 +20,7 @@ export function buildPaieListingConfig(t: TranslateService) {
     {
       filters: buildPaieFilters(t),
       defaultSort: { column: 'mois', direction: 'desc' },
-      features: { search: true, filters: true, columnToggle: true, selectionMode: 'none', refresh: true },
+      features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {
         icon: 'banknote',
         title: tr('rh.paie.listing.emptyState.title'),

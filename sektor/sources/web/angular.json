@@ -202,7 +202,8 @@
             "include": [
               "app/**/*.spec.ts",
               "src/**/*.spec.ts",
-              "../../../nafura-platform/sources/web/lib/anatomy/components/atoms/select/**/*.spec.ts"
+              "../../../nafura-platform/sources/web/lib/anatomy/components/atoms/select/**/*.spec.ts",
+              "../../../nafura-platform/sources/web/lib/anatomy/components/organisms/wizard-shell/**/*.spec.ts"
             ],
             "exclude": ["tests/**"],
             "polyfills": ["zone.js", "zone.js/testing"],

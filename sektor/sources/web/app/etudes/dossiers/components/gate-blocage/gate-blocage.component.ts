@@ -4,6 +4,10 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import type { ProblemeGate, ResultatGate } from '@app/etudes/models';
 
+import {
+  EtudeBannerComponent,
+  type EtudeBannerTone,
+} from '../etude-banner/etude-banner.component';
 import { openGateProblemesDialog } from './gate-problemes-dialog.component';
 
 export type GatePresentation = 'soft' | 'hard' | 'ok' | 'hidden';
@@ -16,7 +20,7 @@ export type GatePresentation = 'soft' | 'hard' | 'ok' | 'hidden';
   selector: 'app-gate-blocage',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslateModule],
+  imports: [TranslateModule, EtudeBannerComponent],
   templateUrl: './gate-blocage.component.html',
   styleUrl: './gate-blocage.component.scss',
 })
@@ -59,6 +63,12 @@ export class GateBlocageComponent {
 
   readonly bloquant = computed(() => this.mode() === 'hard');
 
+  readonly bannerTone = computed((): EtudeBannerTone => {
+    if (this.mode() === 'ok') return 'success';
+    if (this.mode() === 'soft') return 'info';
+    return 'error';
+  });
+
   readonly resumeCount = computed(() => {
     const list = this.problemes();
     const postes = list.filter((p) => !!p.noeudId).length;
@@ -68,7 +78,9 @@ export class GateBlocageComponent {
     }
     const n = list.length;
     if (this.bloquant()) {
-      return `${n} point${n > 1 ? 's' : ''} empêchent de continuer —`;
+      return n > 1
+        ? `${n} points empêchent de continuer —`
+        : '1 point empêchant de continuer —';
     }
     return `${n} point${n > 1 ? 's' : ''} à vérifier —`;
   });
@@ -107,7 +119,7 @@ export class GateBlocageComponent {
 
   openDetails(): void {
     void openGateProblemesDialog(this.dialog, this.problemes()).then((picked) => {
-      if (picked?.noeudId) this.corriger.emit(picked);
+      if (picked?.noeudId || picked?.codeArticle) this.corriger.emit(picked);
     });
   }
 

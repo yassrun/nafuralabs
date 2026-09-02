@@ -1,0 +1,104 @@
+<section class="identite" aria-labelledby="identite-titre">
+  <header class="identite__entete">
+    <h3 id="identite-titre" class="identite__titre">Identité de l’étude</h3>
+    <p class="identite__aide">
+      Objet, MOA et chargé restent corrigeables jusqu’à la soumission. Les dates et montants AO se
+      complètent ici.
+    </p>
+  </header>
+
+  <div class="identite__grille">
+    <div class="identite__objet">
+      <nf-input
+        name="objet"
+        label="Objet"
+        [required]="true"
+        [disabled]="!modifiable() || saving()"
+        [ngModel]="objet()"
+        (ngModelChange)="objet.set($event)"
+      />
+    </div>
+    <nf-input
+      name="clientNom"
+      label="MOA"
+      [required]="true"
+      [disabled]="!modifiable() || saving()"
+      [ngModel]="clientNom()"
+      (ngModelChange)="clientNom.set($event)"
+    />
+    <nf-select
+      name="chargeEtude"
+      label="Chargé d’étude"
+      placeholder="Sélectionner un ingénieur"
+      [required]="true"
+      [disabled]="!modifiable() || saving()"
+      [options]="chargeEtudeOptions()"
+      [ngModel]="chargeEtudeUserId() ?? ''"
+      (ngModelChange)="chargeEtudeUserId.set($event || null)"
+    />
+    <nf-select
+      name="aoType"
+      label="Type d’AO"
+      placeholder="Public / privé"
+      [disabled]="!modifiable() || saving()"
+      [options]="aoTypeOptions"
+      [ngModel]="aoType()"
+      (ngModelChange)="aoType.set($event === 'PRIVE' ? 'PRIVE' : $event === 'PUBLIC' ? 'PUBLIC' : '')"
+    />
+    <nf-input
+      name="dateLimiteDepot"
+      type="date"
+      label="Date limite de dépôt"
+      [disabled]="!modifiable() || saving()"
+      [ngModel]="dateLimiteDepot()"
+      (ngModelChange)="dateLimiteDepot.set($event)"
+    />
+    <nf-input
+      name="aoReference"
+      label="Référence AO"
+      [disabled]="!modifiable() || saving()"
+      [ngModel]="aoReference()"
+      (ngModelChange)="aoReference.set($event)"
+    />
+    <nf-input
+      name="ville"
+      label="Ville"
+      [disabled]="!modifiable() || saving()"
+      [ngModel]="ville()"
+      (ngModelChange)="ville.set($event)"
+    />
+    <nf-input
+      name="dateOuverturePlis"
+      type="date"
+      label="Ouverture des plis"
+      [disabled]="!modifiable() || saving()"
+      [ngModel]="dateOuverturePlis()"
+      (ngModelChange)="dateOuverturePlis.set($event)"
+    />
+    <nf-input
+      name="delaiExecutionJours"
+      type="number"
+      label="Délai d’exécution (jours)"
+      [disabled]="!modifiable() || saving()"
+      [ngModel]="delaiExecutionJours()"
+      (ngModelChange)="delaiExecutionJours.set($event === '' || $event == null ? null : +$event)"
+    />
+    <nf-input
+      name="estimationMoaHt"
+      type="number"
+      label="Estimation MOA HT"
+      [disabled]="!modifiable() || saving()"
+      [ngModel]="estimationMoaHt()"
+      (ngModelChange)="estimationMoaHt.set($event === '' || $event == null ? null : +$event)"
+    />
+    <nf-input
+      name="cautionProvisoire"
+      type="number"
+      label="Caution provisoire (%)"
+      [disabled]="!modifiable() || saving()"
+      [ngModel]="cautionProvisoire()"
+      (ngModelChange)="cautionProvisoire.set($event === '' || $event == null ? null : +$event)"
+    />
+  </div>
+
+</section>

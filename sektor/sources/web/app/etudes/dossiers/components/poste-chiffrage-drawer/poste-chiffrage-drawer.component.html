@@ -34,7 +34,10 @@
         [disabled]="!data.modifiable || closing()"
         (click)="setOrigine('DECOMPOSE')"
       >
-        Je décompose
+        <span>Je décompose</span>
+        @if (origine() === 'DECOMPOSE') {
+          <small>Retenu</small>
+        }
       </button>
       <button
         type="button"
@@ -43,7 +46,10 @@
         [disabled]="!data.modifiable || closing()"
         (click)="setOrigine('FORFAIT')"
       >
-        Forfait
+        <span>Forfait</span>
+        @if (origine() === 'FORFAIT') {
+          <small>Retenu</small>
+        }
       </button>
       <button
         type="button"
@@ -52,7 +58,10 @@
         [disabled]="!data.modifiable || closing()"
         (click)="setOrigine('ESTIME')"
       >
-        J’estime
+        <span>J’estime</span>
+        @if (origine() === 'ESTIME') {
+          <small>Retenu</small>
+        }
       </button>
     </div>
   }

@@ -25,6 +25,8 @@ import {
   issuesForRootIndex,
   validateObjectDeep,
 } from '../utils/nested-validation.util';
+import { buildInstructionsForMode } from '../utils/import-mode.util';
+import type { SmartImportMode } from '../models/smart-import.model';
 
 @Injectable({ providedIn: 'root' })
 export class SmartImportOrchestratorService {
@@ -47,6 +49,7 @@ export class SmartImportOrchestratorService {
     definition: ExtractionDefinition,
     file: File,
     progress?: (value: SmartImportProgress) => void,
+    options?: { mode?: SmartImportMode },
   ): Promise<SmartImportSession> {
     const config = this.resolveConfig(definition);
     progress?.({ phase: 'PREFLIGHT' });
@@ -66,12 +69,19 @@ export class SmartImportOrchestratorService {
       config.importPolicy =
         definition.presentationSchema?.importPolicy === 'STRICT' ? 'STRICT' : config.importPolicy;
 
+      const arrayPath = primaryArrayPath(definition);
+      const instructions = buildInstructionsForMode(
+        definition.instructions,
+        arrayPath,
+        options?.mode ?? 'bulk',
+      );
+
       const response = await firstValueFrom(
         this.extractionService.extractStateless({
           file,
           inlineSchema: definition.dataSchema,
           presentationSchema: definition.presentationSchema,
-          instructions: definition.instructions,
+          instructions,
         }),
       );
 
@@ -117,7 +127,6 @@ export class SmartImportOrchestratorService {
       }
 
       const data = this.extractObject(response.data);
-      const arrayPath = primaryArrayPath(definition);
       const rawRows = data[arrayPath];
       if (!Array.isArray(rawRows) || rawRows.length === 0) {
         throw new SmartImportError('NO_ROWS', 'platform.smartImport.errors.noRows');

@@ -104,6 +104,30 @@ public class DossierEtude implements AuditableEtude {
     @JsonProperty("aoDateLimiteDepot")
     private java.time.LocalDate aoDateLimiteDepot;
 
+    @Transient
+    @JsonProperty("aoReference")
+    private String aoReference;
+
+    @Transient
+    @JsonProperty("aoVille")
+    private String aoVille;
+
+    @Transient
+    @JsonProperty("aoDateOuverturePlis")
+    private java.time.LocalDate aoDateOuverturePlis;
+
+    @Transient
+    @JsonProperty("aoDelaiExecutionJours")
+    private Integer aoDelaiExecutionJours;
+
+    @Transient
+    @JsonProperty("aoEstimationMoaHt")
+    private BigDecimal aoEstimationMoaHt;
+
+    @Transient
+    @JsonProperty("aoCautionProvisoire")
+    private BigDecimal aoCautionProvisoire;
+
     // ── Contenu, délégué au DPGF ─────────────────────────────────────────────
 
     @Column(name = "dpgf_id")

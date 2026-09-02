@@ -20,7 +20,7 @@ export function buildNcListingConfig(t: TranslateService) {
     {
       filters: buildNcFilters(t),
       defaultSort: { column: 'date', direction: 'desc' },
-      features: { search: true, filters: true, columnToggle: true, selectionMode: 'none', refresh: true },
+      features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {
         icon: 'shield-x',
         title: tr('hse.nonConformite.list.emptyState.title'),

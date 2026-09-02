@@ -19,15 +19,17 @@ import {
   type NfTreeNode,
   type NfTreeTableColumn,
 } from '@platform/lib/anatomy/components';
-import { ButtonComponent, ConfirmDialogService } from '@platform/lib/anatomy';
+import { ButtonComponent, ConfirmDialogService, TooltipDirective } from '@platform/lib/anatomy';
 
 import { UnitOfMeasuresApiService } from '@app/catalogue/configuration/unit-of-measures/services/unit-of-measure-api.service';
 
 import type { NoeudDPGF } from '@app/etudes/models';
+import { EtudeBannerComponent } from '../etude-banner/etude-banner.component';
 import { DpgfApiService } from '../../../services/dpgf-api.service';
 import {
   applyTreeRollupPostes,
   applyTreeRollupTotals,
+  bordereauTableMinWidth,
   collectAllExpandableKeys,
   collectNonExploitableArticleKeys,
   countArticlesInNodes,
@@ -35,6 +37,8 @@ import {
   expandAncestors,
   expandAncestorsOfNonExploitable,
   filterTreeByArticleIds,
+  findFocusRow,
+  findRowById,
   getImportNoeudAt,
   importArbreToTreeNodes,
   importKeyToPath,
@@ -66,6 +70,8 @@ import {
     CommonModule,
     TreeTableComponent,
     ButtonComponent,
+    TooltipDirective,
+    EtudeBannerComponent,
   ],
   templateUrl: './bordereau-arbre.component.html',
   styleUrl: './bordereau-arbre.component.scss',
@@ -85,9 +91,15 @@ export class BordereauArbreComponent {
   readonly modifiable = input(true);
   /** Édition structurelle (lots/articles) — mode manuel ou brouillon. */
   readonly editionStructure = input(false);
+  /** false : le parent affiche l’erreur dans le bandeau du wizard. */
+  readonly inlineBanner = input(true);
   readonly selectionEnabled = input(false);
   readonly selectedKey = input<string | null>(null);
   readonly focusNoeudId = input<string | null>(null);
+  /** Code article (ex. a/1) — fallback quand l’arbre d’extraction n’a pas d’UUID. */
+  readonly focusCode = input<string | null>(null);
+  /** Incrémenté à chaque « Voir dans l’arbre » pour re-cibler le même nœud. */
+  readonly focusToken = input(0);
   /**
    * Articles à révéler (expand ancêtres) — ex. postes gate incomplets étape Coût.
    * Ciblé (≤40) pour éviter un expand-all coûteux sur gros bordereau.
@@ -145,7 +157,8 @@ export class BordereauArbreComponent {
     const cols: NfTreeTableColumn<BordereauTreeRow>[] = [
       { key: 'type', label: 'Type', width: selection ? '3.75rem' : '4.25rem' },
       { key: 'code', label: 'Code', width: selection ? '5rem' : '5.5rem', cssClass: 'arbre__col-code' },
-      { key: 'libelle', label: 'Libellé', cssClass: 'arbre__col-libelle' },
+      { key: 'libelle', label: 'Libellé', width: '40%', cssClass: 'arbre__col-libelle' },
+      { key: 'spacer', label: '', cssClass: 'arbre__col-spacer' },
       {
         key: 'unite',
         label: 'Unité',
@@ -205,29 +218,42 @@ export class BordereauArbreComponent {
     return cols;
   });
 
-  /** Largeur fluide viewport — évite le scroll H forcé. */
-  readonly tableMinWidth = computed(() => '100%');
-  /** Remplit le parent flex (dossier fill) — un seul scroll vertical. */
-  readonly tableScrollHeight = '100%';
   readonly showStructureActions = computed(
     () => this.modifiable() && !this.selectionEnabled() && (this.isDraft() || this.editionStructure()),
   );
 
-  readonly rowClass = (row: BordereauTreeRow): string => {
-    const classes = [`arbre__row--${(row.type || '').toLowerCase()}`];
+  /**
+   * Plancher des colonnes fixes (Type…Actions). Le libellé prend le reste
+   * et s’ellipse ; sous ce plancher le scroll H apparaît, sticky à droite.
+   */
+  readonly tableMinWidth = computed(() =>
+    bordereauTableMinWidth({
+      selection: this.selectionEnabled(),
+      structureActions: this.showStructureActions(),
+    }),
+  );
+  /** Remplit le parent flex (dossier fill) — un seul scroll vertical. */
+  readonly tableScrollHeight = '100%';
+
+  private readonly focusedRowKey = signal<string | null>(null);
+
+  readonly rowClass = computed(() => {
     const selected = this.selectedKey();
-    if (selected && (row.key === selected || row.id === selected)) {
-      classes.push('arbre__row--selected');
-    }
-    const focusId = this.focusNoeudId();
-    if (focusId && row.id === focusId) {
-      classes.push('arbre__row--focus');
-    }
-    if (row.nonExploitable) {
-      classes.push('arbre__row--warn');
-    }
-    return classes.join(' ');
-  };
+    const focused = this.focusedRowKey();
+    return (row: BordereauTreeRow): string => {
+      const classes = [`arbre__row--${(row.type || '').toLowerCase()}`];
+      if (selected && (row.key === selected || row.id === selected)) {
+        classes.push('arbre__row--selected');
+      }
+      if (focused && row.key === focused) {
+        classes.push('arbre__row--focus');
+      }
+      if (row.nonExploitable) {
+        classes.push('arbre__row--warn');
+      }
+      return classes.join(' ');
+    };
+  });
 
   readonly rowTitle = (row: BordereauTreeRow): string | null => {
     if (row.nonExploitable) {
@@ -238,7 +264,7 @@ export class BordereauArbreComponent {
         ? `${row.libelle} — clic pour ouvrir le détail`
         : `${row.libelle} — double-clic pour ouvrir le chiffrage`;
     }
-    return row.libelle || null;
+    return null;
   };
 
   typeCourt(type: string | undefined): string {
@@ -276,7 +302,7 @@ export class BordereauArbreComponent {
   }
 
   private lastDraftToken = -1;
-  private lastEmittedFocusId: string | null = null;
+  private lastFocusFingerprint = '';
   private lastExpandFingerprint = '';
   private readonly host = inject(ElementRef<HTMLElement>);
 
@@ -324,31 +350,10 @@ export class BordereauArbreComponent {
     });
     effect(() => {
       const focusId = this.focusNoeudId();
+      const focusCode = this.focusCode();
+      const token = this.focusToken();
       const nodes = this.nodes();
-      untracked(() => {
-        if (!focusId) {
-          this.lastEmittedFocusId = null;
-          return;
-        }
-        if (!nodes.length || this.isDraft()) return;
-        if (focusId === this.lastEmittedFocusId) return;
-        const match = findRowById(nodes, focusId);
-        if (!match) return;
-        const keys = new Set(this.expandedKeys());
-        for (const k of expandAncestors(nodes, match.key)) keys.add(k);
-        this.expandedKeys.set(keys);
-        this.lastEmittedFocusId = focusId;
-        if (match.type === 'ARTICLE') {
-          this.posteSelect.emit(match);
-        }
-        // Laisse le DOM peindre l’expand puis scroll vers la ligne.
-        queueMicrotask(() => {
-          const el = document.querySelector(
-            `.arbre__row--focus, .arbre__row--selected, [data-noeud-id="${CSS.escape(focusId)}"]`,
-          );
-          el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-        });
-      });
+      untracked(() => this.applyFocus(focusId, focusCode, nodes, token, false));
     });
     effect(() => {
       const nodes = this.nodes();
@@ -380,6 +385,39 @@ export class BordereauArbreComponent {
         if (warnKeys.length > 0) this.scrollToFirstIncomplete();
       });
     });
+  }
+
+  /** Recible un nœud (id persisté ou code d’extraction) même si l’URL n’a pas changé. */
+  revelerNoeud(id?: string | null, code?: string | null): void {
+    this.applyFocus(id ?? null, code ?? null, this.nodes(), Date.now(), true);
+  }
+
+  private applyFocus(
+    id: string | null,
+    code: string | null,
+    nodes: NfTreeNode<BordereauTreeRow>[],
+    token: number,
+    force: boolean,
+  ): void {
+    if (!id && !code) {
+      this.focusedRowKey.set(null);
+      this.lastFocusFingerprint = '';
+      return;
+    }
+    if (!nodes.length) return;
+    const fingerprint = `${id ?? ''}|${code ?? ''}|${token}`;
+    if (!force && fingerprint === this.lastFocusFingerprint) return;
+    const match = findFocusRow(nodes, id, code);
+    if (!match) return;
+    this.lastFocusFingerprint = fingerprint;
+    this.focusedRowKey.set(match.key);
+    const keys = new Set(this.expandedKeys());
+    for (const k of expandAncestors(nodes, match.key)) keys.add(k);
+    this.expandedKeys.set(keys);
+    if (match.type === 'ARTICLE' && this.selectionEnabled()) {
+      this.posteSelect.emit(match);
+    }
+    this.scrollToRowKey(match.key);
   }
 
   /**
@@ -728,6 +766,19 @@ export class BordereauArbreComponent {
     });
   }
 
+  private scrollToRowKey(key: string): void {
+    const tryScroll = (): boolean => {
+      const escaped = CSS.escape(key);
+      const el = this.host.nativeElement.querySelector(`[data-row-key="${escaped}"]`);
+      el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      return !!el;
+    };
+    queueMicrotask(() => {
+      if (tryScroll()) return;
+      setTimeout(tryScroll, 80);
+    });
+  }
+
   private toImportNoeud(result: BordereauNoeudDialogResult): ImportNoeudPreview {
     return {
       type: result.type,
@@ -844,20 +895,6 @@ function filterTree(
     }
   }
   return out;
-}
-
-function findRowById(
-  nodes: NfTreeNode<BordereauTreeRow>[],
-  id: string,
-): BordereauTreeRow | null {
-  for (const node of nodes) {
-    if (node.data.id === id) return node.data;
-    if (node.children?.length) {
-      const found = findRowById(node.children, id);
-      if (found) return found;
-    }
-  }
-  return null;
 }
 
 /** Articles sans coût / origine — fallback expand si la gate n’a pas encore de noeudId. */

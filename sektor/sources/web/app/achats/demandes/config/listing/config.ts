@@ -20,7 +20,7 @@ export function buildDemandesListingConfig(t: TranslateService) {
     {
       filters: buildDemandeFilters(t),
       defaultSort: { column: 'createdAt', direction: 'desc' },
-      features: { search: true, filters: true, columnToggle: true, selectionMode: 'none', refresh: true },
+      features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {
         icon: 'shopping-cart',
         title: tr('achats.demande.list.emptyState.title'),

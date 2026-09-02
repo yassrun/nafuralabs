@@ -61,7 +61,7 @@ async function createDossier(
 
 async function openDossier(page: Page, id: string): Promise<void> {
   await page.goto(`/etudes/dossiers/${id}`, { waitUntil: 'domcontentloaded' });
-  await expect(page.getByText(/Pièces du marché|Documents/i).first()).toBeVisible({
+  await expect(page.getByText(/Identité de l’étude|CPS/i).first()).toBeVisible({
     timeout: 20000,
   });
 }
@@ -76,13 +76,14 @@ test.describe('SEKTOR-115 — voie manuelle Documents', () => {
     const id = await createDossier(request, session, suffix);
     await openDossier(page, id);
 
-    const manuel = page.getByRole('button', { name: /Bordereau manuel/i });
-    await expect(manuel).toBeVisible({ timeout: 10000 });
-    await manuel.click();
-
     const continuer = page.getByRole('button', { name: /Continuer vers le bordereau/i });
     await expect(continuer).toBeEnabled({ timeout: 15000 });
     await continuer.click();
+
+    await page.getByRole('button', { name: /^Manuel$/i }).click();
+    const creer = page.getByRole('button', { name: /Créer l’arbre vide|Creer l'arbre vide/i });
+    await expect(creer).toBeVisible({ timeout: 10000 });
+    await creer.click();
 
     await expect(page.getByRole('heading', { name: /Arbre du bordereau/i })).toBeVisible({
       timeout: 20000,

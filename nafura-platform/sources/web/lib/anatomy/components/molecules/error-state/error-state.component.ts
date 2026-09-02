@@ -28,7 +28,8 @@ import { ButtonComponent } from '../../atoms/button';
       @if (showRetry()) {
         <nf-button
           variant="secondary"
-          icon="refresh"
+          icon="refresh-cw"
+          iconLibrary="lucide"
           (clicked)="retry.emit()"
         >{{ retryLabel() }}</nf-button>
       }

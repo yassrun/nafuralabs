@@ -9,10 +9,9 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { TranslateModule } from '@ngx-translate/core';
+import { LucideAngularModule } from 'lucide-angular';
 
 import { SpinnerComponent } from '../../atoms/spinner';
 import { EmptyStateComponent } from '../../molecules/empty-state';
@@ -73,8 +72,7 @@ interface NfTreeFlatRow<T> {
     CommonModule,
     TranslateModule,
     MatTableModule,
-    MatButtonModule,
-    MatIconModule,
+    LucideAngularModule,
     SpinnerComponent,
     EmptyStateComponent,
   ],
@@ -108,6 +106,7 @@ interface NfTreeFlatRow<T> {
                   mat-header-cell
                   *matHeaderCellDef
                   [style.width]="column.width"
+                  [style.min-width]="column.width"
                   [style.right]="stickyEndOffset(column)"
                   [class]="column.cssClass ?? ''"
                   [class.nf-tree-table__cell--center]="column.align === 'center'"
@@ -119,6 +118,7 @@ interface NfTreeFlatRow<T> {
                   mat-cell
                   *matCellDef="let row"
                   [style.width]="column.width"
+                  [style.min-width]="column.width"
                   [style.right]="stickyEndOffset(column)"
                   [class]="column.cssClass ?? ''"
                   [class.nf-tree-table__cell--center]="column.align === 'center'"
@@ -135,7 +135,11 @@ interface NfTreeFlatRow<T> {
                         [disabled]="!row.expandable"
                         (click)="onToggle($event, row)">
                         @if (row.expandable) {
-                          <mat-icon>{{ row.expanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                          @if (row.expanded) {
+                            <lucide-icon name="chevron-down" [size]="16" aria-hidden="true"></lucide-icon>
+                          } @else {
+                            <lucide-icon name="chevron-right" [size]="16" aria-hidden="true"></lucide-icon>
+                          }
                         }
                       </button>
                       @if (cellTemplate(); as template) {
@@ -184,6 +188,7 @@ interface NfTreeFlatRow<T> {
               mat-row
               *matRowDef="let row; columns: displayedColumns()"
               [ngClass]="resolveRowClass(row.data)"
+              [attr.data-row-key]="row.key"
               [attr.title]="resolveRowTitle(row.data)"
               [class.nf-tree-table__row--clickable]="rowClickable()"
               (click)="onRowClicked(row.data)"
@@ -220,6 +225,7 @@ interface NfTreeFlatRow<T> {
     }
     .nf-tree-table__scroll {
       width: 100%;
+      min-width: 0;
       overflow: auto;
       border: 1px solid var(--nf-color-border);
       border-radius: .75rem;
@@ -237,9 +243,12 @@ interface NfTreeFlatRow<T> {
       width: 100%;
     }
     .nf-tree-table__tree-cell {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       min-width: 0;
+      max-width: 100%;
+      width: 100%;
+      overflow: hidden;
       gap: .15rem;
     }
     .nf-tree-table__toggler {
@@ -264,10 +273,11 @@ interface NfTreeFlatRow<T> {
       outline: 2px solid var(--nf-border-focus);
       outline-offset: 2px;
     }
-    .nf-tree-table__toggler mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+    .nf-tree-table__toggler lucide-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 0;
     }
     .nf-tree-table__row--clickable { cursor: pointer; }
     .nf-tree-table__cell--center { text-align: center; }

@@ -175,7 +175,8 @@
                 <nf-button
                   variant="ghost"
                   size="sm"
-                  icon="refresh"
+                  icon="refresh-cw"
+                  iconLibrary="lucide"
                   [loading]="rafraichissementPrix()"
                   [disabled]="
                     chargement() ||
@@ -639,6 +640,46 @@
           </dl>
         }
       </aside>
+
+      <section class="poste__comparatif" aria-labelledby="comparatif-title">
+        <div class="poste__section-head">
+          <h4 id="comparatif-title">Comparatif</h4>
+          <p class="poste__comparatif-legende">Le chiffrage retenu est celui pris en compte au bordereau.</p>
+        </div>
+        <div class="poste__comparatif-grid" role="radiogroup" aria-label="Chiffrage retenu">
+          @for (l of comparatifLignes(); track l.origine) {
+            <button
+              type="button"
+              class="poste__comparatif-card"
+              role="radio"
+              [attr.aria-checked]="l.retenu"
+              [class.poste__comparatif-card--retenu]="l.retenu"
+              [disabled]="!modifiable() || guestReadOnly()"
+              (click)="setOrigineUi(l.origine)"
+            >
+              <span class="poste__comparatif-kicker">
+                @if (l.retenu) {
+                  Retenu
+                } @else {
+                  Retenir
+                }
+              </span>
+              <span class="poste__comparatif-label">{{ l.label }}</span>
+              <strong class="poste__comparatif-pu">
+                @if (l.pu != null) {
+                  {{ l.pu | mad }}
+                } @else {
+                  —
+                }
+              </strong>
+              <span class="poste__comparatif-hint">{{ l.hint }}</span>
+              @if (l.plusBas) {
+                <span class="poste__comparatif-flag">Le plus bas</span>
+              }
+            </button>
+          }
+        </div>
+      </section>
     }
   </section>
 }

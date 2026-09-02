@@ -2,6 +2,7 @@ import type { TranslateService } from '@ngx-translate/core';
 
 import { buildListingConfig } from '@platform/lib/anatomy';
 import type { Fournisseur } from '@app/achats/models';
+import { FOURNISSEUR_IMPORT_DEFINITION } from '@app/socle/shared/smart-import/handlers/fournisseur-import.handler';
 
 import { buildFournisseurColumns } from './columns';
 import { buildFournisseurFilters } from './filters';
@@ -24,7 +25,6 @@ export function buildFournisseursListingConfig(t: TranslateService) {
         search: true,
         filters: true,
         columnToggle: true,
-        selectionMode: 'none',
         viewModeToggle: false,
         refresh: true,
       },
@@ -34,6 +34,11 @@ export function buildFournisseursListingConfig(t: TranslateService) {
         message: tr('achats.fournisseur.list.emptyState.message'),
         actionLabel: tr('achats.fournisseur.list.emptyState.actionLabel'),
         actionId: 'create',
+      },
+      smartImport: {
+        entityKey: 'fournisseur',
+        definition: FOURNISSEUR_IMPORT_DEFINITION,
+        permission: 'achats.fournisseur.create',
       },
     },
   );

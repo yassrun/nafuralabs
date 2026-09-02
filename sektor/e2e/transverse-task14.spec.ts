@@ -29,7 +29,7 @@ test.describe('Task 14 — transverse', () => {
       await page.goto(row.path, { waitUntil: 'domcontentloaded' });
       const listingRow = page.locator('nf-entity-listing tr.mat-mdc-row').first();
       await listingRow.waitFor({ state: 'visible', timeout: 30000 });
-      // Double-click opens detail on listings with row selection; single-click is enough when selectionMode is none.
+      // Double-click opens detail; single click only selects (anatomy default).
       await listingRow.dblclick();
       await expect(page).toHaveURL(row.urlPattern, { timeout: 15000 });
     });

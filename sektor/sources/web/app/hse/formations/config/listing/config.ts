@@ -20,7 +20,7 @@ export function buildFormationsListingConfig(t: TranslateService) {
     {
       filters: buildFormationFilters(t),
       defaultSort: { column: 'dateDebut', direction: 'desc' },
-      features: { search: true, filters: true, columnToggle: true, selectionMode: 'none', refresh: true },
+      features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {
         icon: 'graduation-cap',
         title: tr('hse.formation.list.emptyState.title'),
