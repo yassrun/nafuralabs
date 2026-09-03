@@ -225,6 +225,7 @@ export class DossierDetailPage {
    */
   readonly peutContinuerUi = computed(() => {
     if (!this.modifiable()) return true;
+    if (this.etapeUi() === 1 && this.identite()?.cpsBlocking()) return false;
     if (this.etapeUi() === 3 && this.gatePresentation() === 'soft') return true;
     if (this.etapeUi() === 3 && this.gatePresentation() === 'ok') return true;
     return this.peutContinuer();

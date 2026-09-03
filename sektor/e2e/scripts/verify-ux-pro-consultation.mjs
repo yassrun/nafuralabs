@@ -84,6 +84,7 @@ function assertCreateStatic() {
   assert(/panier d.articles/i.test(ts) || /panier d.articles/i.test(html), 'copy panier d’articles absente');
   console.log('PASS cs-create-no-fournisseur AC-1 (casse AC-10 UX pro)');
 
+  assert(html.includes('nf-action-bar'), 'cs-create-submit: nf-action-bar absente');
   assert(ts.includes('clesStables'), 'cs-create-submit: payload clesStables absent');
   assert(ts.includes('Ajoutez au moins un article'), 'cs-create-submit: validation panier vide absente');
   assert(!ts.includes('Choisir un fournisseur'), 'cs-create-submit: validation fournisseur encore présente');

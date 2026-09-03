@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -13,6 +13,7 @@ import {
 import { FormsModule } from '@angular/forms';
 
 import {
+  ButtonComponent,
   NfInputComponent,
   NfSelectComponent,
   type NfSelectOption,
@@ -25,9 +26,43 @@ import {
   type ChargeEtudeCandidat,
 } from '../../services/dossier-etude-api.service';
 
+type IaFieldKey =
+  | 'objet'
+  | 'clientNom'
+  | 'dateLimiteDepot'
+  | 'aoReference'
+  | 'aoType'
+  | 'ville'
+  | 'dateOuverturePlis'
+  | 'delaiExecutionJours'
+  | 'estimationMoaHt'
+  | 'cautionProvisoire';
+
+type IaFieldState = 'proposed' | 'accepted' | 'rejected';
+
+interface IaFieldProposal {
+  value: string | number;
+  status: IaFieldState;
+}
+
+type CpsPhase = 'idle' | 'loading' | 'ready' | 'partial';
+
+const IA_KEYS: IaFieldKey[] = [
+  'objet',
+  'clientNom',
+  'aoType',
+  'dateLimiteDepot',
+  'aoReference',
+  'ville',
+  'dateOuverturePlis',
+  'delaiExecutionJours',
+  'estimationMoaHt',
+  'cautionProvisoire',
+];
+
 /**
  * Cadrage de l’étude — objet, MOA, chargé, type AO, échéance.
- * Éditable tant que le dossier est BROUILLON / EN_ETUDE (API `update`).
+ * Les champs déduits du CPS restent des propositions jusqu’à Accepter / Refuser / corriger.
  */
 @Component({
   selector: 'app-dossier-identite-panel',
@@ -35,7 +70,9 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    NgTemplateOutlet,
     FormsModule,
+    ButtonComponent,
     NfInputComponent,
     NfSelectComponent,
   ],
@@ -64,13 +101,33 @@ export class DossierIdentitePanelComponent {
   readonly saving = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
   readonly ok = signal(false);
-  readonly prefillCps = signal(false);
+  readonly cpsPhase = signal<CpsPhase>('idle');
+  readonly iaFields = signal<Partial<Record<IaFieldKey, IaFieldProposal>>>({});
+
+  readonly hasPendingCps = computed(() =>
+    IA_KEYS.some((k) => this.iaPending(k)),
+  );
+
+  readonly pendingCount = computed(
+    () => IA_KEYS.filter((k) => this.iaPending(k)).length,
+  );
+
+  readonly cpsBlocking = computed(
+    () => this.cpsPhase() === 'loading' || this.hasPendingCps(),
+  );
 
   readonly banner = computed((): { tone: 'error' | 'info' | 'success'; message: string } | undefined => {
     if (this.erreur()) return { tone: 'error', message: this.erreur()! };
     if (this.ok()) return { tone: 'success', message: 'Détails enregistrés.' };
-    if (this.prefillCps()) {
-      return { tone: 'info', message: 'Champs AO préremplis depuis le CPS — vérifiez-les.' };
+    if (this.cpsPhase() === 'loading') {
+      return { tone: 'info', message: 'Indexation CPS — les champs ne bougeront qu’en revue.' };
+    }
+    const n = this.pendingCount();
+    if (n > 0) {
+      return {
+        tone: 'info',
+        message: `${n} proposition${n > 1 ? 's' : ''} CPS à trancher — Accepter, Refuser ou corriger chaque champ.`,
+      };
     }
     return undefined;
   });
@@ -90,19 +147,94 @@ export class DossierIdentitePanelComponent {
       const d = this.dossier();
       untracked(() => {
         this.hydrate(d);
-        if (this.modifiable()) void this.prefillDepuisCps(d);
+        if (this.modifiable()) void this.chargerPropositionsCps(d);
       });
     });
     void this.chargerIngenieurs();
   }
 
+  iaStatus(key: string): IaFieldState | null {
+    return this.iaFields()[key as IaFieldKey]?.status ?? null;
+  }
+
+  iaPending(key: string): boolean {
+    return this.iaStatus(key) === 'proposed';
+  }
+
+  cpsMissing(key: string): boolean {
+    const phase = this.cpsPhase();
+    if (phase !== 'ready' && phase !== 'partial') return false;
+    return !this.iaFields()[key as IaFieldKey];
+  }
+
+  accepter(key: string): void {
+    const k = key as IaFieldKey;
+    const prop = this.iaFields()[k];
+    if (!prop || prop.status !== 'proposed') return;
+    this.applyValue(k, prop.value);
+    this.patchIa(k, { ...prop, status: 'accepted' });
+    this.ok.set(false);
+  }
+
+  ignorer(key: string): void {
+    const k = key as IaFieldKey;
+    const prop = this.iaFields()[k];
+    if (!prop || prop.status !== 'proposed') return;
+    this.clearValue(k);
+    this.patchIa(k, { ...prop, status: 'rejected' });
+    this.ok.set(false);
+  }
+
+  accepterTout(): void {
+    IA_KEYS.forEach((k) => {
+      if (this.iaPending(k)) this.accepter(k);
+    });
+  }
+
+  ignorerTout(): void {
+    IA_KEYS.forEach((k) => {
+      if (this.iaPending(k)) this.ignorer(k);
+    });
+  }
+
+  onChamp(key: IaFieldKey, raw: string | number | null): void {
+    const numeric =
+      key === 'delaiExecutionJours' ||
+      key === 'estimationMoaHt' ||
+      key === 'cautionProvisoire';
+    if (numeric && (raw === '' || raw == null)) {
+      this.clearValue(key);
+    } else {
+      this.applyValue(key, raw ?? '');
+    }
+    const prop = this.iaFields()[key];
+    if (prop?.status === 'proposed') {
+      const next = typeof raw === 'number' ? raw : String(raw ?? '');
+      this.patchIa(key, { value: next, status: 'accepted' });
+    }
+    this.ok.set(false);
+  }
+
   async enregistrer(): Promise<boolean> {
     const d = this.dossier();
     if (!this.modifiable() || this.saving()) return false;
+    if (this.cpsPhase() === 'loading') {
+      this.erreur.set('Attendez la fin de l’extraction CPS, ou saisissez à la main.');
+      this.ok.set(false);
+      return false;
+    }
+    const n = this.pendingCount();
+    if (n > 0) {
+      this.erreur.set(
+        `Tranchez les ${n} champ${n > 1 ? 's' : ''} CPS (Accepter ou Refuser) avant d’enregistrer.`,
+      );
+      this.ok.set(false);
+      return false;
+    }
     const objet = this.objet().trim();
     const clientNom = this.clientNom().trim();
     const chargeId = this.chargeEtudeUserId();
-    if (!objet || !clientNom || !chargeId) {
+    if (!objet || placeholderIdentite(objet) || !clientNom || placeholderIdentite(clientNom) || !chargeId) {
       this.erreur.set('Objet, MOA et chargé d’étude sont obligatoires.');
       return false;
     }
@@ -139,52 +271,70 @@ export class DossierIdentitePanelComponent {
   }
 
   private hydrate(d: DossierEtude): void {
-    this.objet.set(d.objet ?? '');
-    this.clientNom.set(d.clientNom ?? '');
     this.chargeEtudeUserId.set(d.chargeEtudeUserId ?? null);
-    if (this.prefillEnCours) return;
-    this.dateLimiteDepot.set(toDateInput(d.aoDateLimiteDepot));
-    const ao = d.aoType;
-    this.aoType.set(ao === 'PRIVE' || ao === 'PUBLIC' ? ao : '');
-    this.aoReference.set(d.aoReference ?? '');
-    this.ville.set(d.aoVille ?? '');
-    this.dateOuverturePlis.set(toDateInput(d.aoDateOuverturePlis));
-    this.delaiExecutionJours.set(d.aoDelaiExecutionJours ?? null);
-    this.estimationMoaHt.set(d.aoEstimationMoaHt ?? null);
-    this.cautionProvisoire.set(d.aoCautionProvisoire ?? null);
+    if (!this.prefillEnCours) {
+      this.objet.set(d.objet ?? '');
+      this.clientNom.set(d.clientNom ?? '');
+      this.dateLimiteDepot.set(toDateInput(d.aoDateLimiteDepot));
+      const ao = d.aoType;
+      this.aoType.set(ao === 'PRIVE' || ao === 'PUBLIC' ? ao : '');
+      this.aoReference.set(d.aoReference ?? '');
+      this.ville.set(d.aoVille ?? '');
+      this.dateOuverturePlis.set(toDateInput(d.aoDateOuverturePlis));
+      this.delaiExecutionJours.set(d.aoDelaiExecutionJours ?? null);
+      this.estimationMoaHt.set(d.aoEstimationMoaHt ?? null);
+      this.cautionProvisoire.set(d.aoCautionProvisoire ?? null);
+      this.reapplyLocalIa();
+    }
     this.ok.set(false);
     this.erreur.set(undefined);
   }
 
-  private async prefillDepuisCps(d: DossierEtude): Promise<void> {
+  private reapplyLocalIa(): void {
+    const fields = this.iaFields();
+    for (const key of IA_KEYS) {
+      const prop = fields[key];
+      if (!prop) continue;
+      if (prop.status === 'proposed' || prop.status === 'accepted') {
+        this.applyValue(key, prop.value);
+      }
+    }
+  }
+
+  private async chargerPropositionsCps(d: DossierEtude): Promise<void> {
     try {
       const docs = await this.api.listerDocuments(d.id);
       const cps = docs.find((p) => p.type === 'CPS' || p.type === 'CPS_ET_BORDEREAU');
-      if (!cps?.id || this.prefillPourCps === cps.id) return;
+      if (!cps?.id) {
+        this.prefillPourCps = '';
+        this.cpsPhase.set('idle');
+        this.iaFields.set({});
+        return;
+      }
+      if (this.prefillPourCps === cps.id) return;
       this.prefillPourCps = cps.id;
       this.prefillEnCours = true;
+      this.cpsPhase.set('loading');
+      this.iaFields.set({});
       try {
         for (const delay of [0, 2500, 5000, 8000]) {
           if (delay) await this.sleep(delay);
           const prop = await this.api.proposerMarche(d.id, cps.id);
           const meta = prop?.metadonnees;
           if (!meta || !this.hasMeta(meta)) continue;
-          const applied = this.applyEmptyFromMeta(meta);
-          if (applied) {
-            await this.api.appliquerPropositionMarche(d.id, { metadonnees: applied });
-            const fresh = await this.api.getById(d.id);
-            this.prefillCps.set(true);
-            this.saved.emit(fresh);
-          }
+          this.installerPropositions(meta);
+          const n = this.pendingCount();
+          this.cpsPhase.set(n > 0 ? 'ready' : 'partial');
           return;
         }
-        this.prefillPourCps = '';
+        this.cpsPhase.set('partial');
       } finally {
         this.prefillEnCours = false;
       }
     } catch {
       this.prefillPourCps = '';
       this.prefillEnCours = false;
+      this.cpsPhase.set('idle');
     }
   }
 
@@ -192,58 +342,107 @@ export class DossierIdentitePanelComponent {
     return Object.values(meta).some((v) => v != null && String(v).trim() !== '');
   }
 
-  /** Ne remplit que les champs encore vides — n’écrase pas la saisie. */
-  private applyEmptyFromMeta(meta: MarcheProposeMetadonnees): MarcheProposeMetadonnees | null {
-    const out: MarcheProposeMetadonnees = {};
-    const takeStr = (current: string, suggested: string | null | undefined): string | undefined => {
-      if (placeholderIdentite(current) && suggested?.trim()) return suggested.trim();
-      return undefined;
+  private installerPropositions(meta: MarcheProposeMetadonnees): void {
+    const next: Partial<Record<IaFieldKey, IaFieldProposal>> = {};
+    const take = (key: IaFieldKey, current: string | number | null, raw: string | number | null | undefined) => {
+      if (!isSuggestionValue(raw)) return;
+      if (!isEmptyForCps(current)) return;
+      next[key] = { value: raw as string | number, status: 'proposed' };
+      this.applyValue(key, raw as string | number);
     };
-    const objet = takeStr(this.objet(), meta.objet);
-    if (objet) {
-      this.objet.set(objet);
-      out.objet = objet;
+    take('objet', this.objet(), meta.objet);
+    take('clientNom', this.clientNom(), meta.donneurOrdre);
+    take(
+      'aoType',
+      this.aoType(),
+      meta.type === 'PRIVE' || meta.type === 'PUBLIC' ? meta.type : undefined,
+    );
+    take('dateLimiteDepot', this.dateLimiteDepot(), toDateInput(meta.dateLimiteDepot) || undefined);
+    take('aoReference', this.aoReference(), meta.reference);
+    take('ville', this.ville(), meta.ville);
+    take(
+      'dateOuverturePlis',
+      this.dateOuverturePlis(),
+      toDateInput(meta.dateOuverturePlis) || undefined,
+    );
+    take('delaiExecutionJours', this.delaiExecutionJours(), meta.delaiExecutionJours);
+    take('estimationMoaHt', this.estimationMoaHt(), meta.estimationMoaHt);
+    take('cautionProvisoire', this.cautionProvisoire(), meta.cautionProvisoire);
+    this.iaFields.set(next);
+  }
+
+  private applyValue(key: IaFieldKey, value: string | number): void {
+    switch (key) {
+      case 'objet':
+        this.objet.set(String(value));
+        break;
+      case 'clientNom':
+        this.clientNom.set(String(value));
+        break;
+      case 'dateLimiteDepot':
+        this.dateLimiteDepot.set(String(value));
+        break;
+      case 'aoReference':
+        this.aoReference.set(String(value));
+        break;
+      case 'aoType':
+        this.aoType.set(value === 'PRIVE' ? 'PRIVE' : value === 'PUBLIC' ? 'PUBLIC' : '');
+        break;
+      case 'ville':
+        this.ville.set(String(value));
+        break;
+      case 'dateOuverturePlis':
+        this.dateOuverturePlis.set(String(value));
+        break;
+      case 'delaiExecutionJours':
+        this.delaiExecutionJours.set(value === '' ? null : Number(value));
+        break;
+      case 'estimationMoaHt':
+        this.estimationMoaHt.set(value === '' ? null : Number(value));
+        break;
+      case 'cautionProvisoire':
+        this.cautionProvisoire.set(value === '' ? null : Number(value));
+        break;
     }
-    const moa = takeStr(this.clientNom(), meta.donneurOrdre);
-    if (moa) {
-      this.clientNom.set(moa);
-      out.donneurOrdre = moa;
+  }
+
+  private clearValue(key: IaFieldKey): void {
+    switch (key) {
+      case 'objet':
+        this.objet.set('');
+        break;
+      case 'clientNom':
+        this.clientNom.set('');
+        break;
+      case 'dateLimiteDepot':
+        this.dateLimiteDepot.set('');
+        break;
+      case 'aoReference':
+        this.aoReference.set('');
+        break;
+      case 'aoType':
+        this.aoType.set('');
+        break;
+      case 'ville':
+        this.ville.set('');
+        break;
+      case 'dateOuverturePlis':
+        this.dateOuverturePlis.set('');
+        break;
+      case 'delaiExecutionJours':
+        this.delaiExecutionJours.set(null);
+        break;
+      case 'estimationMoaHt':
+        this.estimationMoaHt.set(null);
+        break;
+      case 'cautionProvisoire':
+        this.cautionProvisoire.set(null);
+        break;
     }
-    if (!this.aoType() && (meta.type === 'PUBLIC' || meta.type === 'PRIVE')) {
-      this.aoType.set(meta.type);
-      out.type = meta.type;
-    }
-    const dateLimite = toDateInput(meta.dateLimiteDepot);
-    if (!this.dateLimiteDepot() && dateLimite) {
-      this.dateLimiteDepot.set(dateLimite);
-      out.dateLimiteDepot = dateLimite;
-    }
-    if (!this.aoReference().trim() && meta.reference?.trim()) {
-      this.aoReference.set(meta.reference.trim());
-      out.reference = meta.reference.trim();
-    }
-    if (!this.ville().trim() && meta.ville?.trim()) {
-      this.ville.set(meta.ville.trim());
-      out.ville = meta.ville.trim();
-    }
-    const ouverture = toDateInput(meta.dateOuverturePlis);
-    if (!this.dateOuverturePlis() && ouverture) {
-      this.dateOuverturePlis.set(ouverture);
-      out.dateOuverturePlis = ouverture;
-    }
-    if (this.delaiExecutionJours() == null && meta.delaiExecutionJours != null) {
-      this.delaiExecutionJours.set(meta.delaiExecutionJours);
-      out.delaiExecutionJours = meta.delaiExecutionJours;
-    }
-    if (this.estimationMoaHt() == null && meta.estimationMoaHt != null) {
-      this.estimationMoaHt.set(meta.estimationMoaHt);
-      out.estimationMoaHt = meta.estimationMoaHt;
-    }
-    if (this.cautionProvisoire() == null && meta.cautionProvisoire != null) {
-      this.cautionProvisoire.set(meta.cautionProvisoire);
-      out.cautionProvisoire = meta.cautionProvisoire;
-    }
-    return Object.keys(out).length ? out : null;
+  }
+
+  private patchIa(key: IaFieldKey, prop: IaFieldProposal): void {
+    this.iaFields.update((cur) => ({ ...cur, [key]: prop }));
   }
 
   private sleep(ms: number): Promise<void> {
@@ -274,4 +473,16 @@ function toDateInput(value: string | null | undefined): string {
 function placeholderIdentite(value: string | null | undefined): boolean {
   const v = (value ?? '').trim();
   return !v || v === 'Nouvelle étude' || v === 'À préciser';
+}
+
+function isEmptyForCps(current: string | number | null): boolean {
+  if (current == null) return true;
+  if (typeof current === 'number') return false;
+  return placeholderIdentite(current);
+}
+
+function isSuggestionValue(raw: string | number | null | undefined): boolean {
+  if (raw == null) return false;
+  if (typeof raw === 'string') return raw.trim().length > 0;
+  return !Number.isNaN(raw);
 }

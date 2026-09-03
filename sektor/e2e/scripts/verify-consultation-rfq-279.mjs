@@ -54,6 +54,7 @@ function assertCreateSource() {
   assert(!html.includes('lookupKey="fournisseurs"'), 'rfq-create-panier: lookupKey fournisseurs sur create');
   assert(!ts.includes('searchFournisseurs'), 'rfq-create-panier: searchFournisseurs encore sur create');
   assert(html.includes('consultation-create-panier'), 'rfq-create-panier: panier picker absent');
+  assert(html.includes('nf-action-bar'), 'rfq-create-panier: nf-action-bar absente');
   assert(!/<textarea/i.test(html), 'rfq-create-panier: textarea sur create');
   console.log('PASS rfq-create-panier (source create)');
 }

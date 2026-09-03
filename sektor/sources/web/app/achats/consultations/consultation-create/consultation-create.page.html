@@ -2,16 +2,20 @@
   <nf-page-header [config]="headerConfig"></nf-page-header>
 
   <form class="cs-form" data-testid="consultation-create-form">
+    <nf-button type="button" variant="ghost" icon="arrow-left" (clicked)="cancel()">
+      Retour
+    </nf-button>
     <section class="cs-panier" data-testid="consultation-create-panier" aria-labelledby="cs-panier-title">
       <div class="cs-panier__head">
         <h2 id="cs-panier-title">Panier *</h2>
         <nf-button
           type="button"
           variant="secondary"
+          icon="plus"
           data-testid="consultation-create-add-article"
           (clicked)="addArticle()"
         >
-          + Ajouter un article
+          Ajouter un article
         </nf-button>
       </div>
 
@@ -49,23 +53,25 @@
       }
     </section>
 
-    <p class="cs-hint">Lien étude : aucun. La consultation vit dans Achats. Destinataires : sur la fiche.</p>
+    <p class="cs-hint">
+      Lien étude : aucun. Les destinataires (fournisseurs) se saisissent ensuite sur la fiche.
+    </p>
 
     @if (erreur(); as err) {
       <p class="cs-error" role="alert" data-testid="consultation-create-error">{{ err }}</p>
     }
 
-    <div class="cs-actions">
+    <nf-action-bar align="right" class="cs-actions">
+      <nf-button type="button" variant="secondary" (clicked)="cancel()">Annuler</nf-button>
       <nf-button
         type="button"
         variant="primary"
         data-testid="consultation-create-submit"
-        [disabled]="saving()"
+        [disabled]="!canCreate() || saving()"
         (clicked)="submit()"
       >
         Créer
       </nf-button>
-      <nf-button type="button" variant="secondary" (clicked)="cancel()">Annuler</nf-button>
-    </div>
+    </nf-action-bar>
   </form>
 </nf-page-shell>

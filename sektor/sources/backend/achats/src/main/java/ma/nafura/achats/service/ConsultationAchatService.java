@@ -87,22 +87,47 @@ public class ConsultationAchatService {
 
     @Transactional(readOnly = true)
     public List<ConsultationAchatDto> list(String lien) {
+        return list(lien, null, null, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ConsultationAchatDto> list(
+            String lien, String statut, UUID fournisseurId, UUID articleId, String search) {
         UUID tenantId = tenantId();
         List<ConsultationAchat> rows = loadRows(tenantId, lien);
         Map<UUID, List<ConsultationAchatDestinataire>> dests = loadDestinataires(rows);
         Map<UUID, List<ConsultationAchatEnvoi>> envois = loadEnvois(rows);
-        return rows.stream()
-                .map(entity -> {
-                    List<ConsultationAchatDestinataire> d =
-                            dests.getOrDefault(entity.getId(), List.of());
-                    return toDto(
-                            entity,
-                            countDevisRecus(d),
-                            List.of(),
-                            d,
-                            envois.getOrDefault(entity.getId(), List.of()));
-                })
-                .toList();
+        String articleCle = resolveArticleCle(articleId);
+        String statutNorm = StringUtils.hasText(statut) ? statut.trim().toUpperCase(Locale.ROOT) : null;
+        String searchNorm = StringUtils.hasText(search) ? search.trim().toLowerCase(Locale.ROOT) : null;
+
+        List<ConsultationAchatDto> out = new ArrayList<>();
+        for (ConsultationAchat entity : rows) {
+            List<ConsultationAchatDestinataire> d = dests.getOrDefault(entity.getId(), List.of());
+            if (statutNorm != null
+                    && !statutNorm.equalsIgnoreCase(
+                            entity.getStatut() != null ? entity.getStatut() : "")) {
+                continue;
+            }
+            if (fournisseurId != null
+                    && d.stream().noneMatch(x -> fournisseurId.equals(x.getFournisseurId()))) {
+                continue;
+            }
+            if (articleCle != null && !panierContains(entity, articleCle)) {
+                continue;
+            }
+            ConsultationAchatDto dto = toDto(
+                    entity,
+                    countDevisRecus(d),
+                    List.of(),
+                    d,
+                    envois.getOrDefault(entity.getId(), List.of()));
+            if (searchNorm != null && !matchesSearch(dto, searchNorm)) {
+                continue;
+            }
+            out.add(dto);
+        }
+        return out;
     }
 
     @Transactional(readOnly = true)
@@ -714,6 +739,54 @@ public class ConsultationAchatService {
                 .createdAt(entity.getCreatedAt())
                 .lignes(lignes)
                 .build();
+    }
+
+    private boolean panierContains(ConsultationAchat entity, String articleCle) {
+        if (entity.getClesStables() == null || !StringUtils.hasText(articleCle)) {
+            return false;
+        }
+        for (String cle : entity.getClesStables()) {
+            if (cle != null && cle.equalsIgnoreCase(articleCle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String resolveArticleCle(UUID articleId) {
+        if (articleId == null) {
+            return null;
+        }
+        CatalogLookupApi lookup = catalogLookup.getIfAvailable();
+        if (lookup == null) {
+            return articleId.toString();
+        }
+        return lookup.getItem(articleId)
+                .map(CatalogItemSnapshot::cleStable)
+                .filter(StringUtils::hasText)
+                .orElse(articleId.toString());
+    }
+
+    private boolean matchesSearch(ConsultationAchatDto dto, String q) {
+        if (dto.getNumero() != null && dto.getNumero().toLowerCase(Locale.ROOT).contains(q)) {
+            return true;
+        }
+        if (dto.getClesStables() != null) {
+            for (String cle : dto.getClesStables()) {
+                if (cle != null && cle.toLowerCase(Locale.ROOT).contains(q)) {
+                    return true;
+                }
+            }
+        }
+        if (dto.getDestinataires() != null) {
+            for (ConsultationDestinataireDto dest : dto.getDestinataires()) {
+                if (dest.getFournisseurNom() != null
+                        && dest.getFournisseurNom().toLowerCase(Locale.ROOT).contains(q)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private UUID tenantId() {

@@ -1,5 +1,19 @@
-/* Listing chrome = nf-entity-listing (AC-1…AC-3). No custom table. */
+/* Listing chrome = nf-entity-listing. Wrapper must flex so the table view is not height 0. */
 :host {
   display: block;
   height: 100%;
+}
+
+.cs-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.cs-list nf-entity-listing {
+  flex: 1 1 0;
+  min-height: 0;
+  display: block;
 }

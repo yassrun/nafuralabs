@@ -9,6 +9,20 @@
   background: var(--nf-color-surface, #fff);
 }
 
+.identite__entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.identite__global {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
 .identite__titre {
   margin: 0;
   font-size: 0.95rem;
@@ -30,6 +44,49 @@
 
 .identite__objet {
   grid-column: 1 / -1;
+}
+
+.identite__champ {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.identite__revue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.identite__badge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--nf-color-primary-100, #e0e7ff);
+  color: var(--nf-color-primary-700, #3730a3);
+  width: fit-content;
+}
+
+.identite__badge--ok {
+  background: var(--nf-color-success-100, #dcfce7);
+  color: var(--nf-color-success-700, #15803d);
+}
+
+.identite__badge--no {
+  background: var(--nf-color-bg-muted, #f3f4f6);
+  color: var(--nf-color-text-secondary);
+}
+
+.identite__champ[data-ia='proposed'] {
+  padding: 0.45rem 0.55rem 0.55rem;
+  border: 1px solid var(--nf-color-primary-500);
+  border-radius: 8px;
+  background: var(--nf-color-primary-50, #eef2ff);
 }
 
 @media (max-width: 960px) {

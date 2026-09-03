@@ -37,8 +37,13 @@ public class ConsultationAchatController {
 
     @GetMapping
     @RequirePermission("achats.consultation.read")
-    public ResponseEntity<List<ConsultationAchatDto>> list(@RequestParam(required = false) String lien) {
-        return ResponseEntity.ok(service.list(lien));
+    public ResponseEntity<List<ConsultationAchatDto>> list(
+            @RequestParam(required = false) String lien,
+            @RequestParam(required = false) String statut,
+            @RequestParam(required = false) UUID fournisseurId,
+            @RequestParam(required = false) UUID articleId,
+            @RequestParam(required = false) String search) {
+        return ResponseEntity.ok(service.list(lien, statut, fournisseurId, articleId, search));
     }
 
     @GetMapping("/{id}")

@@ -685,15 +685,20 @@
           "lien": "Link"
         },
         "filters": {
+          "statut": "Status",
+          "fournisseur": "Supplier",
+          "article": "Item",
+          "articlePlaceholder": "Pick an item…",
           "lien": "Study link",
           "lienAll": "All",
           "lienHors": "Standalone",
           "lienLiee": "Linked"
         },
+        "cta": "New consultation",
         "emptyState": {
           "title": "No consultations",
           "message": "Create standalone — study folder link stays empty. Study overlay can attach later.",
-          "actionLabel": "+ Consultation"
+          "actionLabel": "New consultation"
         }
       },
       "form": {

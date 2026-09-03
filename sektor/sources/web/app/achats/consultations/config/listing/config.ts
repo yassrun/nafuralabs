@@ -31,8 +31,8 @@ export function buildConsultationListingConfig(t: TranslateService) {
         hideActions: ['edit', 'duplicate', 'delete'],
         overrideActions: {
           new: {
-            label: tr('achats.consultation.list.emptyState.actionLabel'),
-            ariaLabel: tr('achats.consultation.list.emptyState.actionLabel'),
+            label: tr('achats.consultation.list.cta'),
+            ariaLabel: tr('achats.consultation.list.cta'),
           },
         },
       },

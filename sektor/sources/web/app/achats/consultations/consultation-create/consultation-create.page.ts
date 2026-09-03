@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
 import {
+  ActionBarComponent,
   ButtonComponent,
   PageHeaderComponent,
   PageShellComponent,
@@ -24,10 +24,10 @@ export interface ConsultationPanierLigne {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
     PageShellComponent,
     PageHeaderComponent,
     ButtonComponent,
+    ActionBarComponent,
   ],
   templateUrl: './consultation-create.page.html',
   styleUrl: './consultation-create.page.scss',
@@ -45,6 +45,7 @@ export class ConsultationCreatePage {
   readonly panier = signal<ConsultationPanierLigne[]>([]);
   readonly saving = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
+  readonly canCreate = computed(() => this.panier().length > 0 && !this.saving());
 
   async addArticle(): Promise<void> {
     this.erreur.set(undefined);
