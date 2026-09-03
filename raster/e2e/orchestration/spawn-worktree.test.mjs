@@ -21,7 +21,13 @@ import {
   WorktreeError,
   REPO_ROOT,
 } from "../../worktree.mjs";
-import { agentCommand, start, SpawnError } from "../../spawn.mjs";
+import {
+  agentCommand,
+  applyRunnerResult,
+  configuredModes,
+  start,
+  SpawnError,
+} from "../../spawn.mjs";
 
 const read = (p) => fs.readFileSync(path.join(REPO_ROOT, p), "utf8");
 
@@ -60,7 +66,11 @@ test("la branche suit le sous-lot, ou le lot à défaut", () => {
 
 test("preuve 2 — sans RASTER_AGENT_CMD, il n'y a pas de commande", () => {
   const avant = process.env.RASTER_AGENT_CMD;
+  const avantLocal = process.env.RASTER_LOCAL_CMD;
+  const avantKey = process.env.CURSOR_API_KEY;
   delete process.env.RASTER_AGENT_CMD;
+  delete process.env.RASTER_LOCAL_CMD;
+  delete process.env.CURSOR_API_KEY;
   try {
     assert.equal(agentCommand(), null);
     process.env.RASTER_AGENT_CMD = "   ";
@@ -68,16 +78,24 @@ test("preuve 2 — sans RASTER_AGENT_CMD, il n'y a pas de commande", () => {
   } finally {
     if (avant === undefined) delete process.env.RASTER_AGENT_CMD;
     else process.env.RASTER_AGENT_CMD = avant;
+    if (avantLocal === undefined) delete process.env.RASTER_LOCAL_CMD;
+    else process.env.RASTER_LOCAL_CMD = avantLocal;
+    if (avantKey === undefined) delete process.env.CURSOR_API_KEY;
+    else process.env.CURSOR_API_KEY = avantKey;
   }
 });
 
 test("preuve 2 — le spawn refuse, et refuse AVANT de créer un worktree", () => {
   const avant = process.env.RASTER_AGENT_CMD;
+  const avantLocal = process.env.RASTER_LOCAL_CMD;
+  const avantKey = process.env.CURSOR_API_KEY;
   delete process.env.RASTER_AGENT_CMD;
+  delete process.env.RASTER_LOCAL_CMD;
+  delete process.env.CURSOR_API_KEY;
   try {
     assert.throws(
-      () => start({ project: "raster", lot: "lot-inexistant-pour-le-test" }),
-      (e) => e instanceof SpawnError && /RASTER_AGENT_CMD/.test(e.message)
+      () => start({ project: "raster", lot: "lot-inexistant-pour-le-test", brief: "x" }),
+      (e) => e instanceof SpawnError && /RASTER_LOCAL_CMD/.test(e.message)
     );
     assert.equal(
       fs.existsSync(worktreePath("raster", "lot-inexistant-pour-le-test", "")),
@@ -87,7 +105,46 @@ test("preuve 2 — le spawn refuse, et refuse AVANT de créer un worktree", () =
   } finally {
     if (avant === undefined) delete process.env.RASTER_AGENT_CMD;
     else process.env.RASTER_AGENT_CMD = avant;
+    if (avantLocal === undefined) delete process.env.RASTER_LOCAL_CMD;
+    else process.env.RASTER_LOCAL_CMD = avantLocal;
+    if (avantKey === undefined) delete process.env.CURSOR_API_KEY;
+    else process.env.CURSOR_API_KEY = avantKey;
   }
+});
+
+test("les modes local et agents ont des commandes séparées", () => {
+  const local = process.env.RASTER_LOCAL_CMD;
+  const agents = process.env.RASTER_AGENTS_CMD;
+  const legacy = process.env.RASTER_AGENT_CMD;
+  process.env.RASTER_LOCAL_CMD = 'node "local runner.mjs"';
+  process.env.RASTER_AGENTS_CMD = 'node "cloud runner.mjs"';
+  delete process.env.RASTER_AGENT_CMD;
+  try {
+    assert.deepEqual(agentCommand("local"), { cmd: "node", args: ["local runner.mjs"] });
+    assert.deepEqual(agentCommand("agents"), { cmd: "node", args: ["cloud runner.mjs"] });
+    assert.deepEqual(configuredModes(), { local: true, agents: true });
+  } finally {
+    if (local === undefined) delete process.env.RASTER_LOCAL_CMD;
+    else process.env.RASTER_LOCAL_CMD = local;
+    if (agents === undefined) delete process.env.RASTER_AGENTS_CMD;
+    else process.env.RASTER_AGENTS_CMD = agents;
+    if (legacy === undefined) delete process.env.RASTER_AGENT_CMD;
+    else process.env.RASTER_AGENT_CMD = legacy;
+  }
+});
+
+test("un runner ne peut muter que les Tasks de sa vague", () => {
+  const calls = [];
+  const count = applyRunnerResult(
+    'RASTER_RESULT {"done":["RAS-1","HORS-1"],"blocked":["RAS-2"]}',
+    ["RAS-1", "RAS-2"],
+    (id, status) => calls.push([id, status])
+  );
+  assert.equal(count, 2);
+  assert.deepEqual(calls, [
+    ["RAS-1", "done"],
+    ["RAS-2", "blocked"],
+  ]);
 });
 
 test("la commande est découpée en respectant les guillemets", () => {

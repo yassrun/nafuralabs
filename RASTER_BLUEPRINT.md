@@ -4,7 +4,7 @@
 Il fonctionne seul pour tout type de projet.
 
 Canon opérationnel : [`raster/AGENTS.md`](raster/AGENTS.md).
-Harness (enchaînement agents, QA NOK) : [`raster/HARNESS.md`](raster/HARNESS.md).
+Harness (pipeline Spec → Code → Done) : [`raster/HARNESS.md`](raster/HARNESS.md).
 
 ---
 
@@ -77,31 +77,22 @@ Une app métier peut coller **lot permanent = BC** (chapitre stable). Ce n’est
 
 ---
 
-## Deux volets
+## Inbox, Ready, Session
 
-### Plan
-
-Le Plan appartient à **un projet**. Il montre :
-
-- les lots de `ROADMAP.md` ;
-- leur ordre voulu ;
-- la borne d’autonomie `<!-- borne -->` ;
-- les sous-lots de chaque lot ;
-- leur readiness calculée.
-
-La borne répond à **« est-ce permis ? »**. La déplacer est un geste humain.
-
-### Session
+- **Inbox** reçoit la discussion et les captures.
+- **Promotion** transforme une capture en travail structuré.
+- **Ready** calcule les sous-lots autonomes qui peuvent être lancés.
+- **Session** contient les sous-lots explicitement lancés par l’humain.
 
 La Session peut rassembler plusieurs projets. Elle montre :
 
-- les sous-lots actuellement lançables ;
+- les sous-sessions lancées ;
 - les Runs actives ;
-- l’orchestrateur de chaque Run ;
-- les agents Spec, Exec et QA ;
-- les gates et questions qui attendent l’humain.
+- leur mode local ou agents ;
+- les phases Spec et Code ;
+- leur statut consolidé.
 
-Le graphe répond à **« est-ce possible ? »**. La Session est le front autorisé et prêt ; elle n’est jamais stockée à la main.
+Un sous-lot devient une sous-session lorsqu’il passe de Ready à Session. Après ce geste, il n’existe plus d’attente humaine dans son exécution.
 
 ---
 
@@ -115,18 +106,16 @@ type: feature
 agent_type: exec
 priority: P1
 assignee: agent
-gate: none
 blocked_by: [RAS-206]
 tags: [ui]
 ```
 
 Enums :
 
-- `status:` `todo` | `doing` | `blocked` | `review` | `done-agent` | `done-me`
-- `type:` `spec` | `feature` | `bug` | `tech` | `physical` | `qa`
-- `agent_type:` `spec` | `exec` | `qa`
+- `status:` `todo` | `doing` | `blocked` | `done`
+- `type:` `spec` | `feature` | `bug` | `tech` | `physical`
+- `agent_type:` `spec` | `exec`
 - `assignee:` `me` | `agent` | `either`
-- `gate:` `none` | `me`
 - `priority:` `P0` | `P1` | `P2` | `P3`
 
 Mapping par défaut :
@@ -135,7 +124,6 @@ Mapping par défaut :
 |---|---|
 | `spec` | `spec` |
 | `feature`, `bug`, `tech` | `exec` |
-| `qa` | `qa` |
 | `physical` | `exec`, avec assignee explicite |
 
 L’interface peut afficher **Code** pour `agent_type: exec`.
@@ -146,10 +134,9 @@ L’interface peut afficher **Code** pour `agent_type: exec`.
 
 | Rôle | Affectation | Responsabilité |
 |---|---|---|
-| **Orchestrator** | Run / sous-lot | calcule, lance, transmet, collecte et s’arrête |
-| **Spec** | Task `agent_type: spec` | clarifie le besoin, écrit le plan, découpe et prépare les preuves attendues |
-| **Code** | Task `agent_type: exec` | implémente et écrit les preuves automatisées |
-| **QA** | Task `agent_type: qa` | exécute les preuves et rend le verdict |
+| **Orchestrator** | Session | calcule, lance, suit et relance les sous-sessions |
+| **Spec** | Task `agent_type: spec` | clarifie le besoin, écrit le plan et découpe |
+| **Code** | Task `agent_type: exec` | implémente, valide techniquement et termine la Task |
 
 Orchestrator est un rôle runtime, jamais un `agent_type` de Task.
 
@@ -167,9 +154,11 @@ Un sous-lot est lançable si :
 4. il reste du travail à exécuter ;
 5. aucune autre Run ne tient déjà ce sous-lot.
 
-`blocked_by` entre tasks d’un même sous-lot ordonne leur exécution en série.
+`blocked_by` entre Tasks d’un même sous-lot ordonne leur front d’exécution.
 Un `blocked_by` vers un autre sous-lot crée une dépendance du graphe.
 `status: blocked` signifie toujours une attente extérieure à Raster.
+
+En mode local, Raster confie une Task Code à la fois au harness. En mode agents, toutes les Tasks Code indépendantes du front peuvent être parallélisées par Cursor Cloud.
 
 ---
 
@@ -181,7 +170,6 @@ Le CLI possède la structure et l’état :
 node raster/t.mjs new <projet> <lot[/sous-lot]> "<titre>"
 node raster/t.mjs promote "<ligne inbox>" <projet> <lot[/sous-lot]>
 node raster/t.mjs status <id> <statut>
-node raster/t.mjs approve <id>
 node raster/t.mjs check
 ```
 
@@ -202,10 +190,9 @@ décidé seul
 écarts / dette
 ```
 
-Une feature ou un bug passe par `review`, puis le QA pose `done-agent`.
-Avec `gate: none`, `done-agent` devient automatiquement `done-me`.
-Avec `gate: me`, l’approbation humaine est le seul chemin vers `done-me`.
-`sweep` retire ensuite les tasks `done-me` ; Git porte l’historique.
+Une Task suit `todo → doing → done`, ou `blocked` en cas d’attente extérieure.
+Code porte sa validation technique et pose `done`.
+`sweep` retire ensuite les Tasks `done` ; Git porte l’historique.
 
 ---
 
@@ -215,6 +202,6 @@ Avec `gate: me`, l’approbation humaine est le seul chemin vers `done-me`.
 - `raster/BACKLOG.md` — arbre du travail actif
 - `ready` — sous-lots techniquement lançables
 - `window` — lots permis par la borne
-- UI — Session, Plan, Inbox, Backlog, Livraisons
+- UI — Inbox, Ready, Session
 
 Les vues sont calculées. Elles ne deviennent jamais une deuxième source de vérité.

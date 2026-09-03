@@ -19,9 +19,9 @@ import { inferWorkType, resolveAgentType } from "./agent-type.mjs";
 const RASTER_ROOT = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(RASTER_ROOT, "..");
 
-const STATUS_ORDER = { doing: 0, review: 1, blocked: 2, todo: 3, "done-agent": 4, "done-me": 5, done: 6 };
+const STATUS_ORDER = { doing: 0, blocked: 1, todo: 2, done: 3 };
 const PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };
-const GLYPH = { todo: "·", doing: "▸", blocked: "✕", review: "◐", "done-agent": "✓", "done-me": "✓", done: "✓" };
+const GLYPH = { todo: "·", doing: "▸", blocked: "✕", done: "✓" };
 
 export function parseFrontmatter(raw) {
   if (!raw.startsWith("---\n") && !raw.startsWith("---\r\n")) return null;
@@ -63,7 +63,7 @@ function loadTasks() {
   for (const file of files) {
     const fm = parseFrontmatter(fs.readFileSync(file, "utf8"));
     if (!fm?.id) continue;
-    if (fm.status === "done" || fm.status === "done-me") continue;
+    if (fm.status === "done") continue;
     const { project, lot, souslot } = treeFromPath(REPO_ROOT, file);
     const type = inferWorkType(fm);
     const agent_type = resolveAgentType(type, fm.agent_type);
@@ -73,7 +73,6 @@ function loadTasks() {
       priority: fm.priority || "P3",
       context: fm.context || "nafura",
       assignee: fm.assignee || "",
-      gate: fm.gate || "",
       type,
       agent_type,
       blocked_by: fm.blocked_by || "",
@@ -89,11 +88,6 @@ function loadTasks() {
 }
 
 /** Tout fichier sous `tasks/` est une task. Les chapeaux sont des dossiers. */
-
-/** Statut dérivé d'un chapeau : ✓ ssi toutes ses tasks live sont done-agent. */
-function hatDone(list) {
-  return list.length > 0 && list.every((t) => t.status === "done-agent");
-}
 
 function sortTasks(a, b) {
   const sa = STATUS_ORDER[a.status] ?? 9;
@@ -132,7 +126,7 @@ export function isoWeekInfo(d = new Date()) {
 function writeIndex(tasks) {
   const sorted = [...tasks].sort(sortTasks);
   const header =
-    "id\tstatus\tpriority\tcontext\tassignee\tgate\ttype\tagent_type\tproject\tlot\tsouslot\ttitle";
+    "id\tstatus\tpriority\tcontext\tassignee\ttype\tagent_type\tproject\tlot\tsouslot\ttitle";
   const rows = sorted.map((t) =>
     [
       t.id,
@@ -140,7 +134,6 @@ function writeIndex(tasks) {
       t.priority,
       t.context,
       t.assignee,
-      t.gate,
       t.type,
       t.agent_type,
       t.project,
@@ -218,8 +211,7 @@ function writeBacklog(tasks) {
         const inSous = bySous.get(sl);
         const indent = lot ? (sl ? "    -" : "  -") : "-";
         if (sl) {
-          const g = hatDone(inSous) ? "✓" : "·";
-          lines.push(`  - ${g} \`${sl}\` sous-lot`);
+          lines.push(`  - · \`${sl}\` sous-lot`);
         }
         for (const t of inSous) lines.push(taskLine(t, indent));
       }

@@ -6,7 +6,6 @@ type: feature
 agent_type: exec
 priority: P0
 assignee: agent
-gate: none
 tags: [homog, achats]
 ---
 

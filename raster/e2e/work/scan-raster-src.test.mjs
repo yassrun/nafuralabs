@@ -119,10 +119,8 @@ test("agent_type mapping is immutable", async () => {
   assert.equal(expectedAgentType("bug"), "exec");
   assert.equal(expectedAgentType("tech"), "exec");
   assert.equal(expectedAgentType("physical"), "exec");
-  assert.equal(expectedAgentType("qa"), "qa");
+  assert.equal(expectedAgentType("qa"), "");
   assert.equal(resolveAgentType("feature", ""), "exec");
-  assert.equal(resolveAgentType("qa", "qa"), "qa");
-  assert.throws(() => resolveAgentType("qa", "exec"));
   assert.throws(() => resolveAgentType("spec", "exec"));
   assert.throws(() => resolveAgentType("feature", "orch"));
   assert.equal(skillForAgentType("orch"), "nafura-orch");
@@ -137,4 +135,5 @@ test("INDEX porte l'arbre (lot/souslot) et plus kind/parent", () => {
   assert.ok(header.includes("\tsouslot\t"), header);
   assert.ok(!header.includes("\tkind\t"), "kind supprimé");
   assert.ok(!header.includes("\tparent\t"), "parent supprimé");
+  assert.ok(!header.includes("\tgate\t"), "gate supprimé");
 });

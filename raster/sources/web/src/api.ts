@@ -4,7 +4,6 @@ export type Task = {
   priority: string;
   context: string;
   assignee: string;
-  gate: string;
   type: string;
   agent_type: string;
   /** Chapeaux derives du CHEMIN — lot et sous-lot sont des dossiers, pas des tickets. */
@@ -15,11 +14,7 @@ export type Task = {
   title: string;
   project: string;
   file: string;
-  /** Sections du corps du .md — l'app les jetait. */
-  question: string;
   rapport: string;
-  /** Derive : cette task te rend la main. */
-  attend: boolean;
 };
 
 /** Verdict par sous-lot — calcule par `t.mjs ready`, jamais stocke. */
@@ -32,13 +27,14 @@ export type Ready = {
   lancable: boolean;
   raisons: string[];
   restant: number;
-  gates: string[];
 };
 
 /** Un lot tenu par un orchestrateur. L'etat vit dans le serveur, jamais sur disque. */
 export type Lance = {
   project: string;
   lot: string;
+  souslot: string;
+  mode: ExecutionMode;
   branch: string;
   cwd: string;
   pid: number;
@@ -51,10 +47,7 @@ export type Lance = {
 export type ViewId =
   | "session"
   | "ready"
-  | "plan"
-  | "sublot"
-  | "captures"
-  | "deliveries";
+  | "captures";
 
 export type WindowLot = {
   lot: string;
@@ -77,9 +70,6 @@ const glyph: Record<string, string> = {
   todo: "·",
   doing: "▸",
   blocked: "✕",
-  review: "◐",
-  "done-agent": "✓",
-  "done-me": "✓",
   done: "✓",
 };
 
@@ -87,21 +77,17 @@ export function statusGlyph(s: string) {
   return glyph[s] || "·";
 }
 
-export type AgentFilter = "all" | "spec" | "exec" | "qa";
+export type ExecutionMode = "local" | "agents";
 
 export function taskAgentType(t: {
   type?: string;
   agent_type?: string;
   status?: string;
-}): "spec" | "exec" | "qa" {
-  // `agent_type` décrit l'auteur attendu de la tâche, mais après livraison
-  // d'une feature/bug le prochain acteur est toujours QA.
-  if (t.status === "review") return "qa";
+}): "spec" | "exec" {
   const a = (t.agent_type || "").toLowerCase();
-  if (a === "spec" || a === "exec" || a === "qa") return a;
+  if (a === "spec" || a === "exec") return a;
   const ty = (t.type || "").toLowerCase();
   if (ty === "spec") return "spec";
-  if (ty === "qa") return "qa";
   return "exec";
 }
 
@@ -129,7 +115,8 @@ export function launchBrief(t: Task) {
 
 export function orchLaunchBrief(
   group: { project: string; lot: string; souslot: string },
-  kids: Task[]
+  kids: Task[],
+  mode: ExecutionMode = "local"
 ) {
   const lines =
     kids.length > 0
@@ -141,12 +128,16 @@ export function orchLaunchBrief(
     `skill: /orchestration   (.claude/skills/orchestration/SKILL.md)`,
     `projet: ${group.project}`,
     `sous-lot: ${where}`,
+    `mode: ${mode}`,
     `plan: ${group.project}/raster-src/lots/${group.lot}/${group.souslot}/00-PLAN.md`,
     "",
     "Tasks du sous-lot :",
     ...lines,
     "",
-    "Un seul sous-lot. Tasks en série. Ne pas coder, ne pas poser done-me.",
+    "Pipeline: Spec → Code → Done. Aucune QA dédiée, aucune gate humaine.",
+    mode === "agents"
+      ? "Les Tasks Code indépendantes peuvent être parallélisées par le harness."
+      : "Mode local: une seule Task Code à la fois dans le worktree.",
   ].join("\n");
 }
 
@@ -203,30 +194,15 @@ export const api = {
   deleteTask: (id: string) =>
     json<Mutation>(`/api/tasks/${encodeURIComponent(id)}`, { method: "DELETE" }),
   running: () =>
-    json<{ running: Lance[]; recent: Lance[]; spawnPret: boolean }>("/api/running"),
-  /** Lance un orchestrateur sur un lot. Refuse sans RASTER_AGENT_CMD. */
-  run: (project: string, lot: string, souslot = "") =>
+    json<{ running: Lance[]; recent: Lance[]; modes: Record<ExecutionMode, boolean> }>("/api/running"),
+  run: (project: string, lot: string, souslot = "", mode: ExecutionMode = "local") =>
     json<{ lance: Lance; running: Lance[] }>("/api/run", {
+      method: "POST",
+      body: JSON.stringify({ project, lot, souslot, mode }),
+    }),
+  stopRun: (project: string, lot: string, souslot = "") =>
+    json<{ running: Lance[] }>("/api/stop", {
       method: "POST",
       body: JSON.stringify({ project, lot, souslot }),
     }),
-  stopRun: (project: string, lot: string) =>
-    json<{ running: Lance[] }>("/api/stop", {
-      method: "POST",
-      body: JSON.stringify({ project, lot }),
-    }),
-  /** Le seul chemin vers `done-me` — jamais un select. */
-  approve: (id: string) =>
-    json<Mutation>(`/api/tasks/${encodeURIComponent(id)}/approve`, {
-      method: "POST",
-      body: "{}",
-    }),
 };
-
-/** Ce qu'on te demande, en une ligne, pour la file d'attente. */
-export function demande(t: Task): string {
-  if (t.status === "blocked") return "Bloqué dehors — débloquer";
-  if (t.status === "done-agent" && t.gate === "me") return "Approuver";
-  if (t.question) return "Trancher";
-  return "Regarder";
-}

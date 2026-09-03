@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "vite --port 4210 --host 127.0.0.1",
     "build": "tsc -b && vite build",
-    "preview": "vite preview --port 4210"
+    "preview": "vite preview --port 4210",
+    "cursor:local": "node server/cursor-runner.mjs local",
+    "cursor:agents": "node server/cursor-runner.mjs agents"
   },
   "dependencies": {
+    "@cursor/sdk": "^1.0.30",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

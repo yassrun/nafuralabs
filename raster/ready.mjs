@@ -25,7 +25,7 @@ const RASTER_ROOT = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(RASTER_ROOT, "..");
 
 /** Une task est close quand plus personne n'attend après elle. */
-const CLOSED = new Set(["done-agent", "done-me", "done"]);
+const CLOSED = new Set(["done"]);
 
 export function loadForReadiness() {
   const tasks = [];
@@ -36,7 +36,6 @@ export function loadForReadiness() {
     tasks.push({
       id: fm.id,
       status: fm.status || "todo",
-      gate: fm.gate || "none",
       blocked_by: parseListField(fm.blocked_by),
       title: fm._title,
       project,
@@ -109,7 +108,6 @@ export function computeReadiness(tasks, projet = "") {
       lancable: ouvert && raisons.length === 0,
       raisons: [...new Set(raisons)],
       restant: g.tasks.filter((t) => !CLOSED.has(t.status)).length,
-      gates: g.tasks.filter((t) => t.gate === "me" && !CLOSED.has(t.status)).map((t) => t.id),
     });
   }
 

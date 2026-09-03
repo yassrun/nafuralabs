@@ -20,6 +20,13 @@
  */
 import { spawn } from "node:child_process";
 import { addWorktree, REPO_ROOT, worktreePath } from "./worktree.mjs";
+import {
+  availableModes,
+  executionCommand,
+  normalizeMode,
+} from "./execution-mode.mjs";
+import { setStatus } from "./write.mjs";
+import { regen } from "./regen.mjs";
 
 export class SpawnError extends Error {}
 
@@ -27,10 +34,10 @@ const fail = (m) => {
   throw new SpawnError(m);
 };
 
-/** lot tenu → état. Un lot n'est jamais tenu deux fois (AGENTS.md §7). */
+/** sous-lot tenu → état. Une sous-session n'est jamais tenue deux fois. */
 const running = new Map();
 
-const key = (project, lot) => `${project}//${lot}`;
+const key = (project, lot, souslot = "") => `${project}//${lot}//${souslot}`;
 
 /** Taille du tampon de sortie gardé par lot — de quoi comprendre, pas de quoi archiver. */
 const MAX_LIGNES = 400;
@@ -39,21 +46,42 @@ const MAX_LIGNES = 400;
  * La commande vient de l'environnement, jamais du dépôt.
  * Rien de configuré ⇒ on refuse en le disant.
  */
-export function agentCommand() {
-  const raw = (process.env.RASTER_AGENT_CMD || "").trim();
-  if (!raw) return null;
-  const parts = raw.match(/"[^"]+"|\S+/g) || [];
-  return { cmd: parts[0].replace(/^"|"$/g, ""), args: parts.slice(1).map((a) => a.replace(/^"|"$/g, "")) };
+export function agentCommand(mode = "local") {
+  return executionCommand(mode);
 }
 
-export function isRunning(project, lot) {
-  return running.has(key(project, lot));
+export function configuredModes() {
+  return availableModes();
+}
+
+export function applyRunnerResult(line, allowedTaskIds, apply = setStatus) {
+  if (!String(line).startsWith("RASTER_RESULT ")) return 0;
+  const result = JSON.parse(String(line).slice("RASTER_RESULT ".length));
+  const allowed = new Set(allowedTaskIds);
+  let changed = 0;
+  for (const id of result.done || []) {
+    if (!allowed.has(id)) continue;
+    apply(id, "done");
+    changed++;
+  }
+  for (const id of result.blocked || []) {
+    if (!allowed.has(id)) continue;
+    apply(id, "blocked");
+    changed++;
+  }
+  return changed;
+}
+
+export function isRunning(project, lot, souslot = "") {
+  return running.has(key(project, lot, souslot));
 }
 
 export function list() {
   return [...running.values()].map((r) => ({
     project: r.project,
     lot: r.lot,
+    souslot: r.souslot,
+    mode: r.mode,
     branch: r.branch,
     cwd: r.cwd,
     pid: r.pid,
@@ -71,18 +99,31 @@ export function list() {
  * Ne fait AUCUN git push, AUCUN merge : le brief passé à l'agent le dit,
  * et Raster ne l'exécute pas à sa place.
  */
-export function start({ project, lot, souslot = "", brief = "" }) {
+export function start({
+  project,
+  lot,
+  souslot = "",
+  brief = "",
+  mode = "local",
+  onExit,
+  allowedTaskIds = [],
+}) {
   if (!project || !lot) fail("projet et lot requis");
-  const k = key(project, lot);
+  const selectedMode = normalizeMode(mode);
+  const k = key(project, lot, souslot);
   if (running.has(k)) {
-    fail(`${lot} est déjà tenu (pid ${running.get(k).pid}) — un lot, un orchestrateur`);
+    fail(`${lot}/${souslot || "général"} est déjà tenu (pid ${running.get(k).pid})`);
   }
 
-  const commande = agentCommand();
+  if (!brief.trim()) {
+    fail("brief de sous-session requis");
+  }
+  const commande = agentCommand(selectedMode);
   if (!commande) {
     fail(
-      "aucune commande d'agent configurée — poser RASTER_AGENT_CMD dans l'environnement local. " +
-        "Raster ne stocke ni commande ni clé (CADRE : le dépôt suffit à lire, pas à exécuter)."
+      `mode ${selectedMode} non configuré — poser ${
+        selectedMode === "agents" ? "RASTER_AGENTS_CMD" : "RASTER_LOCAL_CMD"
+      } dans l'environnement local`
     );
   }
 
@@ -91,6 +132,7 @@ export function start({ project, lot, souslot = "", brief = "" }) {
     project,
     lot,
     souslot,
+    mode: selectedMode,
     branch: wt.branch,
     cwd: wt.path,
     depuis: new Date().toISOString(),
@@ -103,17 +145,27 @@ export function start({ project, lot, souslot = "", brief = "" }) {
 
   const child = spawn(commande.cmd, commande.args, {
     cwd: wt.path,
-    env: process.env,
+    env: { ...process.env, RASTER_EXECUTION_MODE: selectedMode },
     shell: false,
     stdio: ["pipe", "pipe", "pipe"],
   });
 
   etat.child = child;
   etat.pid = child.pid || 0;
+  let pendingOutput = "";
 
   const pousse = (buf) => {
-    for (const l of String(buf).split(/\r?\n/)) {
+    pendingOutput += String(buf);
+    const lines = pendingOutput.split(/\r?\n/);
+    pendingOutput = lines.pop() || "";
+    for (const l of lines) {
       if (l.trim()) etat.sortie.push(l);
+      if (!l.startsWith("RASTER_RESULT ")) continue;
+      try {
+        if (applyRunnerResult(l, allowedTaskIds)) regen();
+      } catch (error) {
+        etat.sortie.push(`résultat runner ignoré : ${error.message}`);
+      }
     }
     if (etat.sortie.length > MAX_LIGNES) {
       etat.sortie.splice(0, etat.sortie.length - MAX_LIGNES);
@@ -127,6 +179,7 @@ export function start({ project, lot, souslot = "", brief = "" }) {
     etat.sortie.push(`erreur de lancement : ${e.message}`);
   });
   child.on("exit", (code) => {
+    if (pendingOutput.trim()) pousse("\n");
     etat.etat = code === 0 ? "fini" : "échec";
     etat.code = code;
     etat.child = null;
@@ -134,9 +187,10 @@ export function start({ project, lot, souslot = "", brief = "" }) {
     running.delete(k);
     termines.push({ ...etat, sortie: etat.sortie.slice(-40) });
     if (termines.length > 20) termines.shift();
+    if (onExit) queueMicrotask(() => onExit({ code: code ?? 1 }));
   });
 
-  if (brief && child.stdin) {
+  if (child.stdin) {
     child.stdin.write(brief);
     child.stdin.end();
   }
@@ -152,6 +206,8 @@ export function recent() {
   return termines.map((t) => ({
     project: t.project,
     lot: t.lot,
+    souslot: t.souslot,
+    mode: t.mode,
     branch: t.branch,
     etat: t.etat,
     code: t.code,
@@ -164,8 +220,8 @@ export function recent() {
  * Attend la fin d'un lot lancé dans CE processus. Résout `{ code }`.
  * Sans ça, un `run` en ligne de commande rendrait la main en laissant un orphelin.
  */
-export function waitFor(project, lot, { onLigne } = {}) {
-  const r = running.get(key(project, lot));
+export function waitFor(project, lot, souslot = "", { onLigne } = {}) {
+  const r = running.get(key(project, lot, souslot));
   if (!r || !r.child) return Promise.resolve({ code: 0 });
   if (onLigne) {
     r.child.stdout?.on("data", (b) => onLigne(String(b)));
@@ -177,13 +233,13 @@ export function waitFor(project, lot, { onLigne } = {}) {
   });
 }
 
-export function stop(project, lot) {
-  const k = key(project, lot);
+export function stop(project, lot, souslot = "") {
+  const k = key(project, lot, souslot);
   const r = running.get(k);
   if (!r) fail(`${lot} n'est pas tenu`);
   r.child?.kill();
   running.delete(k);
-  return { project, lot, arrete: true };
+  return { project, lot, souslot, arrete: true };
 }
 
 export function formatRunning(rows) {

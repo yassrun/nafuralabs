@@ -5,12 +5,9 @@
 
 ## Ouvert
 
-1. **orchestration** — `plan-et-session`
-   Distinguer les lots clos, non découpés, bloqués et lançables. Créer une Run de session
-   avec un brief explicite et suivre les agents par sous-lot.
-
-2. **socle** — `volets-plan-session`
-   Rendre visibles les deux espaces : Plan par projet et Session d’exécution.
+1. **orchestration** — `modes-execution`
+   Pipeline Spec → Code → Done. Choix local ou agents cloud ; le harness peut
+   paralléliser les Tasks Code indépendantes d’un sous-lot en mode agents.
 
 <!-- borne -->
 

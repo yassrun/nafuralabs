@@ -1,103 +1,84 @@
-# Harness Raster — Spec / Code / QA
+# Harness Raster — Spec → Code → Done
 
-Gelé 27/08/2026. Canon moteur : [`AGENTS.md`](AGENTS.md) · [`RASTER_BLUEPRINT.md`](../RASTER_BLUEPRINT.md).
-Pact (coupe) : [`ARCHI_BLUEPRINT.md`](../ARCHI_BLUEPRINT.md). Sektor (BC = lot) : [`sektor/raster-src/DECISIONS.md`](../sektor/raster-src/DECISIONS.md).
+Ce document décrit l’exécution d’une sous-session. Le moteur et les enums vivent dans [`AGENTS.md`](AGENTS.md).
 
-Ce fichier porte **comment les agents s’enchaînent**. Il ne remplace pas le CLI ni les enums.
+## Frontière humaine
 
----
+L’humain intervient uniquement pour :
 
-## Trois couches
+1. discuter et capturer dans l’Inbox ;
+2. promouvoir la demande ;
+3. envoyer un sous-lot de Ready vers Session.
 
-| Couche | Question | Fichiers |
-|---|---|---|
-| Humain | Écrans, vocabulaire, règles | `CADRE.md` (app) · `spec.md` (chaque BC, **socle compris**) |
-| Pact | Où vit le code | platform → app → socle + BC |
-| Raster | Qui exécute cette vague | lot / sous-lot / Task / Run |
+Une fois lancée, la sous-session est autonome. Il n’existe ni gate, ni attente humaine, ni phase QA dédiée.
 
-Une convo Cursor n’est pas l’exécution. Elle **alimente une Task Spec** (ou l’inbox). Jamais un prompt direct à Code.
-
----
-
-## Spec humaine puis Spec agents
-
-Une Task `type: spec` fait les deux :
-
-1. Écrire ou amender le `spec.md` du BC impacté (`CADRE.md` si la loi d’app bouge ; deux BC → deux `spec.md`).
-2. Écrire le sous-lot agents : `00-PLAN.md`, canvas si besoin, Tasks via `t.mjs new`, preuves, `blocked_by`, `gate: me` sur la découpe qui engage.
-
-Le `00-PLAN` dit comment on livre **cette** vague. Le `spec.md` dit ce qui est **vrai** pour le BC après. Coder un sous-lot sans toucher le spec du BC = convo qui dérive.
-
----
-
-## Pipeline d’un sous-lot
+## Un sous-lot = une sous-session
 
 ```text
-1 agent Spec  →  n tasks Code (1 agent)  →  1 agent QA (preuves) à la fin
+Session Raster
+└── sous-session (un sous-lot)
+    ├── phase Spec
+    ├── phase Code
+    └── Done
 ```
 
-- **Un sous-lot = un worktree = un worker à la fois.**
-- Tasks **en série** dans le sous-lot (`blocked_by`).
-- **Parallèle = entre sous-lots ready** (tous projets dont le lot est au-dessus de la borne).
-
-Trois tasks Code « indépendantes » dans **le même** sous-lot : le moteur les joue **l’une après l’autre**. Pour du Code vraiment parallèle, Spec **coupe d’autres sous-lots** (périmètres fichiers disjoints), il n’ajoute pas d’agents sur le même worktree.
-
----
-
-## Session et orchestrateurs
-
-Vague normale :
-
-```text
-Session (1) → Run (1) → 1 orch
-                 └── 1 worker par sous-lot ready
-```
-
-Max vivant ≈ **1 + N** (N = sous-lots lançables). Le worker **change de skill** selon la task en tête (Spec, puis Code, puis QA) : ce n’est pas 1 Spec + N Code + 1 QA **simultanés** dans un sous-lot.
-
-Même rôle orch, **découpé** seulement si le span l’exige :
-
-- plusieurs apps Pact dans la Session → 1 orch **par projet** sous l’orch Session ;
-- un lot avec **beaucoup** de sous-lots parallèles → 1 orch **de ce lot**.
-
-Pas de `agent_type` orch. L’orch ne code pas, ne juge pas QA, ne pose pas `done-me`, ne pousse pas.
-
-`window` = lots permis (borne, **toi**). `ready` = sous-lots possibles. L’orch fan-out là-dessus, y compris **multi-projets**.
-
----
-
-## Qui écrit les statuts
-
-Personne ne patche le YAML. **Le CLI** :
+Raster calcule le front, démarre le harness Cursor et suit son état consolidé. Le harness choisit les workers internes et met à jour chaque Task via :
 
 ```bash
-node raster/t.mjs status <id> todo|doing|blocked|review|done-agent
-node raster/t.mjs approve <id>
+node raster/t.mjs status <id> doing
+node raster/t.mjs status <id> done
 ```
 
-| Qui | Transitions |
-|---|---|
-| Spec | `todo → doing → done-agent` |
-| Code | `todo → doing` puis `review` (feature/bug) ou `done-agent` (tech) |
-| QA | `review → done-agent` (pass) ou `→ doing` (fail). Seul à poser `done-agent` sur feature/bug |
-| Toi | `approve` si `gate: me` |
-| CLI | `done-agent` + `gate: none` → `done-me` |
+Un échec extérieur explicite utilise `blocked`. Un échec technique relançable reste `doing` et la boucle de Session peut reprendre le harness.
 
-`done-me` ne se pose pas à la main. L’orch **ne mute pas** les statuts métier : le worker appelle `status`.
+## Ordonnancement
 
----
+Le front suit ces règles :
 
-## Boucle QA NOK
+1. tant qu’une Task Spec est ouverte, Code ne démarre pas ;
+2. après Spec, une Task Code est exécutable lorsque ses `blocked_by` sont `done` ;
+3. plusieurs Tasks Code sans dépendance ouverte forment une même vague ;
+4. le sous-lot est terminé lorsque toutes ses Tasks sont `done`.
 
-Pas d’enum `QA_NOK`. Fail = preuves + texte + **`status → doing`**.
+## Modes
 
-1. Code a mis les tasks en `review` (ou une task `qa` de fin de sous-lot).
-2. QA exécute les **preuves attendues**, sans les réécrire. Diff ≠ preuve.
-3. NOK : remarques dans le journal / rapport de **la** task concernée ; `status doing`.
-4. Le sous-lot reste ouvert. L’orch **recalcule `ready`** et **relance Code** sur le même worktree.
-5. Code rectifie, `review` à nouveau. QA rejoue les mêmes preuves.
-6. Pass → `done-agent`. Toi hors boucle sauf `blocked` + `## Question` ou `gate: me`.
+### Local
 
-Si **une** task `qa` clôt le sous-lot : le fail doit **rouvrir les tasks Code visées** (`doing`), pas seulement marquer la carte QA — sinon Code n’a rien à dispatcher.
+Une seule Task Code à la fois dans le worktree du sous-lot. Ce mode évite les écritures concurrentes locales.
 
-QA ne répare pas pour faire passer.
+Le runner `@cursor/sdk` intégré s’active avec `CURSOR_API_KEY`. `RASTER_LOCAL_CMD` peut le remplacer.
+
+### Agents
+
+Le brief annonce toutes les Tasks Code indépendantes du front comme parallélisables. Le runner Cursor Cloud peut les confier à plusieurs agents et rend un résultat consolidé.
+
+Le runner intégré exige aussi `RASTER_CLOUD_REPO` et accepte `RASTER_CLOUD_REF`. Il crée une PR par défaut. `RASTER_AGENTS_CMD` peut le remplacer.
+
+Les deux runners lisent le brief sur stdin. `CURSOR_API_KEY` reste dans l’environnement.
+
+Le runner agents répercute le résultat cloud vers le contrôleur local avec une ligne stdout :
+
+```text
+RASTER_RESULT {"done":["ID-1","ID-2"],"blocked":[]}
+```
+
+Raster n’accepte que les IDs présents dans la vague confiée. Ce protocole évite qu’un agent cloud modifie arbitrairement le graphe local.
+
+## Boucle de Session
+
+La boucle est mécanique :
+
+```text
+recalculer Ready et les Tasks
+→ lancer les sous-sessions autorisées
+→ suivre les runs Cursor
+→ à la fin, relire les statuts
+→ relancer si une nouvelle vague est exécutable
+→ sortir lorsque toutes les Tasks sont done
+```
+
+Raster ne demande pas à une IA de décider de l’ordonnancement. Le graphe et les statuts suffisent.
+
+## Validation technique
+
+Code est responsable des tests et contrôles nécessaires à sa propre livraison. Ils restent des commandes ou scénarios techniques dans la Task et le rapport, mais ne créent plus de Task, worker ou phase QA.

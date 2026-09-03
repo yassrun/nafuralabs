@@ -26,19 +26,23 @@ import {
   createTask,
   promoteLine,
   setStatus,
-  approve,
   RefusError,
 } from "../../../write.mjs";
 import { readiness } from "../../../ready.mjs";
 import { window_ } from "../../../roadmap.mjs";
 import {
-  agentCommand,
+  configuredModes,
   list as runningLots,
   recent as recentLots,
   start as startLot,
   stop as stopLot,
   SpawnError,
 } from "../../../spawn.mjs";
+import {
+  computeSessionFront,
+  harnessBrief,
+  loadSubLotTasks,
+} from "../../../session-front.mjs";
 import { WorktreeError } from "../../../worktree.mjs";
 import { regen } from "../../../regen.mjs";
 
@@ -48,7 +52,6 @@ export type TaskDto = {
   priority: string;
   context: string;
   assignee: string;
-  gate: string;
   type: string;
   agent_type: string;
   lot: string;
@@ -58,11 +61,7 @@ export type TaskDto = {
   title: string;
   project: string;
   file: string;
-  /** Sections du corps — l'app les jetait, alors qu'elles portent l'essentiel. */
-  question: string;
   rapport: string;
-  /** Dérivé : cette task attend une décision de l'humain. */
-  attend: boolean;
 };
 
 export type ReadyDto = {
@@ -74,7 +73,6 @@ export type ReadyDto = {
   lancable: boolean;
   raisons: string[];
   restant: number;
-  gates: string[];
 };
 
 function repoRootFromConfig(root: string) {
@@ -127,20 +125,18 @@ function loadTasks(repoRoot: string): TaskDto[] {
   const tasks: TaskDto[] = [];
   for (const file of collectTaskFiles(repoRoot)) {
     const fm = parseFrontmatter(fs.readFileSync(file, "utf8"));
-    if (!fm?.id || fm.status === "done" || fm.status === "done-me") continue;
+    if (!fm?.id || fm.status === "done") continue;
     const rel = path.relative(repoRoot, file).replace(/\\/g, "/");
     const { project, lot, souslot } = treeFromPath(repoRoot, file);
     const type = inferWorkType(fm);
     const agent_type = resolveAgentType(type, fm.agent_type);
     const status = fm.status || "todo";
-    const gate = fm.gate || "none";
     tasks.push({
       id: fm.id,
       status,
       priority: fm.priority || "P3",
       context: fm.context || "nafura",
       assignee: fm.assignee || "",
-      gate,
       type,
       agent_type,
       lot,
@@ -150,13 +146,7 @@ function loadTasks(repoRoot: string): TaskDto[] {
       title: fm._title,
       project,
       file: rel,
-      question: section(fm._body, "Question"),
       rapport: section(fm._body, "Rapport"),
-      // Trois façons de te rendre la main (`AGENTS.md` §0.1-2).
-      attend:
-        (status === "done-agent" && gate === "me") ||
-        status === "blocked" ||
-        (gate === "me" && section(fm._body, "Question") !== ""),
     });
   }
   return tasks;
@@ -274,6 +264,49 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
         });
       };
 
+      const startSubSession = (
+        project: string,
+        lot: string,
+        souslot: string,
+        mode: "local" | "agents"
+      ) => {
+        const tasks = loadSubLotTasks(project, lot, souslot);
+        const front = computeSessionFront(tasks, mode);
+        if (!front.tasks.length) {
+          throw new SpawnError(
+            front.phase === "done"
+              ? "sous-lot déjà terminé"
+              : "aucune Task exécutable dans ce sous-lot"
+          );
+        }
+        const before = new Map(
+          tasks.map((task: { id: string; status: string }) => [task.id, task.status])
+        );
+        return startLot({
+          project,
+          lot,
+          souslot,
+          mode,
+          brief: harnessBrief({ project, lot, souslot, mode, tasks }),
+          allowedTaskIds: front.tasks.map((task: { id: string }) => task.id),
+          onExit: ({ code }: { code: number }) => {
+            if (code !== 0) return;
+            const next = loadSubLotTasks(project, lot, souslot);
+            const progressed = next.some(
+              (task: { id: string; status: string }) =>
+                before.get(task.id) !== task.status
+            );
+            const nextFront = computeSessionFront(next, mode);
+            if (!progressed || !nextFront.tasks.length) return;
+            try {
+              startSubSession(project, lot, souslot, mode);
+            } catch (error) {
+              console.error("relance sous-session:", error);
+            }
+          },
+        });
+      };
+
       server.middlewares.use(async (req, res, next) => {
         const url = req.url || "";
         if (!url.startsWith("/api/")) return next();
@@ -309,7 +342,7 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
             return send(res, 200, {
               running: runningLots(),
               recent: recentLots(),
-              spawnPret: agentCommand() !== null,
+              modes: configuredModes(),
             });
           }
 
@@ -318,18 +351,19 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
               project?: string;
               lot?: string;
               souslot?: string;
+              mode?: "local" | "agents";
             };
-            const r = startLot({
-              project: b.project || "",
-              lot: b.lot || "",
-              souslot: b.souslot || "",
-            });
+            const project = b.project || "";
+            const lot = b.lot || "";
+            const souslot = b.souslot || "";
+            const mode = b.mode || "local";
+            const r = startSubSession(project, lot, souslot, mode);
             return send(res, 200, { ok: true, lance: r, running: runningLots() });
           }
 
           if (req.method === "POST" && url === "/api/stop") {
-            const b = (await readJson(req)) as { project?: string; lot?: string };
-            stopLot(b.project || "", b.lot || "");
+            const b = (await readJson(req)) as { project?: string; lot?: string; souslot?: string };
+            stopLot(b.project || "", b.lot || "", b.souslot || "");
             return send(res, 200, { ok: true, running: runningLots() });
           }
 
@@ -374,7 +408,6 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
             const r = promoteLine(b.line.trim(), b.project.trim(), b.target.trim(), {
               type: "spec",
               assignee: "agent",
-              gate: "none",
             });
             return after(res, { id: r.id, file: r.file });
           }
@@ -401,13 +434,6 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
             // Abandon = delete. Les chapeaux sont des dossiers : jamais d'enfants.
             fs.unlinkSync(path.join(root, t.file));
             return after(res);
-          }
-
-          const sub = url.match(/^\/api\/tasks\/([^/?]+)\/approve$/);
-          if (req.method === "POST" && sub) {
-            const id = decodeURIComponent(sub[1]);
-            const r = approve(id);
-            return after(res, { status: r.status });
           }
 
           return send(res, 404, { error: "unknown api route" });

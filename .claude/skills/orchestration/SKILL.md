@@ -1,32 +1,32 @@
 ---
 name: orchestration
-description: Dérouler la fenêtre Raster, lancer un agent par sous-lot prêt, collecter les rapports et s’arrêter à la borne ou sur une décision humaine.
+description: Lancer et suivre les sous-sessions Raster en mode local ou agents, selon le pipeline Spec → Code → Done.
 ---
 
 # Orchestration Raster
 
 Lire d’abord `raster/AGENTS.md` et `raster/HARNESS.md`. Ce skill porte la boucle, pas une seconde copie des règles.
 
-Sektor locale : au passage de main Code/QA, `make -C nafura-platform/ops mode-b` (`.cursor/rules/cursor-qa-browser.mdc`).
+Sektor locale : au passage de main Code, `make -C nafura-platform/ops mode-b` (`.cursor/rules/cursor-qa-browser.mdc`).
 
 ## Boucle
 
 1. `node raster/t.mjs window <projet> --json`.
 2. Identifier les sous-lots autorisés et prêts.
-3. Créer une Run d’orchestration pour la session.
-4. Lancer un agent par sous-lot, en parallèle entre sous-lots.
-5. Dans chaque sous-lot, dérouler les tasks en série selon `blocked_by`.
-6. Router selon `agent_type` : `spec` → Spec, `exec` → Code, `qa` → QA.
-7. Collecter le rapport de livraison de chaque task.
-8. Recalculer `ready` après chaque mutation.
-9. S’arrêter à la borne, sur `gate: me`, sur `status: blocked` ou sur une question indécidable.
+3. L’humain choisit les sous-lots qui passent de Ready à Session et leur mode.
+4. Lancer un harness Cursor par sous-lot.
+5. Router `spec` → Spec puis `exec` → Code.
+6. En local, confier une Task Code à la fois.
+7. En mode agents, confier au harness la vague de Tasks Code indépendantes.
+8. Recalculer le front après chaque fin de run jusqu’à `done`.
+9. Arrêter uniquement sur `status: blocked`, échec technique ou fin.
 
 ## Interdit
 
 - Écrire une Task ou son frontmatter à la main.
 - Déplacer la borne.
-- Coder ou rendre un verdict QA.
-- Poser `done-me`.
+- Coder.
+- Réintroduire une attente humaine dans une sous-session.
 - Pousser vers Git.
 
 ## Commandes

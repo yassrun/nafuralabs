@@ -1,10 +1,6 @@
 /**
- * Preuve Raster— preuve 3 · preuve 5 · preuve 6.
+ * Contrat structurel de l'API Raster.
  * Run: node --test raster/e2e/socle/api-delegue.test.mjs
- *
- * Ces trois critères sont **structurels** : ils disent ce que le code n'a plus le
- * droit de contenir. Un test de comportement ne les attraperait pas — un second
- * chemin d'écriture marche très bien, c'est justement le problème.
  */
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -14,72 +10,49 @@ import test from "node:test";
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const read = (p) => fs.readFileSync(path.join(REPO, p), "utf8");
-
 const API = "raster/sources/web/server/raster-api.ts";
 const FRONT_API = "raster/sources/web/src/api.ts";
 const APP = "raster/sources/web/src/App.tsx";
 
-test("preuve 5 — le serveur n'écrit plus de task lui-même", () => {
+test("le serveur n'écrit aucune Task lui-même", () => {
   const src = read(API);
   const writes = [...src.matchAll(/fs\.writeFileSync\([^)]*/g)].map((m) => m[0]);
-  // La capture d'inbox n'est pas une task : c'est la seule écriture tolérée.
-  const horsInbox = writes.filter((w) => !w.includes("inbox.md"));
   assert.deepEqual(
-    horsInbox,
-    [],
-    `écriture directe restante dans ${API} : ${horsInbox.join(" | ")}`
+    writes.filter((write) => !write.includes("inbox.md")),
+    []
   );
+  assert.ok(!/nextIdForPrefix|PROJECT_PREFIX|setFrontmatterField/.test(src));
 });
 
-test("preuve 5 — l'allocation d'id n'est plus dupliquée dans le serveur", () => {
+test("les mutations de Task passent par le moteur", () => {
   const src = read(API);
-  assert.ok(!/nextIdForPrefix|PROJECT_PREFIX/.test(src), "id alloué côté serveur");
-  assert.ok(!/setFrontmatterField/.test(src), "patch de frontmatter côté serveur");
-});
-
-test("preuve 5 — les mutations passent par les modules du CLI", () => {
-  const src = read(API);
-  for (const fn of ["createTask", "promoteLine", "setStatus", "approve"]) {
+  for (const fn of ["createTask", "promoteLine", "setStatus"]) {
     assert.ok(src.includes(fn), `${fn} non importé par le serveur`);
   }
-  assert.ok(src.includes("RefusError"), "un refus du CLI doit remonter en 400");
+  assert.ok(src.includes("RefusError"));
 });
 
-test("preuve 3 — la nouvelle UI ne propose aucune mutation directe vers done-me", () => {
+test("QA, approbation et attente humaine ont quitté l'API et l'UI", () => {
+  const all = [read(API), read(FRONT_API), read(APP)].join("\n");
+  assert.ok(!/api\.approve|\/approve|onApprove|done-agent|done-me|task\.attend/.test(all));
+  assert.ok(!/question:\s*section\(|attend:/.test(read(API)));
+});
+
+test("le mode local ou agents est transmis au moteur", () => {
+  const api = read(API);
+  const front = read(FRONT_API);
   const app = read(APP);
-  assert.ok(!app.includes("api.patchTask"), "un sélecteur de statut manuel est revenu");
-  assert.ok(app.includes("api.approve"), "l'approbation doit rester l'unique geste final");
+  assert.ok(api.includes("configuredModes"));
+  assert.ok(api.includes("harnessBrief"));
+  assert.ok(/mode\?: "local" \| "agents"/.test(api));
+  assert.ok(front.includes('ExecutionMode = "local" | "agents"'));
+  assert.ok(front.includes("JSON.stringify({ project, lot, souslot, mode })"));
+  assert.ok(app.includes("Agents cloud"));
+  assert.ok(api.includes("startSubSession"));
+  assert.ok(api.includes("onExit:"));
+  assert.ok(api.includes("progressed"));
 });
 
-test("preuve 3 — l'approbation existe et n'est pas un status déguisé", () => {
-  assert.ok(read(FRONT_API).includes("/approve"), "route approve absente du client");
-  assert.ok(read(APP).includes("onApprove"), "action Approuver absente de l'UI");
-});
-
-test("preuve 6 — aucun brief ne référence un skill inexistant", () => {
-  const src = read(FRONT_API);
-  const morts = [...src.matchAll(/nafura-(spec|exec|qa|orch)/g)].map((m) => m[0]);
-  assert.deepEqual(morts, [], `skills fantômes cités : ${morts.join(", ")}`);
-  assert.ok(
-    fs.existsSync(path.join(REPO, ".claude/skills/orchestration/SKILL.md")),
-    "le skill cité par les briefs doit exister"
-  );
-  for (const a of ["exec", "spec", "qa"]) {
-    assert.ok(
-      fs.existsSync(path.join(REPO, `.claude/agents/${a}.md`)),
-      `.claude/agents/${a}.md manquant`
-    );
-  }
-});
-
-test("preuve 2 — le serveur expose les sections du corps du .md", () => {
-  const src = read(API);
-  assert.ok(/question:\s*section\(/.test(src), "section Question non exposée");
-  assert.ok(/rapport:\s*section\(/.test(src), "section Rapport non exposée");
-  assert.ok(read(APP).includes("task.rapport"), "le rapport n'est pas affiché");
-});
-
-test("preuve 1 — les décisions de Session sont dérivées, pas filtrées à la main", () => {
-  assert.ok(read(API).includes("attend:"), "le champ `attend` doit venir du serveur");
-  assert.ok(read(APP).includes("task.attend"), "le panneau À toi doit s'appuyer dessus");
+test("le rapport de livraison reste exposé", () => {
+  assert.ok(/rapport:\s*section\(/.test(read(API)));
 });

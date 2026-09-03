@@ -12,7 +12,7 @@
  *   node raster/t.mjs new raster work/ecriture-readiness "Titre" --type tech
  *   node raster/t.mjs promote "ligne" raster work/ecriture-readiness
  *   node raster/t.mjs status RAS-79 doing
- *   node raster/t.mjs approve RAS-78
+ *   node raster/t.mjs status RAS-78 done
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -25,20 +25,12 @@ const RASTER_ROOT = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(RASTER_ROOT, "..");
 const INBOX = path.join(RASTER_ROOT, "inbox.md");
 
-export const TYPES = ["spec", "feature", "bug", "tech", "physical", "qa"];
+export const TYPES = ["spec", "feature", "bug", "tech", "physical"];
 export const PRIORITIES = ["P0", "P1", "P2", "P3"];
 export const ASSIGNEES = ["me", "agent", "either"];
-export const GATES = ["none", "me"];
 export const CONTEXTS = ["nafura", "saham", "personal"];
 
-/** Statuts qu'une commande `status` accepte. `done-me` n'en est pas : il se gagne. */
-export const SETTABLE_STATUS = [
-  "todo",
-  "doing",
-  "blocked",
-  "review",
-  "done-agent",
-];
+export const SETTABLE_STATUS = ["todo", "doing", "blocked", "done"];
 
 const PROJECT_PREFIX = {
   "sektor-btp": "ERP",
@@ -68,7 +60,7 @@ function rasterSrc(project) {
 }
 
 /**
- * Borne haute des ids. Le backlog live ne suffit pas : `done-me` sort du dépôt
+ * Borne haute des ids. Le backlog live ne suffit pas : `done` sort du dépôt
  * (`t.mjs sweep`), donc `<projet>/raster-src/NEXT` garde le maximum atteint.
  */
 export function nextId(project) {
@@ -112,7 +104,7 @@ export function slugify(s) {
 }
 
 /** Enums fermés — on ne les invente jamais (§2). */
-function checkEnums({ type, priority, assignee, gate, context, agent_type }) {
+function checkEnums({ type, priority, assignee, context, agent_type }) {
   if (!TYPES.includes(type)) {
     refuse(`type "${type}" inconnu — attendu : ${TYPES.join(" | ")}`);
   }
@@ -121,9 +113,6 @@ function checkEnums({ type, priority, assignee, gate, context, agent_type }) {
   }
   if (!ASSIGNEES.includes(assignee)) {
     refuse(`assignee "${assignee}" inconnu — attendu : ${ASSIGNEES.join(" | ")}`);
-  }
-  if (!GATES.includes(gate)) {
-    refuse(`gate "${gate}" inconnue — attendu : ${GATES.join(" | ")}`);
   }
   if (!CONTEXTS.includes(context)) {
     refuse(`context "${context}" inconnu — attendu : ${CONTEXTS.join(" | ")}`);
@@ -206,7 +195,6 @@ export function createTask({
   type = "feature",
   priority = "P2",
   assignee = "agent",
-  gate = "none",
   context = "nafura",
   agent_type = "",
   blocked_by = [],
@@ -220,7 +208,6 @@ export function createTask({
     type,
     priority,
     assignee,
-    gate,
     context,
     agent_type,
   });
@@ -254,7 +241,6 @@ export function createTask({
         agent_type: resolvedAgent,
         priority,
         assignee,
-        gate,
         blocked_by: blocked_by.length ? blocked_by : "",
         tags: tags.length ? tags : "",
       },
@@ -306,7 +292,6 @@ export function promoteLine(line, project, target, opts = {}) {
     type = "spec",
     priority = "P2",
     assignee = "agent",
-    gate = "none",
     ...rest
   } = opts;
   const res = createTask({
@@ -317,7 +302,6 @@ export function promoteLine(line, project, target, opts = {}) {
     tags,
     priority,
     assignee,
-    gate,
     ...rest,
   });
   dropInboxLine(found);
@@ -368,42 +352,14 @@ function appendJournal(file, msg) {
   );
 }
 
-/**
- * `done-me` ne se pose pas — il résulte d'une approbation (§0.1-8).
- * Sur `gate: none`, `done-agent` bascule seul : personne ne t'attend.
- */
 export function setStatus(id, status) {
-  if (status === "done-me") {
-    refuse("`done-me` ne se pose pas — il résulte de `approve` (AGENTS.md §0.1-8)");
-  }
   if (!SETTABLE_STATUS.includes(status)) {
     refuse(`status "${status}" inconnu — attendu : ${SETTABLE_STATUS.join(" | ")}`);
   }
-  const { file, fm } = findTask(id);
-  let final = status;
-  if (status === "done-agent" && (fm.gate || "none") === "none") final = "done-me";
-  patchFrontmatter(file, { status: final });
-  appendJournal(
-    file,
-    final === status
-      ? `status → ${final}`
-      : `status → done-agent · gate none → done-me`
-  );
-  return { id, status: final, file: rel(file) };
-}
-
-/** Le seul chemin vers `done-me` : ton approbation d'un `done-agent` sous `gate: me`. */
-export function approve(id) {
-  const { file, fm } = findTask(id);
-  if (fm.status !== "done-agent") {
-    refuse(`${id} est "${fm.status}" — on n'approuve qu'un done-agent`);
-  }
-  if ((fm.gate || "none") !== "me") {
-    refuse(`${id} n'a pas gate: me — rien à approuver`);
-  }
-  patchFrontmatter(file, { status: "done-me" });
-  appendJournal(file, "toi · approuvée → done-me");
-  return { id, status: "done-me", file: rel(file) };
+  const { file } = findTask(id);
+  patchFrontmatter(file, { status });
+  appendJournal(file, `status → ${status}`);
+  return { id, status, file: rel(file) };
 }
 
 export function taskProject(file) {

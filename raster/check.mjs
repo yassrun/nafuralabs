@@ -22,15 +22,8 @@ import { inferWorkType, resolveAgentType } from "./agent-type.mjs";
 const RASTER_ROOT = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(RASTER_ROOT, "..");
 
-const TYPES = new Set(["spec", "feature", "bug", "tech", "physical", "qa"]);
-const STATUSES = new Set([
-  "todo",
-  "doing",
-  "blocked",
-  "review",
-  "done-agent",
-  "done-me",
-]);
+const TYPES = new Set(["spec", "feature", "bug", "tech", "physical"]);
+const STATUSES = new Set(["todo", "doing", "blocked", "done"]);
 const EXEC_TYPES = new Set(["feature", "bug", "tech", "physical"]);
 
 const rel = (p) => path.relative(REPO_ROOT, p).replace(/\\/g, "/");
@@ -110,7 +103,7 @@ function checkTickets(err, warn) {
     }
 
     // R3 — champs supprimés
-    for (const dead of ["kind", "parent", "feature"]) {
+    for (const dead of ["kind", "parent", "feature", "gate"]) {
       if (fm[dead] !== undefined) {
         err(at, `\`${dead}:\` supprimé du schéma — l'arbre est le chemin`);
       }

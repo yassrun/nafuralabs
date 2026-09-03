@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * raster sweep — `done-me` sort du dépôt.
+ * raster sweep — `done` sort du dépôt.
  *
  * Une task validée par l'humain est supprimée : Git porte l'histoire,
  * exactement comme pour la SPEC. Pas d'archive.
@@ -112,7 +112,7 @@ export function sweep({ dry = false } = {}) {
   const partants = [];
   for (const file of collectTaskFiles(REPO_ROOT)) {
     const fm = parseFrontmatter(fs.readFileSync(file, "utf8"));
-    if (!fm || fm.status !== "done-me") continue;
+    if (!fm || fm.status !== "done") continue;
     const { project } = treeFromPath(REPO_ROOT, file);
     const m = file.replace(/\\/g, "/").match(/^(.*\/raster-src)\//);
     partants.push({
@@ -150,6 +150,6 @@ if (isDirect) {
   const removed = sweep({ dry });
   for (const r of removed) console.log(`${dry ? "would remove" : "removed"}  ${r.id}  ${r.at}`);
   console.log(
-    `\nsweep — ${removed.length} task(s) done-me ${dry ? "à supprimer" : "supprimée(s)"}. Git porte l'histoire.`
+    `\nsweep — ${removed.length} task(s) done ${dry ? "à supprimer" : "supprimée(s)"}. Git porte l'histoire.`
   );
 }

@@ -1,28 +1,21 @@
 # AGENTS.md — Raster
 
-> Raster est le système autonome de travail du dépôt : projet · lot · sous-lot · task · Run · livraison.
-> Blueprint : [`RASTER_BLUEPRINT.md`](../RASTER_BLUEPRINT.md).
-> Harness Spec / Code / QA (session, statuts, boucle NOK) : [`HARNESS.md`](HARNESS.md).
-
-**Actors :** `me` | `agent`.
-**Priorité :** capture rapide, état mécanique fiable, autonomie bornée, rapport lisible.
-
----
+> Raster organise le travail : Inbox → Ready → Session.  
+> Blueprint : [`RASTER_BLUEPRINT.md`](../RASTER_BLUEPRINT.md) · Harness : [`HARNESS.md`](HARNESS.md).
 
 ## 1. Règles dures
 
-1. Rien ne s’exécute sans Task Raster.
-2. Une demande nouvelle entre par `raster/inbox.md`, puis `promote` la rattache à un projet et un lot ou sous-lot.
+1. Une demande nouvelle entre par `raster/inbox.md`.
+2. `promote` la rattache à un projet et à un lot ou sous-lot.
 3. Lot et sous-lot sont des dossiers, jamais des tickets.
 4. Une Task est créée uniquement par `node raster/t.mjs new` ou `promote`.
-5. Le CLI possède l’ID, le chemin, le frontmatter, les enums et les mutations d’état.
-6. Les agents utilisent `status` et `approve`; ils ne patchent jamais ces champs directement.
-7. `done-me` ne se pose pas : il résulte d’une approbation ou d’une gate automatique.
-8. Une Task rendue porte un rapport de livraison. Une attente humaine porte une question explicite.
-9. Les agents ne poussent jamais. Les branches et merges restent locaux jusqu’au geste humain final.
-10. Après toute mutation : `node raster/t.mjs check`.
+5. Le CLI possède l’ID, le chemin, le frontmatter, les enums et les statuts.
+6. Les agents mutent un statut uniquement avec `node raster/t.mjs status`.
+7. Une Task rendue contient un rapport de livraison concis.
+8. Les agents ne poussent jamais.
+9. Après toute mutation : `node raster/t.mjs check`.
 
----
+L’humain intervient à l’Inbox, à la promotion et au passage de Ready vers Session. Une sous-session lancée ne porte ni gate ni attente humaine.
 
 ## 2. Arbre canonique
 
@@ -33,25 +26,18 @@
     ├── NEXT
     └── lots/
         └── <lot>/
-            ├── LOT.md                    optionnel
-            ├── tasks/                    lot simple
+            ├── tasks/
             │   └── {ID}-{slug}.md
             └── <sous-lot>/
                 ├── 00-PLAN.md
-                ├── ux/                   optionnel
+                ├── ux/                 optionnel
                 └── tasks/
                     └── {ID}-{slug}.md
 ```
 
-Le défaut est **Lot → Task**.
-Créer un sous-lot seulement pour une tranche livrable indépendante avec son propre plan.
-Si un lot possède des sous-lots, toutes ses nouvelles tasks vivent dans un sous-lot.
-
----
+Un sous-lot est une tranche livrable. En Session, il devient une sous-session autonome.
 
 ## 3. Task
-
-### Frontmatter
 
 ```yaml
 id: RAS-207
@@ -61,190 +47,115 @@ type: feature
 agent_type: exec
 priority: P1
 assignee: agent
-gate: none
 blocked_by: [RAS-206]
 tags: [ui]
 ```
 
-Enums fermés :
+Enums :
 
-- `status:` `todo` | `doing` | `blocked` | `review` | `done-agent` | `done-me`
-- `type:` `spec` | `feature` | `bug` | `tech` | `physical` | `qa`
-- `agent_type:` `spec` | `exec` | `qa`
+- `status:` `todo` | `doing` | `blocked` | `done`
+- `type:` `spec` | `feature` | `bug` | `tech` | `physical`
+- `agent_type:` `spec` | `exec`
 - `priority:` `P0` | `P1` | `P2` | `P3`
 - `assignee:` `me` | `agent` | `either`
-- `gate:` `none` | `me`
 
-`parent` n’existe pas : le parent est le chemin.
-`ready` n’existe pas dans le frontmatter : il est calculé.
+`parent` et `ready` ne sont pas stockés. Le parent vient du chemin ; Ready est calculé.
 
-### Corps
+Corps minimal :
 
 ```markdown
 # Titre
 
-> Résultat attendu en deux lignes maximum.
+> Résultat attendu.
 
 ## Étapes
-- [ ] Étape de travail
-
-## Preuves attendues
-- Commande, scénario ou observation qui démontre le résultat
+- [ ] Travail
 
 ## Journal
 DD/MM HH:MM  entrée append-only
 
 ## Rapport de livraison
-ce qui a changé
-preuves exécutées
-décidé seul
-écarts / dette
+ce qui a changé · validation technique exécutée · écarts
 ```
 
-Une Task qui attend l’humain ajoute :
+La validation technique appartient à Code. Il n’existe pas de Task ni de phase QA dédiée dans le MVP.
 
-```markdown
-## Question
+## 4. Pipeline
 
-<décision attendue>
-
-- **A** — conséquence
-- **B** — conséquence
-
-Recommandé : A — raison
+```text
+Spec → Code → Done
 ```
 
-Le corps narratif est éditable directement. Le fichier, son frontmatter et ses statuts restent sous contrôle du CLI.
+- **Spec** clarifie et découpe.
+- **Code** implémente, valide techniquement et pose `done`.
+- **Done** clôt la Task ; `sweep` la retire du backlog actif.
 
----
+L’orchestrateur de Session est déterministe : il calcule, lance, suit et relance. Il ne code pas.
 
-## 4. Types et agents
+## 5. Ready et Session
 
-| `type` | Sens | `agent_type` |
-|---|---|---|
-| `spec` | clarifier, découper, planifier, préparer l’UX et les preuves | `spec` |
-| `feature` | comportement nouveau | `exec` |
-| `bug` | comportement existant à corriger | `exec` |
-| `tech` | refonte, performance ou migration sans nouveau comportement | `exec` |
-| `physical` | appeler, signer, acheter ou autre travail hors logiciel | `exec` |
-| `qa` | exécuter les preuves et rendre le verdict | `qa` |
+Un sous-lot est Ready si :
 
-L’UI affiche **Code** pour `exec`.
-`assignee` indique qui exécute; `agent_type` indique la compétence.
+1. toutes ses dépendances externes sont `done` ;
+2. aucune Task n’est `blocked` ;
+3. il reste du travail ;
+4. aucune sous-session ne le tient déjà.
 
-### Orchestrator
+Le passage **Ready → Session** est un geste humain. Ensuite Raster lance un harness Cursor par sous-lot.
 
-Orchestrator est un rôle de **Run**, pas un type de Task. Il :
+À l’intérieur :
 
-- lit `window` et `ready` ;
-- prend les sous-lots du front autorisé ;
-- lance un agent par sous-lot ;
-- enchaîne les tasks en série ;
-- collecte les rapports ;
-- s’arrête à la borne, sur une gate ou sur une question bloquante.
+- les Tasks Spec passent avant Code ;
+- les dépendances internes déterminent le front exécutable ;
+- mode `local` : une Task Code à la fois ;
+- mode `agents` : les Tasks Code indépendantes du front peuvent être parallélisées par le harness Cursor ;
+- Raster suit le statut consolidé du sous-lot.
 
----
+## 6. Modes d’exécution
 
-## 5. CLI
+Les commandes et clés vivent dans l’environnement, jamais dans le dépôt :
 
-### Lecture
+```text
+CURSOR_API_KEY       clé du SDK Cursor
+RASTER_CLOUD_REPO    URL GitHub connectée à Cursor, requise en cloud
+RASTER_CLOUD_REF     branche de départ cloud, optionnelle
+```
+
+Raster fournit son runner `@cursor/sdk`. `RASTER_LOCAL_CMD` et `RASTER_AGENTS_CMD` permettent de le remplacer ; `RASTER_AGENT_CMD` reste un alias local de compatibilité.
+
+```bash
+node raster/t.mjs run <projet> <lot> [sous-lot] --mode local
+node raster/t.mjs run <projet> <lot> [sous-lot] --mode agents
+node raster/t.mjs running
+node raster/t.mjs stop <projet> <lot> [sous-lot]
+```
+
+Raster passe au runner un brief sur stdin. Le runner adapte ce contrat au Cursor SDK local ou cloud.
+
+- en local, le brief donne le chemin absolu du CLI de contrôle ;
+- en agents, le runner renvoie sur stdout `RASTER_RESULT {"done":[...],"blocked":[...]}` ;
+- Raster ignore tout ID qui n’appartient pas à la vague confiée ;
+- après progrès, la boucle recalcule et lance automatiquement la vague suivante.
+
+## 7. CLI
 
 ```bash
 node raster/t.mjs index
 node raster/t.mjs check
 node raster/t.mjs ready [projet] [--json]
 node raster/t.mjs window [projet] [--json]
-```
 
-### Écriture
-
-```bash
 node raster/t.mjs new <projet> <lot[/sous-lot]> "<titre>" [options]
 node raster/t.mjs promote "<ligne inbox>" <projet> <lot[/sous-lot]>
-node raster/t.mjs status <id> <statut>
-node raster/t.mjs approve <id>
+node raster/t.mjs status <id> todo|doing|blocked|done
 node raster/t.mjs sweep [--dry]
 ```
 
-### Exécution
-
-```bash
-node raster/t.mjs worktree add <projet> <lot> [sous-lot]
-node raster/t.mjs worktree rm <projet> <lot> [sous-lot]
-node raster/t.mjs run <projet> <lot> [sous-lot]
-node raster/t.mjs running
-node raster/t.mjs stop <projet> <lot>
-```
-
----
-
-## 6. Plan et readiness
-
-`<projet>/ROADMAP.md` est écrit à la main. Il ordonne les lots et contient un marqueur unique `<!-- borne -->`.
-
-- au-dessus : Raster est autorisé à lancer ;
-- en dessous : Raster n’est pas autorisé ;
-- déplacer la borne est une décision humaine.
-
-Un sous-lot est `ready` si :
-
-1. toutes ses dépendances externes sont closes ;
-2. aucune task n’est `blocked` ;
-3. il reste une task ouverte ;
-4. aucune Run ne le tient déjà.
-
-`blocked_by` interne au sous-lot ordonne les tasks.
-`blocked_by` externe crée une arête entre sous-lots.
-`status: blocked` signifie uniquement un blocage extérieur.
-
----
-
-## 7. Exécution et Git
-
-Une session utilise une branche `session/<projet>-<date>`.
-Chaque sous-lot utilise son propre worktree hors dépôt :
-
-```text
-../.raster-worktrees/<projet>/<sous-lot>
-```
-
-Branche du sous-lot :
-
-```text
-<lot-slug>/<sous-lot-slug>
-```
-
-Les tasks restent dans l’arbre d’intégration et sont mutées par le CLI.
-Le code part dans le worktree.
-Un sous-lot n’est tenu que par un agent à la fois.
-
----
-
-## 8. Statuts et livraison
-
-```text
-feature | bug : todo → doing → review → done-agent → done-me → sweep
-spec | tech | physical | qa : todo → doing → done-agent → done-me → sweep
-```
-
-L’agent Exec pose `review` sur feature et bug.
-Le QA est le seul à poser `done-agent` sur feature et bug.
-
-| Gate | Après `done-agent` |
-|---|---|
-| `none` | passage automatique à `done-me` |
-| `me` | attend l’approbation humaine |
-
-`sweep` supprime les tasks `done-me` et nettoie leurs références. Git porte l’historique.
-
----
-
-## 9. Interdit
+## 8. Interdit
 
 - Créer ou déplacer une Task manuellement.
-- Inventer un enum, `parent`, `ready`, `estimate` ou une sélection de session stockée.
-- Utiliser un document d’index manuel comme seconde source de vérité.
-- Lancer directement un Exec sur une demande non capturée.
-- Laisser une gate ou un blocage sans `## Question`.
-- Poser `done-me` directement.
+- Réintroduire `qa`, `review`, `done-agent`, `done-me`, `gate` ou une attente humaine en Session.
+- Lancer Code sur une demande non promue.
+- Lancer plusieurs workers locaux dans le même worktree.
+- Stocker une commande agent ou une clé dans le dépôt.
 - Pousser depuis un agent.

@@ -1,6 +1,6 @@
 ---
 name: exec
-description: Exécute les Tasks Code d’un seul sous-lot Raster, en série. Implémente et écrit les preuves sans juger sa propre livraison.
+description: Exécute les Tasks Code d’un sous-lot Raster, valide techniquement et termine la livraison.
 ---
 
 # Agent Code
@@ -13,7 +13,7 @@ Règles : `raster/AGENTS.md`.
 
 - `00-PLAN.md` ;
 - la Task courante ;
-- ses preuves attendues ;
+- sa validation technique ;
 - les éléments UX concernés ;
 - le périmètre de fichiers indiqué.
 
@@ -21,16 +21,14 @@ Règles : `raster/AGENTS.md`.
 
 1. Poser `doing` par le CLI.
 2. Implémenter uniquement le périmètre demandé.
-3. Écrire les preuves automatisées attendues.
-4. Montrer la discrimination : rouge avant, vert après lorsque pertinent.
-5. Compléter journal et rapport de livraison.
-6. Poser `review` sur feature/bug ; `done-agent` sur tech/physical lorsque le QA n’est pas requis.
-7. Exécuter `node raster/t.mjs check`.
+3. Exécuter la validation technique adaptée.
+4. Compléter journal et rapport de livraison.
+5. Poser `done`.
+6. Exécuter `node raster/t.mjs check`.
 
 ## Interdit
 
 - Étendre silencieusement le périmètre.
 - Corriger un sujet voisin : le capturer dans l’inbox.
-- Poser `done-agent` sur feature/bug.
-- Poser `done-me`.
+- Réintroduire une phase QA ou un statut intermédiaire de validation.
 - Pousser ou merger les autres worktrees.

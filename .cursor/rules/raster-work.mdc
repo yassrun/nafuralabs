@@ -20,7 +20,7 @@ Canon : `RASTER_BLUEPRINT.md`, `raster/AGENTS.md`, `raster/HARNESS.md`, `OPS_BLU
 | Tasks | `<lot-ou-sous-lot>/tasks/{ID}-{slug}.md` |
 | Preuves e2e | `<projet>/e2e/` |
 | Code | `<projet>/sources/` |
-| Harness Spec/Code/QA | `raster/HARNESS.md` |
+| Harness Spec/Code | `raster/HARNESS.md` |
 | Décisions coupe Sektor | `sektor/raster-src/DECISIONS.md` |
 
 Lot et sous-lot sont des dossiers. Task est le seul ticket.

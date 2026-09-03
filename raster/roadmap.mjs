@@ -108,7 +108,7 @@ export function formatWindow(w) {
     }
     lines.push(`  ${l.lot}`);
     for (const g of l.lancables) {
-      lines.push(`    ▸ ${g.souslot || "(à plat)"}  ${g.restant} task(s)${g.gates.length ? `  gate:me ${g.gates.join(",")}` : ""}`);
+      lines.push(`    ▸ ${g.souslot || "(à plat)"}  ${g.restant} task(s)`);
     }
     for (const g of l.bloques) {
       lines.push(`    ✕ ${g.souslot || "(à plat)"}  ${g.raisons.join(" · ")}`);

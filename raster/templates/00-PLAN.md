@@ -21,14 +21,14 @@ Découpage d’exécution, risques et décisions techniques locales.
 |---|---|---|---|
 | 1 | Clarifier le résultat | spec | — |
 | 2 | Implémenter | exec | 1 |
-| 3 | Vérifier | qa | 2 |
+| 3 | Terminer | exec | 2 |
 
-## Preuves attendues
+## Validation technique
 
 - Commande, scénario ou observation qui démontre le résultat.
 - État initial nécessaire.
 - Résultat attendu.
 
-## Décisions ouvertes
+## Blocages extérieurs
 
-Uniquement les décisions qui empêchent le plan de se dérouler.
+Uniquement ce que le harness ne peut pas résoudre seul.

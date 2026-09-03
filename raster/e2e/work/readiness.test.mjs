@@ -11,7 +11,6 @@ import { computeReadiness } from "../../ready.mjs";
 const t = (id, souslot, over = {}) => ({
   id,
   status: "todo",
-  gate: "none",
   blocked_by: [],
   title: id,
   project: "p",
@@ -38,14 +37,12 @@ test("preuve 4 — un blocked_by EXTERNE ouvert bloque le sous-lot", () => {
   assert.ok(par(rows, "CH-B").raisons.some((r) => r.includes("A-1")));
 });
 
-test("preuve 4 — un blocked_by externe CLOS ne bloque plus", () => {
-  for (const clos of ["done-agent", "done-me", "done"]) {
-    const rows = computeReadiness([
-      t("A-1", "CH-A", { status: clos }),
-      t("B-1", "CH-B", { blocked_by: ["A-1"] }),
-    ]);
-    assert.equal(par(rows, "CH-B").lancable, true, `bloqueur ${clos}`);
-  }
+test("preuve 4 — un blocked_by externe done ne bloque plus", () => {
+  const rows = computeReadiness([
+    t("A-1", "CH-A", { status: "done" }),
+    t("B-1", "CH-B", { blocked_by: ["A-1"] }),
+  ]);
+  assert.equal(par(rows, "CH-B").lancable, true);
 });
 
 test("preuve 4 — `status: blocked` (externe) bloque, sans aucun blocked_by", () => {
@@ -55,7 +52,7 @@ test("preuve 4 — `status: blocked` (externe) bloque, sans aucun blocked_by", (
 });
 
 test("un sous-lot entièrement clos n'est ni ouvert ni lançable", () => {
-  const rows = computeReadiness([t("A-1", "CH-A", { status: "done-agent" })]);
+  const rows = computeReadiness([t("A-1", "CH-A", { status: "done" })]);
   assert.equal(par(rows, "CH-A").ouvert, false);
   assert.equal(par(rows, "CH-A").lancable, false);
 });
@@ -64,11 +61,6 @@ test("un bloqueur inconnu bloque — il ne s'ignore pas en silence", () => {
   const rows = computeReadiness([t("A-1", "CH-A", { blocked_by: ["DISPARU-1"] })]);
   assert.equal(par(rows, "CH-A").lancable, false);
   assert.ok(par(rows, "CH-A").raisons.some((r) => r.includes("inconnu")));
-});
-
-test("les gate:me ouvertes sont remontées par sous-lot", () => {
-  const rows = computeReadiness([t("A-1", "CH-A", { gate: "me" }), t("A-2", "CH-A")]);
-  assert.deepEqual(par(rows, "CH-A").gates, ["A-1"]);
 });
 
 test("le filtre projet ne laisse passer que le projet demandé", () => {

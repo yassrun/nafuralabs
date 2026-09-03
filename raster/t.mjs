@@ -3,7 +3,7 @@
  * Raster CLI — la seule voie d'écriture d'une task (`AGENTS.md` §0.1-9).
  *
  * Lecture :  index · check · ready · window
- * Écriture : new · promote · status · approve   (chacune régénère)
+ * Écriture : new · promote · status   (chacune régénère)
  * Archive :  sweep
  */
 import { regen } from "./regen.mjs";
@@ -15,7 +15,6 @@ import {
   createTask,
   promoteLine,
   setStatus,
-  approve,
   RefusError,
 } from "./write.mjs";
 import {
@@ -34,6 +33,11 @@ import {
   SpawnError,
 } from "./spawn.mjs";
 import { listRasterProjects } from "./walk-tasks.mjs";
+import {
+  computeSessionFront,
+  harnessBrief,
+  loadSubLotTasks,
+} from "./session-front.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -82,24 +86,24 @@ function usage() {
 
   écriture — régénèrent les vues
     new <projet> <lot[/sous-lot]> "<titre>"
-        [--type feature|bug|tech|spec|physical|qa] [--priority P0..P3]
-        [--assignee me|agent|either] [--gate none|me] [--context nafura|saham|personal]
+        [--type feature|bug|tech|spec|physical] [--priority P0..P3]
+        [--assignee me|agent|either] [--context nafura|saham|personal]
         [--blocked-by ID,ID] [--tags a,b] [--note "…"] [--nouveau-lot]
     promote "<ligne inbox>" <projet> <lot[/sous-lot]>
-      [--priority P0..P3] [--assignee me|agent|either] [--gate none|me]
-    status <id> <statut>        todo|doing|blocked|review|done-agent
-    approve <id>                done-agent + gate:me → done-me
+      [--priority P0..P3] [--assignee me|agent|either]
+    status <id> <statut>        todo|doing|blocked|done
 
-  exécution — la commande d'agent vient de RASTER_AGENT_CMD, jamais du dépôt
+  exécution — runners configurés dans l'environnement, jamais dans le dépôt
     worktree list                       les worktrees d'agent (hors dépôt)
     worktree add <projet> <lot> [sous-lot]    crée branche + worktree
     worktree rm  <projet> <lot> [sous-lot]    retire le worktree, garde la branche
-    run <projet> <lot> [sous-lot]             lance un orchestrateur
+    run <projet> <lot> [sous-lot] [--mode local|agents]
+                                               lance un harness Cursor
     running                             les lots tenus
-    stop <projet> <lot>                 arrête et libère le lot
+    stop <projet> <lot> [sous-lot]      arrête et libère la sous-session
 
   archive
-    sweep [--dry]               supprime les done-me · Git porte l'histoire
+    sweep [--dry]               supprime les done · Git porte l'histoire
 `);
 }
 
@@ -129,7 +133,7 @@ function run() {
     const dry = argv.includes("--dry");
     const removed = sweep({ dry });
     for (const r of removed) console.log(`${dry ? "would remove" : "removed"}  ${r.id}  ${r.at}`);
-    console.log(`sweep — ${removed.length} task(s) done-me ${dry ? "à supprimer" : "supprimée(s)"}`);
+    console.log(`sweep — ${removed.length} task(s) done ${dry ? "à supprimer" : "supprimée(s)"}`);
     if (!dry && removed.length) regen();
     return 0;
   }
@@ -156,7 +160,6 @@ function run() {
       type: flags.type || "feature",
       priority: flags.priority || "P2",
       assignee: flags.assignee || "agent",
-      gate: flags.gate || "none",
       context: flags.context || "nafura",
       agent_type: flags["agent-type"] || "",
       blocked_by: list(flags["blocked-by"]),
@@ -175,7 +178,6 @@ function run() {
       type: "spec",
       priority: flags.priority || "P2",
       assignee: flags.assignee || "agent",
-      gate: flags.gate || "none",
     });
     regen();
     console.log(`${r.id}  ${r.file}  · ligne retirée de raster/inbox.md`);
@@ -186,13 +188,6 @@ function run() {
     const r = setStatus(pos[0], pos[1]);
     regen();
     console.log(`${r.id}  status: ${r.status}`);
-    return 0;
-  }
-
-  if (cmd === "approve") {
-    const r = approve(pos[0]);
-    regen();
-    console.log(`${r.id}  status: done-me — \`t.mjs sweep\` la sortira du dépôt`);
     return 0;
   }
 
@@ -219,9 +214,23 @@ function run() {
   // `run` ATTEND son agent : l'état vit en mémoire, rendre la main l'orphelinerait.
   if (cmd === "run") {
     const [project, lot, souslot] = pos;
-    const r = start({ project, lot, souslot: souslot || "" });
-    console.log(`▸ ${r.project}/${r.lot}  pid ${r.pid}  ${r.branch}\n  ${r.cwd}\n`);
-    return waitFor(project, lot, {
+    const mode = flags.mode || "local";
+    const tasks = loadSubLotTasks(project, lot, souslot || "");
+    const front = computeSessionFront(tasks, mode);
+    if (!front.tasks.length) {
+      throw new SpawnError("aucune Task exécutable dans ce sous-lot");
+    }
+    const brief = harnessBrief({ project, lot, souslot: souslot || "", tasks, mode });
+    const r = start({
+      project,
+      lot,
+      souslot: souslot || "",
+      mode,
+      brief,
+      allowedTaskIds: front.tasks.map((task) => task.id),
+    });
+    console.log(`▸ ${r.project}/${r.lot}  ${mode}  pid ${r.pid}  ${r.branch}\n  ${r.cwd}\n`);
+    return waitFor(project, lot, souslot || "", {
       onLigne: (s) => process.stdout.write(s),
     }).then(({ code }) => {
       console.log(`\n${code === 0 ? "fini" : `échec (code ${code})`} — ${lot}`);
@@ -242,8 +251,8 @@ function run() {
   }
 
   if (cmd === "stop") {
-    const r = stop(pos[0], pos[1]);
-    console.log(`arrêté  ${r.project}/${r.lot}`);
+    const r = stop(pos[0], pos[1], pos[2] || "");
+    console.log(`arrêté  ${r.project}/${r.lot}/${r.souslot || "général"}`);
     return 0;
   }
 

@@ -27,7 +27,6 @@ test("preuve 1 — un enum inconnu est refusé, et rien n'est écrit", () => {
     { type: "bidule" },
     { priority: "P9" },
     { assignee: "personne" },
-    { gate: "peut-etre" },
     { context: "autre" },
   ]) {
     assert.throws(
@@ -90,9 +89,10 @@ test("preuve 1 — un titre vide est refusé", () => {
   );
 });
 
-test("preuve 3 — `done-me` ne se pose pas par `status`", () => {
+test("preuve 3 — seuls todo, doing, blocked et done sont acceptés", () => {
   assert.throws(() => setStatus("RAS-79", "done-me"), RefusError);
   assert.throws(() => setStatus("RAS-79", "termine"), RefusError);
+  assert.deepEqual(TYPES, ["spec", "feature", "bug", "tech", "physical"]);
 });
 
 test("le slug est stable, sans accent ni ponctuation", () => {
