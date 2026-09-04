@@ -5,6 +5,7 @@ export type {
   ConsultationAchatPanier,
   ConsultationDestinataire,
   ConsultationDestinataireCreate,
+  ConsultationDestinataireContact,
   ConsultationEnvoi,
   ConsultationDevis,
   ConsultationDevisImport,

@@ -3,7 +3,17 @@ import { Injectable, inject } from '@angular/core';
 import { LookupService } from '@platform/lib/anatomy';
 import type { LookupItem } from '@platform/lib/anatomy/types';
 
+import {
+  partnerLookupLabel,
+  partnerRaisonSociale,
+} from './erp-lookup-label';
 import { PartnersApiService, type PartnerRoleType } from './partners-api.service';
+
+export {
+  partnerLookupLabel,
+  partnerRaisonSociale,
+  partnerRaisonSocialeFromLabel,
+} from './erp-lookup-label';
 
 export interface ErpLookupRequest {
   /** Cache key — include filters in the key when params vary. */
@@ -79,27 +89,45 @@ export class ErpLookupService {
     if (q.length < 2) {
       return Promise.resolve([]);
     }
-    return this.fetch({
-      key: `partners:${role}:${q}`,
-      endpoint: '/api/v1/partners',
-      params: {
-        role,
-        page: 0,
-        size: 50,
-        q,
-      },
-      displayField: 'raisonSociale',
-      valueField: 'id',
-    }).then((items) => exactCodeFirst(items, q));
+    return this.lookup
+      .get({
+        key: `partners:${role}:${q}`,
+        endpoint: '/api/v1/partners',
+        params: {
+          role,
+          page: 0,
+          size: 50,
+          q,
+        },
+        displayField: 'raisonSociale',
+        valueField: 'id',
+        transform: (response) =>
+          extractRecords(response).map((row) => {
+            const id = String(row['id'] ?? '');
+            const designation = partnerRaisonSociale({
+              key: id,
+              value: '',
+              data: row,
+            });
+            return {
+              key: id,
+              value: designation || String(row['code'] ?? id),
+              data: row,
+            };
+          }),
+      })
+      .then((items) => exactCodeFirst(items, q));
   }
 
   async partnerById(id: string): Promise<LookupItem | null> {
     try {
       const p = await this.partnersApi.getById(id);
+      const data = p as unknown as Record<string, unknown>;
+      const item: LookupItem = { key: p.id, value: '', data };
       return {
         key: p.id,
-        value: p.code ? `${p.code} — ${p.raisonSociale}` : p.raisonSociale,
-        data: p as unknown as Record<string, unknown>,
+        value: partnerRaisonSociale(item) || p.code,
+        data,
       };
     } catch {
       return null;
@@ -315,13 +343,6 @@ function extractRecords(response: unknown): Record<string, unknown>[] {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
-}
-
-/** Display label for partner lookup rows loaded via {@link ErpLookupService.partnersByRole}. */
-export function partnerLookupLabel(item: LookupItem): string {
-  const data = item.data as Record<string, unknown> | undefined;
-  const code = data?.['code'];
-  return code ? `${String(code)} — ${item.value}` : item.value;
 }
 
 export function partnerSelectOptions(

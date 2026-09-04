@@ -17,6 +17,7 @@ import {ConfigDrivenDetailPage,
   createDetailFacadeFromCrud,
   ButtonComponent,
   LOOKUP_SEARCHERS,
+  NfInputComponent,
   NfSelectComponent,
   type LookupSearchFn,
   type NfSelectOption,
@@ -31,23 +32,28 @@ import type {
   AttestationFournisseurType,
   CatalogueFournisseurLigne,
   CatalogueFournisseurLigneCreate,
+  ContratAchat,
   Fournisseur,
   FournisseurCreate,
   PartnerAttestationsStatus,
 } from '@app/achats/models';
-import { PartnersApiService, type Partner } from '@app/socle/shared/services/partners-api.service';
+import { PartnersApiService, type Partner, type PartnerContact } from '@app/socle/shared/services/partners-api.service';
+import { CT_STATUS_KEYS } from '@app/socle/shell/i18n-labels';
 
 import {
   AttestationsFournisseurApiService,
   CatalogueFournisseurApiService,
   FournisseurFacade,
 } from '../services';
+import { ContratApiService } from '@app/achats/contrats/services';
 import { buildFournisseurDetailConfig } from '../config';
 
-type DetailTab = 'informations' | 'attestations' | 'catalogue';
+type DetailTab = 'informations' | 'contacts' | 'contrats' | 'attestations' | 'catalogue';
 
 const TABS: { id: DetailTab; label: string }[] = [
   { id: 'informations', label: 'Informations' },
+  { id: 'contacts', label: 'Contacts' },
+  { id: 'contrats', label: 'Contrats' },
   { id: 'attestations', label: 'Attestations' },
   { id: 'catalogue', label: 'Catalogue' },
 ];
@@ -127,6 +133,7 @@ function emptyCatalogueDraft(): CatalogueDraft {
     ButtonComponent,
     CommonModule,
     FormsModule,
+    NfInputComponent,
     NfSelectComponent,
     ...ConfigDrivenDetailPageImports,
   ],
@@ -258,6 +265,21 @@ function emptyCatalogueDraft(): CatalogueDraft {
         background: var(--nf-color-surface);
       }
       .field--check { flex-direction: row; align-items: center; gap: 0.4rem; padding-top: 1.2rem; }
+      .primary-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin: 0;
+        font-size: 0.8rem;
+        color: var(--nf-color-text-secondary);
+        cursor: pointer;
+      }
+      .primary-switch input {
+        width: 1rem;
+        height: 1rem;
+        accent-color: var(--nf-color-teal-700, var(--nf-color-success-700));
+      }
+      .form-grid .primary-switch { grid-column: 1 / -1; padding-top: 0.25rem; }
       .form-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
       .btn {
         padding: 0.4rem 0.75rem;
@@ -314,6 +336,7 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
   private readonly partnersApi = inject(PartnersApiService);
   private readonly attestationsApi = inject(AttestationsFournisseurApiService);
   private readonly catalogueApi = inject(CatalogueFournisseurApiService);
+  private readonly contratApi = inject(ContratApiService);
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
   private readonly itemsApi = inject(ItemsApiService);
@@ -339,8 +362,18 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
   readonly attestationStatus = signal<PartnerAttestationsStatus | null>(null);
   readonly attestations = signal<AttestationFournisseur[]>([]);
   readonly catalogue = signal<CatalogueFournisseurLigne[]>([]);
+  readonly contacts = signal<PartnerContact[]>([]);
+  readonly contrats = signal<ContratAchat[]>([]);
   readonly attestationsLoading = signal(false);
   readonly catalogueLoading = signal(false);
+  readonly contactsLoading = signal(false);
+  readonly contratsLoading = signal(false);
+  readonly contactSaving = signal(false);
+  readonly primarySavingId = signal<string | null>(null);
+  readonly contactErreur = signal<string | undefined>(undefined);
+  contactDraftNom = '';
+  contactDraftEmail = '';
+  contactDraftPrimary = true;
   attestationDraft: AttestationDraft = emptyAttestationDraft();
   catalogueDraft: CatalogueDraft = emptyCatalogueDraft();
   readonly editingAttestationId = signal<string | null>(null);
@@ -377,6 +410,15 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
 
   constructor() {
     super();
+    const initialTab = this.route.snapshot.queryParamMap.get('tab');
+    if (
+      initialTab === 'contacts' ||
+      initialTab === 'contrats' ||
+      initialTab === 'attestations' ||
+      initialTab === 'catalogue'
+    ) {
+      this.activeTab.set(initialTab);
+    }
     effect(() => {
       const id = this.itemId();
       if (!id || this.mode() === 'create') {
@@ -393,6 +435,8 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
       const tab = this.activeTab();
       const id = this.itemId();
       if (!id || this.mode() === 'create') return;
+      if (tab === 'contacts') void this.loadContacts(id);
+      if (tab === 'contrats') void this.loadContrats(id);
       if (tab === 'attestations') void this.loadAttestations(id);
       if (tab === 'catalogue') void this.loadCatalogue(id);
     });
@@ -406,6 +450,12 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
 
   setTab(tab: DetailTab): void {
     this.activeTab.set(tab);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: tab === 'informations' ? null : tab },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   attestationTypeLabel(type: AttestationFournisseurType): string {
@@ -442,6 +492,33 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
 
   fmtPrice(value: number): string {
     return `${FMT.format(value)} MAD`;
+  }
+
+  fmtDate(value: string | undefined): string {
+    if (!value) return '—';
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString('fr-MA');
+  }
+
+  contratStatusLabel(status: string): string {
+    const key = CT_STATUS_KEYS[status as keyof typeof CT_STATUS_KEYS];
+    return key ? this.translate.instant(key) : status;
+  }
+
+  contratTypeLabel(type: ContratAchat['type']): string {
+    const key = `achats.contratType.${type}`;
+    const label = this.translate.instant(key);
+    return label === key ? type : label;
+  }
+
+  openContrat(row: ContratAchat): void {
+    void this.router.navigate(['/achats/contrats', row.id]);
+  }
+
+  openNewContrat(): void {
+    const id = this.itemId();
+    if (!id) return;
+    void this.router.navigate(['/achats/contrats/new'], { queryParams: { fournisseurId: id } });
   }
 
   selectChipType(type: AttestationFournisseurType): void {
@@ -611,6 +688,70 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
     }
   }
 
+  async saveContact(): Promise<void> {
+    const partnerId = this.itemId();
+    const nom = this.contactDraftNom.trim();
+    const email = this.contactDraftEmail.trim();
+    if (!partnerId || !nom || !email || !email.includes('@')) {
+      this.contactErreur.set('Nom et e-mail valides requis.');
+      return;
+    }
+    this.contactSaving.set(true);
+    this.contactErreur.set(undefined);
+    try {
+      await this.partnersApi.createContact({
+        partnerId,
+        nom,
+        email,
+        isPrimary: this.contactDraftPrimary,
+      });
+      this.contactDraftNom = '';
+      this.contactDraftEmail = '';
+      this.showSuccess('Contact enregistré');
+      await this.loadContacts(partnerId);
+    } catch {
+      this.contactErreur.set('Enregistrement du contact impossible.');
+    } finally {
+      this.contactSaving.set(false);
+    }
+  }
+
+  async setPrimary(row: PartnerContact, checked: boolean): Promise<void> {
+    const partnerId = this.itemId();
+    if (!partnerId || !row.id) return;
+    this.primarySavingId.set(row.id);
+    this.contactErreur.set(undefined);
+    try {
+      await this.partnersApi.updateContact(row.id, {
+        nom: row.nom,
+        email: row.email || undefined,
+        fonction: row.fonction || undefined,
+        telephone: row.telephone || undefined,
+        isPrimary: checked,
+      });
+      await this.loadContacts(partnerId);
+    } catch {
+      this.contactErreur.set('Mise à jour du contact principal impossible.');
+    } finally {
+      this.primarySavingId.set(null);
+    }
+  }
+
+  private async loadContacts(partnerId: string): Promise<void> {
+    this.contactsLoading.set(true);
+    try {
+      const rows = await this.partnersApi.listContacts(partnerId);
+      this.contacts.set(rows ?? []);
+      this.contactDraftPrimary = (rows ?? []).length === 0;
+    } catch {
+      this.contacts.set([]);
+      this.contactDraftPrimary = true;
+      this.showError('Chargement des contacts impossible');
+    } finally {
+      this.contactsLoading.set(false);
+    }
+  }
+
   private async loadAttestations(partnerId: string): Promise<void> {
     this.attestationsLoading.set(true);
     try {
@@ -626,6 +767,19 @@ export class FournisseurDetailPage extends ConfigDrivenDetailPage<Fournisseur> {
       this.showError('Chargement attestations impossible');
     } finally {
       this.attestationsLoading.set(false);
+    }
+  }
+
+  private async loadContrats(fournisseurId: string): Promise<void> {
+    this.contratsLoading.set(true);
+    try {
+      const res = await this.contratApi.getAll({ page: 0, pageSize: 200, fournisseurId });
+      this.contrats.set(res.items ?? []);
+    } catch {
+      this.contrats.set([]);
+      this.showError('Chargement des contrats impossible');
+    } finally {
+      this.contratsLoading.set(false);
     }
   }
 

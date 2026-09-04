@@ -7,7 +7,7 @@
 
 1. **homogenisation-ux** — unifier actions (retour / save / create / delete), filtres listing et `nf-*` sur **Études · Achats · Catalogue · Chantiers** · contrat [`raster-src/lots/homogenisation-ux/CONTRAT.md`](raster-src/lots/homogenisation-ux/CONTRAT.md) · [`LOT.md`](raster-src/lots/homogenisation-ux/LOT.md)
 2. **raffinement-ux-pro** — **bouclé 28/08** · combobox FK, picker article, consultations, fournisseur/BC, cockpit, ops chantiers, catalogue lignes/parc · [`raster-src/lots/raffinement-ux-pro/LOT.md`](raster-src/lots/raffinement-ux-pro/LOT.md)
-3. **consultation** — métier + UX chrome bouclés (28/08) · **ouvert** sous-lot `destinataires-envoi-suivi` (RFQ : panier puis N fournisseurs, envoi, statut selon devis)
+3. **consultation** — métier + UX chrome + RFQ destinataires **bouclés** · **ouvert** sous-lot `destinataires-brouillon-cc` (brouillon + Enregistrer, N contacts To+CC, onglet Contacts + onglet Contrats sur la fiche fournisseur). Write-through **cassé**.
 4. **etudes** — finition-parcours bouclé · picker-article bouclé (28/08)
 
 5. **chantiers** — raffinement du BC : arbre vendu / interne, avancement en quantité, situation cumulative, budget par nœud, continuité Étude–Devis–Chantier et cockpit décisionnel. 14 gels du 23/08 dans [`raster-src/DECISIONS-PRODUIT-CHANTIER.md`](raster-src/DECISIONS-PRODUIT-CHANTIER.md) · découpe dans [`raster-src/lots/chantiers/LOT.md`](raster-src/lots/chantiers/LOT.md).

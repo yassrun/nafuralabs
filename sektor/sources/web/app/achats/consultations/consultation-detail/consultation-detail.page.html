@@ -12,13 +12,29 @@
       [saving]="isSaving()"
       (action)="onAction($event)">
 
+      <ng-template nfField="lienEtude">
+        @if (item()?.dossierEtudeId; as dossierId) {
+          <a
+            class="cs-lien-etude"
+            [routerLink]="['/etudes/dossiers', dossierId]"
+            data-testid="consultation-lien-etude"
+          >
+            {{ 'achats.consultation.lien.ouvrirDossier' | translate }}
+          </a>
+        } @else {
+          <span data-testid="consultation-lien-hors">{{
+            'achats.consultation.lien.hors' | translate
+          }}</span>
+        }
+      </ng-template>
+
       <ng-template nfField="panier">
         @if (panierFige()) {
           <p class="cs-callout" data-testid="consultation-panier-fige">
             {{ 'achats.consultation.panier.fige' | translate }}
           </p>
         }
-        @if (panierCles().length === 0) {
+        @if (panierLignes().length === 0) {
           <p class="cs-empty">{{ 'achats.consultation.panier.empty' | translate }}</p>
         } @else {
           <table class="cs-panier-table" data-testid="consultation-panier-lignes">
@@ -29,10 +45,10 @@
               </tr>
             </thead>
             <tbody>
-              @for (cle of panierCles(); track cle) {
+              @for (ligne of panierLignes(); track ligne.cleStable) {
                 <tr>
-                  <td>{{ cle }}</td>
-                  <td>{{ cle }}</td>
+                  <td class="cs-panier-code">{{ ligne.code }}</td>
+                  <td>{{ ligne.libelle }}</td>
                 </tr>
               }
             </tbody>
@@ -46,30 +62,60 @@
         <h2>{{ 'achats.consultation.destinataires.title' | translate }}</h2>
 
         @if (destinataires().length === 0) {
-          <p class="cs-empty">{{ 'achats.consultation.destinataires.empty' | translate }}</p>
+          <p class="cs-hint" data-testid="consultation-destinataires-empty">
+            {{ 'achats.consultation.destinataires.empty' | translate }}
+          </p>
         } @else {
           <table class="cs-dest-table" data-testid="consultation-destinataires-table">
             <thead>
               <tr>
                 <th>{{ 'achats.consultation.destinataires.fournisseur' | translate }}</th>
-                <th>{{ 'achats.consultation.destinataires.email' | translate }}</th>
                 <th>{{ 'achats.consultation.destinataires.statut' | translate }}</th>
                 <th>{{ 'achats.consultation.destinataires.devis' | translate }}</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
-              @for (row of destinataires(); track row.id) {
+              @for (row of destinataires(); track row.key) {
                 <tr [attr.data-testid]="'consultation-destinataire-row'">
-                  <td>{{ row.fournisseurNom }}</td>
-                  <td>{{ row.contactEmail }}</td>
+                  <td>
+                    <div class="cs-dest-group">
+                      <strong>{{ row.fournisseurNom }}</strong>
+                      <ul class="cs-dest-group__contacts">
+                        @for (contact of row.contacts; track contact.id; let i = $index) {
+                          <li>
+                            {{ contact.nom || contact.email }}
+                            @if (contact.email && contact.nom) {
+                              <span class="cs-dest-role"> · {{ contact.email }}</span>
+                            }
+                            <span class="cs-dest-role">({{ contactRole(i) }})</span>
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                  </td>
                   <td>{{ statutDestinataire(row) }}</td>
                   <td
                     data-testid="consultation-destinataire-import"
                     [attr.data-destinataire-id]="row.id"
                   >
-                    <nf-smart-import-trigger
-                      [definition]="importDefinition"
-                      (completed)="onSmartImportComplete($event, row.id)" />
+                    @if (row.id) {
+                      <nf-smart-import-trigger
+                        [definition]="importDefinition"
+                        (completed)="onSmartImportComplete($event, row.id)" />
+                    }
+                  </td>
+                  <td>
+                    @if (!row.sent) {
+                      <nf-button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        (clicked)="removeDestinataire(row)"
+                      >
+                        {{ 'achats.consultation.destinataires.remove' | translate }}
+                      </nf-button>
+                    }
                   </td>
                 </tr>
               }
@@ -79,6 +125,7 @@
 
         <div class="cs-dest-add">
           <nf-select
+            class="cs-dest-add__fournisseur"
             [label]="'achats.consultation.destinataires.fournisseur' | translate"
             lookupKey="fournisseurs"
             [placeholder]="'achats.consultation.destinataires.placeholder' | translate"
@@ -90,44 +137,59 @@
             data-testid="consultation-destinataire-fournisseur"
           />
 
-          @if (contactsEmail().length > 1) {
-            <nf-select
-              [label]="'achats.consultation.destinataires.contactPlaceholder' | translate"
-              [placeholder]="'achats.consultation.destinataires.contactPlaceholder' | translate"
-              [options]="contactSelectOptions()"
-              [ngModel]="draftContactId()"
-              (ngModelChange)="draftContactId.set($event)"
-              name="destinataireContactId"
-              data-testid="consultation-destinataire-contact"
-            />
+          @if (draftFournisseurId() && destContactsReady()) {
+            @if (contactsEmail().length === 0) {
+              <p class="cs-hint" data-testid="consultation-destinataire-sans-email">
+                {{ 'achats.consultation.destinataires.sansEmail' | translate }}
+                <a
+                  [routerLink]="['/achats/fournisseurs', draftFournisseurId()]"
+                  [queryParams]="{ tab: 'contacts' }"
+                  data-testid="consultation-destinataire-fiche-fournisseur"
+                >
+                  {{ 'achats.consultation.destinataires.ajouterContact' | translate }}
+                </a>
+              </p>
+            } @else {
+              <fieldset class="cs-dest-contacts" data-testid="consultation-destinataire-contacts">
+                <legend>{{ 'achats.consultation.destinataires.contacts' | translate }}</legend>
+                @for (contact of contactsEmail(); track contact.id; let i = $index) {
+                  <label class="cs-dest-contact">
+                    <input
+                      type="checkbox"
+                      [checked]="isContactChecked(contact.id)"
+                      (change)="toggleDraftContact(contact.id, $any($event.target).checked)"
+                      [attr.data-testid]="'consultation-destinataire-contact-' + contact.id"
+                    />
+                    <span>
+                      {{ contact.nom }} — {{ contact.email }}
+                      <span class="cs-dest-role">({{ contactRole(i) }})</span>
+                    </span>
+                  </label>
+                }
+                <a
+                  class="cs-dest-add-contact"
+                  [routerLink]="['/achats/fournisseurs', draftFournisseurId()]"
+                  [queryParams]="{ tab: 'contacts' }"
+                  data-testid="consultation-destinataire-fiche-fournisseur"
+                >
+                  {{ 'achats.consultation.destinataires.ajouterContact' | translate }}
+                </a>
+              </fieldset>
+            }
           }
 
-          <nf-button
-            type="button"
-            variant="secondary"
-            data-testid="consultation-destinataire-add"
-            [disabled]="destSaving() || !draftFournisseurId()"
-            (clicked)="addDestinataire()"
-          >
-            {{ 'achats.consultation.destinataires.add' | translate }}
-          </nf-button>
+          <div class="cs-dest-add__row">
+            <nf-button
+              type="button"
+              variant="secondary"
+              data-testid="consultation-destinataire-add"
+              [disabled]="!canAddDestinataire()"
+              (clicked)="addDestinataire()"
+            >
+              {{ 'achats.consultation.destinataires.add' | translate }}
+            </nf-button>
+          </div>
         </div>
-
-        @if (sansEmailFournisseurId(); as frnId) {
-          <p
-            class="cs-error"
-            role="alert"
-            data-testid="consultation-destinataire-sans-email"
-          >
-            {{ 'achats.consultation.destinataires.sansEmail' | translate }}
-          </p>
-          <a
-            [routerLink]="['/achats/fournisseurs', frnId]"
-            data-testid="consultation-destinataire-fiche-fournisseur"
-          >
-            {{ 'achats.consultation.destinataires.ouvrirFiche' | translate }}
-          </a>
-        }
 
         @if (destErreur(); as err) {
           <p class="cs-error" role="alert" data-testid="consultation-destinataire-error">{{ err }}</p>
@@ -136,9 +198,19 @@
         <div class="cs-dest-actions">
           <nf-button
             type="button"
+            variant="secondary"
+            data-testid="consultation-destinataires-save"
+            [disabled]="destSaving() || !destDirty()"
+            [loading]="destSaving()"
+            (clicked)="saveDestinataires()"
+          >
+            {{ 'achats.consultation.destinataires.save' | translate }}
+          </nf-button>
+          <nf-button
+            type="button"
             variant="primary"
             data-testid="consultation-envoyer"
-            [disabled]="envoyerSaving() || destSaving() || !canEnvoyer()"
+            [disabled]="envoyerSaving() || destSaving() || destDirty() || !canEnvoyer()"
             (clicked)="envoyer()"
           >
             {{ 'achats.consultation.envoyer' | translate }}

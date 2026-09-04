@@ -15,14 +15,17 @@ import ma.nafura.achats.api.dto.ConsultationAchatDto;
 import ma.nafura.achats.api.request.ConsultationAchatCreateDto;
 import ma.nafura.achats.api.request.ConsultationAchatPanierDto;
 import ma.nafura.achats.api.request.ConsultationDestinataireCreateDto;
+import ma.nafura.achats.api.request.ConsultationDestinatairesSaveDto;
 import ma.nafura.achats.api.request.ConsultationDevisImportDto;
 import ma.nafura.achats.domain.consultation.ConsultationAchat;
 import ma.nafura.achats.domain.consultation.ConsultationAchatDestinataire;
+import ma.nafura.achats.domain.consultation.ConsultationAchatDestinataireContact;
 import ma.nafura.achats.domain.consultation.ConsultationAchatDevis;
 import ma.nafura.achats.domain.consultation.ConsultationAchatEnvoi;
 import ma.nafura.achats.domain.fournisseur.Partner;
 import ma.nafura.achats.domain.fournisseur.PartnerContact;
 import ma.nafura.achats.domain.fournisseur.PartnerRoleType;
+import ma.nafura.achats.repository.ConsultationAchatDestinataireContactRepository;
 import ma.nafura.achats.repository.ConsultationAchatDestinataireRepository;
 import ma.nafura.achats.repository.ConsultationAchatDevisRepository;
 import ma.nafura.achats.repository.ConsultationAchatEnvoiRepository;
@@ -65,6 +68,9 @@ class ConsultationAchatServiceTest {
     private ConsultationAchatDestinataireRepository destinataireRepository;
 
     @Mock
+    private ConsultationAchatDestinataireContactRepository destContactRepository;
+
+    @Mock
     private ConsultationAchatEnvoiRepository envoiRepository;
 
     @Mock
@@ -100,6 +106,7 @@ class ConsultationAchatServiceTest {
                 repository,
                 devisRepository,
                 destinataireRepository,
+                destContactRepository,
                 envoiRepository,
                 partnerRepository,
                 roleRepository,
@@ -203,6 +210,56 @@ class ConsultationAchatServiceTest {
         assertThatThrownBy(() -> service.addDestinataire(CONSULTATION, dto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("consultation.destinataire.sans_email");
+        org.mockito.Mockito.verify(destinataireRepository, never()).save(any());
+    }
+
+    @Test
+    void addDestinataireRefuseSansContactEmailMemeSiPartnersEmail() {
+        ConsultationAchat entity = consultationPrep();
+        when(repository.findByIdAndTenantId(CONSULTATION, TENANT)).thenReturn(Optional.of(entity));
+        when(partnerRepository.findByIdAndTenantId(FOURNISSEUR, TENANT))
+                .thenReturn(Optional.of(Partner.builder()
+                        .id(FOURNISSEUR)
+                        .raisonSociale("Atlas")
+                        .email("fallback@atlas.example")
+                        .build()));
+        when(roleRepository.existsByTenantIdAndPartnerIdAndRole(
+                        TENANT, FOURNISSEUR, PartnerRoleType.FOURNISSEUR))
+                .thenReturn(true);
+        when(destinataireRepository.existsByConsultationIdAndFournisseurId(CONSULTATION, FOURNISSEUR))
+                .thenReturn(false);
+        when(contactRepository.findByTenantIdAndPartnerIdOrderByNomAsc(TENANT, FOURNISSEUR))
+                .thenReturn(List.of());
+
+        ConsultationDestinataireCreateDto dto = new ConsultationDestinataireCreateDto();
+        dto.setFournisseurId(FOURNISSEUR);
+        assertThatThrownBy(() -> service.addDestinataire(CONSULTATION, dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("consultation.destinataire.sans_email");
+        org.mockito.Mockito.verify(destinataireRepository, never()).save(any());
+        org.mockito.Mockito.verify(contactRepository, never()).save(any());
+    }
+
+    @Test
+    void addDestinataireRefuseWriteThroughPayload() {
+        ConsultationAchat entity = consultationPrep();
+        when(repository.findByIdAndTenantId(CONSULTATION, TENANT)).thenReturn(Optional.of(entity));
+        Partner fournisseur = Partner.builder().id(FOURNISSEUR).raisonSociale("Sika").build();
+        when(partnerRepository.findByIdAndTenantId(FOURNISSEUR, TENANT)).thenReturn(Optional.of(fournisseur));
+        when(roleRepository.existsByTenantIdAndPartnerIdAndRole(
+                        TENANT, FOURNISSEUR, PartnerRoleType.FOURNISSEUR))
+                .thenReturn(true);
+        when(destinataireRepository.existsByConsultationIdAndFournisseurId(CONSULTATION, FOURNISSEUR))
+                .thenReturn(false);
+        when(contactRepository.findByTenantIdAndPartnerIdOrderByNomAsc(TENANT, FOURNISSEUR))
+                .thenReturn(List.of());
+
+        ConsultationDestinataireCreateDto dto = new ConsultationDestinataireCreateDto();
+        dto.setFournisseurId(FOURNISSEUR);
+        assertThatThrownBy(() -> service.addDestinataire(CONSULTATION, dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("consultation.destinataire.sans_email");
+        org.mockito.Mockito.verify(contactRepository, never()).save(any());
         org.mockito.Mockito.verify(destinataireRepository, never()).save(any());
     }
 
@@ -364,6 +421,153 @@ class ConsultationAchatServiceTest {
         assertThat(captor.getValue().getContactId()).isEqualTo(CONTACT_B);
         assertThat(saved.getDestinataires()).hasSize(1);
         assertThat(saved.getDestinataires().get(0).getContactEmail()).isEqualTo("devis@lafarge.example");
+    }
+
+    @Test
+    void addDestinatairePlusieursContacts_toEtCc() {
+        ConsultationAchat entity = consultationPrep();
+        when(repository.findByIdAndTenantId(CONSULTATION, TENANT)).thenReturn(Optional.of(entity));
+        when(partnerRepository.findByIdAndTenantId(FOURNISSEUR, TENANT))
+                .thenReturn(Optional.of(Partner.builder().id(FOURNISSEUR).raisonSociale("Lafarge").build()));
+        when(roleRepository.existsByTenantIdAndPartnerIdAndRole(
+                        TENANT, FOURNISSEUR, PartnerRoleType.FOURNISSEUR))
+                .thenReturn(true);
+        when(destinataireRepository.existsByConsultationIdAndFournisseurId(CONSULTATION, FOURNISSEUR))
+                .thenReturn(false);
+        PartnerContact contactA = PartnerContact.builder()
+                .id(CONTACT_A)
+                .partnerId(FOURNISSEUR)
+                .nom("A. Benali")
+                .email("achat@lafarge.example")
+                .build();
+        PartnerContact contactB = PartnerContact.builder()
+                .id(CONTACT_B)
+                .partnerId(FOURNISSEUR)
+                .nom("B. Kadiri")
+                .email("devis@lafarge.example")
+                .build();
+        when(contactRepository.findByTenantIdAndPartnerIdOrderByNomAsc(TENANT, FOURNISSEUR))
+                .thenReturn(List.of(contactA, contactB));
+        when(contactRepository.findByIdAndTenantId(CONTACT_A, TENANT)).thenReturn(Optional.of(contactA));
+        when(contactRepository.findByIdAndTenantId(CONTACT_B, TENANT)).thenReturn(Optional.of(contactB));
+        UUID destId = UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
+        when(destinataireRepository.save(any(ConsultationAchatDestinataire.class))).thenAnswer(inv -> {
+            ConsultationAchatDestinataire row = inv.getArgument(0);
+            if (row.getId() == null) {
+                row.setId(destId);
+            }
+            return row;
+        });
+        when(destinataireRepository.findByConsultationIdOrderByCreatedAtAsc(CONSULTATION))
+                .thenReturn(List.of(destRow(destId, FOURNISSEUR, CONTACT_A)));
+        when(destContactRepository.findByDestinataireIdInOrderByPositionAsc(any()))
+                .thenReturn(List.of(
+                        ConsultationAchatDestinataireContact.builder()
+                                .destinataireId(destId)
+                                .contactId(CONTACT_A)
+                                .position(0)
+                                .build(),
+                        ConsultationAchatDestinataireContact.builder()
+                                .destinataireId(destId)
+                                .contactId(CONTACT_B)
+                                .position(1)
+                                .build()));
+        when(devisRepository.findByConsultationIdOrderByCreatedAtAsc(CONSULTATION)).thenReturn(List.of());
+
+        ConsultationDestinataireCreateDto dto = new ConsultationDestinataireCreateDto();
+        dto.setFournisseurId(FOURNISSEUR);
+        dto.setContactIds(List.of(CONTACT_A, CONTACT_B));
+        ConsultationAchatDto saved = service.addDestinataire(CONSULTATION, dto);
+
+        assertThat(saved.getDestinataires().get(0).getContacts()).hasSize(2);
+        assertThat(saved.getDestinataires().get(0).getContactEmail()).isEqualTo("achat@lafarge.example");
+        org.mockito.Mockito.verify(destContactRepository, org.mockito.Mockito.times(2))
+                .save(any(ConsultationAchatDestinataireContact.class));
+    }
+
+    @Test
+    void saveDestinataires_majContactsDuMemeFournisseur() {
+        ConsultationAchat entity = consultationPrep();
+        ConsultationAchatDestinataire existing = destRow(DEST_A, FOURNISSEUR, CONTACT_A);
+        when(repository.findByIdAndTenantId(CONSULTATION, TENANT)).thenReturn(Optional.of(entity));
+        when(destinataireRepository.findByConsultationIdOrderByCreatedAtAsc(CONSULTATION))
+                .thenReturn(List.of(existing));
+        when(envoiRepository.findByConsultationIdOrderBySentAtAsc(CONSULTATION)).thenReturn(List.of());
+        when(partnerRepository.findByIdAndTenantId(FOURNISSEUR, TENANT))
+                .thenReturn(Optional.of(Partner.builder().id(FOURNISSEUR).raisonSociale("Lafarge").build()));
+        when(roleRepository.existsByTenantIdAndPartnerIdAndRole(
+                        TENANT, FOURNISSEUR, PartnerRoleType.FOURNISSEUR))
+                .thenReturn(true);
+        PartnerContact contactA = contact(CONTACT_A, FOURNISSEUR, "A. Benali", "achat@lafarge.example");
+        PartnerContact contactB = contact(CONTACT_B, FOURNISSEUR, "B. Kadiri", "devis@lafarge.example");
+        when(contactRepository.findByTenantIdAndPartnerIdOrderByNomAsc(TENANT, FOURNISSEUR))
+                .thenReturn(List.of(contactA, contactB));
+        when(contactRepository.findByIdAndTenantId(CONTACT_A, TENANT)).thenReturn(Optional.of(contactA));
+        when(contactRepository.findByIdAndTenantId(CONTACT_B, TENANT)).thenReturn(Optional.of(contactB));
+        when(destinataireRepository.save(any(ConsultationAchatDestinataire.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(destContactRepository.findByDestinataireIdInOrderByPositionAsc(any()))
+                .thenReturn(List.of(
+                        ConsultationAchatDestinataireContact.builder()
+                                .destinataireId(DEST_A)
+                                .contactId(CONTACT_A)
+                                .position(0)
+                                .build(),
+                        ConsultationAchatDestinataireContact.builder()
+                                .destinataireId(DEST_A)
+                                .contactId(CONTACT_B)
+                                .position(1)
+                                .build()));
+        when(devisRepository.findByConsultationIdOrderByCreatedAtAsc(CONSULTATION)).thenReturn(List.of());
+
+        ConsultationDestinataireCreateDto item = new ConsultationDestinataireCreateDto();
+        item.setFournisseurId(FOURNISSEUR);
+        item.setContactIds(List.of(CONTACT_A, CONTACT_B));
+        ConsultationDestinatairesSaveDto body = new ConsultationDestinatairesSaveDto();
+        body.setItems(List.of(item));
+        ConsultationAchatDto saved = service.saveDestinataires(CONSULTATION, body);
+
+        org.mockito.Mockito.verify(destContactRepository).deleteByDestinataireId(DEST_A);
+        org.mockito.Mockito.verify(destContactRepository).flush();
+        assertThat(saved.getDestinataires()).hasSize(1);
+        assertThat(saved.getDestinataires().get(0).getContacts()).hasSize(2);
+    }
+
+    @Test
+    void saveDestinataires_remplaceLesNonEnvoyes() {
+        ConsultationAchat entity = consultationPrep();
+        ConsultationAchatDestinataire existing = destRow(DEST_A, FOURNISSEUR, CONTACT_A);
+        when(repository.findByIdAndTenantId(CONSULTATION, TENANT)).thenReturn(Optional.of(entity));
+        when(destinataireRepository.findByConsultationIdOrderByCreatedAtAsc(CONSULTATION))
+                .thenReturn(List.of(existing))
+                .thenReturn(List.of(destRow(DEST_B, FOURNISSEUR_B, CONTACT_B)));
+        when(envoiRepository.findByConsultationIdOrderBySentAtAsc(CONSULTATION)).thenReturn(List.of());
+        when(partnerRepository.findByIdAndTenantId(FOURNISSEUR_B, TENANT))
+                .thenReturn(Optional.of(Partner.builder().id(FOURNISSEUR_B).raisonSociale("Sika").build()));
+        when(roleRepository.existsByTenantIdAndPartnerIdAndRole(
+                        TENANT, FOURNISSEUR_B, PartnerRoleType.FOURNISSEUR))
+                .thenReturn(true);
+        PartnerContact contactB = contact(CONTACT_B, FOURNISSEUR_B, "M. Kadiri", "devis@sika.example");
+        when(contactRepository.findByTenantIdAndPartnerIdOrderByNomAsc(TENANT, FOURNISSEUR_B))
+                .thenReturn(List.of(contactB));
+        when(contactRepository.findByIdAndTenantId(CONTACT_B, TENANT)).thenReturn(Optional.of(contactB));
+        when(destinataireRepository.save(any(ConsultationAchatDestinataire.class))).thenAnswer(inv -> {
+            ConsultationAchatDestinataire row = inv.getArgument(0);
+            if (row.getId() == null) {
+                row.setId(DEST_B);
+            }
+            return row;
+        });
+        when(devisRepository.findByConsultationIdOrderByCreatedAtAsc(CONSULTATION)).thenReturn(List.of());
+
+        ConsultationDestinataireCreateDto item = new ConsultationDestinataireCreateDto();
+        item.setFournisseurId(FOURNISSEUR_B);
+        ConsultationDestinatairesSaveDto body = new ConsultationDestinatairesSaveDto();
+        body.setItems(List.of(item));
+        ConsultationAchatDto saved = service.saveDestinataires(CONSULTATION, body);
+
+        org.mockito.Mockito.verify(destinataireRepository).delete(existing);
+        assertThat(saved.getDestinataires()).hasSize(1);
+        assertThat(saved.getDestinataires().get(0).getFournisseurId()).isEqualTo(FOURNISSEUR_B);
     }
 
     @Test
@@ -549,7 +753,7 @@ class ConsultationAchatServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("consultation.envoyer.sans_destinataire");
         org.mockito.Mockito.verify(envoiRepository, never()).save(any());
-        org.mockito.Mockito.verify(emailService, never()).sendEmail(any(), any(), any(), any());
+        org.mockito.Mockito.verify(emailService, never()).sendWithAttachments(any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -585,11 +789,13 @@ class ConsultationAchatServiceTest {
         assertThat(captor.getValue().getDestinataireId()).isEqualTo(destId);
         assertThat(captor.getValue().getEmail()).isEqualTo("achat@lafarge.example");
         org.mockito.Mockito.verify(emailService)
-                .sendEmail(
-                        org.mockito.ArgumentMatchers.eq("achat@lafarge.example"),
+                .sendWithAttachments(
+                        org.mockito.ArgumentMatchers.eq(List.of("achat@lafarge.example")),
+                        org.mockito.ArgumentMatchers.eq(List.of()),
                         org.mockito.ArgumentMatchers.contains("CS-2026-0001"),
                         org.mockito.ArgumentMatchers.anyString(),
-                        org.mockito.ArgumentMatchers.contains("ciment-cpj-45"));
+                        org.mockito.ArgumentMatchers.contains("ciment-cpj-45"),
+                        org.mockito.ArgumentMatchers.eq(List.of()));
         assertThat(result.getStatut()).isEqualTo(ConsultationAchat.STATUT_OUVERTE);
         assertThat(entity.getStatut()).isEqualTo(ConsultationAchat.STATUT_OUVERTE);
         assertThat(result.getEnvois()).hasSize(1);
@@ -615,7 +821,7 @@ class ConsultationAchatServiceTest {
         ConsultationAchatDto result = service.envoyer(CONSULTATION);
 
         org.mockito.Mockito.verify(envoiRepository, never()).save(any());
-        org.mockito.Mockito.verify(emailService, never()).sendEmail(any(), any(), any(), any());
+        org.mockito.Mockito.verify(emailService, never()).sendWithAttachments(any(), any(), any(), any(), any(), any());
         assertThat(result.getEnvois()).hasSize(1);
         assertThat(result.getStatut()).isEqualTo(ConsultationAchat.STATUT_OUVERTE);
     }
@@ -676,11 +882,13 @@ class ConsultationAchatServiceTest {
         assertThat(captor.getValue().getDestinataireId()).isEqualTo(destB);
         assertThat(captor.getValue().getEmail()).isEqualTo("devis@sika.example");
         org.mockito.Mockito.verify(emailService)
-                .sendEmail(
-                        org.mockito.ArgumentMatchers.eq("devis@sika.example"),
+                .sendWithAttachments(
+                        org.mockito.ArgumentMatchers.eq(List.of("devis@sika.example")),
+                        org.mockito.ArgumentMatchers.eq(List.of()),
                         org.mockito.ArgumentMatchers.anyString(),
                         org.mockito.ArgumentMatchers.anyString(),
-                        org.mockito.ArgumentMatchers.anyString());
+                        org.mockito.ArgumentMatchers.anyString(),
+                        org.mockito.ArgumentMatchers.eq(List.of()));
         assertThat(result.getEnvois()).hasSize(2);
     }
 
@@ -725,6 +933,25 @@ class ConsultationAchatServiceTest {
         request.setFichierNom(fichierNom);
         request.setLignes(List.of(ligneCiment()));
         return request;
+    }
+
+    private void stubDestinataireSaveAndReload(UUID contactId) {
+        when(destinataireRepository.save(any(ConsultationAchatDestinataire.class))).thenAnswer(inv -> {
+            ConsultationAchatDestinataire row = inv.getArgument(0);
+            if (row.getId() == null) {
+                row.setId(UUID.randomUUID());
+            }
+            return row;
+        });
+        when(destinataireRepository.findByConsultationIdOrderByCreatedAtAsc(CONSULTATION))
+                .thenAnswer(inv -> List.of(ConsultationAchatDestinataire.builder()
+                        .id(UUID.randomUUID())
+                        .consultationId(CONSULTATION)
+                        .fournisseurId(FOURNISSEUR)
+                        .contactId(contactId)
+                        .statut(ConsultationAchatDestinataire.STATUT_EN_ATTENTE)
+                        .build()));
+        when(devisRepository.findByConsultationIdOrderByCreatedAtAsc(CONSULTATION)).thenReturn(List.of());
     }
 
     private void stubCreateSave() {

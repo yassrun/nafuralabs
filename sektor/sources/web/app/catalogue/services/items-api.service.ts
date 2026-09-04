@@ -50,6 +50,18 @@ export class ItemsApiService extends FeatureApiService<Item, ItemCreate, ItemUpd
     };
   }
 
+  async getByCleStable(cleStable: string): Promise<Item | null> {
+    const cle = cleStable.trim();
+    if (!cle) {
+      return null;
+    }
+    try {
+      return await this.get<Item>(`${this.basePath}/identites/${encodeURIComponent(cle)}`);
+    } catch {
+      return null;
+    }
+  }
+
   extraireCreer(body: {
     designation: string;
     nature?: string;

@@ -54,6 +54,7 @@ function assertSource() {
     'sources/backend/achats/src/main/java/ma/nafura/achats/api/controller/ConsultationAchatController.java',
   );
   assert(html.includes('data-testid="consultation-envoyer"'), 'CTA Envoyer absent');
+  assert(html.includes('data-testid="consultation-destinataires-save"'), 'CTA Enregistrer destinataires absent');
   assert(html.includes('data-testid="consultation-journal"'), 'tableau journal absent');
   assert(html.includes('data-testid="consultation-panier-fige"'), 'message panier figé absent');
   assert(ts.includes('envoyer(') && ts.includes('canEnvoyer'), 'méthode envoyer absente');
@@ -333,11 +334,19 @@ async function main() {
 
     const section = page.getByTestId('consultation-destinataires');
     await selectFournisseur(page, section, frnUi3);
+    await section.getByTestId('consultation-destinataire-contacts').waitFor({ timeout: 10000 });
     await section.getByTestId('consultation-destinataire-add').click();
     await page.waitForFunction(
       () => document.querySelectorAll('[data-testid="consultation-destinataire-row"]').length >= 3,
       null,
       { timeout: 10000 },
+    );
+    const saveBtn = section.getByTestId('consultation-destinataires-save');
+    await saveBtn.click();
+    await page.waitForFunction(
+      () => document.querySelector('[data-testid="consultation-destinataires-save"] button')?.disabled === true,
+      null,
+      { timeout: 15000 },
     );
     await page.waitForFunction(
       () => document.querySelector('[data-testid="consultation-envoyer"] button')?.disabled === false,

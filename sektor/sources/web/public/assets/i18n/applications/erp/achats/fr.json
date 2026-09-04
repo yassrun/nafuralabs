@@ -672,7 +672,8 @@
       },
       "lien": {
         "liee": "Liée",
-        "hors": "Hors étude"
+        "hors": "Hors étude",
+        "ouvrirDossier": "Ouvrir le dossier d’étude"
       },
       "list": {
         "columns": {
@@ -716,20 +717,29 @@
       },
       "destinataires": {
         "title": "Destinataires",
-        "empty": "Aucun destinataire.",
+        "empty": "Ajoutez les fournisseurs à consulter.",
         "add": "Ajouter",
+        "save": "Enregistrer",
+        "remove": "Retirer",
         "fournisseur": "Fournisseur",
         "email": "E-mail",
+        "contacts": "Contacts",
+        "to": "À",
+        "cc": "Cc",
+        "brouillon": "Brouillon",
         "statut": "Statut",
         "enAttente": "En attente",
         "devisRecu": "Devis reçu",
         "devis": "Devis",
         "placeholder": "Taper ≥ 2 car. — rechercher un fournisseur…",
         "contactPlaceholder": "Choisir le contact e-mail…",
-        "contactRequis": "Choisissez le contact e-mail.",
-        "sansEmail": "Impossible d’ajouter ce fournisseur : aucun contact avec e-mail sur la fiche. Ajoutez un contact, puis réessayez.",
+        "contactRequis": "Cochez au moins un contact e-mail.",
+        "sansEmail": "Aucun contact e-mail sur la fiche. Ajoutez un contact, puis réessayez.",
+        "ajouterContact": "Ajouter un contact",
         "ouvrirFiche": "Ouvrir la fiche fournisseur",
         "doublon": "Ce fournisseur est déjà destinataire de cette consultation.",
+        "dejaEnvoye": "Un destinataire déjà envoyé ne peut pas être retiré.",
+        "saveError": "Enregistrement des destinataires impossible.",
         "error": "Ajout du destinataire impossible."
       },
       "envoyer": "Envoyer la consultation",

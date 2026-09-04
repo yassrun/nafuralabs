@@ -28,6 +28,154 @@
     </nf-entity-detail>
   }
 
+  @if (mode() === 'edit' && activeTab() === 'contacts') {
+    <section class="panel" data-testid="fournisseur-contacts">
+      <div class="panel__header">
+        <div>
+          <h3 class="panel__title">Contacts</h3>
+          <p class="panel__hint">Personnes avec e-mail — utilisées comme destinataires des consultations (À / Cc).</p>
+        </div>
+      </div>
+
+      @if (contactsLoading()) {
+        <p class="loading-inline">Chargement des contacts…</p>
+      } @else if (contacts().length) {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>E-mail</th>
+              <th>Principal</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of contacts(); track row.id) {
+              <tr data-testid="fournisseur-contact-row">
+                <td>{{ row.nom }}</td>
+                <td>{{ row.email || '—' }}</td>
+                <td>
+                  <label class="primary-switch">
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      [checked]="!!row.isPrimary"
+                      [disabled]="contactSaving() || primarySavingId() === row.id"
+                      (change)="setPrimary(row, $any($event.target).checked)"
+                      [attr.data-testid]="'fournisseur-contact-primary-' + row.id"
+                    />
+                    <span>{{ row.isPrimary ? 'Oui' : 'Non' }}</span>
+                  </label>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <div class="empty" data-testid="fournisseur-contacts-empty">Aucun contact pour ce fournisseur.</div>
+      }
+
+      <article class="form-card" data-testid="fournisseur-contact-form">
+        <h4>Nouveau contact</h4>
+        <div class="form-grid">
+          <nf-input
+            type="text"
+            label="Nom"
+            [ngModel]="contactDraftNom"
+            (ngModelChange)="contactDraftNom = $event"
+            name="contactNom"
+            data-testid="fournisseur-contact-nom"
+          />
+          <nf-input
+            type="email"
+            label="E-mail"
+            [ngModel]="contactDraftEmail"
+            (ngModelChange)="contactDraftEmail = $event"
+            name="contactEmail"
+            data-testid="fournisseur-contact-email"
+          />
+          <label class="field field--check primary-switch">
+            <input
+              type="checkbox"
+              role="switch"
+              [ngModel]="contactDraftPrimary"
+              (ngModelChange)="contactDraftPrimary = $event"
+              name="contactPrimary"
+              data-testid="fournisseur-contact-primary"
+            />
+            Principal — destinataire « À » des consultations
+          </label>
+        </div>
+        @if (contactErreur(); as err) {
+          <p class="alert">{{ err }}</p>
+        }
+        <div class="form-actions">
+          <nf-button
+            type="button"
+            variant="primary"
+            data-testid="fournisseur-contact-save"
+            [disabled]="contactSaving()"
+            (clicked)="saveContact()"
+          >
+            Enregistrer le contact
+          </nf-button>
+        </div>
+      </article>
+    </section>
+  }
+
+  @if (mode() === 'edit' && activeTab() === 'contrats') {
+    <section class="panel" data-testid="fournisseur-contrats">
+      <div class="panel__header">
+        <div>
+          <h3 class="panel__title">Contrats fournisseur</h3>
+          <p class="panel__hint">Cadres et marchés liés à ce fournisseur.</p>
+        </div>
+        <nf-button type="button" variant="secondary" data-testid="fournisseur-contrat-new" (clicked)="openNewContrat()">
+          Nouveau contrat
+        </nf-button>
+      </div>
+
+      @if (contratsLoading()) {
+        <p class="loading-inline">Chargement des contrats…</p>
+      } @else if (contrats().length) {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>N°</th>
+              <th>Type</th>
+              <th>Objet</th>
+              <th>Début</th>
+              <th>Fin</th>
+              <th class="num">Plafond HT</th>
+              <th>Statut</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of contrats(); track row.id) {
+              <tr data-testid="fournisseur-contrat-row">
+                <td>{{ row.numero }}</td>
+                <td>{{ contratTypeLabel(row.type) }}</td>
+                <td>{{ row.objet || '—' }}</td>
+                <td>{{ fmtDate(row.dateDebut) }}</td>
+                <td>{{ fmtDate(row.dateFin) }}</td>
+                <td class="num">{{ row.montantPlafondHt != null ? fmtPrice(row.montantPlafondHt) : '—' }}</td>
+                <td>{{ contratStatusLabel(row.status) }}</td>
+                <td>
+                  <nf-button type="button" size="sm" variant="secondary" (clicked)="openContrat(row)">
+                    Ouvrir
+                  </nf-button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <div class="empty" data-testid="fournisseur-contrats-empty">Aucun contrat pour ce fournisseur.</div>
+      }
+    </section>
+  }
+
   @if (mode() === 'edit' && activeTab() === 'attestations') {
     <section class="panel">
       <div class="panel__header">

@@ -85,6 +85,21 @@ function assertCreateStatic() {
   console.log('PASS cs-create-no-fournisseur AC-1 (casse AC-10 UX pro)');
 
   assert(html.includes('nf-action-bar'), 'cs-create-submit: nf-action-bar absente');
+  const detailHtml = read(
+    'sources/web/app/achats/consultations/consultation-detail/consultation-detail.page.html',
+  );
+  const detailTs = read(
+    'sources/web/app/achats/consultations/consultation-detail/consultation-detail.page.ts',
+  );
+  assert(
+    !detailHtml.includes('<td>{{ cle }}</td>'),
+    'fiche panier: désignation encore égale à la clé technique',
+  );
+  assert(detailTs.includes('panierLignes'), 'fiche panier: résolution catalogue absente');
+  assert(detailTs.includes('getByCleStable'), 'fiche panier: GET identites absente');
+  assert(detailHtml.includes('consultation-lien-etude'), 'fiche: lien dossier étude absent');
+  console.log('PASS cs-fiche-panier-libelle (code ≠ slug désignation)');
+
   assert(ts.includes('clesStables'), 'cs-create-submit: payload clesStables absent');
   assert(ts.includes('Ajoutez au moins un article'), 'cs-create-submit: validation panier vide absente');
   assert(!ts.includes('Choisir un fournisseur'), 'cs-create-submit: validation fournisseur encore présente');

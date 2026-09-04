@@ -44,4 +44,37 @@ export class PartnersApiService extends FeatureApiService<Partner, PartnerCreate
     const params = { ...(query ?? { page: 0, pageSize: 200 }), role } as ListQuery;
     return this.getAll(params);
   }
+
+  listContacts(partnerId: string): Promise<PartnerContact[]> {
+    return this.get<PartnerContact[]>(`${this.basePath}/${partnerId}/contacts`);
+  }
+
+  createContact(body: PartnerContactCreate): Promise<PartnerContact> {
+    return this.post<PartnerContact>('/api/v1/partner-contacts', body);
+  }
+
+  updateContact(id: string, body: PartnerContactUpdate): Promise<PartnerContact> {
+    return this.put<PartnerContact>(`/api/v1/partner-contacts/${id}`, body);
+  }
 }
+
+export interface PartnerContact {
+  id: string;
+  partnerId: string;
+  nom: string;
+  email?: string | null;
+  fonction?: string | null;
+  telephone?: string | null;
+  isPrimary?: boolean;
+}
+
+export interface PartnerContactCreate {
+  partnerId: string;
+  nom: string;
+  email?: string;
+  fonction?: string;
+  telephone?: string;
+  isPrimary?: boolean;
+}
+
+export type PartnerContactUpdate = Partial<Omit<PartnerContactCreate, 'partnerId'>>;

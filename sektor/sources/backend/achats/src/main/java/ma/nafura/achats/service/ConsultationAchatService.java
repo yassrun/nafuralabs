@@ -6,6 +6,7 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import ma.nafura.achats.api.dto.ConsultationAchatDto;
+import ma.nafura.achats.api.dto.ConsultationDestinataireContactDto;
 import ma.nafura.achats.api.dto.ConsultationDestinataireDto;
 import ma.nafura.achats.api.dto.ConsultationDevisDto;
 import ma.nafura.achats.api.dto.ConsultationDevisLigneDto;
@@ -21,15 +23,18 @@ import ma.nafura.achats.api.dto.ConsultationEnvoiDto;
 import ma.nafura.achats.api.request.ConsultationAchatCreateDto;
 import ma.nafura.achats.api.request.ConsultationAchatPanierDto;
 import ma.nafura.achats.api.request.ConsultationDestinataireCreateDto;
+import ma.nafura.achats.api.request.ConsultationDestinatairesSaveDto;
 import ma.nafura.achats.api.request.ConsultationDevisImportDto;
 import ma.nafura.achats.domain.consultation.ConsultationAchat;
 import ma.nafura.achats.domain.consultation.ConsultationAchatDestinataire;
+import ma.nafura.achats.domain.consultation.ConsultationAchatDestinataireContact;
 import ma.nafura.achats.domain.consultation.ConsultationAchatDevis;
 import ma.nafura.achats.domain.consultation.ConsultationAchatDevisLigne;
 import ma.nafura.achats.domain.consultation.ConsultationAchatEnvoi;
 import ma.nafura.achats.domain.fournisseur.Partner;
 import ma.nafura.achats.domain.fournisseur.PartnerContact;
 import ma.nafura.achats.domain.fournisseur.PartnerRoleType;
+import ma.nafura.achats.repository.ConsultationAchatDestinataireContactRepository;
 import ma.nafura.achats.repository.ConsultationAchatDestinataireRepository;
 import ma.nafura.achats.repository.ConsultationAchatDevisRepository;
 import ma.nafura.achats.repository.ConsultationAchatEnvoiRepository;
@@ -54,6 +59,7 @@ public class ConsultationAchatService {
     private final ConsultationAchatRepository repository;
     private final ConsultationAchatDevisRepository devisRepository;
     private final ConsultationAchatDestinataireRepository destinataireRepository;
+    private final ConsultationAchatDestinataireContactRepository destContactRepository;
     private final ConsultationAchatEnvoiRepository envoiRepository;
     private final PartnerRepository partnerRepository;
     private final PartnerRoleRepository roleRepository;
@@ -66,6 +72,7 @@ public class ConsultationAchatService {
             ConsultationAchatRepository repository,
             ConsultationAchatDevisRepository devisRepository,
             ConsultationAchatDestinataireRepository destinataireRepository,
+            ConsultationAchatDestinataireContactRepository destContactRepository,
             ConsultationAchatEnvoiRepository envoiRepository,
             PartnerRepository partnerRepository,
             PartnerRoleRepository roleRepository,
@@ -76,6 +83,7 @@ public class ConsultationAchatService {
         this.repository = repository;
         this.devisRepository = devisRepository;
         this.destinataireRepository = destinataireRepository;
+        this.destContactRepository = destContactRepository;
         this.envoiRepository = envoiRepository;
         this.partnerRepository = partnerRepository;
         this.roleRepository = roleRepository;
@@ -173,17 +181,61 @@ public class ConsultationAchatService {
             throw new IllegalArgumentException("consultation.destinataire.doublon");
         }
 
-        List<PartnerContact> emailContacts = emailContactsOf(fournisseur.getId(), tenantId);
-        PartnerContact bound = bindContact(emailContacts, request.getContactId());
+        List<PartnerContact> bound =
+                bindContacts(emailContactsOf(fournisseur.getId(), tenantId), request.resolvedContactIds());
+        persistDestinataire(consultation.getId(), tenantId, fournisseur.getId(), bound);
+        recomputeAndPersistStatut(consultation);
+        return toDto(consultation, true);
+    }
 
-        ConsultationAchatDestinataire row = ConsultationAchatDestinataire.builder()
-                .tenantId(tenantId)
-                .consultationId(consultation.getId())
-                .fournisseurId(fournisseur.getId())
-                .contactId(bound.getId())
-                .statut(ConsultationAchatDestinataire.STATUT_EN_ATTENTE)
-                .build();
-        destinataireRepository.save(row);
+    @Transactional
+    public ConsultationAchatDto saveDestinataires(UUID consultationId, ConsultationDestinatairesSaveDto request) {
+        ConsultationAchat consultation = require(consultationId);
+        UUID tenantId = tenantId();
+        List<ConsultationDestinataireCreateDto> items =
+                request != null && request.getItems() != null ? request.getItems() : List.of();
+
+        LinkedHashMap<UUID, ConsultationDestinataireCreateDto> unique = new LinkedHashMap<>();
+        for (ConsultationDestinataireCreateDto item : items) {
+            if (item == null || item.getFournisseurId() == null) {
+                throw new IllegalArgumentException("consultation.fournisseur.obligatoire");
+            }
+            if (unique.containsKey(item.getFournisseurId())) {
+                throw new IllegalArgumentException("consultation.destinataire.doublon");
+            }
+            unique.put(item.getFournisseurId(), item);
+        }
+
+        List<ConsultationAchatDestinataire> existing =
+                nullToEmpty(destinataireRepository.findByConsultationIdOrderByCreatedAtAsc(consultation.getId()));
+        Set<UUID> sent = sentDestinataireIds(consultation.getId());
+        Map<UUID, ConsultationAchatDestinataire> byFournisseur = new LinkedHashMap<>();
+        for (ConsultationAchatDestinataire row : existing) {
+            byFournisseur.put(row.getFournisseurId(), row);
+        }
+
+        for (ConsultationAchatDestinataire row : existing) {
+            if (sent.contains(row.getId()) && !unique.containsKey(row.getFournisseurId())) {
+                throw new IllegalArgumentException("consultation.destinataire.deja_envoye");
+            }
+            if (!sent.contains(row.getId()) && !unique.containsKey(row.getFournisseurId())) {
+                destContactRepository.deleteByDestinataireId(row.getId());
+                destinataireRepository.delete(row);
+            }
+        }
+
+        for (ConsultationDestinataireCreateDto item : unique.values()) {
+            Partner fournisseur = requireFournisseur(item.getFournisseurId(), tenantId);
+            List<PartnerContact> bound =
+                    bindContacts(emailContactsOf(fournisseur.getId(), tenantId), item.resolvedContactIds());
+            ConsultationAchatDestinataire row = byFournisseur.get(fournisseur.getId());
+            if (row == null) {
+                persistDestinataire(consultation.getId(), tenantId, fournisseur.getId(), bound);
+            } else if (!sent.contains(row.getId())) {
+                replaceContacts(row, bound);
+            }
+        }
+
         recomputeAndPersistStatut(consultation);
         return toDto(consultation, true);
     }
@@ -220,13 +272,15 @@ public class ConsultationAchatService {
         EmailService mail = emailService.getIfAvailable();
         OffsetDateTime now = OffsetDateTime.now();
         for (ConsultationAchatDestinataire dest : pending) {
-            String email = contactEmail(dest.getContactId());
-            if (!StringUtils.hasText(email)) {
+            List<String> emails = destEmails(dest);
+            if (emails.isEmpty()) {
                 throw new IllegalArgumentException("consultation.destinataire.sans_email");
             }
+            String to = emails.get(0);
+            List<String> cc = emails.size() > 1 ? emails.subList(1, emails.size()) : List.of();
             if (mail != null) {
                 try {
-                    mail.sendEmail(email, subject, html, text);
+                    mail.sendWithAttachments(List.of(to), cc, subject, html, text, List.of());
                 } catch (RuntimeException ex) {
                     log.warn(
                             "consultation envoi mail dest={} : {}",
@@ -238,7 +292,7 @@ public class ConsultationAchatService {
                     .tenantId(consultation.getTenantId())
                     .consultationId(consultation.getId())
                     .destinataireId(dest.getId())
-                    .email(email.trim())
+                    .email(String.join(", ", emails))
                     .sentAt(now)
                     .build());
         }
@@ -336,20 +390,91 @@ public class ConsultationAchatService {
         return withEmail;
     }
 
-    private PartnerContact bindContact(List<PartnerContact> emailContacts, UUID requestedContactId) {
+    private Partner requireFournisseur(UUID fournisseurId, UUID tenantId) {
+        Partner fournisseur = partnerRepository
+                .findByIdAndTenantId(fournisseurId, tenantId)
+                .orElseThrow(() -> new IllegalArgumentException("consultation.fournisseur.introuvable"));
+        if (!roleRepository.existsByTenantIdAndPartnerIdAndRole(
+                tenantId, fournisseur.getId(), PartnerRoleType.FOURNISSEUR)) {
+            throw new IllegalArgumentException("consultation.fournisseur.pas_fiche");
+        }
+        return fournisseur;
+    }
+
+    private ConsultationAchatDestinataire persistDestinataire(
+            UUID consultationId, UUID tenantId, UUID fournisseurId, List<PartnerContact> bound) {
+        ConsultationAchatDestinataire row = ConsultationAchatDestinataire.builder()
+                .tenantId(tenantId)
+                .consultationId(consultationId)
+                .fournisseurId(fournisseurId)
+                .contactId(bound.get(0).getId())
+                .statut(ConsultationAchatDestinataire.STATUT_EN_ATTENTE)
+                .build();
+        destinataireRepository.save(row);
+        writeContactLinks(row, bound);
+        return row;
+    }
+
+    private void replaceContacts(ConsultationAchatDestinataire row, List<PartnerContact> bound) {
+        row.setContactId(bound.get(0).getId());
+        destinataireRepository.save(row);
+        writeContactLinks(row, bound);
+    }
+
+    private void writeContactLinks(ConsultationAchatDestinataire row, List<PartnerContact> bound) {
+        if (row.getId() != null) {
+            destContactRepository.deleteByDestinataireId(row.getId());
+            destContactRepository.flush();
+        }
+        int position = 0;
+        for (PartnerContact contact : bound) {
+            destContactRepository.save(ConsultationAchatDestinataireContact.builder()
+                    .tenantId(row.getTenantId())
+                    .destinataireId(row.getId())
+                    .contactId(contact.getId())
+                    .position(position++)
+                    .build());
+        }
+    }
+
+    private Set<UUID> sentDestinataireIds(UUID consultationId) {
+        Set<UUID> sent = new HashSet<>();
+        List<ConsultationAchatEnvoi> existing =
+                envoiRepository.findByConsultationIdOrderBySentAtAsc(consultationId);
+        if (existing != null) {
+            for (ConsultationAchatEnvoi row : existing) {
+                if (row.getDestinataireId() != null) {
+                    sent.add(row.getDestinataireId());
+                }
+            }
+        }
+        return sent;
+    }
+
+    private List<PartnerContact> bindContacts(List<PartnerContact> emailContacts, List<UUID> requestedIds) {
         if (emailContacts.isEmpty()) {
             throw new IllegalArgumentException("consultation.destinataire.sans_email");
         }
-        if (emailContacts.size() == 1) {
-            return emailContacts.get(0);
-        }
-        if (requestedContactId == null) {
+        List<UUID> requested = requestedIds != null ? requestedIds : List.of();
+        if (requested.isEmpty()) {
+            if (emailContacts.size() == 1) {
+                return List.of(emailContacts.get(0));
+            }
             throw new IllegalArgumentException("consultation.destinataire.contact_requis");
         }
-        return emailContacts.stream()
-                .filter(c -> requestedContactId.equals(c.getId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("consultation.destinataire.contact_invalide"));
+        Map<UUID, PartnerContact> byId = new HashMap<>();
+        for (PartnerContact contact : emailContacts) {
+            byId.put(contact.getId(), contact);
+        }
+        List<PartnerContact> bound = new ArrayList<>();
+        for (UUID id : requested) {
+            PartnerContact contact = byId.get(id);
+            if (contact == null) {
+                throw new IllegalArgumentException("consultation.destinataire.contact_invalide");
+            }
+            bound.add(contact);
+        }
+        return bound;
     }
 
     private void notifierLienEtude(UUID dossierEtudeId) {
@@ -603,6 +728,29 @@ public class ConsultationAchatService {
         return out;
     }
 
+    private List<String> destEmails(ConsultationAchatDestinataire dest) {
+        List<String> emails = new ArrayList<>();
+        if (dest.getId() != null) {
+            List<ConsultationAchatDestinataireContact> links =
+                    destContactRepository.findByDestinataireIdOrderByPositionAsc(dest.getId());
+            if (links != null) {
+                for (ConsultationAchatDestinataireContact link : links) {
+                    String email = contactEmail(link.getContactId());
+                    if (StringUtils.hasText(email) && !emails.contains(email)) {
+                        emails.add(email);
+                    }
+                }
+            }
+        }
+        if (emails.isEmpty()) {
+            String email = contactEmail(dest.getContactId());
+            if (StringUtils.hasText(email)) {
+                emails.add(email);
+            }
+        }
+        return emails;
+    }
+
     private String contactEmail(UUID contactId) {
         if (contactId == null) {
             return "";
@@ -691,7 +839,22 @@ public class ConsultationAchatService {
         }
         UUID tenantId = tenantId();
         Map<UUID, String> noms = new HashMap<>();
-        Map<UUID, String> emails = new HashMap<>();
+        List<UUID> destIds = new ArrayList<>();
+        for (ConsultationAchatDestinataire row : rows) {
+            if (row.getId() != null) {
+                destIds.add(row.getId());
+            }
+        }
+        Map<UUID, List<ConsultationAchatDestinataireContact>> linksByDest = new HashMap<>();
+        if (!destIds.isEmpty()) {
+            List<ConsultationAchatDestinataireContact> links =
+                    destContactRepository.findByDestinataireIdInOrderByPositionAsc(destIds);
+            if (links != null) {
+                for (ConsultationAchatDestinataireContact link : links) {
+                    linksByDest.computeIfAbsent(link.getDestinataireId(), k -> new ArrayList<>()).add(link);
+                }
+            }
+        }
         List<ConsultationDestinataireDto> out = new ArrayList<>();
         for (ConsultationAchatDestinataire row : rows) {
             String nom = noms.computeIfAbsent(
@@ -700,22 +863,53 @@ public class ConsultationAchatService {
                             .findByIdAndTenantId(id, tenantId)
                             .map(Partner::getRaisonSociale)
                             .orElse(""));
-            String email = emails.computeIfAbsent(
-                    row.getContactId(),
-                    id -> contactRepository
-                            .findByIdAndTenantId(id, tenantId)
-                            .map(c -> c.getEmail() != null ? c.getEmail() : "")
-                            .orElse(""));
+            List<ConsultationDestinataireContactDto> contacts = contactDtosOf(row, linksByDest.get(row.getId()));
+            ConsultationDestinataireContactDto first = contacts.isEmpty() ? null : contacts.get(0);
             out.add(ConsultationDestinataireDto.builder()
                     .id(row.getId())
                     .fournisseurId(row.getFournisseurId())
                     .fournisseurNom(nom)
-                    .contactId(row.getContactId())
-                    .contactEmail(email)
+                    .contactId(first != null ? first.getId() : row.getContactId())
+                    .contactEmail(first != null ? first.getEmail() : "")
+                    .contacts(contacts)
                     .statut(row.getStatut())
                     .build());
         }
         return out;
+    }
+
+    private List<ConsultationDestinataireContactDto> contactDtosOf(
+            ConsultationAchatDestinataire row, List<ConsultationAchatDestinataireContact> links) {
+        List<ConsultationDestinataireContactDto> out = new ArrayList<>();
+        if (links != null && !links.isEmpty()) {
+            for (ConsultationAchatDestinataireContact link : links) {
+                ConsultationDestinataireContactDto dto = contactDto(link.getContactId());
+                if (dto != null) {
+                    out.add(dto);
+                }
+            }
+        }
+        if (out.isEmpty() && row.getContactId() != null) {
+            ConsultationDestinataireContactDto dto = contactDto(row.getContactId());
+            if (dto != null) {
+                out.add(dto);
+            }
+        }
+        return out;
+    }
+
+    private ConsultationDestinataireContactDto contactDto(UUID contactId) {
+        if (contactId == null) {
+            return null;
+        }
+        return contactRepository
+                .findByIdAndTenantId(contactId, tenantId())
+                .map(c -> ConsultationDestinataireContactDto.builder()
+                        .id(c.getId())
+                        .nom(c.getNom() != null ? c.getNom() : "")
+                        .email(c.getEmail() != null ? c.getEmail().trim() : "")
+                        .build())
+                .orElse(null);
     }
 
     private ConsultationDevisDto toDevisDto(ConsultationAchatDevis entity) {

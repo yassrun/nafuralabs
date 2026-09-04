@@ -22,9 +22,6 @@ export function buildFournisseurFields(t: TranslateService): DetailFieldConfig[]
     { key: 'adresse', label: tr('achats.fournisseur.form.fields.adresse'), type: 'text' },
     { key: 'ville', label: tr('achats.fournisseur.form.fields.ville'), type: 'select', options: villeSelectOptions() },
     { key: 'pays', label: tr('achats.fournisseur.form.fields.pays'), type: 'text', defaultValue: 'MA' },
-    { key: 'contactPrincipalNom', label: tr('achats.fournisseur.form.fields.contactNom'), type: 'text' },
-    { key: 'contactPrincipalTel', label: tr('achats.fournisseur.form.fields.contactTel'), type: 'phone-ma' },
-    { key: 'contactPrincipalEmail', label: tr('achats.fournisseur.form.fields.contactEmail'), type: 'text' },
     {
       key: 'conditionsPaiementParDefaut', label: tr('achats.fournisseur.form.fields.conditionsPaiement'), type: 'text',
       defaultValue: tr('achats.fournisseur.form.fields.conditionsPaiementDefault'),
