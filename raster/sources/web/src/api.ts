@@ -193,6 +193,17 @@ export const api = {
     }),
   deleteTask: (id: string) =>
     json<Mutation>(`/api/tasks/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  session: () => json<{ keys: string[] }>("/api/session"),
+  commitSession: (key: string) =>
+    json<{ keys: string[] }>("/api/session", {
+      method: "POST",
+      body: JSON.stringify({ key }),
+    }),
+  releaseSession: (key: string) =>
+    json<{ keys: string[] }>("/api/session", {
+      method: "DELETE",
+      body: JSON.stringify({ key }),
+    }),
   running: () =>
     json<{ running: Lance[]; recent: Lance[]; modes: Record<ExecutionMode, boolean> }>("/api/running"),
   run: (project: string, lot: string, souslot = "", mode: ExecutionMode = "local") =>

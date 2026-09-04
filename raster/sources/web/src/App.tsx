@@ -32,6 +32,7 @@ export default function App() {
   const [running, setRunning] = useState<Lance[]>([]);
   const [modes, setModes] = useState<Record<ExecutionMode, boolean>>({ local: false, agents: false });
   const [executionMode, setExecutionMode] = useState<ExecutionMode>("local");
+  const [sessionKeys, setSessionKeys] = useState<string[]>([]);
   const [inboxLines, setInboxLines] = useState<string[]>([]);
   const [project, setProject] = useState("");
   const [captureProject, setCaptureProject] = useState("");
@@ -44,8 +45,8 @@ export default function App() {
   const [error, setError] = useState("");
 
   const refresh = useCallback(async () => {
-    const [meta, taskData, readyData, windowData, runData, inboxData] = await Promise.all([
-      api.meta(), api.tasks(), api.ready(), api.windows(), api.running(), api.inbox(),
+    const [meta, taskData, readyData, windowData, runData, inboxData, sessionData] = await Promise.all([
+      api.meta(), api.tasks(), api.ready(), api.windows(), api.running(), api.inbox(), api.session(),
     ]);
     setProjects(meta.projects);
     setTasks(taskData.tasks);
@@ -54,6 +55,7 @@ export default function App() {
     setRunning(runData.running);
     setModes(runData.modes);
     setInboxLines(inboxData.lines);
+    setSessionKeys(sessionData.keys);
     setProject((current) => {
       if (current && meta.projects.includes(current)) return current;
       return projetPorteur(meta.projects, taskData.tasks);
@@ -91,9 +93,20 @@ export default function App() {
     () => new Set(projectWindow?.lots.flatMap((lot) => lot.lancables.map((row) => row.key)) || []),
     [projectWindow]
   );
-  const sessionGroups = projectGroups.filter((group) => authorizedKeys.has(group.key));
+  const runningKeys = useMemo(
+    () => new Set(running.map((run) => `${run.project}//${run.lot}//${run.souslot}`)),
+    [running]
+  );
+  const engagedKeys = useMemo(() => {
+    const keys = new Set(sessionKeys);
+    for (const key of runningKeys) keys.add(key);
+    return keys;
+  }, [sessionKeys, runningKeys]);
+  const sessionGroups = projectGroups.filter((group) => engagedKeys.has(group.key));
   const projectReady = ready.filter((row) => row.project === project && row.ouvert);
-  const readyNow = projectReady.filter((row) => row.lancable);
+  const readyNow = projectReady.filter(
+    (row) => row.lancable && authorizedKeys.has(row.key) && !engagedKeys.has(row.key)
+  );
   const selectedGroup = projectGroups.find((group) => group.key === selectedKey) || sessionGroups[0] || projectGroups[0] || null;
   useEffect(() => {
     if (selectedGroup && selectedGroup.key !== selectedKey) setSelectedKey(selectedGroup.key);
@@ -177,19 +190,19 @@ export default function App() {
                 : 0;
           return <button key={item.id} aria-selected={view === item.id} onClick={() => setView(item.id)}><span className="rf-nav-icon">{item.icon}</span><span>{item.label}</span>{count ? <span className="rf-nav-count">{count}</span> : null}</button>;
         })}</nav>
-        <p className="rf-sidebar-note">La session est calculée depuis la fenêtre autorisée et la readiness.</p>
+        <p className="rf-sidebar-note">Ready = lançable, pas encore engagé. Session = sous-lots passés à l’exécution.</p>
       </aside>
 
       <main className="rf-main">
-        {view === "session" ? <SessionView groups={sessionGroups} selected={selectedGroup} running={running} modes={modes} mode={executionMode} busy={busy} onMode={setExecutionMode} onSelect={setSelectedKey} onRun={(group, mode) => void mutate(() => api.run(group.project, group.lot, group.souslot, mode))} /> : null}
-        {view === "ready" ? <ReadyView rows={readyNow} groups={projectGroups} running={running} onOpen={(key) => { setSelectedKey(key); setView("session"); }} /> : null}
+        {view === "session" ? <SessionView groups={sessionGroups} selected={selectedGroup} running={running} modes={modes} mode={executionMode} busy={busy} onMode={setExecutionMode} onSelect={setSelectedKey} onRun={(group, mode) => void mutate(() => api.run(group.project, group.lot, group.souslot, mode))} onRelease={(key) => void mutate(() => api.releaseSession(key))} /> : null}
+        {view === "ready" ? <ReadyView rows={readyNow} groups={projectGroups} onCommit={(key) => void mutate(async () => { await api.commitSession(key); setSelectedKey(key); setView("session"); })} /> : null}
         {view === "captures" ? <CaptureView entries={visibleCaptureEntries} projects={projects} filter={captureFilter} onFilter={setCaptureFilter} onDelete={deleteCapture} onUpdate={updateCapture} /> : null}
       </main>
     </div>
   </div>;
 }
 
-function SessionView({ groups, selected, running, modes, mode, busy, onMode, onSelect, onRun }: { groups: Group[]; selected: Group | null; running: Lance[]; modes: Record<ExecutionMode, boolean>; mode: ExecutionMode; busy: boolean; onMode: (mode: ExecutionMode) => void; onSelect: (key: string) => void; onRun: (group: Group, mode: ExecutionMode) => void }) {
+function SessionView({ groups, selected, running, modes, mode, busy, onMode, onSelect, onRun, onRelease }: { groups: Group[]; selected: Group | null; running: Lance[]; modes: Record<ExecutionMode, boolean>; mode: ExecutionMode; busy: boolean; onMode: (mode: ExecutionMode) => void; onSelect: (key: string) => void; onRun: (group: Group, mode: ExecutionMode) => void; onRelease: (key: string) => void }) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -198,9 +211,9 @@ function SessionView({ groups, selected, running, modes, mode, busy, onMode, onS
   }, [selected]);
 
   const selectedRunning = selected ? running.some((run) => run.project === selected.project && run.lot === selected.lot && run.souslot === selected.souslot) : false;
-  return <><PageHead kicker="Front prêt · maintenant" title="Session d’exécution" subtitle={`${groups.length} sous-session(s) autorisée(s).`}>{selected ? <div className="rf-launch-controls"><select aria-label="Mode d’exécution" value={mode} onChange={(event) => onMode(event.target.value as ExecutionMode)}><option value="local">Local</option><option value="agents">Agents cloud</option></select><button className="rf-primary" disabled={busy || selectedRunning} onClick={() => modes[mode] ? onRun(selected, mode) : void copyCursorBrief(selected, mode)}>{selectedRunning ? "● En cours" : modes[mode] ? `▶ Lancer · ${mode}` : "Copier le brief Cursor"}</button></div> : null}</PageHead>
+  return <><PageHead kicker="Front prêt · maintenant" title="Session d’exécution" subtitle={`${groups.length} sous-session(s) engagée(s).`}>{selected ? <div className="rf-launch-controls"><select aria-label="Mode d’exécution" value={mode} onChange={(event) => onMode(event.target.value as ExecutionMode)}><option value="local">Local</option><option value="agents">Agents cloud</option></select><button className="rf-primary" disabled={busy || selectedRunning} onClick={() => modes[mode] ? onRun(selected, mode) : void copyCursorBrief(selected, mode)}>{selectedRunning ? "● En cours" : modes[mode] ? `▶ Lancer · ${mode}` : "Copier le brief Cursor"}</button>{!selectedRunning ? <button className="rf-secondary" disabled={busy} onClick={() => onRelease(selected.key)}>Retirer</button> : null}</div> : null}</PageHead>
     {!modes[mode] ? <div className="rf-notice">Mode {mode} non configuré. {mode === "local" ? "RASTER_LOCAL_CMD" : "RASTER_AGENTS_CMD"} doit pointer vers le runner Cursor ; le brief reste copiable.</div> : null}
-    <div className="rf-session-grid"><section><div className="rf-section-row"><h2>Agents et handoffs</h2><GroupPicker groups={groups} selected={selected} onSelect={onSelect} /></div>{groups.length ? <div className="rf-session-hierarchy">{groups.map((group) => {
+    <div className="rf-session-grid"><section><div className="rf-section-row"><h2>Agents et handoffs</h2>{groups.length > 1 ? <GroupPicker groups={groups} selected={selected} onSelect={onSelect} /> : null}</div>{groups.length ? <div className="rf-session-hierarchy">{groups.map((group) => {
       const isExpanded = expanded[group.key] ?? group.key === selected?.key;
       const activeRun = running.find((run) => run.project === group.project && run.lot === group.lot && run.souslot === group.souslot);
       const isRunning = Boolean(activeRun);
@@ -218,23 +231,22 @@ function SessionView({ groups, selected, running, modes, mode, busy, onMode, onS
         </button>
         {isExpanded ? <div className="rf-session-children">{group.tasks.map((task) => <div key={task.id} className="rf-session-task"><div className="rf-session-task-line" /> <div className="rf-session-task-body"><span className={`rf-agent rf-${taskAgentType(task)}`}>{taskAgentType(task) === "exec" ? "CO" : taskAgentType(task).slice(0, 2).toUpperCase()}</span><div className="rf-session-task-main"><div className="rf-session-task-row"><strong>{task.id} · {task.title}</strong><span className={`rf-status rf-status-${task.status}`}>{STATUS_LABEL[task.status] || task.status}</span></div><small>{agentName(task)}</small></div></div></div>)}</div> : null}
       </div>;
-    })}</div> : <Empty text="Rien dans la fenêtre autorisée." />}</section></div>
+    })}</div> : <Empty text="Aucun sous-lot engagé. Passez-en un depuis Ready." />}</section></div>
   </>;
 }
 
-function ReadyView({ rows, groups, running, onOpen }: { rows: Ready[]; groups: Group[]; running: Lance[]; onOpen: (key: string) => void }) {
-  return <><PageHead kicker="Prêts à lancer" title="Ready" subtitle="Ouverts, sans blocage, prêts pour qualification puis exécution." />
+function ReadyView({ rows, groups, onCommit }: { rows: Ready[]; groups: Group[]; onCommit: (key: string) => void }) {
+  return <><PageHead kicker="Prêts à lancer" title="Ready" subtitle="Ouverts, sans blocage, dans la fenêtre roadmap — pas encore en session." />
     {rows.length ? <div className="rf-flow">{rows.map((row) => {
       const key = `${row.project}//${row.lot}//${row.souslot}`;
       const group = groups.find((g) => g.key === key);
-      const isRunning = running.some((run) => run.project === row.project && run.lot === row.lot && run.souslot === row.souslot);
-      return <button key={row.key} className="rf-ready-row" onClick={() => onOpen(row.key)}>
-        <span className="rf-ready-mark">{isRunning ? "●" : "▸"}</span>
+      return <button key={row.key} className="rf-ready-row" onClick={() => onCommit(row.key)}>
+        <span className="rf-ready-mark">▸</span>
         <div>
           <strong>{row.souslot || row.lot}</strong>
           <small>{row.lot} · {row.restant} task(s) ouverte(s)</small>
         </div>
-        <em>{group ? `${group.tasks.filter((task) => task.type === "spec" && task.status !== "done").length} spec à qualifier` : "ouvrir"}</em>
+        <em>{group ? `${group.tasks.filter((task) => task.type === "spec" && task.status !== "done").length} spec à qualifier` : "engager"}</em>
       </button>;
     })}</div> : <Empty text="Rien de ready dans ce projet." />}
   </>;

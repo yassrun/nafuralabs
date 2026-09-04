@@ -45,6 +45,13 @@ import {
 } from "../../../session-front.mjs";
 import { WorktreeError } from "../../../worktree.mjs";
 import { regen } from "../../../regen.mjs";
+import {
+  add as commitSession,
+  list as sessionKeys,
+  prune as pruneSession,
+  remove as releaseSession,
+  sessionKey,
+} from "../../../session-queue.mjs";
 
 export type TaskDto = {
   id: string;
@@ -346,6 +353,38 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
             });
           }
 
+          if (req.method === "GET" && url === "/api/session") {
+            const ready = readiness();
+            const running = runningLots();
+            return send(res, 200, { keys: pruneSession(ready, running) });
+          }
+
+          if (req.method === "POST" && url === "/api/session") {
+            const b = (await readJson(req)) as { key?: string };
+            const key = b.key?.trim() || "";
+            if (!key) return send(res, 400, { error: "key required" });
+            const row = readiness().find((r) => r.key === key);
+            if (!row?.lancable) {
+              return send(res, 400, { error: "sous-lot non lançable" });
+            }
+            return send(res, 200, { keys: commitSession(key) });
+          }
+
+          if (req.method === "DELETE" && url === "/api/session") {
+            const b = (await readJson(req)) as { key?: string };
+            const key = b.key?.trim() || "";
+            if (!key) return send(res, 400, { error: "key required" });
+            const running = runningLots();
+            if (
+              running.some(
+                (run) => sessionKey(run.project, run.lot, run.souslot) === key
+              )
+            ) {
+              return send(res, 400, { error: "sous-session en cours" });
+            }
+            return send(res, 200, { keys: releaseSession(key) });
+          }
+
           if (req.method === "POST" && url === "/api/run") {
             const b = (await readJson(req)) as {
               project?: string;
@@ -357,8 +396,14 @@ export function rasterApiPlugin(repoRoot?: string): Plugin {
             const lot = b.lot || "";
             const souslot = b.souslot || "";
             const mode = b.mode || "local";
+            commitSession(sessionKey(project, lot, souslot));
             const r = startSubSession(project, lot, souslot, mode);
-            return send(res, 200, { ok: true, lance: r, running: runningLots() });
+            return send(res, 200, {
+              ok: true,
+              lance: r,
+              running: runningLots(),
+              keys: sessionKeys(),
+            });
           }
 
           if (req.method === "POST" && url === "/api/stop") {

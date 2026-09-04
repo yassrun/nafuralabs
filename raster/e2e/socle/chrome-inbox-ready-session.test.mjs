@@ -64,3 +64,11 @@ test("preuve 4 — le chrome restant expose inbox, ready et session", () => {
   assert.ok(/function ReadyView/.test(app), `${APP} : ReadyView manquant`);
   assert.ok(/function CaptureView/.test(app), `${APP} : CaptureView manquant`);
 });
+
+test("preuve 5 — Ready et Session sont disjoints", () => {
+  const app = read(APP);
+  assert.ok(/engagedKeys/.test(app), `${APP} : engagedKeys manquant`);
+  assert.ok(/!engagedKeys\.has\(row\.key\)/.test(app), `${APP} : Ready doit exclure les engagés`);
+  assert.ok(/engagedKeys\.has\(group\.key\)/.test(app), `${APP} : Session doit lister les engagés`);
+  assert.ok(/commitSession/.test(app), `${APP} : passage Ready → Session manquant`);
+});
