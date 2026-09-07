@@ -1,5 +1,4 @@
-<nf-page-shell scroll>
-  <nf-page-header [config]="headerConfig">
+<nf-screen [header]="headerConfig" [scroll]="true">
     <ng-container actions>
       @if (item(); as d) {
         <nf-button variant="secondary" (clicked)="printDevis()">Imprimer</nf-button>
@@ -11,7 +10,6 @@
         }
       }
     </ng-container>
-  </nf-page-header>
   <div class="devis-screen">
     <nf-entity-detail
       #detail
@@ -99,4 +97,4 @@
     </footer>
     </article>
   }
-</nf-page-shell>
+</nf-screen>

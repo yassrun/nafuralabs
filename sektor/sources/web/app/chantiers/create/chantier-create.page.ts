@@ -21,8 +21,7 @@ import {
   NfSelectComponent,
   type LookupSearchFn,
   type NfSelectOption,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
   ToastService,
   VilleMaSelectComponent,
 } from '@platform/lib/anatomy';
@@ -52,16 +51,14 @@ function addMonthsIso(from: Date, months: number): string {
   imports: [
     FormsModule,
     TranslateModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     ButtonComponent,
     NfSelectComponent,
     VilleMaSelectComponent
 ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nf-page-shell [scroll]="true">
-      <nf-page-header [config]="headerConfig()"></nf-page-header>
+    <nf-screen [header]="headerConfig()" [scroll]="true">
 
       <p class="step-meta">{{ 'chantiers.create.stepLabel' | translate: { current: step() + 1, total: 5 } }}</p>
       <div class="progress">
@@ -228,7 +225,7 @@ function addMonthsIso(from: Date, months: number): string {
           <nf-button variant="primary" (clicked)="submit()" data-testid="chantier-create-submit">{{ 'chantiers.create.submit' | translate }}</nf-button>
         }
       </div>
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [`
     :host { display: block; height: 100%; }

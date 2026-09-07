@@ -1,10 +1,9 @@
 
-import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 
 import type { ContratLocation } from '@app/catalogue/models';
@@ -15,9 +14,8 @@ export type ContratAvecJours = ContratLocation & { _jours: number };
 @Component({
   selector: 'app-echeances-location',
   standalone: true,
-  imports: [TranslateModule, PageHeaderComponent, MadCurrencyPipe],
+  imports: [TranslateModule, MadCurrencyPipe],
   template: `
-    <nf-page-header [config]="header()"></nf-page-header>
     <div class="card">
       <table>
         <thead>
@@ -79,7 +77,6 @@ export type ContratAvecJours = ContratLocation & { _jours: number };
 })
 export class EcheancesLocationPage {
   private readonly gmao = inject(MaterielGmaoFacadeService);
-  private readonly translate = inject(TranslateService);
 
   readonly soon = toSignal(
     this.gmao.getContrats().pipe(
@@ -99,15 +96,4 @@ export class EcheancesLocationPage {
     ),
     { initialValue: [] as ContratAvecJours[] },
   );
-
-  readonly header = computed(() => ({
-    title: 'materielGmao.locations.echeancesTitle',
-    subtitle: 'materielGmao.locations.echeancesSubtitle',
-    breadcrumbs: [
-      { label: this.translate.instant('nav.stock'), route: '/inventory/suivi/etat-stock' },
-      { label: this.translate.instant('nav.materiel'), route: '/materiel/parc' },
-      { label: this.translate.instant('nav.materiel.locations'), route: '/materiel/locations/contrats' },
-      { label: this.translate.instant('materielGmao.locations.echeancesTitle') },
-    ],
-  }));
 }

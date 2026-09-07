@@ -1,5 +1,4 @@
-<nf-page-shell>
-  <nf-page-header [config]="headerConfig"></nf-page-header>
+<nf-screen [header]="headerConfig">
   <div class="chips-row">
     @for (chip of chips; track chip.id) {
       <nf-button
@@ -13,4 +12,4 @@
     }
   </div>
   <nf-entity-listing #listing [config]="config" [facade]="facade" (action)="onAction($event)"></nf-entity-listing>
-</nf-page-shell>
+</nf-screen>

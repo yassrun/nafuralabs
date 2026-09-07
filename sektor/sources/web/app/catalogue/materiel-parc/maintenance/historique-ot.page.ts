@@ -5,7 +5,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { combineLatest, map } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { PageHeaderComponent, PageShellComponent } from '@platform/lib/anatomy';
+import { ScreenComponent } from '@platform/lib/anatomy';
 
 import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao-facade.service';
 import type { OrdreTravail } from '@app/catalogue/models/materiel-gmao.models';
@@ -13,11 +13,9 @@ import type { OrdreTravail } from '@app/catalogue/models/materiel-gmao.models';
 @Component({
   selector: 'app-historique-ot',
   standalone: true,
-  imports: [RouterModule, TranslateModule, PageShellComponent, PageHeaderComponent],
+  imports: [RouterModule, TranslateModule, ScreenComponent],
   template: `
-    <nf-page-shell [scroll]="true">
-      <nf-page-header [config]="header()">
-      </nf-page-header>
+    <nf-screen [header]="header()" [scroll]="true">
 
       <ul class="timeline">
         @for (o of rows(); track o.id) {
@@ -30,7 +28,7 @@ import type { OrdreTravail } from '@app/catalogue/models/materiel-gmao.models';
           <li>{{ 'materielGmao.empty.history' | translate }}</li>
         }
       </ul>
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [

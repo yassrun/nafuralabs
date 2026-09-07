@@ -16,8 +16,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {
   ConfirmDialogService,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
 } from '@platform/lib/anatomy';
 import { ButtonComponent } from '@platform/lib/anatomy/components';
 import { TreeEditorComponent } from '@platform/lib/anatomy/components/organisms';
@@ -38,15 +37,13 @@ const LIST_QUERY = {
   imports: [
     FormsModule,
     TranslateModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     TreeEditorComponent,
     ButtonComponent
 ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nf-page-shell scroll>
-      <nf-page-header [config]="headerConfig"></nf-page-header>
+    <nf-screen [header]="headerConfig" [scroll]="true">
 
       <div class="ic-layout">
         <div class="ic-layout__tree">
@@ -116,7 +113,7 @@ const LIST_QUERY = {
           }
         </aside>
       </div>
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [`
     .ic-layout {

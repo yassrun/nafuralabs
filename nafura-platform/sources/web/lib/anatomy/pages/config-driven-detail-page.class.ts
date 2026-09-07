@@ -11,8 +11,7 @@
  *   standalone: true,
  *   imports: [ConfigDrivenDetailPageImports],
  *   template: `
- *     <nf-page-shell scroll>
- *       <nf-page-header [config]="headerConfig"></nf-page-header>
+ *     <nf-screen [header]="headerConfig" [scroll]="true">
  *       <nf-entity-detail
  *         #detail
  *         [config]="config"
@@ -24,7 +23,7 @@
  *         (action)="onAction($event)">
  *         <!-- Custom field templates here -->
  *       </nf-entity-detail>
- *     </nf-page-shell>
+ *     </nf-screen>
  *   `,
  *   styles: [ConfigDrivenDetailPageStyles],
  * })
@@ -45,6 +44,7 @@ import {
   FieldTemplateDirective,
   PageHeaderComponent,
   PageShellComponent,
+  ScreenComponent,
   ToastService,
   ConfirmDialogService,
   PrintDialogService,
@@ -158,6 +158,7 @@ export const ConfigDrivenDetailPageImports = [
   FieldTemplateDirective,
   PageHeaderComponent,
   PageShellComponent,
+  ScreenComponent,
   StatusMachineComponent,
 ] as const;
 
@@ -171,7 +172,8 @@ export const ConfigDrivenDetailPageStyles = `
     height: 100%;
   }
 
-  nf-page-shell {
+  nf-page-shell,
+  nf-screen {
     height: 100%;
   }
 

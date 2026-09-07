@@ -1,5 +1,4 @@
-<nf-page-shell>
-  <nf-page-header [config]="headerConfig"></nf-page-header>
+<nf-screen [header]="headerConfig">
 
   @if (mode() === 'view' && item(); as ao) {
     <div class="ao-toolbar">
@@ -32,4 +31,4 @@
     [saving]="isSaving()"
     (action)="onAction($event)">
   </nf-entity-detail>
-</nf-page-shell>
+</nf-screen>

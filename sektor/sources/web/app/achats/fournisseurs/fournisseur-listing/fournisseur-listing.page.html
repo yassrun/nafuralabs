@@ -1,5 +1,4 @@
-<nf-page-shell>
-  <nf-page-header [config]="headerConfig"></nf-page-header>
+<nf-screen [header]="headerConfig">
 
   <div class="chips-row">
     @for (chip of chips; track chip.id) {
@@ -24,4 +23,4 @@
     (action)="onAction($event)"
     (smartImportCompleted)="onSmartImportComplete($event)">
   </nf-entity-listing>
-</nf-page-shell>
+</nf-screen>

@@ -1,16 +1,16 @@
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { PageShellComponent } from '@platform/lib/anatomy';
+import { ScreenComponent } from '@platform/lib/anatomy';
 
 @Component({
   selector: 'app-locations-hub',
   standalone: true,
-  imports: [RouterModule, TranslateModule, PageShellComponent],
+  imports: [RouterModule, TranslateModule, ScreenComponent],
   template: `
-    <nf-page-shell [scroll]="true">
+    <nf-screen [header]="header()" [scroll]="true">
       <nav class="subnav" aria-label="Locations">
         <a routerLink="/materiel/locations/contrats" routerLinkActive="active">{{
           'materielGmao.locations.tabContrats' | translate
@@ -23,7 +23,7 @@ import { PageShellComponent } from '@platform/lib/anatomy';
         }}</a>
       </nav>
       <router-outlet />
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
@@ -52,4 +52,15 @@ import { PageShellComponent } from '@platform/lib/anatomy';
     `,
   ],
 })
-export class LocationsHubPage {}
+export class LocationsHubPage {
+  private readonly translate = inject(TranslateService);
+
+  readonly header = computed(() => ({
+    title: this.translate.instant('nav.materiel.locations'),
+    breadcrumbs: [
+      { label: this.translate.instant('nav.stock'), route: '/inventory/suivi/etat-stock' },
+      { label: this.translate.instant('nav.materiel'), route: '/materiel/parc' },
+      { label: this.translate.instant('nav.materiel.locations') },
+    ],
+  }));
+}

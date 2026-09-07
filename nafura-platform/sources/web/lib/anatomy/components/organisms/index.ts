@@ -19,6 +19,7 @@ export * from './entity-detail';
 export * from './master-slave-shell';
 export * from './wizard-shell';
 export * from './page-shell';
+export * from './page-screen';
 export * from './chart';
 export * from './table';
 export * from './dashboard-grid';

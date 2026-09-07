@@ -5,7 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { PageShellComponent, ButtonComponent } from '@platform/lib/anatomy';
+import { ScreenComponent, ButtonComponent } from '@platform/lib/anatomy';
+import type { PageHeaderConfig } from '@platform/lib/anatomy';
 
 import {
   ClientPartnerSelectComponent,
@@ -20,15 +21,13 @@ import { DevisApiService } from '../services/devis-api.service';
   imports: [
     FormsModule,
     TranslateModule,
-    PageShellComponent,
+    ScreenComponent,
     ButtonComponent,
     ClientPartnerSelectComponent
 ],
   template: `
-    <nf-page-shell scroll>
+    <nf-screen [header]="headerConfig" [scroll]="true">
       <section class="from-dpgf">
-        <h1>Générer un devis depuis le DPGF</h1>
-        <p>Sélectionnez le client Partner avant de créer le devis.</p>
         @if (erreur(); as msg) {
           <p class="from-dpgf__err" role="alert">{{ msg }}</p>
         }
@@ -53,7 +52,7 @@ import { DevisApiService } from '../services/devis-api.service';
           </nf-button>
         </div>
       </section>
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [
     `
@@ -77,6 +76,11 @@ import { DevisApiService } from '../services/devis-api.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DevisFromDpgfPage {
+  readonly headerConfig: PageHeaderConfig = {
+    title: 'Générer un devis depuis le DPGF',
+    subtitle: 'Sélectionnez le client Partner avant de créer le devis.',
+  };
+
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly devisApi = inject(DevisApiService);

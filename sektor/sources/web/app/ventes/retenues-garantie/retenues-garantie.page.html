@@ -1,5 +1,4 @@
-<nf-page-shell>
-  <nf-page-header [config]="headerConfig"></nf-page-header>
+<nf-screen [header]="headerConfig">
 
   <div class="rgp">
     <app-retenue-summary-card [retenues]="facade.retenues()"></app-retenue-summary-card>
@@ -136,4 +135,4 @@
       </table>
     </section>
   </div>
-</nf-page-shell>
+</nf-screen>

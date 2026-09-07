@@ -545,7 +545,7 @@
         "save": "Save Template",
         "system": "System template (read-only)",
         "systemHint": "Duplicate it to edit the HTML (logo, header, tables…). Logo also comes from Administration → Settings → Branding.",
-        "logoHint": "Logo: upload it under Settings → Branding. In HTML use <img th:src=\"${tenant.logo}\" />.",
+        "logoHint": "Logo: upload it under Settings → Branding. In HTML use <img th:src=\"$'{'tenant.logo'}'\" />.",
         "unsavedChanges": "Unsaved changes.",
         "noEntityTypes": "No document type declared by the installed modules.",
         "variableGroups": {

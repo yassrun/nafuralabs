@@ -1,9 +1,8 @@
 
-import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { PageHeaderComponent } from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 
 import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao-facade.service';
@@ -11,9 +10,8 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
 @Component({
   selector: 'app-contrats-location',
   standalone: true,
-  imports: [TranslateModule, PageHeaderComponent, MadCurrencyPipe],
+  imports: [TranslateModule, MadCurrencyPipe],
   template: `
-    <nf-page-header [config]="header()"></nf-page-header>
     <div class="card">
       <table>
         <thead>
@@ -70,18 +68,6 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
 })
 export class ContratsLocationPage {
   private readonly gmao = inject(MaterielGmaoFacadeService);
-  private readonly translate = inject(TranslateService);
 
   readonly contrats = toSignal(this.gmao.getContrats(), { initialValue: [] });
-
-  readonly header = computed(() => ({
-    title: 'materielGmao.locations.contratsTitle',
-    subtitle: 'materielGmao.locations.contratsSubtitle',
-    breadcrumbs: [
-      { label: this.translate.instant('nav.stock'), route: '/inventory/suivi/etat-stock' },
-      { label: this.translate.instant('nav.materiel'), route: '/materiel/parc' },
-      { label: this.translate.instant('nav.materiel.locations'), route: '/materiel/locations/contrats' },
-      { label: this.translate.instant('materielGmao.locations.contratsTitle') },
-    ],
-  }));
 }

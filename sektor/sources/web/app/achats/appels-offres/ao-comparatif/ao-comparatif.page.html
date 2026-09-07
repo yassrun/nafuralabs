@@ -1,9 +1,9 @@
-<nf-page-shell scroll>
-  <nf-page-header [config]="pageHeaderConfig()">
-    <nf-button type="button" class="btn btn-secondary" (clicked)="onRecompute()" [disabled]="loading() || !ao()" variant="secondary">
+<nf-screen [header]="pageHeaderConfig()" [scroll]="true">
+    <ng-container actions>
+<nf-button type="button" class="btn btn-secondary" (clicked)="onRecompute()" [disabled]="loading() || !ao()" variant="secondary">
       Recalculer scores
     </nf-button>
-  </nf-page-header>
+    </ng-container>
   @if (loading()) {
     <p class="muted">{{ 'achats.common.loading' | translate }}</p>
   } @else if (!ao()) {
@@ -61,4 +61,4 @@
       <a [routerLink]="['/achats/appels-offres', ao()!.id]" class="link">{{ 'achats.appelOffre.comparatif.backToAo' | translate }}</a>
     </p>
   }
-</nf-page-shell>
+</nf-screen>

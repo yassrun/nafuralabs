@@ -4,18 +4,16 @@ import { RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { PageHeaderComponent, PageShellComponent } from '@platform/lib/anatomy';
+import { ScreenComponent } from '@platform/lib/anatomy';
 
 import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao-facade.service';
 
 @Component({
   selector: 'app-plans-maintenance',
   standalone: true,
-  imports: [RouterModule, TranslateModule, PageShellComponent, PageHeaderComponent],
+  imports: [RouterModule, TranslateModule, ScreenComponent],
   template: `
-    <nf-page-shell [scroll]="true">
-      <nf-page-header [config]="header()">
-      </nf-page-header>
+    <nf-screen [header]="header()" [scroll]="true">
 
       @if (weeklyDue() >= 3) {
         <div class="banner" role="status">
@@ -61,7 +59,7 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
       <p class="hint">
         <a routerLink="/materiel/maintenance/ot">{{ 'materielGmao.maintenance.gotoOt' | translate }}</a>
       </p>
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [

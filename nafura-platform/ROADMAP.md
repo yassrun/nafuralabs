@@ -5,8 +5,7 @@
 
 ## Ouvert
 
-Aucun sous-lot actif. Le prochain travail sera découpé depuis le besoin courant,
-puis créé dans `nafura-platform/raster-src/` par le CLI Raster.
+1. **nf-screen** — cadre d’écran anatomy (header + breadcrumbs + body) · sous-lot `cadre-v1` · catalogue / études / achats / ventes / chantiers · [`raster-src/lots/nf-screen/LOT.md`](raster-src/lots/nf-screen/LOT.md)
 
 <!-- borne -->
 
@@ -14,3 +13,4 @@ puis créé dans `nafura-platform/raster-src/` par le CLI Raster.
 
 - Stabiliser les APIs Platform consommées par Sektor.
 - Continuer le pliage architectural uniquement lorsqu’une preuve existante protège le comportement.
+- Étendre `nf-screen` hors des cinq modules (RH, finance, HSE, marchés, socle) et specials nommés.

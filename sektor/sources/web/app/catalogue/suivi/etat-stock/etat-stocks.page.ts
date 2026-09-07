@@ -19,8 +19,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { resolveLocale } from '@platform/lib/anatomy/pipes/_locale-resolver';
 
 import {
-  PageShellComponent,
-  PageHeaderComponent,
+  ScreenComponent,
   KpiStripComponent,
   EntityListingComponent,
   ColumnTemplateDirective,
@@ -44,8 +43,7 @@ import { buildEtatStocksColumns } from './config';
   imports: [
     CommonModule,
     FormsModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     KpiStripComponent,
     EntityListingComponent,
     ColumnTemplateDirective,
@@ -57,8 +55,7 @@ import { buildEtatStocksColumns } from './config';
     TranslateModule,
   ],
   template: `
-    <nf-page-shell>
-      <nf-page-header [config]="headerConfig"></nf-page-header>
+    <nf-screen [header]="headerConfig">
 
       <div class="etat-content">
         <!-- KPI Strip -->
@@ -151,7 +148,7 @@ import { buildEtatStocksColumns } from './config';
 
         </nf-entity-listing>
       </div>
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
@@ -160,7 +157,7 @@ import { buildEtatStocksColumns } from './config';
       height: 100%;
     }
 
-    nf-page-shell {
+    nf-screen {
       height: 100%;
     }
 

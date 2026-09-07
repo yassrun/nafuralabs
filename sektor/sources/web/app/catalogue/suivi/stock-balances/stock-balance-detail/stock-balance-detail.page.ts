@@ -24,8 +24,7 @@ import { ArticlePickerFieldComponent } from '@app/catalogue/components/article-p
   standalone: true,
   imports: [...ConfigDrivenDetailPageImports, FormsModule, ReactiveFormsModule, ArticlePickerFieldComponent],
   template: `
-    <nf-page-shell scroll>
-      <nf-page-header [config]="headerConfig"></nf-page-header>
+    <nf-screen [header]="headerConfig" [scroll]="true">
       <nf-entity-detail
         #detail
         [config]="config"
@@ -39,7 +38,7 @@ import { ArticlePickerFieldComponent } from '@app/catalogue/components/article-p
           <app-article-picker-field [formControl]="$any(control)" context="lookup" />
         </ng-template>
       </nf-entity-detail>
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [ConfigDrivenDetailPageStyles],

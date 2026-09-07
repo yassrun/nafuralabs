@@ -1,5 +1,4 @@
-<nf-page-shell>
-  <nf-page-header [config]="headerConfig"></nf-page-header>
+<nf-screen [header]="headerConfig">
   <nf-entity-listing
     #listing
     [config]="config"
@@ -7,4 +6,4 @@
     [openOnRowClick]="true"
     (action)="onAction($event)">
   </nf-entity-listing>
-</nf-page-shell>
+</nf-screen>

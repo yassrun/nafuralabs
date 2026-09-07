@@ -1,5 +1,4 @@
-<nf-page-shell scroll>
-  <nf-page-header [config]="headerConfig"></nf-page-header>
+<nf-screen [header]="headerConfig" [scroll]="true">
   <nf-entity-detail
     #detail
     [config]="config"
@@ -92,4 +91,4 @@
       <app-facture-print [facture]="item()!"></app-facture-print>
     </section>
   }
-</nf-page-shell>
+</nf-screen>

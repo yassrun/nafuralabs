@@ -15,7 +15,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { gantt, type GanttStatic } from 'dhtmlx-gantt';
 
-import { PageHeaderComponent, PageShellComponent } from '@platform/lib/anatomy';
+import { ScreenComponent } from '@platform/lib/anatomy';
 
 import type { AffectationChantier } from '@app/catalogue/models';
 import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao-facade.service';
@@ -117,13 +117,12 @@ function buildTasks(rows: AffectationChantier[], conflicts: Set<string>): MgTask
 @Component({
   selector: 'app-materiel-planning',
   standalone: true,
-  imports: [TranslateModule, PageShellComponent, PageHeaderComponent],
+  imports: [TranslateModule, ScreenComponent],
   template: `
-    <nf-page-shell [scroll]="false">
-      <nf-page-header [config]="header()"></nf-page-header>
+    <nf-screen [header]="header()" [scroll]="true">
       <p class="hint">{{ 'materielGmao.planning.hint' | translate }}</p>
       <div #ganttHost class="gantt-host" tabindex="0"></div>
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [

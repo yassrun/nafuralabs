@@ -21,15 +21,14 @@ import { STOCK_BALANCE_LISTING_CONFIG } from '../config';
   standalone: true,
   imports: [...ConfigDrivenListingPageImports],
   template: `
-    <nf-page-shell>
-      <nf-page-header [config]="headerConfig"></nf-page-header>
+    <nf-screen [header]="headerConfig">
       <nf-entity-listing
         #listing
         [config]="config"
         [facade]="facade"
         (action)="onAction($event)">
       </nf-entity-listing>
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [ConfigDrivenListingPageStyles],

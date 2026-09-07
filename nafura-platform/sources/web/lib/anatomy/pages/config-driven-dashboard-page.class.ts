@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { BasePageClass } from '../../../core/pages/base-page.class';
 import { PageHeaderComponent } from '../components';
 import { PageShellComponent } from '../components';
+import { ScreenComponent } from '../components';
 import { DashboardGridComponent } from '../components';
 import { DashboardPanelComponent } from '../components';
 import type { DashboardPageConfig, DashboardDataProvider } from '../types';
@@ -20,6 +21,7 @@ export const ConfigDrivenDashboardPageImports = [
   CommonModule,
   PageShellComponent,
   PageHeaderComponent,
+  ScreenComponent,
   DashboardGridComponent,
   DashboardPanelComponent,
 ] as const;
@@ -34,7 +36,8 @@ export const ConfigDrivenDashboardPageStyles = `
     height: 100%;
   }
 
-  nf-page-shell {
+  nf-page-shell,
+  nf-screen {
     height: 100%;
   }
 

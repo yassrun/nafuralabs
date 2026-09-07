@@ -1,7 +1,7 @@
-import { Component, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent } from '../../atoms/button';
 import { BreadcrumbComponent } from '../breadcrumb';
@@ -92,11 +92,11 @@ export interface PageHeaderConfig {
   template: `
     <div class="nf-page-header">
       <!-- Row 1: one column (breadcrumbs) -->
-      @if (effectiveBreadcrumbs().length > 0) {
+      @if (visibleBreadcrumbs().length > 0) {
         <div class="nf-page-header__row nf-page-header__row--one-col">
           <nf-breadcrumb
             class="nf-page-header__breadcrumbs"
-            [items]="effectiveBreadcrumbs()">
+            [items]="visibleBreadcrumbs()">
           </nf-breadcrumb>
         </div>
       }
@@ -287,6 +287,8 @@ export interface PageHeaderConfig {
   `],
 })
 export class PageHeaderComponent {
+  private readonly translate = inject(TranslateService);
+
   // ═══════════════════════════════════════════════════════════════════════════
   // Inputs - Config object (recommended)
   // ═══════════════════════════════════════════════════════════════════════════
@@ -334,8 +336,24 @@ export class PageHeaderComponent {
   }
 
   effectiveBreadcrumbs(): BreadcrumbItem[] {
-    return this.config()?.breadcrumbs ?? this.breadcrumbs() ?? [];
+    return this.visibleBreadcrumbs();
   }
+
+  /**
+   * Fil oriente. The last crumb is dropped when it reprints the H1
+   * (listing root = no fil; detail keeps parents).
+   */
+  readonly visibleBreadcrumbs = computed(() => {
+    const crumbs = this.config()?.breadcrumbs ?? this.breadcrumbs() ?? [];
+    const titleKey = this.config()?.title ?? this.title() ?? '';
+    if (crumbs.length === 0 || !titleKey) {
+      return crumbs;
+    }
+    const title = this.translate.instant(titleKey);
+    const last = crumbs[crumbs.length - 1]!;
+    const lastLabel = this.translate.instant(last.label);
+    return lastLabel === title ? crumbs.slice(0, -1) : crumbs;
+  });
 
   effectivePrimaryAction(): PageHeaderAction | undefined {
     return this.config()?.primaryAction ?? this.primaryAction();

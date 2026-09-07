@@ -8,8 +8,7 @@ import {
   ButtonComponent,
   LOOKUP_SEARCHERS,
   NfSelectComponent,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
   ToastService,
   type LookupSearchFn,
 } from '@platform/lib/anatomy';
@@ -43,15 +42,13 @@ function addMonthsIso(from: string, months: number): string {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     ButtonComponent,
     NfSelectComponent,
     TranslateModule,
   ],
   template: `
-    <nf-page-shell scroll>
-      <nf-page-header [config]="headerConfig"></nf-page-header>
+    <nf-screen [header]="headerConfig" [scroll]="true">
 
       <div class="panel">
         <label>{{ 'chantiers.sousTraitance.create.fields.chantier' | translate }}</label>
@@ -115,7 +112,7 @@ function addMonthsIso(from: string, months: number): string {
           </nf-button>
         </div>
       </div>
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [`
     :host { display: block; height: 100%; }

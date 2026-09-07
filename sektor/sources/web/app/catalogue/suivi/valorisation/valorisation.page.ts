@@ -28,17 +28,15 @@ import type { ValorisationSnapshot, FamilleValorisation, LocationValorisation } 
     BadgeComponent,
   ],
   template: `
-    <nf-page-shell [scroll]="true">
-      <nf-page-header [config]="config.headerConfig" (actionClick)="onHeaderAction($event)">
-        <div actions class="valorisation-header-actions">
-          <nf-input
-            class="valorisation-date-field"
-            type="date"
-            [label]="'inventory.valorisation.date' | translate"
-            [ngModel]="selectedDateValue()"
-            (ngModelChange)="onDateChange($event)" />
-        </div>
-      </nf-page-header>
+    <nf-screen [header]="config.headerConfig" [scroll]="true" (actionClick)="onHeaderAction($event)">
+      <div actions class="valorisation-header-actions">
+        <nf-input
+          class="valorisation-date-field"
+          type="date"
+          [label]="'inventory.valorisation.date' | translate"
+          [ngModel]="selectedDateValue()"
+          (ngModelChange)="onDateChange($event)" />
+      </div>
 
       @if (loading()) {
         <div class="valorisation-loading">
@@ -87,7 +85,7 @@ import type { ValorisationSnapshot, FamilleValorisation, LocationValorisation } 
           </nf-dashboard-grid>
         </div>
       }
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [

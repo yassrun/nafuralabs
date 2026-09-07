@@ -1,5 +1,4 @@
-<nf-page-shell>
-  <nf-page-header [config]="headerConfig"></nf-page-header>
+<nf-screen [header]="headerConfig">
 
   <nf-entity-listing
     #listing
@@ -8,4 +7,4 @@
     (action)="onAction($event)"
     (smartImportCompleted)="onSmartImportComplete($event)">
   </nf-entity-listing>
-</nf-page-shell>
+</nf-screen>

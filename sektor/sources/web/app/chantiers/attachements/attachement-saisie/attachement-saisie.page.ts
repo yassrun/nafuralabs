@@ -7,8 +7,7 @@ import {
   ButtonComponent,
   LOOKUP_SEARCHERS,
   NfSelectComponent,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
   type LookupSearchFn,
 } from '@platform/lib/anatomy';
 import { ChantierApiService } from '../../services/chantier-api.service';
@@ -31,15 +30,13 @@ const STATUTS_FIGES = new Set([
   imports: [
     FormsModule,
     RouterLink,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     ButtonComponent,
     NfSelectComponent,
     TranslateModule,
   ],
   template: `
-    <nf-page-shell scroll>
-      <nf-page-header [config]="pageHeaderConfig"></nf-page-header>
+    <nf-screen [header]="pageHeaderConfig" [scroll]="true">
 
       <div class="toolbar">
         <a routerLink="/chantiers/attachements" [queryParams]="backQueryParams()" class="link-back">← Liste</a>
@@ -145,7 +142,7 @@ const STATUTS_FIGES = new Set([
           }
         }
       }
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [`
     :host { display: block; height: 100%; }

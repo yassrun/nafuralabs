@@ -1,5 +1,4 @@
-<nf-page-shell>
-  <nf-page-header [config]="headerConfigOverride()"></nf-page-header>
+<nf-screen [header]="headerConfigOverride()">
 
   @if (mode() === 'edit') {
     <nav class="tabs">
@@ -444,4 +443,4 @@
       </article>
     </section>
   }
-</nf-page-shell>
+</nf-screen>
