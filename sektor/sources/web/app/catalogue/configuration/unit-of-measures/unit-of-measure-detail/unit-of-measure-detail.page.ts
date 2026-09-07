@@ -22,8 +22,7 @@ import { UNIT_OF_MEASURE_DETAIL_CONFIG } from '../config';
   standalone: true,
   imports: [...ConfigDrivenDetailPageImports],
   template: `
-    <nf-page-shell scroll>
-      <nf-page-header [config]="headerConfig"></nf-page-header>
+    <nf-screen [header]="headerConfig" [scroll]="true">
       <nf-entity-detail
         #detail
         [config]="config"
@@ -34,7 +33,7 @@ import { UNIT_OF_MEASURE_DETAIL_CONFIG } from '../config';
         [saving]="isSaving()"
         (action)="onAction($event)">
       </nf-entity-detail>
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [ConfigDrivenDetailPageStyles],

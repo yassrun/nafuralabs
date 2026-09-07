@@ -8,8 +8,7 @@ import {
   buildRouteBreadcrumbs,
   ButtonComponent,
   ConfigDrivenListingPageStyles,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
   ToastService,
 } from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
@@ -33,16 +32,14 @@ type StatusFilter = 'ALL' | ContratSousTraitanceStatus;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     MadCurrencyPipe,
     FilterResetComponent,
     ButtonComponent,
     TranslateModule,
   ],
   template: `
-    <nf-page-shell scroll>
-      <nf-page-header [config]="headerConfig()"></nf-page-header>
+    <nf-screen [header]="headerConfig()" [scroll]="true">
 
       <div class="toolbar">
         <div class="toolbar__search">
@@ -121,7 +118,7 @@ type StatusFilter = 'ALL' | ContratSousTraitanceStatus;
           </tbody>
         </table>
       </div>
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [
     ConfigDrivenListingPageStyles,

@@ -32,6 +32,16 @@ export class ContratDetailPage extends ConfigDrivenDetailPage<ContratAchat> {
   private readonly translate = inject(TranslateService);
   readonly facade = createDetailFacadeFromCrud<ContratAchat, ContratAchatCreate>({ crud: this.crud, lookups: () => this.crud.lookups() });
   readonly config = buildContratDetailConfig(this.translate);
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+    if (this.mode() !== 'create') return;
+    const fournisseurId = this.route.snapshot.queryParamMap.get('fournisseurId');
+    if (!fournisseurId) return;
+    const current = this.item();
+    this.item.set({ ...(current ?? ({} as ContratAchat)), fournisseurId });
+  }
+
   get headerTitle(): string {
     if (this.mode() === 'create') return this.translate.instant('achats.contrat.createTitle');
     const item = this.item();

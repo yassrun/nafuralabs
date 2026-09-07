@@ -4,8 +4,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } 
 import {
   ButtonComponent,
   ConfirmDialogService,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
 } from '@platform/lib/anatomy';
 import type { PageHeaderConfig } from '@platform/lib/anatomy';
 
@@ -21,7 +20,7 @@ type TabId = 'file' | 'editions';
   selector: 'app-catalogue-console',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageShellComponent, PageHeaderComponent, ButtonComponent],
+  imports: [ScreenComponent, ButtonComponent],
   templateUrl: './catalogue-console.page.html',
   styleUrl: './catalogue-console.page.scss',
 })

@@ -8,8 +8,7 @@ import {
   LOOKUP_SEARCHERS,
   NfSelectComponent,
   type LookupSearchFn,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
 } from '@platform/lib/anatomy';
 
 import type { PointageEngin } from '@app/catalogue/models';
@@ -21,14 +20,12 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
   imports: [
     FormsModule,
     TranslateModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     ButtonComponent,
     NfSelectComponent,
   ],
   template: `
-    <nf-page-shell [scroll]="true">
-      <nf-page-header [config]="header()"></nf-page-header>
+    <nf-screen [header]="header()" [scroll]="true">
 
       <section class="form-card" data-testid="pointage-engin-form">
         <h3>{{ 'materielGmao.pointage.quick' | translate }}</h3>
@@ -91,7 +88,7 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
           </tbody>
         </table>
       </div>
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [

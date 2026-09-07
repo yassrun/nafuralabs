@@ -9,8 +9,7 @@ import {
   ButtonComponent,
   LOOKUP_SEARCHERS,
   NfSelectComponent,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
   ToastService,
   type LookupSearchFn,
   type NfSelectOption,
@@ -86,8 +85,7 @@ function todayIso(): string {
   imports: [
     CommonModule,
     FormsModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     MadCurrencyPipe,
     FilterResetComponent,
     ButtonComponent,
@@ -95,8 +93,7 @@ function todayIso(): string {
     TranslateModule,
   ],
   template: `
-    <nf-page-shell scroll>
-      <nf-page-header [config]="headerConfig"></nf-page-header>
+    <nf-screen [header]="headerConfig" [scroll]="true">
 
       <div class="toolbar">
         <input class="search" type="search" placeholder="Chantier, titre, type…"
@@ -191,7 +188,7 @@ function todayIso(): string {
           }
         </div>
       }
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [`
     :host { display: block; height: 100%; }

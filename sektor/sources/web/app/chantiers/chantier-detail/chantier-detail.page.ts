@@ -7,7 +7,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { map } from 'rxjs/operators';
 
 import { BadgeComponent, ButtonComponent, EmptyStateComponent } from '@platform/lib/anatomy/components';
-import { PageHeaderComponent, PageShellComponent, ToastService, ConfirmDialogService } from '@platform/lib/anatomy';
+import { ScreenComponent, ToastService, ConfirmDialogService } from '@platform/lib/anatomy';
 import { AttachmentListComponent } from '@platform/features/collaboration/doc-manager/components/attachment-list.component';
 import {
   DOCUMENT_ATTACHMENT_CONFIG,
@@ -77,11 +77,10 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
   selector: 'app-chantier-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, PageShellComponent, PageHeaderComponent, BadgeComponent, ButtonComponent, EmptyStateComponent, MadCurrencyPipe, TranslateModule, AttachmentListComponent, PhotoChantierGalleryComponent, ChantierLotsTabComponent, ChantierEquipeTabComponent, PilotageTabComponent],
+  imports: [CommonModule, RouterLink, ScreenComponent, BadgeComponent, ButtonComponent, EmptyStateComponent, MadCurrencyPipe, TranslateModule, AttachmentListComponent, PhotoChantierGalleryComponent, ChantierLotsTabComponent, ChantierEquipeTabComponent, PilotageTabComponent],
   template: `
-    <nf-page-shell [scroll]="true">
+    <nf-screen [header]="headerConfig()" [scroll]="true">
       @if (chantier(); as c) {
-        <nf-page-header [config]="headerConfig()"></nf-page-header>
 
         <!-- AC-1 — une seule identité de page : le header porte code + nom. Ici seulement
              le statut, le client et la source, sans second H1 ni code dupliqué. -->
@@ -290,7 +289,7 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
           (action)="goBack()">
         </nf-empty-state>
       }
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [`
     :host { display: block; height: 100%; }

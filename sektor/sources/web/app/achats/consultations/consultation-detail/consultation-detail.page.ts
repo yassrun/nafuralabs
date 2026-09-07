@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -14,7 +14,6 @@ import {
   LOOKUP_SEARCHERS,
   NfSelectComponent,
   type LookupSearchFn,
-  type NfSelectOption,
 } from '@platform/lib/anatomy';
 import { FieldTemplateDirective } from '@platform/lib/anatomy/components/organisms/entity-detail';
 import {
@@ -22,11 +21,14 @@ import {
   type ReviewedExtraction,
 } from '@platform/app/document-extraction/smart-import';
 
+import { ItemsApiService } from '@app/catalogue/services/items-api.service';
+import { partnerRaisonSocialeFromLabel } from '@app/socle/shared/services/erp-lookup.service';
 import {
   DEVIS_CONSULTATION_IMPORT_DEFINITION,
   DevisConsultationImportService,
 } from '@app/socle/shared/smart-import/handlers/devis-consultation-import.handler';
 
+import { toPanierLigne, type ConsultationPanierLigne } from '../consultation-panier-ligne';
 import { buildConsultationDetailConfig } from '../config';
 import {
   ConsultationAchatApiService,
@@ -37,6 +39,16 @@ import {
   type ConsultationEnvoi,
   type PartnerContactRow,
 } from '../services';
+
+interface DestDraftRow {
+  key: string;
+  id?: string;
+  fournisseurId: string;
+  fournisseurNom: string;
+  contacts: PartnerContactRow[];
+  statut: string;
+  sent: boolean;
+}
 
 @Component({
   selector: 'app-consultation-detail',
@@ -55,80 +67,12 @@ import {
   templateUrl: './consultation-detail.page.html',
   styleUrl: './consultation-detail.page.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styles: [
-    ConfigDrivenDetailPageStyles,
-    `
-      .cs-import-block,
-      .cs-dest-block {
-        margin-top: 1rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        max-width: 48rem;
-      }
-      .cs-import-block h2,
-      .cs-dest-block h2 {
-        margin: 0;
-        font-size: 1rem;
-      }
-      .cs-callout {
-        margin: 0;
-        padding: 0.75rem 1rem;
-        background: var(--nf-color-surface-muted, #f4f6f8);
-        border-radius: 0.35rem;
-      }
-      .cs-hint,
-      .cs-empty {
-        margin: 0;
-        color: var(--nf-color-text-secondary, #5c6570);
-      }
-      .cs-error {
-        margin: 0;
-        color: var(--nf-color-danger, #b42318);
-      }
-      .cs-import-block table,
-      .cs-panier-table,
-      .cs-dest-table,
-      .cs-journal-table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      .cs-import-block th,
-      .cs-import-block td,
-      .cs-panier-table th,
-      .cs-panier-table td,
-      .cs-dest-table th,
-      .cs-dest-table td,
-      .cs-journal-table th,
-      .cs-journal-table td {
-        text-align: left;
-        padding: 0.45rem 0.65rem;
-        border-bottom: 1px solid var(--nf-color-border, #e2e5e9);
-      }
-      .cs-dest-add {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        align-items: flex-end;
-      }
-      .cs-dest-add nf-select {
-        min-width: 16rem;
-      }
-      .cs-dest-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        align-items: center;
-      }
-      .cs-dest-table td nf-smart-import-trigger {
-        display: inline-flex;
-      }
-    `,
-  ],
+  styles: [ConfigDrivenDetailPageStyles],
 })
 export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationAchat> {
   private readonly crud = inject(ConsultationFacade);
   private readonly api = inject(ConsultationAchatApiService);
+  private readonly itemsApi = inject(ItemsApiService);
   private readonly importer = inject(DevisConsultationImportService);
   private readonly translate = inject(TranslateService);
   private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
@@ -140,6 +84,7 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
   readonly importDefinition = DEVIS_CONSULTATION_IMPORT_DEFINITION;
   readonly importHint = signal<string | undefined>(undefined);
   readonly importErreur = signal<string | undefined>(undefined);
+  readonly panierLignes = signal<ConsultationPanierLigne[]>([]);
 
   private fournisseurHits: Array<{ value: string; label: string }> = [];
 
@@ -149,11 +94,12 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
     return hits;
   };
 
+  readonly destDraft = signal<DestDraftRow[]>([]);
   readonly draftFournisseurId = signal('');
   readonly draftFournisseurLabel = signal('');
-  readonly draftContactId = signal('');
+  readonly draftSelectedContactIds = signal<string[]>([]);
+  readonly destContactsReady = signal(false);
   readonly contactsEmail = signal<PartnerContactRow[]>([]);
-  readonly sansEmailFournisseurId = signal<string | undefined>(undefined);
   readonly destErreur = signal<string | undefined>(undefined);
   readonly destSaving = signal(false);
   readonly envoyerErreur = signal<string | undefined>(undefined);
@@ -170,8 +116,9 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
     this.isLoading.set(true);
     try {
       const item = await this.facade.loadById(id);
-      this.item.set(item);
+      this.applyItem(item);
       this.mode.set('view');
+      await this.resolvePanier(item.clesStables ?? []);
     } catch {
       this.showError(this.translate.instant('achats.consultation.loadError'));
       this.navigateToList();
@@ -180,16 +127,12 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
     }
   }
 
-  panierCles(): string[] {
-    return this.item()?.clesStables ?? [];
-  }
-
   lignes(): ConsultationDevisLigne[] {
     return (this.item()?.devis ?? []).flatMap((d) => d.lignes ?? []);
   }
 
-  destinataires(): ConsultationDestinataire[] {
-    return this.item()?.destinataires ?? [];
+  destinataires(): DestDraftRow[] {
+    return this.destDraft();
   }
 
   envois(): ConsultationEnvoi[] {
@@ -200,12 +143,29 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
     return this.envois().length > 0;
   }
 
+  readonly destDirty = computed(() => {
+    return snapshotDest(this.destDraft()) !== snapshotDest(this.serverDestRows());
+  });
+
   canEnvoyer(): boolean {
+    if (this.destDirty()) {
+      return false;
+    }
     const sent = new Set(this.envois().map((e) => e.destinataireId));
-    return this.destinataires().some((d) => d.id && !sent.has(d.id));
+    return this.destDraft().some((d) => d.id && !sent.has(d.id));
   }
 
-  statutDestinataire(row: ConsultationDestinataire): string {
+  readonly canAddDestinataire = computed(() => {
+    if (!this.draftFournisseurId().trim() || !this.destContactsReady()) {
+      return false;
+    }
+    return this.draftSelectedContactIds().length > 0;
+  });
+
+  statutDestinataire(row: DestDraftRow): string {
+    if (!row.id) {
+      return this.translate.instant('achats.consultation.destinataires.brouillon');
+    }
     const code = (row.statut || 'EN_ATTENTE').toUpperCase();
     const key =
       code === 'DEVIS_RECU'
@@ -214,66 +174,130 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
     return this.translate.instant(key);
   }
 
-  contactSelectOptions(): NfSelectOption[] {
-    return this.contactsEmail().map((c) => ({
-      value: c.id,
-      label: `${c.nom} — ${c.email ?? ''}`.trim(),
-    }));
+  contactsLabel(row: DestDraftRow): string {
+    return row.contacts
+      .map((c, i) => {
+        const role = i === 0
+          ? this.translate.instant('achats.consultation.destinataires.to')
+          : this.translate.instant('achats.consultation.destinataires.cc');
+        const nom = (c.nom || '').trim();
+        const email = (c.email || '').trim();
+        const who = [nom, email].filter(Boolean).join(' · ');
+        return who ? `${who} (${role})` : role;
+      })
+      .join(', ');
+  }
+
+  isContactChecked(id: string): boolean {
+    return this.draftSelectedContactIds().includes(id);
+  }
+
+  toggleDraftContact(id: string, checked: boolean): void {
+    const current = this.draftSelectedContactIds();
+    if (checked) {
+      if (!current.includes(id)) {
+        this.draftSelectedContactIds.set([...current, id]);
+      }
+      return;
+    }
+    this.draftSelectedContactIds.set(current.filter((x) => x !== id));
+  }
+
+  contactRole(index: number): string {
+    return index === 0
+      ? this.translate.instant('achats.consultation.destinataires.to')
+      : this.translate.instant('achats.consultation.destinataires.cc');
   }
 
   async onFournisseurChange(id: string): Promise<void> {
     const value = (id || '').trim();
     this.draftFournisseurId.set(value);
     const hit = this.fournisseurHits.find((h) => h.value === value);
-    this.draftFournisseurLabel.set(hit?.label ?? '');
-    this.draftContactId.set('');
-    this.sansEmailFournisseurId.set(undefined);
+    this.draftFournisseurLabel.set(partnerRaisonSocialeFromLabel(hit?.label) || hit?.label || '');
+    this.draftSelectedContactIds.set([]);
     this.destErreur.set(undefined);
     this.contactsEmail.set([]);
+    this.destContactsReady.set(false);
     if (!value) return;
     try {
       const all = await this.api.listPartnerContacts(value);
-      const withEmail = (all ?? []).filter((c) => (c.email || '').trim());
+      const withEmail = (all ?? [])
+        .filter((c) => (c.email || '').trim())
+        .sort((a, b) => Number(!!b.isPrimary) - Number(!!a.isPrimary));
       this.contactsEmail.set(withEmail);
-      if (withEmail.length === 0) {
-        this.sansEmailFournisseurId.set(value);
-      } else if (withEmail.length === 1) {
-        this.draftContactId.set(withEmail[0].id);
-      }
+      this.draftSelectedContactIds.set(withEmail.map((c) => c.id));
+      this.destContactsReady.set(true);
     } catch {
       this.destErreur.set(this.translate.instant('achats.consultation.destinataires.error'));
     }
   }
 
-  async addDestinataire(): Promise<void> {
-    const current = this.item();
+  addDestinataire(): void {
     const fournisseurId = this.draftFournisseurId().trim();
-    if (!current || !fournisseurId) return;
-    const contacts = this.contactsEmail();
-    if (contacts.length > 1 && !this.draftContactId().trim()) {
+    if (!fournisseurId || !this.canAddDestinataire()) return;
+    const byId = new Map(this.contactsEmail().map((c) => [c.id, c]));
+    const contacts = this.draftSelectedContactIds()
+      .map((id) => byId.get(id))
+      .filter((c): c is PartnerContactRow => !!c);
+    if (!contacts.length) {
       this.destErreur.set(this.translate.instant('achats.consultation.destinataires.contactRequis'));
       return;
     }
+    const existing = this.destDraft().find((d) => d.fournisseurId === fournisseurId);
+    if (existing?.sent) {
+      this.destErreur.set(this.translate.instant('achats.consultation.destinataires.doublon'));
+      return;
+    }
+    const row: DestDraftRow = {
+      key: existing?.key ?? `draft-${fournisseurId}`,
+      id: existing?.id,
+      fournisseurId,
+      fournisseurNom: this.draftFournisseurLabel() || existing?.fournisseurNom || '',
+      contacts,
+      statut: existing?.statut || 'EN_ATTENTE',
+      sent: false,
+    };
+    if (existing) {
+      this.destDraft.set(this.destDraft().map((d) => (d.fournisseurId === fournisseurId ? row : d)));
+    } else {
+      this.destDraft.set([...this.destDraft(), row]);
+    }
+    this.resetDestDraft();
+  }
+
+  removeDestinataire(row: DestDraftRow): void {
+    if (row.sent) return;
+    this.destDraft.set(this.destDraft().filter((d) => d.key !== row.key));
+  }
+
+  async saveDestinataires(): Promise<void> {
+    const current = this.item();
+    if (!current || !this.destDirty()) return;
     this.destSaving.set(true);
     this.destErreur.set(undefined);
     try {
-      const body: { fournisseurId: string; contactId?: string } = { fournisseurId };
-      if (contacts.length > 1) {
-        body.contactId = this.draftContactId().trim();
-      }
-      const saved = await this.api.addDestinataire(current.id, body);
-      this.item.set(this.crud.enrich(saved));
-      this.resetDestDraft();
+      const saved = await this.api.saveDestinataires(
+        current.id,
+        this.destDraft().map((d) => ({
+          fournisseurId: d.fournisseurId,
+          contactIds: d.contacts.map((c) => c.id),
+        })),
+      );
+      this.applyItem(this.crud.enrich(saved));
     } catch (err) {
       const code = apiCode(err);
       if (code === 'consultation.destinataire.sans_email') {
-        this.sansEmailFournisseurId.set(fournisseurId);
+        this.destErreur.set(this.translate.instant('achats.consultation.destinataires.sansEmail'));
       } else if (code === 'consultation.destinataire.doublon') {
         this.destErreur.set(this.translate.instant('achats.consultation.destinataires.doublon'));
       } else if (code === 'consultation.destinataire.contact_requis') {
         this.destErreur.set(this.translate.instant('achats.consultation.destinataires.contactRequis'));
+      } else if (code === 'consultation.destinataire.deja_envoye') {
+        this.destErreur.set(this.translate.instant('achats.consultation.destinataires.dejaEnvoye'));
+      } else if (code === 'consultation.destinataire.contact_invalide') {
+        this.destErreur.set(this.translate.instant('achats.consultation.destinataires.contactRequis'));
       } else {
-        this.destErreur.set(this.translate.instant('achats.consultation.destinataires.error'));
+        this.destErreur.set(this.translate.instant('achats.consultation.destinataires.saveError'));
       }
     } finally {
       this.destSaving.set(false);
@@ -287,7 +311,7 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
     this.envoyerErreur.set(undefined);
     try {
       const saved = await this.api.envoyer(current.id);
-      this.item.set(this.crud.enrich(saved));
+      this.applyItem(this.crud.enrich(saved));
     } catch {
       this.envoyerErreur.set(this.translate.instant('achats.consultation.envoyerError'));
     } finally {
@@ -295,13 +319,42 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
     }
   }
 
+  private applyItem(item: ConsultationAchat): void {
+    this.item.set(item);
+    this.hydrateDestDraft(item);
+  }
+
+  private hydrateDestDraft(item: ConsultationAchat): void {
+    const sent = new Set((item.envois ?? []).map((e) => e.destinataireId));
+    this.destDraft.set((item.destinataires ?? []).map((d) => toDraftRow(d, sent.has(d.id))));
+  }
+
+  private serverDestRows(): DestDraftRow[] {
+    const item = this.item();
+    if (!item) return [];
+    const sent = new Set((item.envois ?? []).map((e) => e.destinataireId));
+    return (item.destinataires ?? []).map((d) => toDraftRow(d, sent.has(d.id)));
+  }
+
   private resetDestDraft(): void {
     this.draftFournisseurId.set('');
     this.draftFournisseurLabel.set('');
-    this.draftContactId.set('');
+    this.draftSelectedContactIds.set([]);
     this.contactsEmail.set([]);
-    this.sansEmailFournisseurId.set(undefined);
+    this.destContactsReady.set(false);
     this.destErreur.set(undefined);
+  }
+
+  private async resolvePanier(cles: string[]): Promise<void> {
+    const unique = [...new Set(cles.map((c) => c.trim()).filter(Boolean))];
+    if (!unique.length) {
+      this.panierLignes.set([]);
+      return;
+    }
+    const rows = await Promise.all(
+      unique.map(async (cle) => toPanierLigne(cle, await this.itemsApi.getByCleStable(cle))),
+    );
+    this.panierLignes.set(rows);
   }
 
   async onSmartImportComplete(result: ReviewedExtraction, destinataireId: string): Promise<void> {
@@ -319,11 +372,48 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
         );
         return;
       }
-      this.item.set(this.crud.enrich(saved));
+      this.applyItem(this.crud.enrich(saved));
     } catch {
       this.importErreur.set(this.translate.instant('achats.consultation.import.error'));
     }
   }
+}
+
+function toDraftRow(d: ConsultationDestinataire, sent: boolean): DestDraftRow {
+  const contacts: PartnerContactRow[] = (d.contacts ?? [])
+    .filter((c) => c.id)
+    .map((c) => ({
+      id: c.id,
+      partnerId: d.fournisseurId,
+      nom: c.nom || '',
+      email: c.email || d.contactEmail,
+    }));
+  if (!contacts.length && d.contactId) {
+    contacts.push({
+      id: d.contactId,
+      partnerId: d.fournisseurId,
+      nom: '',
+      email: d.contactEmail,
+    });
+  }
+  return {
+    key: d.id,
+    id: d.id,
+    fournisseurId: d.fournisseurId,
+    fournisseurNom: d.fournisseurNom,
+    contacts,
+    statut: d.statut,
+    sent,
+  };
+}
+
+function snapshotDest(rows: DestDraftRow[]): string {
+  return JSON.stringify(
+    rows.map((r) => ({
+      fournisseurId: r.fournisseurId,
+      contactIds: r.contacts.map((c) => c.id),
+    })),
+  );
 }
 
 function apiCode(err: unknown): string | undefined {
@@ -333,4 +423,3 @@ function apiCode(err: unknown): string | undefined {
   }
   return undefined;
 }
-

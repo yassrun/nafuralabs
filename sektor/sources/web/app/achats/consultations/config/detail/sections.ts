@@ -9,7 +9,7 @@ export function buildConsultationSections(t: TranslateService): DetailSectionCon
       id: 'identite',
       title: tr('achats.consultation.form.sections.identite'),
       icon: 'clipboard-list',
-      fields: ['numero', 'statutLabel', 'lienEtude'],
+      fields: ['statutLabel', 'lienEtude'],
       columns: 2,
     },
     {

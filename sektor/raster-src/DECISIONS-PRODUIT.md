@@ -7,7 +7,7 @@
 >
 > Comment continuer : ajouter une entrée datée sous **Gelé** ou **Ouvert**. Une fois gelé, on ne rejoue pas le débat dans le chat — on amende ce fichier.
 
-Dernière passe : 28/08/2026 (consultation RFQ : 1 panier + N destinataires — casse « un fournisseur » du 22/08).
+Dernière passe : 04/09/2026 (consultation : brouillon destinataires + N contacts CC — casse write-through du matin).
 
 ---
 
@@ -327,7 +327,7 @@ Ordre des gestes : **panier d’abord** → **destinataires ensuite** (contacts)
 
 Create `/achats/consultations/new` = panier seulement. Pas de wizard. Fiche = destinataires + CTA Envoyer + suivi.
 
-Ajouter un fournisseur **refuse** s’il n’a aucun `PartnerContact` avec e-mail. Pas de mail collé. Pas de fallback `partners.email`.
+Ajouter un fournisseur **refuse** s’il n’a **aucun** `PartnerContact` avec e-mail. **Amendé 04/09 (brouillon)** : [`lots/consultation/destinataires-brouillon-cc/CONTRAT.md`](lots/consultation/destinataires-brouillon-cc/CONTRAT.md) — brouillon local + Enregistrer ; N contacts To+CC ; créer un contact sur la fiche, pas sur le RFQ. Write-through du matin **cassé**.
 
 ### Statut (dérivé des devis, pas de l’envoi)
 
@@ -342,6 +342,27 @@ Après le 1er envoi : panier **figé** ; on peut encore ajouter un destinataire 
 
 - Overlay étude, flag CONSULTÉ, gate N devis, portail invité, attribution / BC, scoring AO, saisie manuelle PU — pas dans ce tour.
 - Réintroduire `fournisseur_id` unique sur la consultation.
+
+---
+
+## Gelé (04/09/2026) — contact write-through depuis la consultation
+
+**Cassé le soir même** — voir gel brouillon ci-dessous. Le sous-lot `contact-write-through` n’est plus la vérité produit.
+
+---
+
+## Gelé (04/09/2026) — destinataires brouillon + N contacts (CC)
+
+**Amende** AC-4 / AC-6 du 28/08. **Casse** le write-through du matin (promote / saisie nom+e-mail sur la consultation).
+
+- Destinataire = **1 fournisseur** (unique) + **N `PartnerContact`**.
+- Ajouter = brouillon local. Persist = **Enregistrer** (`PUT …/destinataires`).
+- E-mails = liste de contacts. 0 contact → lien `/achats/fournisseurs/{id}?tab=contacts`. Pas de champ libre, pas de promote.
+- **Principal** : un seul `isPrimary` par fournisseur (toggle fiche). C’est le destinataire « À » par défaut.
+- Contacts = **onglet Contacts** sur la fiche fournisseur. Contrats fournisseur = **onglet Contrats** (pas mélangés avec les personnes).
+- Envoi : To = 1er contact, CC = les autres. Devis toujours 1 par fournisseur.
+
+Ancrage : [`lots/consultation/destinataires-brouillon-cc/CONTRAT.md`](lots/consultation/destinataires-brouillon-cc/CONTRAT.md).
 
 ---
 

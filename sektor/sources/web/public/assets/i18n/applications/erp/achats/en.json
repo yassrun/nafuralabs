@@ -672,7 +672,8 @@
       },
       "lien": {
         "liee": "Linked",
-        "hors": "Standalone"
+        "hors": "Standalone",
+        "ouvrirDossier": "Open the study dossier"
       },
       "list": {
         "columns": {
@@ -716,20 +717,29 @@
       },
       "destinataires": {
         "title": "Recipients",
-        "empty": "No recipients.",
+        "empty": "Add the suppliers to consult.",
         "add": "Add",
+        "save": "Save",
+        "remove": "Remove",
         "fournisseur": "Supplier",
         "email": "Email",
+        "contacts": "Contacts",
+        "to": "To",
+        "cc": "Cc",
+        "brouillon": "Draft",
         "statut": "Status",
         "enAttente": "Pending",
         "devisRecu": "Quote received",
         "devis": "Quote",
         "placeholder": "Type ≥ 2 chars — search a supplier…",
         "contactPlaceholder": "Choose the email contact…",
-        "contactRequis": "Choose the email contact.",
-        "sansEmail": "Cannot add this supplier: no contact with an email on the record. Add a contact, then retry.",
+        "contactRequis": "Check at least one email contact.",
+        "sansEmail": "No email contact on the supplier record. Add a contact, then retry.",
+        "ajouterContact": "Add a contact",
         "ouvrirFiche": "Open supplier record",
         "doublon": "This supplier is already a recipient of this consultation.",
+        "dejaEnvoye": "A recipient already sent cannot be removed.",
+        "saveError": "Could not save recipients.",
         "error": "Could not add the recipient."
       },
       "envoyer": "Send the consultation",

@@ -22,12 +22,19 @@ export interface ConsultationDevis {
   lignes: ConsultationDevisLigne[];
 }
 
+export interface ConsultationDestinataireContact {
+  id: string;
+  nom?: string;
+  email?: string | null;
+}
+
 export interface ConsultationDestinataire {
   id: string;
   fournisseurId: string;
   fournisseurNom: string;
   contactId: string;
   contactEmail: string;
+  contacts?: ConsultationDestinataireContact[];
   statut: string;
 }
 
@@ -44,6 +51,7 @@ export interface PartnerContactRow {
   partnerId: string;
   nom: string;
   email?: string | null;
+  isPrimary?: boolean;
 }
 
 export interface ConsultationAchat {
@@ -90,6 +98,7 @@ export interface ConsultationAchatCreate {
 export interface ConsultationDestinataireCreate {
   fournisseurId: string;
   contactId?: string;
+  contactIds?: string[];
 }
 
 export interface ConsultationAchatPanier {
@@ -173,11 +182,22 @@ export class ConsultationAchatApiService extends FeatureApiService<
     return this.post<ConsultationAchat>(`${this.basePath}/${id}/destinataires`, body);
   }
 
+  saveDestinataires(
+    id: string,
+    items: Array<{ fournisseurId: string; contactIds: string[] }>,
+  ): Promise<ConsultationAchat> {
+    return this.put<ConsultationAchat>(`${this.basePath}/${id}/destinataires`, { items });
+  }
+
   envoyer(id: string): Promise<ConsultationAchat> {
     return this.post<ConsultationAchat>(`${this.basePath}/${id}/envoyer`, {});
   }
 
   listPartnerContacts(partnerId: string): Promise<PartnerContactRow[]> {
     return this.get<PartnerContactRow[]>(`/api/v1/partners/${partnerId}/contacts`);
+  }
+
+  getPartner(partnerId: string): Promise<{ id: string; email?: string | null; raisonSociale?: string }> {
+    return this.get(`/api/v1/partners/${partnerId}`);
   }
 }

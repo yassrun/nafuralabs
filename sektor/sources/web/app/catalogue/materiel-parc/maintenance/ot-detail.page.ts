@@ -1,25 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { PageHeaderComponent, PageShellComponent } from '@platform/lib/anatomy';
+import { ScreenComponent } from '@platform/lib/anatomy';
 
 import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao-facade.service';
 
 @Component({
   selector: 'app-ot-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslateModule, PageShellComponent, PageHeaderComponent],
+  imports: [CommonModule, RouterModule, TranslateModule, ScreenComponent],
   template: `
-    <nf-page-shell [scroll]="true">
+    <nf-screen [header]="screenHeader()" [scroll]="true">
       @if (ot(); as o) {
-        <nf-page-header [config]="header(o)">
-        </nf-page-header>
-
         <div class="grid">
           <section class="card">
             <h3>{{ 'materielGmao.ot.costs' | translate }}</h3>
@@ -41,7 +38,7 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
       } @else {
         <p>{{ 'materielGmao.empty.ot' | translate }}</p>
       }
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
@@ -76,6 +73,11 @@ export class OtDetailPage {
     ),
     { initialValue: undefined },
   );
+
+  readonly screenHeader = computed(() => {
+    const o = this.ot();
+    return o ? this.header(o) : { title: this.translate.instant('materielGmao.ot.listTitle') };
+  });
 
   header(o: { numero: string; description: string }) {
     return {

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 
-import { ButtonComponent, PageHeaderComponent, PageShellComponent } from '@platform/lib/anatomy';
+import { ButtonComponent, ScreenComponent } from '@platform/lib/anatomy';
 import type { PageHeaderConfig } from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 
@@ -23,8 +23,7 @@ import {
   imports: [
     FormsModule,
     RouterLink,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     ButtonComponent,
     MadCurrencyPipe
 ],

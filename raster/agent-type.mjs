@@ -26,6 +26,7 @@ export function parseListField(raw) {
 
 export function inferWorkType(fm) {
   const ty = (fm.type || "").toLowerCase();
+  if (ty === "qa") return "feature";
   if (WORK_TYPES.has(ty)) return ty;
   const tags = parseListField(fm.tags).map((t) => t.toLowerCase());
   for (const t of ["bug", "tech", "physical", "spec"]) {
@@ -48,6 +49,7 @@ export function resolveAgentType(type, given) {
   if (!expected) return "";
   const g = (given || "").toLowerCase().trim();
   if (!g) return expected;
+  if (g === "qa" && expected === "exec") return "exec";
   if (g !== expected) {
     throw new Error(
       `agent_type "${g}" incompatible with type "${type}" (expected ${expected})`

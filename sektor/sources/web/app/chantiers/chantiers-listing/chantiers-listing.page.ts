@@ -8,8 +8,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@platform/lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
 import {
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
   ButtonComponent,
   NfSelectComponent,
   type NfSelectOption,
@@ -38,8 +37,7 @@ import { formatPercentDisplay } from '@app/socle/shared/utils/percent-display.ut
   imports: [
     CommonModule,
     FormsModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     FilterResetComponent,
     ButtonComponent,
     NfSelectComponent,
@@ -47,8 +45,7 @@ import { formatPercentDisplay } from '@app/socle/shared/utils/percent-display.ut
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nf-page-shell scroll>
-      <nf-page-header [config]="headerConfig()"></nf-page-header>
+    <nf-screen [header]="headerConfig()" [scroll]="true">
 
       <div class="toolbar">
         <input
@@ -210,7 +207,7 @@ import { formatPercentDisplay } from '@app/socle/shared/utils/percent-display.ut
           </nf-button>
         </div>
       }
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [`
     :host { display: block; height: 100%; }

@@ -1,5 +1,4 @@
-<nf-page-shell>
-  <nf-page-header [config]="headerConfig"></nf-page-header>
+<nf-screen [header]="headerConfig">
 
   @if (mode() !== 'create' && item(); as bc) {
     <section class="approval-bar">
@@ -162,4 +161,4 @@
       </ng-container>
     }
   </nf-entity-detail>
-</nf-page-shell>
+</nf-screen>

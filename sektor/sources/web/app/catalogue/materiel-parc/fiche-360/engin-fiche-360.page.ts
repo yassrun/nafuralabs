@@ -1,11 +1,11 @@
 
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { combineLatest, from, map, of, switchMap } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { PageHeaderComponent, PageShellComponent } from '@platform/lib/anatomy';
+import { ScreenComponent } from '@platform/lib/anatomy';
 
 import type {
   AffectationChantier,
@@ -45,12 +45,11 @@ const EMPTY_ENGIN_FICHE_VM: EnginFicheVm = {
 @Component({
   selector: 'app-engin-fiche-360',
   standalone: true,
-  imports: [RouterModule, TranslateModule, PageShellComponent, PageHeaderComponent],
+  imports: [RouterModule, TranslateModule, ScreenComponent],
   template: `
-    <nf-page-shell [scroll]="true">
+    <nf-screen [header]="screenHeader()" [scroll]="true">
       @if (vm(); as m) {
         @if (m.engine; as eng) {
-          <nf-page-header [config]="header(eng)"></nf-page-header>
 
           <section class="tabs">
             <a class="tab" [class.active]="tab() === 'id'" (click)="setTab('id')">{{
@@ -158,7 +157,7 @@ const EMPTY_ENGIN_FICHE_VM: EnginFicheVm = {
           <p>{{ 'materielGmao.empty.engine' | translate }}</p>
         }
       }
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
@@ -293,6 +292,20 @@ export class EnginFiche360Page {
   setTab(t: 'id' | 'aff' | 'maint' | 'fuel' | 'ctrl'): void {
     this.tab.set(t);
   }
+
+  readonly screenHeader = computed(() => {
+    const eng = this.vm().engine;
+    return eng
+      ? this.header(eng)
+      : {
+          title: this.translate.instant('materielGmao.fiche360.title'),
+          breadcrumbs: [
+            { label: this.translate.instant('nav.stock'), route: '/inventory/suivi/etat-stock' },
+            { label: this.translate.instant('nav.materiel'), route: '/materiel/parc' },
+            { label: this.translate.instant('materielGmao.fiche360.title') },
+          ],
+        };
+  });
 
   header(eng: CatalogueMateriel) {
     return {

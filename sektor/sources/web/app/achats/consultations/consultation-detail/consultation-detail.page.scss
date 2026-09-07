@@ -1,5 +1,155 @@
-/* Detail chrome = nf-entity-detail + import magique (AC-4…AC-6). */
+/* Detail chrome = nf-entity-detail + destinataires / journal / import. */
 :host {
   display: block;
   height: 100%;
+}
+
+.cs-import-block,
+.cs-dest-block {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 52rem;
+}
+
+.cs-import-block h2,
+.cs-dest-block h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.cs-callout {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: var(--nf-color-surface-muted, #f4f6f8);
+  border-radius: 0.35rem;
+}
+
+.cs-hint,
+.cs-empty {
+  margin: 0;
+  color: var(--nf-color-text-secondary, #5c6570);
+}
+
+.cs-hint a {
+  margin-left: 0.35rem;
+}
+
+.cs-error {
+  margin: 0;
+  color: var(--nf-color-danger, #b42318);
+}
+
+.cs-lien-etude {
+  font-weight: 500;
+}
+
+.cs-import-block table,
+.cs-panier-table,
+.cs-dest-table,
+.cs-journal-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cs-import-block th,
+.cs-import-block td,
+.cs-panier-table th,
+.cs-panier-table td,
+.cs-dest-table th,
+.cs-dest-table td,
+.cs-journal-table th,
+.cs-journal-table td {
+  text-align: left;
+  padding: 0.45rem 0.65rem;
+  border-bottom: 1px solid var(--nf-color-border, #e2e5e9);
+}
+
+.cs-panier-code {
+  white-space: nowrap;
+  color: var(--nf-color-text-secondary, #5c6570);
+  font-variant-numeric: tabular-nums;
+}
+
+.cs-dest-add {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.cs-dest-add__fournisseur {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.cs-dest-add__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.cs-dest-add__row nf-select,
+.cs-dest-add__row nf-input {
+  flex: 1 1 14rem;
+  min-width: 14rem;
+}
+
+.cs-dest-contacts {
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--nf-color-border, #e2e5e9);
+  border-radius: 0.35rem;
+  width: 100%;
+  max-width: 32rem;
+}
+
+.cs-dest-contacts legend {
+  padding: 0 0.35rem;
+  font-size: 0.85rem;
+}
+
+.cs-dest-contact {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0.35rem 0;
+  font-size: 0.9rem;
+}
+
+.cs-dest-role {
+  color: var(--nf-color-text-secondary, #5c6570);
+}
+
+.cs-dest-add-contact {
+  display: inline-block;
+  margin-top: 0.35rem;
+}
+
+.cs-dest-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  padding-top: 0.25rem;
+}
+
+.cs-dest-table td nf-smart-import-trigger {
+  display: inline-flex;
+}
+
+.cs-dest-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cs-dest-group__contacts {
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  color: var(--nf-color-text-secondary, #5c6570);
+  font-size: 0.85rem;
 }

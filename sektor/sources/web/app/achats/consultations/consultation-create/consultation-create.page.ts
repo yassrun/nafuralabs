@@ -5,8 +5,7 @@ import { Router } from '@angular/router';
 import {
   ActionBarComponent,
   ButtonComponent,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
 } from '@platform/lib/anatomy';
 import type { PageHeaderConfig } from '@platform/lib/anatomy';
 
@@ -24,8 +23,7 @@ export interface ConsultationPanierLigne {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     ButtonComponent,
     ActionBarComponent,
   ],

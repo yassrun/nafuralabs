@@ -8,6 +8,7 @@ import ma.nafura.achats.api.dto.ConsultationAchatDto;
 import ma.nafura.achats.api.request.ConsultationAchatCreateDto;
 import ma.nafura.achats.api.request.ConsultationAchatPanierDto;
 import ma.nafura.achats.api.request.ConsultationDestinataireCreateDto;
+import ma.nafura.achats.api.request.ConsultationDestinatairesSaveDto;
 import ma.nafura.achats.api.request.ConsultationDevisImportDto;
 import ma.nafura.achats.service.ConsultationAchatService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -63,6 +65,13 @@ public class ConsultationAchatController {
     public ResponseEntity<ConsultationAchatDto> addDestinataire(
             @PathVariable UUID id, @Valid @RequestBody ConsultationDestinataireCreateDto body) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.addDestinataire(id, body));
+    }
+
+    @PutMapping("/{id}/destinataires")
+    @RequirePermission("achats.consultation.create")
+    public ResponseEntity<ConsultationAchatDto> saveDestinataires(
+            @PathVariable UUID id, @RequestBody ConsultationDestinatairesSaveDto body) {
+        return ResponseEntity.ok(service.saveDestinataires(id, body));
     }
 
     @PatchMapping("/{id}/panier")

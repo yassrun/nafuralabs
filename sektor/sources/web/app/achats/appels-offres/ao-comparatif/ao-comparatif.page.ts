@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import {PageHeaderComponent, PageShellComponent, ToastService, ButtonComponent, ConfirmDialogService} from '@platform/lib/anatomy';
+import {ScreenComponent, ToastService, ButtonComponent, ConfirmDialogService} from '@platform/lib/anatomy';
 import type { PageHeaderConfig } from '@platform/lib/anatomy/components';
 import type { AppelOffre, ScoringAO } from '@app/achats/models';
 
@@ -14,7 +14,7 @@ import { AoApiService, AoFacade } from '../services';
   selector: 'app-ao-comparatif',
   standalone: true,
   imports: [
-    ButtonComponent,CommonModule, DecimalPipe, RouterLink, TranslateModule, PageShellComponent, PageHeaderComponent],
+    ButtonComponent,CommonModule, DecimalPipe, RouterLink, TranslateModule, ScreenComponent],
   templateUrl: './ao-comparatif.page.html',
   styleUrl: './ao-comparatif.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

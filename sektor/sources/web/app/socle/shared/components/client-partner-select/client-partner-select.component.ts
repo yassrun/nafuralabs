@@ -15,6 +15,7 @@ import { NfSelectComponent, type NfSelectOption } from '@platform/lib/anatomy';
 
 import {
   ErpLookupService,
+  partnerRaisonSocialeFromLabel,
   partnerSelectOptions,
 } from '@app/socle/shared/services/erp-lookup.service';
 
@@ -24,7 +25,7 @@ export interface ClientPartnerSelection {
 }
 
 /**
- * Sélecteur Partner (rôle CLIENT) — valeur = UUID, libellé = code — raison sociale.
+ * Sélecteur Partner (rôle CLIENT) — valeur = UUID, libellé = raison sociale (code en secondaire).
  * Pas de saisie libre : le nom est dérivé du référentiel.
  */
 @Component({
@@ -117,11 +118,7 @@ export class ClientPartnerSelectComponent {
     }
     const opt = this.options().find((o) => o.value === id);
     const label = opt?.label ?? this.clientNom() ?? null;
-    // Extraire la raison sociale après "CODE — " si présent.
-    const nom =
-      label && label.includes(' — ')
-        ? label.split(' — ').slice(1).join(' — ').replace(/ \(à resélectionner\)$/, '')
-        : label;
-    this.selectionChange.emit({ clientId: id, clientNom: nom });
+    const nom = partnerRaisonSocialeFromLabel(label);
+    this.selectionChange.emit({ clientId: id, clientNom: nom || null });
   }
 }

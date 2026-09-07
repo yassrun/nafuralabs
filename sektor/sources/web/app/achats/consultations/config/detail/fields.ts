@@ -6,12 +6,6 @@ export function buildConsultationFields(t: TranslateService): DetailFieldConfig[
   const tr = (k: string) => t.instant(k);
   return [
     {
-      key: 'numero',
-      label: tr('achats.consultation.form.fields.numero'),
-      type: 'text',
-      readonly: true,
-    },
-    {
       key: 'statutLabel',
       label: tr('achats.consultation.form.fields.statut'),
       type: 'text',
@@ -20,7 +14,7 @@ export function buildConsultationFields(t: TranslateService): DetailFieldConfig[
     {
       key: 'lienEtude',
       label: tr('achats.consultation.form.fields.lien'),
-      type: 'text',
+      type: 'custom',
       readonly: true,
     },
     {

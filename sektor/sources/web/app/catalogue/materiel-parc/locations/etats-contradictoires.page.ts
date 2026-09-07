@@ -1,18 +1,15 @@
 
-import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-
-import { PageHeaderComponent } from '@platform/lib/anatomy';
 
 import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao-facade.service';
 
 @Component({
   selector: 'app-etats-contradictoires',
   standalone: true,
-  imports: [TranslateModule, PageHeaderComponent],
+  imports: [TranslateModule],
   template: `
-    <nf-page-header [config]="header()"></nf-page-header>
     <div class="card">
       <table>
         <thead>
@@ -65,18 +62,6 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
 })
 export class EtatsContradictoiresPage {
   private readonly gmao = inject(MaterielGmaoFacadeService);
-  private readonly translate = inject(TranslateService);
 
   readonly etats = toSignal(this.gmao.getEtats(), { initialValue: [] });
-
-  readonly header = computed(() => ({
-    title: 'materielGmao.locations.etatsTitle',
-    subtitle: 'materielGmao.locations.etatsSubtitle',
-    breadcrumbs: [
-      { label: this.translate.instant('nav.stock'), route: '/inventory/suivi/etat-stock' },
-      { label: this.translate.instant('nav.materiel'), route: '/materiel/parc' },
-      { label: this.translate.instant('nav.materiel.locations'), route: '/materiel/locations/contrats' },
-      { label: this.translate.instant('materielGmao.locations.etatsTitle') },
-    ],
-  }));
 }

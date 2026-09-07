@@ -545,7 +545,7 @@
         "save": "Enregistrer le modèle",
         "system": "Modèle système (lecture seule)",
         "systemHint": "Dupliquez-le pour éditer l'HTML (logo, en-tête, tableaux…). Le logo vient aussi de Administration → Paramètres → Branding.",
-        "logoHint": "Logo : uploadez-le dans Paramètres → Branding. Dans le HTML, utilisez <img th:src=\"${tenant.logo}\" />.",
+        "logoHint": "Logo : uploadez-le dans Paramètres → Branding. Dans le HTML, utilisez <img th:src=\"$'{'tenant.logo'}'\" />.",
         "unsavedChanges": "Modifications non enregistrées.",
         "noEntityTypes": "Aucun type de document déclaré par les modules installés.",
         "variableGroups": {

@@ -38,6 +38,7 @@ import {
   EntityDetailComponent,
   PageHeaderComponent,
   PageShellComponent,
+  ScreenComponent,
   ToastService,
   ConfirmDialogService,
   ListingActionHandler,
@@ -56,6 +57,7 @@ export const ConfigDrivenMasterSlavePageImports = [
   CommonModule,
   PageShellComponent,
   PageHeaderComponent,
+  ScreenComponent,
   MasterSlaveShellComponent,
   EntityListingComponent,
   EntityDetailComponent,
@@ -66,7 +68,8 @@ export const ConfigDrivenMasterSlavePageImports = [
  */
 export const ConfigDrivenMasterSlavePageStyles = `
   :host { display: block; height: 100%; }
-  nf-page-shell { height: 100%; }
+  nf-page-shell,
+  nf-screen { height: 100%; }
   nf-page-header { flex: 0 0 auto; }
   nf-master-slave-shell { flex: 1 1 0; min-height: 0; display: block; }
 `;

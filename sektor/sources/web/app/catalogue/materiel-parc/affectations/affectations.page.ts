@@ -14,8 +14,7 @@ import {
   LOOKUP_SEARCHERS,
   NfSelectComponent,
   type LookupSearchFn,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
 } from '@platform/lib/anatomy';
 
 import {
@@ -29,15 +28,12 @@ import type { AffectationChantier } from '@app/catalogue/models';
   standalone: true,
   imports: [
     FormsModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     ButtonComponent,
     NfSelectComponent,
   ],
   template: `
-    <nf-page-shell [scroll]="true">
-      <nf-page-header
-        [config]="{
+    <nf-screen [header]="{
           title: 'Affectations chantier',
           subtitle: summary(),
           breadcrumbs: [
@@ -45,8 +41,7 @@ import type { AffectationChantier } from '@app/catalogue/models';
             { label: 'Matériel & Équipements' },
             { label: 'Affectations chantier' }
           ]
-        }">
-      </nf-page-header>
+        }" [scroll]="true">
 
       <section class="form-card" data-testid="affectation-create-form">
         <h3>Nouvelle affectation</h3>
@@ -134,7 +129,7 @@ import type { AffectationChantier } from '@app/catalogue/models';
           </tbody>
         </table>
       </section>
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [

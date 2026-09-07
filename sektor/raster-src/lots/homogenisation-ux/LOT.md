@@ -4,6 +4,7 @@
 > Distinct de [`raffinement-ux-pro`](../raffinement-ux-pro/) (combobox / picker / entity lab — bouclé 28/08).
 
 **Contrat lot :** [`CONTRAT.md`](CONTRAT.md) · canvas [`contrat-actions-et-filtres/ux/actions-et-filtres-wireframe.canvas.tsx`](contrat-actions-et-filtres/ux/actions-et-filtres-wireframe.canvas.tsx).
+Cadre d’écran : lot platform [`nf-screen/cadre-v1`](../../../../nafura-platform/raster-src/lots/nf-screen/cadre-v1/00-PLAN.md) — pas redéfini ici.
 
 **Baseline mesurée 31/08** (avant ce lot) :
 
@@ -30,6 +31,7 @@
 ## Hors lot
 
 - Marchés, Finance, RH, HSE, shell
+- `nf-screen` (platform)
 - MatDialog → `nf-modal`
 - Grilles `<input>` DPGF / mètres
 - OT / fiche 360 GMAO, stock-balances pageSize 5000

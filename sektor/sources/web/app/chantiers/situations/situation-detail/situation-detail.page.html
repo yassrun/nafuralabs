@@ -1,6 +1,5 @@
-<nf-page-shell scroll>
+<nf-screen [header]="headerConfig" [scroll]="true">
   @if (!printMode()) {
-    <nf-page-header [config]="headerConfig"></nf-page-header>
 
     <div class="situation-detail-layout">
       <div class="situation-detail-layout__main">
@@ -49,4 +48,4 @@
   @if (printMode() && item()) {
     <app-decompte-print [situation]="item()!" />
   }
-</nf-page-shell>
+</nf-screen>

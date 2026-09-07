@@ -9,8 +9,7 @@ import {
   LOOKUP_SEARCHERS,
   NfSelectComponent,
   type LookupSearchFn,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
 } from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 
@@ -24,15 +23,13 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
     FormsModule,
     RouterModule,
     TranslateModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     MadCurrencyPipe,
     ButtonComponent,
     NfSelectComponent,
   ],
   template: `
-    <nf-page-shell [scroll]="true">
-      <nf-page-header [config]="header()"></nf-page-header>
+    <nf-screen [header]="header()" [scroll]="true">
 
       <section class="form-card" data-testid="pleins-carburant-form">
         <h3>{{ 'materielGmao.fuel.quickAdd' | translate }}</h3>
@@ -115,7 +112,7 @@ import { MaterielGmaoFacadeService } from '@app/catalogue/services/materiel-gmao
       <nf-button type="button" class="btn secondary" (clicked)="exportCsv()" variant="secondary">
         {{ 'materielGmao.fuel.exportCsv' | translate }}
       </nf-button>
-    </nf-page-shell>
+    </nf-screen>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [

@@ -120,6 +120,7 @@ test("agent_type mapping is immutable", async () => {
   assert.equal(expectedAgentType("tech"), "exec");
   assert.equal(expectedAgentType("physical"), "exec");
   assert.equal(expectedAgentType("qa"), "");
+  assert.equal(resolveAgentType("feature", "qa"), "exec");
   assert.equal(resolveAgentType("feature", ""), "exec");
   assert.throws(() => resolveAgentType("spec", "exec"));
   assert.throws(() => resolveAgentType("feature", "orch"));

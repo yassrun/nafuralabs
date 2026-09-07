@@ -5,7 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FilterResetComponent } from '@platform/lib/anatomy/components/molecules/filter-reset/filter-reset.component';
 
-import { ButtonComponent, NfSelectComponent, PageHeaderComponent, PageShellComponent, type NfSelectOption } from '@platform/lib/anatomy';
+import { ButtonComponent, NfSelectComponent, ScreenComponent, type NfSelectOption } from '@platform/lib/anatomy';
 import { AttachementApiService } from '../attachement-api.service';
 import { ATTACHEMENT_STATUS_KEYS } from '@app/socle/shell/i18n-labels';
 import {
@@ -36,16 +36,14 @@ const STATUS_CSS: Record<string, string> = {
     CommonModule,
     FormsModule,
     RouterLink,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     FilterResetComponent,
     ButtonComponent,
     NfSelectComponent,
     TranslateModule,
   ],
   template: `
-    <nf-page-shell scroll>
-      <nf-page-header [config]="pageHeaderConfig"></nf-page-header>
+    <nf-screen [header]="pageHeaderConfig" [scroll]="true">
 
       <div class="toolbar">
         <input class="search" type="search"
@@ -113,7 +111,7 @@ const STATUS_CSS: Record<string, string> = {
           <div class="empty">{{ 'chantiers.attachement.list.emptyState' | translate }}</div>
         }
       </div>
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [`
     :host { display: block; height: 100%; }

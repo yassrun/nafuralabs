@@ -10,8 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 
 import {
-  PageShellComponent,
-  PageHeaderComponent,
+  ScreenComponent,
   ButtonComponent,
   IconComponent,
 } from '@platform/lib/anatomy';
@@ -42,8 +41,7 @@ interface QuickChip {
   imports: [
     MadCurrencyPipe,
     FormsModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     ButtonComponent,
     IconComponent,
     MatButtonModule,

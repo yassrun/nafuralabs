@@ -1,5 +1,4 @@
-<nf-page-shell>
-  <nf-page-header [config]="headerConfig"></nf-page-header>
+<nf-screen [header]="headerConfig">
 
   <div class="cs-list" data-testid="consultation-achat-list">
     <nf-entity-listing
@@ -9,4 +8,4 @@
       (action)="onAction($event)">
     </nf-entity-listing>
   </div>
-</nf-page-shell>
+</nf-screen>

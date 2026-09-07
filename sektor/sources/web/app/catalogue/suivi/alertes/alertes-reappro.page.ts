@@ -19,8 +19,7 @@ const AUTO_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
   standalone: true,
   imports: [...ConfigDrivenListingPageImports, ColumnTemplateDirective, FormsModule, TranslateModule, ButtonComponent],
   template: `
-    <nf-page-shell>
-      <nf-page-header [config]="headerConfig"></nf-page-header>
+    <nf-screen [header]="headerConfig">
       <nf-entity-listing
         #listing
         [config]="config"
@@ -42,7 +41,7 @@ const AUTO_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
           <span class="alert-shortage">-{{ item.shortage }}</span>
         </ng-template>
       </nf-entity-listing>
-    </nf-page-shell>
+    </nf-screen>
 
     @if (showThresholdDialog()) {
       <div class="dialog-overlay" (click)="closeThresholdDialog()">

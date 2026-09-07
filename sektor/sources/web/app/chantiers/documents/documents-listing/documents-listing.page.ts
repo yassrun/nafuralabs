@@ -22,8 +22,7 @@ import {
   ConfirmDialogService,
   LOOKUP_SEARCHERS,
   NfSelectComponent,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
   PaginationComponent,
   TabsComponent,
   ToastService,
@@ -113,8 +112,7 @@ function todayIso(): string {
   imports: [
     CommonModule,
     FormsModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     FilterResetComponent,
     ButtonComponent,
     NfSelectComponent,
@@ -123,8 +121,7 @@ function todayIso(): string {
     TranslateModule,
   ],
   template: `
-    <nf-page-shell scroll>
-      <nf-page-header [config]="headerConfig()" (actionClick)="onHeaderAction($event)"></nf-page-header>
+    <nf-screen [header]="headerConfig()" [scroll]="true" (actionClick)="onHeaderAction($event)">
 
       @if (routeChantierId() && selectedChantier(); as chantier) {
         <div class="scope-banner">
@@ -370,7 +367,7 @@ function todayIso(): string {
           </section>
         </div>
       }
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [`
     :host { display: block; height: 100%; }

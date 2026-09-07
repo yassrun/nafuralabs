@@ -20,6 +20,7 @@ import {
 interface ContratQuery extends ListQuery {
   status?: string;
   type?: string;
+  fournisseurId?: string;
   quick?: 'ACTIFS' | 'EXPIRATION_PROCHE' | 'ECHUS';
 }
 
@@ -40,6 +41,7 @@ export class ContratApiService extends FeatureApiService<
     });
     if (q.status) params = params.set('status', q.status);
     if (q.type) params = params.set('type', q.type);
+    if (q.fournisseurId) params = params.set('fournisseurId', q.fournisseurId);
 
     const rows = await this.get<ApiContratFournisseur[]>(this.basePath, params);
     let items = (rows ?? []).map(contratToListItem) as unknown as ContratAchat[];

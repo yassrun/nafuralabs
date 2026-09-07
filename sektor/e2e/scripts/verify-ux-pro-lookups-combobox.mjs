@@ -42,6 +42,7 @@ const DETAIL_HTML =
   'nafura-platform/sources/web/lib/anatomy/components/organisms/entity-detail/entity-detail.component.html';
 const APP = 'sektor/sources/web/app/socle/app.config.ts';
 const ERP = 'sektor/sources/web/app/socle/shared/services/erp-lookup.service.ts';
+const ERP_LABEL = 'sektor/sources/web/app/socle/shared/services/erp-lookup-label.ts';
 const SEARCHERS = 'sektor/sources/web/app/socle/shared/services/erp-lookup-searchers.ts';
 const ROUTES = 'sektor/sources/web/app/socle/shared/config/erp-lookup-list-routes.ts';
 const CTRL =
@@ -60,6 +61,7 @@ read(SELECT_SPEC);
 const detailHtml = read(DETAIL_HTML);
 const app = read(APP);
 const erp = read(ERP);
+const erpLabel = read(ERP_LABEL);
 const searchers = read(SEARCHERS);
 const routes = read(ROUTES);
 const ctrl = read(CTRL);
@@ -125,6 +127,15 @@ if (!repo.includes('raisonSociale') || !repo.includes('LOWER(p.code) LIKE LOWER(
 }
 if (!searchers.includes('partnerSelectOptions')) {
   fail('AC-3: partner hits must expose code — label via partnerSelectOptions');
+}
+if (
+  erpLabel.includes('`${String(code)} — ${item.value}`') ||
+  /return code \? `\$\{String\(code\)\} —/.test(erpLabel)
+) {
+  fail('AC-4: partner lookup still prefixes code before designation');
+}
+if (!erpLabel.includes('`${raison} (${code})`')) {
+  fail('AC-4: partner lookup label must show designation first, code secondary');
 }
 
 // AC-4 — hit rows: code + label (not raw UUID)

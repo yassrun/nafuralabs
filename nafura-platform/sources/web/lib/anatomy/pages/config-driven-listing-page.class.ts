@@ -11,12 +11,11 @@
  *   standalone: true,
  *   imports: [ConfigDrivenListingPageImports],
  *   template: `
- *     <nf-page-shell>
- *       <nf-page-header [config]="headerConfig"></nf-page-header>
+ *     <nf-screen [header]="headerConfig">
  *       <nf-entity-listing #listing [config]="config" [facade]="facade" (action)="onAction($event)">
  *         <!-- Custom templates here -->
  *       </nf-entity-listing>
- *     </nf-page-shell>
+ *     </nf-screen>
  *   `,
  *   styles: [ConfigDrivenListingPageStyles],
  * })
@@ -38,6 +37,7 @@ import {
   BadgeComponent,
   PageHeaderComponent,
   PageShellComponent,
+  ScreenComponent,
   ListingActionHandler,
   ToastService,
 } from '../components';
@@ -61,6 +61,7 @@ export const ConfigDrivenListingPageImports = [
   BadgeComponent,
   PageHeaderComponent,
   PageShellComponent,
+  ScreenComponent,
 ] as const;
 
 /**
@@ -73,7 +74,8 @@ export const ConfigDrivenListingPageStyles = `
     height: 100%;
   }
 
-  nf-page-shell {
+  nf-page-shell,
+  nf-screen {
     height: 100%;
   }
 
@@ -185,11 +187,9 @@ export abstract class ConfigDrivenListingPage<TItem> {
       ? this.headerTitle()
       : this.headerTitle;
     const breadcrumbs = buildRouteBreadcrumbs(this.route);
-    // Listing pages are route leaves — a lone crumb duplicates the page title.
-    const effectiveBreadcrumbs = breadcrumbs.length > 1 ? breadcrumbs : [];
     return {
       title,
-      ...(effectiveBreadcrumbs.length > 0 ? { breadcrumbs: effectiveBreadcrumbs } : {}),
+      ...(breadcrumbs.length > 0 ? { breadcrumbs } : {}),
     };
   }
 

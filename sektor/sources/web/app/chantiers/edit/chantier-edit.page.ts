@@ -19,8 +19,7 @@ import {
   EmptyStateComponent,
   NfSelectComponent,
   type NfSelectOption,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
   ToastService,
   VilleMaSelectComponent,
 } from '@platform/lib/anatomy';
@@ -42,8 +41,7 @@ interface ClientOption {
   imports: [
     FormsModule,
     TranslateModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     ButtonComponent,
     ActionBarComponent,
     EmptyStateComponent,
@@ -52,7 +50,7 @@ interface ClientOption {
 ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nf-page-shell [scroll]="true">
+    <nf-screen [header]="headerConfig()" [scroll]="true">
       @if (loading()) {
         <p class="loading">{{ 'chantiers.chantier.edit.loading' | translate }}</p>
       } @else if (notFound()) {
@@ -64,7 +62,6 @@ interface ClientOption {
           (action)="goBack()">
         </nf-empty-state>
       } @else {
-        <nf-page-header [config]="headerConfig()"></nf-page-header>
 
         @if (validationMessage()) {
           <p class="err" role="alert">{{ validationMessage() }}</p>
@@ -191,7 +188,7 @@ interface ClientOption {
           </nf-action-bar>
         </div>
       }
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [`
     :host { display: block; height: 100%; }

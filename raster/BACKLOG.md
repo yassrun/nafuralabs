@@ -15,6 +15,7 @@
     - · `SEKTOR-308` feature — Create consultation : nf-action-bar, Créer in…
     - · `SEKTOR-309` feature — Overlay étude : N destinataires, create panie…
     - · `SEKTOR-310` tech — Preuves listing create overlay RFQ
+    - · `SEKTOR-310` feature — Preuves listing create overlay RFQ
 - `etudes` lot
   - · `raffinement-etude` sous-lot
     - · `SEKTOR-305` feature — Cadrage unique — revue CPS champ par champ

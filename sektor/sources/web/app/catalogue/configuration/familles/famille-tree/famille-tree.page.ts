@@ -16,8 +16,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {
   ConfirmDialogService,
-  PageHeaderComponent,
-  PageShellComponent,
+  ScreenComponent,
   ButtonComponent,
   NfSelectComponent,
   type NfSelectOption,
@@ -37,16 +36,14 @@ import type { FamilleArticleConfig } from '../models';
   imports: [
     FormsModule,
     TranslateModule,
-    PageShellComponent,
-    PageHeaderComponent,
+    ScreenComponent,
     TreeTableComponent,
     ButtonComponent,
     NfSelectComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nf-page-shell scroll>
-      <nf-page-header [config]="headerConfig"></nf-page-header>
+    <nf-screen [header]="headerConfig" [scroll]="true">
 
       <div class="fa-toolbar">
         <nf-button variant="primary" icon="plus" iconLibrary="lucide" (clicked)="onAddRoot()">
@@ -179,7 +176,7 @@ import type { FamilleArticleConfig } from '../models';
           }
         </aside>
       </div>
-    </nf-page-shell>
+    </nf-screen>
   `,
   styles: [`
     .fa-toolbar {

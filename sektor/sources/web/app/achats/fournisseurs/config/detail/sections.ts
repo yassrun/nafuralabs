@@ -13,13 +13,6 @@ export function buildFournisseurSections(t: TranslateService): DetailSectionConf
       columns: 2,
     },
     {
-      id: 'contact',
-      title: tr('achats.fournisseur.form.sections.contact'),
-      icon: 'user',
-      fields: ['contactPrincipalNom', 'contactPrincipalTel', 'contactPrincipalEmail'],
-      columns: 3,
-    },
-    {
       id: 'conditions',
       title: tr('achats.fournisseur.form.sections.conditions'),
       icon: 'credit-card',
