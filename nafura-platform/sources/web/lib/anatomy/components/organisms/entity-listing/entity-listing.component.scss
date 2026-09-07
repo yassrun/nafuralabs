@@ -93,14 +93,6 @@
   min-width: 0;
 }
 
-.nf-entity-listing__toolbar-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--nf-space-2, 8px);
-  flex: 0 0 auto;
-  margin-left: auto;
-}
-
 @media (max-width: 640px) {
   .nf-entity-listing__toolbar-inner {
     flex-wrap: nowrap;

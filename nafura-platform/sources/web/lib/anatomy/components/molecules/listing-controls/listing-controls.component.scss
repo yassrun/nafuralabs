@@ -82,48 +82,56 @@
   color: var(--nf-text-muted);
 }
 
-.mat-mdc-menu-panel.nf-listing-controls-menu--columns,
-.mat-mdc-menu-panel.nf-listing-controls-menu--filter {
-  background: var(--nf-surface-section);
-  border: 1px solid var(--nf-border-default);
-  border-radius: var(--nf-radius-md);
-  box-shadow: var(--nf-shadow-md);
-}
-
-.nf-listing-controls-menu--filter .nf-listing-controls-menu__content {
-  padding: 0;
-  min-width: auto;
-  max-width: none;
-}
-
-/* Filter popup: force width so Type/Category aren't truncated; allow full height for fields + buttons */
-.mat-mdc-menu-panel.nf-listing-controls-menu--filter {
-  min-width: 500px !important;
-  max-width: 560px;
-  max-height: min(80vh, 420px);
-  overflow: visible;
-}
-
-@media (max-width: 640px) {
+/* Overlay panels live outside :host — pierce so sizing rules apply */
+:host ::ng-deep {
+  .mat-mdc-menu-panel.nf-listing-controls-menu--columns,
   .mat-mdc-menu-panel.nf-listing-controls-menu--filter {
-    min-width: min(100vw - 24px, 560px) !important;
-    max-width: calc(100vw - 24px);
-  }
-}
-
-/* Tomic skin for checkboxes in columns popup */
-.nf-listing-controls-menu--columns .mat-mdc-checkbox {
-  .mdc-label {
-    color: var(--nf-text-primary);
+    background: var(--nf-surface-section, #fff);
+    border: 1px solid var(--nf-border-default, #e5e7eb);
+    border-radius: var(--nf-radius-md, 8px);
+    box-shadow: var(--nf-shadow-md, 0 8px 24px rgba(0, 0, 0, 0.12));
   }
 
-  .mdc-checkbox__background {
-    border-color: var(--nf-border-default);
+  .nf-listing-controls-menu--filter .nf-listing-controls-menu__content {
+    padding: 0;
+    min-width: 0;
+    max-width: none;
+    width: auto;
+    height: auto;
   }
 
-  &.mat-mdc-checkbox-checked .mdc-checkbox__background,
-  &.mat-mdc-checkbox-indeterminate .mdc-checkbox__background {
-    border-color: var(--nf-primary);
-    background-color: var(--nf-primary);
+  /* Size panel to filter-builder content (Apply/Clear always visible in flow) */
+  .mat-mdc-menu-panel.nf-listing-controls-menu--filter {
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: min(560px, calc(100vw - 24px));
+    height: auto;
+    max-height: min(80vh, 640px);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  @media (max-width: 640px) {
+    .mat-mdc-menu-panel.nf-listing-controls-menu--filter {
+      width: calc(100vw - 24px) !important;
+      max-width: calc(100vw - 24px);
+    }
+  }
+
+  /* Tomic skin for checkboxes in columns popup */
+  .nf-listing-controls-menu--columns .mat-mdc-checkbox {
+    .mdc-label {
+      color: var(--nf-text-primary);
+    }
+
+    .mdc-checkbox__background {
+      border-color: var(--nf-border-default);
+    }
+
+    &.mat-mdc-checkbox-checked .mdc-checkbox__background,
+    &.mat-mdc-checkbox-indeterminate .mdc-checkbox__background {
+      border-color: var(--nf-primary);
+      background-color: var(--nf-primary);
+    }
   }
 }

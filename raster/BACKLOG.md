@@ -10,15 +10,14 @@
 
 - `consultation` lot
   - · `ux-listing-create-etude` sous-lot
-    - ✓ `SEKTOR-306` spec — Consultation UX : CTA listing sans ++, filtre…
-    - ◐ `SEKTOR-307` feature — Listing consultations : CTA sans ++, filtres …
-    - ◐ `SEKTOR-308` feature — Create consultation : nf-action-bar, Créer in…
-    - ◐ `SEKTOR-309` feature — Overlay étude : N destinataires, create panie…
-    - · `SEKTOR-310` qa — Preuves listing create overlay RFQ
+    - · `SEKTOR-306` spec — Consultation UX : CTA listing sans ++, filtre…
+    - · `SEKTOR-307` feature — Listing consultations : CTA sans ++, filtres …
+    - · `SEKTOR-308` feature — Create consultation : nf-action-bar, Créer in…
+    - · `SEKTOR-309` feature — Overlay étude : N destinataires, create panie…
+    - · `SEKTOR-310` tech — Preuves listing create overlay RFQ
 - `etudes` lot
   - · `raffinement-etude` sous-lot
-    - ◐ `SEKTOR-303` feature — chrome etude: stepper etats + action bar
-    - ◐ `SEKTOR-305` feature — Cadrage unique — revue CPS champ par champ
+    - · `SEKTOR-305` feature — Cadrage unique — revue CPS champ par champ
 - `homogenisation-ux` lot
   - · `achats-residuel` sous-lot
     - ▸ `SEKTOR-296` feature — selects detail et bc-detail action-bar
@@ -29,4 +28,4 @@
 
 ---
 
-**31 live · 2 projets**
+**9 live · 1 projets**

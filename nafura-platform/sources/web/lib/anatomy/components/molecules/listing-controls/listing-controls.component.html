@@ -9,36 +9,38 @@
       (clicked)="onSelectionToggleClick()">
     </nf-button>
   }
-  <nf-button
-    variant="tertiary"
-    iconLibrary="lucide"
-    icon="eye-off"
-    [active]="hiddenColumnsCount() > 0"
-    [matMenuTriggerFor]="columnsMenu"
-    [attr.aria-label]="'Show columns' | translate">
-  </nf-button>
-  <mat-menu
-    #columnsMenu="matMenu"
-    class="nf-listing-controls-menu nf-listing-controls-menu--columns"
-    xPosition="before"
-    yPosition="below">
-    <div class="nf-listing-controls-menu__content" (click)="$event.stopPropagation()">
-      <div class="nf-listing-controls-menu__header">{{ 'Columns' | translate }}</div>
-      @for (col of columns(); track col.key) {
-        <label class="nf-listing-controls-menu__row">
-          <mat-checkbox
-            [checked]="col.visible"
-            (change)="setColumnVisibility(col.key, $event.checked)"
-            (click)="$event.stopPropagation()">
-            {{ col.label | translate }}
-          </mat-checkbox>
-        </label>
-      }
-      @if (columns().length === 0) {
-        <p class="nf-listing-controls-menu__empty">{{ 'No columns' | translate }}</p>
-      }
-    </div>
-  </mat-menu>
+  @if (showColumnsButton()) {
+    <nf-button
+      variant="tertiary"
+      iconLibrary="lucide"
+      icon="eye-off"
+      [active]="hiddenColumnsCount() > 0"
+      [matMenuTriggerFor]="columnsMenu"
+      [attr.aria-label]="'Show columns' | translate">
+    </nf-button>
+    <mat-menu
+      #columnsMenu="matMenu"
+      class="nf-listing-controls-menu nf-listing-controls-menu--columns"
+      xPosition="before"
+      yPosition="below">
+      <div class="nf-listing-controls-menu__content" (click)="$event.stopPropagation()">
+        <div class="nf-listing-controls-menu__header">{{ 'Columns' | translate }}</div>
+        @for (col of columns(); track col.key) {
+          <label class="nf-listing-controls-menu__row">
+            <mat-checkbox
+              [checked]="col.visible"
+              (change)="setColumnVisibility(col.key, $event.checked)"
+              (click)="$event.stopPropagation()">
+              {{ col.label | translate }}
+            </mat-checkbox>
+          </label>
+        }
+        @if (columns().length === 0) {
+          <p class="nf-listing-controls-menu__empty">{{ 'No columns' | translate }}</p>
+        }
+      </div>
+    </mat-menu>
+  }
   @if (filterFields().length > 0) {
     <nf-button
       variant="tertiary"
@@ -76,16 +78,6 @@
       [active]="filterActive()"
       (clicked)="onFilterClick()"
       [attr.aria-label]="'Filter' | translate">
-    </nf-button>
-  }
-  @if (showSortButton()) {
-    <nf-button
-      variant="tertiary"
-      iconLibrary="lucide"
-      icon="arrow-up-down"
-      [active]="sortActive()"
-      (clicked)="onSortClick()"
-      [attr.aria-label]="'Sort' | translate">
     </nf-button>
   }
   @if (showViewModeSwitcher() && viewModes().length > 1) {

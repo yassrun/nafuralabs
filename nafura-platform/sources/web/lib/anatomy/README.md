@@ -66,16 +66,20 @@ anatomy/
 
 ## ERP Archetypes (Ready)
 
+Live demos (mocks, no auth): **[Anatomy Showroom](../../../sandbox-web/README.md)** → `npm start` → http://127.0.0.1:4300
+
 Use the config-driven base classes for all new ERP pages.
 
-| Archetype | Base Class | Purpose |
-|-----------|------------|---------|
-| RecordCollection | ConfigDrivenListingPage | Listing + search/filter/action |
-| RecordForm | ConfigDrivenDetailPage | Create/edit/view detail |
-| RecordPanel | ConfigDrivenMasterSlavePage | Master list + detail pane |
-| OperationalDashboard | ConfigDrivenDashboardPage | KPI/alerts/activity overview |
-| SettingsPage | ConfigDrivenSettingsPage | Configuration tabs + save/restore |
-| RecordWizard | ConfigDrivenWizardPage | Step-based create flow |
+| Archetype | `UxPatternType` | Base Class | Purpose |
+|-----------|-----------------|------------|---------|
+| RecordCollection | `listing` | ConfigDrivenListingPage | Listing + search/filter/action |
+| RecordForm | `detail` | ConfigDrivenDetailPage | Create/edit/view detail |
+| RecordForm + children | `details1n` | Detail + embedded listing(s) | Full-page detail with 1–N collections |
+| Hierarchy | `tree` | Tree editor page | Hierarchical navigation / edit |
+| RecordPanel | `masterSlave` | ConfigDrivenMasterSlavePage | Master list + detail pane |
+| OperationalDashboard | `dashboard` | ConfigDrivenDashboardPage | KPI/alerts/activity overview |
+| SettingsPage | `settings` | ConfigDrivenSettingsPage | Configuration tabs + save/restore |
+| RecordWizard | `wizard` | ConfigDrivenWizardPage | Step-based create flow |
 
 Related config types live in anatomy types:
 - ListingPageConfig / DetailPageConfig

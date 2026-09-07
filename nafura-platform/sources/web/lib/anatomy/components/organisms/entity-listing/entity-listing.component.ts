@@ -51,7 +51,8 @@ import { DataTableComponent } from '../data-table';
 import { PaginationComponent } from '../pagination';
 import { ListingControlsComponent, ListingControlsColumn } from '../../molecules/listing-controls';
 import { FilterResetComponent } from '../../molecules/filter-reset/filter-reset.component';
-import { ButtonListComponent, ButtonListItem } from '../../molecules/button-list';
+import { ButtonListItem } from '../../molecules/button-list';
+import { ListingActionsComponent } from '../../molecules/listing-actions';
 import { DataStateComponent, type DataStateValue } from '../../molecules/data-state';
 import { ToastService, ConfirmDialogService, CsvService, ImportExportDialogService } from '../../services';
 import { PermissionService } from '../../../../../core/security/services/permission.service';
@@ -86,7 +87,7 @@ import type { ReviewedExtraction } from '@platform/app/document-extraction/smart
     PaginationComponent,
     ListingControlsComponent,
     FilterResetComponent,
-    ButtonListComponent,
+    ListingActionsComponent,
     DataStateComponent,
     CardViewComponent,
     GridViewComponent,

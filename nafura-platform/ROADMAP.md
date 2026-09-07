@@ -5,8 +5,7 @@
 
 ## Ouvert
 
-Aucun sous-lot actif. Le prochain travail sera découpé depuis le besoin courant,
-puis créé dans `nafura-platform/raster-src/` par le CLI Raster.
+1. **anatomy-showroom** — mini-app sandbox + canon archétypes écrans (listing, details, details-1N, tree) · [`raster-src/lots/anatomy-showroom/LOT.md`](raster-src/lots/anatomy-showroom/LOT.md) · sous-lot [`sandbox-v1`](raster-src/lots/anatomy-showroom/sandbox-v1/00-PLAN.md)
 
 <!-- borne -->
 

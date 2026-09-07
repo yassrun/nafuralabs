@@ -17,6 +17,8 @@ import type { ButtonVariant, PageHeaderConfig } from '../components';
 export type UxPatternType =
   | 'listing'
   | 'detail'
+  | 'details1n'
+  | 'tree'
   | 'masterSlave'
   | 'wizard'
   | 'settings'

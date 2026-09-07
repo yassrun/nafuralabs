@@ -162,10 +162,13 @@ import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
   `,
   styles: [`
     .nf-filter-builder {
-      padding: var(--nf-space-2, 8px) var(--nf-space-3, 12px);
-      width: 100%;
-      min-width: 480px;
-      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      padding: var(--nf-space-3, 12px);
+      width: fit-content;
+      min-width: 260px;
+      max-width: min(560px, calc(100vw - 32px));
       box-sizing: border-box;
     }
 
@@ -180,9 +183,10 @@ import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
 
     .nf-filter-builder__fields {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: var(--nf-space-2, 8px) var(--nf-space-3, 12px);
       margin-bottom: var(--nf-space-3, 12px);
+      width: 100%;
     }
 
     .nf-filter-builder__field {
@@ -226,9 +230,10 @@ import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
     .nf-filter-builder__actions {
       display: flex;
       justify-content: flex-end;
+      flex-wrap: wrap;
       gap: var(--nf-space-2, 8px);
+      flex-shrink: 0;
       padding-top: var(--nf-space-2, 8px);
-      padding-bottom: var(--nf-space-2, 8px);
       border-top: 1px solid var(--nf-border-default);
     }
   `],

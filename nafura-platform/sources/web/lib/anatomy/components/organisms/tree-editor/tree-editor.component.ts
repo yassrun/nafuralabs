@@ -31,7 +31,7 @@ export interface TreeMoveEvent {
     <section class="nf-tree-editor">
       <header class="nf-tree-editor__header">
         <h3 class="nf-tree-editor__title">{{ title() }}</h3>
-        @if (!readonly()) {
+        @if (!readonly() && showAddRoot()) {
           <button type="button" class="nf-tree-editor__btn" (click)="onAddRoot()">{{ addRootLabel() }}</button>
         }
       </header>
@@ -138,6 +138,8 @@ export class TreeEditorComponent {
   nodes = input<TreeEditorNode[]>([]);
   selectedId = input<string | null>(null);
   readonly = input<boolean>(false);
+  /** When false, hide the header « Add root » (page toolbar owns the action). Default true. */
+  showAddRoot = input<boolean>(true);
   title = input<string>('Tree Editor');
   emptyLabel = input<string>('No nodes yet.');
   addRootLabel = input<string>('Add root');

@@ -2,11 +2,10 @@
 id: SEKTOR-310
 status: todo
 context: nafura
-type: qa
-agent_type: qa
+type: tech
+agent_type: exec
 priority: P1
 assignee: agent
-gate: none
 blocked_by: [SEKTOR-307, SEKTOR-308, SEKTOR-309]
 tags: [qa]
 ---

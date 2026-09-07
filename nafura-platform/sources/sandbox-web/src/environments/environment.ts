@@ -1,0 +1,22 @@
+export const environment = {
+  production: false,
+  appName: 'Anatomy Showroom',
+  apiBaseUrl: 'http://127.0.0.1:4300',
+  keycloakUrl: '',
+  keycloakRealm: '',
+  keycloakClientId: '',
+  devAuthBypass: true,
+  devAuthEagerBootstrap: false,
+  onboardingV2Enabled: false,
+  directKeycloakLogin: false,
+  cursorAuthAutoLogin: false,
+  devAuthUser: {
+    id: 'sandbox',
+    email: 'sandbox@nafura.local',
+    firstName: 'Sandbox',
+    lastName: 'Showroom',
+    tenantId: 'sandbox',
+    tenantName: 'Sandbox',
+    tenantSlug: 'sandbox',
+  },
+};

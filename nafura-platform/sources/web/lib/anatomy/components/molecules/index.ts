@@ -20,6 +20,7 @@ export * from './breadcrumb';
 export * from './alert';
 export * from './tabs';
 export * from './listing-controls';
+export * from './listing-actions';
 export * from './filter-builder';
 export * from './alert-list';
 export * from './action-grid';

@@ -19,11 +19,10 @@ export interface ListingControlsColumn {
 /**
  * Listing Controls Component (nf-listing-controls)
  *
- * Left-aligned listing toolbar: optional multi-select toggle, columns visibility, filter, sort, search.
+ * Left-aligned listing toolbar: optional multi-select toggle, columns visibility, filter, search.
  * - Multi-select (first): when showSelectionToggle, toggles table selection mode.
  * - Columns (eye): active when hiddenColumnsCount > 0.
  * - Filter: active when filterActive is true.
- * - Sort: active when sortActive is true.
  */
 @Component({
   selector: 'nf-listing-controls',
@@ -51,6 +50,8 @@ export class ListingControlsComponent {
   columns = input<ListingControlsColumn[]>([]);
   /** Number of columns currently hidden. When > 0, columns button shows active. */
   hiddenColumnsCount = input<number>(0);
+  /** When false, hide the columns visibility control (e.g. tree listing). Default true. */
+  showColumnsButton = input<boolean>(true);
   /** When true, at least one filter is applied — filter button shows active. */
   filterActive = input<boolean>(false);
   /** Filter fields for the filter builder popup. When provided (length > 0), filter button opens a menu with the builder. */
@@ -59,10 +60,6 @@ export class ListingControlsComponent {
   filterValues = input<Record<string, unknown>>({});
   /** Lookups for filter options (e.g. roles for member role filter). */
   lookups = input<LookupContext>({});
-  /** When true, show the sort button. Default true. */
-  showSortButton = input<boolean>(true);
-  /** When true, sort is applied (different from default) — sort button shows active. */
-  sortActive = input<boolean>(false);
   /** Current search term (one-way; parent owns value). */
   search = input<string>('');
 
@@ -81,7 +78,6 @@ export class ListingControlsComponent {
   filterClick = output<void>();
   /** Emitted when user applies or clears filters in the filter builder. */
   filterChange = output<Record<string, unknown>>();
-  sortClick = output<void>();
   searchChange = output<string>();
   /** Emitted when the view mode changes. */
   viewModeChange = output<ViewMode>();
@@ -124,10 +120,6 @@ export class ListingControlsComponent {
   onFilterClear(): void {
     this.filterChange.emit({});
     this.filterMenuTrigger?.closeMenu();
-  }
-
-  onSortClick(): void {
-    this.sortClick.emit();
   }
 
   onSelectionToggleClick(): void {

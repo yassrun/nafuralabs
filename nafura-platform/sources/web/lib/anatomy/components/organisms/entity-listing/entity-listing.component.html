@@ -15,7 +15,6 @@
             [filterFields]="config().filters"
             [filterValues]="filterValues()"
             [lookups]="listingLookups()"
-            [showSortButton]="false"
             [search]="searchTerm()"
             [showViewModeSwitcher]="config().features.viewModeToggle"
             [viewModes]="config().viewModes.available"
@@ -42,32 +41,18 @@
         }
 
         <!-- Right: Actions -->
-        <div class="nf-entity-listing__toolbar-actions">
+        <nf-listing-actions
+          [actions]="globalActions()"
+          [selectionActions]="selectionActions()"
+          size="md"
+          (actionClick)="onToolbarAction($event)">
           @if (smartImportVisible()) {
             <nf-smart-import-action
               [definition]="$any(config().smartImport!.definition)"
               [accept]="config().smartImport!.accept ?? '.xlsx,.xls,.csv,.pdf'"
               (completed)="onSmartImportCompleted($event)" />
           }
-
-          <!-- Selection Actions (Edit, Duplicate, Delete) -->
-          @if (selectionActions().length > 0) {
-            <nf-button-list
-              [actions]="selectionActions()"
-              [size]="'md'"
-              (actionClick)="onToolbarAction($event)">
-            </nf-button-list>
-          }
-
-          <!-- Global Actions (Import/Export, New) - always visible -->
-          @if (globalActions().length > 0) {
-            <nf-button-list
-              [actions]="globalActions()"
-              [size]="'md'"
-              (actionClick)="onToolbarAction($event)">
-            </nf-button-list>
-          }
-        </div>
+        </nf-listing-actions>
       </div>
 
       @if (mobileActiveFilterChips().length > 0) {

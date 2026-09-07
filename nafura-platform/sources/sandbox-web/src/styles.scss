@@ -1,0 +1,19 @@
+@use '../../web/core/styles' as platform;
+@use '../../web/lib/design-system/tokens' as shared-tokens;
+@use '../../web/lib/design-system/typography' as shared-typography;
+@use '../../web/lib/anatomy/styles/tokens' as erp-tokens;
+
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: var(--nf-bg-page, #f4f5f7);
+  color: var(--nf-text-primary, #1a1a1a);
+}
+
+* {
+  box-sizing: border-box;
+}
