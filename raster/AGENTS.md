@@ -1,5 +1,7 @@
 # AGENTS.md — Raster
 
+> **Pause monorepo :** hors travail **sur le produit Raster lui-même**, ne pas appliquer ce fichier. Le reste de NafuraLabs ne passe plus par Inbox / Tasks / Session.
+
 > Raster organise le travail : Inbox → Ready → Session.  
 > Blueprint : [`RASTER_BLUEPRINT.md`](../RASTER_BLUEPRINT.md) · Harness : [`HARNESS.md`](HARNESS.md).
 

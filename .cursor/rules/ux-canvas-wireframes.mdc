@@ -1,5 +1,5 @@
 ---
-description: UX design via Cursor Canvas wireframes, versionnés dans le sous-lot Raster
+description: UX design via Cursor Canvas wireframes
 alwaysApply: true
 ---
 
@@ -7,19 +7,11 @@ alwaysApply: true
 
 Avant toute implémentation UI non triviale, produire ou itérer un `.canvas.tsx`.
 
-## Source unique
+## Où
 
-```text
-<projet>/raster-src/lots/<lot>/<sous-lot>/ux/<name>-wireframe.canvas.tsx
-```
+Preview IDE : dossier `canvases/` du workspace Cursor.
 
-Pour un lot simple sans sous-lot :
-
-```text
-<projet>/raster-src/lots/<lot>/ux/<name>-wireframe.canvas.tsx
-```
-
-L’IDE peut exiger une copie temporaire sous son dossier `canvases/`, mais la source versionnée reste dans Raster.
+Si le wireframe doit vivre dans Git, le poser à côté du code concerné (ex. `sources/web/…` ou un dossier `ux/` du produit) — **pas** sous `raster-src/`.
 
 ## Contenu attendu
 
@@ -27,9 +19,8 @@ L’IDE peut exiger une copie temporaire sous son dossier `canvases/`, mais la s
 - états vides, chargement et erreur ;
 - actions principales ;
 - navigation réelle du flux ;
-- fallback manuel lorsque l’IA intervient ;
-- décisions UX utiles au `00-PLAN.md`.
+- fallback manuel lorsque l’IA intervient.
 
 ## Interdit
 
-Coder un écran majeur avant validation du wireframe, conserver deux sources de vérité, ou laisser le seul exemplaire hors du dépôt.
+Coder un écran majeur avant d’avoir un wireframe à montrer. Deux sources de vérité (Figma + canvas, ou deux canvases divergents).

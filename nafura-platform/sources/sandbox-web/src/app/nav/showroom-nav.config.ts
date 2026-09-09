@@ -47,11 +47,18 @@ export const SHOWROOM_NAV: ShowroomNavSection[] = [
     menu: 'archetypes',
     items: [
       {
-        id: 'listing',
-        label: 'nf-listing',
+        id: 'listing-flat',
+        label: 'nf-listing-flat',
         route: '/archetypes/listing',
         status: 'live',
-        description: 'Collection racine',
+        description: 'Collection à plat · toolbar + pager',
+      },
+      {
+        id: 'listing-tree',
+        label: 'nf-listing-tree',
+        route: '/archetypes/listing-tree',
+        status: 'live',
+        description: 'Hiérarchie · header colonnes',
       },
       {
         id: 'details',
@@ -73,13 +80,6 @@ export const SHOWROOM_NAV: ShowroomNavSection[] = [
         route: '/archetypes/master-slave',
         status: 'live',
         description: 'Split panes entity-focus',
-      },
-      {
-        id: 'tree',
-        label: 'nf-tree',
-        route: '/archetypes/tree',
-        status: 'live',
-        description: 'Hiérarchie · listing-controls',
       },
       {
         id: 'wizard',

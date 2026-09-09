@@ -49,6 +49,7 @@ export const CATALOG_MOLECULES: CatalogEntry[] = [
   { id: 'search-input', selector: 'nf-search-input', layer: 'molecules', status: 'stub' },
   { id: 'listing-controls', selector: 'nf-listing-controls', layer: 'molecules', status: 'live' },
   { id: 'listing-actions', selector: 'nf-listing-actions', layer: 'molecules', status: 'live', note: 'top-right · + slot nf-smart-import-action' },
+  { id: 'action-menu', selector: 'nf-action-menu', layer: 'molecules', status: 'live', note: 'cascade (Status ▸) + overflow ⋯ récursif' },
   { id: 'stat-card', selector: 'nf-stat-card', layer: 'molecules', status: 'stub' },
   { id: 'kpi-strip', selector: 'nf-kpi-strip', layer: 'molecules', status: 'stub' },
   { id: 'address', selector: 'nf-address-form', layer: 'molecules', status: 'stub', note: 'sandbox dédié plus tard' },
@@ -63,7 +64,9 @@ export const CATALOG_ORGANISMS: CatalogEntry[] = [
   { id: 'tree-editor', selector: 'nf-tree-editor', layer: 'organisms', status: 'partial', note: 'plan simple — études = nf-tree-table' },
   { id: 'tree-table', selector: 'nf-tree-table', layer: 'organisms', status: 'live', note: '→ archetype tree (études)' },
   { id: 'master-slave-shell', selector: 'nf-master-slave-shell', layer: 'organisms', status: 'live', note: '→ archetype' },
-  { id: 'entity-listing', selector: 'nf-entity-listing', layer: 'organisms', status: 'partial', note: '→ listing' },
+  { id: 'listing-flat', selector: 'nf-listing-flat', layer: 'organisms', status: 'live', note: 'toolbar + action bar + table + pager' },
+  { id: 'listing-tree', selector: 'nf-listing-tree', layer: 'organisms', status: 'live', note: '→ archetype listing-tree' },
+  { id: 'entity-listing', selector: 'nf-entity-listing', layer: 'organisms', status: 'partial', note: 'legacy · → listing-flat' },
   { id: 'entity-detail', selector: 'nf-entity-detail', layer: 'organisms', status: 'stub' },
   { id: 'drawer', selector: 'nf-drawer', layer: 'organisms', status: 'stub' },
   { id: 'modal', selector: 'nf-modal', layer: 'organisms', status: 'stub' },
@@ -85,8 +88,10 @@ export const CATALOG_ALL: CatalogEntry[] = [
 ];
 
 export function catalogRoute(entry: CatalogEntry): string {
-  if (entry.id === 'tree-table' || entry.id === 'tree-editor') return '/archetypes/tree';
+  if (entry.id === 'tree-table' || entry.id === 'tree-editor' || entry.id === 'listing-tree') {
+    return '/archetypes/listing-tree';
+  }
   if (entry.id === 'master-slave-shell') return '/archetypes/master-slave';
-  if (entry.id === 'entity-listing') return '/archetypes/listing';
+  if (entry.id === 'entity-listing' || entry.id === 'listing-flat') return '/archetypes/listing';
   return `/components/${entry.layer}/${entry.id}`;
 }

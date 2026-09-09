@@ -8,11 +8,11 @@ import {
 
 import { HomePage } from './pages/home.page';
 import { StubPage } from './pages/stub.page';
-import { ProductListingPage } from './archetypes/product-listing.page';
+import { ListingFlatPage } from './archetypes/listing-flat.page';
 import { ProductDetailPage } from './archetypes/product-detail.page';
 import { Details1nPage } from './archetypes/details-1n.page';
 import { MasterSlavePage } from './archetypes/master-slave.page';
-import { TreePage } from './archetypes/tree.page';
+import { ListingTreePage } from './archetypes/listing-tree.page';
 import { ComponentDemoPage } from './components/component-demo.page';
 
 /** Remount when params/data change so sidebar clicks always refresh the view. */
@@ -40,11 +40,12 @@ export class SandboxNoReuseStrategy implements RouteReuseStrategy {
 
 export const APP_ROUTES: Routes = [
   { path: '', component: HomePage },
-  { path: 'archetypes/listing', component: ProductListingPage },
+  { path: 'archetypes/listing', component: ListingFlatPage },
+  { path: 'archetypes/listing-tree', component: ListingTreePage },
   { path: 'archetypes/details/:id', component: ProductDetailPage },
   { path: 'archetypes/details-1n/:id', component: Details1nPage },
   { path: 'archetypes/master-slave', component: MasterSlavePage },
-  { path: 'archetypes/tree', component: TreePage },
+  { path: 'archetypes/tree', redirectTo: 'archetypes/listing-tree', pathMatch: 'full' },
   {
     path: 'archetypes/wizard',
     component: StubPage,

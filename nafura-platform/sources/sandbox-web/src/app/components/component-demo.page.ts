@@ -40,6 +40,10 @@ import {
   ListingActionsComponent,
   type ListingActionItem,
 } from '@platform/lib/anatomy/components/molecules/listing-actions';
+import {
+  ActionMenuComponent,
+  type ActionMenuNode,
+} from '@platform/lib/anatomy/components/molecules/action-menu';
 import { DataTableComponent } from '@platform/lib/anatomy/components/organisms/data-table';
 import { PageShellComponent } from '@platform/lib/anatomy/components/organisms/page-shell';
 import type { ColumnConfig, FilterFieldConfig } from '@platform/lib/anatomy/types';
@@ -84,6 +88,7 @@ const ICON_COLORS = ['primary', 'success', 'warning', 'danger', 'info'] as const
     SelectionBarComponent,
     ListingControlsComponent,
     ListingActionsComponent,
+    ActionMenuComponent,
     DataTableComponent,
     PageShellComponent,
   ],
@@ -626,6 +631,54 @@ const ICON_COLORS = ['primary', 'success', 'warning', 'danger', 'info'] as const
           </section>
         }
 
+        @case ('action-menu') {
+          <section class="block">
+            <h2>Barre mixte — boutons + cascade « Status » + overflow « ⋯ »</h2>
+            <div class="row">
+              <nf-button variant="primary" size="sm" icon="check" (clicked)="onListAction('approve')">Approuver</nf-button>
+              <nf-button variant="secondary" size="sm" icon="calendar" (clicked)="onListAction('postpone')">Décaler</nf-button>
+              <nf-action-menu
+                label="Status"
+                [nodes]="statusMenuNodes"
+                (actionClick)="onListAction($event)"
+              />
+              <nf-action-menu
+                [nodes]="overflowMenuNodes"
+                (actionClick)="onListAction($event)"
+              />
+            </div>
+            <p class="muted">
+              Last action: {{ lastAction() || '—' }} · « Supprimer » passe par ConfirmDialog (confirm: true) ·
+              « Archiver » est disabled · « Exporter » ouvre un sous-menu.
+            </p>
+          </section>
+          <section class="block">
+            <h2>Overflow « ⋯ » seul, aligné bord droit (xPosition=before auto)</h2>
+            <div class="row" style="justify-content: flex-end">
+              <nf-action-menu
+                [nodes]="overflowMenuNodes"
+                tooltip="Plus d'actions"
+                (actionClick)="onListAction($event)"
+              />
+            </div>
+          </section>
+          <section class="block">
+            <h2>États — trigger disabled · sous-menu vide (item disabled)</h2>
+            <div class="row">
+              <nf-action-menu
+                label="Status"
+                [nodes]="statusMenuNodes"
+                [disabled]="true"
+                (actionClick)="onListAction($event)"
+              />
+              <nf-action-menu
+                [nodes]="edgeMenuNodes"
+                (actionClick)="onListAction($event)"
+              />
+            </div>
+          </section>
+        }
+
         @default {
           <div class="stub">
             <p class="muted">
@@ -891,6 +944,36 @@ export class ComponentDemoPage {
     { id: 'delete', label: 'Delete', variant: 'danger', icon: 'trash-2' },
   ];
   readonly treeDemoSelected = signal<string | null>('lot');
+
+  readonly statusMenuNodes: ActionMenuNode[] = [
+    { id: 'status-draft', label: 'Brouillon' },
+    { id: 'status-approved', label: 'Approuvé' },
+    { id: 'status-closed', label: 'Clôturé' },
+  ];
+
+  readonly overflowMenuNodes: ActionMenuNode[] = [
+    { id: 'duplicate', label: 'Dupliquer', icon: 'copy' },
+    {
+      kind: 'submenu',
+      id: 'export',
+      label: 'Exporter',
+      icon: 'download',
+      children: [
+        { id: 'export-csv', label: 'CSV', icon: 'file' },
+        { id: 'export-xlsx', label: 'Excel (.xlsx)', icon: 'file' },
+        { id: 'export-print', label: 'Imprimer', icon: 'printer' },
+      ],
+    },
+    { kind: 'divider' },
+    { id: 'archive', label: 'Archiver', icon: 'archive', disabled: true },
+    { id: 'delete', label: 'Supprimer', icon: 'trash-2', danger: true, confirm: true },
+  ];
+
+  readonly edgeMenuNodes: ActionMenuNode[] = [
+    { kind: 'submenu', id: 'empty-sub', label: 'Sous-menu vide', icon: 'folder', children: [] },
+    { id: 'hidden', label: 'Caché', visible: false },
+    { id: 'ok', label: 'Action visible', icon: 'check' },
+  ];
 
   onListAction(id: string): void {
     this.lastAction.set(id);

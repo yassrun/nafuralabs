@@ -1,35 +1,21 @@
 ---
-description: Canon Raster autonome — projets, lots, sous-lots, plans, Tasks, agents et chemins
+description: Raster et Pact en pause — travailler directement, pas via lots/Tasks/Pact
 alwaysApply: true
 ---
 
-# Où écrire quoi
+# Cadre de travail (pause Raster / Pact)
 
-Canon : `RASTER_BLUEPRINT.md`, `raster/AGENTS.md`, `raster/HARNESS.md`, `OPS_BLUEPRINT.md` et `ARCHI_BLUEPRINT.md` (**Pact**).
+**Ne pas** passer par Raster ni par Pact pour le moment.
 
-**Pact** = platform → app → socle + BC. Sektor : **un BC = un lot Raster permanent** (`sektor/raster-src/DECISIONS.md`). Platform ≠ lot Sektor. Socle / chrome transversal ≠ faux BC.
+Interdit tant que ce mode n’est pas levé :
 
-| Élément | Chemin |
-|---|---|
-| Inbox globale | `raster/inbox.md` |
-| Roadmap projet | `<projet>/ROADMAP.md` |
-| Lot | `<projet>/raster-src/lots/<lot>/` |
-| Sous-lot | `<projet>/raster-src/lots/<lot>/<sous-lot>/` |
-| Plan | `<sous-lot>/00-PLAN.md` |
-| UX | `<sous-lot>/ux/*.canvas.tsx` |
-| Tasks | `<lot-ou-sous-lot>/tasks/{ID}-{slug}.md` |
-| Preuves e2e | `<projet>/e2e/` |
-| Code | `<projet>/sources/` |
-| Harness Spec/Code | `raster/HARNESS.md` |
-| Décisions coupe Sektor | `sektor/raster-src/DECISIONS.md` |
+- `raster/inbox.md`, `promote`, `node raster/t.mjs *`
+- créer / muter des Tasks sous `raster-src/`
+- exiger un `00-PLAN.md`, un lot, un sous-lot ou un `ROADMAP.md` avant de coder
+- lire `ARCHI_BLUEPRINT.md` / Pact comme canon obligatoire
+- `node raster/t.mjs check` avant de rendre la main
 
-Lot et sous-lot sont des dossiers. Task est le seul ticket.
-Le CLI crée les Tasks et possède leur frontmatter.
-Le Plan, l’UX et le code sont édités directement.
+Travailler **directement** dans `<projet>/sources/` (et `e2e/` / `ops/` si besoin).  
+Les dossiers `raster/`, `raster-src/`, `RASTER_BLUEPRINT.md` et `ARCHI_BLUEPRINT.md` restent dans le dépôt : ne pas les étendre, ne pas les prendre pour instruction d’agent.
 
-Avant de rendre la main :
-
-```bash
-node raster/t.mjs check
-```
-
+Toujours vrai (hors Raster) : Mode B QA (`.cursor/rules/cursor-qa-browser.mdc`), lab métier (`.cursor/rules/lab-mode-no-prod-data.mdc`), métier BTP hors `nafura-platform/`.
