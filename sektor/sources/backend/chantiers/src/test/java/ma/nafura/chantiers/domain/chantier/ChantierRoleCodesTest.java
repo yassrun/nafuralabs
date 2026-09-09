@@ -36,4 +36,53 @@ class ChantierRoleCodesTest {
         assertThat(ChantierRoleCodes.isAffectable(ChantierRoleCodes.BTP_POINTEUR)).isTrue();
         assertThat(ChantierRoleCodes.isAffectable(ChantierRoleCodes.BTP_DG)).isFalse();
     }
+
+    @Test
+    void commandGrade_placesOperationalRolesOnTheScale() {
+        assertThat(ChantierRoleCodes.commandGrade(ChantierRoleCodes.BTP_POINTEUR))
+                .isEqualTo(ChantierRoleCodes.COMMAND_GRADE_FIELD);
+        assertThat(ChantierRoleCodes.commandGrade(ChantierRoleCodes.BTP_INGENIEUR))
+                .isEqualTo(ChantierRoleCodes.COMMAND_GRADE_SITE);
+        assertThat(ChantierRoleCodes.commandGrade(ChantierRoleCodes.BTP_DAF))
+                .isEqualTo(ChantierRoleCodes.COMMAND_GRADE_NONE);
+        assertThat(ChantierRoleCodes.commandGrade("OWNER"))
+                .isEqualTo(ChantierRoleCodes.COMMAND_GRADE_DIRECTION);
+        assertThat(ChantierRoleCodes.PLANNING_STRUCTURE_APPLY_MIN)
+                .isEqualTo(ChantierRoleCodes.COMMAND_GRADE_CONDUCTEUR);
+        assertThat(ChantierRoleCodes.PLANNING_CALENDAR_ADMIN_MIN)
+                .isEqualTo(ChantierRoleCodes.COMMAND_GRADE_DIRECTEUR);
+    }
+
+    @Test
+    void canCommand_isStrictlyAboveAndCascades() {
+        int dt = ChantierRoleCodes.COMMAND_GRADE_DIRECTEUR;
+        int conducteur = ChantierRoleCodes.COMMAND_GRADE_CONDUCTEUR;
+        int chef = ChantierRoleCodes.COMMAND_GRADE_SITE;
+        int field = ChantierRoleCodes.COMMAND_GRADE_FIELD;
+        int direction = ChantierRoleCodes.COMMAND_GRADE_DIRECTION;
+
+        assertThat(ChantierRoleCodes.canCommand(dt, ChantierRoleCodes.BTP_CONDUCTEUR_TRAVAUX)).isTrue();
+        assertThat(ChantierRoleCodes.canCommand(dt, ChantierRoleCodes.BTP_CHEF_CHANTIER)).isTrue();
+        assertThat(ChantierRoleCodes.canCommand(dt, ChantierRoleCodes.BTP_DIRECTEUR_TRAVAUX)).isFalse();
+        assertThat(ChantierRoleCodes.canCommand(conducteur, ChantierRoleCodes.BTP_DIRECTEUR_TRAVAUX))
+                .isFalse();
+        assertThat(ChantierRoleCodes.canCommand(conducteur, ChantierRoleCodes.BTP_CHEF_CHANTIER)).isTrue();
+        assertThat(ChantierRoleCodes.canCommand(chef, ChantierRoleCodes.BTP_CHEF_EQUIPE)).isTrue();
+        assertThat(ChantierRoleCodes.canCommand(chef, ChantierRoleCodes.BTP_CHEF_CHANTIER)).isFalse();
+        assertThat(ChantierRoleCodes.canCommand(field, ChantierRoleCodes.BTP_POINTEUR)).isFalse();
+        assertThat(ChantierRoleCodes.canCommand(direction, ChantierRoleCodes.BTP_DIRECTEUR_TRAVAUX))
+                .isTrue();
+    }
+
+    @Test
+    void rolesCommandableBy_excludesPeersAndAbove() {
+        assertThat(ChantierRoleCodes.rolesCommandableBy(ChantierRoleCodes.COMMAND_GRADE_CONDUCTEUR))
+                .contains(
+                        ChantierRoleCodes.BTP_CHEF_CHANTIER,
+                        ChantierRoleCodes.BTP_CHEF_EQUIPE,
+                        ChantierRoleCodes.BTP_INGENIEUR)
+                .doesNotContain(
+                        ChantierRoleCodes.BTP_CONDUCTEUR_TRAVAUX, ChantierRoleCodes.BTP_DIRECTEUR_TRAVAUX);
+        assertThat(ChantierRoleCodes.rolesCommandableBy(ChantierRoleCodes.COMMAND_GRADE_FIELD)).isEmpty();
+    }
 }

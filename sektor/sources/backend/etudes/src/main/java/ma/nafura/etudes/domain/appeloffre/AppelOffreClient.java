@@ -66,7 +66,7 @@ public class AppelOffreClient {
     @Column(name = "type", nullable = false, length = 20)
     private String type;
 
-    @Column(name = "date_limite_depot", nullable = false)
+    @Column(name = "date_limite_depot")
     private LocalDate dateLimiteDepot;
 
     @Column(name = "date_ouverture_plis")

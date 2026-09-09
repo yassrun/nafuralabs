@@ -154,6 +154,9 @@
           "periode": "Period",
           "emptyTitle": "No assignments",
           "emptyDesc": "Assign employees to this site with a role.",
+          "noAuthorityTitle": "Read only",
+          "noAuthorityDesc": "You cannot appoint the team on this site.",
+          "forbidden": "You cannot appoint this role on this site.",
           "seeTab": "Manage assignments in the Team tab."
         },
         "sections": {
@@ -558,23 +561,116 @@
       "title": "Schedule",
       "empty": "No activity",
       "emptyHint": "The site can already be billed without a schedule. Here you plan the work — formwork, pouring, demobilization.",
+      "buildTitle": "Build the schedule",
+      "buildHint": "The site is already billable. Add phases, activities and milestones on the site calendar.",
       "newActivite": "New activity",
+      "newJalon": "Milestone",
+      "newPhase": "Phase",
+      "retry": "Retry",
+      "loading": "Loading the schedule — nothing is written until the data is known.",
+      "convention": "Convention 1 d = {hours} h",
       "lotsHorsGantt": "Lots stay in the tree — not on the Gantt",
       "filterRequired": "Filter one site to create an activity.",
+      "summary": {
+        "lignes": "rows",
+        "retards": "late",
+        "avancement": "Average progress"
+      },
+      "error": {
+        "title": "The schedule could not be loaded",
+        "hint": "Network or API failure. This is not an empty site. Retry keeps the site and filters.",
+        "body": "Activities cannot be displayed",
+        "retryKeeps": "No zero-row table. No « 0 activity » badge."
+      },
+      "forbidden": {
+        "title": "Access denied",
+        "hint": "This site is outside your scope. No activity label, date or id is shown.",
+        "body": "Go back to a site you can access.",
+        "openChantiers": "Open my sites"
+      },
+      "filtered": {
+        "title": "No results for these filters",
+        "hint": "The activities are still there. We do not invite you to rebuild the schedule.",
+        "clear": "Clear filters"
+      },
+      "formes": {
+        "activite": "Activity",
+        "jalon": "Milestone",
+        "phase": "Phase"
+      },
+      "natures": {
+        "prepaInstall": "Setup / installation",
+        "etudesValidation": "Design / approval",
+        "approvisionnement": "Procurement",
+        "travaux": "Works",
+        "controleEssai": "Inspection / test",
+        "receptionCloture": "Handover / close-out",
+        "jalonTechnique": "Technical milestone",
+        "jalonContractuel": "Contractual milestone",
+        "jalonFinancier": "Financial milestone"
+      },
+      "grid": {
+        "activite": "Activity / code",
+        "forme": "Kind",
+        "debut": "Start",
+        "fin": "Finish",
+        "duree": "Duration",
+        "predecessors": "Predecessors"
+      },
+      "calendar": {
+        "action": "Hours",
+        "title": "Site working hours",
+        "hint": "Working days and exceptions. Activities appear on the Gantt (table + bars), not here.",
+        "jour": "Day",
+        "creneaux": "Slots",
+        "exceptions": "Exceptions",
+        "saveDefault": "Save 8 h Mon–Fri"
+      },
+      "views": {
+        "label": "View",
+        "save": "Save view",
+        "apply": "Apply a view…",
+        "prompt": "View name (filters, columns, scale — grants no access)",
+        "defaultName": "My view",
+        "saved": "View saved"
+      },
       "toolbar": {
+        "chantier": "Site",
+        "tousChantiers": "All sites",
         "periode": "Period",
         "ceMois": "This month",
         "ceTrimestre": "This quarter",
         "cetteAnnee": "This year",
+        "glissant": "Rolling 6 months",
         "tout": "All",
         "granularite": "Granularity",
+        "nature": "Nature",
+        "toutesNatures": "All",
+        "jour": "Day",
+        "semaine": "Week",
+        "mois": "Month",
+        "trimestre": "Quarter",
+        "today": "Today",
+        "exportPdf": "Export PDF",
         "pleinEcran": "Full screen"
       },
       "drawer": {
         "title": "Activity",
+        "create": {
+          "activite": "New activity",
+          "jalon": "New milestone",
+          "phase": "New phase"
+        },
+        "forme": "Kind — never a one-day milestone",
         "libelle": "Label",
+        "nature": "Nature",
+        "natureNone": "(to qualify)",
         "debut": "Start",
-        "fin": "End",
+        "fin": "Finish",
+        "duree": "Duration (working hours)",
+        "dureeHint": "{hours} h  ({days} d × {perDay} h)",
+        "jalonHint": "Duration 0 — same start and finish. Never a fake day.",
+        "phaseHint": "Dates come from children. No manual duration.",
         "parent": "Under",
         "parentNone": "(none — root)",
         "zone": "Zone",

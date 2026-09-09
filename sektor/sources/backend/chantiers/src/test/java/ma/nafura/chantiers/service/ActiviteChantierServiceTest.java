@@ -3,7 +3,9 @@ package ma.nafura.chantiers.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -14,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.chantiers.api.dto.ActiviteChantierDto;
 import ma.nafura.chantiers.api.dto.ActiviteRattachementDto;
+import ma.nafura.chantiers.api.dto.PlanningCapacitesDto;
 import ma.nafura.chantiers.api.request.ActiviteChantierCreateDto;
 import ma.nafura.chantiers.api.request.ActivitePrecedenceCreateDto;
 import ma.nafura.chantiers.api.request.ActiviteRattachementCreateDto;
@@ -26,6 +29,7 @@ import ma.nafura.chantiers.domain.chantier.ChantierLot;
 import ma.nafura.chantiers.domain.chantier.NatureLigne;
 import ma.nafura.chantiers.domain.chantier.ZoneChantier;
 import ma.nafura.chantiers.repository.ActiviteChantierRepository;
+import ma.nafura.chantiers.repository.ActiviteNatureRepository;
 import ma.nafura.chantiers.repository.ActivitePrecedenceRepository;
 import ma.nafura.chantiers.repository.ActiviteRattachementRepository;
 import ma.nafura.chantiers.repository.ChantierLotRepository;
@@ -40,6 +44,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.web.server.ResponseStatusException;
 
 /** AC-1..AC-7 — création WBS, zone, quotité, précédence. */
 @ExtendWith(MockitoExtension.class)
@@ -55,10 +60,13 @@ class ActiviteChantierServiceTest {
     @Mock private ActiviteChantierRepository activiteRepository;
     @Mock private ActivitePrecedenceRepository precedenceRepository;
     @Mock private ActiviteRattachementRepository rattachementRepository;
+    @Mock private ActiviteNatureRepository natureRepository;
     @Mock private ChantierService chantierService;
     @Mock private ZoneChantierRepository zoneRepository;
     @Mock private ChantierLotRepository lotRepository;
     @Mock private PosteBudgetaireRepository posteRepository;
+    @Mock private CalendrierChantierService calendrierService;
+    @Mock private PlanningPolicy planningPolicy;
 
     private ActiviteChantierService service;
     private final List<ActiviteChantier> activites = new ArrayList<>();
@@ -72,13 +80,20 @@ class ActiviteChantierServiceTest {
                 activiteRepository,
                 precedenceRepository,
                 rattachementRepository,
+                natureRepository,
                 chantierService,
                 zoneRepository,
                 lotRepository,
-                posteRepository);
+                posteRepository,
+                calendrierService,
+                planningPolicy);
 
         when(chantierService.getById(CHANTIER))
                 .thenReturn(Chantier.builder().id(CHANTIER).code("CH-1").label("Résidence").build());
+        when(calendrierService.deriveInclusiveFin(eq(CHANTIER), any(), anyInt()))
+                .thenAnswer(inv -> ma.nafura.chantiers.domain.calendrier.CalendrierOuvreCalculator
+                        .standard(ma.nafura.chantiers.domain.calendrier.CalendrierOuvreCalculator.FUSEAU_DEFAUT)
+                        .deriveInclusiveFin(inv.getArgument(1), inv.getArgument(2)));
         when(activiteRepository.save(any())).thenAnswer(inv -> {
             ActiviteChantier a = inv.getArgument(0);
             activites.removeIf(x -> x.getId().equals(a.getId()));
@@ -114,6 +129,7 @@ class ActiviteChantierServiceTest {
         });
         when(precedenceRepository.findByTenantIdAndChantierId(eq(TENANT), eq(CHANTIER)))
                 .thenAnswer(inv -> List.copyOf(precedences));
+        when(planningPolicy.capacites(CHANTIER)).thenReturn(PlanningCapacitesDto.applyAll());
 
         when(zoneRepository.findByIdAndTenantId(eq(ZONE), eq(TENANT)))
                 .thenReturn(Optional.of(ZoneChantier.builder()
@@ -161,6 +177,10 @@ class ActiviteChantierServiceTest {
         assertThat(enfant.getParentActiviteId()).isEqualTo(parent.getId());
         assertThat(enfant.getZoneId()).isEqualTo(ZONE);
         assertThat(enfant.getLibelle()).isEqualTo("Coffrage R+1");
+        assertThat(parent.getForme()).isEqualTo("ACTIVITE");
+        assertThat(enfant.getForme()).isEqualTo("ACTIVITE");
+        assertThat(parent.getNatureCode()).isNull();
+        assertThat(parent.getDureeMinutesOuvrees()).isNull();
     }
 
     @Test
@@ -202,6 +222,23 @@ class ActiviteChantierServiceTest {
         assertThat(created.getLibelle()).isEqualTo("Libre");
         assertThat(created.getRattachements()).isEmpty();
         assertThat(activites).hasSize(1);
+    }
+
+    @Test
+    void planning_exposeCapacitesPourLEcran() {
+        assertThat(service.planning(CHANTIER).getCapacites().isEditerStructure()).isTrue();
+        assertThat(service.planning(CHANTIER).getCapacites().isAdministrerCalendrier()).isTrue();
+    }
+
+    @Test
+    void planning_autreChantier_403() {
+        doThrow(new ResponseStatusException(
+                        org.springframework.http.HttpStatus.FORBIDDEN, PlanningPolicy.REFUS_CODE))
+                .when(planningPolicy)
+                .assertCanRead("ch-other");
+        assertThatThrownBy(() -> service.planning("ch-other"))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining(PlanningPolicy.REFUS_CODE);
     }
 
     private static ActiviteChantierCreateDto createDto(String libelle, String parentId, String zoneId) {

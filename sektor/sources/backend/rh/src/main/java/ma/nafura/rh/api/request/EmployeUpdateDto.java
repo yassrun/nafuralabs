@@ -27,7 +27,11 @@ public class EmployeUpdateDto {
 
     private java.util.UUID userId;
 
+    private String posteId;
+
     private String poste;
+
+    private String departementId;
 
     private String departement;
 

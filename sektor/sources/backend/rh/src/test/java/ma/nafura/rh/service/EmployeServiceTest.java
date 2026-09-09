@@ -38,6 +38,9 @@ class EmployeServiceTest {
     @Mock
     private EmployeSeedService seedService;
 
+    @Mock
+    private RhReferentielBinder referentielBinder;
+
     @InjectMocks
     private EmployeService service;
 
@@ -100,6 +103,8 @@ class EmployeServiceTest {
     @Test
     void create_assignsMatriculeWhenMissing() {
         EmployeCreateDto request = createRequest(null);
+        when(referentielBinder.bind(any(), any(), any(), any()))
+                .thenReturn(new RhReferentielBinder.Bound("rh-pst-001", "Ouvrier", null, null));
         when(repository.findByIdAndTenantId(any(), eq(TENANT_ID))).thenReturn(Optional.empty());
         when(repository.findByTenantIdOrderByNomAscPrenomAsc(TENANT_ID)).thenReturn(List.of());
         when(repository.save(any(Employe.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -128,6 +133,8 @@ class EmployeServiceTest {
         Employe existing = sampleEmploye("emp-001", "MAT-001", "Alami", "Karim");
         when(repository.findByIdAndTenantId("emp-001", TENANT_ID)).thenReturn(Optional.of(existing));
         when(repository.save(any(Employe.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(referentielBinder.bind(any(), eq("Chef de chantier"), any(), any()))
+                .thenReturn(new RhReferentielBinder.Bound("rh-pst-002", "Chef de chantier", null, null));
 
         EmployeUpdateDto update = new EmployeUpdateDto();
         update.setPoste("Chef de chantier");
@@ -155,6 +162,7 @@ class EmployeServiceTest {
                 .nom(nom)
                 .prenom(prenom)
                 .cin("AB123456")
+                .posteId("rh-pst-001")
                 .poste("Ouvrier")
                 .categorie("OUVRIER")
                 .typeContrat("CDI")
@@ -171,6 +179,7 @@ class EmployeServiceTest {
         dto.setPrenom("Karim");
         dto.setCin("AB123456");
         dto.setCnss("1234567");
+        dto.setPosteId("rh-pst-001");
         dto.setPoste("Ouvrier");
         dto.setCategorie("OUVRIER");
         dto.setTypeContrat("CDI");

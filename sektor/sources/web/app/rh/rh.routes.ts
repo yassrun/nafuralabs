@@ -12,6 +12,16 @@ export const RH_ROUTES: Routes = [
       import('./employes/employe.routes').then((m) => m.EMPLOYE_ROUTES),
   },
   {
+    path: 'rh/postes',
+    loadChildren: () =>
+      import('./referentiels/rh-nomenclature.routes').then((m) => m.POSTE_RH_ROUTES),
+  },
+  {
+    path: 'rh/departements',
+    loadChildren: () =>
+      import('./referentiels/rh-nomenclature.routes').then((m) => m.DEPARTEMENT_RH_ROUTES),
+  },
+  {
     path: 'rh/conges',
     loadChildren: () =>
       import('./conges/conge.routes').then((m) => m.CONGE_ROUTES),

@@ -1,6 +1,32 @@
 <nf-screen [header]="headerConfig">
 
   <div data-testid="consultation-achat-fiche">
+    @if (item(); as cs) {
+      <div class="cs-statut-strip" data-testid="consultation-statut">
+        <nf-badge
+          [variant]="statutVariant()"
+          [rounded]="true"
+          data-testid="consultation-statut-badge"
+        >
+          {{ cs.statutLabel }}
+        </nf-badge>
+        @if (cs.dossierEtudeId; as dossierId) {
+          <a
+            class="cs-lien-etude"
+            [routerLink]="['/etudes/dossiers', dossierId]"
+            data-testid="consultation-lien-etude"
+          >
+            {{ 'achats.consultation.lien.ouvrirDossier' | translate }}
+          </a>
+        } @else {
+          <nf-badge data-testid="consultation-lien-hors">{{
+            'achats.consultation.lien.hors' | translate
+          }}</nf-badge>
+        }
+        <nf-badge data-testid="consultation-avancement">{{ avancementLabel() }}</nf-badge>
+      </div>
+    }
+
     <nf-entity-detail
       #detail
       [config]="config"
@@ -11,27 +37,25 @@
       [saving]="isSaving()"
       (action)="onAction($event)">
 
-      <ng-template nfField="lienEtude">
-        @if (item()?.dossierEtudeId; as dossierId) {
-          <a
-            class="cs-lien-etude"
-            [routerLink]="['/etudes/dossiers', dossierId]"
-            data-testid="consultation-lien-etude"
-          >
-            {{ 'achats.consultation.lien.ouvrirDossier' | translate }}
-          </a>
-        } @else {
-          <span data-testid="consultation-lien-hors">{{
-            'achats.consultation.lien.hors' | translate
-          }}</span>
-        }
-      </ng-template>
-
       <ng-template nfField="panier">
         @if (panierFige()) {
           <p class="cs-callout" data-testid="consultation-panier-fige">
             {{ 'achats.consultation.panier.fige' | translate }}
           </p>
+        } @else {
+          <div class="cs-panier-head">
+            <nf-button
+              type="button"
+              variant="secondary"
+              icon="plus"
+              data-testid="consultation-panier-add"
+              [disabled]="panierSaving()"
+              [loading]="panierSaving()"
+              (clicked)="addArticle()"
+            >
+              {{ 'achats.consultation.panier.add' | translate }}
+            </nf-button>
+          </div>
         }
         @if (panierLignes().length === 0) {
           <p class="cs-empty">{{ 'achats.consultation.panier.empty' | translate }}</p>
@@ -41,17 +65,37 @@
               <tr>
                 <th>{{ 'achats.consultation.panier.columns.code' | translate }}</th>
                 <th>{{ 'achats.consultation.panier.columns.libelle' | translate }}</th>
+                @if (!panierFige()) {
+                  <th></th>
+                }
               </tr>
             </thead>
             <tbody>
-              @for (ligne of panierLignes(); track ligne.cleStable) {
+              @for (ligne of panierLignes(); track ligne.cleStable; let i = $index) {
                 <tr>
                   <td class="cs-panier-code">{{ ligne.code }}</td>
                   <td>{{ ligne.libelle }}</td>
+                  @if (!panierFige()) {
+                    <td class="cs-panier-actions">
+                      <nf-button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        [attr.data-testid]="'consultation-panier-remove-' + i"
+                        [disabled]="panierSaving() || panierLignes().length < 2"
+                        (clicked)="removeArticle(ligne.cleStable)"
+                      >
+                        {{ 'achats.consultation.panier.remove' | translate }}
+                      </nf-button>
+                    </td>
+                  }
                 </tr>
               }
             </tbody>
           </table>
+        }
+        @if (panierErreur(); as err) {
+          <p class="cs-error" role="alert" data-testid="consultation-panier-error">{{ err }}</p>
         }
       </ng-template>
     </nf-entity-detail>

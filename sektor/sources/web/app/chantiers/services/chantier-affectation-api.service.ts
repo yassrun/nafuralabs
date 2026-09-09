@@ -14,6 +14,7 @@ export interface ChantierAffectation {
   dateDebut: string;
   dateFin?: string | null;
   isActive: boolean;
+  canMutate?: boolean;
 }
 
 export interface ChantierAffectationCreate {

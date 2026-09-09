@@ -5,7 +5,6 @@ import java.util.List;
 import ma.nafura.chantiers.api.dto.ChantierAffectationDto;
 import ma.nafura.chantiers.api.request.ChantierAffectationCreateDto;
 import ma.nafura.chantiers.api.request.ChantierAffectationUpdateDto;
-import ma.nafura.chantiers.domain.chantier.ChantierRoleCodes;
 import ma.nafura.chantiers.service.ChantierAffectationService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
@@ -32,26 +31,26 @@ public class ChantierAffectationController {
     }
 
     @GetMapping
-    @RequirePermission("chantiers.read")
+    @RequirePermission(value = "chantiers.chantiers.chantier.read", fullPermission = true)
     public ResponseEntity<List<ChantierAffectationDto>> list(@PathVariable String chantierId) {
         return ResponseEntity.ok(service.listByChantier(chantierId));
     }
 
     @GetMapping("/roles")
-    @RequirePermission("chantiers.read")
+    @RequirePermission(value = "chantiers.chantiers.chantier.read", fullPermission = true)
     public ResponseEntity<List<String>> affectableRoles(@PathVariable String chantierId) {
-        return ResponseEntity.ok(ChantierRoleCodes.affectableRoles().stream().sorted().toList());
+        return ResponseEntity.ok(service.assignableRoles(chantierId));
     }
 
     @PostMapping
-    @RequirePermission("chantiers.update")
+    @RequirePermission(value = "chantiers.chantiers.chantier.update", fullPermission = true)
     public ResponseEntity<ChantierAffectationDto> create(
             @PathVariable String chantierId, @Valid @RequestBody ChantierAffectationCreateDto body) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(chantierId, body));
     }
 
     @PutMapping("/{affectationId}")
-    @RequirePermission("chantiers.update")
+    @RequirePermission(value = "chantiers.chantiers.chantier.update", fullPermission = true)
     public ResponseEntity<ChantierAffectationDto> update(
             @PathVariable String chantierId,
             @PathVariable String affectationId,
@@ -60,7 +59,7 @@ public class ChantierAffectationController {
     }
 
     @DeleteMapping("/{affectationId}")
-    @RequirePermission("chantiers.update")
+    @RequirePermission(value = "chantiers.chantiers.chantier.update", fullPermission = true)
     public ResponseEntity<Void> deactivate(
             @PathVariable String chantierId, @PathVariable String affectationId) {
         service.deactivate(chantierId, affectationId);

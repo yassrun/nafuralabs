@@ -6,7 +6,14 @@ export interface Employe {
   id: string; matricule: string; nom: string; prenom: string;
   cin: string; cnss?: string; dateNaissance?: string;
   adresse?: string; ville?: string; telephone?: string; email?: string;
-  poste: string; departement?: string; categorie: CategorieEmploye;
+  userId?: string;
+  posteId: string;
+  poste: string;
+  posteName?: string;
+  departementId?: string;
+  departement?: string;
+  departementName?: string;
+  categorie: CategorieEmploye;
   typeContrat: TypeContrat; statut: StatutEmploye;
   dateEmbauche: string; dateFinContrat?: string;
   salaireBase: number;
@@ -19,8 +26,23 @@ export interface Employe {
   rc?: string;
   patente?: string;
 }
+export interface RhNomenclature {
+  id: string;
+  code: string;
+  libelle: string;
+  actif: boolean;
+}
+export type RhPoste = RhNomenclature;
+export type RhDepartement = RhNomenclature;
+export type RhNomenclatureCreate = Omit<RhNomenclature, 'id'>;
+export type RhNomenclatureUpdate = Partial<RhNomenclatureCreate>;
 export interface EmployeListItem extends Employe { anciennete: number; }
-export type EmployeCreate = Omit<Employe, 'id' | 'matricule'>;
+export type EmployeCreate = Omit<Employe, 'id' | 'matricule' | 'poste' | 'departement' | 'posteName' | 'departementName'> & {
+  posteId: string;
+  poste?: string;
+  departementId?: string;
+  departement?: string;
+};
 export type EmployeUpdate = Partial<EmployeCreate>;
 
 export type TypeConge = 'ANNUEL' | 'MALADIE' | 'MATERNITE' | 'SANS_SOLDE' | 'EXCEPTIONNEL';

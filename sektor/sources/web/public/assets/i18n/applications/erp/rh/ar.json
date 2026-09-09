@@ -20,7 +20,13 @@
       "pointage": { "title": "الحضور بالأوراش", "breadcrumb": "الحضور" },
       "pointageSaisie": { "title": "تسجيل الحضور", "breadcrumb": "التسجيل" },
       "pointageValidation": { "title": "تحقق الحضور", "breadcrumb": "التحقق" },
-      "planning": { "title": "جدولة الفرق", "breadcrumb": "جدولة الفرق" }
+      "planning": { "title": "جدولة الفرق", "breadcrumb": "جدولة الفرق" },
+      "postes": { "title": "المناصب", "breadcrumb": "المناصب" },
+      "posteNew": { "title": "منصب جديد", "breadcrumb": "جديد" },
+      "posteDetail": { "title": "تفاصيل المنصب", "breadcrumb": "التفاصيل" },
+      "departements": { "title": "الأقسام", "breadcrumb": "الأقسام" },
+      "departementNew": { "title": "قسم جديد", "breadcrumb": "جديد" },
+      "departementDetail": { "title": "تفاصيل القسم", "breadcrumb": "التفاصيل" }
     },
     "common": {
       "module": "الموارد البشرية",
@@ -183,6 +189,54 @@
       },
       "errors": {
         "notFound": "الموظف {id} غير موجود"
+      }
+    },
+    "nomenclature": {
+      "actif": "نشط",
+      "inactif": "غير نشط"
+    },
+    "poste": {
+      "title": "المناصب",
+      "titleSingular": "منصب",
+      "titleNew": "منصب جديد",
+      "titleDetail": "تفاصيل المنصب",
+      "listing": {
+        "headerTitle": "المناصب",
+        "emptyState": {
+          "title": "لا توجد مناصب",
+          "message": "أنشئ مناصب الموارد البشرية — منفصلة عن الدور التطبيقي.",
+          "actionLabel": "منصب جديد"
+        }
+      },
+      "columns": { "code": "الرمز", "libelle": "التسمية", "actif": "نشط" },
+      "fields": { "code": "الرمز", "libelle": "التسمية", "actif": "نشط" },
+      "sections": { "identite": "المنصب" },
+      "toasts": { "saved": "تم حفظ المنصب {libelle}" },
+      "deleteConfirm": {
+        "title": "حذف المنصب",
+        "message": "حذف المنصب {libelle}؟"
+      }
+    },
+    "departement": {
+      "title": "الأقسام",
+      "titleSingular": "قسم",
+      "titleNew": "قسم جديد",
+      "titleDetail": "تفاصيل القسم",
+      "listing": {
+        "headerTitle": "الأقسام",
+        "emptyState": {
+          "title": "لا توجد أقسام",
+          "message": "أنشئ الأقسام (الأشغال، المقر…).",
+          "actionLabel": "قسم جديد"
+        }
+      },
+      "columns": { "code": "الرمز", "libelle": "التسمية", "actif": "نشط" },
+      "fields": { "code": "الرمز", "libelle": "التسمية", "actif": "نشط" },
+      "sections": { "identite": "القسم" },
+      "toasts": { "saved": "تم حفظ القسم {libelle}" },
+      "deleteConfirm": {
+        "title": "حذف القسم",
+        "message": "حذف القسم {libelle}؟"
       }
     },
     "conge": {

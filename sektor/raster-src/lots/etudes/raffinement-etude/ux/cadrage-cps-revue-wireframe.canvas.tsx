@@ -136,10 +136,12 @@ export default function CadrageCpsRevueWireframe() {
         CTA listing = brouillon coquille + wizard etape 1. Charge d etude =
         utilisateur courant s il est ingenieur, sinon a choisir avant import
         CPS. Proposition jamais persistee comme verite (pas d
-        appliquerPropositionMarche silencieux). Editer un champ propose =
-        l accepter corrige. Continuer exige 0 proposition en attente.
-        Extraction partielle ou echec = saisie manuelle, jamais un bandeau
-        unique « verifiez-les ».
+        appliquerPropositionMarche silencieux). Badge de provenance =
+        « IA · CPS », pas « Accepte » : la revue n est pas stockee, seulement
+        la valeur. Accepter / Refuser tant que non enregistre. Editer un
+        champ propose = l accepter corrige. Enregistrer / Continuer
+        confirment les valeurs affichees. Extraction partielle ou echec =
+        saisie manuelle, jamais un bandeau unique « verifiez-les ».
       </Text>
     </Stack>
   );
@@ -442,8 +444,8 @@ function VueBloque() {
         <Stack gap={12}>
           <Stepper current={1} />
           <Text>
-            Objet, MOA, type AO et reference portent encore le badge CPS.
-            Date limite et ville sont vides : ce n est pas bloquant (optionnel).
+            Objet, MOA, type AO et reference portent le badge IA · CPS.
+            Date limite et ville vides : Non trouve dans le CPS (optionnel).
           </Text>
           <Footer
             primary="Continuer vers le bordereau"
@@ -493,16 +495,16 @@ function FieldRow({
             </Text>
             {status === "proposed" && (
               <Pill tone="warning" size="sm">
-                CPS {source ?? ""}
+                IA · CPS {source ?? ""}
               </Pill>
             )}
             {status === "accepted" && (
-              <Pill tone="success" size="sm">
-                Accepte {source ?? ""}
+              <Pill size="sm">
+                IA · CPS {source ?? ""}
               </Pill>
             )}
             {status === "rejected" && (
-              <Pill size="sm">Refuse — saisie manuelle</Pill>
+              <Pill size="sm">Saisie manuelle</Pill>
             )}
             {status === "empty" && (
               <Pill size="sm">Non trouve dans le CPS</Pill>

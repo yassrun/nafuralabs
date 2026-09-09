@@ -35,8 +35,20 @@ export function buildEmployeFields(t: TranslateService): DetailFieldConfig[] {
         { value: 'Direction', label: tr('rh.employe.categories.Direction') },
       ],
     },
-    { key: 'poste', label: tr('rh.employe.fieldsRequired.poste'), type: 'text', required: true },
-    { key: 'departement', label: tr('rh.employe.fields.departement'), type: 'text' },
+    {
+      key: 'posteId',
+      label: tr('rh.employe.fieldsRequired.poste'),
+      type: 'select',
+      required: true,
+      lookupKey: 'rhPostes',
+    },
+    {
+      key: 'departementId',
+      label: tr('rh.employe.fields.departement'),
+      type: 'select',
+      lookupKey: 'rhDepartements',
+      clearable: true,
+    },
     { key: 'dateEmbauche', label: tr('rh.employe.fieldsRequired.dateEmbauche'), type: 'date', required: true },
     { key: 'dateFinContrat', label: tr('rh.employe.fields.dateFinContrat'), type: 'date' },
     {

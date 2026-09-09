@@ -1,0 +1,102 @@
+{
+  "at": "2026-09-08T16:28:55.631Z",
+  "status": "PASS",
+  "steps": [
+    {
+      "id": "seed",
+      "ac": "-",
+      "pass": true,
+      "detail": "chantier=d2481909-e286-412f-b4b2-ec60c1cc4f97 poste=d2481909-e286-412f-b4b2-ec60c1cc4f97-lot-1-poste-1-1"
+    },
+    {
+      "id": "palier1-avancement-noeud",
+      "ac": "AC11",
+      "pass": true,
+      "detail": "POST avancement nœud sans activité → 201"
+    },
+    {
+      "id": "capacites",
+      "ac": "SEKTOR-327",
+      "pass": true,
+      "detail": "GET planning capacites={\"lire\":true,\"editerStructure\":true,\"proposerStructure\":false,\"administrerCalendrier\":true,\"proposerCalendrier\":false,\"gererVues\":true} status=200"
+    },
+    {
+      "id": "ac13-403",
+      "ac": "AC13",
+      "pass": true,
+      "detail": "chantier inconnu → 400 leak=false"
+    },
+    {
+      "id": "jalon-jour-fictif",
+      "ac": "L1",
+      "pass": true,
+      "detail": "POST jalon 1 j → 400 {\"code\":\"BAD_REQUEST\",\"messageKey\":\"error.badRequest\",\"message\":\"chantiers.activite.jalon_jour_fictif\",\"params\":{},\"fiel"
+    },
+    {
+      "id": "jalon-zero",
+      "ac": "L1",
+      "pass": true,
+      "detail": "POST jalon → 201 duree=0 2026-09-15/2026-09-15"
+    },
+    {
+      "id": "phase",
+      "ac": "L1",
+      "pass": true,
+      "detail": "POST phase → 201 forme=PHASE"
+    },
+    {
+      "id": "activite-duree",
+      "ac": "L1",
+      "pass": true,
+      "detail": "POST activité 1440 min → 201 duree=1440 fin=2026-09-10"
+    },
+    {
+      "id": "precedence",
+      "ac": "AC27",
+      "pass": true,
+      "detail": "POST precedence FD → 201"
+    },
+    {
+      "id": "calendrier",
+      "ac": "SEKTOR-326",
+      "pass": true,
+      "detail": "GET calendrier → 200 fuseau=Africa/Casablanca"
+    },
+    {
+      "id": "ui-grid-colonnes",
+      "ac": "AC27",
+      "pass": true,
+      "detail": "ready=3 duree=true pred=true"
+    },
+    {
+      "id": "ui-convention",
+      "ac": "L1",
+      "pass": true,
+      "detail": "convention=\"Convention 1 j = 8 h\""
+    },
+    {
+      "id": "ui-pas-erreur-vide",
+      "ac": "AC21",
+      "pass": true,
+      "detail": "error=0 empty=0 ready=3"
+    },
+    {
+      "id": "ui-drawer-jalon",
+      "ac": "L1",
+      "pass": true,
+      "detail": "hint jalon visible=1"
+    },
+    {
+      "id": "ui-calendrier-contexte",
+      "ac": "L1",
+      "pass": true,
+      "detail": "drawer calendrier=1"
+    },
+    {
+      "id": "ui-vue-sauvegardee",
+      "ac": "L1",
+      "pass": true,
+      "detail": "localStorage vues=true"
+    }
+  ]
+}

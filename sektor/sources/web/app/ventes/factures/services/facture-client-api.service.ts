@@ -66,6 +66,10 @@ export class FactureClientApiService extends FeatureApiService<
     return { items, total: items.length };
   }
 
+  async getPlanningFacture(id: string): Promise<ApiFactureClient> {
+    return this.get<ApiFactureClient>(`${this.basePath}/${id}`);
+  }
+
   override async getById(id: string | number): Promise<FactureClient> {
     return this.get<FactureClient>(`${this.basePath}/${id}`);
   }

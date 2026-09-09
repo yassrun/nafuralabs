@@ -5,6 +5,7 @@ import {
   HostListener,
   LOCALE_ID,
   computed,
+  signal,
   effect,
   inject,
   viewChild,
@@ -14,12 +15,25 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { gantt, type GanttStatic } from 'dhtmlx-gantt';
 
-import { BadgeComponent, ConfigDrivenDashboardPageImports, EmptyStateComponent, ConfirmDialogService, ToastService } from '@platform/lib/anatomy';
+import {
+  AlertComponent,
+  ListingControlsComponent,
+  type ListingControlsColumn,
+  ButtonComponent,
+  ConfigDrivenDashboardPageImports,
+  EmptyStateComponent,
+  ErrorStateComponent,
+  LoadingStateComponent,
+  ToastService,
+} from '@platform/lib/anatomy';
 
+import type { ActiviteForme } from '../services/activite-api.service';
 import type { PlanningGranularity } from '../models';
 import { GanttLegendComponent } from './components/gantt-legend/gantt-legend.component';
 import { GanttToolbarComponent } from './components/gantt-toolbar/gantt-toolbar.component';
 import { ActiviteDrawerComponent } from './components/activite-drawer/activite-drawer.component';
+import { PlanningBusinessViewsComponent } from './components/planning-business-views.component';
+import { CalendrierDrawerComponent } from './components/calendrier-drawer/calendrier-drawer.component';
 import { type PlanningDataset, type PlanningTask, PlanningFacade } from './services/planning.facade';
 
 @Component({
@@ -28,10 +42,16 @@ import { type PlanningDataset, type PlanningTask, PlanningFacade } from './servi
   imports: [
     ...ConfigDrivenDashboardPageImports,
     EmptyStateComponent,
-    BadgeComponent,
+    ErrorStateComponent,
+    LoadingStateComponent,
+    AlertComponent,
+    ListingControlsComponent,
+    ButtonComponent,
     GanttToolbarComponent,
     GanttLegendComponent,
     ActiviteDrawerComponent,
+    CalendrierDrawerComponent,
+    PlanningBusinessViewsComponent,
     TranslateModule
 ],
   templateUrl: './chantiers-planning.page.html',
@@ -44,7 +64,6 @@ export class ChantiersPlanningPage {
   private readonly destroyRef = inject(DestroyRef);
   private readonly locale = inject(LOCALE_ID);
   private readonly translate = inject(TranslateService);
-  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toast = inject(ToastService);
 
   readonly facade = inject(PlanningFacade);
@@ -61,12 +80,49 @@ export class ChantiersPlanningPage {
     icon: 'event',
   }));
 
+  readonly activeView = signal<'EXECUTION'|'CLIENT'|'FINANCIER'|'RESSOURCES'>('EXECUTION');
+  readonly businessView = computed(() => { const view=this.activeView(); return view==='EXECUTION'?'CLIENT':view; });
+  readonly planningViews = [{id:'EXECUTION' as const,label:'Exécution'}, {id:'CLIENT' as const,label:'Client'}, {id:'FINANCIER' as const,label:'Financier'}, {id:'RESSOURCES' as const,label:'Ressources'}];
+  readonly displayOpen = signal(false);
+  private readonly treeExpansion = new Map<string, boolean>();
+  setTreeExpanded(expanded: boolean): void {
+    if (!this.ganttInitialized) return;
+    this.ganttInstance.batchUpdate(() => {
+      this.ganttInstance.eachTask(task => {
+        this.treeExpansion.set(String(task.id), expanded);
+        if (expanded) this.ganttInstance.open(task.id); else this.ganttInstance.close(task.id);
+      });
+    });
+  }
+  readonly showLinks = this.facade.showLinks;
+  readonly displayColumns = [
+    { id: 'forme', label: 'Type de ligne' }, { id: 'start_date', label: 'Début' },
+    { id: 'end_date', label: 'Fin' }, { id: 'duree', label: 'Durée' },
+    { id: 'predecessors', label: 'Prédécesseurs' },
+  ];
+  readonly listingColumns = computed<ListingControlsColumn[]>(() => this.displayColumns.map(column => ({
+    key: column.id, label: column.label, visible: this.facade.visibleColumns().includes(column.id),
+  })));
+  readonly hiddenColumnCount = computed(() => this.listingColumns().filter(column => !column.visible).length);
+  onColumnsChange(columns: ListingControlsColumn[]): void {
+    this.facade.visibleColumns.set(['text', ...columns.filter(column => column.visible).map(column => column.key)]);
+  }
+  toggleColumn(id: string): void {
+    this.facade.visibleColumns.update(columns => columns.includes(id) ? columns.filter(c => c !== id) : [...columns, id]);
+  }
   readonly dataset = this.facade.ganttDataset;
   readonly summary = this.facade.summary;
-  readonly hasData = computed(() => this.dataset().tasks.length > 0);
+  readonly pageState = this.facade.pageState;
+  readonly canCreate = computed(
+    () =>
+      !!this.summary().monoChantier &&
+      (this.facade.capacites().editerStructure || this.facade.capacites().proposerStructure),
+  );
 
   private readonly ganttInstance: GanttStatic = gantt;
   private ganttInitialized = false;
+  private ganttPluginsReady = false;
+  private boundGanttHost: HTMLDivElement | null = null;
   private ganttEventIds: string[] = [];
 
   constructor() {
@@ -80,6 +136,11 @@ export class ChantiersPlanningPage {
       const dataset = this.dataset();
       const granularity = this.facade.granularity();
       const range = this.facade.effectiveRange();
+      this.facade.visibleColumns();
+      this.showLinks();
+      this.facade.simulation();
+      this.facade.showCritical();
+      this.pageState();
       if (!host) {
         return;
       }
@@ -99,10 +160,13 @@ export class ChantiersPlanningPage {
     });
 
     this.destroyRef.onDestroy(() => {
+      this.ganttEventIds.forEach((eventId) => this.ganttInstance.detachEvent(eventId));
+      this.ganttEventIds = [];
       if (this.ganttInitialized) {
         this.ganttInstance.clearAll();
-        this.ganttEventIds.forEach((eventId) => this.ganttInstance.detachEvent(eventId));
       }
+      this.ganttInitialized = false;
+      this.boundGanttHost = null;
     });
   }
 
@@ -153,11 +217,35 @@ export class ChantiersPlanningPage {
     void this.router.navigate(['/chantiers', chantierId]);
   }
 
-  async onNewActivite(): Promise<void> {
-    const res = await this.facade.openCreate();
+  async onNewLigne(forme: ActiviteForme): Promise<void> {
+    const res = await this.facade.openCreate(forme);
     if (!res.ok) {
       this.toast.error(res.message ?? this.translate.instant('chantiers.planning.filterRequired'));
     }
+  }
+
+  onSaveView(name: string): void {
+    const res = this.facade.saveCurrentView(name);
+    if (!res.ok) {
+      this.toast.error(res.message ?? name);
+      return;
+    }
+    this.toast.success(this.translate.instant('chantiers.planning.views.saved'));
+  }
+
+  onApplyView(id: string): void {
+    this.facade.applyView(id);
+    const chantierId = this.facade.selectedChantierIds()[0] ?? null;
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { chantier: chantierId },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  onOpenChantiers(): void {
+    void this.router.navigate(['/chantiers']);
   }
 
   @HostListener('window:resize')
@@ -198,90 +286,164 @@ export class ChantiersPlanningPage {
     rangeStart: Date,
     rangeEnd: Date,
   ): void {
-    this.configureGantt(granularity, rangeStart, rangeEnd);
+    this.configureGantt(granularity, rangeStart, rangeEnd, host.clientWidth);
 
     host.style.width = '100%';
     const ganttHeight = Math.min(680, Math.max(360, 116 + dataset.tasks.length * 48));
     host.style.height = `${ganttHeight}px`;
     host.style.minHeight = '360px';
 
-    if (!this.ganttInitialized) {
-      this.ganttInstance.init(host);
-      this.attachGanttEvents();
-      this.ganttInitialized = true;
-    }
+    this.bindGanttHost(host);
 
     this.ganttInstance.clearAll();
-    this.ganttInstance.parse({ data: dataset.tasks, links: dataset.links });
+    this.ganttInstance.parse({ data: dataset.tasks.map(task => ({ ...task, open: this.treeExpansion.get(String(task.id)) ?? task.open })), links: dataset.links });
+    this.updateTodayMarker();
     this.ganttInstance.setSizes();
     this.ganttInstance.render();
-    const firstActivityDate = dataset.tasks.reduce(
-      (earliest, task) => task.start_date < earliest ? task.start_date : earliest,
-      dataset.tasks[0]?.start_date ?? rangeStart,
+    const dated = dataset.tasks.filter((task) => !Number.isNaN(task.start_date?.getTime?.() ?? Number.NaN));
+    const firstActivityDate = dated.reduce(
+      (earliest, task) => (task.start_date < earliest ? task.start_date : earliest),
+      dated[0]?.start_date ?? rangeStart,
     );
-    this.ganttInstance.showDate(firstActivityDate);
+    if (!Number.isNaN(firstActivityDate.getTime())) {
+      this.ganttInstance.showDate(firstActivityDate);
+    }
   }
 
-  private configureGantt(granularity: PlanningGranularity, rangeStart: Date, rangeEnd: Date): void {
+  private bindGanttHost(host: HTMLDivElement): void {
+    if (!this.ganttPluginsReady) {
+      this.ganttInstance.plugins({ marker: true, tooltip: true, keyboard_navigation: true });
+      this.ganttPluginsReady = true;
+    }
+    if (this.ganttInitialized && this.boundGanttHost === host) {
+      return;
+    }
+    this.ganttEventIds.forEach((eventId) => this.ganttInstance.detachEvent(eventId));
+    this.ganttEventIds = [];
+    this.ganttInstance.init(host);
+    this.attachGanttEvents();
+    this.ganttInitialized = true;
+    this.boundGanttHost = host;
+  }
+
+  private configureGantt(
+    granularity: PlanningGranularity,
+    rangeStart: Date,
+    rangeEnd: Date,
+    hostWidth = 0,
+  ): void {
     const config = this.ganttInstance.config as Record<string, unknown>;
     const templates = this.ganttInstance.templates as Record<string, unknown>;
 
-    this.ganttInstance.plugins({ marker: true, tooltip: true, keyboard_navigation: true });
     this.ganttInstance.config['date_format'] = '%Y-%m-%d';
     this.ganttInstance.config['drag_links'] = false;
+    this.ganttInstance.config['show_links'] = this.showLinks();
     this.ganttInstance.config['drag_progress'] = false;
-    this.ganttInstance.config['drag_resize'] = true;
-    this.ganttInstance.config['drag_move'] = true;
-    this.ganttInstance.config['grid_width'] = 488;
+    this.ganttInstance.config['drag_resize'] = false;
+    this.ganttInstance.config['drag_move'] = false;
+    const width = hostWidth > 0 ? hostWidth : 960;
+    this.ganttInstance.config['grid_width'] = Math.min(560, Math.max(280, Math.floor(width * 0.52)));
+    this.ganttInstance.config.layout = {
+      css: 'gantt_container', cols: [
+        { width: Math.min(560, Math.max(280, Math.floor(width * 0.52))), rows: [
+          { view: 'grid', scrollX: 'gridScroll', scrollY: 'scrollVer', scrollable: true },
+          { view: 'scrollbar', id: 'gridScroll', group: 'horizontal' },
+        ] },
+        { resizer: true, width: 1 },
+        { rows: [
+          { view: 'timeline', scrollX: 'scrollHor', scrollY: 'scrollVer' },
+          { view: 'scrollbar', id: 'scrollHor', group: 'horizontal' },
+        ] },
+        { view: 'scrollbar', id: 'scrollVer' },
+      ],
+    };
     this.ganttInstance.config['row_height'] = 48;
     this.ganttInstance.config['bar_height'] = 20;
     this.ganttInstance.config['show_progress'] = true;
     this.ganttInstance.config['open_tree_initially'] = true;
-    this.ganttInstance.config.columns = [
+    const visible = new Set(this.facade.visibleColumns());
+    const columns: Record<string, unknown>[] = [
       {
         name: 'text',
-        label: 'Activité',
+        label: this.translate.instant('chantiers.planning.grid.activite'),
         tree: true,
-        width: 220,
+        width: 168,
         resize: true,
         template: (task: PlanningTask) => task.text,
       },
-      {
+    ];
+    if (visible.has('forme')) {
+      columns.push({
+        name: 'forme',
+        label: this.translate.instant('chantiers.planning.grid.forme'),
+        width: 78,
+        align: 'center',
+        template: (task: PlanningTask) => this.formeLabel(task.forme),
+      });
+    }
+    if (visible.has('start_date')) {
+      columns.push({
         name: 'start_date',
-        label: 'Début',
+        label: this.translate.instant('chantiers.planning.grid.debut'),
         width: 88,
         align: 'center',
         template: (task: PlanningTask) => this.formatGridDate(task.start_date),
-      },
-      {
+      });
+    }
+    if (visible.has('end_date')) {
+      columns.push({
         name: 'end_date',
-        label: 'Fin',
+        label: this.translate.instant('chantiers.planning.grid.fin'),
         width: 88,
         align: 'center',
-        template: (task: PlanningTask) => this.formatGridDate(new Date(task.end_date.getTime() - 86400000)),
-      },
-      {
-        name: 'progress',
-        label: 'Avanc.',
+        template: (task: PlanningTask) => this.formatGridDate(this.visibleEnd(task)),
+      });
+    }
+    if (visible.has('duree')) {
+      columns.push({
+        name: 'duree',
+        label: this.translate.instant('chantiers.planning.grid.duree'),
         width: 88,
         align: 'center',
-        template: (task: PlanningTask) => `${Math.round((task.progress ?? 0) * 100)}%`,
-      },
-    ];
+        template: (task: PlanningTask) => task.dureeLabel || '',
+      });
+    }
+    if (visible.has('predecessors')) {
+      columns.push({
+        name: 'predecessors',
+        label: this.translate.instant('chantiers.planning.grid.predecessors'),
+        width: 140,
+        align: 'left',
+        template: (task: PlanningTask) => task.predecessorsLabel || '—',
+      });
+    }
+    this.ganttInstance.config.columns = columns;
 
     this.configureScale(granularity);
 
-    config['start_date'] = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), rangeStart.getDate() - 7);
-    config['end_date'] = new Date(rangeEnd.getFullYear(), rangeEnd.getMonth(), rangeEnd.getDate() + 7);
+    const from = this.safeDay(rangeStart);
+    const to = this.safeDay(rangeEnd);
+    const scaleStart = new Date(from.getFullYear(), from.getMonth(), from.getDate() - 7);
+    let scaleEnd = new Date(to.getFullYear(), to.getMonth(), to.getDate() + 8);
+    if (scaleEnd.getTime() <= scaleStart.getTime()) {
+      scaleEnd = new Date(scaleStart.getTime() + 14 * 86400000);
+    }
+    config['fit_tasks'] = true;
+    config['show_tasks_outside_timescale'] = true;
+    config['start_date'] = scaleStart;
+    config['end_date'] = scaleEnd;
 
     this.ganttInstance.templates.task_class = (_start, _end, task: PlanningTask) =>
-      `planning-task planning-task--${task.recordType.toLowerCase()} planning-task--${task.status.toLowerCase()}`;
+      `planning-task planning-task--${task.recordType.toLowerCase()} planning-task--${task.status.toLowerCase()} ${this.facade.showCritical() && this.facade.simulation()?.rows.some(r => r.id === task.id && r.critical) ? 'planning-task--critical' : ''}`;
     this.ganttInstance.templates.grid_row_class = (_start, _end, task: PlanningTask) => `planning-row planning-row--${task.recordType.toLowerCase()}`;
     this.ganttInstance.templates.task_text = (_start, _end, task: PlanningTask) =>
       task.recordType === 'ACTIVITE' ? `${Math.round(task.progress * 100)}%` : '';
     this.ganttInstance.templates.tooltip_text = (_start, _end, task: PlanningTask) =>
-      `<div class="planning-tooltip"><strong>${task.text}</strong><br/>${this.formatUiDate(task.start_date)} → ${this.formatUiDate(new Date(task.end_date.getTime() - 86400000))}<br/>Avancement: ${Math.round(task.progress * 100)}%</div>`;
+      `<div class="planning-tooltip"><strong>${task.text}</strong><br/>${this.formatUiDate(task.start_date)} → ${this.formatUiDate(this.visibleEnd(task))}<br/>Avancement: ${Math.round((task.progress || 0) * 100)}%</div>`;
 
+  }
+
+  private updateTodayMarker(): void {
     const markerStore = this.ganttInstance as unknown as Record<string, string | number | undefined>;
     if (markerStore['_nafuraTodayMarker']) {
       this.ganttInstance.deleteMarker(markerStore['_nafuraTodayMarker']);
@@ -293,7 +455,6 @@ export class ChantiersPlanningPage {
       title: `Aujourd'hui · ${this.formatUiDate(new Date())}`,
     });
   }
-
   private configureScale(granularity: PlanningGranularity): void {
     const config = this.ganttInstance.config as Record<string, unknown>;
     const templates = this.ganttInstance.templates as Record<string, unknown>;
@@ -334,7 +495,12 @@ export class ChantiersPlanningPage {
 
   private attachGanttEvents(): void {
     this.ganttEventIds.push(
-      this.ganttInstance.attachEvent('onTaskClick', (id: string | number) => {
+      this.ganttInstance.attachEvent('onTaskOpened', (id: string | number) => { this.treeExpansion.set(String(id), true); }),
+      this.ganttInstance.attachEvent('onTaskClosed', (id: string | number) => { this.treeExpansion.set(String(id), false); }),
+    );
+    this.ganttEventIds.push(
+      this.ganttInstance.attachEvent('onTaskClick', (id: string | number, event: MouseEvent) => {
+        if ((event.target as HTMLElement | null)?.closest('.gantt_open, .gantt_close')) return true;
         const task = this.ganttInstance.getTask(id) as PlanningTask;
         this.facade.setSelectedTask(String(id));
         if (task.recordType === 'CHANTIER') {
@@ -355,46 +521,42 @@ export class ChantiersPlanningPage {
       }),
     );
 
-    this.ganttEventIds.push(
-      this.ganttInstance.attachEvent('onAfterTaskDrag', (id: string | number) => {
-        const task = this.ganttInstance.getTask(id) as PlanningTask;
-        if (task.recordType !== 'ACTIVITE') {
-          return true;
-        }
-        void this.handleActiviteDrag(String(id), task);
-        return true;
-      }),
-    );
   }
 
-  private async handleActiviteDrag(id: string, task: PlanningTask): Promise<void> {
-    const endDate = new Date(task.end_date.getTime() - 86400000);
-    const confirmed = await this.confirmDialog.confirm({
-      title: 'Confirmer le décalage',
-      message: `Confirmer le décalage de ${task.text} vers ${this.formatUiDate(task.start_date)} → ${this.formatUiDate(endDate)} ?`,
-      confirmLabel: 'OK',
-      cancelLabel: this.translate.instant('common.actions.cancel'),
-    });
-    if (!confirmed) {
-      this.revertGanttRender();
-      return;
+  private formeLabel(forme: PlanningTask['forme']): string {
+    if (forme === 'PHASE') {
+      return this.translate.instant('chantiers.planning.formes.phase');
     }
-
-    const res = await this.facade.updateActiviteDates(id, task.start_date, endDate);
-    if (!res.ok) {
-      this.toast.error(res.message ?? 'Replanification refusée.');
-      this.revertGanttRender();
+    if (forme === 'JALON') {
+      return this.translate.instant('chantiers.planning.formes.jalon');
     }
+    if (forme === 'ACTIVITE') {
+      return this.translate.instant('chantiers.planning.formes.activite');
+    }
+    return '';
   }
 
-  private revertGanttRender(): void {
-    const host = this.ganttHost()?.nativeElement;
-    if (host) {
-      this.renderGantt(host, this.dataset(), this.facade.granularity(), this.facade.effectiveRange().start, this.facade.effectiveRange().end);
+  private visibleEnd(task: PlanningTask): Date {
+    const end = task.end_date;
+    if (task.forme === 'JALON') return task.start_date;
+    if (!end || Number.isNaN(end.getTime())) {
+      return task.start_date;
     }
+    return new Date(end.getTime() - 86400000);
+  }
+
+  private safeDay(value: Date): Date {
+    if (!value || Number.isNaN(value.getTime())) {
+      const today = new Date();
+      return new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    }
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
   }
 
   private formatUiDate(value: Date): string {
+    if (!value || Number.isNaN(value.getTime())) {
+      return '—';
+    }
     return new Intl.DateTimeFormat(this.locale, {
       day: '2-digit',
       month: 'short',
@@ -403,6 +565,9 @@ export class ChantiersPlanningPage {
   }
 
   private formatGridDate(value: Date): string {
+    if (!value || Number.isNaN(value.getTime())) {
+      return '—';
+    }
     return new Intl.DateTimeFormat(this.locale, {
       day: '2-digit',
       month: 'short',

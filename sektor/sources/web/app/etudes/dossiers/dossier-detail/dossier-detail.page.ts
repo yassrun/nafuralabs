@@ -108,6 +108,14 @@ export class DossierDetailPage {
   private readonly synthesePanel = viewChild(SyntheseValidationPanelComponent);
 
   readonly dossier = signal<DossierEtude | undefined>(undefined);
+  /** En-tête : durée d’exécution lue sur le formulaire de cadrage dès qu’elle est connue. */
+  readonly dossierPourEntete = computed((): DossierEtude | undefined => {
+    const d = this.dossier();
+    if (!d) return undefined;
+    const live = this.identite()?.delaiExecutionJours();
+    if (live == null || live === d.aoDelaiExecutionJours) return d;
+    return { ...d, aoDelaiExecutionJours: live };
+  });
   readonly synthese = signal<DossierEtudeSynthese | undefined>(undefined);
   readonly gates = signal<ResultatGate[]>([]);
   readonly chargement = signal(true);
@@ -397,6 +405,10 @@ export class DossierDetailPage {
       this.etapeUiLecture.set(ui);
       return;
     }
+    if (this.etapeUi() === 1) {
+      const ok = await this.identite()?.enregistrer();
+      if (ok === false) return;
+    }
     const maxUi = backendToUiEtape(this.etapeBackend());
     if (ui > maxUi) {
       // Voie manuelle : DPGF déjà créé à l’étape Documents — le stepper peut viser le bordereau.
@@ -428,7 +440,7 @@ export class DossierDetailPage {
     this.erreur.set(undefined);
     try {
       const maj = await this.api.allerAEtape(dossier.id, etape);
-      this.dossier.set(maj);
+      this.dossier.set(conserverAoListing(dossier, maj));
       await this.refreshSynthese(dossier.id);
       this.posteDirty.set(false);
     } catch (e) {
@@ -922,6 +934,22 @@ export class DossierDetailPage {
     const translated = this.translate.instant(key);
     return translated !== key ? translated : key;
   }
+}
+
+/** PUT /etape ne renvoyait pas l’enrichissement AOC — on ne perd pas le cadrage déjà sauvé. */
+function conserverAoListing(prev: DossierEtude, maj: DossierEtude): DossierEtude {
+  return {
+    ...maj,
+    appelOffreClientId: maj.appelOffreClientId ?? prev.appelOffreClientId,
+    aoType: maj.aoType ?? prev.aoType,
+    aoDateLimiteDepot: maj.aoDateLimiteDepot ?? prev.aoDateLimiteDepot,
+    aoReference: maj.aoReference ?? prev.aoReference,
+    aoVille: maj.aoVille ?? prev.aoVille,
+    aoDateOuverturePlis: maj.aoDateOuverturePlis ?? prev.aoDateOuverturePlis,
+    aoDelaiExecutionJours: maj.aoDelaiExecutionJours ?? prev.aoDelaiExecutionJours,
+    aoEstimationMoaHt: maj.aoEstimationMoaHt ?? prev.aoEstimationMoaHt,
+    aoCautionProvisoire: maj.aoCautionProvisoire ?? prev.aoCautionProvisoire,
+  };
 }
 
 /** Format monétaire MAD pour les messages d'erreur du gain (AC-3/AC-4). */

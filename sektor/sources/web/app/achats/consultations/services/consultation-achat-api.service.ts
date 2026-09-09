@@ -178,6 +178,10 @@ export class ConsultationAchatApiService extends FeatureApiService<
     return this.patchRequest<ConsultationAchat>(`${this.basePath}/${id}/panier`, body);
   }
 
+  replacePanier(id: string, body: ConsultationAchatPanier): Promise<ConsultationAchat> {
+    return this.put<ConsultationAchat>(`${this.basePath}/${id}/panier`, body);
+  }
+
   addDestinataire(id: string, body: ConsultationDestinataireCreate): Promise<ConsultationAchat> {
     return this.post<ConsultationAchat>(`${this.basePath}/${id}/destinataires`, body);
   }

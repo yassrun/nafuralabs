@@ -2,13 +2,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   input,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {
   ButtonComponent,
@@ -49,12 +50,14 @@ const ROLE_LABELS: Record<string, string> = {
     <section class="equipe">
       <header class="equipe__header">
         <h3>{{ 'chantiers.chantier.detail.tabs.equipe' | translate }}</h3>
-        <nf-button variant="primary" size="sm" (click)="showForm.set(true)">
-          {{ 'chantiers.chantier.detail.equipe.add' | translate }}
-        </nf-button>
+        @if (canAdd()) {
+          <nf-button variant="primary" size="sm" (click)="showForm.set(true)">
+            {{ 'chantiers.chantier.detail.equipe.add' | translate }}
+          </nf-button>
+        }
       </header>
 
-      @if (showForm()) {
+      @if (showForm() && canAdd()) {
         <form class="equipe__form" (ngSubmit)="submit()">
           <label>
             <span>{{ 'chantiers.chantier.detail.equipe.employe' | translate }}</span>
@@ -105,8 +108,8 @@ const ROLE_LABELS: Record<string, string> = {
         <p class="muted">{{ 'common.loading' | translate }}</p>
       } @else if (rows().length === 0) {
         <nf-empty-state
-          [title]="'chantiers.chantier.detail.equipe.emptyTitle' | translate"
-          [message]="'chantiers.chantier.detail.equipe.emptyDesc' | translate"
+          [title]="(canAdd() ? 'chantiers.chantier.detail.equipe.emptyTitle' : 'chantiers.chantier.detail.equipe.noAuthorityTitle') | translate"
+          [message]="(canAdd() ? 'chantiers.chantier.detail.equipe.emptyDesc' : 'chantiers.chantier.detail.equipe.noAuthorityDesc') | translate"
         />
       } @else {
         <table class="equipe__table">
@@ -130,9 +133,11 @@ const ROLE_LABELS: Record<string, string> = {
                 <td>{{ row.roleLabel ?? roleLabel(row.roleCode) }}</td>
                 <td>{{ row.dateDebut }}{{ row.dateFin ? ' → ' + row.dateFin : '' }}</td>
                 <td>
-                  <nf-button variant="ghost" size="sm" (click)="remove(row)">
-                    {{ 'chantiers.common.actions.remove' | translate }}
-                  </nf-button>
+                  @if (row.canMutate) {
+                    <nf-button variant="ghost" size="sm" (click)="remove(row)">
+                      {{ 'chantiers.common.actions.remove' | translate }}
+                    </nf-button>
+                  }
                 </td>
               </tr>
             }
@@ -161,10 +166,12 @@ export class ChantierEquipeTabComponent {
 
   private readonly api = inject(ChantierAffectationApiService);
   private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
   private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
 
   readonly rows = signal<ChantierAffectation[]>([]);
-  readonly roles = signal<string[]>(Object.keys(ROLE_LABELS));
+  readonly roles = signal<string[]>([]);
+  readonly canAdd = computed(() => this.roles().length > 0);
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly showForm = signal(false);
@@ -172,7 +179,7 @@ export class ChantierEquipeTabComponent {
   draft = {
     employeId: '',
     employeLabel: '',
-    roleCode: 'BTP_CHEF_CHANTIER',
+    roleCode: '',
     dateDebut: new Date().toISOString().slice(0, 10),
     dateFin: '',
   };
@@ -200,10 +207,17 @@ export class ChantierEquipeTabComponent {
     try {
       const [rows, roles] = await Promise.all([
         this.api.listByChantier(id),
-        this.api.affectableRoles(id).catch(() => Object.keys(ROLE_LABELS)),
+        this.api.affectableRoles(id).catch(() => [] as string[]),
       ]);
       this.rows.set(rows ?? []);
-      this.roles.set(roles?.length ? roles : Object.keys(ROLE_LABELS));
+      const assignable = roles ?? [];
+      this.roles.set(assignable);
+      if (assignable.length && !assignable.includes(this.draft.roleCode)) {
+        this.draft.roleCode = assignable[0];
+      }
+      if (!assignable.length) {
+        this.showForm.set(false);
+      }
     } catch {
       this.rows.set([]);
       this.toast.error('Impossible de charger les affectations');
@@ -231,14 +245,14 @@ export class ChantierEquipeTabComponent {
       this.draft = {
         employeId: '',
         employeLabel: '',
-        roleCode: 'BTP_CHEF_CHANTIER',
+        roleCode: this.roles()[0] ?? '',
         dateDebut: new Date().toISOString().slice(0, 10),
         dateFin: '',
       };
       await this.reload();
       this.toast.success('Affectation créée');
     } catch (e) {
-      this.toast.error(e instanceof Error ? e.message : 'Création impossible');
+      this.toast.error(this.mutationError(e));
     } finally {
       this.saving.set(false);
     }
@@ -252,7 +266,15 @@ export class ChantierEquipeTabComponent {
       await this.reload();
       this.toast.success('Affectation retirée');
     } catch (e) {
-      this.toast.error(e instanceof Error ? e.message : 'Suppression impossible');
+      this.toast.error(this.mutationError(e));
     }
+  }
+
+  private mutationError(e: unknown): string {
+    const raw = e instanceof Error ? e.message : '';
+    if (raw.includes('chantiers.affectation.interdit')) {
+      return this.translate.instant('chantiers.chantier.detail.equipe.forbidden');
+    }
+    return raw || this.translate.instant('chantiers.chantier.detail.equipe.forbidden');
   }
 }

@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.rh.domain.employe.Employe;
 import ma.nafura.rh.repository.EmployeRepository;
+import ma.nafura.rh.service.RhReferentielBinder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,10 +18,15 @@ public class EmployeSeedService {
 
     private final EmployeRepository repository;
     private final ObjectMapper objectMapper;
+    private final RhReferentielBinder referentielBinder;
 
-    public EmployeSeedService(EmployeRepository repository, ObjectMapper objectMapper) {
+    public EmployeSeedService(
+            EmployeRepository repository,
+            ObjectMapper objectMapper,
+            RhReferentielBinder referentielBinder) {
         this.repository = repository;
         this.objectMapper = objectMapper;
+        this.referentielBinder = referentielBinder;
     }
 
     @Transactional
@@ -31,6 +37,10 @@ public class EmployeSeedService {
         try (InputStream in = new ClassPathResource("seed/employes-seed.json").getInputStream()) {
             JsonNode root = objectMapper.readTree(in);
             for (JsonNode node : root.get("employes")) {
+                String posteLibelle = node.get("poste").asText();
+                String departementLibelle = textOrNull(node, "departement");
+                RhReferentielBinder.Bound bound =
+                        referentielBinder.bind(null, posteLibelle, null, departementLibelle);
                 Employe entity = Employe.builder()
                         .id(node.get("id").asText())
                         .tenantId(TenantContext.getTenantId())
@@ -47,8 +57,10 @@ public class EmployeSeedService {
                         .ville(textOrNull(node, "ville"))
                         .telephone(textOrNull(node, "telephone"))
                         .email(textOrNull(node, "email"))
-                        .poste(node.get("poste").asText())
-                        .departement(textOrNull(node, "departement"))
+                        .posteId(bound.posteId())
+                        .poste(bound.poste())
+                        .departementId(bound.departementId())
+                        .departement(bound.departement())
                         .categorie(node.get("categorie").asText())
                         .typeContrat(node.get("typeContrat").asText())
                         .statut(node.path("statut").asText(Employe.STATUT_ACTIF))

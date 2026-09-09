@@ -81,6 +81,13 @@ public class ConsultationAchatController {
         return ResponseEntity.ok(service.addToPanier(id, body));
     }
 
+    @PutMapping("/{id}/panier")
+    @RequirePermission("achats.consultation.create")
+    public ResponseEntity<ConsultationAchatDto> replacePanier(
+            @PathVariable UUID id, @RequestBody ConsultationAchatPanierDto body) {
+        return ResponseEntity.ok(service.replacePanier(id, body));
+    }
+
     @PostMapping("/{id}/envoyer")
     @RequirePermission("achats.consultation.create")
     public ResponseEntity<ConsultationAchatDto> envoyer(@PathVariable UUID id) {

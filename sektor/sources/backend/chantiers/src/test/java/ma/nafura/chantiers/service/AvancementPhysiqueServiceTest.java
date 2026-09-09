@@ -121,6 +121,18 @@ class AvancementPhysiqueServiceTest {
         assertThat(result.getFirst().getQuantiteRealisee()).isEqualByComparingTo("40");
     }
 
+    /** SEKTOR-325 — palier 1 intact : POST avancement nœud sans activité → accepté. */
+    @Test
+    void palier1_declarationNoeudSansActivite_resteAcceptee() {
+        when(activiteCouvertureService.activitesCouvrant(POSTE)).thenReturn(List.of());
+        when(avancementLectureService.quantiteFaiteCumuleePoste(POSTE)).thenReturn(BigDecimal.ZERO);
+
+        List<AvancementPhysiqueDto> result = service.create(CHANTIER, createDto(null, POSTE, "10"));
+
+        assertThat(result).hasSize(1);
+        assertThat(stockage.getFirst().getActiviteId()).isNull();
+    }
+
     /** AC-1 — un pourcentage fourni en entrée est refusé, jamais ignoré. */
     @Test
     void declaration_avecPourcentage_estRefusee() {

@@ -1,13 +1,25 @@
 :host {
   display: block;
   height: 100%;
+  min-width: 0;
+  contain: inline-size;
 }
 
 nf-page-shell {
   height: 100%;
 }
 
+// Keep the planning within the shell track, even when the global header is wide.
+::ng-deep .naf-shell:has(app-chantiers-planning) {
+  grid-template-columns: minmax(0, 1fr);
+}
+::ng-deep .naf-shell:has(app-chantiers-planning) .naf-shell__workspace {
+  min-width: 0;
+}
+
 .planning-page {
+  min-width: 0;
+  max-width: 100%;
   display: grid;
   gap: 0.85rem;
   min-height: 0;
@@ -29,6 +41,8 @@ nf-page-shell {
 }
 
 .planning-workspace {
+  min-width: 0;
+  max-width: 100%;
   min-height: 0;
   border-radius: 1rem;
   border: 1px solid color-mix(in srgb, var(--nf-primary, var(--nf-color-primary-600)) 10%, var(--nf-color-border));
@@ -42,6 +56,7 @@ nf-page-shell {
   min-height: 0;
   padding: 0.65rem;
   outline: none;
+  overflow: auto;
 }
 
 .planning-gantt-shell:focus-visible {
@@ -51,17 +66,33 @@ nf-page-shell {
 
 .planning-gantt {
   width: 100%;
-  height: 360px;
+  height: max(360px, calc(100dvh - 300px));
   min-height: 360px;
+  min-width: 0;
 }
 
 .planning-empty-state {
   min-height: 28rem;
   display: grid;
   place-items: center;
+  align-content: center;
+  gap: 1rem;
   border-radius: 1.2rem;
   border: 1px dashed rgba(15, 118, 110, 0.25);
   background: linear-gradient(180deg, var(--nf-color-bg-subtle), var(--nf-color-bg-muted));
+}
+
+.planning-empty-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.planning-state {
+  display: grid;
+  gap: 0.85rem;
+  min-height: 22rem;
 }
 
 :host ::ng-deep {
@@ -182,6 +213,8 @@ nf-page-shell {
   }
 
   .planning-page {
+  min-width: 0;
+  max-width: 100%;
     gap: 0.5rem;
   }
 
@@ -200,3 +233,28 @@ nf-page-shell {
     width: 280px !important;
   }
 }
+
+.planning-display-controls { display:flex; flex-wrap:wrap; gap:.75rem; align-items:center; }
+.planning-display-controls:empty { display:none; }
+.planning-context-strip {display:flex;align-items:center;justify-content:space-between;gap:.5rem;color:#667085;font-size:.78rem;}
+.planning-tree-tools {display:flex;gap:.5rem;}
+.planning-tree-tools button {font:inherit;cursor:pointer;background:transparent;border:0;padding:.3rem;color:#465675;border-radius:.3rem;}
+.planning-tree-tools button:hover {background:#eef2fc;}
+.planning-calendar-note {font-size:.75rem;color:#667085;margin:0;}
+.planning-display-controls fieldset { display:flex; flex-wrap:wrap; gap:1rem; border:1px solid var(--nf-color-border); border-radius:.5rem; }
+.planning-display-controls label { display:flex; align-items:center; gap:.3rem; font-size:.85rem; }
+.planning-display-controls p { width:100%; margin:0; font-size:.8rem; }
+
+.planning-network { display:flex; flex-wrap:wrap; gap:.65rem; align-items:center; }
+.planning-network p { margin:0; width:100%; font-size:.85rem; }
+.planning-network__table { overflow:auto; width:100%; max-height:20rem; }
+.planning-network table { border-collapse:collapse; width:100%; font-size:.8rem; }
+.planning-network td, .planning-network th { padding:.65rem; text-align:left; border-bottom:1px solid var(--nf-color-border); }
+.planning-network__changed { background:#fff8e7; }
+:host ::ng-deep .planning-task--critical { background:#b42318 !important; border-color:#b42318 !important; }
+
+.planning-view-tabs {display:flex;gap:.4rem;flex-wrap:wrap;border-bottom:1px solid var(--nf-color-border);padding-bottom:.6rem;}
+.planning-view-tabs button {font:inherit;border:0;border-radius:.5rem;padding:.65rem 1rem;background:transparent;color:var(--nf-color-text-secondary);cursor:pointer;}
+.planning-view-tabs button.active {background:var(--nf-color-primary-600,#2041b7);color:white;}
+
+.planning-view-tabs .planning-back {margin-left:auto;font-size:.78rem;}

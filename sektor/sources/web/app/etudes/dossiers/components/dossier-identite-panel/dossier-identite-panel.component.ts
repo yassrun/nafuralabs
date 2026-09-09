@@ -62,7 +62,8 @@ const IA_KEYS: IaFieldKey[] = [
 
 /**
  * Cadrage de l’étude — objet, MOA, chargé, type AO, échéance.
- * Les champs déduits du CPS restent des propositions jusqu’à Accepter / Refuser / corriger.
+ * Les champs déduits du CPS portent le badge IA · CPS. Accepter / Refuser
+ * seulement tant que la valeur n’est pas encore enregistrée.
  */
 @Component({
   selector: 'app-dossier-identite-panel',
@@ -112,9 +113,8 @@ export class DossierIdentitePanelComponent {
     () => IA_KEYS.filter((k) => this.iaPending(k)).length,
   );
 
-  readonly cpsBlocking = computed(
-    () => this.cpsPhase() === 'loading' || this.hasPendingCps(),
-  );
+  /** Bloque Continuer / Enregistrer seulement pendant l’indexation — pas la revue. */
+  readonly cpsBlocking = computed(() => this.cpsPhase() === 'loading');
 
   readonly banner = computed((): { tone: 'error' | 'info' | 'success'; message: string } | undefined => {
     if (this.erreur()) return { tone: 'error', message: this.erreur()! };
@@ -126,7 +126,7 @@ export class DossierIdentitePanelComponent {
     if (n > 0) {
       return {
         tone: 'info',
-        message: `${n} proposition${n > 1 ? 's' : ''} CPS à trancher — Accepter, Refuser ou corriger chaque champ.`,
+        message: `${n} proposition${n > 1 ? 's' : ''} CPS — Enregistrer les confirme, ou Refuser champ par champ.`,
       };
     }
     return undefined;
@@ -164,7 +164,8 @@ export class DossierIdentitePanelComponent {
   cpsMissing(key: string): boolean {
     const phase = this.cpsPhase();
     if (phase !== 'ready' && phase !== 'partial') return false;
-    return !this.iaFields()[key as IaFieldKey];
+    if (this.iaFields()[key as IaFieldKey]) return false;
+    return isEmptyForCps(this.valeurCourante(key as IaFieldKey));
   }
 
   accepter(key: string): void {
@@ -223,14 +224,8 @@ export class DossierIdentitePanelComponent {
       this.ok.set(false);
       return false;
     }
-    const n = this.pendingCount();
-    if (n > 0) {
-      this.erreur.set(
-        `Tranchez les ${n} champ${n > 1 ? 's' : ''} CPS (Accepter ou Refuser) avant d’enregistrer.`,
-      );
-      this.ok.set(false);
-      return false;
-    }
+    // Enregistrer / Continuer confirment les propositions encore affichées.
+    this.accepterTout();
     const objet = this.objet().trim();
     const clientNom = this.clientNom().trim();
     const chargeId = this.chargeEtudeUserId();
@@ -346,7 +341,10 @@ export class DossierIdentitePanelComponent {
     const next: Partial<Record<IaFieldKey, IaFieldProposal>> = {};
     const take = (key: IaFieldKey, current: string | number | null, raw: string | number | null | undefined) => {
       if (!isSuggestionValue(raw)) return;
-      if (!isEmptyForCps(current)) return;
+      if (!isEmptyForCps(current)) {
+        next[key] = { value: current as string | number, status: 'accepted' };
+        return;
+      }
       next[key] = { value: raw as string | number, status: 'proposed' };
       this.applyValue(key, raw as string | number);
     };
@@ -438,6 +436,31 @@ export class DossierIdentitePanelComponent {
       case 'cautionProvisoire':
         this.cautionProvisoire.set(null);
         break;
+    }
+  }
+
+  private valeurCourante(key: IaFieldKey): string | number | null {
+    switch (key) {
+      case 'objet':
+        return this.objet();
+      case 'clientNom':
+        return this.clientNom();
+      case 'dateLimiteDepot':
+        return this.dateLimiteDepot();
+      case 'aoReference':
+        return this.aoReference();
+      case 'aoType':
+        return this.aoType();
+      case 'ville':
+        return this.ville();
+      case 'dateOuverturePlis':
+        return this.dateOuverturePlis();
+      case 'delaiExecutionJours':
+        return this.delaiExecutionJours();
+      case 'estimationMoaHt':
+        return this.estimationMoaHt();
+      case 'cautionProvisoire':
+        return this.cautionProvisoire();
     }
   }
 

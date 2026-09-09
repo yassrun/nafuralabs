@@ -6,7 +6,7 @@
     @if (synthese(); as syn) {
       <app-dossier-summary-header
         [synthese]="syn"
-        [dossier]="dossier()!"
+        [dossier]="dossierPourEntete()!"
         [hasDpgf]="!!dossier()?.dpgfId"
         [anomaliesEtape]="anomaliesEtapeCourante()"
         [etapeUi]="etapeUi()"

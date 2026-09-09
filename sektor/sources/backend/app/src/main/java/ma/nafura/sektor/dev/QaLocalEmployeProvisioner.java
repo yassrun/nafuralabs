@@ -10,8 +10,12 @@ import ma.nafura.platform.identity.domain.model.AppUser;
 import ma.nafura.platform.identity.repository.AppUserRepository;
 import ma.nafura.platform.tenancy.domain.model.Tenant;
 import ma.nafura.platform.tenancy.repository.TenantRepository;
+import ma.nafura.rh.api.request.RhNomenclatureUpdateDto;
 import ma.nafura.rh.domain.employe.Employe;
 import ma.nafura.rh.repository.EmployeRepository;
+import ma.nafura.rh.service.RhNomenclatureCodes;
+import ma.nafura.rh.service.RhPosteService;
+import ma.nafura.rh.service.RhReferentielBinder;
 import ma.nafura.socle.dev.config.QaLocalConstants;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -33,6 +37,8 @@ public class QaLocalEmployeProvisioner implements ApplicationRunner {
     private final TenantRepository tenantRepository;
     private final AppUserRepository appUserRepository;
     private final EmployeRepository employeRepository;
+    private final RhReferentielBinder referentielBinder;
+    private final RhPosteService posteService;
 
     @Override
     @Transactional
@@ -70,7 +76,7 @@ public class QaLocalEmployeProvisioner implements ApplicationRunner {
                     familyName(roleUser.name()),
                     "QA",
                     roleUser.email(),
-                    roleUser.tenantRoleCode(),
+                    posteLibelle(roleUser.tenantRoleCode()),
                     categorie(roleUser.tenantRoleCode())
                 );
             }
@@ -103,8 +109,22 @@ public class QaLocalEmployeProvisioner implements ApplicationRunner {
                 existing.setUserId(userId);
                 dirty = true;
             }
-            if (!email.equalsIgnoreCase(existing.getEmail())) {
+            if (!email.equalsIgnoreCase(existing.getEmail() == null ? "" : existing.getEmail())) {
                 existing.setEmail(email);
+                dirty = true;
+            }
+            String wantedPoste = posteLibelle(poste);
+            if (existing.getPosteId() != null
+                    && existing.getPoste() != null
+                    && existing.getPoste().startsWith("BTP_")) {
+                RhNomenclatureUpdateDto update = new RhNomenclatureUpdateDto();
+                update.setLibelle(wantedPoste);
+                update.setCode(RhNomenclatureCodes.slug(wantedPoste, "P", 1));
+                posteService.update(existing.getPosteId(), update);
+                existing.setPoste(wantedPoste);
+                dirty = true;
+            } else if (existing.getPosteId() == null || !wantedPoste.equals(existing.getPoste())) {
+                applyReferentiel(existing, wantedPoste, existing.getDepartement() != null ? existing.getDepartement() : "QA");
                 dirty = true;
             }
             if (dirty) {
@@ -115,6 +135,7 @@ public class QaLocalEmployeProvisioner implements ApplicationRunner {
         if (employeRepository.findByTenantIdAndMatricule(tenantId, matricule).isPresent()) {
             return;
         }
+        RhReferentielBinder.Bound bound = referentielBinder.bind(null, posteLibelle(poste), null, "QA");
         employeRepository.save(Employe.builder()
             .id(id)
             .tenantId(tenantId)
@@ -124,14 +145,42 @@ public class QaLocalEmployeProvisioner implements ApplicationRunner {
             .cin(cin)
             .email(email)
             .userId(userId)
-            .poste(poste)
-            .departement("QA")
+            .posteId(bound.posteId())
+            .poste(bound.poste())
+            .departementId(bound.departementId())
+            .departement(bound.departement())
             .categorie(categorie)
             .typeContrat("CDI")
             .statut(Employe.STATUT_ACTIF)
             .dateEmbauche(LocalDate.of(2024, 1, 1))
             .salaireBase(BigDecimal.ZERO)
             .build());
+    }
+
+    private void applyReferentiel(Employe existing, String posteLibelle, String departementLibelle) {
+        RhReferentielBinder.Bound bound =
+                referentielBinder.bind(null, posteLibelle, null, departementLibelle);
+        existing.setPosteId(bound.posteId());
+        existing.setPoste(bound.poste());
+        existing.setDepartementId(bound.departementId());
+        existing.setDepartement(bound.departement());
+    }
+
+    private static String posteLibelle(String roleOrPoste) {
+        if (roleOrPoste == null || roleOrPoste.isBlank()) {
+            return "Employé";
+        }
+        return switch (roleOrPoste.trim()) {
+            case "BTP_CONDUCTEUR_TRAVAUX" -> "Conducteur de travaux";
+            case "BTP_DIRECTEUR_TRAVAUX" -> "Directeur des travaux";
+            case "BTP_CHEF_CHANTIER" -> "Chef de chantier";
+            case "BTP_INGENIEUR" -> "Ingénieur";
+            case "BTP_MAGASINIER" -> "Magasinier";
+            case "BTP_DG" -> "Directeur général";
+            case "BTP_DAF" -> "Directeur administratif et financier";
+            case "Gérant", "OWNER" -> "Gérant";
+            default -> roleOrPoste.startsWith("BTP_") ? roleOrPoste.replace('_', ' ') : roleOrPoste;
+        };
     }
 
     private static String familyName(String displayName) {

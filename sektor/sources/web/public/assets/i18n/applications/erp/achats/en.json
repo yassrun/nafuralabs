@@ -668,7 +668,8 @@
         "ouverte": "Awaiting replies",
         "partielle": "Partial",
         "complete": "Complete",
-        "devisRecus": "{{count}} quotes"
+        "devisRecus": "{{count}} quotes",
+        "avancement": "{k}/{n} quotes"
       },
       "lien": {
         "liee": "Linked",
@@ -754,6 +755,12 @@
       "panier": {
         "empty": "Empty basket.",
         "fige": "Basket locked. Items can no longer be changed. You can still add a recipient.",
+        "add": "Add an item",
+        "remove": "Remove",
+        "doublon": "This item is already in the basket.",
+        "sansIdentite": "Item has no catalogue identity.",
+        "videRefuse": "The basket must keep at least one item.",
+        "saveError": "Unable to update the basket.",
         "columns": {
           "code": "Code",
           "libelle": "Description"

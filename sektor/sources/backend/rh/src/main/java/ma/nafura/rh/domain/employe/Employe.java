@@ -66,11 +66,25 @@ public class Employe {
     @Column(name = "user_id")
     private UUID userId;
 
+    @Column(name = "poste_id", nullable = false, length = 100)
+    private String posteId;
+
     @Column(nullable = false)
     private String poste;
 
+    @Column(name = "departement_id", length = 100)
+    private String departementId;
+
     @Column(length = 120)
     private String departement;
+
+    public String getPosteName() {
+        return poste;
+    }
+
+    public String getDepartementName() {
+        return departement;
+    }
 
     @Column(nullable = false, length = 30)
     private String categorie;

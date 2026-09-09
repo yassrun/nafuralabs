@@ -38,4 +38,8 @@ public interface EmployeRepository extends TenantScopedRepository<Employe, Strin
             UUID tenantId, String statut, String typeContrat, String categorie);
 
     long countByTenantId(UUID tenantId);
+
+    long countByTenantIdAndPosteId(UUID tenantId, String posteId);
+
+    long countByTenantIdAndDepartementId(UUID tenantId, String departementId);
 }

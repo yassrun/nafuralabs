@@ -20,7 +20,13 @@
       "pointage": { "title": "Pointage chantiers", "breadcrumb": "Pointage" },
       "pointageSaisie": { "title": "Saisie pointage", "breadcrumb": "Saisie" },
       "pointageValidation": { "title": "Validation pointage", "breadcrumb": "Validation" },
-      "planning": { "title": "Planning équipes", "breadcrumb": "Planning équipes" }
+      "planning": { "title": "Planning équipes", "breadcrumb": "Planning équipes" },
+      "postes": { "title": "Postes", "breadcrumb": "Postes" },
+      "posteNew": { "title": "Nouveau poste", "breadcrumb": "Nouveau" },
+      "posteDetail": { "title": "Détail poste", "breadcrumb": "Détail" },
+      "departements": { "title": "Départements", "breadcrumb": "Départements" },
+      "departementNew": { "title": "Nouveau département", "breadcrumb": "Nouveau" },
+      "departementDetail": { "title": "Détail département", "breadcrumb": "Détail" }
     },
     "common": {
       "module": "RH",
@@ -183,6 +189,54 @@
       },
       "errors": {
         "notFound": "Employé {id} introuvable"
+      }
+    },
+    "nomenclature": {
+      "actif": "Actif",
+      "inactif": "Inactif"
+    },
+    "poste": {
+      "title": "Postes",
+      "titleSingular": "Poste",
+      "titleNew": "Nouveau poste",
+      "titleDetail": "Détail poste",
+      "listing": {
+        "headerTitle": "Postes",
+        "emptyState": {
+          "title": "Aucun poste",
+          "message": "Créez les postes RH (maçon, conducteur de travaux…) — distincts du rôle applicatif.",
+          "actionLabel": "Nouveau poste"
+        }
+      },
+      "columns": { "code": "Code", "libelle": "Libellé", "actif": "Actif" },
+      "fields": { "code": "Code", "libelle": "Libellé", "actif": "Actif" },
+      "sections": { "identite": "Poste" },
+      "toasts": { "saved": "Poste {libelle} enregistré" },
+      "deleteConfirm": {
+        "title": "Supprimer le poste",
+        "message": "Supprimer le poste {libelle} ?"
+      }
+    },
+    "departement": {
+      "title": "Départements",
+      "titleSingular": "Département",
+      "titleNew": "Nouveau département",
+      "titleDetail": "Détail département",
+      "listing": {
+        "headerTitle": "Départements",
+        "emptyState": {
+          "title": "Aucun département",
+          "message": "Créez les départements (Travaux, Gros œuvre, Siège…).",
+          "actionLabel": "Nouveau département"
+        }
+      },
+      "columns": { "code": "Code", "libelle": "Libellé", "actif": "Actif" },
+      "fields": { "code": "Code", "libelle": "Libellé", "actif": "Actif" },
+      "sections": { "identite": "Département" },
+      "toasts": { "saved": "Département {libelle} enregistré" },
+      "deleteConfirm": {
+        "title": "Supprimer le département",
+        "message": "Supprimer le département {libelle} ?"
       }
     },
     "conge": {

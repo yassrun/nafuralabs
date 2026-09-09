@@ -24,10 +24,15 @@ public class EmployeService {
 
     private final EmployeRepository repository;
     private final EmployeSeedService seedService;
+    private final RhReferentielBinder referentielBinder;
 
-    public EmployeService(EmployeRepository repository, EmployeSeedService seedService) {
+    public EmployeService(
+            EmployeRepository repository,
+            EmployeSeedService seedService,
+            RhReferentielBinder referentielBinder) {
         this.repository = repository;
         this.seedService = seedService;
+        this.referentielBinder = referentielBinder;
     }
 
     @Transactional(readOnly = true)
@@ -59,6 +64,9 @@ public class EmployeService {
             throw new IllegalArgumentException("Employe id already exists: " + id);
         }
 
+        RhReferentielBinder.Bound bound = referentielBinder.bind(
+                request.getPosteId(), request.getPoste(), request.getDepartementId(), request.getDepartement());
+
         Employe entity = Employe.builder()
                 .id(id)
                 .tenantId(tenantId)
@@ -73,8 +81,10 @@ public class EmployeService {
                 .telephone(trimOrNull(request.getTelephone()))
                 .email(trimOrNull(request.getEmail()))
                 .userId(request.getUserId())
-                .poste(request.getPoste().trim())
-                .departement(trimOrNull(request.getDepartement()))
+                .posteId(bound.posteId())
+                .poste(bound.poste())
+                .departementId(bound.departementId())
+                .departement(bound.departement())
                 .categorie(request.getCategorie().trim())
                 .typeContrat(request.getTypeContrat().trim())
                 .statut(resolveStatut(request.getStatut(), Employe.STATUT_ACTIF))
@@ -129,11 +139,30 @@ public class EmployeService {
         if (request.getUserId() != null) {
             entity.setUserId(request.getUserId());
         }
-        if (request.getPoste() != null) {
-            entity.setPoste(request.getPoste().trim());
-        }
-        if (request.getDepartement() != null) {
-            entity.setDepartement(trimOrNull(request.getDepartement()));
+        if (request.getPosteId() != null
+                || request.getPoste() != null
+                || request.getDepartementId() != null
+                || request.getDepartement() != null) {
+            boolean posteById = StringUtils.hasText(request.getPosteId());
+            boolean posteByLibelle = request.getPoste() != null && !posteById;
+            String posteId = posteById
+                    ? request.getPosteId().trim()
+                    : (posteByLibelle ? null : entity.getPosteId());
+            String posteLibelle = posteById ? null : request.getPoste();
+            boolean departementIdSent = request.getDepartementId() != null;
+            String departementId = departementIdSent
+                    ? trimOrNull(request.getDepartementId())
+                    : (posteByLibelle ? entity.getDepartementId() : request.getDepartementId());
+            String departementLibelle = departementIdSent ? null : request.getDepartement();
+            if (!departementIdSent && posteByLibelle) {
+                departementLibelle = entity.getDepartement();
+            }
+            RhReferentielBinder.Bound bound =
+                    referentielBinder.bind(posteId, posteLibelle, departementId, departementLibelle);
+            entity.setPosteId(bound.posteId());
+            entity.setPoste(bound.poste());
+            entity.setDepartementId(bound.departementId());
+            entity.setDepartement(bound.departement());
         }
         if (request.getCategorie() != null) {
             entity.setCategorie(request.getCategorie().trim());

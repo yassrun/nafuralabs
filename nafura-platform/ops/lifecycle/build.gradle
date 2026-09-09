@@ -439,6 +439,11 @@ task collectMigrations {
         changelogOutputDir.mkdirs()
 
         def discovered = discoverSqlSources(scopedAppId ?: null)
+        // Optional exact path for a targeted local migration, preserving the stable changeset id.
+        def migrationPath = project.findProperty('migrationPath')?.toString()?.replace('\\', '/')?.trim()
+        if (migrationPath) {
+            discovered = discovered.findAll { it.relativePath.replace('\\', '/') == migrationPath }
+        }
         if (discovered.isEmpty()) {
             if (scopedAppId) {
                 throw new GradleException("No SQL migration sources found for app '${scopedAppId}'.")

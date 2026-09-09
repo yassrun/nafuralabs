@@ -154,6 +154,9 @@
           "periode": "Période",
           "emptyTitle": "Aucune affectation",
           "emptyDesc": "Affectez des employés à ce chantier avec un rôle.",
+          "noAuthorityTitle": "Lecture seule",
+          "noAuthorityDesc": "Vous ne pouvez pas nommer l’équipe sur ce chantier.",
+          "forbidden": "Vous ne pouvez pas nommer ce rôle sur ce chantier.",
           "seeTab": "Gérez les affectations dans l'onglet Équipe."
         },
         "sections": {
@@ -558,23 +561,116 @@
       "title": "Planning",
       "empty": "Aucune activité",
       "emptyHint": "Le chantier se facture déjà sans planning. Ici on planifie le terrain — coffrage, coulage, repli.",
+      "buildTitle": "Construire le planning",
+      "buildHint": "Le chantier se facture déjà. Ici on pose phases, activités et jalons sur le calendrier du chantier.",
       "newActivite": "Nouvelle activité",
+      "newJalon": "Jalon",
+      "newPhase": "Phase",
+      "retry": "Réessayer",
+      "loading": "Chargement du planning — aucune écriture tant que les données ne sont pas connues.",
+      "convention": "Convention 1 j = {hours} h",
       "lotsHorsGantt": "Lots hors Gantt — ils restent dans l'arbre",
       "filterRequired": "Filtrez un chantier pour créer une activité.",
+      "summary": {
+        "lignes": "lignes",
+        "retards": "retards",
+        "avancement": "Avancement moyen"
+      },
+      "error": {
+        "title": "Le planning n'a pas pu être chargé",
+        "hint": "Panne réseau ou API. Ce n'est pas un chantier sans activité. Réessayer conserve le chantier et les filtres.",
+        "body": "Impossible d'afficher les activités",
+        "retryKeeps": "Pas de tableau à zéro ligne. Pas de badge « 0 activité »."
+      },
+      "forbidden": {
+        "title": "Accès refusé",
+        "hint": "Ce chantier n'est pas dans votre périmètre. Aucun libellé, date ou identifiant d'activité n'est montré.",
+        "body": "Retourner à un chantier autorisé.",
+        "openChantiers": "Ouvrir mes chantiers"
+      },
+      "filtered": {
+        "title": "Aucun résultat pour ces filtres",
+        "hint": "Les activités existent toujours. On n'invite pas à recréer le planning.",
+        "clear": "Effacer les filtres"
+      },
+      "formes": {
+        "activite": "Activité",
+        "jalon": "Jalon",
+        "phase": "Phase"
+      },
+      "natures": {
+        "prepaInstall": "Préparation / installation",
+        "etudesValidation": "Études / validation",
+        "approvisionnement": "Approvisionnement",
+        "travaux": "Travaux",
+        "controleEssai": "Contrôle / essai",
+        "receptionCloture": "Réception / clôture",
+        "jalonTechnique": "Jalon technique",
+        "jalonContractuel": "Jalon contractuel",
+        "jalonFinancier": "Jalon financier"
+      },
+      "grid": {
+        "activite": "Activité / code",
+        "forme": "Forme",
+        "debut": "Début",
+        "fin": "Fin",
+        "duree": "Durée",
+        "predecessors": "Prédécesseurs"
+      },
+      "calendar": {
+        "action": "Horaires",
+        "title": "Horaires du chantier",
+        "hint": "Jours ouvrés et exceptions. Les activités se voient sur le Gantt (tableau + barres), pas ici.",
+        "jour": "Jour",
+        "creneaux": "Créneaux",
+        "exceptions": "Exceptions",
+        "saveDefault": "Enregistrer 8 h lun–ven"
+      },
+      "views": {
+        "label": "Vue",
+        "save": "Enregistrer la vue",
+        "apply": "Appliquer une vue…",
+        "prompt": "Nom de la vue (filtres, colonnes, échelle — aucun droit supplémentaire)",
+        "defaultName": "Ma vue",
+        "saved": "Vue enregistrée"
+      },
       "toolbar": {
+        "chantier": "Chantier",
+        "tousChantiers": "Tous les chantiers",
         "periode": "Période",
         "ceMois": "Ce mois",
         "ceTrimestre": "Ce trimestre",
         "cetteAnnee": "Cette année",
+        "glissant": "6 mois glissants",
         "tout": "Tout",
         "granularite": "Granularité",
+        "nature": "Nature",
+        "toutesNatures": "Toutes",
+        "jour": "Jour",
+        "semaine": "Semaine",
+        "mois": "Mois",
+        "trimestre": "Trimestre",
+        "today": "Aujourd'hui",
+        "exportPdf": "Exporter PDF",
         "pleinEcran": "Plein écran"
       },
       "drawer": {
         "title": "Activité",
+        "create": {
+          "activite": "Nouvelle activité",
+          "jalon": "Nouveau jalon",
+          "phase": "Nouvelle phase"
+        },
+        "forme": "Forme — jamais un jalon d'un jour",
         "libelle": "Libellé",
+        "nature": "Nature",
+        "natureNone": "(à qualifier)",
         "debut": "Début",
         "fin": "Fin",
+        "duree": "Durée (h ouvrées)",
+        "dureeHint": "{hours} h  ({days} j × {perDay} h)",
+        "jalonHint": "Durée 0 — même date début et fin. Jamais un jour fictif.",
+        "phaseHint": "Dates dérivées des enfants. Pas de durée manuelle.",
         "parent": "Sous",
         "parentNone": "(aucune — racine)",
         "zone": "Zone",

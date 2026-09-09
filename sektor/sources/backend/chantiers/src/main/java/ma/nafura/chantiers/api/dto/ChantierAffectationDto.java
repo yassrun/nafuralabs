@@ -24,4 +24,5 @@ public class ChantierAffectationDto {
     private LocalDate dateDebut;
     private LocalDate dateFin;
     private Boolean isActive;
+    private Boolean canMutate;
 }

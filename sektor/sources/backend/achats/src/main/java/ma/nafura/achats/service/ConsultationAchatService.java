@@ -303,23 +303,26 @@ public class ConsultationAchatService {
     @Transactional
     public ConsultationAchatDto addToPanier(UUID id, ConsultationAchatPanierDto request) {
         ConsultationAchat entity = require(id);
-        if (entity.getId() != null && envoiRepository.existsByConsultationId(entity.getId())) {
-            throw new IllegalArgumentException("consultation.panier.fige");
-        }
+        assertPanierEditable(entity);
         Set<String> merged = new LinkedHashSet<>();
         if (entity.getClesStables() != null) {
             merged.addAll(entity.getClesStables());
         }
         merged.addAll(normalizePanier(request != null ? request.getClesStables() : null));
         entity.setClesStables(merged);
-        if (entity.getDossierEtudeId() == null
-                && request != null
-                && request.getDossierEtudeId() != null) {
-            entity.setDossierEtudeId(request.getDossierEtudeId());
+        return persistPanier(entity, request);
+    }
+
+    @Transactional
+    public ConsultationAchatDto replacePanier(UUID id, ConsultationAchatPanierDto request) {
+        ConsultationAchat entity = require(id);
+        assertPanierEditable(entity);
+        Set<String> panier = normalizePanier(request != null ? request.getClesStables() : null);
+        if (panier.isEmpty()) {
+            throw new IllegalArgumentException("consultation.panier.vide");
         }
-        ConsultationAchatDto dto = toDto(repository.save(entity), false);
-        notifierLienEtude(entity.getDossierEtudeId());
-        return dto;
+        entity.setClesStables(panier);
+        return persistPanier(entity, request);
     }
 
     @Transactional
@@ -578,6 +581,24 @@ public class ConsultationAchatService {
             map.computeIfAbsent(row.getConsultationId(), k -> new ArrayList<>()).add(row);
         }
         return map;
+    }
+
+    private void assertPanierEditable(ConsultationAchat entity) {
+        if (entity.getId() != null && envoiRepository.existsByConsultationId(entity.getId())) {
+            throw new IllegalArgumentException("consultation.panier.fige");
+        }
+    }
+
+    private ConsultationAchatDto persistPanier(
+            ConsultationAchat entity, ConsultationAchatPanierDto request) {
+        if (entity.getDossierEtudeId() == null
+                && request != null
+                && request.getDossierEtudeId() != null) {
+            entity.setDossierEtudeId(request.getDossierEtudeId());
+        }
+        ConsultationAchatDto dto = toDto(repository.save(entity), false);
+        notifierLienEtude(entity.getDossierEtudeId());
+        return dto;
     }
 
     private Set<String> normalizePanier(List<String> input) {

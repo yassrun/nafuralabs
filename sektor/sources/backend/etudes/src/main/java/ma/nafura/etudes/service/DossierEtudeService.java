@@ -275,7 +275,7 @@ public class DossierEtudeService {
         if (dto.getNotes() != null) {
             dossier.setNotes(trimOrNull(dto.getNotes()));
         }
-        if (dossier.getAppelOffreClientId() == null && dto.getDateLimiteDepot() != null) {
+        if (dossier.getAppelOffreClientId() == null && aUnCadrageAo(dto)) {
             DossierEtudeCreateDto aocSeed = new DossierEtudeCreateDto();
             aocSeed.setObjet(dossier.getObjet());
             aocSeed.setAoReference(dto.getAoReference());
@@ -297,6 +297,7 @@ public class DossierEtudeService {
         }
         DossierEtude saved = repository.save(dossier);
         enrichirAoListing(List.of(saved));
+        appliquerAoTransientsDepuisDto(saved, dto);
         return saved;
     }
 
@@ -357,7 +358,9 @@ public class DossierEtudeService {
                 && etape > DossierEtude.ETAPE_PREMIERE) {
             dossier.setStatus(StatutDossierEtude.EN_ETUDE);
         }
-        return repository.save(dossier);
+        DossierEtude saved = repository.save(dossier);
+        enrichirAoListing(List.of(saved));
+        return saved;
     }
 
     @Transactional
@@ -1139,6 +1142,47 @@ public class DossierEtudeService {
                 devisRecus,
                 parametres.consultationObligatoire(),
                 parametres.consultationMinimum());
+    }
+
+    private static boolean aUnCadrageAo(DossierEtudeUpdateDto dto) {
+        return dto.getDateLimiteDepot() != null
+                || dto.getDateOuverturePlis() != null
+                || dto.getDelaiExecutionJours() != null
+                || dto.getEstimationMoaHt() != null
+                || dto.getCautionProvisoire() != null
+                || StringUtils.hasText(dto.getAoReference())
+                || StringUtils.hasText(dto.getAoType())
+                || dto.getVille() != null;
+    }
+
+    /**
+     * Complète l’en-tête renvoyé si l’AOC n’a pas encore tout recopié (délai, type, réf.).
+     */
+    private static void appliquerAoTransientsDepuisDto(DossierEtude d, DossierEtudeUpdateDto dto) {
+        if (!StringUtils.hasText(d.getAoType()) && StringUtils.hasText(dto.getAoType())) {
+            d.setAoType(dto.getAoType().trim());
+        }
+        if (!StringUtils.hasText(d.getAoReference()) && StringUtils.hasText(dto.getAoReference())) {
+            d.setAoReference(dto.getAoReference().trim());
+        }
+        if (d.getAoVille() == null && dto.getVille() != null) {
+            d.setAoVille(trimOrNull(dto.getVille()));
+        }
+        if (d.getAoDateLimiteDepot() == null && dto.getDateLimiteDepot() != null) {
+            d.setAoDateLimiteDepot(dto.getDateLimiteDepot());
+        }
+        if (d.getAoDateOuverturePlis() == null && dto.getDateOuverturePlis() != null) {
+            d.setAoDateOuverturePlis(dto.getDateOuverturePlis());
+        }
+        if (d.getAoDelaiExecutionJours() == null && dto.getDelaiExecutionJours() != null) {
+            d.setAoDelaiExecutionJours(dto.getDelaiExecutionJours());
+        }
+        if (d.getAoEstimationMoaHt() == null && dto.getEstimationMoaHt() != null) {
+            d.setAoEstimationMoaHt(dto.getEstimationMoaHt());
+        }
+        if (d.getAoCautionProvisoire() == null && dto.getCautionProvisoire() != null) {
+            d.setAoCautionProvisoire(dto.getCautionProvisoire());
+        }
     }
 
     private AppelOffreClient creerAocLie(DossierEtudeCreateDto dto, String donneurOrdre) {

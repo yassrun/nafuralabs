@@ -694,6 +694,42 @@ class ConsultationAchatServiceTest {
     }
 
     @Test
+    void replacePanier_remplaceLeSet() {
+        ConsultationAchat entity = ConsultationAchat.builder()
+                .id(CONSULTATION)
+                .tenantId(TENANT)
+                .numero("CS-2026-0001")
+                .statut(ConsultationAchat.STATUT_PREPARATION)
+                .clesStables(new java.util.LinkedHashSet<>(List.of("peinture", "ciment-cpj-45")))
+                .build();
+        when(repository.findByIdAndTenantId(CONSULTATION, TENANT)).thenReturn(Optional.of(entity));
+        when(destinataireRepository.findByConsultationIdOrderByCreatedAtAsc(CONSULTATION)).thenReturn(List.of());
+        when(repository.save(any(ConsultationAchat.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ConsultationAchatPanierDto dto = new ConsultationAchatPanierDto();
+        dto.setClesStables(List.of("sable-de-dune"));
+
+        ConsultationAchatDto result = service.replacePanier(CONSULTATION, dto);
+
+        assertThat(result.getClesStables()).containsExactly("sable-de-dune");
+        assertThat(entity.getClesStables()).containsExactly("sable-de-dune");
+    }
+
+    @Test
+    void replacePanier_vide_refuse() {
+        ConsultationAchat entity = consultationPrep();
+        when(repository.findByIdAndTenantId(CONSULTATION, TENANT)).thenReturn(Optional.of(entity));
+
+        ConsultationAchatPanierDto dto = new ConsultationAchatPanierDto();
+        dto.setClesStables(List.of());
+
+        assertThatThrownBy(() -> service.replacePanier(CONSULTATION, dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("consultation.panier.vide");
+        org.mockito.Mockito.verify(repository, never()).save(any());
+    }
+
+    @Test
     void importDevisHorsEtude_neNotifiePasLeFlag() {
         ConsultationAchat entity = consultationPrep();
         ConsultationAchatDestinataire dest = destRow(DEST_A, FOURNISSEUR, CONTACT_A);

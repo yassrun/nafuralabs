@@ -90,8 +90,8 @@ export class NfInputComponent implements ControlValueAccessor {
   /**
    * Write value from form control
    */
-  writeValue(value: string): void {
-    this.value.set(value ?? '');
+  writeValue(value: string | number | null): void {
+    this.value.set(value == null || value === '' ? '' : String(value));
   }
 
   /**

@@ -8,9 +8,22 @@ public class ActiviteChantierUpdateDto {
 
     private String libelle;
 
+    private ma.nafura.chantiers.domain.calendrier.CalendrierActivite calendrierSpecifique;
+    private Boolean utiliserCalendrierChantier;
+
+    private String forme;
+
+    private String natureCode;
+
+    private String code;
+
     private LocalDate dateDebut;
 
     private LocalDate dateFin;
+
+    private Integer dureeMinutesOuvrees;
+
+    private Boolean recalculerFin;
 
     private String parentActiviteId;
 

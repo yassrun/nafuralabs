@@ -668,7 +668,8 @@
         "ouverte": "En attente de réponses",
         "partielle": "Partielle",
         "complete": "Complète",
-        "devisRecus": "{{count}} devis"
+        "devisRecus": "{{count}} devis",
+        "avancement": "{k}/{n} devis"
       },
       "lien": {
         "liee": "Liée",
@@ -754,6 +755,12 @@
       "panier": {
         "empty": "Panier vide.",
         "fige": "Panier figé. Les articles ne peuvent plus être modifiés. Vous pouvez encore ajouter un destinataire.",
+        "add": "Ajouter un article",
+        "remove": "Retirer",
+        "doublon": "Cet article est déjà dans le panier.",
+        "sansIdentite": "Article sans identité catalogue.",
+        "videRefuse": "Le panier doit garder au moins un article.",
+        "saveError": "Mise à jour du panier impossible.",
         "columns": {
           "code": "Code",
           "libelle": "Désignation"

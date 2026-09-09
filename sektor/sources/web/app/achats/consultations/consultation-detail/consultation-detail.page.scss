@@ -41,8 +41,29 @@
   color: var(--nf-color-danger, #b42318);
 }
 
+.cs-statut-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  max-width: 52rem;
+}
+
 .cs-lien-etude {
   font-weight: 500;
+}
+
+.cs-panier-head {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.65rem;
+}
+
+.cs-panier-actions {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
 }
 
 .cs-import-block table,

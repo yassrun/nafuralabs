@@ -3,8 +3,10 @@
     <div>
       <h3 id="identite-titre" class="identite__titre">Identité de l’étude</h3>
       <p class="identite__aide">
-        Objet, MOA et chargé restent corrigeables jusqu’à la soumission. Les valeurs déduites du CPS
-        restent des propositions jusqu’à Accepter, Refuser ou corriger.
+        Objet, MOA et chargé restent corrigeables jusqu’à la soumission. Le badge
+        <strong>IA · CPS</strong> indique une valeur extraite du PDF. Accepter ou Refuser
+        seulement tant que ce n’est pas enregistré — Enregistrer et Continuer confirment
+        les valeurs affichées.
       </p>
     </div>
     @if (hasPendingCps()) {
@@ -111,7 +113,7 @@
         type="number"
         label="Délai d’exécution (jours)"
         [disabled]="!modifiable() || saving()"
-        [ngModel]="delaiExecutionJours()"
+        [ngModel]="delaiExecutionJours() == null ? '' : ('' + delaiExecutionJours())"
         (ngModelChange)="onChamp('delaiExecutionJours', $event === '' || $event == null ? '' : +$event)"
       />
     </div>
@@ -143,7 +145,7 @@
 <ng-template #revue let-key>
   @if (iaPending(key)) {
     <div class="identite__revue">
-      <span class="identite__badge">CPS</span>
+      <span class="identite__badge identite__badge--ia">IA · CPS</span>
       <nf-button size="sm" [disabled]="!modifiable() || saving()" (clicked)="accepter(key)">
         Accepter
       </nf-button>
@@ -157,9 +159,9 @@
       </nf-button>
     </div>
   } @else if (iaStatus(key) === 'accepted') {
-    <span class="identite__badge identite__badge--ok">Accepté</span>
+    <span class="identite__badge identite__badge--ia">IA · CPS</span>
   } @else if (iaStatus(key) === 'rejected') {
-    <span class="identite__badge identite__badge--no">Refusé — saisie manuelle</span>
+    <span class="identite__badge identite__badge--no">Saisie manuelle</span>
   } @else if (cpsMissing(key)) {
     <span class="identite__badge identite__badge--no">Non trouvé dans le CPS</span>
   }

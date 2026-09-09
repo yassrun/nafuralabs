@@ -380,6 +380,8 @@
     "finance.retenueSource": "Withholding tax (public)",
     "rh": "Human Resources",
     "rh.employes": "Employees",
+    "rh.postes": "Job titles",
+    "rh.departements": "Departments",
     "rh.pointage": "Site Time Tracking",
     "rh.planning": "Team Planning",
     "rh.conges": "Leave & Absence",

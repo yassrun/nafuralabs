@@ -1,49 +1,158 @@
 <nf-screen [header]="headerConfig()" [scroll]="true">
 
   <section class="planning-page">
+    <nav class="planning-view-tabs" aria-label="Vues du planning">
+      @for(view of planningViews; track view.id) {
+        <button type="button" [class.active]="activeView() === view.id" [attr.aria-pressed]="activeView() === view.id" (click)="activeView.set(view.id)">{{ view.label }}</button>
+      }
+      @if(summary().monoChantier; as chantier) {
+        <button type="button" class="planning-back" (click)="onOpenChantier(chantier.id)">Fiche chantier ↗</button>
+      }
+    </nav>
+    @if(activeView() === 'EXECUTION') {
     <app-gantt-toolbar
-      [chantiers]="facade.chantiers()"
+      [simulating]="facade.simulating()" (simulateClick)="facade.simulateNetwork()" [settingsOpen]="displayOpen()" (settingsToggle)="displayOpen.set(!displayOpen())" [chantiers]="facade.chantiers()"
       [selectedChantierIds]="facade.selectedChantierIds()"
       [periodPreset]="facade.periodPreset()"
       [granularity]="facade.granularity()"
-      [canCreate]="!!summary().monoChantier"
+      [natureFilter]="facade.natureFilter()"
+      [canCreate]="canCreate()"
+      [canCalendar]="!!summary().monoChantier"
+      [capacites]="facade.capacites()"
+      [savedViews]="facade.savedViews()"
       (selectedChantiersChange)="onSelectChantiers($event)"
       (periodPresetChange)="facade.setPeriodPreset($event); facade.clearCustomRange()"
       (granularityChange)="onGranularityChange($event)"
+      (natureFilterChange)="facade.setNatureFilter($event)"
       (todayClick)="onToday()"
       (exportClick)="onExportPdf()"
       (fullscreenClick)="onToggleFullscreen()"
-      (newActiviteClick)="onNewActivite()">
+      (newActiviteClick)="onNewLigne('ACTIVITE')"
+      (newJalonClick)="onNewLigne('JALON')"
+      (newPhaseClick)="onNewLigne('PHASE')"
+      (calendarClick)="facade.openCalendar()"
+      (saveView)="onSaveView($event)"
+      (applyView)="onApplyView($event)">
+      <nf-listing-controls [columns]="listingColumns()" [hiddenColumnsCount]="hiddenColumnCount()" [showSearch]="false"
+        [filterActive]="displayOpen() || !!facade.natureFilter() || !!facade.legendFilter().length"
+        (columnsChange)="onColumnsChange($event)" (filterClick)="displayOpen.set(!displayOpen())" />
     </app-gantt-toolbar>
 
-    <div class="planning-summary">
-      <nf-badge variant="info">{{ summary().chantierCount }} {{ summary().chantierCount > 1 ? 'chantiers' : 'chantier' }}</nf-badge>
-      <nf-badge variant="default">{{ summary().activiteCount }} activités</nf-badge>
-      <nf-badge [variant]="summary().lateCount ? 'warning' : 'success'">{{ summary().lateCount }} retards</nf-badge>
-      <nf-badge variant="default">Avancement moyen {{ summary().completion }}%</nf-badge>
-      <span class="planning-summary__hint">{{ 'chantiers.planning.lotsHorsGantt' | translate }}</span>
+    @if (facade.simulation() || facade.simulationError()) { <section class="planning-network">
+      @if (facade.simulationError()) { <p role="alert">{{ facade.simulationError() }}</p> }
+      @if (facade.simulation(); as simulation) {
+        <p><strong>Simulation à la journée — non enregistrée.</strong> Les débuts actuels sont des dates au plus tôt. Les fins des activités sont incluses ; FD reprend le jour ouvré suivant. Les heures de passage entre postes ne sont pas calculées.</p>
+        <label><input type="checkbox" [checked]="facade.showCritical()" (change)="facade.showCritical.set(!facade.showCritical())" /> Repérer en rouge les activités critiques de cette simulation</label>
+        <div class="planning-network__table"><table><thead><tr><th>Activité</th><th>Dates actuelles</th><th>Dates proposées</th><th>Marge ouvrée</th></tr></thead><tbody>
+          @for (row of simulation.rows; track row.id) {
+            <tr [class.planning-network__changed]="row.changed"><td>{{ row.label }} @if(row.critical) { <strong> · Critique</strong> }</td><td>{{ row.previousStart }} → {{ row.previousFinish }}</td><td>{{ row.start }} → {{ row.finish }}</td><td>{{ row.floatDays }} j</td></tr>
+          }
+        </tbody></table></div>
+        @if (facade.capacites().editerStructure) { <nf-button [disabled]="facade.simulating()" (clicked)="facade.applyNetwork()">Appliquer les dates proposées</nf-button> }
+        <nf-button variant="secondary" (clicked)="facade.simulation.set(null)">Fermer la simulation</nf-button>
+      }
+    </section>
+    }
+    <div class="planning-display-controls">
+
+      @if (displayOpen()) {
+        <label><input type="checkbox" [checked]="showLinks()" (change)="showLinks.set(!showLinks())" /> Liaisons logiques</label>
+
+      }
     </div>
-
-    <app-gantt-legend [items]="facade.legend()" (toggle)="onLegendToggle($event)"></app-gantt-legend>
-
-    @if (hasData()) {
-      <div class="planning-workspace" #fullscreenHost>
-        <div class="planning-gantt-shell" tabindex="0" (keydown)="onGanttKeydown($event)">
-          <div class="planning-gantt" #ganttHost></div>
+    @if (pageState() === 'ready' || pageState() === 'filtered') {
+      <div class="planning-context-strip">
+        <span>{{ summary().activiteCount }} lignes @if(summary().lateCount) { · <strong>{{ summary().lateCount }} en retard</strong> }</span>
+        <span class="planning-tree-tools">
+          <button type="button" (click)="setTreeExpanded(false)">Tout replier</button>
+          <button type="button" (click)="setTreeExpanded(true)">Tout développer</button>
+        </span>
+      </div>
+      @if(displayOpen()) {
+        <app-gantt-legend [items]="facade.legend()" (toggle)="onLegendToggle($event)"></app-gantt-legend>
+        <p class="planning-calendar-note">Calendrier {{ facade.calendarContext().versionLabel }} · {{ facade.calendarContext().fuseauIana }} · 1 jour = {{ facade.calendarContext().heuresParJour }} h</p>
+      }
+    }
+    @switch (pageState()) {
+      @case ('loading') {
+        <div class="planning-state" data-testid="planning-state-loading">
+          <nf-loading-state variant="skeleton" [message]="'chantiers.planning.loading' | translate"></nf-loading-state>
         </div>
-      </div>
+      }
+      @case ('error') {
+        <div class="planning-state" data-testid="planning-state-error">
+          <nf-alert
+            variant="danger"
+            [title]="'chantiers.planning.error.title' | translate"
+            [message]="'chantiers.planning.error.hint' | translate">
+          </nf-alert>
+          <nf-error-state
+            [title]="'chantiers.planning.error.body' | translate"
+            [message]="'chantiers.planning.error.retryKeeps' | translate"
+            [retryLabel]="'chantiers.planning.retry' | translate"
+            (retry)="facade.retryLoad()">
+          </nf-error-state>
+        </div>
+      }
+      @case ('forbidden') {
+        <div class="planning-state" data-testid="planning-state-forbidden">
+          <nf-alert
+            variant="warning"
+            [title]="'chantiers.planning.forbidden.title' | translate"
+            [message]="'chantiers.planning.forbidden.hint' | translate">
+          </nf-alert>
+          <nf-empty-state
+            icon="lock"
+            [title]="'chantiers.planning.forbidden.body' | translate"
+            [actionLabel]="'chantiers.planning.forbidden.openChantiers' | translate"
+            (action)="onOpenChantiers()">
+          </nf-empty-state>
+        </div>
+      }
+      @case ('empty') {
+        <div class="planning-empty-state" data-testid="planning-state-empty">
+          <nf-empty-state
+            icon="event"
+            [title]="'chantiers.planning.buildTitle' | translate"
+            [message]="'chantiers.planning.buildHint' | translate">
+          </nf-empty-state>
+          <div class="planning-empty-state__actions">
+            <nf-button variant="primary" data-testid="planning-empty-activite" [disabled]="!canCreate()" (clicked)="onNewLigne('ACTIVITE')">
+              {{ 'chantiers.planning.newActivite' | translate }}
+            </nf-button>
+            <nf-button variant="secondary" data-testid="planning-empty-jalon" [disabled]="!canCreate()" (clicked)="onNewLigne('JALON')">
+              {{ 'chantiers.planning.newJalon' | translate }}
+            </nf-button>
+            <nf-button variant="secondary" data-testid="planning-empty-phase" [disabled]="!canCreate()" (clicked)="onNewLigne('PHASE')">
+              {{ 'chantiers.planning.newPhase' | translate }}
+            </nf-button>
+          </div>
+        </div>
+      }
+      @case ('filtered') {
+        <div class="planning-empty-state" data-testid="planning-state-filtered">
+          <nf-empty-state
+            icon="filter_alt"
+            [title]="'chantiers.planning.filtered.title' | translate"
+            [message]="'chantiers.planning.filtered.hint' | translate"
+            [actionLabel]="'chantiers.planning.filtered.clear' | translate"
+            (action)="facade.clearFilters()">
+          </nf-empty-state>
+        </div>
+      }
+      @case ('ready') {
+        <div class="planning-workspace" #fullscreenHost data-testid="planning-state-ready">
+          <div class="planning-gantt-shell" tabindex="0" (keydown)="onGanttKeydown($event)">
+            <div class="planning-gantt" #ganttHost data-testid="planning-gantt"></div>
+          </div>
+        </div>
+      }
+    }
     } @else {
-      <div class="planning-empty-state">
-        <nf-empty-state
-          icon="event"
-          [title]="'chantiers.planning.empty' | translate"
-          [message]="'chantiers.planning.emptyHint' | translate"
-          [actionLabel]="'chantiers.planning.newActivite' | translate"
-          (action)="onNewActivite()">
-        </nf-empty-state>
-      </div>
+      <app-planning-business-views [view]="businessView()" />
     }
   </section>
 
   <app-activite-drawer></app-activite-drawer>
+  <app-calendrier-drawer></app-calendrier-drawer>
 </nf-screen>

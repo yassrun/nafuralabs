@@ -849,6 +849,20 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
         order: 10,
       },
       {
+        id: 'rh.postes',
+        label: 'nav.rh.postes',
+        icon: 'clipboard-list',
+        route: '/rh/postes',
+        order: 12,
+      },
+      {
+        id: 'rh.departements',
+        label: 'nav.rh.departements',
+        icon: 'building-2',
+        route: '/rh/departements',
+        order: 14,
+      },
+      {
         id: 'rh.pointage',
         label: 'nav.rh.pointage',
         icon: 'clock',

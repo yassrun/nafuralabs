@@ -87,6 +87,7 @@
       (modeChange)="onViewModeChange($event)">
     </nf-view-mode-switcher>
   }
+  @if (showSearch()) {
   <div class="nf-listing-controls__search">
     <lucide-icon name="search" size="20" class="nf-listing-controls__search-icon"></lucide-icon>
     <input
@@ -98,4 +99,5 @@
       [attr.aria-label]="'Search' | translate"
     />
   </div>
+  }
 </div>

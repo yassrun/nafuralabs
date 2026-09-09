@@ -20,7 +20,13 @@
       "pointage": { "title": "Site time clock", "breadcrumb": "Time clock" },
       "pointageSaisie": { "title": "Time clock entry", "breadcrumb": "Entry" },
       "pointageValidation": { "title": "Time clock validation", "breadcrumb": "Validation" },
-      "planning": { "title": "Team schedule", "breadcrumb": "Team schedule" }
+      "planning": { "title": "Team schedule", "breadcrumb": "Team schedule" },
+      "postes": { "title": "Job titles", "breadcrumb": "Job titles" },
+      "posteNew": { "title": "New job title", "breadcrumb": "New" },
+      "posteDetail": { "title": "Job title details", "breadcrumb": "Details" },
+      "departements": { "title": "Departments", "breadcrumb": "Departments" },
+      "departementNew": { "title": "New department", "breadcrumb": "New" },
+      "departementDetail": { "title": "Department details", "breadcrumb": "Details" }
     },
     "common": {
       "module": "HR",
@@ -183,6 +189,54 @@
       },
       "errors": {
         "notFound": "Employee {id} not found"
+      }
+    },
+    "nomenclature": {
+      "actif": "Active",
+      "inactif": "Inactive"
+    },
+    "poste": {
+      "title": "Job titles",
+      "titleSingular": "Job title",
+      "titleNew": "New job title",
+      "titleDetail": "Job title details",
+      "listing": {
+        "headerTitle": "Job titles",
+        "emptyState": {
+          "title": "No job titles",
+          "message": "Create HR job titles (mason, site manager…) — distinct from the app role.",
+          "actionLabel": "New job title"
+        }
+      },
+      "columns": { "code": "Code", "libelle": "Label", "actif": "Active" },
+      "fields": { "code": "Code", "libelle": "Label", "actif": "Active" },
+      "sections": { "identite": "Job title" },
+      "toasts": { "saved": "Job title {libelle} saved" },
+      "deleteConfirm": {
+        "title": "Delete job title",
+        "message": "Delete job title {libelle}?"
+      }
+    },
+    "departement": {
+      "title": "Departments",
+      "titleSingular": "Department",
+      "titleNew": "New department",
+      "titleDetail": "Department details",
+      "listing": {
+        "headerTitle": "Departments",
+        "emptyState": {
+          "title": "No departments",
+          "message": "Create departments (Works, Structure, HQ…).",
+          "actionLabel": "New department"
+        }
+      },
+      "columns": { "code": "Code", "libelle": "Label", "actif": "Active" },
+      "fields": { "code": "Code", "libelle": "Label", "actif": "Active" },
+      "sections": { "identite": "Department" },
+      "toasts": { "saved": "Department {libelle} saved" },
+      "deleteConfirm": {
+        "title": "Delete department",
+        "message": "Delete department {libelle}?"
       }
     },
     "conge": {

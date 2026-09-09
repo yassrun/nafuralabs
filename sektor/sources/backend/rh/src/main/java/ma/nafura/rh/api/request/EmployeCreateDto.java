@@ -34,8 +34,11 @@ public class EmployeCreateDto {
 
     private java.util.UUID userId;
 
-    @NotBlank
+    private String posteId;
+
     private String poste;
+
+    private String departementId;
 
     private String departement;
 

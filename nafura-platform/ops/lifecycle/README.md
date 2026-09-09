@@ -78,3 +78,9 @@ kubectl logs job/sektor-btp-lifecycle -f
 - The backend init containers wait for Liquibase metadata table `databasechangelog` before app startup.
 - Cross-module SQL should be kept under:
   - `tools/lifecycle/src/main/resources/db/changelog/schema/`
+
+### Migration locale ciblée
+
+La propriété Gradle facultative `migrationPath` sélectionne un chemin SQL exact parmi les sources de l’application. Les identifiants Liquibase restent identiques à la collecte complète. Un chemin absent fait échouer la collecte.
+
+Elle peut être transmise à `nlops.sh build-images` puis `nlops.sh migrate` par `ORG_GRADLE_PROJECT_migrationPath`. Réserver ce filtre aux migrations locales dont les prérequis sont déjà appliqués. Après l’opération, reconstruire l’image lifecycle sans ce filtre pour restaurer le catalogue complet.

@@ -62,6 +62,8 @@ export class ListingControlsComponent {
   lookups = input<LookupContext>({});
   /** Current search term (one-way; parent owns value). */
   search = input<string>('');
+  /** Hide search when the host only needs column and filter controls. */
+  showSearch = input<boolean>(true);
 
   // ─── View Mode ─────────────────────────────────────────────────────────────
   /** When true, show the view mode switcher. */

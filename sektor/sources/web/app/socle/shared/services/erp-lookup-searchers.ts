@@ -33,6 +33,8 @@ export function buildErpLookupSearchers(
   );
   const chantiers = typeahead((q) => erp.chantiers(q));
   const employes = typeahead((q) => erp.employes('ACTIF', q));
+  const rhPostes = typeahead((q) => erp.rhPostes(q));
+  const rhDepartements = typeahead((q) => erp.rhDepartements(q));
   const locations = typeahead((q) => erp.locations(q));
   const depotLocations = typeahead((q) =>
     erp.locations(q).then((items) =>
@@ -70,6 +72,8 @@ export function buildErpLookupSearchers(
     chantiersBudget: chantiers,
     employes,
     employees: employes,
+    rhPostes,
+    rhDepartements,
     locations,
     allLocations: locations,
     location: locations,

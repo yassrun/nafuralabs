@@ -2,6 +2,8 @@ package ma.nafura.chantiers.domain.activite;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -16,8 +18,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Activité du planning chantier — CONTRAT planning-activites AC-1..AC-3.
+ * Ligne du planning chantier — CONTRAT planning-activites AC-1..AC-3, étendu L1 (SEKTOR-325).
  * WBS libre via {@code parentActiviteId} ; zone facultative ({@link ma.nafura.chantiers.domain.chantier.ZoneChantier}).
+ * Forme / nature / durée ouvrée : gel 08/09. Dates {@code dateDebut}/{@code dateFin} = dates
+ * <em>visibles</em> (fin incluse historique) — ne pas les décaler.
  */
 @Entity
 @Table(name = "chantier_activites")
@@ -51,11 +55,40 @@ public class ActiviteChantier {
     @Column(nullable = false, length = 500)
     private String libelle;
 
+    /** Code lisible facultatif — distinct de l'id technique. */
+    @Column(length = 80)
+    private String code;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private ActiviteForme forme = ActiviteForme.ACTIVITE;
+
+    /** Classification ; null = à qualifier. Référentiel {@link ActiviteNature}. */
+    @Column(name = "nature_code", length = 50)
+    private String natureCode;
+
     @Column(name = "date_debut", nullable = false)
     private LocalDate dateDebut;
 
+    /** Date de fin <em>visible</em> (fin incluse historique). */
     @Column(name = "date_fin", nullable = false)
     private LocalDate dateFin;
+
+    /**
+     * Durée opérationnelle en minutes ouvrées. Null = à qualifier (lignes migrées).
+     * Jalon = 0. Phase = null (dates dérivées à la lecture, pas une durée manuelle).
+     */
+    @Column(name = "duree_minutes_ouvrees")
+    private Integer dureeMinutesOuvrees;
+
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(name = "calendrier_specifique", columnDefinition = "jsonb")
+    private ma.nafura.chantiers.domain.calendrier.CalendrierActivite calendrierSpecifique;
+
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(name = "planning_allocations", columnDefinition = "jsonb")
+    private java.util.List<PlanningAllocation> planningAllocations;
 
     @Column(nullable = false)
     private int ordre;
@@ -82,6 +115,9 @@ public class ActiviteChantier {
         updatedAt = now;
         if (status == null || status.isBlank()) {
             status = STATUS_PLANIFIE;
+        }
+        if (forme == null) {
+            forme = ActiviteForme.ACTIVITE;
         }
     }
 

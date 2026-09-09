@@ -170,6 +170,40 @@ export class ErpLookupService {
       .then((items) => exactMatriculeFirst(items, q));
   }
 
+  rhPostes(search?: string): Promise<LookupItem[]> {
+    return this.rhNomenclature('/api/v1/rh/postes', 'rhPostes', search);
+  }
+
+  rhDepartements(search?: string): Promise<LookupItem[]> {
+    return this.rhNomenclature('/api/v1/rh/departements', 'rhDepartements', search);
+  }
+
+  private rhNomenclature(
+    endpoint: string,
+    cacheKey: string,
+    search?: string,
+  ): Promise<LookupItem[]> {
+    const q = search?.trim() ?? '';
+    if (q.length < 2) {
+      return Promise.resolve([]);
+    }
+    return this.lookup.get({
+      key: `${cacheKey}:${q}`,
+      endpoint,
+      params: { q, actif: true },
+      transform: (response) => {
+        const rows = extractRecords(response);
+        return rows.map((row) => {
+          const id = String(row['id'] ?? '');
+          const code = String(row['code'] ?? '').trim();
+          const libelle = String(row['libelle'] ?? '').trim();
+          const label = code && libelle ? `${libelle} · ${code}` : libelle || code || id;
+          return { key: id, value: label, data: row };
+        });
+      },
+    });
+  }
+
   /** Full item rows for catalogue / line editors (uom, price, type). */
   items(search?: string): Promise<LookupItem[]> {
     return this.fetch({

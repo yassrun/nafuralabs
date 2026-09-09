@@ -277,4 +277,95 @@ class DossierEtudeServiceClientTest {
         assertThat(out.getDevisGenereId()).isEqualTo(devisId);
         assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.DEVIS_GENERE);
     }
+
+    @Test
+    void update_cadrageAo_persisteDelaiEtType() {
+        UUID id = UUID.randomUUID();
+        UUID aocId = UUID.randomUUID();
+        DossierEtude dossier = DossierEtude.builder()
+                .id(id)
+                .tenantId(TENANT)
+                .numero("DE-0320")
+                .objet("Cadrage AO")
+                .status(StatutDossierEtude.BROUILLON)
+                .clientNom("RRA")
+                .build();
+        when(repository.findByIdAndTenantId(id, TENANT)).thenReturn(Optional.of(dossier));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ma.nafura.etudes.domain.appeloffre.AppelOffreClient aoc =
+                ma.nafura.etudes.domain.appeloffre.AppelOffreClient.builder()
+                        .id(aocId)
+                        .tenantId(TENANT)
+                        .numero("AOC-0320")
+                        .reference("A049/RRA/2026")
+                        .objet("Cadrage AO")
+                        .donneurOrdre("RRA")
+                        .type("PUBLIC")
+                        .dateLimiteDepot(java.time.LocalDate.of(2026, 8, 31))
+                        .delaiExecutionJours(180)
+                        .status(ma.nafura.etudes.domain.appeloffre.AppelOffreClient.STATUS_A_ETUDIER)
+                        .build();
+        when(aocService.create(any())).thenReturn(aoc);
+        when(aocRepository.findByIdAndTenantId(aocId, TENANT)).thenReturn(Optional.of(aoc));
+
+        DossierEtudeUpdateDto dto = new DossierEtudeUpdateDto();
+        dto.setObjet("Cadrage AO");
+        dto.setClientNom("RRA");
+        dto.setAoType("PUBLIC");
+        dto.setAoReference("A049/RRA/2026");
+        dto.setDateLimiteDepot(java.time.LocalDate.of(2026, 8, 31));
+        dto.setDelaiExecutionJours(180);
+
+        DossierEtude updated = service.update(id, dto);
+
+        assertThat(updated.getAppelOffreClientId()).isEqualTo(aocId);
+        assertThat(updated.getAoDelaiExecutionJours()).isEqualTo(180);
+        assertThat(updated.getAoType()).isEqualTo("PUBLIC");
+        assertThat(updated.getAoReference()).isEqualTo("A049/RRA/2026");
+    }
+
+    @Test
+    void update_cadrageAo_sansDateLimite_persisteDelai() {
+        UUID id = UUID.randomUUID();
+        UUID aocId = UUID.randomUUID();
+        DossierEtude dossier = DossierEtude.builder()
+                .id(id)
+                .tenantId(TENANT)
+                .numero("DE-0271")
+                .objet("Cadrage sans date")
+                .status(StatutDossierEtude.BROUILLON)
+                .clientNom("RRA")
+                .build();
+        when(repository.findByIdAndTenantId(id, TENANT)).thenReturn(Optional.of(dossier));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ma.nafura.etudes.domain.appeloffre.AppelOffreClient aoc =
+                ma.nafura.etudes.domain.appeloffre.AppelOffreClient.builder()
+                        .id(aocId)
+                        .tenantId(TENANT)
+                        .numero("AOC-0271")
+                        .reference("A049/RRA/2026")
+                        .objet("Cadrage sans date")
+                        .donneurOrdre("RRA")
+                        .type("PUBLIC")
+                        .delaiExecutionJours(90)
+                        .status(ma.nafura.etudes.domain.appeloffre.AppelOffreClient.STATUS_A_ETUDIER)
+                        .build();
+        when(aocService.create(any())).thenReturn(aoc);
+        when(aocRepository.findByIdAndTenantId(aocId, TENANT)).thenReturn(Optional.of(aoc));
+
+        DossierEtudeUpdateDto dto = new DossierEtudeUpdateDto();
+        dto.setObjet("Cadrage sans date");
+        dto.setClientNom("RRA");
+        dto.setAoType("PUBLIC");
+        dto.setAoReference("A049/RRA/2026");
+        dto.setDelaiExecutionJours(90);
+
+        DossierEtude updated = service.update(id, dto);
+
+        assertThat(updated.getAppelOffreClientId()).isEqualTo(aocId);
+        assertThat(updated.getAoDelaiExecutionJours()).isEqualTo(90);
+        assertThat(updated.getAoType()).isEqualTo("PUBLIC");
+    }
 }

@@ -60,10 +60,14 @@ public class AppelOffreClientService {
                     .toList();
         }
         if (dateFrom != null) {
-            rows = rows.stream().filter(a -> !a.getDateLimiteDepot().isBefore(dateFrom)).toList();
+            rows = rows.stream()
+                    .filter(a -> a.getDateLimiteDepot() != null && !a.getDateLimiteDepot().isBefore(dateFrom))
+                    .toList();
         }
         if (dateTo != null) {
-            rows = rows.stream().filter(a -> !a.getDateLimiteDepot().isAfter(dateTo)).toList();
+            rows = rows.stream()
+                    .filter(a -> a.getDateLimiteDepot() != null && !a.getDateLimiteDepot().isAfter(dateTo))
+                    .toList();
         }
         if (StringUtils.hasText(search)) {
             String term = search.trim().toLowerCase(Locale.ROOT);
@@ -322,7 +326,8 @@ public class AppelOffreClientService {
                     a -> a.getVille() != null ? a.getVille() : "", String.CASE_INSENSITIVE_ORDER);
             case "status" -> Comparator.comparing(AppelOffreClient::getStatus, String.CASE_INSENSITIVE_ORDER);
             case "delaiRestant" -> Comparator.comparingInt(AppelOffreClient::getDelaiRestant);
-            default -> Comparator.comparing(AppelOffreClient::getDateLimiteDepot);
+            default -> Comparator.comparing(
+                    AppelOffreClient::getDateLimiteDepot, Comparator.nullsLast(Comparator.naturalOrder()));
         };
         if (desc) {
             comparator = comparator.reversed();

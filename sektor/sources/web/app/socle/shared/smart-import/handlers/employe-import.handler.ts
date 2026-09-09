@@ -73,6 +73,7 @@ export class EmployeImportService {
         prenom: String(row['prenom'] ?? '').trim(),
         cin: String(row['cin'] ?? '').trim(),
         cnss: row['cnss'] ? String(row['cnss']).trim() : undefined,
+        posteId: '',
         poste: row['poste'] ? String(row['poste']).trim() : 'Non précisé',
         departement: row['departement'] ? String(row['departement']).trim() : undefined,
         categorie: 'Ouvrier',

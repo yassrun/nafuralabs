@@ -24,24 +24,34 @@ public class ChantierAffectationService {
     private final ChantierAffectationRepository repository;
     private final ChantierRepository chantierRepository;
     private final EmployeRepository employeRepository;
+    private final ChantierAffectationPolicy policy;
 
     public ChantierAffectationService(
             ChantierAffectationRepository repository,
             ChantierRepository chantierRepository,
-            EmployeRepository employeRepository) {
+            EmployeRepository employeRepository,
+            ChantierAffectationPolicy policy) {
         this.repository = repository;
         this.chantierRepository = chantierRepository;
         this.employeRepository = employeRepository;
+        this.policy = policy;
     }
 
     @Transactional(readOnly = true)
     public List<ChantierAffectationDto> listByChantier(String chantierId) {
         requireChantier(chantierId);
+        int actorGrade = policy.actorGradeOn(chantierId);
         return repository
                 .findByTenantIdAndChantierIdAndIsActiveTrueOrderByRoleCodeAscEmployeIdAsc(tenantId(), chantierId)
                 .stream()
-                .map(this::toDto)
+                .map(entity -> toDto(entity, actorGrade))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> assignableRoles(String chantierId) {
+        requireChantier(chantierId);
+        return policy.assignableRoles(chantierId);
     }
 
     @Transactional(readOnly = true)
@@ -50,7 +60,7 @@ public class ChantierAffectationService {
         return repository
                 .findByTenantIdAndEmployeIdAndIsActiveTrueOrderByChantierIdAsc(tenantId(), employeId)
                 .stream()
-                .map(this::toDto)
+                .map(this::toDtoWithoutActor)
                 .toList();
     }
 
@@ -59,6 +69,7 @@ public class ChantierAffectationService {
         requireChantier(chantierId);
         Employe employe = requireEmploye(request.getEmployeId());
         String roleCode = requireAffectableRole(request.getRoleCode());
+        policy.assertCanMutate(chantierId, roleCode);
         LocalDate dateDebut = request.getDateDebut() != null ? request.getDateDebut() : LocalDate.now();
         LocalDate dateFin = request.getDateFin();
         if (dateFin != null && dateFin.isBefore(dateDebut)) {
@@ -85,16 +96,19 @@ public class ChantierAffectationService {
                 .dateFin(dateFin)
                 .isActive(Boolean.TRUE)
                 .build();
-        return toDto(repository.save(entity), employe);
+        return toDto(repository.save(entity), employe, policy.actorGradeOn(chantierId));
     }
 
     @Transactional
     public ChantierAffectationDto update(String chantierId, String affectationId, ChantierAffectationUpdateDto request) {
         requireChantier(chantierId);
         ChantierAffectation entity = requireAffectation(chantierId, affectationId);
+        policy.assertCanMutate(chantierId, entity.getRoleCode());
 
         if (StringUtils.hasText(request.getRoleCode())) {
-            entity.setRoleCode(requireAffectableRole(request.getRoleCode()));
+            String nextRole = requireAffectableRole(request.getRoleCode());
+            policy.assertCanMutate(chantierId, nextRole);
+            entity.setRoleCode(nextRole);
         }
         if (request.getDateDebut() != null) {
             entity.setDateDebut(request.getDateDebut());
@@ -115,13 +129,14 @@ public class ChantierAffectationService {
         if (entity.getDateFin() != null && entity.getDateFin().isBefore(entity.getDateDebut())) {
             throw new IllegalArgumentException("dateFin must be on or after dateDebut");
         }
-        return toDto(repository.save(entity));
+        return toDto(repository.save(entity), policy.actorGradeOn(chantierId));
     }
 
     @Transactional
     public void deactivate(String chantierId, String affectationId) {
         requireChantier(chantierId);
         ChantierAffectation entity = requireAffectation(chantierId, affectationId);
+        policy.assertCanMutate(chantierId, entity.getRoleCode());
         entity.setIsActive(Boolean.FALSE);
         if (entity.getDateFin() == null) {
             entity.setDateFin(LocalDate.now());
@@ -180,14 +195,26 @@ public class ChantierAffectationService {
         return normalized;
     }
 
-    private ChantierAffectationDto toDto(ChantierAffectation entity) {
-        Employe employe = employeRepository
-                .findByIdAndTenantId(entity.getEmployeId(), tenantId())
-                .orElse(null);
-        return toDto(entity, employe);
+    private ChantierAffectationDto toDtoWithoutActor(ChantierAffectation entity) {
+        return toDto(entity, resolveEmploye(entity), false);
     }
 
-    private ChantierAffectationDto toDto(ChantierAffectation entity, Employe employe) {
+    private ChantierAffectationDto toDto(ChantierAffectation entity, int actorGrade) {
+        return toDto(
+                entity,
+                resolveEmploye(entity),
+                ChantierRoleCodes.canCommand(actorGrade, entity.getRoleCode()));
+    }
+
+    private ChantierAffectationDto toDto(ChantierAffectation entity, Employe employe, int actorGrade) {
+        return toDto(entity, employe, ChantierRoleCodes.canCommand(actorGrade, entity.getRoleCode()));
+    }
+
+    private Employe resolveEmploye(ChantierAffectation entity) {
+        return employeRepository.findByIdAndTenantId(entity.getEmployeId(), tenantId()).orElse(null);
+    }
+
+    private ChantierAffectationDto toDto(ChantierAffectation entity, Employe employe, boolean canMutate) {
         String nom = null;
         String matricule = null;
         UUID userId = null;
@@ -208,6 +235,7 @@ public class ChantierAffectationService {
                 .dateDebut(entity.getDateDebut())
                 .dateFin(entity.getDateFin())
                 .isActive(entity.getIsActive())
+                .canMutate(canMutate)
                 .build();
     }
 

@@ -380,6 +380,8 @@
     "finance.retenueSource": "Retenue source (marchés publics)",
     "rh": "Ressources Humaines",
     "rh.employes": "Employés",
+    "rh.postes": "Postes",
+    "rh.departements": "Départements",
     "rh.pointage": "Pointage chantiers",
     "rh.planning": "Planning équipes",
     "rh.conges": "Congés & Absences",

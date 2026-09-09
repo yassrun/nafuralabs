@@ -16,7 +16,7 @@ export function buildEmployeSections(t: TranslateService): DetailSectionConfig[]
       id: 'contrat',
       title: tr('rh.employe.sections.contrat'),
       icon: 'file-text',
-      fields: ['matricule', 'typeContrat', 'categorie', 'poste', 'departement', 'dateEmbauche', 'dateFinContrat', 'statut'],
+      fields: ['matricule', 'typeContrat', 'categorie', 'posteId', 'departementId', 'dateEmbauche', 'dateFinContrat', 'statut'],
       columns: 3,
     },
     {

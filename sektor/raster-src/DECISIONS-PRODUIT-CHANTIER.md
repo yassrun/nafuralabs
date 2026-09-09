@@ -5,7 +5,7 @@
 >
 > Comment continuer : ajouter une entrée datée sous **Gelé** ou **Ouvert**. Une fois gelé, on ne rejoue pas le débat dans le chat — on amende ce fichier.
 
-Dernière passe : 23/08/2026 (**simplicité — trois paliers** · arbre du chantier vendu / interne · planning = couche d'activités · WBS libre + zone · capacité vs engagement · avancement en quantité · déclencheur GAGNE · marché à la notification · budget sur l'arbre · réel imputé à l'activité · frontière RH · frontière ST · baseline · les cinq derniers points).
+Dernière passe : 08/09/2026 (**planning unifié L1** — formes / natures / durée ouvrée / calendrier chantier / erreurs distinctes). Passe 23/08 : simplicité trois paliers · arbre · planning = couche d'activités · WBS · capacité vs engagement · avancement · GAGNE · marché · budget · réel · RH · ST · baseline.
 
 ---
 
@@ -126,7 +126,7 @@ Gratuit à construire, mais on ne peut plus planifier par zone / niveau / phase 
 
 ### Aujourd'hui dans le code (constat, pas une spec)
 
-`sources/web/app/chantiers/planning/` existe **sans aucun backend** — pas d'entité, pas de controller, rien côté `chantiers/`. Le planning est à écrire, pas à reprendre.
+Sous-lot `planning-activites` (août 2026) : `ActiviteChantier` + API `/api/v1/chantiers/{id}/activites` + Gantt `/chantiers/planning` — AC-1..AC-19 livrés. Le constat 23/08 « web sans backend » est caduc. L1 `planning-unifie` **étend** ce modèle (formes, natures, durée ouvrée, calendrier), il ne le recrée pas.
 
 ---
 
@@ -407,6 +407,23 @@ Un ouvrier qui tourne sur trois chantiers dans le mois n'aurait plus de feuille 
 
 ---
 
+## Gelé (08/09/2026) — Autorité d’affectation : un grade, pas une matrice IAM
+
+Nommer / remplacer / retirer un membre d’équipe est un **commandement de chantier**, pas un droit IAM plat.
+
+- **Porte IAM** : `chantiers.update` (forme seedée `chantiers.chantiers.chantier.update`).
+- **Règle domaine** : `grade(acteur) > grade(cible)` sur **ce** chantier. Cascade automatique.
+- **Périmètre** : OWNER / DG = tous chantiers. Les autres = affectations actives sur ce chantier. Le rôle IAM DT/conducteur/chef **sans** nomination n’autorise rien ici.
+- **Chef d’équipe** : ne commande aucune affectation RH (répartition des tâches = autre surface).
+
+Échelle cible : chef d’équipe/pointeur (0) < chef de chantier/magasinier/ingénieur (1) < conducteur (2) < DT (3) < Direction (4).
+
+`HIERARCHY_ASC` reste le repli d’**approbateur** absent, pas cette règle.
+
+Sous-lot : [`lots/chantiers/equipe-autorite/00-PLAN.md`](lots/chantiers/equipe-autorite/00-PLAN.md).
+
+---
+
 ## Gelé (28/08/2026) — Affectation employé = combobox, pas picker
 
 L’onglet Équipe et l’étape create ne reçoivent **pas** un overlay « employee picker » (le picker reste l’article). Champ employé = combobox `lookupKey: employes` (recherche serveur ≥ 2 car., œil fiche RH). Rôle chantier = enum natif.
@@ -537,11 +554,33 @@ Le **journal de chantier** garde son rôle de fait quotidien (météo, effectif,
 
 ---
 
+## Gelé (08/09/2026) — Planning unifié L1 (fondations palier 2)
+
+Atelier [`specifications/planning-unifie`](../specifications/planning-unifie/SPECIFICATION.md). Sous-lot [`lots/chantiers/planning-unifie/00-PLAN.md`](lots/chantiers/planning-unifie/00-PLAN.md).
+
+**Le palier 1 prime.** Aucun champ L1 n’est obligatoire pour facturer, attacher ou situer. Un calendrier n’est créé qu’à la première écriture planning, jamais à la conversion.
+
+| Règle | Contenu |
+|---|---|
+| Un planning, des vues | D01 — une vue sélectionne et présente ; elle ne crée pas un autre planning à ressaisir. L1 = vue Exécution existante + vues **sauvegardées** (filtres/colonnes). Les vues Ma semaine / Client / Financier / Ressources = L3–L5. |
+| Formes | D06 — `PHASE` / `ACTIVITE` / `JALON` sur la **couche d’activités**, pas sur l’arbre. Un parent déjà productif n’est **pas** converti automatiquement en phase. Jalon : durée 0, même date début/fin. Phase : dates dérivées des enfants. |
+| Natures | Classification configurable, pas une permission. Valeurs désactivables sans effacer l’historique. |
+| Durée | Minutes ouvrées stockées ; affichage heures/jours avec convention visible (ex. 1 j = 8 h du calendrier). Lignes migrées : durée « à qualifier » si non déductible — pas de recalcul de masse à l’ouverture. |
+| Calendrier | D05 — un calendrier **par chantier** (fuseau IANA, semaine type, exceptions, versions). A04 **provisoire** : pas de calendrier par activité en L1. A05 **provisoire** : minutes réelles pour le calcul, affichage local. Modifier le calendrier ne réécrit pas le réalisé. |
+| Droits | Capacités séparées (lire / éditer la structure / administrer le calendrier / gérer les vues). IAM ouvre la porte ; ADMIN technique n’est pas une signature métier. A01–A03 (semaine, report, publication client) restent ouverts. |
+| Erreurs | Panne ≠ 403 ≠ vide ≠ filtres sans résultat. Une erreur API n’affiche pas « 0 activité » (AC21). |
+| Migration | IDs, rattachements, dates **visibles** inchangés (AC25). Calendrier historique explicite — ne pas présumer lundi–vendredi. |
+
+Hors gel L1 : simulation, chemin critique, décalages de dépendance, Ma semaine, publication client, finance, IA, nivellement, XER/MSP. A01–A09 hors A04/A05 provisoires restent ouverts.
+
+---
+
 ## Ouvert (prochain tour)
 
 - **ST au palier 1.** Tranché **A** (27/08) : contrat sur le nœud, sans activité. Voir gel du même jour.
-- Le grain exact des activités livrées au palier 2 (durée minimale, jalons, liens FD/DD seuls ou les quatre types).
-- La reprise ou non de l'existant `chantiers/planning/` côté web (aucun backend derrière).
+- A01–A03, A06–A09 (semaine, publication, pondération, trésorerie, surcharge) — atelier §19, pas L1.
+- L2 exécution fiable : simulation, marges, chemin critique, décalages.
+- La reprise de `chantiers/planning/` : **faite** dans `planning-activites` (écran branché sur le backend activités).
 - HSE et réception définitive / réserves — pas Al Qods mois 1. La **réception provisoire** (livraison) est dans `vie-de-chantier` AC-15.
 - Documents palier 1 (OS, plan, PV, BL) : rentrés dans `vie-de-chantier`, plus « hors lot » pour ces types.
 

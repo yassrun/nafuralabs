@@ -5,7 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
+import { MatDialog } from '@angular/material/dialog';
 import {
+  BadgeComponent,
   ButtonComponent,
   ConfigDrivenDetailPage,
   ConfigDrivenDetailPageImports,
@@ -28,6 +30,7 @@ import {
   DevisConsultationImportService,
 } from '@app/socle/shared/smart-import/handlers/devis-consultation-import.handler';
 
+import { openCatalogItemPicker } from '@app/etudes/dossiers/components/catalog-item-pick-dialog/catalog-item-pick-dialog.component';
 import { toPanierLigne, type ConsultationPanierLigne } from '../consultation-panier-ligne';
 import { buildConsultationDetailConfig } from '../config';
 import {
@@ -62,6 +65,7 @@ interface DestDraftRow {
     FieldTemplateDirective,
     SmartImportTriggerComponent,
     ButtonComponent,
+    BadgeComponent,
     NfSelectComponent,
   ],
   templateUrl: './consultation-detail.page.html',
@@ -76,6 +80,7 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
   private readonly importer = inject(DevisConsultationImportService);
   private readonly translate = inject(TranslateService);
   private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
+  private readonly dialog = inject(MatDialog);
 
   readonly facade = createDetailFacadeFromCrud<ConsultationAchat>({
     crud: this.crud,
@@ -100,6 +105,8 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
   readonly draftSelectedContactIds = signal<string[]>([]);
   readonly destContactsReady = signal(false);
   readonly contactsEmail = signal<PartnerContactRow[]>([]);
+  readonly panierErreur = signal<string | undefined>(undefined);
+  readonly panierSaving = signal(false);
   readonly destErreur = signal<string | undefined>(undefined);
   readonly destSaving = signal(false);
   readonly envoyerErreur = signal<string | undefined>(undefined);
@@ -141,6 +148,80 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
 
   panierFige(): boolean {
     return this.envois().length > 0;
+  }
+
+  statutVariant(): 'success' | 'warning' | 'info' | 'default' {
+    const code = (this.item()?.statut || '').toUpperCase();
+    if (code === 'COMPLETE') return 'success';
+    if (code === 'PARTIELLE') return 'warning';
+    if (code === 'OUVERTE') return 'info';
+    return 'default';
+  }
+
+  avancementLabel(): string {
+    const item = this.item();
+    const n = (item?.destinataires ?? []).length;
+    const k = item?.devisRecus ?? 0;
+    return this.translate.instant('achats.consultation.statut.avancement', { k, n });
+  }
+
+  async addArticle(): Promise<void> {
+    if (this.panierFige() || this.panierSaving()) return;
+    this.panierErreur.set(undefined);
+    const result = await openCatalogItemPicker(this.dialog, {
+      context: 'lookup',
+      uniteOptions: [],
+    });
+    if (!result?.itemId) return;
+    const cleStable = (result.cleStable || result.code || '').trim();
+    if (!cleStable) {
+      this.panierErreur.set(this.translate.instant('achats.consultation.panier.sansIdentite'));
+      return;
+    }
+    if (this.panierLignes().some((l) => l.cleStable === cleStable)) {
+      this.panierErreur.set(this.translate.instant('achats.consultation.panier.doublon'));
+      return;
+    }
+    await this.persistPanier(
+      () => this.api.addToPanier(this.item()!.id, { clesStables: [cleStable] }),
+    );
+  }
+
+  async removeArticle(cleStable: string): Promise<void> {
+    if (this.panierFige() || this.panierSaving()) return;
+    const remaining = this.panierLignes()
+      .map((l) => l.cleStable)
+      .filter((cle) => cle !== cleStable);
+    if (!remaining.length) {
+      this.panierErreur.set(this.translate.instant('achats.consultation.panier.videRefuse'));
+      return;
+    }
+    await this.persistPanier(
+      () => this.api.replacePanier(this.item()!.id, { clesStables: remaining }),
+    );
+  }
+
+  private async persistPanier(save: () => Promise<ConsultationAchat>): Promise<void> {
+    const current = this.item();
+    if (!current) return;
+    this.panierSaving.set(true);
+    this.panierErreur.set(undefined);
+    try {
+      const saved = await save();
+      this.applyItem(this.crud.enrich(saved));
+      await this.resolvePanier(saved.clesStables ?? []);
+    } catch (err) {
+      const code = apiCode(err);
+      if (code === 'consultation.panier.fige') {
+        this.panierErreur.set(this.translate.instant('achats.consultation.panier.fige'));
+      } else if (code === 'consultation.panier.vide') {
+        this.panierErreur.set(this.translate.instant('achats.consultation.panier.videRefuse'));
+      } else {
+        this.panierErreur.set(this.translate.instant('achats.consultation.panier.saveError'));
+      }
+    } finally {
+      this.panierSaving.set(false);
+    }
   }
 
   readonly destDirty = computed(() => {

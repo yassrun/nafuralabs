@@ -12,6 +12,8 @@ export const ERP_LOOKUP_CREATE_ROUTES: Readonly<Record<string, string>> = {
   items: '/inventory/catalogue/articles/new',
   employes: '/rh/employes/new',
   employees: '/rh/employes/new',
+  rhPostes: '/rh/postes/new',
+  rhDepartements: '/rh/departements/new',
   currencies: '/finance/configuration/currencies/new',
   deviseCode: '/finance/devises/new',
   unitOfMeasures: '/inventory/units-of-measure/new',
