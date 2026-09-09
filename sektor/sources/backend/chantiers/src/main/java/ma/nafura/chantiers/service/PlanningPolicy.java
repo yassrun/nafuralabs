@@ -13,7 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
  * Planning domain policy (SEKTOR-327). IAM ({@code chantiers.read} /
  * {@code create} / {@code update}) opens the door; command grade + active
  * affectation decide the métier capabilities. Technical ADMIN is not a métier
- * signature. A01–A03 (week, report, publication) are out of L1.
+ * signature. Week/report preparation and client publication have separate métier gates.
  */
 @Service
 public class PlanningPolicy {
@@ -58,6 +58,11 @@ public class PlanningPolicy {
 
     public void assertCanPrepareWeek(String chantierId) { refuseUnless(canPrepareWeek(chantierId)); }
     public void assertCanValidateWeek(String chantierId) { refuseUnless(canValidateWeek(chantierId)); }
+
+    public boolean canPublishClient(String chantierId) {
+        return affectationPolicy.actorGradeOn(chantierId)>=ChantierRoleCodes.COMMAND_GRADE_DIRECTEUR;
+    }
+    public void assertCanPublishClient(String chantierId) { refuseUnless(canPublishClient(chantierId)); }
 
     static PlanningCapacitesDto fromGradeAndRoles(int grade, List<String> roles, String iamRole) {
         if (grade >= ChantierRoleCodes.COMMAND_GRADE_DIRECTION) {

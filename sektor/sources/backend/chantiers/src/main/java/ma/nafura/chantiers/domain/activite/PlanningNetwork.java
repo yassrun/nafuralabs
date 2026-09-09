@@ -9,15 +9,18 @@ import ma.nafura.chantiers.domain.calendrier.CalendrierOuvreCalculator;
  * Existing starts are release dates. This model deliberately does not infer intraday sequencing. */
 public final class PlanningNetwork {
     private static final int HORIZON = 366 * 3;
-    public record Task(String id, String label, LocalDate start, int minutes, boolean milestone, CalendrierOuvreCalculator calendar) {}
+    public record Task(String id, String label, LocalDate start, int minutes, boolean milestone, CalendrierOuvreCalculator calendar,
+                       LocalDate actualStart, LocalDate fixedFinish) {
+        public Task(String id,String label,LocalDate start,int minutes,boolean milestone,CalendrierOuvreCalculator calendar){this(id,label,start,minutes,milestone,calendar,null,null);}
+    }
     public record Link(String predecessor, String successor, String type) {}
     public record Row(String id, String label, LocalDate start, LocalDate finish, LocalDate latestStart,
-                      long floatDays, boolean critical) {}
+                      long floatDays, boolean critical, LocalDate workStart) {}
     public record Result(List<Row> rows, LocalDate finish) {}
 
     public static Result calculate(List<Task> tasks, List<Link> links) {
         Map<String,Task> byId = new LinkedHashMap<>();
-        tasks.forEach(t -> { if (t.start() == null || (!t.milestone() && t.minutes() <= 0))
+        tasks.forEach(t -> { if (t.start() == null || (t.fixedFinish()==null && !t.milestone() && t.minutes() <= 0))
             throw new IllegalArgumentException("Chaque activité doit avoir un début et une durée ouvrée positive.");
             if (byId.put(t.id(), t) != null) throw new IllegalArgumentException("Activité dupliquée."); });
         if (tasks.isEmpty()) return new Result(List.of(), null);
@@ -39,9 +42,18 @@ public final class PlanningNetwork {
         if(order.size()!=tasks.size()) throw new IllegalArgumentException("Cycle détecté dans les liaisons.");
         Map<String,LocalDate> starts=new HashMap<>(), ends=new HashMap<>(), latest=new HashMap<>();
         for(String id:order) {
-            Task t=byId.get(id); LocalDate start=workingStart(t,t.start(),1);
+            Task t=byId.get(id); LocalDate start=t.fixedFinish()!=null?t.start():workingStart(t,t.start(),1);
             for(Link l:incoming.get(id)) {
-                LocalDate bound = l.type().startsWith("F") ? ends.get(l.predecessor()) : starts.get(l.predecessor());
+                Task predecessor=byId.get(l.predecessor());
+                LocalDate bound = l.type().startsWith("F") ? ends.get(l.predecessor()) : logicalStart(predecessor,starts.get(l.predecessor()));
+                if(t.actualStart()!=null && l.type().endsWith("D")) {
+                    if(bound.isAfter(t.actualStart()))throw new IllegalArgumentException("La liaison déplacerait le début déjà constaté de « "+t.label()+" ».");
+                    continue;
+                }
+                if(t.fixedFinish()!=null) {
+                    if(bound.isAfter(end(t,start)))throw new IllegalArgumentException("La liaison déplacerait une fin conservée de « "+t.label()+" ». Précisez son reste à faire.");
+                    continue;
+                }
                 if(l.type().endsWith("D")) start=max(start,workingStart(t,bound,1));
                 else if(end(t,start).isBefore(bound)) {
                     LocalDate lo=start, hi=workingStart(t,bound,1);
@@ -56,10 +68,12 @@ public final class PlanningNetwork {
         List<String> reverse=new ArrayList<>(order); Collections.reverse(reverse);
         for(String id:reverse) {
             Task t=byId.get(id); LocalDate upper=projectEnd;
+            if(t.fixedFinish()!=null){latest.put(id,starts.get(id));continue;}
             LocalDate endLimit=projectEnd;
             for(Link l:outgoing.get(id)) {
                 Task successor=byId.get(l.successor());
-                LocalDate bound=l.type().endsWith("D") ? latest.get(l.successor()) : end(successor,latest.get(l.successor()));
+                if(t.actualStart()!=null && l.type().startsWith("D"))continue;
+                LocalDate bound=l.type().endsWith("D") ? logicalStart(successor,latest.get(l.successor())) : end(successor,latest.get(l.successor()));
                 if(l.type().startsWith("D")) upper=min(upper,bound); else endLimit=min(endLimit,bound);
             }
             LocalDate lo=starts.get(id), hi=upper;
@@ -71,11 +85,12 @@ public final class PlanningNetwork {
         for(Task t:tasks) { LocalDate start=starts.get(t.id()), last=latest.get(t.id());
             long slack=0;
             for(LocalDate d=start;d.isBefore(last);d=d.plusDays(1)) if(t.milestone() || t.calendar().minutesOuvrees(d)>0) slack++;
-            rows.add(new Row(t.id(),t.label(),start,t.milestone()?start:ends.get(t.id()).minusDays(1),last,slack,slack==0));
+            rows.add(new Row(t.id(),t.label(),logicalStart(t,start),t.milestone()?start:ends.get(t.id()).minusDays(1),last,slack,t.fixedFinish()==null&&slack==0,start));
         }
         return new Result(List.copyOf(rows), rows.stream().map(Row::finish).max(LocalDate::compareTo).orElse(null));
     }
-    private static LocalDate end(Task t,LocalDate start) { return t.milestone()?start:t.calendar().deriveInclusiveFin(start,t.minutes()).plusDays(1); }
+    private static LocalDate logicalStart(Task t,LocalDate workStart){return t.actualStart()==null?workStart:t.actualStart();}
+    private static LocalDate end(Task t,LocalDate start) { return t.fixedFinish()!=null?(t.milestone()?t.fixedFinish():t.fixedFinish().plusDays(1)):t.milestone()?start:t.calendar().deriveInclusiveFin(start,t.minutes()).plusDays(1); }
     private static LocalDate workingStart(Task t,LocalDate date,int direction) {
         if(t.milestone()) return date;
         for(int i=0;i<HORIZON;i++,date=date.plusDays(direction)) if(t.calendar().minutesOuvrees(date)>0) return date;

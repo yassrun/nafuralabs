@@ -1,7 +1,8 @@
-import { Component, computed, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PlanningWeekComponent } from './planning-week.component';
 import { PlanningSuppliesComponent } from './planning-supplies.component';
+import { PlanningPublicationsComponent } from './planning-publications.component';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ButtonComponent } from '@platform/lib/anatomy/components';
@@ -17,7 +18,7 @@ import { marketPlanning } from '../services/planning-market';
 
 @Component({
   selector: 'app-planning-business-views', standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ButtonComponent, PlanningWeekComponent, PlanningSuppliesComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ButtonComponent, PlanningWeekComponent, PlanningSuppliesComponent, PlanningPublicationsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (!chantierId()) { <p>Sélectionnez un chantier pour afficher cette vue.</p> }
@@ -27,6 +28,7 @@ import { marketPlanning } from '../services/planning-market';
       @if (error()) { <p role="alert">{{ error() }}</p><nf-button variant="secondary" (clicked)="reload()">Réessayer</nf-button> }
       @if (view() === 'CLIENT') {
         <h2>Planning client</h2><p>Prévision courante issue du planning. Cette vue n’est pas une version publiée ni un accord du client.</p>
+        <app-planning-publications [chantierId]="chantierId()!" [technical]="includeTechnical()" [execution]="includeExecution()" />
         <h3>Lots et ouvrages vendus</h3>
         <p>Dates issues des activités rattachées. L’avancement vient des ouvrages ; il ne s’agit pas d’une moyenne des activités. Un ouvrage sans activité reste visible.</p>
         <div class="controls">
@@ -142,8 +144,14 @@ export class PlanningBusinessViewsComponent {
   readonly financialMilestones=computed(()=>this.allRows().filter(a=>a.natureCode==='JALON_FINANCIER'));
   readonly employees=computed(()=>[...new Map(this.assignments().map(a=>[a.employeId,{id:a.employeId,name:a.employeNom || a.employeMatricule || a.employeId}])).values()]);
   readonly days=computed(()=>Array.from({length:7},(_,i)=> { const d=new Date(this.weekStart()+'T12:00:00'); d.setDate(d.getDate()+i); return toIsoDate(d); }));
-  readonly weekActivities=computed(()=>this.activityRows().filter(a=>a.dateDebut<=this.days()[6] && a.dateFin>=this.weekStart()));
-  constructor() { effect(()=>{this.chantierId();this.view();this.weekStart();void this.reload();}); }
+  readonly weekActivities=computed(()=>this.activityRows().filter(a=>this.days().some(day=>
+    a.dateDebut<=day && a.dateFin>=day && !a.planningRemainder?.pauses.some(p=>p.from<=day && p.through>=day))));
+  constructor() { effect(()=>{
+    this.chantierId();this.weekStart();
+    // A validated report changes the working days without changing the selected week.
+    if(this.view()==='RESSOURCES') this.facade.activites();
+    untracked(()=>void this.reload());
+  }); }
   private monday(value:string):string {const d=new Date(value+'T12:00:00');d.setDate(d.getDate()-(d.getDay()+6)%7);return toIsoDate(d);}
   setWeek(value:string) { if (/^\d{4}-\d{2}-\d{2}$/.test(value)) this.weekStart.set(this.monday(value)); }
   loadFor(id:string,date:string) {return this.loads().find(r=>r.employeId===id && r.date===date);}
@@ -179,7 +187,7 @@ export class PlanningBusinessViewsComponent {
     const id=this.chantierId(); if(!id || !this.activityId || !this.assignmentId || this.saving())return;
     if (!Number.isFinite(Number(this.hours)) || Number(this.hours)<0 || Number(this.hours)>24) {this.error.set('Saisissez entre 0 et 24 heures par jour.');return;}
     this.saving.set(true);this.error.set('');
-    try {await this.api.reserveResource(id,this.activityId,this.assignmentId,Math.round(Number(this.hours)*60));await this.facade.loadAll();await this.reload();}
+    try {await this.api.reserveResource(id,this.activityId,this.assignmentId,Math.round(Number(this.hours)*60));await this.facade.loadAll();}
     catch(error:any) {this.error.set(error?.error?.message || 'Réservation refusée. Vérifiez les dates de l’affectation et vos droits.');}
     finally {this.saving.set(false);}
   }

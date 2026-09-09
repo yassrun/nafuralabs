@@ -20,7 +20,6 @@ import {
   ListingControlsComponent,
   type ListingControlsColumn,
 } from '../../molecules/listing-controls';
-import { FilterResetComponent } from '../../molecules/filter-reset/filter-reset.component';
 import { ListingActionsComponent } from '../../molecules/listing-actions';
 import type { ColumnConfig } from '../../../types';
 import { matchesFilters, matchesSearch } from './listing-query.util';
@@ -36,7 +35,6 @@ import {
     CommonModule,
     TranslateModule,
     ListingControlsComponent,
-    FilterResetComponent,
     ListingActionsComponent,
     DataTableComponent,
     PaginationComponent,
@@ -59,9 +57,9 @@ import {
           (selectionToggleClick)="toggleSelectionOn.update((v) => !v)"
           (columnsChange)="onColumnsChange($event)"
           (filterChange)="onFilterChange($event)"
+          (filterReset)="onResetFilters()"
           (searchChange)="onSearchChange($event)"
         />
-        <nf-filter-reset [active]="filterActive()" (reset)="onResetFilters()" />
         @if (hasActions()) {
           <nf-listing-actions
             [actions]="config().actions ?? []"
@@ -212,6 +210,7 @@ export class ListingFlatComponent<T = unknown> {
   readonly hasActions = computed(() => {
     const actions = this.config().actions ?? [];
     return (
+      !!this.config().projectedActions ||
       actions.some((a) => a.visible !== false) ||
       this.visibleSelectionActions().length > 0
     );

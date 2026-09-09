@@ -28,7 +28,8 @@ public class PlanningWeekService {
         this.weeks=weeks;this.activities=activities;this.assignments=assignments;this.calendars=calendars;this.policy=policy;this.json=json;this.chantiers=chantiers;this.resources=resources;
     }
     public record Row(String id,String label,LocalDate start,LocalDate finish,Integer minutes,
-                      Object calendar,List<PlanningAllocation> allocations,List<PlanningNeed> needs) {}
+                      Object calendar,List<PlanningAllocation> allocations,List<PlanningNeed> needs,
+                      @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL) PlanningRemainder remainder) {}
     public record Snapshot(List<Row> activities,String calendar,List<String> assignmentCoverage,List<String> conflicts) {}
     public record View(Long version,int revision,String status,String note,boolean changed,String token,
                        Snapshot current,Snapshot submitted,List<PlanningWeek.Event> history,boolean canPrepare,boolean canDecide,boolean ownPreparation) {}
@@ -104,20 +105,21 @@ public class PlanningWeekService {
         var tenant=TenantContext.getTenantId();var finish=start.plusDays(6);
         var all=activities.findByTenantIdAndChantierIdOrderByOrdreAscLibelleAsc(tenant,chantierId).stream()
                 .filter(a->a.getForme()==ActiviteForme.ACTIVITE && !a.getDateDebut().isAfter(finish) && !a.getDateFin().isBefore(start))
+                .filter(a->a.getPlanningRemainder()==null || java.util.stream.IntStream.range(0,7).anyMatch(i->a.plannedOn(start.plusDays(i))))
                 .sorted(Comparator.comparing(ActiviteChantier::getId)).toList();
         List<Row> rows=new ArrayList<>();Set<String> coverage=new TreeSet<>();Set<String> conflicts=new TreeSet<>();
         for(var a:all) {
             var allocations=a.getPlanningAllocations()==null?List.<PlanningAllocation>of():a.getPlanningAllocations();
             rows.add(new Row(a.getId(),a.getLibelle(),a.getDateDebut(),a.getDateFin(),a.getDureeMinutesOuvrees(),a.getCalendrierSpecifique(),
                     allocations.stream().sorted(Comparator.comparing(PlanningAllocation::affectationId)).toList(),
-                    a.getPlanningNeeds()==null?List.of():a.getPlanningNeeds().stream().sorted(Comparator.comparing(PlanningNeed::id)).toList()));
+                    a.getPlanningNeeds()==null?List.of():a.getPlanningNeeds().stream().sorted(Comparator.comparing(PlanningNeed::id)).toList(),a.getPlanningRemainder()));
             for(var allocation:allocations) {
                 var assignment=assignments.findByIdAndTenantId(allocation.affectationId(),tenant).filter(x->chantierId.equals(x.getChantierId()));
                 coverage.add(assignment.map(x->x.getId()+":"+x.getEmployeId()+":"+x.getDateDebut()+":"+x.getDateFin()+":"+x.getIsActive()).orElse(allocation.affectationId()+":absente"));
                 var calculator=a.getCalendrierSpecifique()==null?calendars.calculatorFor(chantierId):a.getCalendrierSpecifique().calculator();
                 for(var day=start;!day.isAfter(finish);day=day.plusDays(1)) {
                     LocalDate d=day;
-                    if(!d.isBefore(a.getDateDebut()) && !d.isAfter(a.getDateFin()) && calculator.minutesOuvrees(d)>0 && assignment.filter(x->x.isEffectiveOn(d)).isEmpty())
+                    if(a.plannedOn(d) && calculator.minutesOuvrees(d)>0 && assignment.filter(x->x.isEffectiveOn(d)).isEmpty())
                         conflicts.add(a.getLibelle()+" : affectation indisponible le "+d);
                 }
             }

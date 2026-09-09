@@ -4,9 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '@platform/lib/anatomy/components';
 import { ActiviteApiService } from '../../services/activite-api.service';
 import { PlanningFacade } from '../services/planning.facade';
+import { PlanningReportsComponent } from './planning-reports.component';
 import type { ChantierAffectation } from '../../services/chantier-affectation-api.service';
 
-export interface WeekSnapshot { activities:{id:string;label:string;start:string;finish:string;needs:any[];allocations:any[]}[]; conflicts:string[]; }
+export interface WeekSnapshot { activities:{id:string;label:string;start:string;finish:string;needs:any[];allocations:any[];remainder?:{resumeStart:string;statusDate:string;minutes:number}}[]; conflicts:string[]; }
 export interface PlanningWeekView {
   version:number|null;revision:number;status:string;note:string;changed:boolean;token:string;
   current:WeekSnapshot;submitted:WeekSnapshot|null;
@@ -14,7 +15,7 @@ export interface PlanningWeekView {
   canPrepare:boolean;canDecide:boolean;ownPreparation:boolean;
 }
 @Component({
-  selector:'app-planning-week',standalone:true,imports:[CommonModule,FormsModule,ButtonComponent],
+  selector:'app-planning-week',standalone:true,imports:[CommonModule,FormsModule,ButtonComponent,PlanningReportsComponent],
   template:`
     <section aria-label="Validation de la semaine">
       <div class="title"><h3>Semaine du {{ start() | date:'dd/MM/yyyy' }}</h3>
@@ -45,6 +46,7 @@ export interface PlanningWeekView {
         }
         @if(w.submitted){<details><summary>Contenu enregistré de la révision {{ w.revision }}</summary>
           <ul>@for(a of w.submitted.activities;track a.id){<li>{{ a.label }} · {{ a.start | date:'dd/MM' }} → {{ a.finish | date:'dd/MM' }}
+            @if(a.remainder){<p>Reprise le {{ a.remainder.resumeStart|date:'dd/MM' }} · {{ a.remainder.minutes/60 }} h restantes, arrêté au {{ a.remainder.statusDate|date:'dd/MM' }}.</p>}
             <ul>@for(r of a.allocations;track r.affectationId){<li>{{ assignmentName(r.affectationId) }} · {{ r.minutesParJour/60 }} h/j</li>}
             @for(n of a.needs;track n.id){<li>{{ n.label }} · {{ n.quantity }} {{ n.unit }} · {{ n.daysBeforeStart }} j avant le début · délai {{ n.leadDays }} j</li>}</ul>
           </li>}</ul>
@@ -53,6 +55,7 @@ export interface PlanningWeekView {
           @for(event of w.history;track $index){<article><strong>R{{ event.revision }} · {{ actionLabel(event.action) }}</strong> · {{ event.at | date:'dd/MM/yyyy HH:mm' }}
             <p>{{ event.note }}</p><details><summary>Contenu et traçabilité</summary><p>Identifiant de l’auteur : {{ event.actor }}</p>
               <ul>@for(a of historical(event.snapshot);track a.id){<li>{{ a.label }} · {{ a.start | date:'dd/MM' }} → {{ a.finish | date:'dd/MM' }}
+                @if(a.remainder){<p>Reprise le {{ a.remainder.resumeStart|date:'dd/MM' }} · {{ a.remainder.minutes/60 }} h restantes, arrêté au {{ a.remainder.statusDate|date:'dd/MM' }}.</p>}
                 <ul>@for(r of a.allocations;track r.affectationId){<li>{{ assignmentName(r.affectationId) }} · {{ r.minutesParJour/60 }} h/j</li>}
                 @for(n of a.needs;track n.id){<li>{{ n.label }} · {{ n.quantity }} {{ n.unit }} · {{ n.daysBeforeStart }} j avant le début · délai {{ n.leadDays }} j</li>}</ul>
               </li>}</ul>
@@ -60,6 +63,7 @@ export interface PlanningWeekView {
         </details>}
       }
     </section>
+    <app-planning-reports [chantierId]="chantierId()" [start]="start()" [canPrepare]="data()?.canPrepare ?? false" />
   `,
   styles:[`section{margin:1rem 0;padding:1rem;border:1px solid var(--nf-color-border);border-radius:.65rem}.title,.actions{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}h3{margin:0;font-size:1rem}.title span{font-size:.85rem}p,li{font-size:.85rem}label{display:grid;gap:.4rem;font-size:.85rem}textarea{font:inherit;padding:.6rem;border:1px solid var(--nf-color-border);border-radius:.4rem}.actions,details{margin-top:.75rem}summary{cursor:pointer}article{padding:.6rem;border-bottom:1px solid var(--nf-color-border)}[role=alert]{color:#b42318}`]
 })

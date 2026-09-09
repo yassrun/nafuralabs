@@ -60,7 +60,7 @@ public class PlanningResourceService {
             LocalDate date=start.plusDays(i); int total=0,other=0; long capacity=base.minutesOuvrees(date); List<String> ids=new ArrayList<>();
             if(assignments.stream().noneMatch(a->employee.equals(a.getEmployeId()) && a.isEffectiveOn(date))) continue;
             for(var activity:all) {
-                if(activity.getForme()!=ActiviteForme.ACTIVITE || activity.getPlanningAllocations()==null || date.isBefore(activity.getDateDebut()) || date.isAfter(activity.getDateFin())) continue;
+                if(activity.getForme()!=ActiviteForme.ACTIVITE || activity.getPlanningAllocations()==null || !activity.plannedOn(date)) continue;
                 for(var allocation:activity.getPlanningAllocations()) {
                     var assignment=byAssignment.get(allocation.affectationId());
                     if(assignment==null || !employee.equals(assignment.getEmployeId()) || !activity.getChantierId().equals(assignment.getChantierId()) || !assignment.isEffectiveOn(date)) continue;

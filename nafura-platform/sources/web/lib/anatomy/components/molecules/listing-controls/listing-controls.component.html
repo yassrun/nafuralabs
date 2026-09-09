@@ -80,6 +80,12 @@
       [attr.aria-label]="'Filter' | translate">
     </nf-button>
   }
+  @if (showFilterReset()) {
+    <nf-filter-reset
+      [active]="filterActive()"
+      (reset)="filterReset.emit()"
+    />
+  }
   @if (showViewModeSwitcher() && viewModes().length > 1) {
     <nf-view-mode-switcher
       [modes]="viewModes()"

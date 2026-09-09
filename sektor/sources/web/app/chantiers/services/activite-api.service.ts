@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 
 import { FeatureApiService } from '@platform/lib/anatomy';
 import type { PlanningWeekView } from '../planning/components/planning-week.component';
+import type { PublicationOptions, PublicationPreview, PublicationVersion } from '../planning/services/planning-publication';
+import type { PlanningReport, ReportPreview, ReportRequest } from '../planning/services/planning-report';
 
 export type ActiviteStatus = 'PLANIFIE' | 'EN_COURS' | 'TERMINE' | 'EN_RETARD';
 export type PrecedenceType = 'FD' | 'DD' | 'FF' | 'DF';
@@ -37,6 +39,7 @@ export interface ActiviteChantier {
   rattachements?: ActiviteRattachement[];
   planningAllocations?: { affectationId: string; minutesParJour: number }[];
   planningNeeds?: PlanningNeed[];
+  planningRemainder?: {statusDate:string;resumeStart:string;minutes:number;pauses:{from:string;through:string}[]} | null;
 }
 
 export interface PlanningNeed {
@@ -237,6 +240,14 @@ export class ActiviteApiService extends FeatureApiService<
   planningWeek(chantierId:string,start:string):Promise<PlanningWeekView> {
     return this.get(`/api/v1/chantiers/${chantierId}/planning-weeks/${start}`);
   }
+  planningPublications(id:string):Promise<PublicationVersion[]> { return this.get(`${this.basePath}/${id}/planning-publications`); }
+  planningReports(id:string):Promise<PlanningReport[]> { return this.get(`${this.basePath}/${id}/planning-reports`); }
+  previewReport(id:string,body:ReportRequest):Promise<ReportPreview> { return this.post(`${this.basePath}/${id}/planning-reports/preview`,body); }
+  proposeReport(id:string,body:{request:ReportRequest;token:string;reason:string}):Promise<PlanningReport> { return this.post(`${this.basePath}/${id}/planning-reports`,body); }
+  decideReport(id:string,reportId:string,body:{version:number;action:string;note:string}):Promise<PlanningReport> { return this.post(`${this.basePath}/${id}/planning-reports/${reportId}/decision`,body); }
+  previewPublication(id:string,options:PublicationOptions):Promise<PublicationPreview> { return this.post(`${this.basePath}/${id}/planning-publications/preview`,options); }
+  publishPlanning(id:string,body:{title:string;token:string;options:PublicationOptions}):Promise<PublicationVersion> { return this.post(`${this.basePath}/${id}/planning-publications`,body); }
+  acknowledgePlanning(id:string,publicationId:string,body:{version:number;outcome:string;date:string;clientName:string;evidence:string;note:string}):Promise<PublicationVersion> { return this.post(`${this.basePath}/${id}/planning-publications/${publicationId}/acknowledgements`,body); }
   commandPlanningWeek(chantierId:string,start:string,action:string,body:{version:number|null;token:string;note:string}):Promise<PlanningWeekView> {
     return this.post(`/api/v1/chantiers/${chantierId}/planning-weeks/${start}/${action}`,body);
   }

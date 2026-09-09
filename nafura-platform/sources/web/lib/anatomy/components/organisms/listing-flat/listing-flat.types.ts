@@ -46,6 +46,11 @@ export interface ListingFlatConfig {
   actions?: ListingActionItem[];
   /** Actions shown when rows are selected (scope gates by selection count). */
   selectionActions?: ListingSelectionAction[];
+  /**
+   * Host projects extras into the action bar (e.g. nf-smart-import-action).
+   * Keeps the bar visible when `actions` / selection actions are empty.
+   */
+  projectedActions?: boolean;
 }
 
 export const DEFAULT_LISTING_FLAT_FEATURES: ListingFlatFeatures = {

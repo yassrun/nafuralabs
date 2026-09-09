@@ -1,52 +1,36 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { MatMenuModule } from '@angular/material/menu';
-import { LucideAngularModule } from 'lucide-angular';
+import { Component, ChangeDetectionStrategy, output } from '@angular/core';
 
-import { ButtonComponent } from '@platform/lib/anatomy/components/atoms/button';
+import {
+  SmartImportActionComponent,
+  type ReviewedExtraction,
+} from '@platform/app/document-extraction/smart-import';
+
+import { PRODUCT_IMPORT_DEFINITION } from '../mocks/product-import.definition';
 
 /**
- * Showroom stub of `nf-smart-import-action` (tooltip + mat-menu).
- * Real component lives in document-extraction; not wired to extraction APIs here.
+ * Showroom host for `nf-smart-import-action` with a Product ExtractionDefinition.
+ * File import still needs extraction API + tenant; Info champs works offline from the schema.
  */
 @Component({
   selector: 'sb-smart-import-stub',
   standalone: true,
-  imports: [ButtonComponent, MatMenuModule, LucideAngularModule],
+  imports: [SmartImportActionComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nf-button
-      variant="secondary"
-      size="sm"
-      icon="sparkles"
-      iconLibrary="lucide"
-      tooltip="Import magique — menu (info champs · unitaire · bulk)"
-      [matMenuTriggerFor]="importMenu"
-      aria-haspopup="menu"
-      aria-label="Import magique"
-    >
-      <span class="label">
-        Import magique
-        <lucide-icon name="chevron-down" [size]="14" aria-hidden="true" />
-      </span>
-    </nf-button>
-
-    <mat-menu #importMenu="matMenu" xPosition="before">
-      <button mat-menu-item type="button" disabled>Info champs (help)</button>
-      <button mat-menu-item type="button" disabled>Importer un fichier</button>
-      <button mat-menu-item type="button" disabled>Import bulk</button>
-    </mat-menu>
+    <nf-smart-import-action
+      [definition]="definition"
+      (completed)="completed.emit($event)"
+    />
   `,
   styles: [
     `
       :host {
         display: inline-flex;
       }
-      .label {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-      }
     `,
   ],
 })
-export class SmartImportStubComponent {}
+export class SmartImportStubComponent {
+  readonly definition = PRODUCT_IMPORT_DEFINITION;
+  readonly completed = output<ReviewedExtraction>();
+}

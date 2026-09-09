@@ -660,13 +660,13 @@ export class PlanningFacade {
           parent,
           type: forme === 'JALON' ? 'milestone' : forme === 'PHASE' ? 'project' : undefined,
           open: true,
-          readonly: false,
+          readonly: !!activite.planningRemainder,
           recordType: 'ACTIVITE',
           status: activite.status,
           chantierId: chantier.id,
           activiteId: activite.id,
           forme,
-          dureeLabel: formatDureeOuvree(activite.dureeMinutesOuvrees, forme),
+          dureeLabel: activite.planningRemainder && activite.status!=='TERMINE' && (activite.avancementPercent??0)<100 ? `${formatDureeOuvree(activite.planningRemainder.minutes, forme)} restantes` : formatDureeOuvree(activite.dureeMinutesOuvrees, forme),
           predecessorsLabel: this.formatPredecessors(preds),
         });
       }
@@ -912,9 +912,11 @@ export class PlanningFacade {
     this.saving.set(true);
     this.drawerError.set(null);
     try {
+      const resumed = this.activites().find(a=>a.id===draft.activiteId)?.planningRemainder;
       const body = {
         ...this.toWriteBody(draft),
-        recalculerFin: draft.forme === 'ACTIVITE' && draft.dureeMinutesOuvrees != null,
+        recalculerFin: !resumed && draft.forme === 'ACTIVITE' && draft.dureeMinutesOuvrees != null,
+        ...(resumed ? {dateFin:draft.dateFin} : {}),
         ...(this.capacites().administrerCalendrier ? {
           calendrierSpecifique: draft.calendrierSpecifique ?? undefined,
           utiliserCalendrierChantier: !draft.calendrierSpecifique,
@@ -1353,7 +1355,7 @@ export class PlanningFacade {
     }
   }
 
-  private async reloadChantier(chantierId: string): Promise<void> {
+  async reloadChantier(chantierId: string): Promise<void> {
     this.simulation.set(null);
     const planning = await this.activiteApi.planning(chantierId);
     this._activites.update((items) => [

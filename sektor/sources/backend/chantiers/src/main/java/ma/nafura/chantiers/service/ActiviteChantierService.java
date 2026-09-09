@@ -185,6 +185,15 @@ public class ActiviteChantierService {
     public ActiviteChantierDto update(String chantierId, String activiteId, ActiviteChantierUpdateDto request) {
         planningPolicy.assertCanEditStructure(chantierId);
         ActiviteChantier entity = requireActivite(chantierId, activiteId);
+        if(entity.getPlanningRemainder()!=null && (
+                (request.getDateDebut()!=null&&!request.getDateDebut().equals(entity.getDateDebut())) ||
+                (request.getDateFin()!=null&&!request.getDateFin().equals(entity.getDateFin())) ||
+                (request.getDureeMinutesOuvrees()!=null&&!request.getDureeMinutesOuvrees().equals(entity.getDureeMinutesOuvrees())) ||
+                (request.getForme()!=null&&!request.getForme().equals(entity.getForme().name())) ||
+                (request.getCalendrierSpecifique()!=null&&!java.util.Objects.equals(request.getCalendrierSpecifique(),entity.getCalendrierSpecifique())) ||
+                (Boolean.TRUE.equals(request.getUtiliserCalendrierChantier())&&entity.getCalendrierSpecifique()!=null) ||
+                Boolean.TRUE.equals(request.getRecalculerFin())))
+            throw new IllegalArgumentException("Utilisez le report du reste à faire pour modifier les dates de cette activité commencée. Son calendrier spécifique est conservé.");
         UUID tenantId = tenantId();
         if (request.getLibelle() != null) {
             entity.setLibelle(request.getLibelle().trim());
@@ -209,7 +218,7 @@ public class ActiviteChantierService {
                 || request.getDateFin() != null
                 || request.getDureeMinutesOuvrees() != null
                 || request.getForme() != null;
-        if (datesTouched) {
+        if (datesTouched && entity.getPlanningRemainder()==null) {
             LocalDate debut = request.getDateDebut() != null ? request.getDateDebut() : entity.getDateDebut();
             LocalDate fin;
             if (forme.estJalon() && request.getDateDebut() != null && request.getDateFin() == null) {
@@ -588,6 +597,7 @@ public class ActiviteChantierService {
                 .calendrierSpecifique(entity.getCalendrierSpecifique())
                 .planningAllocations(entity.getPlanningAllocations())
                 .planningNeeds(entity.getPlanningNeeds())
+                .planningRemainder(entity.getPlanningRemainder())
                 .ordre(entity.getOrdre())
                 .avancementPercent(entity.getAvancementPercent())
                 .status(entity.getStatus())

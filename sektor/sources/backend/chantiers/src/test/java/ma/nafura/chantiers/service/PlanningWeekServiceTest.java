@@ -78,6 +78,13 @@ class PlanningWeekServiceTest {
         activity.setAvancementPercent(java.math.BigDecimal.TEN);activity.setStatus("EN_COURS");
         assertThat(service.read("c",monday).status()).isEqualTo("VALIDEE");
     }
+    @Test void completePauseDoesNotCreateWorkToApproveAndNullRemainderKeepsLegacyShape() throws Exception {
+        var before=service.read("c",monday);
+        assertThat(new ObjectMapper().findAndRegisterModules().writeValueAsString(before.current())).doesNotContain("remainder");
+        activity.setPlanningRemainder(new PlanningRemainder(monday.minusDays(1),monday.plusWeeks(1),480,
+                List.of(new PlanningRemainder.Pause(monday,monday.plusDays(6)))));
+        assertThat(service.read("c",monday).current().activities()).isEmpty();
+    }
     @Test void weekMustStartOnMondayAndCannotSubmitEmptyWeek(){
         assertThatThrownBy(()->service.read("c",monday.plusDays(1))).hasMessageContaining("lundi");
         when(activities.findByTenantIdAndChantierIdOrderByOrdreAscLibelleAsc(tenant,"c")).thenReturn(List.of());

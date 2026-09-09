@@ -50,7 +50,6 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
 import { DataTableComponent } from '../data-table';
 import { PaginationComponent } from '../pagination';
 import { ListingControlsComponent, ListingControlsColumn } from '../../molecules/listing-controls';
-import { FilterResetComponent } from '../../molecules/filter-reset/filter-reset.component';
 import { ButtonListItem } from '../../molecules/button-list';
 import { ListingActionsComponent } from '../../molecules/listing-actions';
 import { DataStateComponent, type DataStateValue } from '../../molecules/data-state';
@@ -86,7 +85,6 @@ import type { ReviewedExtraction } from '@platform/app/document-extraction/smart
     DataTableComponent,
     PaginationComponent,
     ListingControlsComponent,
-    FilterResetComponent,
     ListingActionsComponent,
     DataStateComponent,
     CardViewComponent,

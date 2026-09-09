@@ -22,14 +22,10 @@
             (selectionToggleClick)="onToggleSelectionMode()"
             (columnsChange)="onColumnsChange($event)"
             (filterChange)="onFilterChange($event)"
+            (filterReset)="onResetFilters()"
             (searchChange)="onSearchChange($event)"
             (viewModeChange)="onViewModeChange($event)">
           </nf-listing-controls>
-
-          <nf-filter-reset
-            [active]="hasActiveFilters()"
-            (reset)="onResetFilters()"
-          />
         </div>
 
         <!-- Center: Selection Count (only when 2+ items selected) -->

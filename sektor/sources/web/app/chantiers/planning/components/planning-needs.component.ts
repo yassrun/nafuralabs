@@ -11,6 +11,9 @@ import { PlanningFacade } from '../services/planning.facade';
   template:`
     @if(activity(); as a) {
       <p>Dates calculées depuis le début enregistré de l’activité. Les délais sont exprimés en jours calendaires. Un besoin prévu ne confirme pas sa disponibilité.</p>
+      @if(a.planningRemainder; as remainder) {
+        <p>Reprise prévue le {{ remainder.resumeStart | date:'dd/MM/yyyy' }}. Les besoins conservent leurs quantités et dates initiales : vérifiez ce qui reste à fournir et ajustez les échéances dans Achats avant toute soumission.</p>
+      }
       @if(error()) {<p role="alert">{{ error() }}</p>}
       @for(n of a.planningNeeds ?? []; track n.id) {
         <article>

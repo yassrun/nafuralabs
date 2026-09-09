@@ -39,6 +39,16 @@ class PlanningResourceServiceTest {
         assertThat(activity.getPlanningAllocations()).containsExactly(new PlanningAllocation("r",240));
         service.reserve("c","a","r",0);assertThat(activity.getPlanningAllocations()).isEmpty();
     }
+    @Test void pausesReleaseReservedCapacityAndResumeUsesSameAllocation() {
+        activity.setPlanningAllocations(List.of(new PlanningAllocation("r",240)));
+        activity.setPlanningRemainder(new PlanningRemainder(monday,monday.plusDays(4),240,
+                List.of(new PlanningRemainder.Pause(monday.plusDays(1),monday.plusDays(3)))));
+        var days=service.week("c",monday);
+        assertThat(days.getFirst().reservedMinutes()).isEqualTo(240);
+        assertThat(days.subList(1,4)).allMatch(d->d.reservedMinutes()==0);
+        assertThat(days.get(4).reservedMinutes()).isEqualTo(240);
+        assertThat(activity.getPlanningAllocations()).hasSize(1);
+    }
     @Test void rejectsPartialAssignment() {
         assignment.setDateFin(monday.plusDays(2));
         assertThatThrownBy(()->service.reserve("c","a","r",480)).hasMessageContaining("toute la période");

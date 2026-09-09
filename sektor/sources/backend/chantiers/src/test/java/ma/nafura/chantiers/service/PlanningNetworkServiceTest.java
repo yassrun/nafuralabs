@@ -40,13 +40,20 @@ class PlanningNetworkServiceTest {
         assertThatThrownBy(()->service.apply("c",simulation.token())).isInstanceOf(ResponseStatusException.class).hasMessageContaining("planning a changé");
         verify(activities,never()).save(any());
     }
-    @Test void cannotMoveActualProgress() {
+    @Test void keepsStartedDatesAndCalculatesUnstartedSuccessor() {
         a.setStatus("EN_COURS");
-        assertThatThrownBy(()->service.simulate("c")).hasMessageContaining("réalisé");
+        var result=service.simulate("c");
+        assertThat(result.rows().getFirst().changed()).isFalse();
+        assertThat(result.rows().get(1).start()).isEqualTo(a.getDateFin().plusDays(1));
     }
     @Test void applicationRequiresEditPolicy() {
         doThrow(new IllegalStateException("forbidden")).when(policy).assertCanEditStructure("c");
         assertThatThrownBy(()->service.apply("c","token")).hasMessage("forbidden");
         verify(activities,never()).save(any());
+    }
+    @Test void runningRemainderNeedsFreshEstimateBeforeAutomaticReschedule() {
+        a.setStatus("EN_COURS");a.setDateDebut(LocalDate.now().minusDays(2));a.setDateFin(LocalDate.now().plusDays(1));
+        a.setPlanningRemainder(new PlanningRemainder(LocalDate.now().minusDays(1),LocalDate.now(),480,List.of()));
+        assertThat(service.simulate("c").rows().getFirst().changed()).isFalse();
     }
 }

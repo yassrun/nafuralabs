@@ -28,6 +28,13 @@ import { PlanningNeedsComponent } from '../planning-needs.component';
       @if (facade.drawerOpen() && facade.draft(); as draft) {
         <form class="activite-drawer" data-testid="activite-drawer" (submit)="$event.preventDefault(); onSave()">
           <p class="activite-drawer__eyebrow">{{ chantierLine() }}</p>
+          @if(detail()?.activite?.planningRemainder;as remainder){
+            <section class="activite-drawer__block" aria-label="Reprise et reste à faire">
+              <h3>Reprise prévue le {{ formatDate(remainder.resumeStart) }}</h3>
+              <p>{{ remainder.minutes/60 }} h restantes estimées au {{ formatDate(remainder.statusDate) }}. Début et avancement conservés.</p>
+              <p>Les réservations sont libérées pendant les pauses. Pour modifier la reprise, ouvrez Ressources → Équipes et semaine → Reporter des activités.</p>
+            </section>
+          }
 
           <div class="activite-drawer__formes" data-testid="activite-forme">
             <span>Type de ligne</span>
@@ -38,6 +45,7 @@ import { PlanningNeedsComponent } from '../planning-needs.component';
                   class="activite-drawer__forme"
                   [class.activite-drawer__forme--on]="draft.forme === f"
                   [attr.data-testid]="'activite-forme-' + f"
+                  [disabled]="!!detail()?.activite?.planningRemainder"
                   (click)="facade.patchForme(f)">
                   {{ ('chantiers.planning.formes.' + formeKey(f)) | translate }}
                 </button>
@@ -74,7 +82,7 @@ import { PlanningNeedsComponent } from '../planning-needs.component';
                 type="date"
                 [ngModel]="draft.dateDebut"
                 (ngModelChange)="onDebutChange($event)"
-                name="dateDebut" />
+                name="dateDebut" [disabled]="!!detail()?.activite?.planningRemainder" />
             </label>
             @if (draft.forme === 'ACTIVITE') {
               <label class="activite-drawer__field">
@@ -86,7 +94,7 @@ import { PlanningNeedsComponent } from '../planning-needs.component';
                   step="0.5"
                   [ngModel]="dureeHeures()"
                   (ngModelChange)="onDureeHeures($event)"
-                  name="dureeHeures" />
+                  name="dureeHeures" [disabled]="!!detail()?.activite?.planningRemainder" />
               </label>
             } @else if (draft.forme === 'JALON') {
               <p class="activite-drawer__hint" data-testid="activite-jalon-hint">
@@ -104,9 +112,9 @@ import { PlanningNeedsComponent } from '../planning-needs.component';
           </p>
 
           @if (detail(); as saved) {
-            <p class="activite-drawer__hint">Dates enregistrées : <strong>{{ saved.activite.dateDebut }} → {{ saved.activite.dateFin }}</strong>. La fin est recalculée lors de l’enregistrement.</p>
+            <p class="activite-drawer__hint">Dates enregistrées : <strong>{{ saved.activite.dateDebut }} → {{ saved.activite.dateFin }}</strong>. {{ saved.activite.planningRemainder ? 'Fin issue du report validé ; durée ci-dessus = durée initiale.' : 'La fin est recalculée lors de l’enregistrement.' }}</p>
           }
-          @if (draft.forme === 'ACTIVITE') {
+          @if (draft.forme === 'ACTIVITE' && !detail()?.activite?.planningRemainder) {
             <section class="activite-drawer__block">
               <h3>Calendrier de travail</h3>
               <p class="activite-drawer__hint">{{ draft.calendrierSpecifique ? 'Calendrier spécifique à cette activité' : 'Hérité du chantier' }}</p>
@@ -342,8 +350,9 @@ export class ActiviteDrawerComponent {
     effect((cleanup) => {
       const draft = this.facade.draft();
       const open = this.facade.drawerOpen();
+      const remainder = this.detail()?.activite?.planningRemainder;
       this.previewDate.set(''); this.previewError.set(''); this.previewLoading.set(false);
-      if (!open || draft?.forme !== 'ACTIVITE' || !draft.dateDebut || !(draft.dureeMinutesOuvrees! > 0)) return;
+      if (!open || remainder || draft?.forme !== 'ACTIVITE' || !draft.dateDebut || !(draft.dureeMinutesOuvrees! > 0)) return;
       let active = true;
       this.previewLoading.set(true);
       const timer = setTimeout(() => {

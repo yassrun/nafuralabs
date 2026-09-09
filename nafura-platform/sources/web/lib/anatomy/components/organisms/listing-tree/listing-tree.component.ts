@@ -24,7 +24,6 @@ import {
   ListingControlsComponent,
   type ListingControlsColumn,
 } from '../../molecules/listing-controls';
-import { FilterResetComponent } from '../../molecules/filter-reset/filter-reset.component';
 import { ListingActionsComponent } from '../../molecules/listing-actions';
 import {
   collectExpandableKeys,
@@ -44,7 +43,6 @@ import {
     CommonModule,
     TranslateModule,
     ListingControlsComponent,
-    FilterResetComponent,
     ListingActionsComponent,
     TreeTableComponent,
   ],
@@ -63,9 +61,9 @@ import {
           [showSearch]="features().search"
           (columnsChange)="onColumnsChange($event)"
           (filterChange)="onFilterChange($event)"
+          (filterReset)="onResetFilters()"
           (searchChange)="search.set($event)"
         />
-        <nf-filter-reset [active]="filterActive()" (reset)="onResetFilters()" />
         @if (features().treeActions) {
           <nf-listing-actions
             mode="tree"

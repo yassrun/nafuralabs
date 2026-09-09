@@ -27,6 +27,7 @@ public class ActiviteChantierDto {
     private int ordre;
     private java.util.List<ma.nafura.chantiers.domain.activite.PlanningAllocation> planningAllocations;
     private java.util.List<ma.nafura.chantiers.domain.activite.PlanningNeed> planningNeeds;
+    private ma.nafura.chantiers.domain.activite.PlanningRemainder planningRemainder;
     private BigDecimal avancementPercent;
     private String status;
     private List<ActiviteRattachementDto> rattachements;

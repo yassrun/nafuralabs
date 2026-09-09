@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');const fs=require('node:fs');const ts=require('typescript');
+const compiled=ts.transpileModule(fs.readFileSync(__dirname+'/planning-publication.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+const mod={exports:{}};new Function('exports','require','module',compiled)(mod.exports,require,mod);
+const {publicationChanges}=mod.exports;
+const row={id:'a',parentId:null,kind:'LOT',label:'Gros œuvre',start:'2026-09-14',finish:'2026-09-16',progress:0};
+const base={chantierCode:'CH-QA',chantierName:'QA',client:'Client',options:{technical:false,execution:false},rows:[row]};
+assert.deepEqual(publicationChanges(base,structuredClone(base)),[]);
+assert.match(publicationChanges(base,{...base,rows:[{...row,finish:'2026-09-20'}]})[0],/dates.*2026-09-20/);
+assert.match(publicationChanges(base,{...base,rows:[{...row,progress:50}]})[0],/avancement 0 % → 50 %/);
+assert.equal(publicationChanges(base,{...base,rows:[{...row,id:'b'}]}).length,2);
+assert.match(publicationChanges(base,{...base,client:'Autre client'})[0],/Identification/);
+assert.match(publicationChanges(base,{...base,options:{technical:true,execution:false}})[0],/Périmètre/);
+assert.equal(base.rows[0].finish,'2026-09-16');
+console.log('7 contrôles de comparaison des publications réussis.');

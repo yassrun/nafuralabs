@@ -23,34 +23,48 @@ public class PlanningNetworkService {
         this.activities=activities; this.links=links; this.calendars=calendars; this.policy=policy;
     }
     public record Proposal(String id,String label,LocalDate previousStart,LocalDate previousFinish,
-                           LocalDate start,LocalDate finish,LocalDate latestStart,long floatDays,boolean critical,boolean changed) {}
+                           LocalDate start,LocalDate finish,LocalDate latestStart,long floatDays,boolean critical,boolean changed,LocalDate workStart) {}
     public record Simulation(String token,List<Proposal> rows,LocalDate finish,String precision) {}
     @Transactional(readOnly=true)
     public Simulation simulate(String chantierId) {
+        return simulateWithStarts(chantierId,Map.of());
+    }
+    @Transactional(readOnly=true)
+    public Simulation simulateWithStarts(String chantierId,Map<String,LocalDate> starts) {
+        return simulateWithRemainders(chantierId,starts,Map.of());
+    }
+    @Transactional(readOnly=true)
+    public Simulation simulateWithRemainders(String chantierId,Map<String,LocalDate> starts,Map<String,PlanningRemainder> remainders) {
         policy.assertCanRead(chantierId);
         var tenant=TenantContext.getTenantId();
         var all=activities.findByTenantIdAndChantierIdOrderByOrdreAscLibelleAsc(tenant,chantierId);
         var edges=links.findByTenantIdAndChantierId(tenant,chantierId);
         var defaultCalendar=calendars.calculatorFor(chantierId);
+        if(starts.keySet().stream().anyMatch(id->all.stream().noneMatch(a->a.getId().equals(id)&&a.getForme()!=ActiviteForme.PHASE)))
+            throw new IllegalArgumentException("Une activité sélectionnée est absente du chantier ou est une phase.");
         List<PlanningNetwork.Task> tasks=new ArrayList<>();
         for(var a:all) {
             if(a.getForme()==ActiviteForme.PHASE) continue;
-            if(!ActiviteChantier.STATUS_PLANIFIE.equals(a.getStatus()))
-                throw new IllegalArgumentException("La simulation nécessite des activités planifiées. Le réalisé ne peut pas être déplacé par ce calcul.");
             boolean milestone=a.getForme()==ActiviteForme.JALON;
-            if(!milestone && a.getDureeMinutesOuvrees()==null)
+            boolean begun=!ActiviteChantier.STATUS_PLANIFIE.equals(a.getStatus()) || (a.getAvancementPercent()!=null&&a.getAvancementPercent().signum()>0) || a.getPlanningRemainder()!=null;
+            var remainder=remainders.getOrDefault(a.getId(),a.getPlanningRemainder());
+            boolean completed=ActiviteChantier.STATUS_TERMINE.equals(a.getStatus()) || (a.getAvancementPercent()!=null&&a.getAvancementPercent().compareTo(java.math.BigDecimal.valueOf(100))>=0);
+            if(begun && starts.containsKey(a.getId()))throw new IllegalArgumentException("Le début d’une activité commencée est conservé. Précisez son reste à faire.");
+            if(!begun && !milestone && a.getDureeMinutesOuvrees()==null)
                 throw new IllegalArgumentException("Renseignez la durée ouvrée de « "+a.getLibelle()+" » avant le calcul.");
-            tasks.add(new PlanningNetwork.Task(a.getId(),a.getLibelle(),a.getDateDebut(),
-                    milestone?0:a.getDureeMinutesOuvrees(),milestone,
-                    a.getCalendrierSpecifique()==null?defaultCalendar:a.getCalendrierSpecifique().calculator()));
+            boolean frozen=begun&&(completed||remainder==null||(!remainders.containsKey(a.getId())&&!remainder.resumeStart().isAfter(LocalDate.now())));
+            tasks.add(new PlanningNetwork.Task(a.getId(),a.getLibelle(),!frozen&&remainder!=null?remainder.resumeStart():starts.getOrDefault(a.getId(),a.getDateDebut()),
+                    milestone||frozen?0:remainder!=null?remainder.minutes():a.getDureeMinutesOuvrees(),milestone,
+                    a.getCalendrierSpecifique()==null?defaultCalendar:a.getCalendrierSpecifique().calculator(),begun?a.getDateDebut():null,frozen?a.getDateFin():null));
         }
         var result=PlanningNetwork.calculate(tasks,edges.stream()
                 .map(e->new PlanningNetwork.Link(e.getPredActiviteId(),e.getSuccActiviteId(),e.getTypeLien())).toList());
         var originals=new HashMap<String,ActiviteChantier>(); all.forEach(a->originals.put(a.getId(),a));
+        var frozenIds=tasks.stream().filter(t->t.fixedFinish()!=null).map(PlanningNetwork.Task::id).collect(java.util.stream.Collectors.toSet());
         var rows=result.rows().stream().map(r->{var old=originals.get(r.id());
             return new Proposal(r.id(),r.label(),old.getDateDebut(),old.getDateFin(),r.start(),r.finish(),r.latestStart(),r.floatDays(),r.critical(),
-                    !r.start().equals(old.getDateDebut()) || !r.finish().equals(old.getDateFin()));}).toList();
-        String snapshot=all.stream().sorted(Comparator.comparing(ActiviteChantier::getId)).toList().toString()+edges.stream().sorted(Comparator.comparing(ActivitePrecedence::getId)).toList().toString()+calendars.find(chantierId).toString();
+                    !r.start().equals(old.getDateDebut()) || !r.finish().equals(old.getDateFin()) || remainders.containsKey(r.id()) || (!frozenIds.contains(r.id())&&old.getPlanningRemainder()!=null&&!r.workStart().equals(old.getPlanningRemainder().resumeStart())),r.workStart());}).toList();
+        String snapshot=all.stream().sorted(Comparator.comparing(ActiviteChantier::getId)).toList().toString()+edges.stream().sorted(Comparator.comparing(ActivitePrecedence::getId)).toList().toString()+calendars.find(chantierId).toString()+new TreeMap<>(starts)+new TreeMap<>(remainders);
         try {
             String token=HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(snapshot.getBytes(StandardCharsets.UTF_8)));
             return new Simulation(token,rows,result.finish(),"JOUR");
@@ -63,6 +77,7 @@ public class PlanningNetworkService {
         if(!simulation.token().equals(token)) throw new ResponseStatusException(HttpStatus.CONFLICT,"Le planning a changé. Relancez la simulation.");
         for(var row:simulation.rows()) if(row.changed()) {
             var activity=activities.findByIdAndTenantId(row.id(),TenantContext.getTenantId()).orElseThrow();
+            if(activity.getPlanningRemainder()!=null)activity.setPlanningRemainder(activity.getPlanningRemainder().rescheduled(row.workStart()));
             activity.setDateDebut(row.start()); activity.setDateFin(row.finish()); activities.save(activity);
         }
         return simulation;

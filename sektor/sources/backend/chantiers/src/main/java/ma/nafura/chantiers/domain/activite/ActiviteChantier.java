@@ -94,6 +94,14 @@ public class ActiviteChantier {
     @Column(name = "planning_needs", columnDefinition = "jsonb")
     private java.util.List<PlanningNeed> planningNeeds;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(name="planning_remainder",columnDefinition="jsonb")
+    private PlanningRemainder planningRemainder;
+
+    public boolean plannedOn(LocalDate day) {
+        return !day.isBefore(dateDebut) && !day.isAfter(dateFin) && (planningRemainder==null || planningRemainder.includes(day));
+    }
+
     @Column(nullable = false)
     private int ordre;
 

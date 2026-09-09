@@ -6,6 +6,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { ButtonComponent } from '../../atoms/button';
 import { FilterBuilderComponent } from '../filter-builder';
+import { FilterResetComponent } from '../filter-reset/filter-reset.component';
 import { ViewModeSwitcherComponent } from '../../organisms/entity-listing/view-mode-switcher.component';
 import type { FilterFieldConfig, LookupContext, ViewMode } from '../../../types';
 
@@ -19,10 +20,12 @@ export interface ListingControlsColumn {
 /**
  * Listing Controls Component (nf-listing-controls)
  *
- * Left-aligned listing toolbar: optional multi-select toggle, columns visibility, filter, search.
+ * Left-aligned listing toolbar: optional multi-select toggle, columns visibility,
+ * filter + reset, search.
  * - Multi-select (first): when showSelectionToggle, toggles table selection mode.
  * - Columns (eye): active when hiddenColumnsCount > 0.
  * - Filter: active when filterActive is true.
+ * - Filter reset: sits next to the filter control (not between search and actions).
  */
 @Component({
   selector: 'nf-listing-controls',
@@ -31,6 +34,7 @@ export interface ListingControlsColumn {
     CommonModule,
     ButtonComponent,
     FilterBuilderComponent,
+    FilterResetComponent,
     ViewModeSwitcherComponent,
     LucideAngularModule,
     MatMenuModule,
@@ -64,6 +68,8 @@ export class ListingControlsComponent {
   search = input<string>('');
   /** Hide search when the host only needs column and filter controls. */
   showSearch = input<boolean>(true);
+  /** Show the filter-reset control next to the filter button. Default true. */
+  showFilterReset = input<boolean>(true);
 
   // ─── View Mode ─────────────────────────────────────────────────────────────
   /** When true, show the view mode switcher. */
@@ -80,6 +86,8 @@ export class ListingControlsComponent {
   filterClick = output<void>();
   /** Emitted when user applies or clears filters in the filter builder. */
   filterChange = output<Record<string, unknown>>();
+  /** Emitted when the filter-reset control is clicked. */
+  filterReset = output<void>();
   searchChange = output<string>();
   /** Emitted when the view mode changes. */
   viewModeChange = output<ViewMode>();

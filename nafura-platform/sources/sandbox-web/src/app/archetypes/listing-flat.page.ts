@@ -14,11 +14,12 @@ import type { ListingActionItem } from '@platform/lib/anatomy/components/molecul
 import type { ColumnConfig, FilterFieldConfig } from '@platform/lib/anatomy/types';
 
 import { ProductMockFacade, type Product } from '../mocks/product-mock.facade';
+import { SmartImportStubComponent } from '../components/smart-import-stub.component';
 
 @Component({
   selector: 'sb-listing-flat',
   standalone: true,
-  imports: [FormsModule, ScreenComponent, ListingFlatComponent],
+  imports: [FormsModule, ScreenComponent, ListingFlatComponent, SmartImportStubComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nf-screen [header]="headerConfig">
@@ -30,7 +31,11 @@ import { ProductMockFacade, type Product } from '../mocks/product-mock.facade';
             (rowDblClick)="open($event)"
             (actionClick)="onListingAction($event)"
             (selectionChange)="selection.set($event)"
-          />
+          >
+            @if (optActSmartImport()) {
+              <sb-smart-import-stub />
+            }
+          </nf-listing-flat>
         </div>
         <aside class="lab__opts">
           <h2>Configuration</h2>
@@ -69,6 +74,7 @@ import { ProductMockFacade, type Product } from '../mocks/product-mock.facade';
           </label>
 
           <h3>Action bar</h3>
+          <label><input type="checkbox" [ngModel]="optActSmartImport()" (ngModelChange)="optActSmartImport.set($event)" /> Import magique</label>
           <label><input type="checkbox" [ngModel]="optActNew()" (ngModelChange)="optActNew.set($event)" /> New</label>
           <label><input type="checkbox" [ngModel]="optActExport()" (ngModelChange)="optActExport.set($event)" /> Export</label>
           <label><input type="checkbox" [ngModel]="optActDuplicate()" (ngModelChange)="optActDuplicate.set($event)" /> Dupliquer (sélection)</label>
@@ -162,6 +168,7 @@ export class ListingFlatPage {
   readonly optPagination = signal(true);
   readonly optSelection = signal<ListingFlatSelection>('none');
   readonly optSelectionToggle = signal(false);
+  readonly optActSmartImport = signal(true);
   readonly optActNew = signal(true);
   readonly optActExport = signal(true);
   readonly optActDuplicate = signal(true);
@@ -228,7 +235,7 @@ export class ListingFlatPage {
 
   readonly headerConfig: PageHeaderConfig = {
     title: 'Products',
-    subtitle: 'nf-listing-flat · toolbar + action bar + table + pager',
+    subtitle: 'nf-listing-flat · toolbar + action bar (smart-import · Export · New) + table + pager',
   };
 
   readonly listingConfig = computed((): ListingFlatConfig => ({
@@ -239,6 +246,7 @@ export class ListingFlatPage {
     emptyMessage: 'No products',
     actions: this.enabledActions(),
     selectionActions: this.enabledSelectionActions(),
+    projectedActions: this.optActSmartImport(),
     features: {
       search: this.optSearch(),
       filters: this.optFilters(),
