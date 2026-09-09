@@ -1,5 +1,7 @@
 import { Component, computed, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { PlanningWeekComponent } from './planning-week.component';
+import { PlanningSuppliesComponent } from './planning-supplies.component';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ButtonComponent } from '@platform/lib/anatomy/components';
@@ -15,12 +17,12 @@ import { marketPlanning } from '../services/planning-market';
 
 @Component({
   selector: 'app-planning-business-views', standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ButtonComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ButtonComponent, PlanningWeekComponent, PlanningSuppliesComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (!chantierId()) { <p>Sélectionnez un chantier pour afficher cette vue.</p> }
     @else {
-      <nf-button variant="secondary" [disabled]="loading()" (clicked)="exportCsv()">Exporter cette vue (CSV)</nf-button>
+      @if(view()!=='RESSOURCES' || resourceTab()==='EQUIPES') {<nf-button variant="secondary" [disabled]="loading()" (clicked)="exportCsv()">Exporter cette vue (CSV)</nf-button>}
       @if (loading()) { <p role="status">Chargement des données du chantier…</p> }
       @if (error()) { <p role="alert">{{ error() }}</p><nf-button variant="secondary" (clicked)="reload()">Réessayer</nf-button> }
       @if (view() === 'CLIENT') {
@@ -71,8 +73,15 @@ import { marketPlanning } from '../services/planning-market';
         </tbody></table></div>
       }
       @if (view() === 'RESSOURCES') {
-        <h2>Ressources du chantier</h2><p>Réservations journalières des collaborateurs affectés. La surcharge compare les heures réservées au calendrier du chantier ; elle est indicative, sans prise en compte des autres chantiers ou des absences RH.</p>
+        <h2>Ressources du chantier</h2>
+        <div class="controls" aria-label="Type de ressources">
+          <nf-button [variant]="resourceTab()==='EQUIPES'?'primary':'tertiary'" (clicked)="resourceTab.set('EQUIPES')">Équipes et semaine</nf-button>
+          <nf-button [variant]="resourceTab()==='ACHATS'?'primary':'tertiary'" (clicked)="resourceTab.set('ACHATS')">Achats et livraisons</nf-button>
+        </div>
+        @if(resourceTab()==='EQUIPES') {
+        <p>Charge du chantier et réservations sur les autres chantiers. Les congés approuvés sont signalés sans afficher leur motif. La surcharge reste indicative : les heures ne sont pas encore positionnées sur des créneaux précis.</p>
         <label>Semaine à partir du <input type="date" [ngModel]="weekStart()" (ngModelChange)="setWeek($event)" /></label>
+        <app-planning-week [chantierId]="chantierId()!" [start]="weekStart()" [assignments]="assignments()" />
         @if (facade.capacites().editerStructure) {
           <form class="controls" (submit)="$event.preventDefault(); reserve()">
             <label>Activité <select name="activity" [(ngModel)]="activityId"><option value="">Choisir une activité</option>@for(a of activityRows(); track a.id) { <option [value]="a.id">{{ a.libelle }}</option> }</select></label>
@@ -82,9 +91,14 @@ import { marketPlanning } from '../services/planning-market';
           </form><p>La réservation couvre les jours travaillés de l’activité. Saisir 0 retire cette réservation.</p>
         }
         <div class="table-wrap"><table><thead><tr><th>Collaborateur</th>@for(day of days(); track day) { <th>{{ day | date:'EEE dd/MM' }}</th> }</tr></thead><tbody>
-          @for (employee of employees(); track employee.id) { <tr><td>{{ employee.name }}</td>@for(day of days(); track day) { @let load = loadFor(employee.id,day); <td [class.overload]="load?.overload">{{ (load?.reservedMinutes ?? 0)/60 }} / {{ (load?.calendarMinutes ?? 0)/60 }} h @if(load?.overload) { <strong> · Surcharge</strong> }</td> }</tr> }
+          @for (employee of employees(); track employee.id) { <tr><td>{{ employee.name }}</td>@for(day of days(); track day) { @let load = loadFor(employee.id,day); <td [class.overload]="load?.overload || load?.approvedAbsence">{{ (load?.reservedMinutes ?? 0)/60 }} h ici
+            @if(load?.otherReservedMinutes) {<br/><small>+ {{ load!.otherReservedMinutes/60 }} h ailleurs</small>}
+            <br/><small>Repère : {{ (load?.calendarMinutes ?? 0)/60 }} h</small>
+            @if(load?.approvedAbsence) {<br/><strong>Congé approuvé</strong>} @else if(load?.partialAbsence) {<br/><strong>Congé partiel · vérifier les horaires</strong>}
+            @if(load?.overload) { <br/><strong>Surcharge à vérifier</strong> }</td> }</tr> }
           @empty { <tr><td colspan="8">Aucun collaborateur affecté chargé. Constituez d’abord l’équipe du chantier.</td></tr> }
         </tbody></table></div>
+        <p>Le repère est la plus grande capacité journalière des calendriers concernés, sans cumul des journées. Les congés partiels restent des alertes tant que leurs horaires ne sont pas précisés. Les engins ne sont pas encore suivis dans cette grille.</p>
         <h3>Réservations enregistrées</h3><ul>@for(a of activityRows(); track a.id) { @for(r of a.planningAllocations; track r.affectationId) { <li>{{ a.libelle }} · {{ assignmentName(r.affectationId) }} · {{ r.minutesParJour/60 }} h/j</li> } }</ul>
         <h3>Préparer les activités de la période</h3>
         <p>Activités qui recoupent ces sept jours. Ouvrez une activité pour compléter ses besoins ou préparer sa demande d’achat. Cette liste ne valide pas la semaine.</p>
@@ -93,6 +107,7 @@ import { marketPlanning } from '../services/planning-market';
             <tr><td><nf-button variant="tertiary" (clicked)="facade.openActivite(a.id)">{{ a.libelle }}</nf-button></td><td>{{ a.dateDebut | date:'dd/MM/yyyy' }}</td><td>{{ a.dateFin | date:'dd/MM/yyyy' }}</td><td>{{ a.planningNeeds?.length ?? 0 }} besoin(s) renseigné(s)</td></tr>
           } @empty {<tr><td colspan="4">Aucune activité sur cette période.</td></tr>}
         </tbody></table></div>
+        } @else {<app-planning-supplies [chantierId]="chantierId()!" />}
       }
     }
   `,
@@ -116,7 +131,8 @@ export class PlanningBusinessViewsComponent {
   readonly chantierId=computed(()=>this.facade.summary().monoChantier?.id);
   readonly loading=signal(false); readonly saving=signal(false); readonly error=signal('');
   readonly includeTechnical=signal(false); readonly includeExecution=signal(false);
-  readonly weekStart=signal(toIsoDate(new Date()));
+  readonly weekStart=signal(this.monday(toIsoDate(new Date())));
+  readonly resourceTab=signal<'EQUIPES'|'ACHATS'>('EQUIPES');
   readonly assignments=signal<ChantierAffectation[]>([]); readonly loads=signal<PlanningResourceDay[]>([]);
   readonly situations=signal<SituationListItem[]>([]); readonly invoices=signal<ApiFactureClient[]>([]);
   activityId=''; assignmentId=''; hours=8; private generation=0;
@@ -128,7 +144,8 @@ export class PlanningBusinessViewsComponent {
   readonly days=computed(()=>Array.from({length:7},(_,i)=> { const d=new Date(this.weekStart()+'T12:00:00'); d.setDate(d.getDate()+i); return toIsoDate(d); }));
   readonly weekActivities=computed(()=>this.activityRows().filter(a=>a.dateDebut<=this.days()[6] && a.dateFin>=this.weekStart()));
   constructor() { effect(()=>{this.chantierId();this.view();this.weekStart();void this.reload();}); }
-  setWeek(value:string) { if (/^\d{4}-\d{2}-\d{2}$/.test(value)) this.weekStart.set(value); }
+  private monday(value:string):string {const d=new Date(value+'T12:00:00');d.setDate(d.getDate()-(d.getDay()+6)%7);return toIsoDate(d);}
+  setWeek(value:string) { if (/^\d{4}-\d{2}-\d{2}$/.test(value)) this.weekStart.set(this.monday(value)); }
   loadFor(id:string,date:string) {return this.loads().find(r=>r.employeId===id && r.date===date);}
   assignmentName(id:string) {const a=this.assignments().find(a=>a.id===id);return a?.employeNom || a?.employeMatricule || id;}
   async reload():Promise<void> {
@@ -179,8 +196,8 @@ export class PlanningBusinessViewsComponent {
       rows.push(['Activité / jalon','Début','Fin','Avancement physique (%)']);
       this.clientRows().forEach(a=>rows.push([a.libelle,a.dateDebut,a.dateFin,a.avancementPercent??0]));
     } else if(this.view()==='RESSOURCES') {
-      rows.push(['Charge indicative du chantier, hors absences et autres chantiers'],['Collaborateur',...this.days().map(d=>d+' (heures réservées / capacité)')]);
-      this.employees().forEach(e=>rows.push([e.name,...this.days().map(d=>{const r=this.loadFor(e.id,d);return `${(r?.reservedMinutes??0)/60} / ${(r?.calendarMinutes??0)/60}`;})]));
+      rows.push(['Charge indicative : ici + autres chantiers ; repère calendrier ; congé approuvé'],['Collaborateur',...this.days()]);
+      this.employees().forEach(e=>rows.push([e.name,...this.days().map(d=>{const r=this.loadFor(e.id,d);return `${(r?.reservedMinutes??0)/60} h ici + ${(r?.otherReservedMinutes??0)/60} h ailleurs / repère ${(r?.calendarMinutes??0)/60} h${r?.approvedAbsence?' ; congé approuvé':r?.partialAbsence?' ; congé partiel à vérifier':''}`;})]));
     } else {
       rows.push(['Jalon financier prévu','Date']);this.financialMilestones().forEach(a=>rows.push([a.libelle,a.dateDebut]));
       rows.push([],['Situation','Début période','Fin période','Statut','Net TTC — devise à vérifier sur la pièce']);

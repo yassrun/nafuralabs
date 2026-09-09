@@ -67,6 +67,8 @@ class PlanningPolicyTest {
         assertThat(c.isAdministrerCalendrier()).isFalse();
         assertThat(c.isGererVues()).isTrue();
         policy.assertCanRead(CHANTIER);
+        assertThat(policy.canPrepareWeek(CHANTIER)).isTrue();
+        assertThat(policy.canValidateWeek(CHANTIER)).isFalse();
         assertThatThrownBy(() -> policy.assertCanEditStructure(CHANTIER)).satisfies(this::forbidden);
         assertThatThrownBy(() -> policy.assertCanAdministerCalendar(CHANTIER)).satisfies(this::forbidden);
     }
@@ -77,6 +79,8 @@ class PlanningPolicyTest {
         stubAffectation(CHANTIER, ChantierRoleCodes.BTP_CHEF_CHANTIER);
 
         PlanningCapacitesDto c = policy.capacites(AUTRE);
+        assertThat(policy.canPrepareWeek(AUTRE)).isFalse();
+        assertThat(policy.canValidateWeek(AUTRE)).isFalse();
         assertThat(c.isLire()).isFalse();
         assertThat(c.isEditerStructure()).isFalse();
         assertThatThrownBy(() -> policy.assertCanRead(AUTRE)).satisfies(this::forbidden);
@@ -95,6 +99,8 @@ class PlanningPolicyTest {
         assertThat(c.isProposerCalendrier()).isTrue();
         assertThat(c.isAdministrerCalendrier()).isFalse();
         policy.assertCanEditStructure(CHANTIER);
+        assertThat(policy.canPrepareWeek(CHANTIER)).isTrue();
+        assertThat(policy.canValidateWeek(CHANTIER)).isTrue();
         assertThatThrownBy(() -> policy.assertCanAdministerCalendar(CHANTIER)).satisfies(this::forbidden);
     }
 

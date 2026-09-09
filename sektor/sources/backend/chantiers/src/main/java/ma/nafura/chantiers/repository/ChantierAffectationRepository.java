@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ChantierAffectationRepository extends TenantScopedRepository<ChantierAffectation, String> {
 
+    List<ChantierAffectation> findByTenantIdAndEmployeIdInAndIsActiveTrue(UUID tenantId, java.util.Collection<String> employeeIds);
+
     List<ChantierAffectation> findByTenantIdAndChantierIdAndIsActiveTrueOrderByRoleCodeAscEmployeIdAsc(
             UUID tenantId, String chantierId);
 

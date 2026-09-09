@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ActiviteChantierRepository extends TenantScopedRepository<ActiviteChantier, String> {
 
+    List<ActiviteChantier> findByTenantIdAndChantierIdInAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(
+            UUID tenantId, java.util.Collection<String> chantierIds, java.time.LocalDate finish, java.time.LocalDate start);
+
     List<ActiviteChantier> findByTenantIdAndChantierIdOrderByOrdreAscLibelleAsc(
             UUID tenantId, String chantierId);
 

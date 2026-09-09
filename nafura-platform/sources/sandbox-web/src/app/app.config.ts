@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding, RouteReuseStrategy } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { MatDialogModule } from '@angular/material/dialog';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
@@ -30,7 +30,8 @@ class EmptyTranslateLoader implements TranslateLoader {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideAnimationsAsync(),
+    // Sync animations: avoid CDK HighContrastModeDetector NG0203 with Material menus/dialogs.
+    provideAnimations(),
     provideHttpClient(),
     provideRouter(APP_ROUTES, withComponentInputBinding()),
     { provide: RouteReuseStrategy, useClass: SandboxNoReuseStrategy },

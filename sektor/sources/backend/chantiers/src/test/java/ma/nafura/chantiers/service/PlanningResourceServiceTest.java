@@ -18,7 +18,8 @@ class PlanningResourceServiceTest {
     final ChantierAffectationRepository assignments=mock(ChantierAffectationRepository.class);
     final CalendrierChantierService calendars=mock(CalendrierChantierService.class);
     final PlanningPolicy policy=mock(PlanningPolicy.class);
-    final PlanningResourceService service=new PlanningResourceService(activities,assignments,calendars,policy);
+    final ma.nafura.rh.repository.CongeRepository leaves=mock(ma.nafura.rh.repository.CongeRepository.class);
+    final PlanningResourceService service=new PlanningResourceService(activities,assignments,calendars,policy,leaves);
     ActiviteChantier activity;
     ChantierAffectation assignment;
     @BeforeEach void setup() {
@@ -27,6 +28,10 @@ class PlanningResourceServiceTest {
         assignment=ChantierAffectation.builder().id("r").chantierId("c").employeId("e").dateDebut(monday).build();
         when(activities.findByIdAndTenantId("a",tenant)).thenReturn(Optional.of(activity));
         when(assignments.findByIdAndTenantId("r",tenant)).thenReturn(Optional.of(assignment));
+        when(assignments.findByTenantIdAndChantierIdAndIsActiveTrueOrderByRoleCodeAscEmployeIdAsc(tenant,"c")).thenReturn(List.of(assignment));
+        when(assignments.findByTenantIdAndEmployeIdInAndIsActiveTrue(eq(tenant),any())).thenReturn(List.of(assignment));
+        when(activities.findByTenantIdAndChantierIdInAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(eq(tenant),any(),eq(monday.plusDays(6)),eq(monday))).thenReturn(List.of(activity));
+        when(calendars.calculatorFor("c")).thenReturn(CalendrierOuvreCalculator.standard("Africa/Casablanca"));
     }
     @AfterEach void cleanup(){TenantContext.clear();}
     @Test void replaceAndRemoveReservation() {
@@ -58,5 +63,39 @@ class PlanningResourceServiceTest {
         assertThat(week.getFirst().reservedMinutes()).isEqualTo(600);
         assertThat(week.getFirst().overload()).isTrue();
         assertThat(week.get(5).reservedMinutes()).isZero();
+    }
+    @Test void aggregatesOtherChantiersWithoutExposingTheirActivitiesAndFlagsApprovedLeave() {
+        activity.setPlanningAllocations(List.of(new PlanningAllocation("r",240)));
+        var external=ChantierAffectation.builder().id("outside").chantierId("other").employeId("e").dateDebut(monday).dateFin(monday).build();
+        var task=ActiviteChantier.builder().id("secret-activity").chantierId("other").forme(ActiviteForme.ACTIVITE).dateDebut(monday).dateFin(monday.plusDays(1)).planningAllocations(List.of(new PlanningAllocation("outside",360))).build();
+        when(assignments.findByTenantIdAndEmployeIdInAndIsActiveTrue(eq(tenant),any())).thenReturn(List.of(assignment,external));
+        when(activities.findByTenantIdAndChantierIdInAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(eq(tenant),any(),any(),any())).thenReturn(List.of(activity,task));
+        when(calendars.calculatorForResourceAggregation("other")).thenReturn(CalendrierOuvreCalculator.standard("Africa/Casablanca"));
+        when(leaves.findByTenantIdAndEmployeIdInAndStatusInAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(eq(tenant),eq(Set.of("e")),eq(Set.of("APPROUVE","EN_COURS","SOLDE")),eq(monday.plusDays(6)),eq(monday)))
+                .thenReturn(List.of(ma.nafura.rh.domain.conge.Conge.builder().employeId("e").dateDebut(monday).dateFin(monday).nombreJours(java.math.BigDecimal.ONE).build()));
+        var week=service.week("c",monday);
+        assertThat(week.getFirst().otherReservedMinutes()).isEqualTo(360);
+        assertThat(week.getFirst().overload()).isTrue();
+        assertThat(week.getFirst().approvedAbsence()).isTrue();
+        assertThat(week.getFirst().activityIds()).containsExactly("a");
+        assertThat(week.get(1).otherReservedMinutes()).isZero();
+        assertThat(week.get(1).approvedAbsence()).isFalse();
+    }
+    @Test void halfDayLeaveIsAnAlertNotAConfirmedFullDayConflict() {
+        activity.setPlanningAllocations(List.of(new PlanningAllocation("r",240)));
+        when(leaves.findByTenantIdAndEmployeIdInAndStatusInAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(eq(tenant),any(),any(),any(),any()))
+                .thenReturn(List.of(ma.nafura.rh.domain.conge.Conge.builder().employeId("e").dateDebut(monday).dateFin(monday).nombreJours(new java.math.BigDecimal("0.5")).build()));
+        var day=service.week("c",monday).getFirst();assertThat(day.partialAbsence()).isTrue();assertThat(day.approvedAbsence()).isFalse();
+    }
+    @Test void expiredLocalAssignmentDoesNotExposeOtherChantierLoadsOrLeave() {
+        assignment.setDateFin(monday.minusDays(1));
+        assertThat(service.week("c",monday)).isEmpty();
+        verifyNoInteractions(leaves);
+        verify(assignments,never()).findByTenantIdAndEmployeIdInAndIsActiveTrue(any(),any());
+    }
+    @Test void readPermissionIsCheckedBeforeCrossChantierOrRhQueries() {
+        doThrow(new IllegalStateException("forbidden")).when(policy).assertCanRead("c");
+        assertThatThrownBy(()->service.week("c",monday)).hasMessage("forbidden");
+        verifyNoInteractions(leaves);verify(assignments,never()).findByTenantIdAndEmployeIdInAndIsActiveTrue(any(),any());
     }
 }

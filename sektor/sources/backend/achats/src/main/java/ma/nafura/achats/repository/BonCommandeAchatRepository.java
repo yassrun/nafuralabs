@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BonCommandeAchatRepository extends TenantScopedRepository<BonCommandeAchat, UUID> {
 
+    List<BonCommandeAchat> findByTenantIdAndChantierIdAndDaIdIn(UUID tenantId, String chantierId, java.util.Collection<String> demandeIds);
+
     Optional<BonCommandeAchat> findByTenantIdAndNumero(UUID tenantId, String numero);
 
     List<BonCommandeAchat> findByTenantIdOrderByCreatedAtDesc(UUID tenantId);

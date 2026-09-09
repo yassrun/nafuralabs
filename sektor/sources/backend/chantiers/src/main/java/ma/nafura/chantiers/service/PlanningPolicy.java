@@ -46,6 +46,19 @@ public class PlanningPolicy {
         refuseUnless(resolve(chantierId).isAdministrerCalendrier());
     }
 
+    public boolean canPrepareWeek(String chantierId) {
+        var roles=affectationPolicy.actorRolesOn(chantierId);
+        return canValidateWeek(chantierId) || (roles!=null && roles.stream()
+                .map(ChantierRoleCodes::normalize).anyMatch(ChantierRoleCodes.BTP_CHEF_CHANTIER::equals));
+    }
+
+    public boolean canValidateWeek(String chantierId) {
+        return affectationPolicy.actorGradeOn(chantierId)>=ChantierRoleCodes.COMMAND_GRADE_CONDUCTEUR;
+    }
+
+    public void assertCanPrepareWeek(String chantierId) { refuseUnless(canPrepareWeek(chantierId)); }
+    public void assertCanValidateWeek(String chantierId) { refuseUnless(canValidateWeek(chantierId)); }
+
     static PlanningCapacitesDto fromGradeAndRoles(int grade, List<String> roles, String iamRole) {
         if (grade >= ChantierRoleCodes.COMMAND_GRADE_DIRECTION) {
             return PlanningCapacitesDto.applyAll();

@@ -24,7 +24,11 @@
       "@core/*": ["../web/core/*"],
       "@lib/*": ["../web/lib/*"],
       "@app/*": ["./src/app/*"],
-      "@env": ["./src/environments/environment"]
+      "@env": ["./src/environments/environment"],
+
+      // Pin Angular / i18n on this app's node_modules (avoids dual @angular → NG0203).
+      "@angular/*": ["./node_modules/@angular/*"],
+      "@ngx-translate/*": ["./node_modules/@ngx-translate/*"]
     }
   },
   "angularCompilerOptions": {

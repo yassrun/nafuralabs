@@ -11,6 +11,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CongeRepository extends TenantScopedRepository<Conge, String> {
 
+    List<Conge> findByTenantIdAndEmployeIdInAndStatusInAndDateDebutLessThanEqualAndDateFinGreaterThanEqual(
+            UUID tenantId, Collection<String> employeeIds, Collection<String> statuses, LocalDate to, LocalDate from);
+
     List<Conge> findByTenantIdAndStatusInAndDateDebutLessThanEqualAndDateFinGreaterThanEqualOrderByDateDebutAsc(
             UUID tenantId, Collection<String> statuses, LocalDate to, LocalDate from);
 

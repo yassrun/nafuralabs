@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { FeatureApiService } from '@platform/lib/anatomy';
+import type { PlanningWeekView } from '../planning/components/planning-week.component';
 
 export type ActiviteStatus = 'PLANIFIE' | 'EN_COURS' | 'TERMINE' | 'EN_RETARD';
 export type PrecedenceType = 'FD' | 'DD' | 'FF' | 'DF';
@@ -135,7 +136,13 @@ export interface CalendrierVersionWrite {
   exceptions?: CalendrierException[];
 }
 
-export interface PlanningResourceDay { employeId: string; date: string; reservedMinutes: number; calendarMinutes: number; overload: boolean; activityIds: string[]; }
+export interface PlanningResourceDay { employeId: string; date: string; reservedMinutes: number; calendarMinutes: number; overload: boolean; activityIds: string[]; otherReservedMinutes:number; approvedAbsence:boolean; partialAbsence:boolean; }
+export interface PlanningSupply {
+  activityId:string;activityLabel:string;needId:string;label:string;quantity:number;unit:string;
+  activityStart:string;neededDate:string;launchDate:string;demandId:string|null;demandNumber:string|null;
+  demandStatus:string|null;demandDate:string|null;sourceUnavailable:boolean;
+  orders:{id:string;number:string;status:string;expectedDate:string|null;receipts:{id:string;number:string;date:string;status:string}[]}[];
+}
 export interface PlanningNetworkRow {
   id: string; label: string; previousStart: string; previousFinish: string;
   start: string; finish: string; latestStart: string; floatDays: number; critical: boolean; changed: boolean;
@@ -222,6 +229,16 @@ export class ActiviteApiService extends FeatureApiService<
 
   async resourceWeek(chantierId: string, start: string): Promise<PlanningResourceDay[]> {
     return this.get<PlanningResourceDay[]>(`${this.basePath}/${chantierId}/planning-resources?start=${encodeURIComponent(start)}`);
+  }
+  planningSupplies(chantierId:string):Promise<PlanningSupply[]> {
+    return this.get(`${this.basePath}/${chantierId}/planning-supplies`);
+  }
+
+  planningWeek(chantierId:string,start:string):Promise<PlanningWeekView> {
+    return this.get(`/api/v1/chantiers/${chantierId}/planning-weeks/${start}`);
+  }
+  commandPlanningWeek(chantierId:string,start:string,action:string,body:{version:number|null;token:string;note:string}):Promise<PlanningWeekView> {
+    return this.post(`/api/v1/chantiers/${chantierId}/planning-weeks/${start}/${action}`,body);
   }
   async reserveResource(chantierId: string, activityId: string, affectationId: string, minutesParJour: number): Promise<void> {
     await this.put<void>(`${this.basePath}/${chantierId}/planning-resources`, { activityId, affectationId, minutesParJour });

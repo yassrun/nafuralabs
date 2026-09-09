@@ -150,6 +150,12 @@ public class CalendrierChantierService {
     public CalendrierOuvreCalculator calculatorFor(String chantierId) {
         planningPolicy.assertCanRead(chantierId);
         chantierService.getById(chantierId);
+        return calculatorForResourceAggregation(chantierId);
+    }
+
+    /** Internal capacity calculation only: caller scopes the employees to an authorized chantier.
+     * Other chantier identities and calendar details must not be returned to that caller. */
+    CalendrierOuvreCalculator calculatorForResourceAggregation(String chantierId) {
         return calendrierRepository.findByTenantIdAndChantierId(tenantId(), chantierId)
                 .map(this::toCalculator)
                 .orElseGet(() -> activiteRepository.countByTenantIdAndChantierId(tenantId(), chantierId) > 0

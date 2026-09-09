@@ -448,19 +448,41 @@ Parcours matérialisés : navigation des six vues ; sélection/détail d'activit
 
 La réinitialisation de la page rétablit les données d'exemple. La maquette ne simule pas les permissions réelles, la réservation transactionnelle, le PDF final, les événements ERP, le multilingue ni le calcul complet FD/DD/FF/DF. Les comportements illustratifs sont signalés dans l'interface.
 
-## 19. Décisions à prendre à la prochaine séance
+## 19. Décisions métier et arbitrages restants
+
+Accord utilisateur du 9 septembre 2026 : A01, A02, A03 et A09 sont adoptées ci-dessous. Cet accord fixe la cible ; il ne signifie pas que les circuits de validation sont déjà implémentés. A05–A08 restent des propositions.
 
 | ID | Question | Proposition pour commencer |
 |---|---|---|
-| A01 | Qui valide une semaine et peut-il valider sa propre préparation ? | Conducteur ou supérieur du périmètre ; auto-approbation à décider explicitement. |
-| A02 | Qui autorise un report sur la semaine suivante ? | Chef propose ; conducteur valide si impact dates/ressources ou semaine déjà approuvée. |
-| A03 | Qui publie et enregistre l'accord client ? | DT/DG ou délégation explicite avec preuve. |
+| A01 | Qui valide une semaine et peut-il valider sa propre préparation ? | **Adopté** : le chef prépare ; le conducteur ou un supérieur habilité dans le périmètre valide. Auto-validation interdite, y compris pour la direction. |
+| A02 | Qui autorise un report sur la semaine suivante ? | **Adopté** : le chef propose ; le conducteur ou supérieur habilité valide les impacts sur dates ou ressources. Une semaine déjà validée doit être validée à nouveau après ces changements. |
+| A03 | Qui publie et enregistre l'accord client ? | **Adopté** : DT/DG ou délégataire explicite ; publication d'une version figée. L'accord client est enregistré séparément avec sa preuve. |
 | A04 | Le calendrier peut-il varier selon une activité ? | Oui — demandé explicitement : bouton chantier et bouton dans chaque activité. Héritage par défaut, calendrier spécifique facultatif, retour à l’héritage. Délégations et approbations métier restent à préciser. |
 | A05 | Comment compter les jours et les nuits avec changement de fuseau ? | Minutes réelles pour capacité, affichage local ; jour ouvré équivalent explicite. |
 | A06 | Quelle pondération pour l'avancement global ? | Heures prévues si fiables, sinon poids métier approuvés ; pas de moyenne silencieuse. |
 | A07 | Quelle base monétaire dans la trésorerie ? | Net à encaisser/décaisser issu des sources ; préciser taxes, retenues et devises par marché. |
 | A08 | Faut-il saisir les personnes ou uniquement l'équipe dans Ma semaine ? | Équipe + capacité en premier, détail nominatif lorsque nécessaire au contrôle. |
-| A09 | Quel comportement en surcharge ? | Brouillon autorisé avec alerte, validation bloquée pour les conflits fermes. |
+| A09 | Quel comportement en surcharge ? | **Adopté** : brouillon autorisé avec alerte ; validation bloquée uniquement sur un conflit confirmé. Une surcharge indicative locale ne vaut pas conflit confirmé. |
+
+### 19.1 Cycle hebdomadaire retenu pour l'implémentation
+
+1. **Brouillon** : le préparateur sélectionne les activités de la semaine, précise les moyens et les besoins. Aucun engagement n'est créé par la simple préparation.
+2. **Soumise** : une révision du contenu est figée et identifiée. Le validateur voit les dates, ressources, besoins, alertes et écarts de cette révision.
+3. **Validée** : décision d'un conducteur ou supérieur habilité distinct du préparateur. Identité, date et révision sont conservées. Modifier le préparateur ou soumettre à nouveau ne doit pas permettre de contourner la séparation des personnes.
+4. **À corriger** : le validateur renvoie la semaine avec un motif. Le préparateur produit une nouvelle révision avant soumission.
+5. **À revalider** : après modification des dates ou des ressources d'une révision validée, celle-ci reste consultable dans l'historique mais ne représente plus le planning courant approuvé.
+
+Un report présente les conséquences sur la semaine d'origine et celle de destination ; il ne recopie pas silencieusement l'accord de la première vers la seconde. Le réalisé reste distinct du prévisionnel et n'est pas effacé par une révision.
+
+### 19.2 Critères de réception
+
+- Un chef habilité sur le chantier peut préparer et soumettre ; il ne valide pas.
+- Un conducteur ne valide pas sa propre préparation. La même interdiction s'applique au DT/DG.
+- Une habilitation sur un autre chantier n'accorde aucun droit sur cette semaine.
+- Un changement depuis la soumission impose une nouvelle révision ; une validation ne peut pas porter silencieusement sur un contenu différent de celui consulté.
+- Les décisions et versions antérieures restent consultables après correction ou report.
+- Un conflit confirmé bloque la validation ; une donnée de disponibilité inconnue ou une surcharge indicative est présentée comme telle.
+- Publier une version client ne signifie pas qu'elle est acceptée. L'accord doit référencer exactement la version et sa preuve.
 
 ## 20. Références externes de principe
 

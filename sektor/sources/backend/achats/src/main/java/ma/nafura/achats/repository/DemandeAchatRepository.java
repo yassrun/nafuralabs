@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DemandeAchatRepository extends TenantScopedRepository<DemandeAchat, UUID> {
 
+    List<DemandeAchat> findByTenantIdAndChantierIdAndIdIn(UUID tenantId, String chantierId, java.util.Collection<UUID> ids);
+
     Optional<DemandeAchat> findByTenantIdAndNumero(UUID tenantId, String numero);
 
     List<DemandeAchat> findByTenantIdOrderByCreatedAtDesc(UUID tenantId);

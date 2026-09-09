@@ -36,7 +36,19 @@
 
       // Pin Angular / i18n sur la copie Sektor (évite Signal NG19 vs NG20).
       "@angular/*": ["./node_modules/@angular/*"],
-      "@ngx-translate/*": ["./node_modules/@ngx-translate/*"]
+      // Secondary entry points use export maps in Angular 22, not physical directories.
+      // TypeScript reads declarations; esbuild skips .d.ts and resolves the runtime entry.
+      "@angular/core/*": ["./node_modules/@angular/core/types/*.d.ts", "./node_modules/@angular/core/fesm2022/*.mjs"],
+      "@angular/core/primitives/*": ["./node_modules/@angular/core/types/primitives-*.d.ts", "./node_modules/@angular/core/fesm2022/primitives-*.mjs"],
+      "@angular/common/*": ["./node_modules/@angular/common/types/*.d.ts", "./node_modules/@angular/common/fesm2022/*.mjs", "./node_modules/@angular/common/*"],
+      "@angular/common/http/testing": ["./node_modules/@angular/common/types/http-testing.d.ts", "./node_modules/@angular/common/fesm2022/http-testing.mjs"],
+      "@angular/material/*": ["./node_modules/@angular/material/types/*.d.ts", "./node_modules/@angular/material/fesm2022/*.mjs"],
+      "@angular/cdk/*": ["./node_modules/@angular/cdk/types/*.d.ts", "./node_modules/@angular/cdk/fesm2022/*.mjs"],
+      "@angular/platform-browser/animations": ["./node_modules/@angular/platform-browser/types/animations.d.ts", "./node_modules/@angular/platform-browser/fesm2022/animations.mjs"],
+      "@angular/platform-browser/animations/async": ["./node_modules/@angular/platform-browser/types/animations-async.d.ts", "./node_modules/@angular/platform-browser/fesm2022/animations-async.mjs"],
+      "@ngx-translate/*": ["./node_modules/@ngx-translate/*"],
+      "lucide-angular": ["./node_modules/lucide-angular"],
+      "ng2-charts": ["./node_modules/ng2-charts"]
     }
   },
   "angularCompilerOptions": {

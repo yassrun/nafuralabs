@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReceptionAchatRepository extends JpaRepository<ReceptionAchat, UUID> {
 
+    List<ReceptionAchat> findByTenantIdAndBonCommandeAchatIdIn(UUID tenantId, java.util.Collection<UUID> commandeIds);
+
     List<ReceptionAchat> findByTenantIdAndBonCommandeAchatIdOrderByCreatedAtDesc(
             UUID tenantId, UUID bonCommandeAchatId);
 
