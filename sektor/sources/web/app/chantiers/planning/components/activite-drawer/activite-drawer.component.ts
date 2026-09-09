@@ -13,11 +13,12 @@ import {
 import { ActiviteApiService, type ActiviteForme, type PrecedenceType } from '../../../services/activite-api.service';
 import { naturesForForme } from '../../services/planning-natures';
 import { PlanningFacade, toIsoDate } from '../../services/planning.facade';
+import { PlanningNeedsComponent } from '../planning-needs.component';
 
 @Component({
   selector: 'app-activite-drawer',
   standalone: true,
-  imports: [DrawerComponent, BadgeComponent, ButtonComponent, NfSelectComponent, FormsModule, TranslateModule],
+  imports: [PlanningNeedsComponent, DrawerComponent, BadgeComponent, ButtonComponent, NfSelectComponent, FormsModule, TranslateModule],
   template: `
     <nf-drawer
       [open]="facade.drawerOpen()"
@@ -166,6 +167,11 @@ import { PlanningFacade, toIsoDate } from '../../services/planning.facade';
           }
 
           @if (facade.drawerMode() === 'edit') {
+            @if(facade.selectedActiviteDetail()?.activite; as activity) {
+              @if(activity.forme === 'ACTIVITE') {
+                <details class="activite-drawer__block"><summary>Ressources et besoins</summary><app-planning-needs [activityId]="activity.id" /></details>
+              }
+            }
             <details class="activite-drawer__block" data-testid="activite-travaux">
               <summary>{{ 'chantiers.planning.drawer.travauxLies' | translate }}</summary>
               @if (rattachements().length) {

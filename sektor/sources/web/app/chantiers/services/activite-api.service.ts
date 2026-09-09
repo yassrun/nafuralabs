@@ -35,6 +35,12 @@ export interface ActiviteChantier {
   status: ActiviteStatus;
   rattachements?: ActiviteRattachement[];
   planningAllocations?: { affectationId: string; minutesParJour: number }[];
+  planningNeeds?: PlanningNeed[];
+}
+
+export interface PlanningNeed {
+  id:string; type:'PERSONNEL'|'MATIERE'|'MATERIEL'|'SOUS_TRAITANCE'; label:string; quantity:number; unit:string;
+  daysBeforeStart:number; leadDays:number; demandeId?:string; demandeNumero?:string; requestedDate?:string;
 }
 
 export interface ActivitePrecedence {
@@ -143,6 +149,16 @@ export class ActiviteApiService extends FeatureApiService<
   Partial<ActiviteChantier>
 > {
   protected override basePath = '/api/v1/chantiers';
+
+  addNeed(chantierId:string,activityId:string,body:Pick<PlanningNeed,'type'|'label'|'quantity'|'unit'|'daysBeforeStart'|'leadDays'>):Promise<PlanningNeed> {
+    return this.post<PlanningNeed>(`${this.basePath}/${chantierId}/activites/${activityId}/needs`,body);
+  }
+  removeNeed(chantierId:string,activityId:string,id:string):Promise<void> {
+    return this.deleteRequest(`${this.basePath}/${chantierId}/activites/${activityId}/needs/${id}`);
+  }
+  preparePurchase(chantierId:string,activityId:string,id:string):Promise<PlanningNeed> {
+    return this.post<PlanningNeed>(`${this.basePath}/${chantierId}/activites/${activityId}/needs/${id}/purchase`,{});
+  }
 
   async planning(chantierId: string): Promise<ActivitePlanning> {
     return this.get<ActivitePlanning>(`${this.basePath}/${chantierId}/activites/planning`);

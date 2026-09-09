@@ -587,6 +587,7 @@ public class ActiviteChantierService {
                 .dureeMinutesOuvrees(forme.estPhase() ? null : entity.getDureeMinutesOuvrees())
                 .calendrierSpecifique(entity.getCalendrierSpecifique())
                 .planningAllocations(entity.getPlanningAllocations())
+                .planningNeeds(entity.getPlanningNeeds())
                 .ordre(entity.getOrdre())
                 .avancementPercent(entity.getAvancementPercent())
                 .status(entity.getStatus())

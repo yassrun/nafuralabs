@@ -90,6 +90,10 @@ public class ActiviteChantier {
     @Column(name = "planning_allocations", columnDefinition = "jsonb")
     private java.util.List<PlanningAllocation> planningAllocations;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(name = "planning_needs", columnDefinition = "jsonb")
+    private java.util.List<PlanningNeed> planningNeeds;
+
     @Column(nullable = false)
     private int ordre;
 

@@ -5,17 +5,19 @@
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ Études / appels d'offres                               [Nouvelle étude]     │
-│ [Recherche n°, objet, MOA…] [Statut] [Phase] [Chargé] [Alertes] [Réinit.] │
+│ [Recherche n°, objet, MOA…] [État] [Chargé] [Alertes] [Réinit.]          │
 ├──────────────┬───────────┬────────────┬──────────┬──────────┬───────────────┤
-│ Étude        │ Échéance  │ Phase      │ Qualité  │ Alerte   │ Prochaine     │
+│ Étude        │ Échéance  │ État       │ Qualité  │ Alerte   │ Prochaine     │
 │ DE-0042      │ J-3       │ Chiffrage  │ 72 %     │ 3 coûts  │ Chiffrer poste│
-│ École Al Amal│ 29/08     │ En étude   │ établie  │ estimés  │ A-17       →  │
+│ École Al Amal│ 29/08     │            │ établie  │ estimés  │ A-17       →  │
 ├──────────────┴───────────┴────────────┴──────────┴──────────┴───────────────┤
 │ 1–25 sur 42                         [25 ▾]                 [‹] 1 2 [›]     │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 Une seule pagination. La prochaine action ouvre directement la phase ou le poste concerné.
+
+Colonne **État** unique : pendant le travail, le nom d’étape (Cadrage, Bordereau, Chiffrage) ; après soumission, le statut métier (En validation, Convertie, Perdu…). Pas de compteur `n/4`.
 
 ## Détail — phase Chiffrage
 
@@ -90,7 +92,7 @@ Un CTA par intention. Sur mobile, ce drawer occupe tout le viewport.
 │ [Rechercher…]       [Filtres] │
 ├──────────────────────────────┤
 │ DE-0042 · École Al Amal      │
-│ Chiffrage · En étude         │
+│ Chiffrage                    │
 │ Échéance J-3                 │
 │ ⚠ 3 coûts estimés            │
 │ [Chiffrer le prochain poste] │

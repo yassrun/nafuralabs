@@ -1,13 +1,8 @@
 import { buildListingConfig } from '@platform/lib/anatomy';
 import type { ColumnConfig, ListingRouteConfig } from '@platform/lib/anatomy/types';
-import { ETAPES_DOSSIER_ETUDE } from '@app/etudes/models';
 import type { DossierEtude } from '@app/etudes/models';
 
-import { backendToUiEtape, libelleUiEtape } from '../utils/dossier-etape.util';
-import {
-  DOSSIER_STATUT_LABELS,
-  DOSSIER_STATUT_VARIANTS,
-} from '../utils/dossier-status.util';
+import { labelEtatListing, variantEtatListing } from '../utils/dossier-status.util';
 
 export const DOSSIER_ROUTES: ListingRouteConfig<DossierEtude> = {
   detail: (item) => ['/etudes/dossiers', item.id],
@@ -51,29 +46,17 @@ function buildColumns(): ColumnConfig[] {
       width: '130px',
     },
     {
-      key: 'currentStep',
-      label: 'Étape',
-      field: 'currentStep',
-      type: 'text',
-      sortable: true,
-      width: '200px',
-      transform: (value: unknown) => {
-        const backend = Number(value);
-        if (!Number.isFinite(backend)) return String(value ?? '');
-        const ui = backendToUiEtape(backend);
-        return `${ui}/${ETAPES_DOSSIER_ETUDE.length} — ${libelleUiEtape(backend)}`;
-      },
-    },
-    {
       key: 'status',
-      label: 'Statut',
+      label: 'État',
       field: 'status',
       type: 'badge',
       sortable: true,
-      width: '140px',
-      badgeVariant: (value: unknown) => DOSSIER_STATUT_VARIANTS[String(value)] ?? 'default',
-      transform: (value: unknown) =>
-        DOSSIER_STATUT_LABELS[String(value)] ?? String(value ?? ''),
+      width: '180px',
+      badgeVariant: (value: unknown) => variantEtatListing(String(value ?? '')),
+      transform: (_value: unknown, item: unknown) => {
+        const row = item as Pick<DossierEtude, 'status' | 'currentStep'>;
+        return labelEtatListing(row?.status, row?.currentStep);
+      },
     },
     {
       key: 'updatedAt',

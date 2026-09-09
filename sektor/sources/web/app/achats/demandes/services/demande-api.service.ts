@@ -69,6 +69,15 @@ export class DemandeApiService extends FeatureApiService<
 
   override async getById(id: string | number): Promise<DemandeAchat> {
     const row = await this.get<ApiDemandeAchat>(`${this.basePath}/${id}`);
+    if (row.chantierId && !row.chantierName) {
+      try {
+        const chantier = await this.get<{ code: string; name: string }>(`/api/v1/chantiers/${encodeURIComponent(row.chantierId)}`);
+        row.chantierCode = chantier.code;
+        row.chantierName = chantier.name;
+      } catch {
+        // The purchase remains readable when its chantier is inaccessible.
+      }
+    }
     return demandeToUi(row);
   }
 

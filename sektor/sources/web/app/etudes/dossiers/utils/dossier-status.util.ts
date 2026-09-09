@@ -1,5 +1,7 @@
 import type { BadgeVariant } from '@platform/lib/anatomy/types';
 
+import { libelleUiEtape } from './dossier-etape.util';
+
 /** Libellés et variantes partagés liste + détail dossier d'étude. */
 export const DOSSIER_STATUT_LABELS: Record<string, string> = {
   BROUILLON: 'Brouillon',
@@ -48,6 +50,26 @@ export const PHASE_FLOW = [
 export function labelStatutDossier(status: string | undefined | null): string {
   if (!status) return '';
   return DOSSIER_STATUT_LABELS[status] ?? status;
+}
+
+const STATUTS_TRAVAIL = new Set(['BROUILLON', 'EN_ETUDE']);
+
+/**
+ * Listing : une cellule. Pendant le travail on montre l’étape (le statut
+ * est déductible). Après soumission on montre le statut métier.
+ */
+export function labelEtatListing(
+  status: string | undefined | null,
+  currentStep: number | undefined | null,
+): string {
+  if (STATUTS_TRAVAIL.has(status ?? '')) {
+    return libelleUiEtape(Number(currentStep ?? 1));
+  }
+  return labelStatutDossier(status);
+}
+
+export function variantEtatListing(status: string | undefined | null): BadgeVariant {
+  return DOSSIER_STATUT_VARIANTS[String(status ?? '')] ?? 'default';
 }
 
 export function labelPhase(phase: string | undefined | null): string {

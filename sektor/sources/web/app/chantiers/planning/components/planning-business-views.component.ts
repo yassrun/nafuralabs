@@ -9,6 +9,9 @@ import { ChantierAffectationApiService, type ChantierAffectation } from '../../s
 import { SituationApiService } from '../../situations/services/situation-api.service';
 import { FactureClientApiService, type ApiFactureClient } from '../../../ventes/factures/services/facture-client-api.service';
 import type { SituationListItem } from '../../models';
+import { BudgetApiService } from '../../budget/services/budget-api.service';
+import type { BudgetNoeud } from '../../budget/models/budget.model';
+import { marketPlanning } from '../services/planning-market';
 
 @Component({
   selector: 'app-planning-business-views', standalone: true,
@@ -22,6 +25,28 @@ import type { SituationListItem } from '../../models';
       @if (error()) { <p role="alert">{{ error() }}</p><nf-button variant="secondary" (clicked)="reload()">Réessayer</nf-button> }
       @if (view() === 'CLIENT') {
         <h2>Planning client</h2><p>Prévision courante issue du planning. Cette vue n’est pas une version publiée ni un accord du client.</p>
+        <h3>Lots et ouvrages vendus</h3>
+        <p>Dates issues des activités rattachées. L’avancement vient des ouvrages ; il ne s’agit pas d’une moyenne des activités. Un ouvrage sans activité reste visible.</p>
+        <div class="controls">
+          <nf-button variant="tertiary" (clicked)="collapseMarket()">Tout replier</nf-button>
+          <nf-button variant="tertiary" (clicked)="collapsed.set([])">Tout développer</nf-button>
+          <label><input type="checkbox" [ngModel]="showLinkedActivities()" (ngModelChange)="showLinkedActivities.set($event)" /> Détail des activités rattachées</label>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Lot / ouvrage</th><th>Début prévu</th><th>Fin prévue</th><th>Couverture du planning</th><th>Avancement ouvrages</th></tr></thead><tbody>
+          @for(row of visibleMarketRows(); track row.id) {
+            <tr><td [style.padding-left.rem]="0.75 + row.depth * 1.25">
+              @if(row.expandable) { <button type="button" [attr.aria-expanded]="!collapsed().includes(row.id)" [attr.aria-label]="'Développer ou replier ' + row.label" (click)="toggleMarket(row.id)">{{ collapsed().includes(row.id) ? '▸' : '▾' }}</button> }
+              {{ row.label }}</td>
+              <td>{{ row.start ? (row.start | date:'dd/MM/yyyy') : 'Non planifié' }}</td><td>{{ row.finish ? (row.finish | date:'dd/MM/yyyy') : '—' }}</td>
+              <td>{{ row.activityCount }} activité(s) · {{ row.plannedPosts }}/{{ row.totalPosts }} postes rattachés</td>
+              <td>{{ row.progress == null ? '—' : (row.progress | number:'1.0-1') + ' %' }}</td>
+            </tr>
+            @if(showLinkedActivities() && !collapsed().includes(row.id) && !row.expandable) {
+              @for(a of row.activities; track a.id) { <tr><td [style.padding-left.rem]="2 + row.depth * 1.25"><button type="button" (click)="facade.openActivite(a.id)">{{ a.libelle }}</button></td><td>{{ a.dateDebut | date:'dd/MM/yyyy' }}</td><td>{{ a.dateFin | date:'dd/MM/yyyy' }}</td><td colspan="2">Activité liée</td></tr> }
+            }
+          } @empty { <tr><td colspan="5">{{ loading() ? 'Chargement…' : 'Aucun ouvrage vendu chargé.' }}</td></tr> }
+        </tbody></table></div>
+        <h3>Jalons et activités complémentaires</h3>
         <div class="controls"><label><input type="checkbox" [ngModel]="includeTechnical()" (ngModelChange)="includeTechnical.set($event)" /> Jalons techniques</label>
         <label><input type="checkbox" [ngModel]="includeExecution()" (ngModelChange)="includeExecution.set($event)" /> Activités d’exécution</label></div>
         <div class="table-wrap"><table><thead><tr><th>Activité / jalon</th><th>Début</th><th>Fin</th><th>Avancement physique</th></tr></thead><tbody>
@@ -61,6 +86,13 @@ import type { SituationListItem } from '../../models';
           @empty { <tr><td colspan="8">Aucun collaborateur affecté chargé. Constituez d’abord l’équipe du chantier.</td></tr> }
         </tbody></table></div>
         <h3>Réservations enregistrées</h3><ul>@for(a of activityRows(); track a.id) { @for(r of a.planningAllocations; track r.affectationId) { <li>{{ a.libelle }} · {{ assignmentName(r.affectationId) }} · {{ r.minutesParJour/60 }} h/j</li> } }</ul>
+        <h3>Préparer les activités de la période</h3>
+        <p>Activités qui recoupent ces sept jours. Ouvrez une activité pour compléter ses besoins ou préparer sa demande d’achat. Cette liste ne valide pas la semaine.</p>
+        <div class="table-wrap"><table><thead><tr><th>Activité</th><th>Début</th><th>Fin</th><th>Besoins</th></tr></thead><tbody>
+          @for(a of weekActivities(); track a.id) {
+            <tr><td><nf-button variant="tertiary" (clicked)="facade.openActivite(a.id)">{{ a.libelle }}</nf-button></td><td>{{ a.dateDebut | date:'dd/MM/yyyy' }}</td><td>{{ a.dateFin | date:'dd/MM/yyyy' }}</td><td>{{ a.planningNeeds?.length ?? 0 }} besoin(s) renseigné(s)</td></tr>
+          } @empty {<tr><td colspan="4">Aucune activité sur cette période.</td></tr>}
+        </tbody></table></div>
       }
     }
   `,
@@ -73,6 +105,14 @@ export class PlanningBusinessViewsComponent {
   private readonly assignmentApi=inject(ChantierAffectationApiService);
   private readonly situationApi=inject(SituationApiService);
   private readonly invoiceApi=inject(FactureClientApiService);
+  private readonly budgetApi=inject(BudgetApiService);
+  readonly marketNodes=signal<BudgetNoeud[]>([]);
+  readonly collapsed=signal<string[]>([]);
+  readonly showLinkedActivities=signal(false);
+  readonly marketRows=computed(()=>marketPlanning(this.marketNodes(),this.allRows()));
+  readonly visibleMarketRows=computed(()=>this.marketRows().filter(row=>!row.parentIds.some(id=>this.collapsed().includes(id))));
+  toggleMarket(id:string):void {this.collapsed.update(ids=>ids.includes(id)?ids.filter(x=>x!==id):[...ids,id]);}
+  collapseMarket():void {this.collapsed.set(this.marketRows().map(row=>row.id));}
   readonly chantierId=computed(()=>this.facade.summary().monoChantier?.id);
   readonly loading=signal(false); readonly saving=signal(false); readonly error=signal('');
   readonly includeTechnical=signal(false); readonly includeExecution=signal(false);
@@ -86,6 +126,7 @@ export class PlanningBusinessViewsComponent {
   readonly financialMilestones=computed(()=>this.allRows().filter(a=>a.natureCode==='JALON_FINANCIER'));
   readonly employees=computed(()=>[...new Map(this.assignments().map(a=>[a.employeId,{id:a.employeId,name:a.employeNom || a.employeMatricule || a.employeId}])).values()]);
   readonly days=computed(()=>Array.from({length:7},(_,i)=> { const d=new Date(this.weekStart()+'T12:00:00'); d.setDate(d.getDate()+i); return toIsoDate(d); }));
+  readonly weekActivities=computed(()=>this.activityRows().filter(a=>a.dateDebut<=this.days()[6] && a.dateFin>=this.weekStart()));
   constructor() { effect(()=>{this.chantierId();this.view();this.weekStart();void this.reload();}); }
   setWeek(value:string) { if (/^\d{4}-\d{2}-\d{2}$/.test(value)) this.weekStart.set(value); }
   loadFor(id:string,date:string) {return this.loads().find(r=>r.employeId===id && r.date===date);}
@@ -93,10 +134,15 @@ export class PlanningBusinessViewsComponent {
   async reload():Promise<void> {
     const id=this.chantierId(), view=this.view(), start=this.weekStart(), generation=++this.generation;
     this.error.set('');this.assignments.set([]);this.loads.set([]);this.situations.set([]);this.invoices.set([]);
-    if(!id || view==='CLIENT') {this.loading.set(false);return;}
+    this.marketNodes.set([]);
+    if(!id) {this.loading.set(false);return;}
     this.loading.set(true);
     try {
-      if(view==='RESSOURCES') {
+      if(view==='CLIENT') {
+        const tree=await this.budgetApi.getArbre(id);
+        if(generation!==this.generation)return;
+        this.marketNodes.set(tree.lots??[]);
+      } else if(view==='RESSOURCES') {
         const [assignments,loads]=await Promise.all([this.assignmentApi.listByChantier(id),this.api.resourceWeek(id,start)]);
         if(generation!==this.generation)return;
         this.assignments.set(assignments.filter(a=>a.isActive));this.loads.set(loads);
@@ -123,6 +169,13 @@ export class PlanningBusinessViewsComponent {
   exportCsv():void {
     const rows:unknown[][]=[['Chantier',this.facade.summary().monoChantier?.code],['Vue',this.view()],['État','Prévision courante — non publiée'],[]];
     if(this.view()==='CLIENT') {
+      rows.push(['Lot / ouvrage','Début prévu','Fin prévue','Activités','Postes rattachés','Postes vendus','Avancement ouvrages (%)']);
+      this.visibleMarketRows().forEach(r=>{
+        rows.push([r.label,r.start,r.finish,r.activityCount,r.plannedPosts,r.totalPosts,r.progress]);
+        if(this.showLinkedActivities() && !this.collapsed().includes(r.id) && !r.expandable)
+          r.activities.forEach(a=>rows.push(['  '+a.libelle,a.dateDebut,a.dateFin,'Activité liée','','','']));
+      });
+      rows.push([],['Jalons et activités complémentaires']);
       rows.push(['Activité / jalon','Début','Fin','Avancement physique (%)']);
       this.clientRows().forEach(a=>rows.push([a.libelle,a.dateDebut,a.dateFin,a.avancementPercent??0]));
     } else if(this.view()==='RESSOURCES') {
