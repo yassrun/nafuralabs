@@ -7,54 +7,63 @@ import java.util.Set;
 /**
  * Cycle de vie d'un dossier d'étude.
  *
- * <p>Les transitions vivent ici, pas éparpillées en {@code if (status.equals(...))} dans les
- * services. C'était le défaut du module {@code consultation} supprimé : la règle de
- * verrouillage y était dupliquée dans deux services, avec des listes de statuts légèrement
- * différentes.
- *
  * <pre>
- * BROUILLON → EN_ETUDE → EN_VALIDATION → VALIDEE → DEVIS_GENERE → GAGNE → CONVERTIE
- *                  ↑           │                                    ↘
- *                  └── refus ──┘                                     PERDU
+ * BROUILLON → A_DECIDER → AFFECTE → EN_ETUDE ⇄ SUSPENDU → [A_AVIS_EXECUTION] → EN_VALIDATION → …
+ *      │           │          │          │
+ *      └ archive    ├ archive  └ REJETE_CHIFFRAGE ⇄ AFFECTE
+ *                                └ BROUILLON (réinitialiser)
+ *                   └ NE_PAS_ETUDIER → ANNULE
  * </pre>
  */
 public enum StatutDossierEtude {
     BROUILLON,
+    A_DECIDER,
+    AFFECTE,
     EN_ETUDE,
+    A_AVIS_EXECUTION,
     EN_VALIDATION,
     VALIDEE,
     DEVIS_GENERE,
     GAGNE,
     PERDU,
     CONVERTIE,
-    ANNULE;
+    ANNULE,
+    NE_PAS_ETUDIER,
+    REJETE_CHIFFRAGE,
+    SUSPENDU;
 
-    private static final Map<StatutDossierEtude, Set<StatutDossierEtude>> TRANSITIONS = Map.of(
-            BROUILLON, EnumSet.of(EN_ETUDE, ANNULE),
-            EN_ETUDE, EnumSet.of(EN_VALIDATION, BROUILLON, ANNULE),
-            EN_VALIDATION, EnumSet.of(VALIDEE, EN_ETUDE, ANNULE),
-            VALIDEE, EnumSet.of(DEVIS_GENERE, EN_ETUDE, ANNULE),
-            DEVIS_GENERE, EnumSet.of(GAGNE, PERDU, ANNULE),
-            GAGNE, EnumSet.of(CONVERTIE),
-            PERDU, EnumSet.noneOf(StatutDossierEtude.class),
-            CONVERTIE, EnumSet.noneOf(StatutDossierEtude.class),
-            ANNULE, EnumSet.noneOf(StatutDossierEtude.class));
+    private static final Map<StatutDossierEtude, Set<StatutDossierEtude>> TRANSITIONS = Map.ofEntries(
+            Map.entry(BROUILLON, EnumSet.of(A_DECIDER, AFFECTE, ANNULE, NE_PAS_ETUDIER)),
+            Map.entry(A_DECIDER, EnumSet.of(AFFECTE, BROUILLON, ANNULE, NE_PAS_ETUDIER)),
+            Map.entry(AFFECTE, EnumSet.of(EN_ETUDE, REJETE_CHIFFRAGE)),
+            Map.entry(EN_ETUDE, EnumSet.of(EN_VALIDATION, A_AVIS_EXECUTION, SUSPENDU, BROUILLON, ANNULE)),
+            Map.entry(A_AVIS_EXECUTION, EnumSet.of(EN_VALIDATION, EN_ETUDE, ANNULE)),
+            Map.entry(EN_VALIDATION, EnumSet.of(VALIDEE, EN_ETUDE, ANNULE)),
+            Map.entry(VALIDEE, EnumSet.of(DEVIS_GENERE, EN_ETUDE, ANNULE)),
+            Map.entry(DEVIS_GENERE, EnumSet.of(GAGNE, PERDU, ANNULE)),
+            Map.entry(GAGNE, EnumSet.of(CONVERTIE)),
+            Map.entry(PERDU, EnumSet.noneOf(StatutDossierEtude.class)),
+            Map.entry(CONVERTIE, EnumSet.noneOf(StatutDossierEtude.class)),
+            Map.entry(ANNULE, EnumSet.noneOf(StatutDossierEtude.class)),
+            Map.entry(NE_PAS_ETUDIER, EnumSet.of(ANNULE)),
+            Map.entry(REJETE_CHIFFRAGE, EnumSet.of(AFFECTE, BROUILLON, ANNULE)),
+            Map.entry(SUSPENDU, EnumSet.of(EN_ETUDE, EN_VALIDATION, A_AVIS_EXECUTION)));
 
-    /**
-     * Le contenu de l'étude (arbre, décomposition, chiffrage) est-il modifiable ?
-     *
-     * <p>Une étude validée ne se modifie pas en place : on repart d'une nouvelle version
-     * (cf. {@code DpuVersion}).
-     */
     public boolean estModifiable() {
-        return this == BROUILLON || this == EN_ETUDE;
+        return this == BROUILLON
+                || this == A_DECIDER
+                || this == EN_ETUDE
+                || this == REJETE_CHIFFRAGE;
+    }
+
+    public boolean enAttenteGo() {
+        return this == BROUILLON || this == A_DECIDER;
     }
 
     public boolean peutTransitionnerVers(StatutDossierEtude cible) {
         return TRANSITIONS.getOrDefault(this, Set.of()).contains(cible);
     }
 
-    /** États terminaux — plus aucune transition possible. */
     public boolean estTerminal() {
         return TRANSITIONS.getOrDefault(this, Set.of()).isEmpty();
     }

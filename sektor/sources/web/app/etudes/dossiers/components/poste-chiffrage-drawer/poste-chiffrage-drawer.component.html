@@ -83,7 +83,7 @@
       (origineChange)="onOrigine($event)"
     />
 
-    @if (!guestReadOnly) {
+    @if (!guestReadOnly && data.afficherAvisExecution !== false) {
       <details class="poste-drawer__fold">
         <summary>Avis d’exécution</summary>
         <div class="poste-drawer__fold-body">

@@ -85,6 +85,18 @@ public class ChargeEtudeService {
                 .orElse(userId.trim());
     }
 
+    /** Si l'auteur du cadrage est déjà ingénieur, il est le défaut au go. */
+    public ChargeEtudeCandidatDto findMatchingIngenieur(String createdBy) {
+        if (!StringUtils.hasText(createdBy)) {
+            return null;
+        }
+        String key = createdBy.trim();
+        return listIngenieurs().stream()
+                .filter(c -> key.equalsIgnoreCase(c.userId()) || key.equalsIgnoreCase(c.email()))
+                .findFirst()
+                .orElse(null);
+    }
+
     private UUID tenantId() {
         UUID id = TenantContext.getTenantId();
         if (id == null) {

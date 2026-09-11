@@ -1,5 +1,6 @@
 package ma.nafura.etudes.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,4 +31,16 @@ public interface DpgfNoeudRepository extends TenantScopedRepository<DpgfNoeud, U
             value = "DELETE FROM dpgf_noeuds WHERE dpgf_id = :dpgfId AND tenant_id = :tenantId",
             nativeQuery = true)
     int deleteAllByDpgfIdAndTenantId(@Param("dpgfId") UUID dpgfId, @Param("tenantId") UUID tenantId);
+
+    @Query(
+            """
+            select n.dpgf.id, n.chargeLotUserId
+            from DpgfNoeud n
+            where n.tenantId = :tenantId
+              and n.type = 'LOT'
+              and n.chargeLotUserId is not null
+              and n.dpgf.id in :dpgfIds
+            """)
+    List<Object[]> findLotChargeUserIdsByDpgfIds(
+            @Param("tenantId") UUID tenantId, @Param("dpgfIds") Collection<UUID> dpgfIds);
 }

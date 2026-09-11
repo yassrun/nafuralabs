@@ -147,27 +147,18 @@ async function main() {
     }
     console.log('ok footer Continuer → coût (currentStep=3)');
 
-    const header = page
-      .locator('app-dossier-summary-header')
-      .getByRole('button', { name: /^Voir la synthèse$/i });
-    await header.waitFor({ timeout: 10000 });
-    await header.click();
-    try {
-      await page.locator('app-synthese-validation-panel').waitFor({ timeout: 12000 });
-    } catch {
-      const stuck = await currentStep(h, id);
-      throw new Error(
-        `header Voir la synthèse n’avance pas (currentStep=${stuck}, attendu 5) — vue rouge`,
-      );
+    await clickWizard(page, /Continuer vers le planning/i);
+    await page.getByRole('heading', { name: /Planning prévisionnel/i }).waitFor({ timeout: 20000 });
+    const afterChiffrage = await currentStep(h, id);
+    if (afterChiffrage !== 5) {
+      throw new Error(`après footer planning: currentStep=${afterChiffrage} (attendu 5)`);
     }
-    const afterHeader = await currentStep(h, id);
-    if (afterHeader !== 5) {
-      throw new Error(`header Voir la synthèse: currentStep=${afterHeader} (attendu 5)`);
-    }
-    console.log('ok header Voir la synthèse → currentStep=5');
+    console.log('ok footer Continuer → planning (currentStep=5)');
 
-    await clickWizard(page, /Précédent/i);
-    await page.locator('app-consultation-etude-panel').waitFor({ timeout: 15000 });
+    await clickWizard(page, /Continuer vers les ressources/i);
+    await page.getByRole('heading', { name: /Ressources prévues/i }).waitFor({ timeout: 20000 });
+    console.log('ok footer Continuer → ressources');
+
     await clickWizard(page, /Voir la synthèse/i);
     await page.locator('app-synthese-validation-panel').waitFor({ timeout: 20000 });
     const afterFooter = await currentStep(h, id);

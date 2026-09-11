@@ -98,6 +98,37 @@ public class DossierDocumentService {
         return saved;
     }
 
+    @Transactional(readOnly = true)
+    public DossierDocument trouver(UUID dossierEtudeId, UUID pieceId) {
+        return repository
+                .findByIdAndTenantIdAndDossierEtudeId(pieceId, tenantId(), dossierEtudeId)
+                .orElseThrow(() -> new IllegalArgumentException("etudes.document.introuvable"));
+    }
+
+    /** Octets + type pour consultation (lecture seule, tout profil qui voit le dossier). */
+    @Transactional(readOnly = true)
+    public DocumentContenu consulter(UUID dossierEtudeId, UUID pieceId) {
+        DossierDocument piece = trouver(dossierEtudeId, pieceId);
+        byte[] octets = chargerContenu(piece);
+        String mime = "application/octet-stream";
+        String nom = StringUtils.hasText(piece.getNomFichier()) ? piece.getNomFichier() : "document";
+        try {
+            Document stored = documentService.getDocument(UUID.fromString(piece.getDocumentId()), tenantId());
+            if (StringUtils.hasText(stored.getMimeType())) {
+                mime = stored.getMimeType();
+            }
+            if (!StringUtils.hasText(piece.getNomFichier()) && StringUtils.hasText(stored.getFileName())) {
+                nom = stored.getFileName();
+            }
+        } catch (RuntimeException e) {
+            log.warn("Métadonnées doc-manager absentes pour documentId={}: {}", piece.getDocumentId(), e.getMessage());
+        }
+        if ("application/octet-stream".equals(mime)) {
+            mime = mimeDepuisNom(nom);
+        }
+        return new DocumentContenu(octets, nom, mime);
+    }
+
     /** Relit les octets de l'original stocké (pour extraction étape 2 / 3). */
     @Transactional(readOnly = true)
     public byte[] chargerContenu(DossierDocument piece) {
@@ -121,7 +152,35 @@ public class DossierDocumentService {
         repository.delete(piece);
     }
 
+    private static String mimeDepuisNom(String nom) {
+        String lower = nom == null ? "" : nom.toLowerCase();
+        if (lower.endsWith(".pdf")) {
+            return "application/pdf";
+        }
+        if (lower.endsWith(".png")) {
+            return "image/png";
+        }
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
+            return "image/jpeg";
+        }
+        if (lower.endsWith(".xlsx")) {
+            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        }
+        if (lower.endsWith(".xls")) {
+            return "application/vnd.ms-excel";
+        }
+        if (lower.endsWith(".docx")) {
+            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        }
+        if (lower.endsWith(".doc")) {
+            return "application/msword";
+        }
+        return "application/octet-stream";
+    }
+
     private static UUID tenantId() {
         return TenantContext.getTenantId();
     }
+
+    public record DocumentContenu(byte[] octets, String nomFichier, String mimeType) {}
 }

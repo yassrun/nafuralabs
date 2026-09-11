@@ -46,6 +46,8 @@ export interface PosteChiffrageDrawerData {
   guestToken?: string;
   externalDpu?: PrixDPU | null;
   externalDescriptifCps?: string | null;
+  /** False si responsable étude = responsable exécution. */
+  afficherAvisExecution?: boolean;
 }
 
 export interface PosteChiffrageDrawerResult {

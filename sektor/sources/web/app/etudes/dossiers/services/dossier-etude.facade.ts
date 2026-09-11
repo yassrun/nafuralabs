@@ -16,4 +16,19 @@ export class DossierEtudeFacade extends GridFacade<
   DossierEtudeUpdate
 > {
   protected override api = inject(DossierEtudeApiService);
+
+  override async loadLookups(): Promise<void> {
+    try {
+      const list = await this.api.listIngenieurs();
+      this._lookups.set({
+        ingenieurs: list.map((c) => ({
+          key: c.userId,
+          value: (c.displayName || c.email || c.userId).trim(),
+        })),
+      });
+    } catch {
+      this._lookups.set({ ingenieurs: [] });
+    }
+    this._lookupsLoaded.set(true);
+  }
 }

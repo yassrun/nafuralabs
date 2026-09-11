@@ -273,7 +273,7 @@ public class CompletudeEtudeService {
                 }
                 yield 3;
             }
-            case EN_VALIDATION, VALIDEE, DEVIS_GENERE, GAGNE, CONVERTIE -> 4;
+            case EN_VALIDATION, A_AVIS_EXECUTION, VALIDEE, DEVIS_GENERE, GAGNE, CONVERTIE -> 4;
             default -> 1;
         };
     }

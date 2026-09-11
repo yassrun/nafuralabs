@@ -80,13 +80,13 @@ function assertSourceWiring() {
   }
 
   const routesSrc = readFileSync(routesTs, 'utf8');
-  if (!routesSrc.includes("redirectTo: 'etudes/dossiers'")) {
-    fail('AC-9', '/etudes ne redirige pas vers etudes/dossiers', 'etudes/dossiers', routesSrc.match(/redirectTo:\s*'[^']+'/)?.[0]);
+  if (!routesSrc.includes("etudes-dashboard.page")) {
+    fail('AC-9', '/etudes n’ouvre pas le dashboard études', 'etudes-dashboard.page', routesSrc.match(/redirectTo:\s*'[^']+'/)?.[0]);
   } else {
-    pass('AC-9', '/etudes → etudes/dossiers (routes.ts)');
+    pass('AC-9', '/etudes → tableau de bord études (routes.ts)');
   }
   if (routesSrc.includes("redirectTo: 'etudes/devis'")) {
-    fail('AC-9', '/etudes redirige encore vers devis', 'etudes/dossiers', 'etudes/devis');
+    fail('AC-9', '/etudes redirige encore vers devis', 'dashboard', 'etudes/devis');
   }
 
   const colsSrc = readFileSync(devisCols, 'utf8');

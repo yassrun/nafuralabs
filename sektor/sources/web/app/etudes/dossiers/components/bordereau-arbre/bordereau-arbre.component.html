@@ -26,6 +26,9 @@
       Arbre du bordereau
       @if (!chargement()) {
         <span class="arbre__compte">
+          @if (vueLotsAffectes()) {
+            Lots qui vous sont affectés ·
+          }
           {{ compteExploitables() }} article{{ compteExploitables() === 1 ? '' : 's' }}
           @if (compteIgnores() > 0) {
             <nf-button
@@ -44,12 +47,30 @@
     </h4>
     <div class="arbre__actions">
       @if (showStructureActions()) {
+        <nf-listing-controls
+          [showSelectionToggle]="true"
+          [selectionModeActive]="bulkSelectMode()"
+          [showColumnsButton]="false"
+          [showSearch]="false"
+          [showFilterButton]="false"
+          [showFilterReset]="false"
+          (selectionToggleClick)="toggleBulkSelect()"
+        />
         <nf-button type="button" variant="secondary" size="sm" (clicked)="ajouterLot()">
           Ajouter un lot
         </nf-button>
       }
     </div>
   </header>
+
+  @if (showStructureActions() && bulkSelectMode()) {
+    <nf-selection-bar
+      [count]="selectedCount()"
+      [actions]="bulkActions"
+      (actionClick)="onBulkAction($event)"
+      (clear)="toggleBulkSelect()"
+    />
+  }
 
   @if (inlineBanner() && erreur(); as message) {
     <app-etude-banner tone="error" [message]="message" />
@@ -64,14 +85,18 @@
       [loading]="chargement()"
       [expandedKeys]="expandedKeys()"
       (expandedKeysChange)="expandedKeys.set($event)"
-      [rowClickable]="selectionEnabled() || openOnClick()"
+      [selectable]="bulkSelectMode() ? 'multiple' : false"
+      [selectedKeys]="selectedKeys()"
+      (selectedKeysChange)="selectedKeys.set($event)"
+      [isSelectable]="isLotSelectable"
+      [rowClickable]="selectionEnabled() || openOnClick() || bulkSelectMode()"
       [rowClass]="rowClass()"
       [rowTitle]="rowTitle"
       (rowClick)="onRowClick($event)"
       (rowDblClick)="onRowDblClick($event)"
       [minWidth]="tableMinWidth()"
       [scrollHeight]="tableScrollHeight"
-      emptyMessage="Aucun lot / article"
+      [emptyMessage]="emptyMessage()"
     >
       <ng-template #cell let-row let-column="column">
         @switch (column.key) {
@@ -101,6 +126,11 @@
               @if (estCoutDeduit(row)) {
                 <span class="arbre__mode-tag arbre__mode-tag--deduit" title="Coût déduit d’un prix de vente">
                   déduit
+                </span>
+              }
+              @if (row.type === 'LOT' && row.chargeLotNom) {
+                <span class="arbre__mode-tag arbre__mode-tag--affecte" [attr.title]="'Chiffrage : ' + row.chargeLotNom">
+                  {{ row.chargeLotNom }}
                 </span>
               }
             </span>
@@ -138,48 +168,62 @@
           }
           @case ('actions') {
             <span class="arbre__row-actions" (click)="stop($event)">
-              <nf-button
-                type="button"
-                variant="ghost"
-                size="sm"
-                icon="pencil"
-                iconLibrary="lucide"
-                tooltip="Modifier"
-                aria-label="Modifier"
-                (clicked)="modifier(row)"
-              ></nf-button>
-              @if (row.type !== 'ARTICLE') {
+              @if (showLotAffectation() && row.type === 'LOT') {
                 <nf-button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  icon="corner-down-right"
+                  icon="user-plus"
                   iconLibrary="lucide"
-                  tooltip="Ajouter un enfant"
-                  aria-label="Ajouter un enfant"
-                  (clicked)="ajouterEnfant(row)"
+                  [tooltip]="row.chargeLotNom ? 'Changer l’affectation' : 'Affecter un ingénieur'"
+                  [attr.aria-label]="row.chargeLotNom ? 'Changer l’affectation' : 'Affecter un ingénieur'"
+                  (clicked)="affecterLot(row)"
                 ></nf-button>
               }
-              <nf-button
-                type="button"
-                variant="ghost"
-                size="sm"
-                icon="plus"
-                iconLibrary="lucide"
-                tooltip="Ajouter au même niveau"
-                aria-label="Ajouter au même niveau"
-                (clicked)="ajouterMemeNiveau(row)"
-              ></nf-button>
-              <nf-button
-                type="button"
-                variant="danger"
-                size="sm"
-                icon="trash-2"
-                iconLibrary="lucide"
-                tooltip="Supprimer"
-                aria-label="Supprimer"
-                (clicked)="supprimer(row)"
-              ></nf-button>
+              @if (showStructureActions()) {
+                <nf-button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  icon="pencil"
+                  iconLibrary="lucide"
+                  tooltip="Modifier"
+                  aria-label="Modifier"
+                  (clicked)="modifier(row)"
+                ></nf-button>
+                @if (row.type !== 'ARTICLE') {
+                  <nf-button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    icon="corner-down-right"
+                    iconLibrary="lucide"
+                    tooltip="Ajouter un enfant"
+                    aria-label="Ajouter un enfant"
+                    (clicked)="ajouterEnfant(row)"
+                  ></nf-button>
+                }
+                <nf-button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  icon="plus"
+                  iconLibrary="lucide"
+                  tooltip="Ajouter au même niveau"
+                  aria-label="Ajouter au même niveau"
+                  (clicked)="ajouterMemeNiveau(row)"
+                ></nf-button>
+                <nf-button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  icon="trash-2"
+                  iconLibrary="lucide"
+                  tooltip="Supprimer"
+                  aria-label="Supprimer"
+                  (clicked)="supprimer(row)"
+                ></nf-button>
+              }
             </span>
           }
         }

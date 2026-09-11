@@ -16,8 +16,11 @@ import {
   ButtonComponent,
   NfInputComponent,
   NfSelectComponent,
+  SpinnerComponent,
   type NfSelectOption,
 } from '@platform/lib/anatomy';
+
+import { AuthFacade } from '@platform/core/security/services/auth.facade';
 
 import type { DossierEtude, MarcheProposeMetadonnees } from '@app/etudes/models';
 
@@ -76,12 +79,14 @@ const IA_KEYS: IaFieldKey[] = [
     ButtonComponent,
     NfInputComponent,
     NfSelectComponent,
+    SpinnerComponent,
   ],
   templateUrl: './dossier-identite-panel.component.html',
   styleUrl: './dossier-identite-panel.component.scss',
 })
 export class DossierIdentitePanelComponent {
   private readonly api = inject(DossierEtudeApiService);
+  private readonly auth = inject(AuthFacade);
 
   readonly dossier = input.required<DossierEtude>();
   readonly modifiable = input(false);
@@ -116,11 +121,18 @@ export class DossierIdentitePanelComponent {
   /** Bloque Continuer / Enregistrer seulement pendant l’indexation — pas la revue. */
   readonly cpsBlocking = computed(() => this.cpsPhase() === 'loading');
 
+  readonly champsVerrouilles = computed(
+    () => !this.modifiable() || this.saving() || this.cpsBlocking(),
+  );
+
   readonly banner = computed((): { tone: 'error' | 'info' | 'success'; message: string } | undefined => {
     if (this.erreur()) return { tone: 'error', message: this.erreur()! };
     if (this.ok()) return { tone: 'success', message: 'Détails enregistrés.' };
     if (this.cpsPhase() === 'loading') {
-      return { tone: 'info', message: 'Indexation CPS — les champs ne bougeront qu’en revue.' };
+      return {
+        tone: 'info',
+        message: 'Indexation du CPS en cours — attendez les propositions avant de saisir.',
+      };
     }
     const n = this.pendingCount();
     if (n > 0) {
@@ -138,6 +150,35 @@ export class DossierIdentitePanelComponent {
   ];
 
   readonly chargeEtudeOptions = signal<NfSelectOption[]>([]);
+
+  readonly enCadrage = computed(() => {
+    const s = this.dossier().status;
+    return s === 'BROUILLON' || s === 'A_DECIDER';
+  });
+
+  readonly aideCadrage = computed(() => {
+    const s = this.dossier().status;
+    if (s === 'REJETE_CHIFFRAGE') {
+      return 'Après un rejet du chiffrage, déposez les pièces demandées puis Affecter — le chargé déjà nommé reprend le dossier. Réinitialiser pour modifier le cadrage.';
+    }
+    if (s === 'BROUILLON') {
+      return 'Objet et MOA sont éditables ici. Le badge IA · CPS indique une valeur extraite du PDF. Puis À affecter pour envoyer au DG.';
+    }
+    return 'Le cadrage est figé. Cliquez Affecter pour nommer le chargé d’étude.';
+  });
+
+  readonly peutChangerCharge = computed(
+    () =>
+      this.auth.hasPermission('etude.go') ||
+      this.auth.hasRole('BTP_DG') ||
+      this.auth.hasRole('OWNER'),
+  );
+
+  readonly chargeEtudeLibelle = computed(() => {
+    const id = this.chargeEtudeUserId();
+    const fromSelect = this.chargeEtudeOptions().find((o) => o.value === id)?.label;
+    return fromSelect || this.dossier().chargeEtudeNom || 'Affecté au go';
+  });
 
   private prefillPourCps = '';
   private prefillEnCours = false;
@@ -218,9 +259,10 @@ export class DossierIdentitePanelComponent {
 
   async enregistrer(): Promise<boolean> {
     const d = this.dossier();
-    if (!this.modifiable() || this.saving()) return false;
+    if (this.saving()) return false;
+    if (!this.modifiable()) return true;
     if (this.cpsPhase() === 'loading') {
-      this.erreur.set('Attendez la fin de l’extraction CPS, ou saisissez à la main.');
+      this.erreur.set('Indexation du CPS en cours — attendez les propositions.');
       this.ok.set(false);
       return false;
     }
@@ -229,8 +271,14 @@ export class DossierIdentitePanelComponent {
     const objet = this.objet().trim();
     const clientNom = this.clientNom().trim();
     const chargeId = this.chargeEtudeUserId();
-    if (!objet || placeholderIdentite(objet) || !clientNom || placeholderIdentite(clientNom) || !chargeId) {
-      this.erreur.set('Objet, MOA et chargé d’étude sont obligatoires.');
+    const cadrage =
+      this.dossier().status === 'BROUILLON' || this.dossier().status === 'A_DECIDER';
+    if (!objet || placeholderIdentite(objet) || !clientNom || placeholderIdentite(clientNom)) {
+      this.erreur.set('Objet et MOA sont obligatoires.');
+      return false;
+    }
+    if (!cadrage && !chargeId) {
+      this.erreur.set('Le chargé d’étude est affecté au go.');
       return false;
     }
     this.saving.set(true);
@@ -241,8 +289,12 @@ export class DossierIdentitePanelComponent {
       const maj = await this.api.update(d.id, {
         objet,
         clientNom,
-        chargeEtudeUserId: chargeId,
-        chargeEtudeNom: charge?.displayName ?? charge?.email,
+        ...(chargeId
+          ? {
+              chargeEtudeUserId: chargeId,
+              chargeEtudeNom: charge?.displayName ?? charge?.email,
+            }
+          : {}),
         dateLimiteDepot: this.dateLimiteDepot() || undefined,
         aoType: this.aoType() || undefined,
         aoReference: this.aoReference().trim() || undefined,

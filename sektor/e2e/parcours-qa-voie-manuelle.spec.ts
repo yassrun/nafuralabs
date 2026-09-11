@@ -44,9 +44,7 @@ async function createDossier(
   session: CursorSession,
   suffix: string,
 ): Promise<string> {
-  const ing = await request.get(`${API_BASE}/api/v1/etudes/ingenieurs`, { headers: headers(session) });
-  const list = ing.ok() ? ((await ing.json()) as { userId?: string }[]) : [];
-  const chargeEtudeUserId = list[0]?.userId ?? session.userId;
+  const chargeEtudeUserId = session.userId;
   const created = await request.post(`${API_BASE}/api/v1/etudes/dossiers`, {
     headers: headers(session),
     data: {
@@ -56,12 +54,24 @@ async function createDossier(
     },
   });
   expect(created.status(), await created.text()).toBe(201);
-  return ((await created.json()) as { id: string }).id;
+  const id = ((await created.json()) as { id: string }).id;
+  const go = await request.post(`${API_BASE}/api/v1/etudes/dossiers/${id}/go`, {
+    headers: headers(session),
+    data: { chargeEtudeUserId },
+  });
+  expect(go.ok(), await go.text()).toBeTruthy();
+  const accept = await request.post(`${API_BASE}/api/v1/etudes/dossiers/${id}/accepter-affectation`, {
+    headers: headers(session),
+  });
+  expect(accept.ok(), await accept.text()).toBeTruthy();
+  return id;
 }
 
 async function openDossier(page: Page, id: string): Promise<void> {
   await page.goto(`/etudes/dossiers/${id}`, { waitUntil: 'domcontentloaded' });
-  await expect(page.getByText(/Identité de l’étude|CPS/i).first()).toBeVisible({
+  await expect(
+    page.getByRole('heading', { name: /Arbre du bordereau|Bordereau|Manuel/i }).first(),
+  ).toBeVisible({
     timeout: 20000,
   });
 }
@@ -75,10 +85,6 @@ test.describe('SEKTOR-115 — voie manuelle Documents', () => {
     const suffix = Date.now().toString(36);
     const id = await createDossier(request, session, suffix);
     await openDossier(page, id);
-
-    const continuer = page.getByRole('button', { name: /Continuer vers le bordereau/i });
-    await expect(continuer).toBeEnabled({ timeout: 15000 });
-    await continuer.click();
 
     await page.getByRole('button', { name: /^Manuel$/i }).click();
     const creer = page.getByRole('button', { name: /Créer l’arbre vide|Creer l'arbre vide/i });

@@ -175,6 +175,9 @@ public class QaLocalEmployeProvisioner implements ApplicationRunner {
             case "BTP_DIRECTEUR_TRAVAUX" -> "Directeur des travaux";
             case "BTP_CHEF_CHANTIER" -> "Chef de chantier";
             case "BTP_INGENIEUR" -> "Ingénieur";
+            case "BTP_LECTEUR_ETUDE" -> "Lecteur étude";
+            case "BTP_ASSISTANT_ETUDE" -> "Assistante étude";
+            case "BTP_ADMIN_ETUDE" -> "Admin étude";
             case "BTP_MAGASINIER" -> "Magasinier";
             case "BTP_DG" -> "Directeur général";
             case "BTP_DAF" -> "Directeur administratif et financier";

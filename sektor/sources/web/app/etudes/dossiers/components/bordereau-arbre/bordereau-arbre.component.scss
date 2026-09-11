@@ -19,8 +19,14 @@
 }
 
 .arbre__entete,
-app-etude-banner {
+app-etude-banner,
+nf-selection-bar {
   flex-shrink: 0;
+}
+
+nf-selection-bar {
+  display: block;
+  margin-bottom: 0.35rem;
 }
 
 .arbre__entete {
@@ -148,6 +154,15 @@ app-etude-banner {
   color: var(--nf-color-text-secondary);
   line-height: 1.3;
   white-space: nowrap;
+}
+
+.arbre__mode-tag--affecte {
+  color: var(--nf-color-text-primary);
+  border-color: color-mix(in srgb, var(--nf-color-primary-600, #2563eb) 28%, transparent);
+  background: color-mix(in srgb, var(--nf-color-primary-600, #2563eb) 6%, transparent);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 650;
 }
 
 .arbre__mode-tag--estime {

@@ -450,6 +450,14 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
     order: 10,
     children: [
       {
+        id: 'etudes.dashboard',
+        label: 'nav.etudes.dashboard',
+        icon: 'layout-dashboard',
+        route: '/etudes',
+        exactMatch: true,
+        order: 1,
+      },
+      {
         id: 'etudes.dossiers',
         label: 'nav.etudes.dossiers',
         icon: 'clipboard-list',

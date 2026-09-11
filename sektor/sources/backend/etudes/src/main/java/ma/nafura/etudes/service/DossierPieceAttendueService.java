@@ -77,6 +77,16 @@ public class DossierPieceAttendueService {
         } else {
             assouplirSlotHistorique(tenant, dossierId, DossierDocument.TYPE_CPS);
         }
+        if (!repository.existsByTenantIdAndDossierEtudeIdAndType(
+                tenant, dossierId, DossierDocument.TYPE_PLAN)) {
+            repository.save(slot(
+                    tenant,
+                    dossierId,
+                    DossierDocument.TYPE_PLAN,
+                    "Plans (PLA)",
+                    false,
+                    DossierPieceAttendue.SOURCE_MANUEL));
+        }
         assouplirToutesLesPiecesHistoriques(tenant, dossierId);
     }
 

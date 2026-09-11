@@ -1,30 +1,44 @@
 import type { BadgeVariant } from '@platform/lib/anatomy/types';
 
-import { libelleUiEtape } from './dossier-etape.util';
-
-/** Libellés et variantes partagés liste + détail dossier d'étude. */
+/**
+ * Libellés v1 — à raffiner.
+ * Draft → À affecter (DG) → Affecté (chargé) → En chiffrage → Chiffré
+ * → Validé intern → Validé. Branche : Suspendu.
+ */
 export const DOSSIER_STATUT_LABELS: Record<string, string> = {
-  BROUILLON: 'Brouillon',
-  EN_ETUDE: 'En étude',
-  EN_VALIDATION: 'En validation',
-  VALIDEE: 'Validée',
-  DEVIS_GENERE: 'Devis généré',
+  BROUILLON: 'Draft',
+  A_DECIDER: 'À affecter',
+  AFFECTE: 'Affecté',
+  EN_ETUDE: 'En chiffrage',
+  EN_VALIDATION: 'Chiffré',
+  VALIDEE: 'Validé intern',
+  DEVIS_GENERE: 'Validé',
   GAGNE: 'Gagné',
   PERDU: 'Perdu',
   CONVERTIE: 'Convertie',
-  ANNULE: 'Annulé',
+  ANNULE: 'Archivé',
+  NE_PAS_ETUDIER: 'Rejeté',
+  REJETE_CHIFFRAGE: 'Rejeté par le chiffrage',
+  SUSPENDU: 'Suspendu',
+  A_AVIS_EXECUTION: 'Avis d’exécution',
 };
 
 export const DOSSIER_STATUT_VARIANTS: Record<string, BadgeVariant> = {
   BROUILLON: 'default',
+  A_DECIDER: 'info',
+  AFFECTE: 'warning',
   EN_ETUDE: 'warning',
   EN_VALIDATION: 'info',
   VALIDEE: 'success',
-  DEVIS_GENERE: 'info',
+  DEVIS_GENERE: 'success',
   GAGNE: 'success',
   PERDU: 'danger',
   CONVERTIE: 'success',
   ANNULE: 'default',
+  NE_PAS_ETUDIER: 'danger',
+  REJETE_CHIFFRAGE: 'danger',
+  SUSPENDU: 'warning',
+  A_AVIS_EXECUTION: 'warning',
 };
 
 export const PHASE_LABELS: Record<string, string> = {
@@ -37,7 +51,34 @@ export const PHASE_LABELS: Record<string, string> = {
   TERMINE: 'Terminé',
   PERDU: 'Perdu',
   ANNULE: 'Annulé',
+  NE_PAS_ETUDIER: 'Rejeté',
+  REJETE_CHIFFRAGE: 'Rejeté par le chiffrage',
+  SUSPENDU: 'Suspendu',
 };
+
+/** File d’attente dashboard / listing : quelqu’un d’autre doit agir. */
+export const STATUTS_EN_ATTENTE = [
+  'A_DECIDER',
+  'AFFECTE',
+  'EN_VALIDATION',
+  'A_AVIS_EXECUTION',
+  'REJETE_CHIFFRAGE',
+] as const;
+
+export const PIPELINE_STATUTS = [
+  'BROUILLON',
+  'A_DECIDER',
+  'AFFECTE',
+  'EN_ETUDE',
+  'A_AVIS_EXECUTION',
+  'EN_VALIDATION',
+  'VALIDEE',
+  'DEVIS_GENERE',
+] as const;
+
+export function estEnAttente(status: string | undefined | null): boolean {
+  return !!status && (STATUTS_EN_ATTENTE as readonly string[]).includes(status);
+}
 
 export const PHASE_FLOW = [
   'BORDEREAU',
@@ -52,19 +93,13 @@ export function labelStatutDossier(status: string | undefined | null): string {
   return DOSSIER_STATUT_LABELS[status] ?? status;
 }
 
-const STATUTS_TRAVAIL = new Set(['BROUILLON', 'EN_ETUDE']);
-
 /**
- * Listing : une cellule. Pendant le travail on montre l’étape (le statut
- * est déductible). Après soumission on montre le statut métier.
+ * Listing : le statut métier, jamais l’étape wizard.
  */
 export function labelEtatListing(
   status: string | undefined | null,
-  currentStep: number | undefined | null,
+  _currentStep?: number | null,
 ): string {
-  if (STATUTS_TRAVAIL.has(status ?? '')) {
-    return libelleUiEtape(Number(currentStep ?? 1));
-  }
   return labelStatutDossier(status);
 }
 
@@ -76,3 +111,4 @@ export function labelPhase(phase: string | undefined | null): string {
   if (!phase) return '';
   return PHASE_LABELS[phase] ?? phase;
 }
+

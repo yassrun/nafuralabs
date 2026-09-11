@@ -31,6 +31,8 @@ export interface BordereauTreeRow {
   depth: number;
   /** ARTICLE sans unité ou quantité ≤ 0 — à corriger, reste dans l’arbre. */
   nonExploitable?: boolean;
+  chargeLotUserId?: string | null;
+  chargeLotNom?: string | null;
 }
 
 export interface ImportNoeudPreview {
@@ -87,11 +89,20 @@ export function noeudsDpgfToTreeNodes(
   noeuds: NoeudDPGF[],
   depth = 0,
   parentId: string | null = null,
+  inheritedCharge: { userId?: string | null; nom?: string | null } = {},
 ): NfTreeNode<BordereauTreeRow>[] {
   return (noeuds ?? []).map((n, i) => {
     const key = n.id || `n-${depth}-${i}-${n.code}`;
+    const isLot = n.type === 'LOT';
+    const chargeLotUserId = isLot
+      ? n.chargeLotUserId
+      : (n.chargeLotUserId ?? inheritedCharge.userId);
+    const chargeLotNom = isLot ? n.chargeLotNom : (n.chargeLotNom ?? inheritedCharge.nom);
     const children = n.enfants?.length
-      ? noeudsDpgfToTreeNodes(n.enfants, depth + 1, n.id)
+      ? noeudsDpgfToTreeNodes(n.enfants, depth + 1, n.id, {
+          userId: isLot ? n.chargeLotUserId : chargeLotUserId,
+          nom: isLot ? n.chargeLotNom : chargeLotNom,
+        })
       : undefined;
     return {
       key,
@@ -119,6 +130,8 @@ export function noeudsDpgfToTreeNodes(
         forfaitPartnerId: n.forfaitPartnerId,
         forfaitOffreId: n.forfaitOffreId,
         prixDpuId: n.prixDpuId,
+        chargeLotUserId,
+        chargeLotNom,
         depth,
         nonExploitable:
           n.type === 'ARTICLE' &&
@@ -405,10 +418,57 @@ export function getImportNoeudAt(
 export function bordereauTableMinWidth(opts: {
   selection: boolean;
   structureActions: boolean;
+  lotAffectation?: boolean;
+  bulkSelect?: boolean;
 }): string {
   const typeW = opts.selection ? 3.75 : 4.25;
   const codeW = opts.selection ? 5 : 5.5;
   const extraMetrics = opts.selection ? 10.75 : 4.5;
-  const actionsW = opts.structureActions ? 8.5 : 0;
-  return `${typeW + codeW + 7.2 + 4.25 + 4.5 + extraMetrics + actionsW}rem`;
+  let actionsW = 0;
+  if (opts.structureActions && opts.lotAffectation) actionsW = 10.5;
+  else if (opts.structureActions) actionsW = 8.5;
+  else if (opts.lotAffectation) actionsW = 3.25;
+  const selectW = opts.bulkSelect ? 2.75 : 0;
+  return `${selectW + typeW + codeW + 7.2 + 4.25 + 4.5 + extraMetrics + actionsW}rem`;
+}
+
+export function estLotOuSousLot(type: string | undefined): boolean {
+  const t = (type ?? '').toUpperCase();
+  return t === 'LOT' || t === 'SOUS_LOT';
+}
+
+/** Conserve uniquement les clés encore expansibles après un reload. */
+export function retainExpandableKeys<T>(
+  nodes: NfTreeNode<T>[],
+  previous: ReadonlySet<string>,
+): Set<string> {
+  const valid = new Set<string>();
+  const walk = (list: NfTreeNode<T>[]) => {
+    for (const n of list) {
+      if (previous.has(n.key) && (n.children?.length ?? 0) > 0) valid.add(n.key);
+      if (n.children?.length) walk(n.children);
+    }
+  };
+  walk(nodes);
+  return valid;
+}
+
+/**
+ * Nœuds sélectionnés dont aucun ancêtre n’est aussi sélectionné
+ * (supprimer le parent suffit pour les enfants).
+ */
+export function selectedRootRows<T extends { key: string }>(
+  nodes: NfTreeNode<T>[],
+  selected: ReadonlySet<string>,
+): T[] {
+  const out: T[] = [];
+  const walk = (list: NfTreeNode<T>[], ancestorSelected: boolean) => {
+    for (const n of list) {
+      const sel = selected.has(n.key);
+      if (sel && !ancestorSelected) out.push(n.data);
+      if (n.children?.length) walk(n.children, ancestorSelected || sel);
+    }
+  };
+  walk(nodes, false);
+  return out;
 }

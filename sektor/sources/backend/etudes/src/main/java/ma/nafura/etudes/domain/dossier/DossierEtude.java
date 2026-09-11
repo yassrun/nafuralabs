@@ -3,6 +3,8 @@ package ma.nafura.etudes.domain.dossier;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -76,12 +78,32 @@ public class DossierEtude implements AuditableEtude {
     @Column(name = "client_nom", length = 255)
     private String clientNom;
 
-    /** User IAM (UUID) avec rôle BTP_INGENIEUR — chargé d'étude obligatoire. */
+    /** User IAM (UUID) avec rôle BTP_INGENIEUR — posé au go, pas à la création. */
     @Column(name = "charge_etude_user_id", length = 100)
     private String chargeEtudeUserId;
 
     @Column(name = "charge_etude_nom", length = 255)
     private String chargeEtudeNom;
+
+    /** Ingénieur BTP responsable exécution — posé au go. Défaut = chargé d'étude. */
+    @Column(name = "responsable_execution_user_id", length = 100)
+    private String responsableExecutionUserId;
+
+    @Column(name = "responsable_execution_nom", length = 255)
+    private String responsableExecutionNom;
+
+    /** FAVORABLE | RETOUR — dernier avis dossier (pas l'avis poste). */
+    @Column(name = "avis_execution_dossier", length = 20)
+    private String avisExecutionDossier;
+
+    @Column(name = "avis_execution_commentaire", length = 4000)
+    private String avisExecutionCommentaire;
+
+    @Column(name = "avis_execution_decide_par", length = 100)
+    private String avisExecutionDecidePar;
+
+    @Column(name = "avis_execution_decide_at")
+    private OffsetDateTime avisExecutionDecideAt;
 
     // ── Sources documentaires ────────────────────────────────────────────────
 
@@ -127,6 +149,12 @@ public class DossierEtude implements AuditableEtude {
     @Transient
     @JsonProperty("aoCautionProvisoire")
     private BigDecimal aoCautionProvisoire;
+
+    /** Ingénieurs à qui un LOT du bordereau est délégué (listing / Mes études). */
+    @Transient
+    @JsonProperty("lotChargeUserIds")
+    @Builder.Default
+    private List<String> lotChargeUserIds = new ArrayList<>();
 
     // ── Contenu, délégué au DPGF ─────────────────────────────────────────────
 
@@ -217,6 +245,23 @@ public class DossierEtude implements AuditableEtude {
     @Column(name = "motif_refus", length = 1000)
     private String motifRefus;
 
+    /** Auteur du go / no-go (user id). */
+    @Column(name = "go_decide_par", length = 100)
+    private String goDecidePar;
+
+    @Column(name = "go_decide_at")
+    private OffsetDateTime goDecideAt;
+
+    @Column(name = "motif_no_go", length = 1000)
+    private String motifNoGo;
+
+    /** CPS_INCOMPLET | DOC_MANQUANT | AUTRE — refus du chargé d'étude. */
+    @Column(name = "motif_refus_charge_type", length = 40)
+    private String motifRefusChargeType;
+
+    @Column(name = "motif_refus_charge", length = 4000)
+    private String motifRefusCharge;
+
     /** Incrémenté à chaque réouverture / remplacement destructif du bordereau. */
     @Column(name = "bordereau_revision", nullable = false)
     @Builder.Default
@@ -266,6 +311,23 @@ public class DossierEtude implements AuditableEtude {
     @JsonProperty("modifiable")
     public boolean isModifiable() {
         return status != null && status.estModifiable();
+    }
+
+    /** Même personne (ou exécution non posée) → pas d'étape avis d'exécution. */
+    public boolean memeResponsableEtudeEtExecution() {
+        String etude = chargeEtudeUserId != null ? chargeEtudeUserId.trim() : "";
+        String exec = responsableExecutionUserId != null ? responsableExecutionUserId.trim() : "";
+        if (etude.isEmpty()) {
+            return true;
+        }
+        if (exec.isEmpty()) {
+            return true;
+        }
+        return etude.equalsIgnoreCase(exec);
+    }
+
+    public boolean exigeAvisExecution() {
+        return !memeResponsableEtudeEtExecution();
     }
 
     /**

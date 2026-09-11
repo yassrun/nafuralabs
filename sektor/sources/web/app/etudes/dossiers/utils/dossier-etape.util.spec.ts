@@ -2,6 +2,8 @@ import {
   backendGateEtapesForUi,
   backendToUiEtape,
   estAnomaliePieceHorsCadrage,
+  chiffragePretATerminer,
+  estEtapeUiLocale,
   incompleteUiStepIndexes,
   libelleUiEtape,
   nextBackendEtape,
@@ -11,29 +13,39 @@ import {
 } from './dossier-etape.util';
 
 describe('dossier-etape.util', () => {
-  it('projette les étapes backend 1–5 vers les 4 étapes UI', () => {
+  it('projette les étapes backend 1–5 vers les 3 premières étapes UI', () => {
     expect(backendToUiEtape(1)).toBe(1);
     expect(backendToUiEtape(2)).toBe(2);
     expect(backendToUiEtape(3)).toBe(3);
     expect(backendToUiEtape(4)).toBe(3);
-    expect(backendToUiEtape(5)).toBe(4);
+    expect(backendToUiEtape(5)).toBe(3);
   });
 
-  it('mappe les transitions Suivant / Précédent', () => {
+  it('mappe les transitions Suivant / Précédent persistées', () => {
     expect(nextBackendEtape(1)).toBe(2);
     expect(nextBackendEtape(2)).toBe(3);
     expect(nextBackendEtape(3)).toBe(5);
     expect(nextBackendEtape(4)).toBeNull();
+    expect(nextBackendEtape(5)).toBeNull();
+    expect(nextBackendEtape(6)).toBeNull();
 
     expect(prevBackendEtape(2)).toBe(1);
     expect(prevBackendEtape(3)).toBe(2);
-    expect(prevBackendEtape(4)).toBe(3);
+    expect(prevBackendEtape(4)).toBeNull();
     expect(prevBackendEtape(1)).toBeNull();
+  });
+
+  it('marque planning / ressources / synthèse comme locales', () => {
+    expect(estEtapeUiLocale(3)).toBe(false);
+    expect(estEtapeUiLocale(4)).toBe(true);
+    expect(estEtapeUiLocale(6)).toBe(true);
   });
 
   it('regroupe décomposition + consultation + chiffrage sur l’étape UI 3', () => {
     expect(backendGateEtapesForUi(3)).toEqual([3, 4, 5]);
-    expect(backendGateEtapesForUi(4)).toEqual([3, 5]);
+    expect(backendGateEtapesForUi(4)).toEqual([]);
+    expect(backendGateEtapesForUi(5)).toEqual([]);
+    expect(backendGateEtapesForUi(6)).toEqual([3, 5]);
   });
 
   it('route la correction vers la bonne étape UI', () => {
@@ -48,13 +60,14 @@ describe('dossier-etape.util', () => {
     expect(libelleUiEtape(1)).toContain('Cadrage');
     expect(libelleUiEtape(3)).toContain('Chiffrage');
     expect(libelleUiEtape(4)).toContain('Chiffrage');
-    expect(libelleUiEtape(5)).toContain('Synthèse');
+    expect(libelleUiEtape(5)).toContain('Chiffrage');
     expect(uiToBackendEtape(4)).toBe(5);
+    expect(uiToBackendEtape(6)).toBe(5);
   });
 
   it('marque Coût incomplet à la Synthèse si des prix restent manuels', () => {
     expect(
-      incompleteUiStepIndexes(4, [
+      incompleteUiStepIndexes(6, [
         { etape: 5, problemes: [{ message: 'prix_manuel' }] },
       ]),
     ).toEqual([2]);
@@ -62,7 +75,7 @@ describe('dossier-etape.util', () => {
 
   it('n’utilise pas l’alerte qualité comme incomplet de Coût', () => {
     expect(
-      incompleteUiStepIndexes(4, [
+      incompleteUiStepIndexes(6, [
         { etape: 5, problemes: [{ message: 'part_couts_estimes 26%' }] },
       ]),
     ).toEqual([]);
@@ -92,5 +105,25 @@ describe('dossier-etape.util', () => {
         },
       ]),
     ).toEqual([]);
+  });
+});
+
+describe('chiffragePretATerminer', () => {
+  it('refuse s’il n’y a aucun poste', () => {
+    expect(chiffragePretATerminer({ nombreArticles: 0, gates: [{ etape: 5, bloquant: false }] })).toBe(
+      false,
+    );
+  });
+
+  it('refuse tant que la gate chiffrage est bloquante', () => {
+    expect(
+      chiffragePretATerminer({ nombreArticles: 3, gates: [{ etape: 5, bloquant: true }] }),
+    ).toBe(false);
+  });
+
+  it('accepte quand tous les postes ont un prix', () => {
+    expect(
+      chiffragePretATerminer({ nombreArticles: 3, gates: [{ etape: 5, bloquant: false }] }),
+    ).toBe(true);
   });
 });

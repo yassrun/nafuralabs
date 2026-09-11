@@ -47,6 +47,9 @@ const employesSrc = readFileSync(employes, 'utf8');
 
 const emails = [
   'qa.ingenieur@nafuralabs.local',
+  'qa.ingenieur2@nafuralabs.local',
+  'qa.utilisateur@nafuralabs.local',
+  'qa.assistant@nafuralabs.local',
   'qa.conducteur@nafuralabs.local',
   'qa.directeur@nafuralabs.local',
   'qa.daf@nafuralabs.local',
@@ -76,7 +79,12 @@ if (!employesSrc.includes('"qa-emp-"') || !employesSrc.includes('QaLocalConstant
   fail('QA employes not seeded from ROLE_USERS');
 }
 
-console.log('PASS  source: 7 role emails, provisioner, ?role=, superAdmin owner-only, qa-token.sh, employes');
+if (!constantsSrc.includes('BTP_ADMIN_ETUDE') || !constantsSrc.includes('BTP_LECTEUR_ETUDE')
+    || !constantsSrc.includes('BTP_ASSISTANT_ETUDE')) {
+  fail('étude test roles missing (admin / lecteur / assistant)');
+}
+
+console.log('PASS  source: 10 role emails, provisioner, ?role=, superAdmin owner-only, qa-token.sh, employes');
 
 const session = async (query) => {
   const url = `${API_BASE.replace(/\/$/, '')}/api/public/dev/cursor-session${query}`;

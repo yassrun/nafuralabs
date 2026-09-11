@@ -327,6 +327,7 @@
     "etudes": "Estimating",
     "etudes.chiffrage": "Studies & Bids",
     "etudes.soumissions": "Bids & opportunities",
+    "etudes.dashboard": "Dashboard",
     "etudes.dossiers": "Studies / client tenders",
     "etudes.bibliotheque": "Price Library",
     "etudes.catalogueConsole": "Sektor catalogue console",
@@ -782,6 +783,31 @@
       "codeOptional": "Optional — generated if empty.",
       "dateOptional": "Optional — before the work order.",
       "dureeOptional": "Optional — before the work order."
+    },
+    "dashboard": {
+      "title": "Estimating dashboard",
+      "subtitle": "{count} open studies",
+      "loading": "Loading the portfolio…",
+      "error": "Unable to load the estimating portfolio.",
+      "actions": {
+        "create": "New study",
+        "listing": "All files"
+      },
+      "empty": {
+        "title": "No study / tender",
+        "message": "Open a draft framing. Send it for assignment: the GM assigns, then the estimator takes it."
+      },
+      "attention": {
+        "title": "To action",
+        "retard": "{count} overdue",
+        "empty": "Nothing overdue or waiting."
+      },
+      "pipeline": {
+        "title": "Pipeline"
+      },
+      "more": {
+        "title": "More shortcuts"
+      }
     }
   }
 }

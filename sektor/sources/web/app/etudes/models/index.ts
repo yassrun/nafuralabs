@@ -127,6 +127,9 @@ export interface NoeudDPGF {
   forfaitOffreId?: string | null;
   prixDpuId?: string | null;
   descriptif?: string | null;
+  /** Ingénieur BTP chargé du chiffrage — LOT uniquement. */
+  chargeLotUserId?: string | null;
+  chargeLotNom?: string | null;
 }
 
 export interface DPGF {
@@ -367,6 +370,8 @@ export type AppelOffreClientUpdate = Partial<AppelOffreClientCreate>;
 
 export type StatutDossierEtude =
   | 'BROUILLON'
+  | 'A_DECIDER'
+  | 'AFFECTE'
   | 'EN_ETUDE'
   | 'EN_VALIDATION'
   | 'VALIDEE'
@@ -374,7 +379,11 @@ export type StatutDossierEtude =
   | 'GAGNE'
   | 'PERDU'
   | 'CONVERTIE'
-  | 'ANNULE';
+  | 'ANNULE'
+  | 'NE_PAS_ETUDIER'
+  | 'REJETE_CHIFFRAGE'
+  | 'SUSPENDU'
+  | 'A_AVIS_EXECUTION';
 
 /**
  * Étapes métier affichées dans le wizard (4).
@@ -419,6 +428,12 @@ export interface DossierEtude {
   /** User IAM (UUID) — rôle BTP_INGENIEUR. */
   chargeEtudeUserId?: string;
   chargeEtudeNom?: string;
+  /** Ingénieurs à qui un LOT du bordereau est délégué. */
+  lotChargeUserIds?: string[];
+  responsableExecutionUserId?: string;
+  responsableExecutionNom?: string;
+  avisExecutionDossier?: 'FAVORABLE' | 'RETOUR' | string | null;
+  avisExecutionCommentaire?: string | null;
   cpsDocumentId?: string;
   bordereauDocumentId?: string;
   appelOffreClientId?: string;
@@ -443,6 +458,11 @@ export interface DossierEtude {
   chantierGenereId?: string;
   marcheGenereId?: string;
   motifRefus?: string;
+  goDecidePar?: string;
+  goDecideAt?: string;
+  motifNoGo?: string;
+  motifRefusChargeType?: string;
+  motifRefusCharge?: string;
   bordereauRevision?: number;
   validationEtape?: 'N1' | 'N2' | string | null;
   approvalRequestId?: string | null;
@@ -503,7 +523,7 @@ export const TYPES_DOSSIER_DOCUMENT: { value: TypeDossierDocument; label: string
   { value: 'CPS', label: 'CPS / CCTP' },
   { value: 'CPS_ET_BORDEREAU', label: 'CPS + bordereau (même fichier)' },
   { value: 'CPT', label: 'CPT' },
-  { value: 'PLAN', label: 'Plans' },
+  { value: 'PLAN', label: 'PLA / Plans' },
   { value: 'REGLEMENT', label: 'Règlement de consultation' },
   { value: 'AUTRE', label: 'Autre pièce' },
   { value: 'DEVIS_FOURNISSEUR', label: 'Devis fournisseur' },
@@ -558,4 +578,32 @@ export interface MarchePropose {
   metadonnees?: MarcheProposeMetadonnees | null;
   piecesAttendues: MarcheProposePiece[];
   confiance?: number | null;
+}
+
+/** Planning prévisionnel étude (optionnel, après chiffrage). */
+export interface DossierPlanningActivite {
+  id: string;
+  dossierId: string;
+  dpgfNoeudId?: string | null;
+  lotLibelle?: string | null;
+  libelle: string;
+  dateDebut: string;
+  dateFin: string;
+  ordre: number;
+}
+
+export type DossierPlanningRessourceType = 'HUMAIN' | 'MATERIEL';
+
+/** Ressources humaines / matériel prévues (optionnel). */
+export interface DossierPlanningRessource {
+  id: string;
+  dossierId: string;
+  type: DossierPlanningRessourceType | string;
+  libelle: string;
+  quantite: number;
+  unite?: string | null;
+  employeId?: string | null;
+  materielId?: string | null;
+  notes?: string | null;
+  ordre: number;
 }

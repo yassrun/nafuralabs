@@ -136,6 +136,28 @@ class DossierEtudeServiceClientTest {
     }
 
     @Test
+    void create_sans_charge_etude() {
+        when(repository.countByTenantId(TENANT)).thenReturn(0L);
+        when(repository.save(any())).thenAnswer(inv -> {
+            DossierEtude d = inv.getArgument(0);
+            if (d.getId() == null) {
+                d.setId(UUID.randomUUID());
+            }
+            return d;
+        });
+
+        DossierEtudeCreateDto dto = new DossierEtudeCreateDto();
+        dto.setObjet("Cadrage sans ingénieur");
+        dto.setClientNom("MOA cadrage");
+
+        DossierEtude created = service.create(dto);
+
+        assertThat(created.getChargeEtudeUserId()).isNull();
+        assertThat(created.getStatus()).isEqualTo(StatutDossierEtude.BROUILLON);
+        assertThat(created.getCurrentStep()).isEqualTo(DossierEtude.ETAPE_PREMIERE);
+    }
+
+    @Test
     void create_avecMoaTexte_sansPartner() {
         when(repository.countByTenantId(TENANT)).thenReturn(0L);
         when(repository.save(any())).thenAnswer(inv -> {

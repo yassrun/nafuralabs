@@ -4,10 +4,17 @@ describe('headerCtaSlot', () => {
   it('hides jump-to-step CTAs the wizard already covers', () => {
     expect(headerCtaSlot('CORRIGER_BORDEREAU')).toBe('hidden');
     expect(headerCtaSlot('CORRIGER_CHIFFRAGE')).toBe('hidden');
+    expect(headerCtaSlot('VOIR_SYNTHESE')).toBe('hidden');
+    expect(headerCtaSlot('SOUMETTRE_STRUCTURE')).toBe('hidden');
   });
 
-  it('keeps Voir la synthèse as a secondary jump', () => {
-    expect(headerCtaSlot('VOIR_SYNTHESE')).toBe('jump');
+  it('keeps status actions in the header', () => {
+    expect(headerCtaSlot('DECIDER_GO')).toBe('primary');
+    expect(headerCtaSlot('RENVOYER_AFFECTATION')).toBe('primary');
+    expect(headerCtaSlot('SOUMETTRE_GO')).toBe('primary');
+    expect(headerCtaSlot('ACCEPTER_AFFECTATION')).toBe('primary');
+    expect(headerCtaSlot('SOUMETTRE_CHIFFRAGE')).toBe('primary');
+    expect(headerCtaSlot('REPRENDRE_CHIFFRAGE')).toBe('primary');
   });
 
   it('keeps dossier-level decisions as primary', () => {

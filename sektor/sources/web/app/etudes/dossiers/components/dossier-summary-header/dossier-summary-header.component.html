@@ -20,9 +20,16 @@
           </span>
           <span class="dsh__pipe" aria-hidden="true">|</span>
           <span class="dsh__meta-item" role="listitem">
-            <span class="dsh__k">Chargé</span>
+            <span class="dsh__k">Étude</span>
             <span [class.dsh__empty]="!chargeNom()">{{ chargeNom() || '—' }}</span>
           </span>
+          @if (execDistinct()) {
+            <span class="dsh__pipe" aria-hidden="true">|</span>
+            <span class="dsh__meta-item" role="listitem">
+              <span class="dsh__k">Exéc.</span>
+              <span [class.dsh__empty]="!execNom()">{{ execNom() || '—' }}</span>
+            </span>
+          }
           <span class="dsh__pipe" aria-hidden="true">|</span>
           <span class="dsh__meta-item" role="listitem">
             <span class="dsh__k">Durée d’exéc.</span>
@@ -72,27 +79,46 @@
     </div>
 
     @if (showActionBar()) {
-      <nf-action-bar class="dsh__bar" align="between" spacing="sm">
-        <div class="dsh__bar-left">
-          @if (showPartager()) {
-            <nf-button
-              type="button"
-              variant="ghost"
-              size="sm"
-              [disabled]="!canShare()"
-              [attr.title]="
-                canShare()
-                  ? 'Créer un lien invité (24 h)'
-                  : 'Partage indisponible pour ce dossier'
-              "
-              (clicked)="canShare() && emitAction('PARTAGER')"
-            >
-              Partager
-            </nf-button>
-          }
+      <nf-action-bar class="dsh__bar" align="right" spacing="sm">
+        <div class="dsh__bar-actions">
           @if (showReouvrir()) {
             <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REOUVRIR_BORDEREAU')">
               Réouvrir le bordereau
+            </nf-button>
+          }
+          @if (showReinitialiser()) {
+            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REVENIR_DRAFT')">
+              Réinitialiser
+            </nf-button>
+          }
+          @if (showArchiver()) {
+            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('ARCHIVER')">
+              Archiver
+            </nf-button>
+          }
+          @if (showSuspendre()) {
+            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('SUSPENDRE_CHIFFRAGE')">
+              Suspendre
+            </nf-button>
+          }
+          @if (showChiffrageTermine()) {
+            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('SOUMETTRE_CHIFFRAGE')">
+              Chiffrage terminé
+            </nf-button>
+          }
+          @if (showNoGo()) {
+            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('NO_GO')">
+              Rejeter
+            </nf-button>
+          }
+          @if (showRefuserAffectation()) {
+            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REFUSER_AFFECTATION')">
+              Rejeter
+            </nf-button>
+          }
+          @if (showAvisRetour()) {
+            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('AVIS_EXECUTION_RETOUR')">
+              Retour au chiffrage
             </nf-button>
           }
           @if (showRefuser()) {
@@ -105,11 +131,16 @@
               Marquer perdu
             </nf-button>
           }
-        </div>
-        <div class="dsh__bar-right">
-          @if (ctaSlot() === 'jump') {
-            <nf-button type="button" variant="secondary" size="sm" (clicked)="emitAction()">
-              {{ ctaLabel() }}
+          @if (showEnregistrer()) {
+            <nf-button
+              type="button"
+              variant="secondary"
+              size="sm"
+              [disabled]="saving()"
+              [loading]="saving()"
+              (clicked)="emitAction('ENREGISTRER')"
+            >
+              Enregistrer
             </nf-button>
           }
           @if (ctaSlot() === 'primary') {

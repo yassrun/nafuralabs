@@ -67,7 +67,8 @@ class DpuServiceForNoeudTest {
                 mock(DossierIntervenantService.class),
                 mock(GelPrixComposantService.class),
                 new OuvrageCompositeService(mock(OuvrageRepository.class), new DpuCalculator()),
-                new ObjectMapper());
+                new ObjectMapper(),
+                mock(DpgfLotAffectationService.class));
     }
 
     @AfterEach

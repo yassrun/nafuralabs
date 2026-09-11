@@ -12,5 +12,8 @@ public interface DossierDocumentRepository extends JpaRepository<DossierDocument
 
     Optional<DossierDocument> findByIdAndTenantId(UUID id, UUID tenantId);
 
+    Optional<DossierDocument> findByIdAndTenantIdAndDossierEtudeId(
+            UUID id, UUID tenantId, UUID dossierEtudeId);
+
     long countByTenantIdAndDossierEtudeId(UUID tenantId, UUID dossierEtudeId);
 }

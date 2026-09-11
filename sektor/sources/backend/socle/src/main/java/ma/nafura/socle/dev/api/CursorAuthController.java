@@ -51,6 +51,7 @@ public class CursorAuthController {
             QaLocalConstants.OWNER_EMAIL,
             QaLocalConstants.OWNER_NAME,
             "OWNER",
+            QaLocalConstants.OWNER_ROLE_LABEL,
             true
         ));
         for (QaLocalConstants.RoleUser roleUser : QaLocalConstants.ROLE_USERS) {
@@ -59,6 +60,7 @@ public class CursorAuthController {
                 roleUser.email(),
                 roleUser.name(),
                 roleUser.tenantRoleCode(),
+                roleLabel(roleUser.tenantRoleCode()),
                 false
             ));
         }
@@ -121,8 +123,29 @@ public class CursorAuthController {
             familyName,
             tenant.getId().toString(),
             tenant.getName(),
-            tenant.getKey() != null ? tenant.getKey() : tenant.getId().toString()
+            tenant.getKey() != null ? tenant.getKey() : tenant.getId().toString(),
+            superAdmin
         ));
+    }
+
+    static String roleLabel(String roleCode) {
+        if (roleCode == null || roleCode.isBlank()) {
+            return "";
+        }
+        return switch (roleCode.trim()) {
+            case "BTP_INGENIEUR" -> "Ingénieur BTP";
+            case "BTP_LECTEUR_ETUDE" -> "Utilisateur (lecture étude)";
+            case "BTP_ASSISTANT_ETUDE" -> "Assistante étude (saisie)";
+            case "BTP_ADMIN_ETUDE" -> "Admin étude";
+            case "BTP_CONDUCTEUR_TRAVAUX" -> "Conducteur de travaux";
+            case "BTP_DIRECTEUR_TRAVAUX" -> "Directeur des travaux";
+            case "BTP_CHEF_CHANTIER" -> "Chef de chantier";
+            case "BTP_MAGASINIER" -> "Magasinier";
+            case "BTP_DG" -> "Directeur général";
+            case "BTP_DAF" -> "DAF";
+            case "OWNER" -> QaLocalConstants.OWNER_ROLE_LABEL;
+            default -> roleCode.replace('_', ' ');
+        };
     }
 
     private UUID resolveTenantId(UUID userId) {
@@ -163,7 +186,8 @@ public class CursorAuthController {
         String lastName,
         String tenantId,
         String tenantName,
-        String tenantSlug
+        String tenantSlug,
+        boolean superAdmin
     ) {}
 
     public record CursorIdentity(
@@ -171,6 +195,7 @@ public class CursorAuthController {
         String email,
         String name,
         String roleCode,
+        String roleLabel,
         boolean defaultLogin
     ) {}
 

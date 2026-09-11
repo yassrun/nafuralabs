@@ -105,5 +105,17 @@ INSERT INTO role_permission (id, role_code, permission, created_at) VALUES
   ('c0a5b1d2-e3f4-4a01-9c01-000000000204', 'BTP_INGENIEUR', 'etude.read', NOW()),
   ('c0a5b1d2-e3f4-4a01-9c01-000000000205', 'BTP_INGENIEUR', 'etude.create', NOW()),
   ('c0a5b1d2-e3f4-4a01-9c01-000000000206', 'BTP_INGENIEUR', 'etude.update', NOW()),
-  ('c0a5b1d2-e3f4-4a01-9c01-000000000210', 'BTP_INGENIEUR', 'etude.submit', NOW())
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000210', 'BTP_INGENIEUR', 'etude.submit', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000301', 'BTP_DIRECTEUR_TRAVAUX', 'etude.create', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000302', 'BTP_CONDUCTEUR_TRAVAUX', 'etude.create', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000304', 'BTP_CHEF_CHANTIER', 'etude.create', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000306', 'BTP_DAF', 'etude.create', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000308', 'BTP_MAGASINIER', 'etude.read', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-000000000309', 'BTP_MAGASINIER', 'etude.create', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-00000000030a', 'BTP_CHEF_EQUIPE', 'etude.read', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-00000000030b', 'BTP_CHEF_EQUIPE', 'etude.create', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-00000000030c', 'BTP_POINTEUR', 'etude.read', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-00000000030d', 'BTP_POINTEUR', 'etude.create', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-00000000030e', 'BTP_DG', 'etude.go', NOW()),
+  ('c0a5b1d2-e3f4-4a01-9c01-00000000030f', 'OWNER', 'etude.go', NOW())
 ON CONFLICT (role_code, permission) DO NOTHING;

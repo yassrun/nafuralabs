@@ -6,7 +6,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '@env';
 import {
@@ -237,7 +237,7 @@ export class AuthApiService {
   /**
    * Local Mode B / Cursor QA — mint HS256 session (backend flag-gated).
    */
-  async createCursorSession(): Promise<{
+  async createCursorSession(opts?: { role?: string; email?: string }): Promise<{
     accessToken: string;
     expiresIn: number;
     userId: string;
@@ -247,8 +247,16 @@ export class AuthApiService {
     tenantId: string;
     tenantName: string;
     tenantSlug: string;
+    superAdmin?: boolean;
   }> {
     try {
+      let params = new HttpParams();
+      if (opts?.role) {
+        params = params.set('role', opts.role);
+      }
+      if (opts?.email) {
+        params = params.set('email', opts.email);
+      }
       return await firstValueFrom(
         this.http.post<{
           accessToken: string;
@@ -260,7 +268,8 @@ export class AuthApiService {
           tenantId: string;
           tenantName: string;
           tenantSlug: string;
-        }>(`${this.apiBaseUrl}/api/public/dev/cursor-session`, {})
+          superAdmin?: boolean;
+        }>(`${this.apiBaseUrl}/api/public/dev/cursor-session`, {}, { params })
       );
     } catch (error: any) {
       throw this.createError(
@@ -268,6 +277,32 @@ export class AuthApiService {
         error?.message || 'Cursor QA session unavailable (is NAFURA_DEV_CURSOR_AUTH_ENABLED set?)'
       );
     }
+  }
+
+  async listCursorIdentities(): Promise<{
+    defaultEmail: string;
+    users: Array<{
+      alias: string;
+      email: string;
+      name: string;
+      roleCode: string;
+      roleLabel: string;
+      defaultLogin: boolean;
+    }>;
+  }> {
+    return firstValueFrom(
+      this.http.get<{
+        defaultEmail: string;
+        users: Array<{
+          alias: string;
+          email: string;
+          name: string;
+          roleCode: string;
+          roleLabel: string;
+          defaultLogin: boolean;
+        }>;
+      }>(`${this.apiBaseUrl}/api/public/dev/cursor-identities`)
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

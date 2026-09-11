@@ -16,7 +16,9 @@ import { MatDialog, type MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
-import { ButtonComponent, ConfirmDialogService } from '@platform/lib/anatomy';
+import { ButtonComponent, ConfirmDialogService, ToastService } from '@platform/lib/anatomy';
+import { AuthFacade } from '@platform/core/security/services/auth.facade';
+import { lotAssigneAUnAutre } from '../../utils/dossier-responsables.util';
 
 import type { ResultatGate } from '@app/etudes/models';
 
@@ -46,6 +48,8 @@ export class DecompositionWorkspaceComponent {
   private readonly dpuApi = inject(DpuApiService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly dialog = inject(MatDialog);
+  private readonly auth = inject(AuthFacade);
+  private readonly toast = inject(ToastService);
 
   readonly dpgfId = input.required<string>();
   readonly dossierId = input.required<string>();
@@ -60,6 +64,10 @@ export class DecompositionWorkspaceComponent {
   readonly focusToken = input(0);
   /** Gate fusionnée (décomposition + consultation) pour afficher la couverture. */
   readonly consultationGate = input<ResultatGate | undefined>(undefined);
+  /** Masqué si responsable étude = responsable exécution. */
+  readonly afficherAvisExecution = input(true);
+  readonly peutAffecterLots = input(false);
+  readonly vueLotsAffectes = input(false);
 
   readonly change = output<void>();
   readonly dirtyChange = output<boolean>();
@@ -160,6 +168,16 @@ export class DecompositionWorkspaceComponent {
 
   async onSelectPoste(row: BordereauTreeRow | null): Promise<void> {
     if (!row || row.type !== 'ARTICLE' || !row.id) return;
+    const me = this.auth.user();
+    if (lotAssigneAUnAutre(row.chargeLotUserId, me?.id, me?.email)) {
+      const nom = row.chargeLotNom?.trim();
+      this.toast.info(
+        nom
+          ? `Chiffrage réservé à ${nom}. Retirez l’affectation pour le reprendre.`
+          : 'Chiffrage réservé à un autre ingénieur. Retirez l’affectation pour le reprendre.',
+      );
+      return;
+    }
 
     const currentKey = this.selectedKey();
     if (this.drawerRef && (row.key === currentKey || this.openingKey === row.key)) {
@@ -228,6 +246,7 @@ export class DecompositionWorkspaceComponent {
       fgDefaut: this.fgDefaut(),
       margeDefaut: this.margeDefaut(),
       tvaDefaut: this.tvaDefaut(),
+      afficherAvisExecution: this.afficherAvisExecution(),
       onDirtyChange: (dirty) => {
         this.drawerDirty.set(dirty);
         this.dirtyChange.emit(dirty);

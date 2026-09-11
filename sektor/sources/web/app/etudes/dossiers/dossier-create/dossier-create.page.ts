@@ -7,14 +7,12 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { AuthFacade } from '@platform/core/security/services/auth.facade';
 import { ButtonComponent } from '@platform/lib/anatomy';
 
 import { DossierEtudeApiService } from '../services/dossier-etude-api.service';
 
 /**
- * Lanceur : crée un brouillon coquille et ouvre le wizard (étape 1).
- * L’identité et la revue CPS se font dans le cadrage, pas ici.
+ * Lanceur : crée un brouillon de cadrage. Le chargé d’étude est affecté au go DG.
  */
 @Component({
   selector: 'app-dossier-create',
@@ -27,29 +25,15 @@ import { DossierEtudeApiService } from '../services/dossier-etude-api.service';
 export class DossierCreatePage implements OnInit {
   private readonly api = inject(DossierEtudeApiService);
   private readonly nav = inject(Router);
-  private readonly auth = inject(AuthFacade);
 
   readonly enCours = signal(true);
   readonly erreur = signal<string | undefined>(undefined);
 
   async ngOnInit(): Promise<void> {
     try {
-      const list = await this.api.listIngenieurs();
-      const me = this.auth.user();
-      const charge =
-        (me?.id && list.find((c) => c.userId === me.id)) || list[0];
-      if (!charge) {
-        this.erreur.set(
-          'Aucun ingénieur. Affectez le rôle BTP_INGENIEUR dans Administration → Membres.',
-        );
-        this.enCours.set(false);
-        return;
-      }
       const dossier = await this.api.create({
         objet: 'Nouvelle étude',
         clientNom: 'À préciser',
-        chargeEtudeUserId: charge.userId,
-        chargeEtudeNom: charge.displayName ?? charge.email,
       });
       await this.nav.navigate(['/etudes/dossiers', dossier.id], { replaceUrl: true });
     } catch (e) {

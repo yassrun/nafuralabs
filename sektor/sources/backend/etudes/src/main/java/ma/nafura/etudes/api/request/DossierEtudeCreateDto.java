@@ -26,8 +26,7 @@ public class DossierEtudeCreateDto {
     @Size(max = 255)
     private String clientNom;
 
-    /** User IAM (UUID) — rôle BTP_INGENIEUR requis. */
-    @NotBlank
+    /** User IAM (UUID) — optionnel jusqu'au go. */
     @Size(max = 100)
     private String chargeEtudeUserId;
 

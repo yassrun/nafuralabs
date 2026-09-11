@@ -27,6 +27,9 @@ import { SystemRoles } from '../models/user.models';
 import { POST_AUTH_REDIRECT_STORAGE_KEY } from '@lib/anatomy/services/lookup-reference-navigation.service';
 import { applicationRequiresTenant } from '../../application/application-config';
 
+/** After Mode B logout, skip auto-login and show the identity picker. */
+export const CURSOR_PICK_IDENTITY_KEY = 'nafura.modeB.pickIdentity';
+
 /**
  * Auth Facade
  *
@@ -162,6 +165,11 @@ export class AuthFacade {
 
     // Local Cursor QA: HS256 session from backend (no Keycloak).
     if ((environment as { cursorAuthAutoLogin?: boolean }).cursorAuthAutoLogin) {
+      if (this.usesCursorIdentityPicker()) {
+        this.state.setStatus('unauthenticated');
+        this.state.setLoading(false);
+        return;
+      }
       try {
         await this.bootstrapCursorAuth();
       } catch (err) {
@@ -291,6 +299,39 @@ export class AuthFacade {
     return (environment as { cursorAuthAutoLogin?: boolean }).cursorAuthAutoLogin === true;
   }
 
+  /** Mode B: user logged out — stay on /login picker instead of reminting owner. */
+  usesCursorIdentityPicker(): boolean {
+    return this.usesCursorAuthAutoLogin() && this.readCursorPickFlag();
+  }
+
+  markCursorPickIdentity(): void {
+    this.writeCursorPickFlag(true);
+  }
+
+  clearCursorPickIdentity(): void {
+    this.writeCursorPickFlag(false);
+  }
+
+  private readCursorPickFlag(): boolean {
+    try {
+      return sessionStorage.getItem(CURSOR_PICK_IDENTITY_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  private writeCursorPickFlag(on: boolean): void {
+    try {
+      if (on) {
+        sessionStorage.setItem(CURSOR_PICK_IDENTITY_KEY, '1');
+      } else {
+        sessionStorage.removeItem(CURSOR_PICK_IDENTITY_KEY);
+      }
+    } catch {
+      /* private mode */
+    }
+  }
+
   /**
    * Remember intended route, then start OAuth (or dev login flow).
    */
@@ -308,6 +349,10 @@ export class AuthFacade {
    */
   async login(): Promise<void> {
     if (this.usesCursorAuthAutoLogin()) {
+      if (this.usesCursorIdentityPicker()) {
+        await this.router.navigateByUrl('/login');
+        return;
+      }
       await this.bootstrapCursorAuth();
       if (this.isAuthenticated()) {
         await this.router.navigateByUrl('/');
@@ -394,6 +439,12 @@ export class AuthFacade {
     this.state.clear();
     this.state.clearPersistedTenant();
 
+    if (this.usesCursorAuthAutoLogin()) {
+      this.markCursorPickIdentity();
+      await this.router.navigateByUrl(target);
+      return;
+    }
+
     if (environment.devAuthBypass) {
       await this.router.navigateByUrl(target);
       return;
@@ -401,6 +452,29 @@ export class AuthFacade {
 
     // Redirect to Keycloak logout (will redirect back to app root or /login)
     await this.api.logout(tokens?.refreshToken);
+  }
+
+  /** Mode B picker: mint a session for the selected alias (or email). */
+  async loginCursorAs(roleOrEmail: string): Promise<boolean> {
+    this.state.setLoading(true);
+    this.state.setError(null);
+    const selector = roleOrEmail.trim();
+    try {
+      this.clearCursorPickIdentity();
+      if (selector.includes('@')) {
+        await this.bootstrapCursorAuth({ email: selector });
+      } else {
+        await this.bootstrapCursorAuth({ role: selector || undefined });
+      }
+      return this.isAuthenticated();
+    } catch (error) {
+      this.markCursorPickIdentity();
+      this.state.setError(error as AuthError);
+      this.state.setStatus('unauthenticated');
+      return false;
+    } finally {
+      this.state.setLoading(false);
+    }
   }
 
   /**
@@ -521,9 +595,10 @@ export class AuthFacade {
   /**
    * Mode B Cursor QA: restore valid onboarding JWT or mint a new cursor session.
    */
-  private async bootstrapCursorAuth(): Promise<void> {
+  private async bootstrapCursorAuth(opts?: { role?: string; email?: string }): Promise<void> {
+    const forceIdentity = !!(opts?.role || opts?.email);
     const session = this.state.loadPersistedSession();
-    if (session?.tokens?.accessToken) {
+    if (!forceIdentity && session?.tokens?.accessToken) {
       const accessToken = session.tokens.accessToken;
       if (
         !this.tokenService.isMockToken(accessToken) &&
@@ -537,7 +612,7 @@ export class AuthFacade {
       }
     }
 
-    const res = await this.api.createCursorSession();
+    const res = await this.api.createCursorSession(opts);
     const nowIso = new Date().toISOString();
     const user: User = {
       id: res.userId,
@@ -550,11 +625,12 @@ export class AuthFacade {
       status: 'active',
       emailVerified: true,
       mfaEnabled: false,
-      isSuperAdmin: true,
+      isSuperAdmin: res.superAdmin === true,
       createdAt: nowIso,
       updatedAt: nowIso,
       lastLoginAt: nowIso,
     };
+    const isSa = res.superAdmin === true;
     const membership: TenantMembership = {
       tenant: {
         id: res.tenantId,
@@ -569,15 +645,15 @@ export class AuthFacade {
       },
       roles: [
         {
-          id: SystemRoles.SUPER_ADMIN,
-          name: 'Super Admin',
+          id: isSa ? SystemRoles.SUPER_ADMIN : 'MEMBER',
+          name: isSa ? 'Super Admin' : 'Membre',
           description: 'Cursor QA',
-          permissions: ['*'],
-          isSystem: true,
-          priority: 100,
+          permissions: isSa ? ['*'] : [],
+          isSystem: isSa,
+          priority: isSa ? 100 : 10,
         },
       ],
-      permissions: ['*'],
+      permissions: isSa ? ['*'] : [],
       isDefault: true,
       status: 'active',
       joinedAt: nowIso,
@@ -649,9 +725,37 @@ export class AuthFacade {
 
     this.state.setAuthenticatedFromToken(session.tokens, user);
 
+    if (applicationRequiresTenant()) {
+      try {
+        const tenants = await this.api.getUserTenants(user.id, session.tokens.accessToken);
+        if (tenants.length > 0) {
+          this.state.setTenants(tenants);
+          const tenantId =
+            session.tenantId ??
+            this.state.loadPersistedTenant() ??
+            tenants[0]?.tenant.id ??
+            null;
+          if (tenantId) {
+            if (tenants.some((t) => t.tenant.id === tenantId)) {
+              this.state.selectTenant(tenantId);
+            }
+            await this.tenantContextService.initialize(tenantId);
+            this.state.persistTenantSelection(tenantId);
+          }
+          this.state.persistSession(session.rememberMe);
+          this.state.setLoading(false);
+          return;
+        }
+      } catch {
+        /* fall through — never invent OWNER * for a restored Mode B user */
+      }
+    }
+
     const tenantId = session.tenantId ?? this.state.loadPersistedTenant();
     if (tenantId) {
-      const membership = this.buildOnboardingOwnerMembership(tenantId, tenantId);
+      const membership = user.isSuperAdmin
+        ? this.buildOnboardingOwnerMembership(tenantId, tenantId)
+        : this.buildCursorMemberFallback(tenantId);
       this.state.setTenants([membership]);
       this.state.selectTenant(tenantId, membership);
       if (applicationRequiresTenant()) {
@@ -663,6 +767,37 @@ export class AuthFacade {
 
     this.state.persistSession(session.rememberMe);
     this.state.setLoading(false);
+  }
+
+  private buildCursorMemberFallback(tenantId: string): TenantMembership {
+    const nowIso = new Date().toISOString();
+    return {
+      tenant: {
+        id: tenantId,
+        name: tenantId,
+        slug: tenantId,
+        status: 'active',
+        enabledFeatures: [],
+        enabledModules: [],
+        features: {},
+        createdAt: nowIso,
+        updatedAt: nowIso,
+      },
+      roles: [
+        {
+          id: 'MEMBER',
+          name: 'Membre',
+          description: 'Cursor QA',
+          permissions: [],
+          isSystem: true,
+          priority: 10,
+        },
+      ],
+      permissions: [],
+      isDefault: true,
+      status: 'active',
+      joinedAt: nowIso,
+    };
   }
 
   private async restorePersistedKeycloakSession(session: StoredSession): Promise<void> {

@@ -327,6 +327,7 @@
     "etudes": "Études",
     "etudes.chiffrage": "Études & AO",
     "etudes.soumissions": "Soumissions & opportunités",
+    "etudes.dashboard": "Tableau de bord",
     "etudes.dossiers": "Études / appels d'offres",
     "etudes.bibliotheque": "Bibliothèque de prix",
     "etudes.catalogueConsole": "Console catalogue Sektor",
@@ -782,6 +783,31 @@
       "codeOptional": "Facultatif — généré si vide.",
       "dateOptional": "Facultatif — avant l'OS.",
       "dureeOptional": "Facultatif — avant l'OS."
+    },
+    "dashboard": {
+      "title": "Tableau de bord études",
+      "subtitle": "{count} études ouvertes",
+      "loading": "Chargement du portefeuille…",
+      "error": "Impossible de charger le portefeuille études.",
+      "actions": {
+        "create": "Nouvelle étude",
+        "listing": "Tous les dossiers"
+      },
+      "empty": {
+        "title": "Aucune étude / appel d'offres",
+        "message": "Ouvrez un cadrage (Draft). Envoyez-le À affecter : le DG affecte, puis le chargé prend en compte."
+      },
+      "attention": {
+        "title": "À traiter",
+        "retard": "{count} en retard",
+        "empty": "Rien en retard ni en attente."
+      },
+      "pipeline": {
+        "title": "Pipeline"
+      },
+      "more": {
+        "title": "Autres raccourcis"
+      }
     }
   }
 }

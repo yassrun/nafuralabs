@@ -187,16 +187,11 @@
   border-bottom: 1px solid var(--nf-color-border);
 }
 
-.dsh__bar-left,
-.dsh__bar-right {
+.dsh__bar-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
   align-items: center;
-}
-
-.dsh__bar-right {
-  margin-left: auto;
   justify-content: flex-end;
 }
 
@@ -231,8 +226,7 @@
     justify-content: space-between;
   }
 
-  .dsh__bar-left,
-  .dsh__bar-right {
+  .dsh__bar-actions {
     width: 100%;
   }
 }

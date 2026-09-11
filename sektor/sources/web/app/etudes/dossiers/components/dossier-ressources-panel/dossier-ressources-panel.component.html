@@ -1,0 +1,148 @@
+<section class="res" aria-labelledby="res-titre">
+  <header class="res__entete">
+    <div>
+      <h3 id="res-titre" class="res__titre">Ressources prévues</h3>
+      <p class="res__aide">
+        Effectifs et matériel à mobiliser — ex. 1 ingénieur, 2 techniciens. Pas d’affectation
+        nominative obligatoire. Étape facultative.
+      </p>
+    </div>
+  </header>
+
+  @if (erreur()) {
+    <p class="res__erreur" role="alert">{{ erreur() }}</p>
+  }
+
+  @if (chargement()) {
+    <p class="res__etat">Chargement des ressources…</p>
+  } @else {
+    <div class="res__colonnes">
+      <article class="res__bloc">
+        <h4 class="res__sous">Humaines</h4>
+        @if (humaines().length === 0) {
+          <p class="res__etat">Aucun profil — ex. 1 ingénieur, 2 techniciens.</p>
+        } @else {
+          <table class="res__table">
+            <thead>
+              <tr>
+                <th>Rôle / profil</th>
+                <th>Qté</th>
+                @if (modifiable()) {
+                  <th></th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of humaines(); track row.id) {
+                <tr>
+                  <td>{{ row.libelle }}</td>
+                  <td>{{ row.quantite }}@if (row.unite) { {{ row.unite }} }</td>
+                  @if (modifiable()) {
+                    <td>
+                      <nf-button size="sm" variant="ghost" [disabled]="saving()" (clicked)="supprimer(row)">
+                        Retirer
+                      </nf-button>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </article>
+      <article class="res__bloc">
+        <h4 class="res__sous">Matériel</h4>
+        @if (materiel().length === 0) {
+          <p class="res__etat">Aucun matériel prévu.</p>
+        } @else {
+          <table class="res__table">
+            <thead>
+              <tr>
+                <th>Désignation</th>
+                <th>Qté</th>
+                @if (modifiable()) {
+                  <th></th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of materiel(); track row.id) {
+                <tr>
+                  <td>{{ row.libelle }}</td>
+                  <td>{{ row.quantite }}@if (row.unite) { {{ row.unite }} }</td>
+                  @if (modifiable()) {
+                    <td>
+                      <nf-button size="sm" variant="ghost" [disabled]="saving()" (clicked)="supprimer(row)">
+                        Retirer
+                      </nf-button>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </article>
+    </div>
+  }
+
+  @if (modifiable()) {
+    <form class="res__form" (submit)="$event.preventDefault(); ajouter()">
+      <nf-select
+        name="resType"
+        label="Type"
+        [disabled]="saving()"
+        [options]="typeOptions"
+        [ngModel]="draftType()"
+        (ngModelChange)="draftType.set($event === 'MATERIEL' ? 'MATERIEL' : 'HUMAIN')"
+      />
+      <nf-input
+        name="resLibelle"
+        [label]="draftHumain() ? 'Rôle / profil' : 'Désignation'"
+        [required]="true"
+        [disabled]="saving()"
+        [ngModel]="draftLibelle()"
+        (ngModelChange)="draftLibelle.set($event)"
+      />
+      <nf-input
+        name="resQte"
+        type="number"
+        label="Quantité"
+        [required]="true"
+        [disabled]="saving()"
+        [ngModel]="draftQuantite()"
+        (ngModelChange)="draftQuantite.set($event)"
+      />
+      <nf-input
+        name="resUnite"
+        label="Unité"
+        placeholder="u, j…"
+        [disabled]="saving()"
+        [ngModel]="draftUnite()"
+        (ngModelChange)="draftUnite.set($event)"
+      />
+      @if (draftHumain()) {
+        <nf-select
+          name="resEmploye"
+          label="Employé (optionnel)"
+          [disabled]="saving()"
+          [options]="employeOptions()"
+          [ngModel]="draftEmployeId()"
+          (ngModelChange)="draftEmployeId.set($event ?? '')"
+        />
+      } @else {
+        <nf-select
+          name="resMateriel"
+          label="Engin parc (optionnel)"
+          [disabled]="saving()"
+          [options]="materielOptions()"
+          [ngModel]="draftMaterielId()"
+          (ngModelChange)="draftMaterielId.set($event ?? '')"
+        />
+      }
+      <div class="res__submit">
+        <nf-button type="submit" [disabled]="saving()">Ajouter</nf-button>
+      </div>
+    </form>
+  }
+</section>

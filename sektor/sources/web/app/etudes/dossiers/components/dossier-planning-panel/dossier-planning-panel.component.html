@@ -1,0 +1,96 @@
+<section class="planif" aria-labelledby="planif-titre">
+  <header class="planif__entete">
+    <div>
+      <h3 id="planif-titre" class="planif__titre">Planning prévisionnel</h3>
+      <p class="planif__aide">
+        Activités simples liées ou non à un lot vendu. Étape facultative — vous pouvez continuer
+        sans rien saisir. Pas de Gantt ni de liaisons.
+      </p>
+    </div>
+  </header>
+
+  @if (erreur()) {
+    <p class="planif__erreur" role="alert">{{ erreur() }}</p>
+  }
+
+  @if (chargement()) {
+    <p class="planif__etat">Chargement du planning…</p>
+  } @else if (activites().length === 0 && !modifiable()) {
+    <p class="planif__etat">Aucune activité prévue.</p>
+  } @else if (activites().length === 0) {
+    <p class="planif__etat">Aucune activité — ajoutez-en une, ou passez aux ressources.</p>
+  } @else {
+    <table class="planif__table">
+      <thead>
+        <tr>
+          <th>Activité</th>
+          <th>Lot vendu</th>
+          <th>Début</th>
+          <th>Fin</th>
+          @if (modifiable()) {
+            <th></th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of activites(); track row.id) {
+          <tr>
+            <td>{{ row.libelle }}</td>
+            <td>{{ lotAffiche(row) }}</td>
+            <td>{{ row.dateDebut }}</td>
+            <td>{{ row.dateFin }}</td>
+            @if (modifiable()) {
+              <td class="planif__actions">
+                <nf-button size="sm" variant="ghost" [disabled]="saving()" (clicked)="supprimer(row)">
+                  Retirer
+                </nf-button>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (modifiable()) {
+    <form class="planif__form" (submit)="$event.preventDefault(); ajouter()">
+      <nf-input
+        name="planifLibelle"
+        label="Activité"
+        [required]="true"
+        [disabled]="saving()"
+        [ngModel]="draftLibelle()"
+        (ngModelChange)="draftLibelle.set($event)"
+      />
+      <nf-select
+        name="planifLot"
+        label="Lot vendu"
+        [disabled]="saving()"
+        [options]="lotOptions()"
+        [ngModel]="draftLotId()"
+        (ngModelChange)="draftLotId.set($event ?? '')"
+      />
+      <nf-input
+        name="planifDebut"
+        type="date"
+        label="Début"
+        [required]="true"
+        [disabled]="saving()"
+        [ngModel]="draftDebut()"
+        (ngModelChange)="draftDebut.set($event)"
+      />
+      <nf-input
+        name="planifFin"
+        type="date"
+        label="Fin"
+        [required]="true"
+        [disabled]="saving()"
+        [ngModel]="draftFin()"
+        (ngModelChange)="draftFin.set($event)"
+      />
+      <div class="planif__submit">
+        <nf-button type="submit" [disabled]="saving()">Ajouter</nf-button>
+      </div>
+    </form>
+  }
+</section>

@@ -41,7 +41,7 @@
       </div>
     </mat-menu>
   }
-  @if (filterFields().length > 0) {
+  @if (showFilterButton() && filterFields().length > 0) {
     <nf-button
       variant="tertiary"
       iconLibrary="lucide"
@@ -70,7 +70,7 @@
         </nf-filter-builder>
       </div>
     </mat-menu>
-  } @else {
+  } @else if (showFilterButton()) {
     <nf-button
       variant="tertiary"
       iconLibrary="lucide"
@@ -80,7 +80,7 @@
       [attr.aria-label]="'Filter' | translate">
     </nf-button>
   }
-  @if (showFilterReset()) {
+  @if (showFilterButton() && showFilterReset()) {
     <nf-filter-reset
       [active]="filterActive()"
       (reset)="filterReset.emit()"

@@ -41,17 +41,34 @@ import {
 export type PiecesMarcheMode = 'documents' | 'bordereau' | 'destination';
 export type ExtractionPhase = 'idle' | 'running' | 'review' | 'saving' | 'error';
 
+const TYPES_CADRAGE = new Set([
+  'CPS',
+  'BORDEREAU',
+  'CPS_ET_BORDEREAU',
+  'PLAN',
+  'PLA',
+  'AUTRE',
+  'REGLEMENT',
+  'CPT',
+]);
+
+const TYPES_CADRAGE_PRINCIPAUX = new Set(['CPS', 'BORDEREAU', 'CPS_ET_BORDEREAU']);
+
+export function estSlotCadragePrincipal(type: string | undefined): boolean {
+  return TYPES_CADRAGE_PRINCIPAUX.has((type ?? '').toUpperCase());
+}
+
 export function slotMatchesMode(type: string | undefined, mode: PiecesMarcheMode): boolean {
   const t = (type ?? '').toUpperCase();
-  if (mode === 'documents') return t === 'CPS' || t === 'CPS_ET_BORDEREAU';
+  if (mode === 'documents') return TYPES_CADRAGE.has(t);
   if (mode === 'bordereau') return t === 'BORDEREAU' || t === 'CPS_ET_BORDEREAU';
-  return t !== 'CPS' && t !== 'BORDEREAU' && t !== 'CPS_ET_BORDEREAU';
+  return !TYPES_CADRAGE.has(t);
 }
 
 /**
- * Étape 1 — CPS optionnel (propositions d’identité dans le panneau cadrage).
- * Étape 2 — dépôt BDP + construction de l'arbre.
- * Étape 4 — pièces de destination (caution, plans…) détectées par le CPS.
+ * Étape 1 — table de consultation : CPS, BDP, PLA, custom.
+ * Étape 2 — extraire le BDP déjà déposé, ou saisie manuelle.
+ * Étape 4 — pièces de destination (caution, attestations…).
  */
 @Component({
   selector: 'app-pieces-marche',
@@ -88,8 +105,11 @@ export class PiecesMarcheComponent {
    * (statut autre que BROUILLON).
    */
   readonly figeFichiersDeposes = input(false);
+  readonly peutAffecterLots = input(false);
+  readonly vueLotsAffectes = input(false);
 
   readonly change = output<void>();
+  readonly dpgfPret = output<string>();
 
   private readonly arbre = viewChild(BordereauArbreComponent);
 
@@ -101,16 +121,25 @@ export class PiecesMarcheComponent {
   );
 
   readonly ajoutTypeOptions: NfSelectOption[] = [
-    ...this.typesAjout
-      .filter((t) => t.value !== 'BORDEREAU' && t.value !== 'CPS')
-      .map((t) => ({ value: t.value, label: t.label })),
+    { value: 'PLAN', label: 'PLA / Plans' },
+    { value: 'REGLEMENT', label: 'Règlement de consultation' },
+    { value: 'CPT', label: 'CPT' },
+    { value: 'AUTRE', label: 'Custom' },
     { value: 'CAUTION', label: 'Caution' },
     { value: 'ATTESTATION', label: 'Attestation' },
+  ];
+
+  readonly ajoutTypeCadrageOptions: NfSelectOption[] = [
+    { value: 'PLAN', label: 'PLA / Plans' },
+    { value: 'REGLEMENT', label: 'Règlement de consultation' },
+    { value: 'CPT', label: 'CPT' },
+    { value: 'AUTRE', label: 'Custom' },
   ];
 
   readonly pieces = signal<DossierDocument[]>([]);
   readonly slotsAttendus = signal<DossierPieceAttendue[]>([]);
   readonly chargement = signal(false);
+  readonly ouvertureId = signal<string | null>(null);
   readonly envoiSlot = signal<string | null>(null);
   readonly dragOverSlot = signal<string | null>(null);
   readonly initManuel = signal(false);
@@ -166,6 +195,20 @@ export class PiecesMarcheComponent {
     this.slotsAttendus().filter((s) => slotMatchesMode(s.type, this.mode())),
   );
 
+  readonly slotsPrincipaux = computed(() =>
+    this.slotsVisibles().filter((s) => estSlotCadragePrincipal(s.type)),
+  );
+
+  readonly slotsSecondaires = computed(() =>
+    this.slotsVisibles().filter((s) => !estSlotCadragePrincipal(s.type)),
+  );
+
+  readonly autresDeposes = computed(
+    () => this.slotsSecondaires().filter((s) => !!this.documentPourSlot(s)).length,
+  );
+
+  readonly autresOuverts = signal(false);
+
   readonly montreZones = computed(() => {
     const m = this.mode();
     return m === 'documents' || m === 'destination' || m === 'bordereau';
@@ -178,18 +221,18 @@ export class PiecesMarcheComponent {
       case 'destination':
         return 'Pièces de destination — rappel N+1';
       default:
-        return 'Importer le CPS';
+        return 'Documents de la consultation';
     }
   });
 
   readonly aide = computed(() => {
     switch (this.mode()) {
       case 'bordereau':
-        return 'Déposez un BDP pour extraire l’arbre, ou construisez-le à la main.';
+        return 'Le BDP se dépose au cadrage. Ici : extraire l’arbre, ou le saisir à la main.';
       case 'destination':
-        return 'Documents détectés dans le CPS (règlement, plans, caution…). À joindre ici, y compris après soumission, avant la validation N+1.';
+        return 'Documents détectés dans le CPS (règlement, caution…). À joindre ici, y compris après soumission, avant la validation N+1.';
       default:
-        return 'Optionnel — propose les champs du cadrage à revoir. Remplaçable tant que le dossier est en brouillon.';
+        return 'CPS et BDP d’abord. Les autres pièces se plient dessous — elles ne bloquent pas l’affectation.';
     }
   });
 
@@ -260,6 +303,8 @@ export class PiecesMarcheComponent {
   constructor() {
     effect(() => {
       const id = this.dossierId();
+      this.modifiable();
+      this.mode();
       if (id) void this.charger(id);
     });
     effect(() => {
@@ -272,7 +317,79 @@ export class PiecesMarcheComponent {
     return this.labelsParType[type] ?? type;
   }
 
+  libelleSlot(slot: DossierPieceAttendue): string {
+    const lib = (slot.libelle ?? '').trim();
+    if (lib) return lib;
+    return this.libelleType(slot.type);
+  }
+
+  toggleAutres(): void {
+    this.autresOuverts.update((v) => !v);
+  }
+
   /** Corrige le mojibake fréquent UTF-8 lu en Latin-1 (ex. NÂ° → N°). */
+  async ouvrir(piece: DossierDocument): Promise<void> {
+    if (!piece?.id || this.ouvertureId()) return;
+    this.erreur.set(undefined);
+    this.ouvertureId.set(piece.id);
+    try {
+      const blob = await this.api.telechargerDocument(this.dossierId(), piece.id);
+      const nom = this.nomFichierAffiche(piece.nomFichier) || 'document';
+      const typed =
+        blob.type && blob.type !== 'application/octet-stream' && blob.type !== 'application/json'
+          ? blob
+          : new Blob([blob], { type: this.mimeDepuisNom(nom) });
+      if (typed.size === 0) {
+        throw new Error('etudes.document.telechargement_impossible');
+      }
+      const url = URL.createObjectURL(typed);
+      const consultable =
+        typed.type.startsWith('application/pdf') || typed.type.startsWith('image/');
+      if (consultable) {
+        const opened = window.open(url, '_blank', 'noopener,noreferrer');
+        if (!opened) {
+          this.declencherTelechargement(url, nom);
+        }
+      } else {
+        this.declencherTelechargement(url, nom);
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (e) {
+      this.erreur.set(await this.messageOuverture(e));
+    } finally {
+      this.ouvertureId.set(null);
+    }
+  }
+
+  private declencherTelechargement(url: string, nom: string): void {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nom;
+    a.rel = 'noopener';
+    a.click();
+  }
+
+  private mimeDepuisNom(nom: string): string {
+    const lower = nom.toLowerCase();
+    if (lower.endsWith('.pdf')) return 'application/pdf';
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
+    return 'application/octet-stream';
+  }
+
+  private async messageOuverture(e: unknown): Promise<string> {
+    const err = e as { status?: number; error?: Blob | { code?: string; message?: string } };
+    if (err?.error instanceof Blob) {
+      try {
+        const parsed = JSON.parse(await err.error.text()) as { code?: string; message?: string };
+        return this.messageErreur({ ...err, error: parsed });
+      } catch {
+        /* ignore */
+      }
+    }
+    return this.messageErreur(e);
+  }
+
   nomFichierAffiche(nom: string | null | undefined): string {
     if (!nom) return '';
     const patched = nom
@@ -293,6 +410,8 @@ export class PiecesMarcheComponent {
   badgeSlot(slot: DossierPieceAttendue): string {
     if (slot.type === 'BORDEREAU') return 'BDP';
     if (slot.type === 'CPS') return 'CPS';
+    if (slot.type === 'PLAN' || slot.type === 'PLA') return 'PLA';
+    if (slot.type === 'AUTRE') return 'Custom';
     return slot.type.slice(0, 6);
   }
 
@@ -398,6 +517,7 @@ export class PiecesMarcheComponent {
       });
       this.ajoutOuvert.set(false);
       this.ajoutLibelle.set('');
+      this.autresOuverts.set(true);
       await this.charger(this.dossierId());
       this.change.emit();
     } catch (e) {
@@ -701,7 +821,10 @@ export class PiecesMarcheComponent {
     this.info.set(undefined);
     try {
       const res = await this.api.initBordereauManuel(this.dossierId());
-      this.dpgfIdLocal.set(res.dpgfId);
+      if (res?.dpgfId) {
+        this.dpgfIdLocal.set(res.dpgfId);
+        this.dpgfPret.emit(res.dpgfId);
+      }
       this.change.emit();
     } catch (e) {
       this.erreur.set(this.messageErreur(e));
@@ -743,7 +866,7 @@ export class PiecesMarcheComponent {
         void this.capturerDestinationSilencieux();
       }
       if (this.mode() === 'bordereau') {
-        void this.assurerArbreVide();
+        await this.assurerArbreVide();
       }
     } catch (e) {
       this.erreur.set(this.messageErreur(e));
