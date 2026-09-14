@@ -3,7 +3,8 @@ package ma.nafura.platform.collaboration.audit;
 /**
  * Standard audit action catalog for use with {@link AuditService#log}.
  * CRUD actions {@code create}, {@code update}, {@code delete} are auto-captured for
- * entities annotated with {@link Auditable}; others are logged manually by domain services.
+ * entities annotated with {@link ma.nafura.platform.framework.audit.Auditable};
+ * others are logged manually by domain services.
  */
 public final class AuditActions {
 
@@ -29,4 +30,12 @@ public final class AuditActions {
     public static final String COMMENT = "comment";
     /** File attached (manual). */
     public static final String ATTACH = "attach";
+    /** Entity emailed (manual). */
+    public static final String EMAIL = "emailed";
+    /** Document printed / PDF rendered (manual). */
+    public static final String PRINT = "print";
+    /** Listing or document exported (manual). */
+    public static final String EXPORT = "export";
+    /** Workflow submitted for approval (manual). */
+    public static final String SUBMIT = "submit";
 }

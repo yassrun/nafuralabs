@@ -1,12 +1,11 @@
 import type { BadgeVariant } from '@platform/lib/anatomy/types';
 import type { DossierEtude } from '@app/etudes/models';
+import { normalizeStatutDossier } from './dossier-status.util';
 
 const CLOS_POUR_DELAI = new Set([
-  'GAGNE',
-  'PERDU',
-  'CONVERTIE',
-  'ANNULE',
-  'NE_PAS_ETUDIER',
+  'FINAL_APPROVED',
+  'ARCHIVED',
+  'REJECTED',
 ]);
 
 export type KindDelaiListing = 'EN_RETARD' | 'J7' | 'OK' | 'SANS_DATE' | 'CLOS';
@@ -29,7 +28,8 @@ function daysUntil(limite: Date, today: Date): number {
 }
 
 export function estOuvertPourDelai(status: string | null | undefined): boolean {
-  return !!status && !CLOS_POUR_DELAI.has(status);
+  const n = normalizeStatutDossier(status);
+  return !!n && !CLOS_POUR_DELAI.has(n);
 }
 
 export function kindDelaiListing(

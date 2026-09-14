@@ -16,6 +16,7 @@ import type { DossierPlanningRessource } from '@app/etudes/models';
 import { ErpLookupService } from '@app/socle/shared/services/erp-lookup.service';
 
 import { DossierEtudeApiService } from '../../services/dossier-etude-api.service';
+import { messagePlanningErreur } from '../../utils/planning-erreur.util';
 
 const TYPE_OPTIONS: NfSelectOption[] = [
   { value: 'HUMAIN', label: 'Humaine' },
@@ -89,7 +90,7 @@ export class DossierRessourcesPanelComponent {
       this.draftMaterielId.set('');
       this.ressources.set(await this.api.listerPlanningRessources(this.dossierId()));
     } catch (e) {
-      this.erreur.set(this.messageErreur(e));
+      this.erreur.set(messagePlanningErreur(e));
     } finally {
       this.saving.set(false);
     }
@@ -103,7 +104,7 @@ export class DossierRessourcesPanelComponent {
       await this.api.supprimerPlanningRessource(this.dossierId(), row.id);
       this.ressources.set(this.ressources().filter((r) => r.id !== row.id));
     } catch (e) {
-      this.erreur.set(this.messageErreur(e));
+      this.erreur.set(messagePlanningErreur(e));
     } finally {
       this.saving.set(false);
     }
@@ -128,14 +129,9 @@ export class DossierRessourcesPanelComponent {
         ...materiels.map((e) => ({ value: String(e.key), label: e.value })),
       ]);
     } catch (e) {
-      this.erreur.set(this.messageErreur(e));
+      this.erreur.set(messagePlanningErreur(e));
     } finally {
       this.chargement.set(false);
     }
-  }
-
-  private messageErreur(e: unknown): string {
-    const err = e as { error?: { code?: string; message?: string }; message?: string };
-    return err?.error?.code ?? err?.error?.message ?? err?.message ?? 'Enregistrement impossible.';
   }
 }

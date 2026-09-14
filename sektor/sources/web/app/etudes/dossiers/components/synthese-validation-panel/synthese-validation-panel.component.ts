@@ -236,10 +236,10 @@ export class SyntheseValidationPanelComponent {
     (): { tone: 'error' | 'info' | 'success'; message: string } | undefined => {
       if (this.erreur()) return { tone: 'error', message: this.erreur()! };
       const s = this.statut();
-      if (s === 'EN_VALIDATION') {
+      if (s === 'COMPLETED') {
         return { tone: 'info', message: 'En attente de validation.' };
       }
-      if (s === 'VALIDEE' || s === 'DEVIS_GENERE') {
+      if (s === 'FINANCIALLY_APPROVED' || s === 'FINAL_APPROVED') {
         return { tone: 'success', message: 'Dossier validé.' };
       }
       if (this.pretASoumettre()) {
@@ -255,6 +255,6 @@ export class SyntheseValidationPanelComponent {
   /** Destination : dépôt possible jusqu’au devis, pas après gain/conversion. */
   readonly piecesDestinationModifiables = computed(() => {
     const s = this.statut();
-    return s !== 'ANNULE' && s !== 'GAGNE' && s !== 'CONVERTIE';
+    return s !== 'ARCHIVED' && s !== 'FINAL_APPROVED';
   });
 }

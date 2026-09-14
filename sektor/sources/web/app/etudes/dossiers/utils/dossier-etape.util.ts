@@ -1,10 +1,10 @@
 /**
- * Mapping entre étapes métier UI (6) et étapes techniques backend (5).
+ * Mapping entre étapes métier UI (5) et étapes techniques backend (5).
  *
  * Backend conserve 1..5 pour éviter une migration des dossiers existants.
- * UI : Cadrage → Bordereau → Chiffrage → Planning → Ressources → Synthèse.
+ * UI : Cadrage → Bordereau → Chiffrage → Planning et ressources → Synthèse.
  * Correspondance persistée : 1→1, 2→2, 3|4→3, 5→3.
- * Les étapes 4–6 sont locales (pas de gate, pas d’écriture currentStep).
+ * Les étapes 4–5 sont locales (pas de gate, pas d’écriture currentStep).
  */
 
 export const ETAPES_UI_DOSSIER = [
@@ -17,22 +17,17 @@ export const ETAPES_UI_DOSSIER = [
   },
   {
     ui: 4,
-    libelle: 'Planning prévisionnel',
-    nextLabel: 'Continuer vers les ressources',
-  },
-  {
-    ui: 5,
-    libelle: 'Ressources prévues',
+    libelle: 'Planning et ressources',
     nextLabel: 'Voir la synthèse',
   },
   {
-    ui: 6,
+    ui: 5,
     libelle: 'Synthèse et validation',
     nextLabel: 'Soumettre à validation',
   },
 ] as const;
 
-export const UI_ETAPE_MAX = 6;
+export const UI_ETAPE_MAX = 5;
 
 /** Étapes backend techniques (numéros persistés dans `currentStep`). */
 export const BACKEND_ETAPE = {
@@ -72,7 +67,7 @@ export function prevBackendEtape(uiStep: number): number | null {
   return null;
 }
 
-/** True si l’étape UI n’écrit pas `currentStep` (planning / ressources / synthèse). */
+/** True si l’étape UI n’écrit pas `currentStep` (planning+ressources / synthèse). */
 export function estEtapeUiLocale(uiStep: number): boolean {
   return uiStep >= 4;
 }
@@ -88,7 +83,7 @@ export function backendGateEtapesForUi(uiStep: number): number[] {
       BACKEND_ETAPE.CHIFFRAGE,
     ];
   }
-  if (uiStep === 6) return [BACKEND_ETAPE.DECOMPOSITION, BACKEND_ETAPE.CHIFFRAGE];
+  if (uiStep === UI_ETAPE_MAX) return [BACKEND_ETAPE.DECOMPOSITION, BACKEND_ETAPE.CHIFFRAGE];
   return [];
 }
 

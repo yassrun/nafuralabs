@@ -3,6 +3,7 @@ import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { FeatureApiService } from '@platform/lib/anatomy';
+import type { StatusChangeRecord } from '@platform/lib/anatomy';
 import type {
   DossierDocument,
   DossierEtude,
@@ -18,6 +19,7 @@ import type {
 } from '@app/etudes/models';
 import type { ImportNoeudPreview } from '../utils/bordereau-tree.util';
 import type { GuestLinkCreate, GuestLinkCreated } from './guest-access-api.service';
+import { hydrateStatut } from '../utils/dossier-status.util';
 
 /** AC-12 — un poste du devis sans lot parent, nommé par le serveur pour que l'humain le place. */
 export interface PosteOrphelin {
@@ -354,6 +356,7 @@ export interface DossierEtudeSynthese {
   updatedAt?: string | null;
   gates: ResultatGate[];
   actionPrincipale: string;
+  availableActions?: string[];
   decisionsCatalogue?: DecisionCatalogueTrace[];
 }
 
@@ -408,6 +411,35 @@ export class DossierEtudeApiService extends FeatureApiService<
 > {
   protected override basePath = '/api/v1/etudes/dossiers';
   protected override searchFields = ['numero', 'objet', 'clientNom'];
+
+  override async getById(id: string | number): Promise<DossierEtude> {
+    return hydrateStatut(await super.getById(id));
+  }
+
+  override async create(data: DossierEtudeCreate): Promise<DossierEtude> {
+    return hydrateStatut(await super.create(data));
+  }
+
+  override async update(id: string | number, data: DossierEtudeUpdate): Promise<DossierEtude> {
+    return hydrateStatut(await super.update(id, data));
+  }
+
+  protected override normalizeListResponse(payload: unknown) {
+    const page = super.normalizeListResponse(payload);
+    return { ...page, items: page.items.map((item) => hydrateStatut(item)) };
+  }
+
+  override async executeTransition<TResult = DossierEtude>(
+    id: string | number,
+    endpoint: string,
+    payload?: Record<string, unknown>,
+  ): Promise<TResult> {
+    const result = await super.executeTransition<TResult>(id, endpoint, payload);
+    if (result && typeof result === 'object' && 'status' in result) {
+      return hydrateStatut(result as { status?: string }) as TResult;
+    }
+    return result;
+  }
 
   /**
    * État des cinq gates, sans transition.
@@ -502,8 +534,12 @@ export class DossierEtudeApiService extends FeatureApiService<
     return this.executeTransition(id, 'annuler');
   }
 
-  synthese(id: string): Promise<DossierEtudeSynthese> {
-    return this.get<DossierEtudeSynthese>(`${this.basePath}/${id}/synthese`);
+  async synthese(id: string): Promise<DossierEtudeSynthese> {
+    return hydrateStatut(await this.get<DossierEtudeSynthese>(`${this.basePath}/${id}/synthese`));
+  }
+
+  getStatusHistory(id: string): Promise<StatusChangeRecord[]> {
+    return this.get<StatusChangeRecord[]>(`${this.basePath}/${id}/status-history`);
   }
 
   /** Users tenant avec rôle BTP_INGENIEUR — candidats chargé d'étude. */

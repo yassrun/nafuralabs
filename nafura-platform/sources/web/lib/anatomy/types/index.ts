@@ -921,6 +921,87 @@ export interface StatusTransitionEvent {
   note?: string;
 }
 
+/**
+ * Context passed to `hasAccess` / `isVisible` on a status action bar.
+ * Product configs extend this with métier flags.
+ */
+export interface StatusActionContext<TEntity = unknown> {
+  status: string;
+  entity?: TEntity;
+  roles?: string[];
+  availableActions?: string[];
+}
+
+export type StatusAccessFn<TCtx = StatusActionContext> = (ctx: TCtx) => boolean;
+
+/**
+ * Transition in the reusable status action bar (from → to + action).
+ * `hasAccess` defaults to roles; override with métier rules.
+ */
+export interface StatusActionTransition<
+  TStatus extends string = string,
+  TCtx = StatusActionContext,
+> {
+  from: TStatus | TStatus[];
+  to: TStatus;
+  action: string;
+  actionLabel: string;
+  /** Backend enum name when it differs from the UI action code. */
+  backendAction?: string;
+  variant?: ButtonVariant;
+  testId?: string;
+  isVisible?: StatusAccessFn<TCtx>;
+  hasAccess: StatusAccessFn<TCtx>;
+}
+
+/**
+ * Operational command on the status bar that does not change status
+ * (reopen structure, return to pricing). Document / commercial next steps
+ * stay off this bar.
+ */
+export interface StatusActionCommand<TCtx = StatusActionContext> {
+  action: string;
+  actionLabel: string;
+  variant?: ButtonVariant;
+  testId?: string;
+  isVisible?: StatusAccessFn<TCtx>;
+  hasAccess?: StatusAccessFn<TCtx>;
+  disabled?: StatusAccessFn<TCtx>;
+}
+
+export interface StatusActionBarConfig<
+  TStatus extends string = string,
+  TCtx = StatusActionContext,
+> {
+  statuses: Record<TStatus, { label: string; variant: BadgeVariant }>;
+  transitions: StatusActionTransition<TStatus, TCtx>[];
+  commands?: StatusActionCommand<TCtx>[];
+}
+
+/** One resolved button ready to render. */
+export interface ResolvedStatusAction {
+  action: string;
+  actionLabel: string;
+  variant: ButtonVariant;
+  kind: 'transition' | 'command';
+  to?: string;
+  disabled: boolean;
+  testId?: string;
+}
+
+/**
+ * One status change. Storage-agnostic: Postgres today, Elasticsearch later.
+ */
+export interface StatusChangeRecord {
+  id: string;
+  fromStatus: string;
+  toStatus: string;
+  action?: string | null;
+  actor: string;
+  at: string;
+  motif?: string | null;
+}
+
 export interface DetailPageConfig<TItem = unknown> {
   // === Identity ===
   /** Entity name (singular) */

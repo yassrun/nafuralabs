@@ -63,7 +63,7 @@
 
 .res__form {
   display: grid;
-  grid-template-columns: 8rem minmax(0, 2fr) 6.5rem 6rem minmax(0, 1.6fr) auto;
+  grid-template-columns: 8rem minmax(0, 2fr) 6.5rem 6rem minmax(0, 1.6fr) minmax(10rem, auto);
   gap: 0.75rem 1rem;
   align-items: end;
 }

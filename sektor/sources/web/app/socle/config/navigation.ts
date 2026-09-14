@@ -1,17 +1,18 @@
 /**
- * Sektor BTP — sidebar navigation registry (hand-maintained).
- * Source of truth: shell/erp-nav.generated.ts
+ * Sektor BTP — registre sidebar par application.
+ * Source : shell/erp-sidebar.config.ts
+ * Après un changement de route : npm run ai:catalog
  */
 
 import { GeneratedZoneConfig, SidebarNode } from '@platform/core/navigation/sidebar.types';
-import { ERP_NAV_CONFIG_GENERATED, ERP_ZONE_CONFIG_GENERATED } from '../shell/erp-nav.generated';
+import { ERP_SIDEBAR, ERP_SIDEBAR_ZONES } from '../shell/erp-sidebar.config';
 
 export const APPLICATION_NAVIGATION_BY_ID: Record<string, SidebarNode[]> = {
-  erp: [...ERP_NAV_CONFIG_GENERATED],
+  erp: [...ERP_SIDEBAR],
 };
 
 export const APPLICATION_ZONE_CONFIG_BY_ID: Record<string, GeneratedZoneConfig[]> = {
-  erp: [...ERP_ZONE_CONFIG_GENERATED],
+  erp: [...ERP_SIDEBAR_ZONES],
 };
 
 export function resolveApplicationNavigation(

@@ -62,7 +62,7 @@ async function chargeEtudeUserId(
   return session.userId;
 }
 
-/** Dossier VALIDEE, MOA texte, pas de Partner, DPGF FORFAIT chiffré. */
+/** Dossier FINAL_APPROVED, MOA texte, pas de Partner, DPGF FORFAIT chiffré. */
 async function seedDossierValideeSansClient(
   request: APIRequestContext,
   session: CursorSession,
@@ -117,6 +117,20 @@ async function seedDossierValideeSansClient(
   });
   expect(etape.ok(), await etape.text()).toBeTruthy();
 
+  const go = await request.post(`${API_BASE}/api/v1/etudes/dossiers/${dossierId}/go`, {
+    headers: h,
+    data: { chargeEtudeUserId: await chargeEtudeUserId(request, session) },
+  });
+  expect(go.ok(), await go.text()).toBeTruthy();
+  const afterGo = (await go.json()) as { status?: string };
+  if (afterGo.status === 'ASSIGNED') {
+    const accept = await request.post(
+      `${API_BASE}/api/v1/etudes/dossiers/${dossierId}/accepter-affectation`,
+      { headers: h },
+    );
+    expect(accept.ok(), await accept.text()).toBeTruthy();
+  }
+
   const soumettre = await request.post(`${API_BASE}/api/v1/etudes/dossiers/${dossierId}/soumettre`, {
     headers: h,
   });
@@ -127,14 +141,21 @@ async function seedDossierValideeSansClient(
   });
   expect(valider.ok(), await valider.text()).toBeTruthy();
   let body = (await valider.json()) as { status?: string };
-  if (body.status === 'EN_VALIDATION') {
+  if (body.status === 'EN_VALIDATION' || body.status === 'COMPLETED' || body.status === 'FINANCIALLY_APPROVED') {
     valider = await request.post(`${API_BASE}/api/v1/etudes/dossiers/${dossierId}/valider`, {
       headers: h,
     });
     expect(valider.ok(), await valider.text()).toBeTruthy();
     body = (await valider.json()) as { status?: string };
   }
-  expect(body.status).toBe('VALIDEE');
+  if (body.status === 'FINANCIALLY_APPROVED') {
+    valider = await request.post(`${API_BASE}/api/v1/etudes/dossiers/${dossierId}/valider`, {
+      headers: h,
+    });
+    expect(valider.ok(), await valider.text()).toBeTruthy();
+    body = (await valider.json()) as { status?: string };
+  }
+  expect(body.status).toBe('FINAL_APPROVED');
   return dossierId;
 }
 
@@ -179,7 +200,7 @@ test.describe('SEKTOR-117 — créer le client Partner à Générer le devis', (
     };
     expect(devis.clientId).toBe(partnerId);
     expect(devis.devisGenereId).toBeTruthy();
-    expect(devis.status).toBe('DEVIS_GENERE');
+    expect(devis.status).toBe('FINAL_APPROVED');
   });
 
   test('UI : Annuler = pas de devis, bandeau conservé ; Confirmer = devis', async ({
@@ -219,7 +240,7 @@ test.describe('SEKTOR-117 — créer le client Partner à Générer le devis', (
       status?: string;
       devisGenereId?: string | null;
     };
-    expect(cancelled.status).toBe('VALIDEE');
+    expect(cancelled.status).toBe('FINAL_APPROVED');
     expect(cancelled.devisGenereId ?? null).toBeNull();
 
     await cta.click();
@@ -241,7 +262,7 @@ test.describe('SEKTOR-117 — créer le client Partner à Générer le devis', (
       devisGenereId?: string | null;
       clientId?: string | null;
     };
-    expect(generated.status).toBe('DEVIS_GENERE');
+    expect(generated.status).toBe('FINAL_APPROVED');
     expect(generated.devisGenereId).toBeTruthy();
     expect(generated.clientId).toBeTruthy();
   });

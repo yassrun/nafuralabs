@@ -32,10 +32,11 @@ public final class QaLocalConstants {
     /** Extra tenant roles on the owner (full étude power besides OWNER / SUPER_ADMIN). */
     public static final List<String> OWNER_EXTRA_ROLES = List.of("BTP_INGENIEUR", ROLE_ADMIN_ETUDE);
 
-    /**
-     * Permissions for Mode B étude roles. Seeded at boot so listing works without
-     * waiting for a Liquibase job (lab postgres).
-     */
+    /** Inbox cloche — lecture de ses propres notifications. */
+    public static final String NOTIFICATION_READ = "collaboration.collaboration.notification.read";
+
+    public static final List<String> INBOX_PERMISSIONS = List.of(NOTIFICATION_READ);
+
     public static final List<String> ADMIN_ETUDE_PERMISSIONS = List.of(
         "etude.read", "etude.create", "etude.update", "etude.delete",
         "etude.submit", "etude.approve", "etude.avis", "etude.go",

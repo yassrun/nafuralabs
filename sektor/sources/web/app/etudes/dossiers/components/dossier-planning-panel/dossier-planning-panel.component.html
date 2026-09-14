@@ -18,12 +18,12 @@
   } @else if (activites().length === 0 && !modifiable()) {
     <p class="planif__etat">Aucune activité prévue.</p>
   } @else if (activites().length === 0) {
-    <p class="planif__etat">Aucune activité — ajoutez-en une, ou passez aux ressources.</p>
+    <p class="planif__etat">Aucune activité — ajoutez un événement, ou passez à la synthèse.</p>
   } @else {
     <table class="planif__table">
       <thead>
         <tr>
-          <th>Activité</th>
+          <th>Événement</th>
           <th>Lot vendu</th>
           <th>Début</th>
           <th>Fin</th>
@@ -53,10 +53,10 @@
   }
 
   @if (modifiable()) {
-    <form class="planif__form" (submit)="$event.preventDefault(); ajouter()">
+    <form class="planif__form" novalidate (submit)="$event.preventDefault(); ajouter()">
       <nf-input
         name="planifLibelle"
-        label="Activité"
+        label="Événement"
         [required]="true"
         [disabled]="saving()"
         [ngModel]="draftLibelle()"
@@ -89,7 +89,15 @@
         (ngModelChange)="draftFin.set($event)"
       />
       <div class="planif__submit">
-        <nf-button type="submit" [disabled]="saving()">Ajouter</nf-button>
+        <nf-button
+          type="button"
+          data-testid="planif-ajouter"
+          [disabled]="saving()"
+          [loading]="saving()"
+          (clicked)="ajouter()"
+        >
+          Ajouter un événement
+        </nf-button>
       </div>
     </form>
   }

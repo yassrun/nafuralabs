@@ -37,7 +37,7 @@ Deux coupes, rien d'autre.
 | Le web est **déjà** au socle | `web/app/socle/pilotage/`, `web/app/socle/dashboard/`, `web/app/socle/analytics/` |
 | Le socle ne peut pas dépendre d'un BC | `chantiers`, `finance`, `catalogue`, `etudes` déclarent déjà `project(':sektor:socle')` — l'inverse est un cycle |
 | Le fournisseur a déjà nom et ICE | `achats/domain/fournisseur/Partner` (`raisonSociale`, `ice`) |
-| Aucun garde front sur les permissions | `erp-nav.generated.ts` est un arbre nu — pas de champ `permission`, pas de `can(…)` |
+| Aucun garde front sur les permissions | `erp-sidebar.config.ts` est un arbre nu — pas de champ `permission`, pas de `can(…)` |
 
 **Piège de nommage.** Le nœud de navigation `chantiers.pilotage` (« Pilotage chantier ») **n'a rien à voir avec la frontière B** : c'est un groupe de menu qui contient situations, budget et sous-traitance — de la lecture d'**un** chantier. Il **reste** côté Chantiers. Ce qui part au socle, c'est `/api/v1/pilotage`, servi par `PilotageController`.
 

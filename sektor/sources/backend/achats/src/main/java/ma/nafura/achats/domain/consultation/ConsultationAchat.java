@@ -20,6 +20,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.nafura.platform.framework.audit.Auditable;
 
 /**
  * Demande de prix. 1 panier + N destinataires. Lien étude optionnel.
@@ -31,6 +32,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "consultation-achat", trackedFields = {"numero", "statut"})
 public class ConsultationAchat {
 
     public static final String STATUT_PREPARATION = "PREPARATION";

@@ -153,16 +153,16 @@ export class DossierIdentitePanelComponent {
 
   readonly enCadrage = computed(() => {
     const s = this.dossier().status;
-    return s === 'BROUILLON' || s === 'A_DECIDER';
+    return s === 'DRAFT' || s === 'PENDING_ASSIGNMENT';
   });
 
   readonly aideCadrage = computed(() => {
     const s = this.dossier().status;
-    if (s === 'REJETE_CHIFFRAGE') {
-      return 'Après un rejet du chiffrage, déposez les pièces demandées puis Affecter — le chargé déjà nommé reprend le dossier. Réinitialiser pour modifier le cadrage.';
+    if (s === 'STUDY_REJECTED') {
+      return 'Après un refus de l’étude, déposez les pièces demandées puis Reprendre — le dossier revient en cours, sans repasser par le brouillon.';
     }
-    if (s === 'BROUILLON') {
-      return 'Objet et MOA sont éditables ici. Le badge IA · CPS indique une valeur extraite du PDF. Puis À affecter pour envoyer au DG.';
+    if (s === 'DRAFT') {
+      return 'Objet et MOA sont éditables ici. Le badge IA · CPS indique une valeur extraite du PDF. Puis Soumettre pour affectation.';
     }
     return 'Le cadrage est figé. Cliquez Affecter pour nommer le chargé d’étude.';
   });
@@ -272,7 +272,7 @@ export class DossierIdentitePanelComponent {
     const clientNom = this.clientNom().trim();
     const chargeId = this.chargeEtudeUserId();
     const cadrage =
-      this.dossier().status === 'BROUILLON' || this.dossier().status === 'A_DECIDER';
+      this.dossier().status === 'DRAFT' || this.dossier().status === 'PENDING_ASSIGNMENT';
     if (!objet || placeholderIdentite(objet) || !clientNom || placeholderIdentite(clientNom)) {
       this.erreur.set('Objet et MOA sont obligatoires.');
       return false;

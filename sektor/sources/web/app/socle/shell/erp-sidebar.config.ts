@@ -1,16 +1,19 @@
 /**
- * ERP Nafura — Navigation BTP Maroc
- * Un item de premier niveau = un BC (labels métier). Voir sektor/raster-src/DECISIONS.md § Sidebar.
+ * Config sidebar ERP (source unique du menu).
+ * Un item de premier niveau = un BC (labels métier).
  *
  * Cycle : Études → Catalogue → Achats → Chantiers → Marchés → Ventes → Finance → RH → HSE
  * Socle : tableau de bord + pilotage / analytics
  *
- * Zones = id BC, labels vides → séparateurs seulement (pas operations/business/people).
+ * Zones = id BC, labels vides → séparateurs seulement.
+ *
+ * Après un changement de route / item, rafraîchir le catalogue IA :
+ *   npm run ai:catalog
  */
 
 import { GeneratedZoneConfig, SidebarNode } from '@platform/core/navigation/sidebar.types';
 
-export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
+export const ERP_SIDEBAR: SidebarNode[] = [
 
   // ═══════════════════════════════════════════════════════════════════════════
   // TABLEAU DE BORD
@@ -1166,7 +1169,7 @@ export const ERP_NAV_CONFIG_GENERATED: SidebarNode[] = [
   },
 ];
 
-export const ERP_ZONE_CONFIG_GENERATED: GeneratedZoneConfig[] = [
+export const ERP_SIDEBAR_ZONES: GeneratedZoneConfig[] = [
   { id: 'socle', label: '', order: 0 },
   { id: 'etudes', label: '', order: 10 },
   { id: 'catalogue', label: '', order: 20 },
@@ -1180,4 +1183,4 @@ export const ERP_ZONE_CONFIG_GENERATED: GeneratedZoneConfig[] = [
   { id: 'pilotage', label: '', order: 100 },
 ];
 
-export const APP_NAVIGATION: SidebarNode[] = ERP_NAV_CONFIG_GENERATED;
+export const APP_NAVIGATION: SidebarNode[] = ERP_SIDEBAR;

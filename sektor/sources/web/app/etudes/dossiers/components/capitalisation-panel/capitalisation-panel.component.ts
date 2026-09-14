@@ -52,7 +52,7 @@ export class CapitalisationPanelComponent {
 
   readonly visible = computed(() => {
     const s = this.statut();
-    return s === 'VALIDEE' || s === 'DEVIS_GENERE';
+    return s === 'FINANCIALLY_APPROVED' || s === 'FINAL_APPROVED';
   });
 
   readonly candidatsActifs = computed(() => {

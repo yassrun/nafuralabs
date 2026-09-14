@@ -14,6 +14,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import ma.nafura.platform.framework.audit.Auditable;
 
 @Entity
 @Table(name = "factures_fournisseur")
@@ -21,6 +22,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "facture-fournisseur", trackedFields = {"numeroInterne", "numeroFournisseur", "status"})
 public class FactureFournisseur {
 
     public static final String STATUS_BROUILLON = "BROUILLON";

@@ -32,9 +32,9 @@ const ADMIN_HUB_SECTIONS: readonly {
     descriptionKey: 'administration.hub.descriptions.audit',
   },
   {
-    route: '/administration/templates',
-    labelKey: 'administration.navigation.templates',
-    descriptionKey: 'administration.hub.descriptions.templates',
+    route: '/administration/documents',
+    labelKey: 'administration.documents.title',
+    descriptionKey: 'administration.documents.description',
   },
   {
     route: '/administration/email-templates',

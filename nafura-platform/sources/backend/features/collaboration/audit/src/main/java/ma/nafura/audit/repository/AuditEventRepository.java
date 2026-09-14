@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface AuditEventRepository extends TenantScopedRepository<AuditEvent, UUID> {
 
     Page<AuditEvent> findByTenantIdAndEntityTypeAndEntityIdOrderByEventAtDesc(
-            UUID tenantId, String entityType, UUID entityId, Pageable pageable);
+            UUID tenantId, String entityType, String entityId, Pageable pageable);
 
     @Query("SELECT DISTINCT e.entityType FROM AuditEvent e WHERE e.tenantId = :tenantId ORDER BY e.entityType")
     List<String> findDistinctEntityTypesByTenantId(@Param("tenantId") UUID tenantId);

@@ -1,13 +1,24 @@
 package ma.nafura.platform.collaboration.audit.jobs;
 
 import lombok.extern.slf4j.Slf4j;
+import ma.nafura.platform.collaboration.audit.repository.AuditEventRepository;
 import ma.nafura.platform.framework.scheduling.ScheduledJob;
 import ma.nafura.platform.framework.scheduling.ScheduledJobContext;
 import org.springframework.stereotype.Component;
 
+/**
+ * Retention is keep-all. The job only reports volume so we notice growth
+ * without deleting evidence.
+ */
 @Component
 @Slf4j
 public class AuditArchiveJob implements ScheduledJob {
+
+    private final AuditEventRepository auditEventRepository;
+
+    public AuditArchiveJob(AuditEventRepository auditEventRepository) {
+        this.auditEventRepository = auditEventRepository;
+    }
 
     @Override
     public String key() {
@@ -21,7 +32,7 @@ public class AuditArchiveJob implements ScheduledJob {
 
     @Override
     public String description() {
-        return "Archive old audit log entries";
+        return "Report audit_events volume (no deletion)";
     }
 
     @Override
@@ -31,8 +42,7 @@ public class AuditArchiveJob implements ScheduledJob {
 
     @Override
     public void execute(ScheduledJobContext context) {
-        log.info("Job {} executed for tenant {}", key(), context.tenantId());
-        // TODO: wire to audit archive service
+        long count = auditEventRepository.countByTenantId(context.tenantId());
+        log.info("Job {} tenant {} audit_events={}", key(), context.tenantId(), count);
     }
 }
-

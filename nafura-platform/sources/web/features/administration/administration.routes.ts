@@ -30,15 +30,31 @@ export const ADMINISTRATION_ROUTES: Routes = [
   },
   {
     path: 'document-settings',
-    loadChildren: () =>
-      import('./document-settings/document-settings.routes').then(
-        (m) => m.DOCUMENT_SETTINGS_ROUTES
-      ),
+    redirectTo: 'documents/settings',
+    pathMatch: 'full',
   },
   {
     path: 'templates',
-    loadChildren: () =>
-      import('./templates/templates.routes').then((m) => m.TEMPLATES_ROUTES),
+    redirectTo: 'documents/templates',
+    pathMatch: 'full',
+  },
+  {
+    path: 'templates/:id',
+    redirectTo: 'documents/templates/:id',
+  },
+  {
+    path: 'documents',
+    children: [
+      { path: '', redirectTo: 'settings', pathMatch: 'full' },
+      {
+        path: 'settings',
+        loadChildren: () => import('./document-settings/document-settings.routes').then(m => m.DOCUMENT_SETTINGS_ROUTES),
+      },
+      {
+        path: 'templates',
+        loadChildren: () => import('./templates/templates.routes').then(m => m.TEMPLATES_ROUTES),
+      },
+    ],
   },
   {
     path: 'email-templates',

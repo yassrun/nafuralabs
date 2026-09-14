@@ -1,5 +1,6 @@
 import { SidebarNode } from '../navigation/sidebar.types';
 
+/** Feature flags for default chrome widgets. Apps override the UI via SHELL_EXTENSIONS. */
 export interface PlatformAppShellWidgetOptions {
   languageSwitch?: boolean;
   notifications?: boolean;

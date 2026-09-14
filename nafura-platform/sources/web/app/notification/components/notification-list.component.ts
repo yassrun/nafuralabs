@@ -4,6 +4,7 @@
 
 import { Component, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { NotificationApiService, NotificationDto } from '../services/notification-api.service';
 import { NotificationUnreadService } from '../services/notification-unread.service';
@@ -80,6 +81,7 @@ import { NotificationUnreadService } from '../services/notification-unread.servi
 export class NotificationListComponent {
   private readonly api = inject(NotificationApiService);
   private readonly unreadStore = inject(NotificationUnreadService);
+  private readonly router = inject(Router);
 
   compact = input<boolean>(false);
 
@@ -106,14 +108,25 @@ export class NotificationListComponent {
   }
 
   markRead(n: NotificationDto): void {
-    if (n.isRead) return;
+    const open = () => {
+      if (n.actionUrl) {
+        void this.router.navigateByUrl(n.actionUrl);
+        this.closed.emit();
+      }
+    };
+    if (n.isRead) {
+      open();
+      return;
+    }
     this.api.markNotificationRead(n.id).subscribe({
       next: () => {
         this.notifications.update((list) =>
           list.map((x) => (x.id === n.id ? { ...x, isRead: true } : x))
         );
         void this.unreadStore.refresh();
+        open();
       },
+      error: () => open(),
     });
   }
 

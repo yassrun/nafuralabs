@@ -111,12 +111,6 @@
       "send": "Envoyer les invitations",
       "dismiss": "Plus tard",
       "csv": "Importer depuis un CSV"
-    },
-    "completeness": {
-      "label": "Complétude",
-      "tooltipTitle": "Configuration de l'entreprise",
-      "panelTitle": "Finaliser mon entreprise",
-      "loadDemo": "Charger des données de démo →"
     }
   }
 }

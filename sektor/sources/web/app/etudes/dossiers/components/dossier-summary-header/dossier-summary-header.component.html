@@ -4,12 +4,10 @@
       <div class="dsh__identity">
         <h1 class="dsh__titre" [attr.title]="s.numero + ' — ' + s.objet">{{ s.numero }} — {{ s.objet }}</h1>
         <div class="dsh__meta" role="list">
-          <span class="dsh__pill" [attr.data-variant]="statutVariant()">{{ statutLabel() }}</span>
           @if (s.structureVerrouillee) {
-            <span class="dsh__pipe" aria-hidden="true">|</span>
             <span class="dsh__pill dsh__pill--lock">Structure figée</span>
+            <span class="dsh__pipe" aria-hidden="true">|</span>
           }
-          <span class="dsh__pipe" aria-hidden="true">|</span>
           <span class="dsh__meta-item" role="listitem">
             <span class="dsh__k">MOA</span>
             @if (s.clientId && moaNom()) {
@@ -75,88 +73,45 @@
           <span class="dsh__kpi-label">Anomalies étape {{ etapeUi() }}</span>
           <span class="dsh__kpi-value">{{ anomaliesAffichees() }}</span>
         </div>
+        @if (canSave()) {
+          <nf-button
+            class="dsh__save"
+            type="button"
+            variant="secondary"
+            size="sm"
+            [disabled]="saving()"
+            [loading]="saving()"
+            (clicked)="emitAction('ENREGISTRER')"
+          >
+            Enregistrer
+          </nf-button>
+        }
+        @for (action of suiteActions(); track action.action) {
+          <nf-button
+            class="dsh__save"
+            type="button"
+            [variant]="action.variant"
+            size="sm"
+            [attr.data-testid]="action.testId || null"
+            (clicked)="emitAction(action.action)"
+          >
+            {{ action.actionLabel }}
+          </nf-button>
+        }
       </div>
     </div>
 
-    @if (showActionBar()) {
-      <nf-action-bar class="dsh__bar" align="right" spacing="sm">
-        <div class="dsh__bar-actions">
-          @if (showReouvrir()) {
-            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REOUVRIR_BORDEREAU')">
-              Réouvrir le bordereau
-            </nf-button>
-          }
-          @if (showReinitialiser()) {
-            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REVENIR_DRAFT')">
-              Réinitialiser
-            </nf-button>
-          }
-          @if (showArchiver()) {
-            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('ARCHIVER')">
-              Archiver
-            </nf-button>
-          }
-          @if (showSuspendre()) {
-            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('SUSPENDRE_CHIFFRAGE')">
-              Suspendre
-            </nf-button>
-          }
-          @if (showChiffrageTermine()) {
-            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('SOUMETTRE_CHIFFRAGE')">
-              Chiffrage terminé
-            </nf-button>
-          }
-          @if (showNoGo()) {
-            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('NO_GO')">
-              Rejeter
-            </nf-button>
-          }
-          @if (showRefuserAffectation()) {
-            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REFUSER_AFFECTATION')">
-              Rejeter
-            </nf-button>
-          }
-          @if (showAvisRetour()) {
-            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('AVIS_EXECUTION_RETOUR')">
-              Retour au chiffrage
-            </nf-button>
-          }
-          @if (showRefuser()) {
-            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('REFUSER')">
-              Refuser
-            </nf-button>
-          }
-          @if (showMarquerPerdu()) {
-            <nf-button type="button" variant="ghost" size="sm" (clicked)="emitAction('MARQUER_PERDU')">
-              Marquer perdu
-            </nf-button>
-          }
-          @if (showEnregistrer()) {
-            <nf-button
-              type="button"
-              variant="secondary"
-              size="sm"
-              [disabled]="saving()"
-              [loading]="saving()"
-              (clicked)="emitAction('ENREGISTRER')"
-            >
-              Enregistrer
-            </nf-button>
-          }
-          @if (ctaSlot() === 'primary') {
-            <nf-button
-              type="button"
-              variant="primary"
-              size="sm"
-              [attr.data-testid]="actionEffective() === 'GENERER_DEVIS' ? 'dossier-cta-generer-devis' : null"
-              (clicked)="emitAction()"
-            >
-              {{ ctaLabel() }}
-            </nf-button>
-          }
-        </div>
-      </nf-action-bar>
-    }
+    <nf-status-action-bar
+      class="dsh__bar"
+      [status]="statut() || s.status"
+      [config]="workflow"
+      [context]="statusContext()"
+      [history]="statusHistory()"
+      [historyLoading]="historyLoading()"
+      [historyTitle]="s.numero + ' — ' + s.objet"
+      (action)="emitAction($event)"
+      (historyRequested)="loadHistory()"
+    />
 
     @if (s.motifRefus) {
       <p class="dsh__refus" role="status">Refus : {{ s.motifRefus }}</p>

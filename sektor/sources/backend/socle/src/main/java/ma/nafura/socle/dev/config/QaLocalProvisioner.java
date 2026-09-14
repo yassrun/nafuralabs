@@ -67,6 +67,16 @@ public class QaLocalProvisioner implements ApplicationRunner {
         ensureRolePermissions(QaLocalConstants.ROLE_ADMIN_ETUDE, QaLocalConstants.ADMIN_ETUDE_PERMISSIONS);
         ensureRolePermissions("BTP_LECTEUR_ETUDE", QaLocalConstants.LECTEUR_ETUDE_PERMISSIONS);
         ensureRolePermissions("BTP_ASSISTANT_ETUDE", QaLocalConstants.ASSISTANT_ETUDE_PERMISSIONS);
+        ensureRolePermissions("BTP_INGENIEUR", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_CONDUCTEUR_TRAVAUX", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_DIRECTEUR_TRAVAUX", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_DAF", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_DG", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_CHEF_CHANTIER", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_MAGASINIER", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions(QaLocalConstants.ROLE_ADMIN_ETUDE, QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_LECTEUR_ETUDE", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_ASSISTANT_ETUDE", QaLocalConstants.INBOX_PERMISSIONS);
 
         for (QaLocalConstants.RoleUser roleUser : QaLocalConstants.ROLE_USERS) {
             AppUser user = ensureUser(roleUser.email(), roleUser.name());

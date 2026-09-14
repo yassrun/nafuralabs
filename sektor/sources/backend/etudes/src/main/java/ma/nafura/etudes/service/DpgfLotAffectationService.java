@@ -11,6 +11,10 @@ import ma.nafura.etudes.domain.dpu.PrixDpu;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.platform.framework.context.TenantContext;
+import ma.nafura.platform.framework.context.UserContext;
+import ma.nafura.platform.framework.event.EntityAssignedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -25,16 +29,28 @@ public class DpgfLotAffectationService {
     private final DossierEtudeRepository dossierEtudeRepository;
     private final ChargeEtudeService chargeEtudeService;
     private final EtudeSaisiePolicy saisiePolicy;
+    private final ApplicationEventPublisher eventPublisher;
 
     public DpgfLotAffectationService(
             DpgfNoeudRepository noeudRepository,
             DossierEtudeRepository dossierEtudeRepository,
             ChargeEtudeService chargeEtudeService,
             EtudeSaisiePolicy saisiePolicy) {
+        this(noeudRepository, dossierEtudeRepository, chargeEtudeService, saisiePolicy, null);
+    }
+
+    @Autowired
+    public DpgfLotAffectationService(
+            DpgfNoeudRepository noeudRepository,
+            DossierEtudeRepository dossierEtudeRepository,
+            ChargeEtudeService chargeEtudeService,
+            EtudeSaisiePolicy saisiePolicy,
+            ApplicationEventPublisher eventPublisher) {
         this.noeudRepository = noeudRepository;
         this.dossierEtudeRepository = dossierEtudeRepository;
         this.chargeEtudeService = chargeEtudeService;
         this.saisiePolicy = saisiePolicy;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -59,10 +75,15 @@ public class DpgfLotAffectationService {
             noeud.setChargeLotNom(null);
             return noeudRepository.save(noeud);
         }
+        String precedent = noeud.getChargeLotUserId();
         String nom = chargeEtudeService.requireIngenieur(request.getUserId().trim(), request.getNom());
         noeud.setChargeLotUserId(request.getUserId().trim());
         noeud.setChargeLotNom(nom);
-        return noeudRepository.save(noeud);
+        DpgfNoeud saved = noeudRepository.save(noeud);
+        if (!eqIgnoreCase(precedent, saved.getChargeLotUserId())) {
+            notifierAffectationLot(saved, dossier);
+        }
+        return saved;
     }
 
     public boolean voitToutArbre(DossierEtude dossier) {
@@ -146,6 +167,52 @@ public class DpgfLotAffectationService {
         return noeudRepository
                 .findByIdAndTenantId(noeudId, tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("etudes.dpgf.noeud_introuvable"));
+    }
+
+    private void notifierAffectationLot(DpgfNoeud lot, DossierEtude dossier) {
+        if (eventPublisher == null || !StringUtils.hasText(lot.getChargeLotUserId())) {
+            return;
+        }
+        UUID assignee;
+        try {
+            assignee = UUID.fromString(lot.getChargeLotUserId().trim());
+        } catch (IllegalArgumentException ex) {
+            return;
+        }
+        UUID entityId = dossier != null ? dossier.getId() : lot.getId();
+        String actionUrl = dossier != null ? "/etudes/dossiers/" + dossier.getId() : "/etudes";
+        String dossierRef = dossier != null && StringUtils.hasText(dossier.getNumero())
+                ? dossier.getNumero().trim()
+                : "cette étude";
+        String lotRef = lotLabel(lot);
+        eventPublisher.publishEvent(new EntityAssignedEvent(
+                this,
+                tenantId(),
+                "lot-etude",
+                entityId,
+                assignee,
+                null,
+                UserContext.getUserIdOrNull(),
+                UserContext.getUserEmail(),
+                actionUrl,
+                "Le lot " + lotRef + " t'a été affecté",
+                "Étude " + dossierRef + "."));
+    }
+
+    private static String lotLabel(DpgfNoeud lot) {
+        String code = StringUtils.hasText(lot.getCode()) ? lot.getCode().trim() : "";
+        String libelle = StringUtils.hasText(lot.getLibelle()) ? lot.getLibelle().trim() : "";
+        if (!code.isEmpty() && !libelle.isEmpty()) {
+            return code + " — " + libelle;
+        }
+        return !libelle.isEmpty() ? libelle : (!code.isEmpty() ? code : "sans libellé");
+    }
+
+    private static boolean eqIgnoreCase(String a, String b) {
+        if (a == null || b == null) {
+            return a == null && b == null;
+        }
+        return a.trim().equalsIgnoreCase(b.trim());
     }
 
     private UUID tenantId() {

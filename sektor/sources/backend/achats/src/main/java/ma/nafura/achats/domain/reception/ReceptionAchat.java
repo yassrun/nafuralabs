@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import ma.nafura.platform.framework.audit.Auditable;
 
 @Entity
 @Table(name = "receptions_achat")
@@ -20,6 +21,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "reception-achat", trackedFields = {"numero", "status"})
 public class ReceptionAchat {
 
     public static final String STATUS_VALIDE = "VALIDE";

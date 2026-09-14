@@ -221,7 +221,7 @@ class GelPrixComposantServiceTest {
                 .tenantId(TENANT)
                 .numero("ET-1")
                 .objet("x")
-                .status(StatutDossierEtude.VALIDEE)
+                .status(StatutDossierEtude.FINANCIALLY_APPROVED)
                 .dpgfId(dpgfId)
                 .build();
         when(dossierEtudeRepository.findByTenantIdAndDpgfId(TENANT, dpgfId))
@@ -299,7 +299,7 @@ class GelPrixComposantServiceTest {
                 .tenantId(TENANT)
                 .numero("ET-2")
                 .objet("x")
-                .status(StatutDossierEtude.BROUILLON)
+                .status(StatutDossierEtude.DRAFT)
                 .dpgfId(dpgfId)
                 .build();
         when(dossierEtudeRepository.findByTenantIdAndDpgfId(TENANT, dpgfId))

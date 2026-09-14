@@ -14,19 +14,17 @@ import org.springframework.util.StringUtils;
 public final class DossierEtudeListFilter {
 
     static final Set<StatutDossierEtude> CLOS_POUR_DELAI = EnumSet.of(
-            StatutDossierEtude.GAGNE,
-            StatutDossierEtude.PERDU,
-            StatutDossierEtude.CONVERTIE,
-            StatutDossierEtude.ANNULE,
-            StatutDossierEtude.NE_PAS_ETUDIER);
+            StatutDossierEtude.FINAL_APPROVED,
+            StatutDossierEtude.ARCHIVED,
+            StatutDossierEtude.REJECTED);
 
     /** File d’attente : quelqu’un d’autre doit agir (pas le chiffrage en cours). */
     static final Set<StatutDossierEtude> EN_ATTENTE = EnumSet.of(
-            StatutDossierEtude.A_DECIDER,
-            StatutDossierEtude.AFFECTE,
-            StatutDossierEtude.EN_VALIDATION,
-            StatutDossierEtude.A_AVIS_EXECUTION,
-            StatutDossierEtude.REJETE_CHIFFRAGE);
+            StatutDossierEtude.PENDING_ASSIGNMENT,
+            StatutDossierEtude.ASSIGNED,
+            StatutDossierEtude.COMPLETED,
+            StatutDossierEtude.FINANCIALLY_APPROVED,
+            StatutDossierEtude.STUDY_REJECTED);
 
     private DossierEtudeListFilter() {}
 

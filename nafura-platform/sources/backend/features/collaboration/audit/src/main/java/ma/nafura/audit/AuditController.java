@@ -5,7 +5,6 @@ import ma.nafura.platform.authorization.security.authorization.RequirePermission
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/platform/collaboration/audit")
@@ -30,7 +28,7 @@ public class AuditController {
     @GetMapping("/timeline")
     public ResponseEntity<Page<AuditEvent>> getTimeline(
             @RequestParam String entityType,
-            @RequestParam UUID entityId,
+            @RequestParam String entityId,
             Pageable pageable) {
         Page<AuditEvent> page = auditService.getTimeline(entityType, entityId, pageable);
         return ResponseEntity.ok(page);
@@ -85,7 +83,7 @@ public class AuditController {
     @lombok.Data
     public static class LogAuditRequest {
         @NotBlank private String entityType;
-        @NotNull private UUID entityId;
+        @NotBlank private String entityId;
         @NotBlank private String action;
         private String details;
         private Map<String, Object> payload;

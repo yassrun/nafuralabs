@@ -24,6 +24,7 @@ import ma.nafura.etudes.api.dto.AOClientChecklistItemDto;
 import ma.nafura.etudes.api.dto.AOClientDocumentDto;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import ma.nafura.platform.framework.audit.Auditable;
 
 @Entity
 @Table(name = "appels_offres_clients")
@@ -31,6 +32,7 @@ import org.hibernate.type.SqlTypes;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "appel-offre-client", trackedFields = {"numero", "reference", "status"})
 public class AppelOffreClient {
 
     public static final String STATUS_A_ETUDIER = "A_ETUDIER";

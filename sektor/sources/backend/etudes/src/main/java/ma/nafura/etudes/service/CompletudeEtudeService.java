@@ -91,8 +91,8 @@ public class CompletudeEtudeService {
 
         CompletudeCompteursDto compteurs = compter(controles);
         int phaseUi = phaseUiCourante(dossier);
-        boolean lectureSeule = dossier.getStatus() == StatutDossierEtude.GAGNE
-                || dossier.getStatus() == StatutDossierEtude.CONVERTIE;
+        boolean lectureSeule = dossier.getStatus() == StatutDossierEtude.FINAL_APPROVED
+                || dossier.getStatus() == StatutDossierEtude.ARCHIVED;
 
         return CompletudeEtude.builder()
                 .dossierId(dossier.getId())
@@ -262,8 +262,8 @@ public class CompletudeEtudeService {
 
     private static int phaseUiCourante(DossierEtude dossier) {
         return switch (dossier.getStatus()) {
-            case BROUILLON -> 1;
-            case EN_ETUDE -> {
+            case DRAFT, PENDING_ASSIGNMENT, REJECTED, ASSIGNED -> 1;
+            case IN_PROGRESS, SUSPENDED, STUDY_REJECTED -> {
                 int step = dossier.getCurrentStep() != null ? dossier.getCurrentStep() : 1;
                 if (step <= DossierEtude.ETAPE_BORDEREAU) {
                     yield 1;
@@ -273,8 +273,8 @@ public class CompletudeEtudeService {
                 }
                 yield 3;
             }
-            case EN_VALIDATION, A_AVIS_EXECUTION, VALIDEE, DEVIS_GENERE, GAGNE, CONVERTIE -> 4;
-            default -> 1;
+            case COMPLETED, FINANCIALLY_APPROVED, FINANCIALLY_REJECTED,
+                    FINAL_APPROVED, FINAL_REJECTED, ARCHIVED -> 4;
         };
     }
 

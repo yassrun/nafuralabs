@@ -66,4 +66,4 @@ spec:
             - name: AI_PROVIDER
               value: deepseek
             - name: AI_DEEPSEEK_MODEL
-              value: deepseek-v4-flash
+              value: deepseek-flash

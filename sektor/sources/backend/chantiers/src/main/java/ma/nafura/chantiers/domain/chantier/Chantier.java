@@ -20,6 +20,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Persistable;
+import ma.nafura.platform.framework.audit.Auditable;
 
 @Entity
 @Table(name = "chantiers")
@@ -27,6 +28,7 @@ import org.springframework.data.domain.Persistable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "chantier", trackedFields = {"code", "label", "status", "clientName"})
 public class Chantier implements Persistable<String> {
 
     public static final String STATUS_BROUILLON = "BROUILLON";

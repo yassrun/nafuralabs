@@ -161,7 +161,7 @@ class DossierEtudeChainageAvalTest {
 
     @Test
     void gagne_depuisDevisGenere_approuveLeDevisEtJournalise() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         Devis devis = devis(Devis.STATUS_EMIS);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         when(devisRepository.findByIdAndTenantId(DEVIS_ID, TENANT)).thenReturn(Optional.of(devis));
@@ -175,7 +175,7 @@ class DossierEtudeChainageAvalTest {
         DossierEtude out = service.gagne(DOSSIER_ID, body);
 
         // AC-1 — l'étude est gagnée et le devis lié est approuvé, même transaction.
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.GAGNE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
         assertThat(out.getReferenceMarche()).isEqualTo("M-42");
         assertThat(out.getMontantAttribue()).isEqualByComparingTo("737106.00");
         assertThat(devis.getStatus()).isEqualTo(Devis.STATUS_APPROUVE);
@@ -191,7 +191,7 @@ class DossierEtudeChainageAvalTest {
     /** SEKTOR-209/1 — le devis explicitement accepté remplace le fallback et alimente la conversion. */
     @Test
     void gagne_devisExpliciteDifferentDuFallback_devientLaSourceDuSnapshot() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         dossier.setDevisGenereId(DEVIS_FALLBACK_ID);
         dossier.setClientId("client-1");
         dossier.setClientNom("MOA");
@@ -226,7 +226,7 @@ class DossierEtudeChainageAvalTest {
     /** SEKTOR-209/2 — un replay strictement identique est un no-op, audit compris. */
     @Test
     void gagne_replayIdentique_renvoieLeMemeResultatSansNouvelAudit() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         Devis devis = devis(Devis.STATUS_EMIS);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         when(devisRepository.findByIdAndTenantId(DEVIS_ID, TENANT)).thenReturn(Optional.of(devis));
@@ -244,7 +244,7 @@ class DossierEtudeChainageAvalTest {
     /** SEKTOR-209/2 — changer une donnée de la commande rejouée est refusé explicitement. */
     @Test
     void gagne_replayDivergent_refuse() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         Devis devis = devis(Devis.STATUS_EMIS);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         when(devisRepository.findByIdAndTenantId(DEVIS_ID, TENANT)).thenReturn(Optional.of(devis));
@@ -263,7 +263,7 @@ class DossierEtudeChainageAvalTest {
     /** AC-2 — un devis absent interdit le gain, sans écriture. */
     @Test
     void gagne_devisAbsent_refuse() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         when(devisRepository.findByIdAndTenantId(DEVIS_ID, TENANT)).thenReturn(Optional.empty());
 
@@ -275,7 +275,7 @@ class DossierEtudeChainageAvalTest {
         assertThatThrownBy(() -> service.gagne(DOSSIER_ID, body))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("etudes.dossier.gain_devis_introuvable");
-        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.DEVIS_GENERE);
+        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
         verify(transitionEtudeService, never())
                 .consignerGain(any(), any(), any(), any(), any(), any(), any(), any(), any());
     }
@@ -283,7 +283,7 @@ class DossierEtudeChainageAvalTest {
     /** AC-2 — sans devisId explicite, le devisGenereId du dossier fait foi (rétrocompat web). */
     @Test
     void gagne_sansDevisIdExplicite_utiliseDevisGenereIdDuDossier() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         dossier.setDevisGenereId(DEVIS_ID);
         Devis devis = devis(Devis.STATUS_EMIS);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
@@ -294,14 +294,14 @@ class DossierEtudeChainageAvalTest {
         body.setMontantAttribue(new BigDecimal("737106.00"));
 
         DossierEtude out = service.gagne(DOSSIER_ID, body);
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.GAGNE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
         assertThat(devis.getStatus()).isEqualTo(Devis.STATUS_APPROUVE);
     }
 
     /** AC-2 — un devis appartenant à une autre étude interdit le gain. */
     @Test
     void gagne_devisAutreEtude_refuse() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         Devis devis = devis(Devis.STATUS_EMIS);
         devis.setDossierEtudeId(UUID.fromString("99999999-9999-9999-9999-999999999999"));
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
@@ -320,7 +320,7 @@ class DossierEtudeChainageAvalTest {
     /** AC-2 — un devis annulé/perdu/expiré interdit le gain. */
     @Test
     void gagne_devisAnnule_refuse() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         Devis devis = devis(Devis.STATUS_ANNULE);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         when(devisRepository.findByIdAndTenantId(DEVIS_ID, TENANT)).thenReturn(Optional.of(devis));
@@ -338,7 +338,7 @@ class DossierEtudeChainageAvalTest {
     /** AC-3 — attribution ≠ total devis : refus qui porte les deux montants, aucune écriture. */
     @Test
     void gagne_attributionDifferentDuTotalDevis_refuse() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         Devis devis = devis(Devis.STATUS_EMIS);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         when(devisRepository.findByIdAndTenantId(DEVIS_ID, TENANT)).thenReturn(Optional.of(devis));
@@ -356,7 +356,7 @@ class DossierEtudeChainageAvalTest {
                     assertThat(mismatch.getMontantAttribue()).isEqualByComparingTo("500000.00");
                 });
         assertThat(devis.getStatus()).isEqualTo(Devis.STATUS_EMIS);
-        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.DEVIS_GENERE);
+        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
         verify(devisRepository, never()).save(any());
     }
 
@@ -365,7 +365,7 @@ class DossierEtudeChainageAvalTest {
     void gagne_margeNegative_roleOrdinaire_refuse() {
         UserContext.setUserRole("BTP_INGENIEUR");
         UserContext.setSuperAdmin(false);
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         Devis devis = devis(Devis.STATUS_EMIS, new BigDecimal("500000.00"));
         devis.setDpgfId(DPGF_ID);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
@@ -397,7 +397,7 @@ class DossierEtudeChainageAvalTest {
     void gagne_margeNegative_dg_avecMotif_aboutit() {
         UserContext.setUserRole("BTP_DG");
         UserContext.setSuperAdmin(false);
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         Devis devis = devis(Devis.STATUS_EMIS, new BigDecimal("500000.00"));
         devis.setDpgfId(DPGF_ID);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
@@ -413,7 +413,7 @@ class DossierEtudeChainageAvalTest {
 
         DossierEtude out = service.gagne(DOSSIER_ID, body);
 
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.GAGNE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
         assertThat(devis.getStatus()).isEqualTo(Devis.STATUS_APPROUVE);
         verify(transitionEtudeService, times(2))
                 .consignerGain(
@@ -428,7 +428,7 @@ class DossierEtudeChainageAvalTest {
     void gagne_margeNegative_dg_sansMotif_refuse() {
         UserContext.setUserRole("BTP_DG");
         UserContext.setSuperAdmin(false);
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         Devis devis = devis(Devis.STATUS_EMIS, new BigDecimal("500000.00"));
         devis.setDpgfId(DPGF_ID);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
@@ -451,7 +451,7 @@ class DossierEtudeChainageAvalTest {
     /** AC-1 — un échec à la seconde écriture fait échouer la commande entière, sans journal. */
     @Test
     void gagne_panneApresApprobationDevis_neLaissePasDEtatPartiel() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         Devis devis = devis(Devis.STATUS_EMIS);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         when(devisRepository.findByIdAndTenantId(DEVIS_ID, TENANT)).thenReturn(Optional.of(devis));
@@ -478,7 +478,7 @@ class DossierEtudeChainageAvalTest {
 
     @Test
     void perdu_enregistreMotif() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
 
         DossierPerduDto body = new DossierPerduDto();
@@ -487,14 +487,14 @@ class DossierEtudeChainageAvalTest {
         body.setEcartPrixEstime(new BigDecimal("12000"));
 
         DossierEtude out = service.perdu(DOSSIER_ID, body);
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.PERDU);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
         assertThat(out.getMotifPerte()).isEqualTo("PRIX");
         assertThat(out.getConcurrentRetenu()).isEqualTo("Concurrent X");
     }
 
     @Test
     void gagne_horsEtat_refuse() {
-        DossierEtude dossier = dossier(StatutDossierEtude.VALIDEE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINANCIALLY_APPROVED);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         DossierGagneDto body = new DossierGagneDto();
         body.setDateAttribution(LocalDate.now());
@@ -506,7 +506,7 @@ class DossierEtudeChainageAvalTest {
     /** AC-7, AC-13 — l'etude gagnee se convertit, avec ce que l'humain complete. */
     @Test
     void convertir_appellePortEtPasseConvertie() {
-        DossierEtude dossier = dossier(StatutDossierEtude.GAGNE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         dossier.setClientId("client-1");
         dossier.setClientNom("MOA");
         dossier.setMontantAttribue(new BigDecimal("100000"));
@@ -530,9 +530,9 @@ class DossierEtudeChainageAvalTest {
         DossierConversionResultDto result = service.convertir(DOSSIER_ID, body);
 
         assertThat(result.getChantierId()).isEqualTo("CH-1");
-        assertThat(result.getStatus()).isEqualTo("CONVERTIE");
+        assertThat(result.getStatus()).isEqualTo("FINAL_APPROVED");
         assertThat(dossier.getChantierGenereId()).isEqualTo("CH-1");
-        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.CONVERTIE);
+        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
         // AC-10 — rien du cote contractuel : aucun marche n'a ete memorise.
         assertThat(dossier.getMarcheGenereId()).isNull();
 
@@ -559,7 +559,7 @@ class DossierEtudeChainageAvalTest {
     /** AC-10 — toute divergence entre montant, total devis et somme de l'arbre bloque la conversion. */
     @Test
     void convertir_snapshotIncoherent_refuseAvantTouteCreation() {
-        DossierEtude dossier = dossier(StatutDossierEtude.GAGNE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         dossier.setClientId("client-1");
         dossier.setClientNom("MOA");
         dossier.setMontantAttribue(new BigDecimal("100000"));
@@ -577,14 +577,14 @@ class DossierEtudeChainageAvalTest {
                 .hasMessageContaining("snapshot_vente_incoherent");
         // Rien n'a été créé : le port n'est jamais appelé et l'étude reste GAGNE.
         verify(chainageAvalPort, never()).convert(any());
-        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.GAGNE);
+        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
         assertThat(dossier.getChantierGenereId()).isNull();
     }
 
     /** AC-9 — une étude gagnée sans devis lié ne peut pas produire un chantier issu d'étude. */
     @Test
     void convertir_sansDevisLie_refuse() {
-        DossierEtude dossier = dossier(StatutDossierEtude.GAGNE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         dossier.setClientId("client-1");
         when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
 
@@ -597,7 +597,7 @@ class DossierEtudeChainageAvalTest {
     /** AC-7 — depuis un statut autre que GAGNE, refus avec un message metier. */
     @Test
     void convertir_horsEtat_refuse() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.COMPLETED);
         when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
 
         assertThatThrownBy(() -> service.convertir(DOSSIER_ID, new DossierConvertirDto()))
@@ -612,21 +612,21 @@ class DossierEtudeChainageAvalTest {
      */
     @Test
     void convertir_rejoue_renvoieLeChantierDejaCree() {
-        DossierEtude dossier = dossier(StatutDossierEtude.CONVERTIE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         dossier.setChantierGenereId("CH-EXIST");
         when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
 
         DossierConversionResultDto result = service.convertir(DOSSIER_ID, new DossierConvertirDto());
 
         assertThat(result.getChantierId()).isEqualTo("CH-EXIST");
-        assertThat(result.getStatus()).isEqualTo("CONVERTIE");
-        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.CONVERTIE);
+        assertThat(result.getStatus()).isEqualTo("FINAL_APPROVED");
+        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
         verify(chainageAvalPort, never()).convert(any());
     }
 
     @Test
     void convertir_rejoue_clotureLaDemandeMoteurResiduelle() {
-        DossierEtude dossier = dossier(StatutDossierEtude.CONVERTIE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         dossier.setChantierGenereId("CH-EXIST");
         dossier.setApprovalRequestId("apr-walk");
         when(repository.lockByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
@@ -662,7 +662,7 @@ class DossierEtudeChainageAvalTest {
 
         verify(chainageAvalPort, never()).convert(any());
         // Abandon : rien n'a ete cree, l'etude reste GAGNE.
-        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.GAGNE);
+        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
         assertThat(dossier.getChantierGenereId()).isNull();
     }
 
@@ -760,7 +760,7 @@ class DossierEtudeChainageAvalTest {
     }
 
     private DossierEtude dossierAvecDpgf() {
-        DossierEtude dossier = dossier(StatutDossierEtude.GAGNE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         dossier.setClientId("client-1");
         dossier.setClientNom("MOA");
         dossier.setDpgfId(DPGF_ID);
@@ -864,7 +864,7 @@ class DossierEtudeChainageAvalTest {
     /** SEKTOR-211 — 100 % coûts non établis : gain refusé avec ETU-130. */
     @Test
     void gagne_completudeBloquante_refuse() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         ControleEtude controle = ControleEtude.builder()
                 .code(CompletudeEtudeService.ETU_130)
                 .severite(SeveriteControle.BLOCKING)
@@ -882,7 +882,7 @@ class DossierEtudeChainageAvalTest {
     /** SEKTOR-211 — warning commercial accepté avec motif aboutit. */
     @Test
     void gagne_warningAccepte_avecMotif_aboutit() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         Devis devis = devis(Devis.STATUS_EMIS);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         when(devisRepository.findByIdAndTenantId(DEVIS_ID, TENANT)).thenReturn(Optional.of(devis));
@@ -904,13 +904,13 @@ class DossierEtudeChainageAvalTest {
 
         DossierEtude out = service.gagne(DOSSIER_ID, body);
 
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.GAGNE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
     }
 
     /** SEKTOR-211 — warning sans acceptation refusé. */
     @Test
     void gagne_warningSansAcceptation_refuse() {
-        DossierEtude dossier = dossier(StatutDossierEtude.DEVIS_GENERE);
+        DossierEtude dossier = dossier(StatutDossierEtude.FINAL_APPROVED);
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         when(completudeEtudeService.evaluer(dossier))
                 .thenReturn(completudeAvec(ControleEtude.builder()

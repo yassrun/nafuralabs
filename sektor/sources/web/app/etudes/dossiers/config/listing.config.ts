@@ -117,7 +117,7 @@ export function buildDossierListingConfig(ingenieurs: LookupItem[] = []) {
         icon: 'calculate',
         title: "Aucune étude / appel d'offres",
         message:
-          "Ouvrez un cadrage (Draft). Envoyez-le À affecter : le DG affecte ou rejette, puis le chargé prend en compte.",
+          "Créez une étude en brouillon, puis soumettez-la pour affectation. Le responsable affecte un ingénieur, qui démarre l’étude.",
         actionLabel: 'Nouvelle étude',
         actionId: 'create',
       },

@@ -160,12 +160,10 @@ test.describe('SEKTOR-129 — CTA avancent l’étape', () => {
     await expect(page.getByRole('heading', { name: /Planning prévisionnel/i })).toBeVisible({
       timeout: 20000,
     });
-    expect(await currentStep(request, session, id), 'footer planning doit PUT etape 5').toBe(5);
-
-    await clickWizardNext(page, /Continuer vers les ressources/i);
     await expect(page.getByRole('heading', { name: /Ressources prévues/i })).toBeVisible({
       timeout: 20000,
     });
+    expect(await currentStep(request, session, id), 'footer planning doit PUT etape 5').toBe(5);
 
     await clickWizardNext(page, /Voir la synthèse/i);
     await expect(page.getByText(/Synthèse et validation/i).first()).toBeVisible({

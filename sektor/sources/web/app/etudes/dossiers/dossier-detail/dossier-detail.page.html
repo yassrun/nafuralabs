@@ -15,6 +15,8 @@
         [peutAccepterAffectation]="estChargeEtude()"
         [peutSaisirApresGo]="peutSaisirApresGo()"
         [peutAvisExecution]="peutAvisExecution()"
+        [peutValiderFinancier]="peutValiderFinancier()"
+        [peutValiderDefinitif]="peutValiderDefinitif()"
         [peutRenvoyerAffectation]="peutRenvoyerAffectation()"
         [chargeDejaDesigne]="chargeDejaDesigne()"
         [canSave]="peutEnregistrer()"
@@ -42,7 +44,7 @@
       [steps]="etapes"
       [currentStepIndex]="indexCourant()"
       [incompleteStepIndexes]="incompleteStepIndexes()"
-      [canProceed]="dossier()?.status === 'REJETE_CHIFFRAGE' ? false : modifiable() ? peutContinuerUi() : true"
+      [canProceed]="dossier()?.status === 'STUDY_REJECTED' ? false : modifiable() ? peutContinuerUi() : true"
       [allowStepNavigation]="true"
       [backLabel]="backLabel()"
       [nextLabel]="nextLabel()"
@@ -73,9 +75,9 @@
             [dpgfId]="$safeNavigationMigration(dossier()?.dpgfId)"
             [modifiable]="piecesModifiables()"
             [figeFichiersDeposes]="
-              dossier()?.status !== 'BROUILLON' &&
-              dossier()?.status !== 'A_DECIDER' &&
-              dossier()?.status !== 'REJETE_CHIFFRAGE'
+              dossier()?.status !== 'DRAFT' &&
+              dossier()?.status !== 'PENDING_ASSIGNMENT' &&
+              dossier()?.status !== 'STUDY_REJECTED'
             "
             mode="documents"
             (change)="rechargerApresPieces()"
@@ -129,16 +131,17 @@
             }
           </div>
         } @else if (etapeUi() === 4) {
-          <app-dossier-planning-panel
-            [dossierId]="dossier()!.id"
-            [dpgfId]="dossier()?.dpgfId ?? null"
-            [modifiable]="modifiable()"
-          />
-        } @else if (etapeUi() === 5) {
-          <app-dossier-ressources-panel
-            [dossierId]="dossier()!.id"
-            [modifiable]="modifiable()"
-          />
+          <div class="dossier__planif-res">
+            <app-dossier-planning-panel
+              [dossierId]="dossier()!.id"
+              [dpgfId]="dossier()?.dpgfId ?? null"
+              [modifiable]="modifiable()"
+            />
+            <app-dossier-ressources-panel
+              [dossierId]="dossier()!.id"
+              [modifiable]="modifiable()"
+            />
+          </div>
         } @else {
           <app-synthese-validation-panel
             [dossier]="dossier()!"

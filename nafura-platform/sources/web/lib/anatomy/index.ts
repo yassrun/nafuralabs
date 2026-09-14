@@ -131,6 +131,8 @@ export type { CreateDto, UpdateDto } from './data';
 // ═══════════════════════════════════════════════════════════════════════════
 
 export { StatusMachineComponent } from './components/molecules/status-machine';
+export { StatusActionBarComponent } from './components/molecules/status-action-bar';
+export { resolveStatusActions, resolveStatusDef, hasRoles, and, or } from './utils/resolve-status-actions';
 export { StatusTransitionDialogService, StatusTransitionDialogComponent } from './components/services/status-transition-dialog.service';
 export type { StatusTransitionDialogOptions, StatusTransitionDialogResult } from './components/services/status-transition-dialog.service';
 

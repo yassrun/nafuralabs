@@ -96,7 +96,7 @@ class DossierEtudeGoNoGoTest {
 
         DossierEtude out = service.go(DOSSIER, INGE.toString(), "QA Ingenieur");
 
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.AFFECTE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.ASSIGNED);
         assertThat(out.getCurrentStep()).isEqualTo(DossierEtude.ETAPE_BORDEREAU);
         assertThat(out.getChargeEtudeUserId()).isEqualTo(INGE.toString());
         assertThat(out.getResponsableExecutionUserId()).isEqualTo(INGE.toString());
@@ -125,7 +125,7 @@ class DossierEtudeGoNoGoTest {
         UserContext.setUserRole("BTP_INGENIEUR");
         UserContext.setUserId(exec);
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.A_AVIS_EXECUTION);
+        dossier.setStatus(StatutDossierEtude.IN_PROGRESS);
         dossier.setChargeEtudeUserId(INGE.toString());
         dossier.setResponsableExecutionUserId(exec.toString());
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
@@ -133,7 +133,7 @@ class DossierEtudeGoNoGoTest {
 
         DossierEtude out = service.avisExecutionRetour(DOSSIER, "Délais irréalistes sur le lot 2");
 
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.EN_ETUDE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.IN_PROGRESS);
         assertThat(out.getAvisExecutionDossier()).isEqualTo("RETOUR");
         assertThat(out.getAvisExecutionCommentaire()).contains("Délais");
     }
@@ -150,7 +150,7 @@ class DossierEtudeGoNoGoTest {
         DossierEtude out = service.go(DOSSIER, null, null);
 
         assertThat(out.getChargeEtudeUserId()).isEqualTo(INGE.toString());
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.AFFECTE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.ASSIGNED);
     }
 
     @Test
@@ -159,14 +159,14 @@ class DossierEtudeGoNoGoTest {
         UserContext.setUserRole("BTP_DG");
         UserContext.setUserId(moi);
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.A_DECIDER);
+        dossier.setStatus(StatutDossierEtude.PENDING_ASSIGNMENT);
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         DossierEtude out = service.go(DOSSIER, moi.toString(), "QA Owner");
 
         assertThat(out.getChargeEtudeUserId()).isEqualTo(moi.toString());
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.EN_ETUDE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.IN_PROGRESS);
     }
 
     @Test
@@ -178,7 +178,7 @@ class DossierEtudeGoNoGoTest {
 
         DossierEtude out = service.allerAEtape(DOSSIER, DossierEtude.ETAPE_BORDEREAU);
 
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.BROUILLON);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.DRAFT);
         assertThat(out.getCurrentStep()).isEqualTo(DossierEtude.ETAPE_BORDEREAU);
     }
 
@@ -187,40 +187,40 @@ class DossierEtudeGoNoGoTest {
         UserContext.setUserRole("BTP_INGENIEUR");
         UserContext.setUserId(INGE);
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.AFFECTE);
+        dossier.setStatus(StatutDossierEtude.ASSIGNED);
         dossier.setChargeEtudeUserId(INGE.toString());
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
 
         assertThatThrownBy(() -> service.allerAEtape(DOSSIER, DossierEtude.ETAPE_DECOMPOSITION))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("etudes.dossier.verrouille");
-        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.AFFECTE);
+        assertThat(dossier.getStatus()).isEqualTo(StatutDossierEtude.ASSIGNED);
     }
 
     @Test
     void nogo_clot_avec_motif() {
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.A_DECIDER);
+        dossier.setStatus(StatutDossierEtude.PENDING_ASSIGNMENT);
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         DossierEtude out = service.nogo(DOSSIER, "Hors capacité");
 
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.NE_PAS_ETUDIER);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.REJECTED);
         assertThat(out.getMotifNoGo()).isEqualTo("Hors capacité");
         assertThat(out.isModifiable()).isFalse();
     }
 
     @Test
-    void revenir_au_draft_depuis_a_decider() {
+    void revenir_au_draft_depuis_rejected() {
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.A_DECIDER);
+        dossier.setStatus(StatutDossierEtude.REJECTED);
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         DossierEtude out = service.revenirAuDraft(DOSSIER);
 
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.BROUILLON);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.DRAFT);
     }
 
     @Test
@@ -229,40 +229,40 @@ class DossierEtudeGoNoGoTest {
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        assertThat(service.annuler(DOSSIER).getStatus()).isEqualTo(StatutDossierEtude.ANNULE);
+        assertThat(service.annuler(DOSSIER).getStatus()).isEqualTo(StatutDossierEtude.ARCHIVED);
 
         DossierEtude rejete = brouillon();
-        rejete.setStatus(StatutDossierEtude.NE_PAS_ETUDIER);
+        rejete.setStatus(StatutDossierEtude.REJECTED);
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(rejete));
-        assertThat(service.annuler(DOSSIER).getStatus()).isEqualTo(StatutDossierEtude.ANNULE);
+        assertThat(service.annuler(DOSSIER).getStatus()).isEqualTo(StatutDossierEtude.ARCHIVED);
 
         DossierEtude refusChiffrage = brouillon();
-        refusChiffrage.setStatus(StatutDossierEtude.REJETE_CHIFFRAGE);
+        refusChiffrage.setStatus(StatutDossierEtude.STUDY_REJECTED);
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(refusChiffrage));
-        assertThat(service.annuler(DOSSIER).getStatus()).isEqualTo(StatutDossierEtude.ANNULE);
+        assertThat(service.annuler(DOSSIER).getStatus()).isEqualTo(StatutDossierEtude.ARCHIVED);
     }
 
     @Test
     void nogo_sans_motif_accepte() {
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.A_DECIDER);
+        dossier.setStatus(StatutDossierEtude.PENDING_ASSIGNMENT);
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         DossierEtude out = service.nogo(DOSSIER, "  ");
 
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.NE_PAS_ETUDIER);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.REJECTED);
         assertThat(out.getMotifNoGo()).isNull();
     }
 
     @Test
     void archiver_depuis_a_decider() {
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.A_DECIDER);
+        dossier.setStatus(StatutDossierEtude.PENDING_ASSIGNMENT);
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        assertThat(service.annuler(DOSSIER).getStatus()).isEqualTo(StatutDossierEtude.ANNULE);
+        assertThat(service.annuler(DOSSIER).getStatus()).isEqualTo(StatutDossierEtude.ARCHIVED);
     }
 
     @Test
@@ -270,7 +270,7 @@ class DossierEtudeGoNoGoTest {
         UserContext.setUserRole("BTP_ASSISTANT_ETUDE");
         UserContext.setUserId(UUID.fromString("11111111-1111-1111-1111-111111111111"));
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.REJETE_CHIFFRAGE);
+        dossier.setStatus(StatutDossierEtude.STUDY_REJECTED);
         dossier.setChargeEtudeUserId(INGE.toString());
         dossier.setChargeEtudeNom("QA Ingenieur");
         dossier.setMotifRefusCharge("BDP manquant");
@@ -279,7 +279,7 @@ class DossierEtudeGoNoGoTest {
 
         DossierEtude out = service.renvoyerAuCharge(DOSSIER);
 
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.AFFECTE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.IN_PROGRESS);
         assertThat(out.getChargeEtudeUserId()).isEqualTo(INGE.toString());
         assertThat(out.getMotifRefusCharge()).isNull();
     }
@@ -295,21 +295,19 @@ class DossierEtudeGoNoGoTest {
 
         DossierEtude out = service.renvoyerAuCharge(DOSSIER);
 
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.AFFECTE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.ASSIGNED);
     }
 
     @Test
-    void revenir_au_draft_depuis_rejet_chiffrage() {
+    void revenir_au_draft_interdit_depuis_study_rejected() {
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.REJETE_CHIFFRAGE);
+        dossier.setStatus(StatutDossierEtude.STUDY_REJECTED);
         dossier.setChargeEtudeUserId(INGE.toString());
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
-        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        DossierEtude out = service.revenirAuDraft(DOSSIER);
-
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.BROUILLON);
-        assertThat(out.getChargeEtudeUserId()).isEqualTo(INGE.toString());
+        assertThatThrownBy(() -> service.revenirAuDraft(DOSSIER))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("etudes.dossier.transition_interdite");
     }
 
     @Test
@@ -317,16 +315,16 @@ class DossierEtudeGoNoGoTest {
         UserContext.setUserRole("BTP_INGENIEUR");
         UserContext.setUserId(INGE);
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.EN_ETUDE);
+        dossier.setStatus(StatutDossierEtude.IN_PROGRESS);
         dossier.setChargeEtudeUserId(INGE.toString());
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         DossierEtude suspendu = service.suspendreChiffrage(DOSSIER);
-        assertThat(suspendu.getStatus()).isEqualTo(StatutDossierEtude.SUSPENDU);
+        assertThat(suspendu.getStatus()).isEqualTo(StatutDossierEtude.SUSPENDED);
 
         DossierEtude repris = service.reprendreChiffrage(DOSSIER);
-        assertThat(repris.getStatus()).isEqualTo(StatutDossierEtude.EN_ETUDE);
+        assertThat(repris.getStatus()).isEqualTo(StatutDossierEtude.IN_PROGRESS);
     }
 
     @Test
@@ -334,7 +332,7 @@ class DossierEtudeGoNoGoTest {
         UserContext.setUserRole("BTP_MAGASINIER");
         UserContext.setUserId(UUID.fromString("11111111-1111-1111-1111-111111111111"));
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.EN_ETUDE);
+        dossier.setStatus(StatutDossierEtude.IN_PROGRESS);
         dossier.setChargeEtudeUserId(INGE.toString());
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
 
@@ -352,7 +350,7 @@ class DossierEtudeGoNoGoTest {
         UserContext.setUserRole("BTP_DG");
         UserContext.setUserId(UUID.fromString("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"));
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.AFFECTE);
+        dossier.setStatus(StatutDossierEtude.ASSIGNED);
         dossier.setChargeEtudeUserId(INGE.toString());
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
 
@@ -366,7 +364,7 @@ class DossierEtudeGoNoGoTest {
         UserContext.setUserRole("BTP_DG");
         UserContext.setUserId(UUID.fromString("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"));
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.AFFECTE);
+        dossier.setStatus(StatutDossierEtude.ASSIGNED);
         dossier.setChargeEtudeUserId(INGE.toString());
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
 
@@ -380,14 +378,14 @@ class DossierEtudeGoNoGoTest {
         UserContext.setUserRole("BTP_INGENIEUR");
         UserContext.setUserId(INGE);
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.AFFECTE);
+        dossier.setStatus(StatutDossierEtude.ASSIGNED);
         dossier.setChargeEtudeUserId(INGE.toString());
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         DossierEtude out = service.accepterAffectation(DOSSIER);
 
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.EN_ETUDE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.IN_PROGRESS);
     }
 
     @Test
@@ -395,14 +393,14 @@ class DossierEtudeGoNoGoTest {
         UserContext.setUserRole("BTP_INGENIEUR");
         UserContext.setUserId(INGE);
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.AFFECTE);
+        dossier.setStatus(StatutDossierEtude.ASSIGNED);
         dossier.setChargeEtudeUserId(INGE.toString());
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         DossierEtude out = service.refuserAffectation(DOSSIER, "DOC_MANQUANT", "BDP lot 3 manquant");
 
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.REJETE_CHIFFRAGE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.STUDY_REJECTED);
         assertThat(out.getMotifRefusChargeType()).isEqualTo("DOC_MANQUANT");
         assertThat(out.getMotifRefusCharge()).isEqualTo("BDP lot 3 manquant");
         assertThat(out.isModifiable()).isTrue();
@@ -416,7 +414,7 @@ class DossierEtudeGoNoGoTest {
         UserContext.setUserId(lotIng);
 
         DossierEtude dossier = brouillon();
-        dossier.setStatus(StatutDossierEtude.EN_ETUDE);
+        dossier.setStatus(StatutDossierEtude.IN_PROGRESS);
         dossier.setChargeEtudeUserId(INGE.toString());
         dossier.setDpgfId(dpgfId);
         dossier.setCurrentStep(DossierEtude.ETAPE_BORDEREAU);
@@ -441,7 +439,7 @@ class DossierEtudeGoNoGoTest {
                 .numero("DE-0099")
                 .objet("Cadrage")
                 .clientNom("MOA")
-                .status(StatutDossierEtude.BROUILLON)
+                .status(StatutDossierEtude.DRAFT)
                 .currentStep(DossierEtude.ETAPE_PREMIERE)
                 .build();
     }

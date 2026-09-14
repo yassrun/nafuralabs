@@ -11,7 +11,7 @@ function dossier(partial: Partial<DossierEtude>): DossierEtude {
     numero: partial.numero ?? 'ET-0001',
     objet: partial.objet ?? 'Étude',
     currentStep: 1,
-    status: partial.status ?? 'EN_ETUDE',
+    status: partial.status ?? 'IN_PROGRESS',
     version: partial.version ?? 1,
     ...partial,
   };
@@ -23,19 +23,19 @@ describe('etudes-dashboard', () => {
       dossier({
         id: 'att',
         numero: 'ET-3',
-        status: 'A_DECIDER',
+        status: 'PENDING_ASSIGNMENT',
         aoDateLimiteDepot: '2026-10-01',
       }),
       dossier({
         id: 'j7',
         numero: 'ET-2',
-        status: 'AFFECTE',
+        status: 'ASSIGNED',
         aoDateLimiteDepot: '2026-09-14',
       }),
       dossier({
         id: 'late',
         numero: 'ET-1',
-        status: 'EN_ETUDE',
+        status: 'IN_PROGRESS',
         aoDateLimiteDepot: '2026-09-01',
       }),
     ];
@@ -49,8 +49,8 @@ describe('etudes-dashboard', () => {
 
   it('compte mes études sur le chargé connecté', () => {
     const rows = [
-      dossier({ id: 'a', chargeEtudeUserId: ME, status: 'EN_ETUDE' }),
-      dossier({ id: 'b', chargeEtudeUserId: 'autre', status: 'EN_ETUDE' }),
+      dossier({ id: 'a', chargeEtudeUserId: ME, status: 'IN_PROGRESS' }),
+      dossier({ id: 'b', chargeEtudeUserId: 'autre', status: 'IN_PROGRESS' }),
     ];
     const vm = buildEtudesDashboard(rows, ME, TODAY);
     expect(vm.kpis.find((k) => k.id === 'mes-etudes')?.count).toBe(1);
@@ -62,17 +62,17 @@ describe('etudes-dashboard', () => {
         id: 'lot',
         chargeEtudeUserId: 'autre',
         lotChargeUserIds: [ME],
-        status: 'EN_ETUDE',
+        status: 'IN_PROGRESS',
       }),
-      dossier({ id: 'autre', chargeEtudeUserId: 'autre', status: 'EN_ETUDE' }),
+      dossier({ id: 'autre', chargeEtudeUserId: 'autre', status: 'IN_PROGRESS' }),
     ];
     const vm = buildEtudesDashboard(rows, ME, TODAY);
     expect(vm.kpis.find((k) => k.id === 'mes-etudes')?.count).toBe(1);
   });
 
   it('ne met pas un chiffrage en cours dans la file d’attente', () => {
-    expect(motifAttention({ status: 'EN_ETUDE', aoDateLimiteDepot: '2026-10-01' }, TODAY)).toBeNull();
-    expect(motifAttention({ status: 'AFFECTE', aoDateLimiteDepot: '2026-10-01' }, TODAY)).toBe(
+    expect(motifAttention({ status: 'IN_PROGRESS', aoDateLimiteDepot: '2026-10-01' }, TODAY)).toBeNull();
+    expect(motifAttention({ status: 'ASSIGNED', aoDateLimiteDepot: '2026-10-01' }, TODAY)).toBe(
       'ATTENTE',
     );
   });

@@ -85,7 +85,7 @@ import { labelStatutDossier } from '../utils/dossier-status.util';
 import { exigeAvisExecution, idsActeurEgaux } from '../utils/dossier-responsables.util';
 
 /**
- * Parcours d'étude en six étapes métier (backend 1..5 projeté ; 4–6 locales).
+ * Parcours d'étude en cinq étapes métier (backend 1..5 projeté ; 4–5 locales).
  *
  * <p>1. Aucune règle de gate n'est rejouée ici — l'état vient de `GET /gates`.
  * <p>2. Pas de rechargement global de l'arbre DPGF après une transition.
@@ -165,16 +165,17 @@ export class DossierDetailPage {
   /** Étape technique backend (1..5) persistée. */
   readonly etapeBackend = computed(() => this.dossier()?.currentStep ?? 1);
 
-  /** Étape métier UI (1..6). Lecture locale prioritaire (planning / ressources / synthèse). */
+  /** Étape métier UI (1..5). Lecture locale prioritaire (planning+ressources / synthèse). */
   readonly etapeUi = computed(() => {
     if (this.etapeUiLecture() != null) return this.etapeUiLecture()!;
     const statut = this.dossier()?.status;
     if (
       this.etapeBackend() >= 5 &&
-      (statut === 'EN_VALIDATION' ||
-        statut === 'VALIDEE' ||
-        statut === 'DEVIS_GENERE' ||
-        statut === 'A_AVIS_EXECUTION')
+      (statut === 'COMPLETED' ||
+        statut === 'FINANCIALLY_APPROVED' ||
+        statut === 'FINANCIALLY_REJECTED' ||
+        statut === 'FINAL_APPROVED' ||
+        statut === 'FINAL_REJECTED')
     ) {
       return UI_ETAPE_MAX;
     }
@@ -258,7 +259,7 @@ export class DossierDetailPage {
    * Hard / autres étapes : suit la vérité gate.
    */
   readonly peutContinuerUi = computed(() => {
-    if (this.dossier()?.status === 'REJETE_CHIFFRAGE') return false;
+    if (this.dossier()?.status === 'STUDY_REJECTED') return false;
     if (!this.modifiable()) return true;
     if (estEtapeUiLocale(this.etapeUi())) return true;
     if (this.etapeUi() === 1 && this.identite()?.cpsBlocking()) return false;
@@ -266,19 +267,19 @@ export class DossierDetailPage {
     return this.peutContinuer();
   });
 
-  readonly cadrageEditable = computed(() => this.dossier()?.status === 'BROUILLON');
+  readonly cadrageEditable = computed(() => this.dossier()?.status === 'DRAFT');
 
   readonly piecesModifiables = computed(() => {
     const statut = this.dossier()?.status;
-    return statut === 'BROUILLON' || statut === 'A_DECIDER' || statut === 'REJETE_CHIFFRAGE';
+    return statut === 'DRAFT' || statut === 'PENDING_ASSIGNMENT' || statut === 'STUDY_REJECTED';
   });
 
   readonly modifiable = computed(() => {
     const statut = this.dossier()?.status;
-    if (statut === 'BROUILLON' || statut === 'A_DECIDER') {
+    if (statut === 'DRAFT' || statut === 'PENDING_ASSIGNMENT') {
       return true;
     }
-    if (statut === 'EN_ETUDE') return this.peutSaisirApresGo();
+    if (statut === 'IN_PROGRESS') return this.peutSaisirApresGo();
     return false;
   });
 
@@ -296,34 +297,35 @@ export class DossierDetailPage {
   readonly messageVerrou = computed(() => {
     const statut = this.dossier()?.status;
     switch (statut) {
-      case 'EN_VALIDATION':
+      case 'COMPLETED':
         return 'Dossier transmis — en attente de validation. Les pièces, le bordereau et le chiffrage sont verrouillés.';
-      case 'VALIDEE':
-        return 'Validé intern — consultation seule.';
-      case 'DEVIS_GENERE':
-        return 'Validé — consultation seule.';
-      case 'ANNULE':
+      case 'FINANCIALLY_APPROVED':
+        return 'Validé financièrement — en attente de validation définitive.';
+      case 'FINAL_APPROVED':
+        return 'Validé définitivement — le workflow Étude est terminé.';
+      case 'ARCHIVED':
         return 'Dossier archivé — consultation seule.';
-      case 'AFFECTE':
+      case 'ASSIGNED':
         return this.dossier()?.chargeEtudeNom
           ? `Affecté à ${this.dossier()?.chargeEtudeNom} — en attente de prise en charge.`
           : 'Affecté — le chargé d’étude doit prendre en charge ou rejeter.';
-      case 'EN_ETUDE':
+      case 'IN_PROGRESS':
         return this.dossier()?.chargeEtudeNom
-          ? `En chiffrage — seul ${this.dossier()?.chargeEtudeNom} (ou le DG) peut terminer ou suspendre.`
-          : 'En chiffrage — le chargé d’étude peut terminer ou suspendre.';
-      case 'A_AVIS_EXECUTION':
-        return this.dossier()?.responsableExecutionNom
-          ? `Avis d’exécution — ${this.dossier()?.responsableExecutionNom} tranche : favorable ou retour au chiffrage.`
-          : 'Avis d’exécution — le responsable d’exécution tranche : favorable ou retour au chiffrage.';
-      case 'SUSPENDU':
-        return 'Chiffrage suspendu — Reprendre pour continuer, ou Chiffrage terminé pour passer à Chiffré.';
-      case 'NE_PAS_ETUDIER':
+          ? `En cours — seul ${this.dossier()?.chargeEtudeNom} (ou le responsable) peut terminer ou suspendre.`
+          : 'En cours — le chargé d’étude peut terminer ou suspendre.';
+      case 'SUSPENDED':
+        return 'Étude suspendue — Reprendre pour continuer.';
+      case 'REJECTED':
         return this.dossier()?.motifNoGo
           ? `Rejeté — ${this.dossier()?.motifNoGo}`
           : 'Rejeté — ce dossier ne sera pas étudié.';
-      case 'REJETE_CHIFFRAGE':
-        return 'Rejeté par le chiffrage — ajoutez les pièces demandées, puis Affecter. Réinitialiser pour modifier le cadrage.';
+      case 'STUDY_REJECTED':
+        return 'Refusé par l’étude — corrigez les pièces puis Reprendre.';
+      case 'FINANCIALLY_REJECTED':
+      case 'FINAL_REJECTED':
+        return this.dossier()?.motifRefus
+          ? `Refus — ${this.dossier()?.motifRefus}`
+          : 'Refus de validation — Reprendre pour corriger.';
       default:
         return 'Ce dossier est en lecture seule à ce stade du parcours.';
     }
@@ -331,10 +333,10 @@ export class DossierDetailPage {
 
   readonly enAttenteGo = computed(() => {
     const s = this.dossier()?.status;
-    return s === 'BROUILLON' || s === 'A_DECIDER';
+    return s === 'DRAFT' || s === 'PENDING_ASSIGNMENT';
   });
 
-  readonly enAttenteAccept = computed(() => this.dossier()?.status === 'AFFECTE');
+  readonly enAttenteAccept = computed(() => this.dossier()?.status === 'ASSIGNED');
 
   readonly peutDeciderGo = computed(
     () =>
@@ -342,6 +344,22 @@ export class DossierDetailPage {
       this.auth.hasRole('BTP_DG') ||
       this.auth.hasRole('OWNER') ||
       this.auth.hasRole('BTP_ADMIN_ETUDE'),
+  );
+
+  /** DAF / owner — pas l’ingénieur d’exécution. */
+  readonly peutValiderFinancier = computed(
+    () =>
+      this.auth.hasPermission('etude.approve') ||
+      this.auth.hasRole('BTP_DAF') ||
+      this.auth.hasRole('OWNER'),
+  );
+
+  readonly peutValiderDefinitif = computed(
+    () =>
+      this.auth.hasPermission('etude.go') ||
+      this.auth.hasRole('BTP_DG') ||
+      this.auth.hasRole('BTP_ADMIN_ETUDE') ||
+      this.auth.hasRole('OWNER'),
   );
 
   /** Personne nommée chargé d’étude — seule à prendre en charge / rejeter l’affectation. */
@@ -373,7 +391,7 @@ export class DossierDetailPage {
   readonly peutChiffrerLots = computed(
     () =>
       this.peutSaisirApresGo() ||
-      (this.dossier()?.status === 'EN_ETUDE' && this.estIngenieurLotSeulement()),
+      (this.dossier()?.status === 'IN_PROGRESS' && this.estIngenieurLotSeulement()),
   );
 
   readonly peutAvisExecution = computed(() => {
@@ -407,25 +425,25 @@ export class DossierDetailPage {
     if (this.enAttenteGo() && !this.peutDeciderGo()) {
       add(
         'info',
-        this.dossier()?.status === 'A_DECIDER'
-          ? 'À affecter — en attente du DG (affecter ou rejeter).'
+        this.dossier()?.status === 'PENDING_ASSIGNMENT'
+          ? 'En attente d’affectation — le responsable d’études affecte un ingénieur ou rejette le dossier.'
           : this.chargeDejaDesigne()
-            ? 'Draft — corrigez le cadrage si besoin, puis Affecter. Le chargé déjà nommé reprend le dossier.'
-            : 'Draft — saisissez le cadrage, puis cliquez À affecter pour envoyer au DG.',
+            ? 'Brouillon — corrigez le cadrage si besoin, puis Reprendre avec l’affectation existante.'
+            : 'Brouillon — saisissez le cadrage, puis Soumettre pour affectation.',
       );
     }
     if (this.enAttenteAccept() && !this.estChargeEtude() && !this.peutDeciderGo()) {
       add('info', 'Affecté — en attente de prise en charge par le chargé d’étude.');
     }
-    if (this.dossier()?.status === 'EN_ETUDE' && this.estIngenieurLotSeulement()) {
+    if (this.dossier()?.status === 'IN_PROGRESS' && this.estIngenieurLotSeulement()) {
       add('info', 'Vous voyez uniquement les lots qui vous sont affectés.');
     }
     const avisRetour = this.dossier()?.avisExecutionCommentaire?.trim();
-    if (avisRetour && this.dossier()?.status === 'EN_ETUDE' && this.dossier()?.avisExecutionDossier === 'RETOUR') {
+    if (avisRetour && this.dossier()?.status === 'IN_PROGRESS' && this.dossier()?.avisExecutionDossier === 'RETOUR') {
       add('warning', `Avis d’exécution — retour au chiffrage : ${avisRetour}`);
     }
     const refus = this.dossier()?.motifRefusCharge?.trim();
-    if (refus && this.dossier()?.status === 'REJETE_CHIFFRAGE') {
+    if (refus && this.dossier()?.status === 'STUDY_REJECTED') {
       const type = this.dossier()?.motifRefusChargeType;
       const typeLabel =
         type === 'CPS_INCOMPLET'
@@ -471,7 +489,7 @@ export class DossierDetailPage {
     effect(() => {
       const ui = this.etapeUi();
       const d = this.dossier();
-      if (ui !== 2 || !d || d.dpgfId || d.status !== 'EN_ETUDE') return;
+      if (ui !== 2 || !d || d.dpgfId || d.status !== 'IN_PROGRESS') return;
       void this.assurerArbreBordereau();
     });
 
@@ -525,8 +543,8 @@ export class DossierDetailPage {
       this.etapeUiLecture.set(4);
       return;
     }
-    if (estEtapeUiLocale(ui) || ui === 4 || ui === 5) {
-      this.etapeUiLecture.set(ui + 1);
+    if (estEtapeUiLocale(ui)) {
+      this.etapeUiLecture.set(Math.min(ui + 1, UI_ETAPE_MAX));
       return;
     }
 
@@ -548,7 +566,7 @@ export class DossierDetailPage {
     const ui = this.etapeUi();
     if (ui <= 1) return;
     if (!(await this.confirmerSiPosteDirty())) return;
-    if (this.estIngenieurLotSeulement() || estEtapeUiLocale(ui) || ui === 4) {
+    if (this.estIngenieurLotSeulement() || estEtapeUiLocale(ui)) {
       this.etapeUiLecture.set(ui - 1);
       return;
     }
@@ -621,12 +639,12 @@ export class DossierDetailPage {
   async soumettre(): Promise<void> {
     const dossier = this.dossier();
     const statut = dossier?.status;
-    if (!dossier || (statut !== 'EN_ETUDE' && statut !== 'SUSPENDU')) return;
+    if (!dossier || statut !== 'IN_PROGRESS') return;
     this.erreur.set(undefined);
     try {
       this.dossier.set(await this.api.soumettre(dossier.id));
       await this.refreshSynthese(dossier.id);
-      this.etapeUiLecture.set(6);
+      this.etapeUiLecture.set(UI_ETAPE_MAX);
     } catch (e) {
       this.appliquerErreurTransition(e);
     }
@@ -714,7 +732,7 @@ export class DossierDetailPage {
         case 'AVIS_EXECUTION_FAVORABLE':
           this.dossier.set(await this.api.avisExecutionFavorable(dossier.id));
           await this.refreshSynthese(dossier.id);
-          this.etapeUiLecture.set(6);
+          this.etapeUiLecture.set(UI_ETAPE_MAX);
           break;
         case 'AVIS_EXECUTION_RETOUR': {
           const motif = window.prompt('Avis d’exécution — motif du retour au chiffrage :');
@@ -732,9 +750,11 @@ export class DossierDetailPage {
           break;
         case 'VALIDER_N1':
         case 'VALIDER_N2':
+        case 'VALIDER_FINANCIER':
+        case 'VALIDER_DEFINITIF':
           this.dossier.set(await this.api.valider(dossier.id));
           await this.refreshSynthese(dossier.id);
-          this.etapeUiLecture.set(6);
+          this.etapeUiLecture.set(UI_ETAPE_MAX);
           break;
         case 'REFUSER': {
           const motif = window.prompt('Motif du refus (obligatoire) :');
@@ -977,7 +997,7 @@ export class DossierDetailPage {
   private async revenirAuDraft(): Promise<void> {
     const dossier = this.dossier();
     if (!dossier) return;
-    if (dossier.status === 'REJETE_CHIFFRAGE') {
+    if (dossier.status === 'STUDY_REJECTED') {
       const ok = window.confirm(
         'Réinitialiser le cadrage ? Le dossier repasse en Draft. Le chargé d’étude déjà nommé est conservé.',
       );
@@ -1103,7 +1123,7 @@ export class DossierDetailPage {
   private async assurerArbreBordereau(): Promise<void> {
     const dossier = this.dossier();
     if (!dossier?.id || dossier.dpgfId) return;
-    if (dossier.status !== 'EN_ETUDE' && dossier.status !== 'BROUILLON') return;
+    if (dossier.status !== 'IN_PROGRESS' && dossier.status !== 'DRAFT') return;
     try {
       const res = await this.api.initBordereauManuel(dossier.id);
       if (res?.dpgfId) this.onDpgfPret(res.dpgfId);
@@ -1337,19 +1357,19 @@ export class DossierDetailPage {
       return 'La structure est figée. Réouvrez le bordereau pour modifier lots et postes.';
     }
     if (domain === 'etudes.dossier.revenir_draft_hors_etat') {
-      return 'Seuls un dossier À affecter ou Rejeté par le chiffrage peuvent revenir en Draft.';
+      return 'Seul un dossier rejeté peut être renvoyé en brouillon.';
     }
     if (domain === 'etudes.dossier.renvoi_hors_etat') {
-      return 'Seuls un Draft ou un dossier Rejeté par le chiffrage peuvent être renvoyés au chargé.';
+      return 'Seuls un brouillon déjà affecté, ou un dossier à reprendre, peuvent être renvoyés au chargé.';
     }
     if (domain === 'etudes.dossier.archive_hors_etat') {
-      return 'Seuls un Draft ou un dossier Rejeté peuvent être archivés.';
+      return 'Ce dossier ne peut pas être archivé dans son état actuel.';
     }
     if (domain === 'etudes.dossier.go_requis') {
-      return 'Le DG doit d’abord affecter un chargé d’étude.';
+      return 'Le responsable d’études doit d’abord affecter un ingénieur.';
     }
     if (domain === 'etudes.dossier.go_reserve_dg') {
-      return 'Seul le DG (ou l’owner) peut affecter ou rejeter.';
+      return 'Seul le responsable d’études (ou l’owner) peut affecter ou rejeter.';
     }
     if (domain === 'etudes.dossier.warnings_non_acceptes') {
       return 'Des avertissements commerciaux restent à accepter, avec un motif, avant de marquer gagné.';

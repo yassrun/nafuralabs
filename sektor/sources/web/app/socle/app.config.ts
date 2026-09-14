@@ -31,7 +31,8 @@ import {
 } from '@platform/core/shell/shell-extensions';
 import { OnboardingService } from '@platform/core/onboarding/onboarding.service';
 import { ShortcutsService } from '@platform/core/shortcuts/shortcuts.service';
-import { SocieteSwitcherComponent } from '@app/socle/shell/components/societe-switcher/societe-switcher.component';
+import { ORG_CONTEXT_PORT } from '@platform/core/shell/org-context.port';
+import { SektorOrgContextAdapter } from '@app/socle/shell/sektor-org-context.adapter';
 import { ErpNotificationCenterAlertsComponent } from '@app/socle/shell/erp-notification-center-alerts.component';
 import {
   SEKTOR_GOTO_SHORTCUTS,
@@ -167,6 +168,7 @@ function initializeApp(): () => Promise<void> {
       });
       notifStream.connect();
       await erpNotif.refresh();
+      await unreadNotif.refresh();
       erpNotif.startPolling();
     }
   };
@@ -195,11 +197,15 @@ export const appConfig: ApplicationConfig = {
     // repli silencieux. Voir sektor/docs/specs/epics/_archive/front-ownership/.
     { provide: INTEGRATION_AUDIT_PORT, useExisting: ErpAuditService },
 
+    { provide: ORG_CONTEXT_PORT, useClass: SektorOrgContextAdapter },
+
     // Emplacements du shell : la plateforme expose des slots nommés, l'ERP les remplit.
+    // User menu, cloche et bouton IA ont un défaut plateforme — ne les override
+    // (header-user-menu / header-notifications / header-ai) que pour un chrome différent.
+    // Switcher entreprise = nf-org-switcher + ORG_CONTEXT_PORT (pas un slot custom).
     {
       provide: SHELL_EXTENSIONS,
       useValue: [
-        { slot: 'header-tenant-switcher', component: SocieteSwitcherComponent },
         { slot: 'notification-center-alerts', component: ErpNotificationCenterAlertsComponent },
       ] satisfies ShellExtension[],
     },
@@ -212,11 +218,8 @@ export const appConfig: ApplicationConfig = {
           if (!environment.onboardingV2Enabled) {
             return null;
           }
-          const m = await import('@app/socle/onboarding/onboarding-shell-widgets.component');
-          return {
-            // Bandeau « Invitez vos collègues » volontairement non monté — à réactiver plus tard.
-            completenessMeter: m.OnboardingCompletenessWidgetComponent,
-          };
+          // Bandeau « Invitez vos collègues » volontairement non monté — à réactiver plus tard.
+          return {};
         },
       } satisfies OnboardingWidgetsPort,
     },

@@ -181,7 +181,8 @@ class DevisFigeTest {
         devis.setStatus(Devis.STATUS_NEGOCIATION);
         when(repository.findByIdAndTenantId(DEVIS_ID, TENANT)).thenReturn(Optional.of(devis));
         when(jdbcTemplate.query(anyString(), any(RowMapper.class), any(), any()))
-                .thenReturn(List.of("GAGNE"));
+                .thenReturn(List.of("FINAL_APPROVED"))
+                .thenReturn(List.of(true));
 
         assertThatThrownBy(() -> service.createVersion(DEVIS_ID, "reprise"))
                 .isInstanceOf(IllegalStateException.class)
@@ -196,7 +197,8 @@ class DevisFigeTest {
         devis.setStatus(Devis.STATUS_EMIS);
         when(repository.findByIdAndTenantId(DEVIS_ID, TENANT)).thenReturn(Optional.of(devis));
         when(jdbcTemplate.query(anyString(), any(RowMapper.class), any(), any()))
-                .thenReturn(List.of("CONVERTIE"));
+                .thenReturn(List.of("FINAL_APPROVED"))
+                .thenReturn(List.of(true));
 
         assertThatThrownBy(() -> service.cancel(DEVIS_ID))
                 .isInstanceOf(IllegalStateException.class)

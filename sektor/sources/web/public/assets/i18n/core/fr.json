@@ -239,6 +239,12 @@
     }
   },
   "administration": {
+    "documents": {
+      "title": "Documents & impressions",
+      "identity": "Identité & mise en page",
+      "models": "Modèles",
+      "description": "Identité visuelle, mise en page et modèles des documents"
+    },
     "navigation": {
       "title": "Administration",
       "members": "Membres",
@@ -1039,7 +1045,7 @@
     "tabs": {
       "general": "General",
       "localization": "Localisation",
-      "branding": "Image de marque"
+      "branding": "Apparence"
     },
     "general": {
       "title": "General",
@@ -1067,15 +1073,16 @@
       "save.error": "Echec de la mise a jour des parametres de localisation"
     },
     "branding": {
-      "title": "Image de marque",
+      "title": "Apparence de l'application",
+      "appearanceHint": "Thème de l'app (couleur, logo sidebar, favicon). L'identité légale se paramètre depuis le switcher entreprise.",
       "displayName": "Nom d'affichage",
       "displayName.hint": "Affiché dans la barre latérale et le titre du navigateur",
       "primaryColor": "Couleur principale",
       "primaryColor.default": "Par défaut",
       "primaryColor.reset": "Réinitialiser",
       "primaryColor.preview": "Aperçu",
-      "logo": "Logo",
-      "logo.hint": "PNG, JPG ou SVG. Max 2 Mo.",
+      "logo": "Logo (barre latérale)",
+      "logo.hint": "Logo chrome de l'app — pas le logo des devis / factures. PNG, JPG ou SVG. Max 2 Mo.",
       "logo.change": "Changer",
       "logo.remove": "Supprimer",
       "favicon": "Favicon",
@@ -1252,6 +1259,11 @@
       "minChars": "Tapez au moins 2 caractères pour rechercher des enregistrements",
       "clearRecent": "Effacer les récents"
     },
+    "orgSwitcher": {
+      "orgs": "Entreprise",
+      "sites": "Établissement",
+      "settings": "Paramètres de l'entreprise"
+    },
     "topbar": {
       "notifications": "Notifications",
       "mySettings": "Mes paramètres",
@@ -1274,11 +1286,14 @@
       },
       "welcome": "Posez vos questions sur cette application. Je peux vous aider à naviguer, expliquer les données et déclencher des actions.",
       "loading": "Chargement de la conversation...",
+      "refreshing": "Actualisation du fil…",
+      "preparingReply": "Prépare une réponse…",
+      "emptyReply": "Je n’ai pas pu préparer de réponse. Réessayez, ou reformulez.",
       "errorGeneric": "La requête de conversation a échoué.",
       "placeholder": "Écrire un message...",
       "send": "Envoyer",
       "sendHint": "Entrée pour envoyer · Maj+Entrée pour une nouvelle ligne",
-      "sendInProgress": "Envoi...",
+      "sendInProgress": "Envoi…",
       "newChat": "Nouvelle conversation",
       "noHistory": "Aucune conversation",
       "sessionDefault": "Conversation",

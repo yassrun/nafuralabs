@@ -674,7 +674,7 @@
       },
       "nav": {
         "title": "Accessible root navigation",
-        "hint": "Calculation based on the permissionsAny tags on the root nodes of the nav (erp-nav.generated.ts). A module without a tag remains visible by default.",
+        "hint": "Calculation based on the permissionsAny tags on the root nodes of the sidebar (erp-sidebar.config.ts). A module without a tag remains visible by default.",
         "module": "Module",
         "required": "Required permission(s) (OR)",
         "visible": "Visible",
@@ -745,8 +745,32 @@
     },
     "societe": {
       "breadcrumb": "Companies",
-      "title": "Group companies",
-      "subtitle": "Multi-entity — select a company to edit its legal identity, logo and accounting periods",
+      "title": "Company",
+      "subtitle": "Legal identity, establishments and documents — import a modèle J or edit",
+      "tabs": {
+        "identite": "Identity",
+        "identifiants": "Identifiers",
+        "etablissements": "Establishments",
+        "documents": "Documents"
+      },
+      "selector": {
+        "label": "Company"
+      },
+      "documents": {
+        "title": "Printed identity",
+        "hint": "These fields appear on quotes and invoices. They may differ from the legal identity.",
+        "logoLink": "Application logo",
+        "headerLink": "Header and footer",
+        "save": "Save document identity",
+        "saving": "Saving…",
+        "saved": "Identity saved",
+        "loadError": "Could not load document identity.",
+        "saveError": "Document identity was not saved. Check your permissions and try again."
+      },
+      "smartImport": {
+        "applied": "Identity updated from the modèle J",
+        "empty": "No identity extracted"
+      },
       "toasts": {
         "saved": "✓ Settings saved",
         "saveError": "⚠ Fix the fields in error before saving",
@@ -850,8 +874,8 @@
         "newNotes": "New period"
       },
       "extras": {
-        "title": "Management settings (company extras)",
-        "hint": "Multi-entity audit complements: local persistence per company, complementary to the canonical model above.",
+        "title": "Management",
+        "hint": "Group code, currency and fiscal year close.",
         "fields": {
           "codeCourtGroupe": "Group short code",
           "codeCourtPlaceholder": "E.g. SOM-BTP",
@@ -891,7 +915,7 @@
         },
         "removeTitle": "Delete"
       },
-      "empty": "Select a company in the table above.",
+      "empty": "No company to display.",
       "errors": {
         "raisonSocialeRequired": "Company name required",
         "siegeRequired": "Head office address required",

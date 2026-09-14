@@ -26,6 +26,9 @@ import lombok.NoArgsConstructor;
  * <p>Ce journal n'est pas un second historique : il porte uniquement les transitions, pas les
  * données. Il complète {@code created_by / updated_by} ({@link EtudeAuditingListener}) qui ne
  * retient ni l'ancien statut, ni l'acteur d'une transition précise, ni la corrélation.
+ *
+ * <p>Store Postgres aujourd'hui. Lecture exposée en {@code StatusChangeDto}. Elasticsearch
+ * remplacera ce store plus tard, sans changer le contrat UI.
  */
 @Entity
 @Table(name = "transitions_etude")
@@ -57,6 +60,10 @@ public class TransitionEtude {
 
     @Column(name = "nouveau_statut", nullable = false, length = 30)
     private String nouveauStatut;
+
+    /** Action métier qui a provoqué la transition (SUBMIT_FOR_ASSIGNMENT, …). */
+    @Column(name = "action", length = 40)
+    private String action;
 
     /** Identifiant de corrélation commun aux écritures d'un même geste (AC-6). */
     @Column(name = "correlation_id", nullable = false)

@@ -1,6 +1,7 @@
 package ma.nafura.platform.collaboration.notification.inapp;
 
 import ma.nafura.platform.collaboration.notification.domain.model.Notification;
+import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
@@ -55,18 +56,21 @@ public class NotificationController {
     }
 
     @PostMapping("/{id}/read")
+    @RequirePermission("read")
     public ResponseEntity<Void> markRead(@PathVariable UUID id) {
         notificationService.markRead(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/read-all")
+    @RequirePermission("read")
     public ResponseEntity<Void> markAllRead() {
         notificationService.markAllRead();
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/bulk-read")
+    @RequirePermission("read")
     public ResponseEntity<Void> markBulkRead(@RequestBody BulkReadRequest request) {
         notificationService.markReadBulk(request.ids());
         return ResponseEntity.noContent().build();

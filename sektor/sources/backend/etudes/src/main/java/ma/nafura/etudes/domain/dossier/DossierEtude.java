@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ma.nafura.etudes.domain.audit.AuditableEtude;
 import ma.nafura.etudes.domain.audit.EtudeAuditingListener;
+import ma.nafura.platform.framework.audit.Auditable;
 
 /**
  * Dossier d'étude de prix — l'agrégat orchestrateur du parcours.
@@ -32,6 +33,7 @@ import ma.nafura.etudes.domain.audit.EtudeAuditingListener;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "dossier-etude", trackedFields = {"numero", "objet", "status", "currentStep", "chargeEtudeUserId", "clientNom"})
 public class DossierEtude implements AuditableEtude {
 
     /**
@@ -55,7 +57,7 @@ public class DossierEtude implements AuditableEtude {
     public static final String ORIGINE_ETUDE = "ETUDE";
     public static final String ORIGINE_MARCHE_EXISTANT = "MARCHE_EXISTANT";
 
-    /** Étape d'approbation interne pendant {@link StatutDossierEtude#EN_VALIDATION}. */
+    /** Étape d'approbation interne pendant {@link StatutDossierEtude#COMPLETED}. */
     public static final String VALIDATION_N1 = "N1";
     public static final String VALIDATION_N2 = "N2";
 
@@ -170,7 +172,7 @@ public class DossierEtude implements AuditableEtude {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
     @Builder.Default
-    private StatutDossierEtude status = StatutDossierEtude.BROUILLON;
+    private StatutDossierEtude status = StatutDossierEtude.DRAFT;
 
     @Column(name = "origine", nullable = false, length = 30)
     @Builder.Default
@@ -346,7 +348,7 @@ public class DossierEtude implements AuditableEtude {
         this.createdAt = now;
         this.updatedAt = now;
         if (this.status == null) {
-            this.status = StatutDossierEtude.BROUILLON;
+            this.status = StatutDossierEtude.DRAFT;
         }
         if (this.currentStep == null) {
             this.currentStep = ETAPE_PREMIERE;

@@ -1,0 +1,2027 @@
+{
+  "source": "sektor/sources/web/app/socle/shell/erp-sidebar.config.ts",
+  "sourceHash": "e4375603bc321c4c9a80a558bbca55e6e91ee5658abaa94291c224d28e9514ae",
+  "screens": [
+    {
+      "id": "dashboard",
+      "labelKey": "nav.dashboard",
+      "label": "Tableau de bord",
+      "route": "/dashboard",
+      "createRoute": null,
+      "detailRoute": "/dashboard/{id}",
+      "keywords": [
+        "dashboard",
+        "tableau",
+        "bord"
+      ],
+      "permissionKey": null,
+      "help": "Tableau de bord : ouvrez /dashboard."
+    },
+    {
+      "id": "chantiers.liste",
+      "labelKey": "nav.chantiers.mesChanters",
+      "label": "Mes chantiers",
+      "route": "/chantiers",
+      "createRoute": null,
+      "detailRoute": "/chantiers/{id}",
+      "keywords": [
+        "chantiers",
+        "chantier",
+        "liste",
+        "mes"
+      ],
+      "permissionKey": null,
+      "help": "Mes chantiers : ouvrez /chantiers."
+    },
+    {
+      "id": "chantiers.planning",
+      "labelKey": "nav.chantiers.planning",
+      "label": "Planning",
+      "route": "/chantiers/planning",
+      "createRoute": null,
+      "detailRoute": "/chantiers/planning/{id}",
+      "keywords": [
+        "chantiers",
+        "chantier",
+        "planning"
+      ],
+      "permissionKey": null,
+      "help": "Planning : ouvrez /chantiers/planning."
+    },
+    {
+      "id": "chantiers.avancements",
+      "labelKey": "nav.chantiers.avancements",
+      "label": "Avancements",
+      "route": "/chantiers/avancements",
+      "createRoute": "/chantiers/avancements/saisie",
+      "detailRoute": "/chantiers/avancements/{id}",
+      "keywords": [
+        "chantiers",
+        "chantier",
+        "avancements",
+        "avancement"
+      ],
+      "permissionKey": null,
+      "help": "Avancements : liste /chantiers/avancements. Pour créer, ouvrez /chantiers/avancements/saisie."
+    },
+    {
+      "id": "chantiers.situations",
+      "labelKey": "nav.chantiers.situations",
+      "label": "Situations de travaux",
+      "route": "/chantiers/situations",
+      "createRoute": "/chantiers/situations/new",
+      "detailRoute": "/chantiers/situations/{id}",
+      "keywords": [
+        "chantiers",
+        "chantier",
+        "situations",
+        "situation",
+        "travaux"
+      ],
+      "permissionKey": null,
+      "help": "Situations de travaux : liste /chantiers/situations. Pour créer, ouvrez /chantiers/situations/new."
+    },
+    {
+      "id": "chantiers.budget",
+      "labelKey": "nav.chantiers.budget",
+      "label": "Budget chantier",
+      "route": "/chantiers/budget",
+      "createRoute": null,
+      "detailRoute": "/chantiers/budget/{id}",
+      "keywords": [
+        "chantiers",
+        "chantier",
+        "budget"
+      ],
+      "permissionKey": null,
+      "help": "Budget chantier : ouvrez /chantiers/budget."
+    },
+    {
+      "id": "chantiers.sousTraitance",
+      "labelKey": "nav.chantiers.sousTraitance",
+      "label": "Sous-traitance",
+      "route": "/chantiers/sous-traitance",
+      "createRoute": null,
+      "detailRoute": "/chantiers/sous-traitance/{id}",
+      "keywords": [
+        "chantiers",
+        "chantier",
+        "soustraitance",
+        "sous",
+        "traitance"
+      ],
+      "permissionKey": null,
+      "help": "Sous-traitance : ouvrez /chantiers/sous-traitance."
+    },
+    {
+      "id": "chantiers.documents",
+      "labelKey": "nav.chantiers.documents",
+      "label": "Documents",
+      "route": "/chantiers/documents",
+      "createRoute": null,
+      "detailRoute": "/chantiers/documents/{id}",
+      "keywords": [
+        "chantiers",
+        "chantier",
+        "documents",
+        "document"
+      ],
+      "permissionKey": null,
+      "help": "Documents : ouvrez /chantiers/documents."
+    },
+    {
+      "id": "chantiers.attachements",
+      "labelKey": "nav.chantiers.attachements",
+      "label": "Carnets d'attachement",
+      "route": "/chantiers/attachements",
+      "createRoute": null,
+      "detailRoute": "/chantiers/attachements/{id}",
+      "keywords": [
+        "chantiers",
+        "chantier",
+        "attachements",
+        "attachement",
+        "carnets",
+        "carnet"
+      ],
+      "permissionKey": null,
+      "help": "Carnets d'attachement : ouvrez /chantiers/attachements."
+    },
+    {
+      "id": "chantiers.journal",
+      "labelKey": "nav.chantiers.journal",
+      "label": "Journal de chantier",
+      "route": "/chantiers/journal",
+      "createRoute": null,
+      "detailRoute": "/chantiers/journal/{id}",
+      "keywords": [
+        "chantiers",
+        "chantier",
+        "journal"
+      ],
+      "permissionKey": null,
+      "help": "Journal de chantier : ouvrez /chantiers/journal."
+    },
+    {
+      "id": "achats.demandes",
+      "labelKey": "nav.achats.demandes",
+      "label": "Demandes d'achat",
+      "route": "/achats/demandes",
+      "createRoute": "/achats/demandes/new",
+      "detailRoute": "/achats/demandes/{id}",
+      "keywords": [
+        "achats",
+        "achat",
+        "demandes",
+        "demande"
+      ],
+      "permissionKey": null,
+      "help": "Demandes d'achat : liste /achats/demandes. Pour créer, ouvrez /achats/demandes/new."
+    },
+    {
+      "id": "achats.appelsOffres",
+      "labelKey": "",
+      "label": "",
+      "route": "/achats/appels-offres",
+      "createRoute": "/achats/appels-offres/new",
+      "detailRoute": "/achats/appels-offres/{id}",
+      "keywords": [
+        "achats",
+        "achat",
+        "appelsoffres",
+        "appelsoffre"
+      ],
+      "permissionKey": null,
+      "help": " : liste /achats/appels-offres. Pour créer, ouvrez /achats/appels-offres/new."
+    },
+    {
+      "id": "achats.consultations",
+      "labelKey": "nav.achats.consultations",
+      "label": "Consultations",
+      "route": "/achats/consultations",
+      "createRoute": "/achats/consultations/new",
+      "detailRoute": "/achats/consultations/{id}",
+      "keywords": [
+        "achats",
+        "achat",
+        "consultations",
+        "consultation"
+      ],
+      "permissionKey": null,
+      "help": "Consultations : liste /achats/consultations. Pour créer, ouvrez /achats/consultations/new."
+    },
+    {
+      "id": "achats.commandes",
+      "labelKey": "nav.achats.commandes",
+      "label": "Bons de commande",
+      "route": "/achats/commandes",
+      "createRoute": "/achats/commandes/new",
+      "detailRoute": "/achats/commandes/{id}",
+      "keywords": [
+        "achats",
+        "achat",
+        "commandes",
+        "commande",
+        "bons"
+      ],
+      "permissionKey": null,
+      "help": "Bons de commande : liste /achats/commandes. Pour créer, ouvrez /achats/commandes/new."
+    },
+    {
+      "id": "achats.contrats",
+      "labelKey": "nav.achats.contrats",
+      "label": "Contrats fournisseurs",
+      "route": "/achats/contrats",
+      "createRoute": "/achats/contrats/new",
+      "detailRoute": "/achats/contrats/{id}",
+      "keywords": [
+        "achats",
+        "achat",
+        "contrats",
+        "contrat",
+        "fournisseurs",
+        "fournisseur"
+      ],
+      "permissionKey": null,
+      "help": "Contrats fournisseurs : liste /achats/contrats. Pour créer, ouvrez /achats/contrats/new."
+    },
+    {
+      "id": "achats.fournisseurs",
+      "labelKey": "nav.achats.fournisseurs",
+      "label": "Fournisseurs",
+      "route": "/achats/fournisseurs",
+      "createRoute": "/achats/fournisseurs/new",
+      "detailRoute": "/achats/fournisseurs/{id}",
+      "keywords": [
+        "achats",
+        "achat",
+        "fournisseurs",
+        "fournisseur"
+      ],
+      "permissionKey": null,
+      "help": "Fournisseurs : liste /achats/fournisseurs. Pour créer, ouvrez /achats/fournisseurs/new."
+    },
+    {
+      "id": "stock.catalogue.articles",
+      "labelKey": "nav.stock.articles",
+      "label": "Articles",
+      "route": "/inventory/catalogue/articles",
+      "createRoute": "/inventory/catalogue/articles/new",
+      "detailRoute": "/inventory/catalogue/articles/{id}",
+      "keywords": [
+        "stock",
+        "catalogue",
+        "articles",
+        "article",
+        "inventory"
+      ],
+      "permissionKey": null,
+      "help": "Articles : liste /inventory/catalogue/articles. Pour créer, ouvrez /inventory/catalogue/articles/new."
+    },
+    {
+      "id": "stock.catalogue.familles",
+      "labelKey": "nav.stock.familles",
+      "label": "Familles",
+      "route": "/inventory/configuration/familles",
+      "createRoute": "/inventory/configuration/familles/new",
+      "detailRoute": "/inventory/configuration/familles/{id}",
+      "keywords": [
+        "stock",
+        "catalogue",
+        "familles",
+        "famille",
+        "inventory",
+        "configuration"
+      ],
+      "permissionKey": null,
+      "help": "Familles : liste /inventory/configuration/familles. Pour créer, ouvrez /inventory/configuration/familles/new."
+    },
+    {
+      "id": "stock.catalogue.uom",
+      "labelKey": "nav.stock.uom",
+      "label": "Unités de mesure",
+      "route": "/inventory/configuration/uom",
+      "createRoute": "/inventory/configuration/uom/new",
+      "detailRoute": "/inventory/configuration/uom/{id}",
+      "keywords": [
+        "stock",
+        "catalogue",
+        "uom",
+        "inventory",
+        "configuration",
+        "unites",
+        "unite",
+        "mesure"
+      ],
+      "permissionKey": null,
+      "help": "Unités de mesure : liste /inventory/configuration/uom. Pour créer, ouvrez /inventory/configuration/uom/new."
+    },
+    {
+      "id": "catalogue.ouvrages",
+      "labelKey": "nav.etudes.bibliotheque",
+      "label": "Bibliothèque de prix",
+      "route": "/etudes/bibliotheque-prix",
+      "createRoute": "/etudes/bibliotheque-prix/new",
+      "detailRoute": "/etudes/bibliotheque-prix/{id}",
+      "keywords": [
+        "catalogue",
+        "ouvrages",
+        "ouvrage",
+        "etudes",
+        "etude",
+        "bibliothequeprix",
+        "bibliotheque",
+        "prix"
+      ],
+      "permissionKey": null,
+      "help": "Bibliothèque de prix : liste /etudes/bibliotheque-prix. Pour créer, ouvrez /etudes/bibliotheque-prix/new."
+    },
+    {
+      "id": "stock.mouvements.receptions",
+      "labelKey": "nav.stock.receptions",
+      "label": "Réceptions",
+      "route": "/inventory/mouvements/receptions",
+      "createRoute": null,
+      "detailRoute": "/inventory/mouvements/receptions/{id}",
+      "keywords": [
+        "stock",
+        "mouvements",
+        "mouvement",
+        "receptions",
+        "reception",
+        "inventory"
+      ],
+      "permissionKey": null,
+      "help": "Réceptions : ouvrez /inventory/mouvements/receptions."
+    },
+    {
+      "id": "stock.mouvements.sorties",
+      "labelKey": "nav.stock.sorties",
+      "label": "Sorties stock",
+      "route": "/inventory/mouvements/sorties",
+      "createRoute": null,
+      "detailRoute": "/inventory/mouvements/sorties/{id}",
+      "keywords": [
+        "stock",
+        "mouvements",
+        "mouvement",
+        "sorties",
+        "sortie",
+        "inventory"
+      ],
+      "permissionKey": null,
+      "help": "Sorties stock : ouvrez /inventory/mouvements/sorties."
+    },
+    {
+      "id": "stock.mouvements.transferts",
+      "labelKey": "nav.stock.transferts",
+      "label": "Transferts",
+      "route": "/inventory/mouvements/transferts",
+      "createRoute": null,
+      "detailRoute": "/inventory/mouvements/transferts/{id}",
+      "keywords": [
+        "stock",
+        "mouvements",
+        "mouvement",
+        "transferts",
+        "transfert",
+        "inventory"
+      ],
+      "permissionKey": null,
+      "help": "Transferts : ouvrez /inventory/mouvements/transferts."
+    },
+    {
+      "id": "stock.mouvements.retours",
+      "labelKey": "nav.stock.retours",
+      "label": "Retours",
+      "route": "/inventory/mouvements/retours",
+      "createRoute": null,
+      "detailRoute": "/inventory/mouvements/retours/{id}",
+      "keywords": [
+        "stock",
+        "mouvements",
+        "mouvement",
+        "retours",
+        "retour",
+        "inventory"
+      ],
+      "permissionKey": null,
+      "help": "Retours : ouvrez /inventory/mouvements/retours."
+    },
+    {
+      "id": "stock.mouvements.inventaires",
+      "labelKey": "nav.stock.inventaires",
+      "label": "Inventaires physiques",
+      "route": "/inventory/mouvements/inventaires",
+      "createRoute": null,
+      "detailRoute": "/inventory/mouvements/inventaires/{id}",
+      "keywords": [
+        "stock",
+        "mouvements",
+        "mouvement",
+        "inventaires",
+        "inventaire",
+        "inventory",
+        "physiques",
+        "physique"
+      ],
+      "permissionKey": null,
+      "help": "Inventaires physiques : ouvrez /inventory/mouvements/inventaires."
+    },
+    {
+      "id": "stock.mouvements.pertes",
+      "labelKey": "nav.stock.pertes",
+      "label": "Pertes & Chutes",
+      "route": "/inventory/mouvements/pertes-chutes",
+      "createRoute": null,
+      "detailRoute": "/inventory/mouvements/pertes-chutes/{id}",
+      "keywords": [
+        "stock",
+        "mouvements",
+        "mouvement",
+        "pertes",
+        "perte",
+        "inventory",
+        "perteschutes",
+        "perteschute",
+        "chutes",
+        "chute"
+      ],
+      "permissionKey": null,
+      "help": "Pertes & Chutes : ouvrez /inventory/mouvements/pertes-chutes."
+    },
+    {
+      "id": "stock.suivi.etat",
+      "labelKey": "nav.stock.etat",
+      "label": "État des stocks",
+      "route": "/inventory/suivi/etat-stock",
+      "createRoute": null,
+      "detailRoute": "/inventory/suivi/etat-stock/{id}",
+      "keywords": [
+        "stock",
+        "suivi",
+        "etat",
+        "inventory",
+        "etatstock",
+        "des",
+        "stocks"
+      ],
+      "permissionKey": null,
+      "help": "État des stocks : ouvrez /inventory/suivi/etat-stock."
+    },
+    {
+      "id": "stock.suivi.valorisation",
+      "labelKey": "nav.stock.valorisation",
+      "label": "Valorisation",
+      "route": "/inventory/suivi/valorisation",
+      "createRoute": null,
+      "detailRoute": "/inventory/suivi/valorisation/{id}",
+      "keywords": [
+        "stock",
+        "suivi",
+        "valorisation",
+        "inventory"
+      ],
+      "permissionKey": null,
+      "help": "Valorisation : ouvrez /inventory/suivi/valorisation."
+    },
+    {
+      "id": "stock.suivi.alertes",
+      "labelKey": "nav.stock.alertes",
+      "label": "Alertes réappro.",
+      "route": "/inventory/suivi/alertes",
+      "createRoute": null,
+      "detailRoute": "/inventory/suivi/alertes/{id}",
+      "keywords": [
+        "stock",
+        "suivi",
+        "alertes",
+        "alerte",
+        "inventory",
+        "reappro"
+      ],
+      "permissionKey": null,
+      "help": "Alertes réappro. : ouvrez /inventory/suivi/alertes."
+    },
+    {
+      "id": "stock.configuration.depots",
+      "labelKey": "nav.stock.depots",
+      "label": "Dépôts & Emplacements",
+      "route": "/inventory/configuration/depots",
+      "createRoute": "/inventory/configuration/depots/new",
+      "detailRoute": "/inventory/configuration/depots/{id}",
+      "keywords": [
+        "stock",
+        "configuration",
+        "depots",
+        "depot",
+        "inventory",
+        "emplacements",
+        "emplacement"
+      ],
+      "permissionKey": null,
+      "help": "Dépôts & Emplacements : liste /inventory/configuration/depots. Pour créer, ouvrez /inventory/configuration/depots/new."
+    },
+    {
+      "id": "stock.configuration.motifs",
+      "labelKey": "nav.stock.motifs",
+      "label": "Motifs de mouvement",
+      "route": "/inventory/configuration/motifs",
+      "createRoute": "/inventory/configuration/motifs/new",
+      "detailRoute": "/inventory/configuration/motifs/{id}",
+      "keywords": [
+        "stock",
+        "configuration",
+        "motifs",
+        "motif",
+        "inventory",
+        "mouvement"
+      ],
+      "permissionKey": null,
+      "help": "Motifs de mouvement : liste /inventory/configuration/motifs. Pour créer, ouvrez /inventory/configuration/motifs/new."
+    },
+    {
+      "id": "stock.configuration.costing",
+      "labelKey": "nav.stock.costing",
+      "label": "Méthodes de costing",
+      "route": "/inventory/configuration/costing-methods",
+      "createRoute": "/inventory/configuration/costing-methods/new",
+      "detailRoute": "/inventory/configuration/costing-methods/{id}",
+      "keywords": [
+        "stock",
+        "configuration",
+        "costing",
+        "inventory",
+        "costingmethods",
+        "costingmethod",
+        "methodes",
+        "methode"
+      ],
+      "permissionKey": null,
+      "help": "Méthodes de costing : liste /inventory/configuration/costing-methods. Pour créer, ouvrez /inventory/configuration/costing-methods/new."
+    },
+    {
+      "id": "materiel.parc",
+      "labelKey": "nav.materiel.parc",
+      "label": "Parc matériel",
+      "route": "/materiel/parc",
+      "createRoute": null,
+      "detailRoute": "/materiel/parc/{id}",
+      "keywords": [
+        "materiel",
+        "parc"
+      ],
+      "permissionKey": null,
+      "help": "Parc matériel : ouvrez /materiel/parc."
+    },
+    {
+      "id": "materiel.affectations",
+      "labelKey": "nav.materiel.affectations",
+      "label": "Affectations chantiers",
+      "route": "/materiel/affectations",
+      "createRoute": null,
+      "detailRoute": "/materiel/affectations/{id}",
+      "keywords": [
+        "materiel",
+        "affectations",
+        "affectation",
+        "chantiers",
+        "chantier"
+      ],
+      "permissionKey": null,
+      "help": "Affectations chantiers : ouvrez /materiel/affectations."
+    },
+    {
+      "id": "materiel.locations",
+      "labelKey": "nav.materiel.locations",
+      "label": "Locations externes",
+      "route": "/materiel/locations",
+      "createRoute": null,
+      "detailRoute": "/materiel/locations/{id}",
+      "keywords": [
+        "materiel",
+        "locations",
+        "location",
+        "externes",
+        "externe"
+      ],
+      "permissionKey": null,
+      "help": "Locations externes : ouvrez /materiel/locations."
+    },
+    {
+      "id": "materiel.planning",
+      "labelKey": "nav.materiel.planning",
+      "label": "Planning matériel (Gantt)",
+      "route": "/materiel/planning",
+      "createRoute": null,
+      "detailRoute": "/materiel/planning/{id}",
+      "keywords": [
+        "materiel",
+        "planning",
+        "gantt"
+      ],
+      "permissionKey": null,
+      "help": "Planning matériel (Gantt) : ouvrez /materiel/planning."
+    },
+    {
+      "id": "materiel.pointage",
+      "labelKey": "nav.materiel.pointage",
+      "label": "Pointage heures engins",
+      "route": "/materiel/pointage",
+      "createRoute": null,
+      "detailRoute": "/materiel/pointage/{id}",
+      "keywords": [
+        "materiel",
+        "pointage",
+        "heures",
+        "heure",
+        "engins",
+        "engin"
+      ],
+      "permissionKey": null,
+      "help": "Pointage heures engins : ouvrez /materiel/pointage."
+    },
+    {
+      "id": "materiel.controles",
+      "labelKey": "nav.materiel.controles",
+      "label": "Contrôles réglementaires",
+      "route": "/materiel/controles",
+      "createRoute": null,
+      "detailRoute": "/materiel/controles/{id}",
+      "keywords": [
+        "materiel",
+        "controles",
+        "controle",
+        "reglementaires",
+        "reglementaire"
+      ],
+      "permissionKey": null,
+      "help": "Contrôles réglementaires : ouvrez /materiel/controles."
+    },
+    {
+      "id": "materiel.maintenance",
+      "labelKey": "nav.materiel.maintenance",
+      "label": "Maintenance",
+      "route": "/materiel/maintenance/plans",
+      "createRoute": null,
+      "detailRoute": "/materiel/maintenance/plans/{id}",
+      "keywords": [
+        "materiel",
+        "maintenance",
+        "plans",
+        "plan"
+      ],
+      "permissionKey": null,
+      "help": "Maintenance : ouvrez /materiel/maintenance/plans."
+    },
+    {
+      "id": "materiel.carburant",
+      "labelKey": "nav.materiel.carburant",
+      "label": "Carburant & Consommables",
+      "route": "/materiel/carburant/carnets",
+      "createRoute": null,
+      "detailRoute": "/materiel/carburant/carnets/{id}",
+      "keywords": [
+        "materiel",
+        "carburant",
+        "carnets",
+        "carnet",
+        "consommables",
+        "consommable"
+      ],
+      "permissionKey": null,
+      "help": "Carburant & Consommables : ouvrez /materiel/carburant/carnets."
+    },
+    {
+      "id": "etudes.dashboard",
+      "labelKey": "nav.etudes.dashboard",
+      "label": "Tableau de bord",
+      "route": "/etudes",
+      "createRoute": null,
+      "detailRoute": "/etudes/{id}",
+      "keywords": [
+        "etudes",
+        "etude",
+        "dashboard",
+        "tableau",
+        "bord"
+      ],
+      "permissionKey": null,
+      "help": "Tableau de bord : ouvrez /etudes."
+    },
+    {
+      "id": "etudes.dossiers",
+      "labelKey": "nav.etudes.dossiers",
+      "label": "Études / appels d'offres",
+      "route": "/etudes/dossiers",
+      "createRoute": null,
+      "detailRoute": "/etudes/dossiers/{id}",
+      "keywords": [
+        "etudes",
+        "etude",
+        "dossiers",
+        "dossier",
+        "appels",
+        "appel",
+        "offres",
+        "offre",
+        "appeldoffres",
+        "appeldoffre"
+      ],
+      "permissionKey": null,
+      "help": "Études / appels d'offres : ouvrez /etudes/dossiers."
+    },
+    {
+      "id": "etudes.devis",
+      "labelKey": "nav.etudes.devis",
+      "label": "Devis",
+      "route": "/etudes/devis",
+      "createRoute": "/etudes/devis/new",
+      "detailRoute": "/etudes/devis/{id}",
+      "keywords": [
+        "etudes",
+        "etude",
+        "devis",
+        "devi",
+        "chiffrage",
+        "chiffrer",
+        "chiffre",
+        "quotation",
+        "quote"
+      ],
+      "permissionKey": null,
+      "help": "Devis : liste /etudes/devis. Pour créer, ouvrez /etudes/devis/new."
+    },
+    {
+      "id": "marches.contrats",
+      "labelKey": "nav.marches.contrats",
+      "label": "Contrats / Marchés",
+      "route": "/marches/contrats",
+      "createRoute": null,
+      "detailRoute": "/marches/contrats/{id}",
+      "keywords": [
+        "marches",
+        "marche",
+        "contrats",
+        "contrat"
+      ],
+      "permissionKey": null,
+      "help": "Contrats / Marchés : ouvrez /marches/contrats."
+    },
+    {
+      "id": "marches.avenants",
+      "labelKey": "nav.marches.avenants",
+      "label": "Avenants",
+      "route": "/marches/avenants",
+      "createRoute": null,
+      "detailRoute": "/marches/avenants/{id}",
+      "keywords": [
+        "marches",
+        "marche",
+        "avenants",
+        "avenant"
+      ],
+      "permissionKey": null,
+      "help": "Avenants : ouvrez /marches/avenants."
+    },
+    {
+      "id": "marches.factures",
+      "labelKey": "nav.marches.factures",
+      "label": "Factures situations",
+      "route": "/marches/factures",
+      "createRoute": null,
+      "detailRoute": "/marches/factures/{id}",
+      "keywords": [
+        "marches",
+        "marche",
+        "factures",
+        "facture",
+        "situations",
+        "situation"
+      ],
+      "permissionKey": null,
+      "help": "Factures situations : ouvrez /marches/factures."
+    },
+    {
+      "id": "marches.cautions",
+      "labelKey": "nav.marches.cautions",
+      "label": "Cautions bancaires",
+      "route": "/marches/cautions",
+      "createRoute": null,
+      "detailRoute": "/marches/cautions/{id}",
+      "keywords": [
+        "marches",
+        "marche",
+        "cautions",
+        "caution",
+        "bancaires",
+        "bancaire"
+      ],
+      "permissionKey": null,
+      "help": "Cautions bancaires : ouvrez /marches/cautions."
+    },
+    {
+      "id": "marches.revisions",
+      "labelKey": "nav.marches.revisions",
+      "label": "Révisions de prix K",
+      "route": "/marches/revisions-prix",
+      "createRoute": null,
+      "detailRoute": "/marches/revisions-prix/{id}",
+      "keywords": [
+        "marches",
+        "marche",
+        "revisions",
+        "revision",
+        "revisionsprix",
+        "prix"
+      ],
+      "permissionKey": null,
+      "help": "Révisions de prix K : ouvrez /marches/revisions-prix."
+    },
+    {
+      "id": "marches.penalites",
+      "labelKey": "nav.marches.penalites",
+      "label": "Pénalités de retard",
+      "route": "/marches/penalites",
+      "createRoute": null,
+      "detailRoute": "/marches/penalites/{id}",
+      "keywords": [
+        "marches",
+        "marche",
+        "penalites",
+        "penalite",
+        "retard"
+      ],
+      "permissionKey": null,
+      "help": "Pénalités de retard : ouvrez /marches/penalites."
+    },
+    {
+      "id": "marches.dgd",
+      "labelKey": "nav.marches.dgd",
+      "label": "Décompte général définitif (DGD)",
+      "route": "/marches/dgd",
+      "createRoute": null,
+      "detailRoute": "/marches/dgd/{id}",
+      "keywords": [
+        "marches",
+        "marche",
+        "dgd",
+        "decompte",
+        "general",
+        "definitif"
+      ],
+      "permissionKey": null,
+      "help": "Décompte général définitif (DGD) : ouvrez /marches/dgd."
+    },
+    {
+      "id": "marches.os",
+      "labelKey": "nav.marches.os",
+      "label": "Ordres de service",
+      "route": "/marches/os",
+      "createRoute": null,
+      "detailRoute": "/marches/os/{id}",
+      "keywords": [
+        "marches",
+        "marche",
+        "ordres",
+        "ordre",
+        "service"
+      ],
+      "permissionKey": null,
+      "help": "Ordres de service : ouvrez /marches/os."
+    },
+    {
+      "id": "ventes.offres",
+      "labelKey": "nav.ventes.offres",
+      "label": "Offres commerciales",
+      "route": "/ventes/offres",
+      "createRoute": "/ventes/offres/new",
+      "detailRoute": "/ventes/offres/{id}",
+      "keywords": [
+        "ventes",
+        "vente",
+        "offres",
+        "offre",
+        "commerciales",
+        "commerciale"
+      ],
+      "permissionKey": null,
+      "help": "Offres commerciales : liste /ventes/offres. Pour créer, ouvrez /ventes/offres/new."
+    },
+    {
+      "id": "ventes.commandes",
+      "labelKey": "nav.ventes.commandes",
+      "label": "Commandes clients",
+      "route": "/ventes/commandes",
+      "createRoute": null,
+      "detailRoute": "/ventes/commandes/{id}",
+      "keywords": [
+        "ventes",
+        "vente",
+        "commandes",
+        "commande",
+        "clients",
+        "client"
+      ],
+      "permissionKey": null,
+      "help": "Commandes clients : ouvrez /ventes/commandes."
+    },
+    {
+      "id": "ventes.situations",
+      "labelKey": "nav.ventes.situations",
+      "label": "Situations de travaux",
+      "route": "/ventes/situations",
+      "createRoute": null,
+      "detailRoute": "/ventes/situations/{id}",
+      "keywords": [
+        "ventes",
+        "vente",
+        "situations",
+        "situation",
+        "travaux"
+      ],
+      "permissionKey": null,
+      "help": "Situations de travaux : ouvrez /ventes/situations."
+    },
+    {
+      "id": "ventes.factures",
+      "labelKey": "nav.ventes.factures",
+      "label": "Facturation",
+      "route": "/ventes/factures",
+      "createRoute": "/ventes/factures/new",
+      "detailRoute": "/ventes/factures/{id}",
+      "keywords": [
+        "ventes",
+        "vente",
+        "factures",
+        "facture",
+        "facturation"
+      ],
+      "permissionKey": null,
+      "help": "Facturation : liste /ventes/factures. Pour créer, ouvrez /ventes/factures/new."
+    },
+    {
+      "id": "ventes.avoirs",
+      "labelKey": "nav.ventes.avoirs",
+      "label": "Avoirs",
+      "route": "/ventes/avoirs",
+      "createRoute": "/ventes/avoirs/new",
+      "detailRoute": "/ventes/avoirs/{id}",
+      "keywords": [
+        "ventes",
+        "vente",
+        "avoirs",
+        "avoir"
+      ],
+      "permissionKey": null,
+      "help": "Avoirs : liste /ventes/avoirs. Pour créer, ouvrez /ventes/avoirs/new."
+    },
+    {
+      "id": "ventes.retenues",
+      "labelKey": "nav.ventes.retenues",
+      "label": "Retenues de garantie",
+      "route": "/ventes/retenues-garantie",
+      "createRoute": null,
+      "detailRoute": "/ventes/retenues-garantie/{id}",
+      "keywords": [
+        "ventes",
+        "vente",
+        "retenues",
+        "retenue",
+        "retenuesgarantie",
+        "garantie"
+      ],
+      "permissionKey": null,
+      "help": "Retenues de garantie : ouvrez /ventes/retenues-garantie."
+    },
+    {
+      "id": "ventes.clients",
+      "labelKey": "nav.ventes.clients",
+      "label": "Clients",
+      "route": "/ventes/clients",
+      "createRoute": "/ventes/clients/new",
+      "detailRoute": "/ventes/clients/{id}",
+      "keywords": [
+        "ventes",
+        "vente",
+        "clients",
+        "client"
+      ],
+      "permissionKey": null,
+      "help": "Clients : liste /ventes/clients. Pour créer, ouvrez /ventes/clients/new."
+    },
+    {
+      "id": "finance.comptabilite.journaux",
+      "labelKey": "nav.finance.journaux",
+      "label": "Journaux comptables",
+      "route": "/finance/journaux",
+      "createRoute": null,
+      "detailRoute": "/finance/journaux/{id}",
+      "keywords": [
+        "finance",
+        "comptabilite",
+        "journaux",
+        "comptables",
+        "comptable"
+      ],
+      "permissionKey": null,
+      "help": "Journaux comptables : ouvrez /finance/journaux."
+    },
+    {
+      "id": "finance.comptabilite.balance",
+      "labelKey": "nav.finance.balance",
+      "label": "Balance générale",
+      "route": "/finance/balance",
+      "createRoute": null,
+      "detailRoute": "/finance/balance/{id}",
+      "keywords": [
+        "finance",
+        "comptabilite",
+        "balance",
+        "generale"
+      ],
+      "permissionKey": null,
+      "help": "Balance générale : ouvrez /finance/balance."
+    },
+    {
+      "id": "finance.comptabilite.analytique",
+      "labelKey": "nav.finance.analytique",
+      "label": "Comptabilité analytique",
+      "route": "/finance/analytique",
+      "createRoute": null,
+      "detailRoute": "/finance/analytique/{id}",
+      "keywords": [
+        "finance",
+        "comptabilite",
+        "analytique"
+      ],
+      "permissionKey": null,
+      "help": "Comptabilité analytique : ouvrez /finance/analytique."
+    },
+    {
+      "id": "finance.comptabilite.facturesFournisseurs",
+      "labelKey": "nav.finance.facturesFournisseurs",
+      "label": "Factures fournisseurs",
+      "route": "/finance/factures-fournisseurs",
+      "createRoute": null,
+      "detailRoute": "/finance/factures-fournisseurs/{id}",
+      "keywords": [
+        "finance",
+        "comptabilite",
+        "facturesfournisseurs",
+        "facturesfournisseur",
+        "factures",
+        "facture",
+        "fournisseurs",
+        "fournisseur"
+      ],
+      "permissionKey": null,
+      "help": "Factures fournisseurs : ouvrez /finance/factures-fournisseurs."
+    },
+    {
+      "id": "finance.comptabilite.lettrage",
+      "labelKey": "nav.finance.lettrage",
+      "label": "Lettrage",
+      "route": "/finance/lettrage",
+      "createRoute": null,
+      "detailRoute": "/finance/lettrage/{id}",
+      "keywords": [
+        "finance",
+        "comptabilite",
+        "lettrage"
+      ],
+      "permissionKey": null,
+      "help": "Lettrage : ouvrez /finance/lettrage."
+    },
+    {
+      "id": "finance.tresorerie.caisses",
+      "labelKey": "nav.finance.caisses",
+      "label": "Caisses",
+      "route": "/finance/caisses",
+      "createRoute": null,
+      "detailRoute": "/finance/caisses/{id}",
+      "keywords": [
+        "finance",
+        "tresorerie",
+        "caisses",
+        "caisse"
+      ],
+      "permissionKey": null,
+      "help": "Caisses : ouvrez /finance/caisses."
+    },
+    {
+      "id": "finance.tresorerie.virements",
+      "labelKey": "nav.finance.virements",
+      "label": "Virements",
+      "route": "/finance/virements",
+      "createRoute": null,
+      "detailRoute": "/finance/virements/{id}",
+      "keywords": [
+        "finance",
+        "tresorerie",
+        "virements",
+        "virement"
+      ],
+      "permissionKey": null,
+      "help": "Virements : ouvrez /finance/virements."
+    },
+    {
+      "id": "finance.tresorerie.reglements",
+      "labelKey": "nav.finance.reglements",
+      "label": "Règlements",
+      "route": "/finance/reglements",
+      "createRoute": null,
+      "detailRoute": "/finance/reglements/{id}",
+      "keywords": [
+        "finance",
+        "tresorerie",
+        "reglements",
+        "reglement"
+      ],
+      "permissionKey": null,
+      "help": "Règlements : ouvrez /finance/reglements."
+    },
+    {
+      "id": "finance.tresorerie.recouvrement",
+      "labelKey": "nav.finance.recouvrement",
+      "label": "Recouvrement",
+      "route": "/finance/recouvrement",
+      "createRoute": null,
+      "detailRoute": "/finance/recouvrement/{id}",
+      "keywords": [
+        "finance",
+        "tresorerie",
+        "recouvrement"
+      ],
+      "permissionKey": null,
+      "help": "Recouvrement : ouvrez /finance/recouvrement."
+    },
+    {
+      "id": "finance.tresorerie.rapprochement",
+      "labelKey": "nav.finance.rapprochement",
+      "label": "Rapprochement bancaire",
+      "route": "/finance/rapprochement",
+      "createRoute": null,
+      "detailRoute": "/finance/rapprochement/{id}",
+      "keywords": [
+        "finance",
+        "tresorerie",
+        "rapprochement",
+        "bancaire"
+      ],
+      "permissionKey": null,
+      "help": "Rapprochement bancaire : ouvrez /finance/rapprochement."
+    },
+    {
+      "id": "finance.tresorerie.effets",
+      "labelKey": "nav.finance.effets",
+      "label": "Effets de commerce",
+      "route": "/finance/effets",
+      "createRoute": null,
+      "detailRoute": "/finance/effets/{id}",
+      "keywords": [
+        "finance",
+        "tresorerie",
+        "effets",
+        "effet",
+        "commerce"
+      ],
+      "permissionKey": null,
+      "help": "Effets de commerce : ouvrez /finance/effets."
+    },
+    {
+      "id": "finance.tresorerie.virementRemise",
+      "labelKey": "nav.finance.virementRemise",
+      "label": "Remise virements XML",
+      "route": "/finance/virements/remise",
+      "createRoute": null,
+      "detailRoute": "/finance/virements/remise/{id}",
+      "keywords": [
+        "finance",
+        "tresorerie",
+        "virementremise",
+        "virements",
+        "virement",
+        "remise",
+        "xml"
+      ],
+      "permissionKey": null,
+      "help": "Remise virements XML : ouvrez /finance/virements/remise."
+    },
+    {
+      "id": "finance.tresorerie.caissesChantier",
+      "labelKey": "nav.finance.caissesChantier",
+      "label": "Caisses chantier",
+      "route": "/finance/caisses-chantier",
+      "createRoute": null,
+      "detailRoute": "/finance/caisses-chantier/{id}",
+      "keywords": [
+        "finance",
+        "tresorerie",
+        "caisseschantier",
+        "caisses",
+        "caisse",
+        "chantier"
+      ],
+      "permissionKey": null,
+      "help": "Caisses chantier : ouvrez /finance/caisses-chantier."
+    },
+    {
+      "id": "finance.declarations.retenueSource",
+      "labelKey": "nav.finance.retenueSource",
+      "label": "Retenue source (marchés publics)",
+      "route": "/finance/declarations/retenue-source",
+      "createRoute": null,
+      "detailRoute": "/finance/declarations/retenue-source/{id}",
+      "keywords": [
+        "finance",
+        "declarations",
+        "declaration",
+        "retenuesource",
+        "retenue",
+        "source",
+        "marches",
+        "marche",
+        "publics",
+        "public"
+      ],
+      "permissionKey": null,
+      "help": "Retenue source (marchés publics) : ouvrez /finance/declarations/retenue-source."
+    },
+    {
+      "id": "finance.declarations.simplIs",
+      "labelKey": "nav.finance.simplIs",
+      "label": "SIMPL-IS — TVA mensuelle",
+      "route": "/finance/declarations/simpl-is",
+      "createRoute": null,
+      "detailRoute": "/finance/declarations/simpl-is/{id}",
+      "keywords": [
+        "finance",
+        "declarations",
+        "declaration",
+        "simplis",
+        "simpli",
+        "simpl",
+        "tva",
+        "mensuelle"
+      ],
+      "permissionKey": null,
+      "help": "SIMPL-IS — TVA mensuelle : ouvrez /finance/declarations/simpl-is."
+    },
+    {
+      "id": "finance.declarations.etat9421",
+      "labelKey": "nav.finance.etat9421",
+      "label": "État 9421 (IGR — paie RH)",
+      "route": "/finance/declarations/etat-9421",
+      "createRoute": null,
+      "detailRoute": "/finance/declarations/etat-9421/{id}",
+      "keywords": [
+        "finance",
+        "declarations",
+        "declaration",
+        "etat9421",
+        "etat",
+        "9421",
+        "igr",
+        "paie"
+      ],
+      "permissionKey": null,
+      "help": "État 9421 (IGR — paie RH) : ouvrez /finance/declarations/etat-9421."
+    },
+    {
+      "id": "finance.declarations.etat1208",
+      "labelKey": "nav.finance.etat1208",
+      "label": "État 1208 achats fournisseurs",
+      "route": "/finance/declarations/etat-1208",
+      "createRoute": null,
+      "detailRoute": "/finance/declarations/etat-1208/{id}",
+      "keywords": [
+        "finance",
+        "declarations",
+        "declaration",
+        "etat1208",
+        "etat",
+        "1208",
+        "achats",
+        "achat",
+        "fournisseurs",
+        "fournisseur"
+      ],
+      "permissionKey": null,
+      "help": "État 1208 achats fournisseurs : ouvrez /finance/declarations/etat-1208."
+    },
+    {
+      "id": "finance.configuration.devises",
+      "labelKey": "nav.finance.devises",
+      "label": "Devises",
+      "route": "/finance/devises",
+      "createRoute": "/finance/devises/new",
+      "detailRoute": "/finance/devises/{id}",
+      "keywords": [
+        "finance",
+        "configuration",
+        "devises",
+        "devise"
+      ],
+      "permissionKey": null,
+      "help": "Devises : liste /finance/devises. Pour créer, ouvrez /finance/devises/new."
+    },
+    {
+      "id": "finance.configuration.tauxChange",
+      "labelKey": "nav.finance.tauxChange",
+      "label": "Taux de change",
+      "route": "/finance/taux-change",
+      "createRoute": "/finance/taux-change/new",
+      "detailRoute": "/finance/taux-change/{id}",
+      "keywords": [
+        "finance",
+        "configuration",
+        "tauxchange",
+        "taux",
+        "change"
+      ],
+      "permissionKey": null,
+      "help": "Taux de change : liste /finance/taux-change. Pour créer, ouvrez /finance/taux-change/new."
+    },
+    {
+      "id": "finance.configuration.conditionsPaiement",
+      "labelKey": "nav.finance.conditionsPaiement",
+      "label": "Conditions de paiement",
+      "route": "/finance/conditions-paiement",
+      "createRoute": "/finance/conditions-paiement/new",
+      "detailRoute": "/finance/conditions-paiement/{id}",
+      "keywords": [
+        "finance",
+        "configuration",
+        "conditionspaiement",
+        "conditions",
+        "condition",
+        "paiement"
+      ],
+      "permissionKey": null,
+      "help": "Conditions de paiement : liste /finance/conditions-paiement. Pour créer, ouvrez /finance/conditions-paiement/new."
+    },
+    {
+      "id": "finance.configuration.plansComptables",
+      "labelKey": "nav.finance.plansComptables",
+      "label": "Plans comptables",
+      "route": "/finance/plans-comptables",
+      "createRoute": null,
+      "detailRoute": "/finance/plans-comptables/{id}",
+      "keywords": [
+        "finance",
+        "configuration",
+        "planscomptables",
+        "planscomptable",
+        "plans",
+        "plan",
+        "comptables",
+        "comptable"
+      ],
+      "permissionKey": null,
+      "help": "Plans comptables : ouvrez /finance/plans-comptables."
+    },
+    {
+      "id": "rh.employes",
+      "labelKey": "nav.rh.employes",
+      "label": "Employés",
+      "route": "/rh/employes",
+      "createRoute": "/rh/employes/new",
+      "detailRoute": "/rh/employes/{id}",
+      "keywords": [
+        "employes",
+        "employe"
+      ],
+      "permissionKey": null,
+      "help": "Employés : liste /rh/employes. Pour créer, ouvrez /rh/employes/new."
+    },
+    {
+      "id": "rh.postes",
+      "labelKey": "nav.rh.postes",
+      "label": "Postes",
+      "route": "/rh/postes",
+      "createRoute": null,
+      "detailRoute": "/rh/postes/{id}",
+      "keywords": [
+        "postes",
+        "poste"
+      ],
+      "permissionKey": null,
+      "help": "Postes : ouvrez /rh/postes."
+    },
+    {
+      "id": "rh.departements",
+      "labelKey": "nav.rh.departements",
+      "label": "Départements",
+      "route": "/rh/departements",
+      "createRoute": null,
+      "detailRoute": "/rh/departements/{id}",
+      "keywords": [
+        "departements",
+        "departement"
+      ],
+      "permissionKey": null,
+      "help": "Départements : ouvrez /rh/departements."
+    },
+    {
+      "id": "rh.pointage",
+      "labelKey": "nav.rh.pointage",
+      "label": "Pointage chantiers",
+      "route": "/rh/pointage",
+      "createRoute": null,
+      "detailRoute": "/rh/pointage/{id}",
+      "keywords": [
+        "pointage",
+        "chantiers",
+        "chantier"
+      ],
+      "permissionKey": null,
+      "help": "Pointage chantiers : ouvrez /rh/pointage."
+    },
+    {
+      "id": "rh.planning",
+      "labelKey": "nav.rh.planning",
+      "label": "Planning équipes",
+      "route": "/rh/planning-equipes",
+      "createRoute": null,
+      "detailRoute": "/rh/planning-equipes/{id}",
+      "keywords": [
+        "planning",
+        "planningequipes",
+        "planningequipe",
+        "equipes",
+        "equipe"
+      ],
+      "permissionKey": null,
+      "help": "Planning équipes : ouvrez /rh/planning-equipes."
+    },
+    {
+      "id": "rh.conges",
+      "labelKey": "nav.rh.conges",
+      "label": "Congés & Absences",
+      "route": "/rh/conges",
+      "createRoute": "/rh/conges/new",
+      "detailRoute": "/rh/conges/{id}",
+      "keywords": [
+        "conges",
+        "conge",
+        "absences",
+        "absence"
+      ],
+      "permissionKey": null,
+      "help": "Congés & Absences : liste /rh/conges. Pour créer, ouvrez /rh/conges/new."
+    },
+    {
+      "id": "rh.paie",
+      "labelKey": "nav.rh.paie",
+      "label": "Paie",
+      "route": "/rh/paie",
+      "createRoute": "/rh/paie/new",
+      "detailRoute": "/rh/paie/{id}",
+      "keywords": [
+        "paie"
+      ],
+      "permissionKey": null,
+      "help": "Paie : liste /rh/paie. Pour créer, ouvrez /rh/paie/new."
+    },
+    {
+      "id": "rh.paieJournal",
+      "labelKey": "nav.rh.paieJournal",
+      "label": "Journal paie société",
+      "route": "/rh/paie/journal",
+      "createRoute": null,
+      "detailRoute": "/rh/paie/journal/{id}",
+      "keywords": [
+        "paiejournal",
+        "paie",
+        "journal",
+        "societe"
+      ],
+      "permissionKey": null,
+      "help": "Journal paie société : ouvrez /rh/paie/journal."
+    },
+    {
+      "id": "rh.declarations.damancom",
+      "labelKey": "nav.rh.damancom",
+      "label": "DAMANCOM — CNSS",
+      "route": "/rh/paie/declarations/damancom",
+      "createRoute": null,
+      "detailRoute": "/rh/paie/declarations/damancom/{id}",
+      "keywords": [
+        "declarations",
+        "declaration",
+        "damancom",
+        "paie",
+        "cnss"
+      ],
+      "permissionKey": null,
+      "help": "DAMANCOM — CNSS : ouvrez /rh/paie/declarations/damancom."
+    },
+    {
+      "id": "rh.declarations.igr",
+      "labelKey": "nav.rh.igr",
+      "label": "État 9421 — IGR annuel",
+      "route": "/rh/paie/declarations/igr",
+      "createRoute": null,
+      "detailRoute": "/rh/paie/declarations/igr/{id}",
+      "keywords": [
+        "declarations",
+        "declaration",
+        "igr",
+        "paie",
+        "etat",
+        "9421",
+        "annuel"
+      ],
+      "permissionKey": null,
+      "help": "État 9421 — IGR annuel : ouvrez /rh/paie/declarations/igr."
+    },
+    {
+      "id": "rh.declarations.etat1208",
+      "labelKey": "nav.finance.etat1208",
+      "label": "État 1208 achats fournisseurs",
+      "route": "/rh/paie/declarations/etat-1208",
+      "createRoute": null,
+      "detailRoute": "/rh/paie/declarations/etat-1208/{id}",
+      "keywords": [
+        "declarations",
+        "declaration",
+        "etat1208",
+        "paie",
+        "etat",
+        "1208",
+        "achats",
+        "achat",
+        "fournisseurs",
+        "fournisseur"
+      ],
+      "permissionKey": null,
+      "help": "État 1208 achats fournisseurs : ouvrez /rh/paie/declarations/etat-1208."
+    },
+    {
+      "id": "hse.dashboard",
+      "labelKey": "nav.hse.dashboard",
+      "label": "Tableau de bord HSE",
+      "route": "/hse/tableau-bord",
+      "createRoute": null,
+      "detailRoute": "/hse/tableau-bord/{id}",
+      "keywords": [
+        "hse",
+        "dashboard",
+        "tableaubord",
+        "tableau",
+        "bord"
+      ],
+      "permissionKey": null,
+      "help": "Tableau de bord HSE : ouvrez /hse/tableau-bord."
+    },
+    {
+      "id": "hse.incidents",
+      "labelKey": "nav.hse.incidents",
+      "label": "Incidents sécurité",
+      "route": "/hse/incidents",
+      "createRoute": "/hse/incidents/new",
+      "detailRoute": "/hse/incidents/{id}",
+      "keywords": [
+        "hse",
+        "incidents",
+        "incident",
+        "securite"
+      ],
+      "permissionKey": null,
+      "help": "Incidents sécurité : liste /hse/incidents. Pour créer, ouvrez /hse/incidents/new."
+    },
+    {
+      "id": "hse.nonConformites",
+      "labelKey": "nav.hse.nonConformites",
+      "label": "Non-conformités",
+      "route": "/hse/non-conformites",
+      "createRoute": "/hse/non-conformites/new",
+      "detailRoute": "/hse/non-conformites/{id}",
+      "keywords": [
+        "hse",
+        "nonconformites",
+        "nonconformite",
+        "non",
+        "conformites",
+        "conformite"
+      ],
+      "permissionKey": null,
+      "help": "Non-conformités : liste /hse/non-conformites. Pour créer, ouvrez /hse/non-conformites/new."
+    },
+    {
+      "id": "hse.inspections",
+      "labelKey": "nav.hse.inspections",
+      "label": "Inspections",
+      "route": "/hse/inspections",
+      "createRoute": "/hse/inspections/new",
+      "detailRoute": "/hse/inspections/{id}",
+      "keywords": [
+        "hse",
+        "inspections",
+        "inspection"
+      ],
+      "permissionKey": null,
+      "help": "Inspections : liste /hse/inspections. Pour créer, ouvrez /hse/inspections/new."
+    },
+    {
+      "id": "hse.formations",
+      "labelKey": "nav.hse.formations",
+      "label": "Formations",
+      "route": "/hse/formations",
+      "createRoute": "/hse/formations/new",
+      "detailRoute": "/hse/formations/{id}",
+      "keywords": [
+        "hse",
+        "formations",
+        "formation"
+      ],
+      "permissionKey": null,
+      "help": "Formations : liste /hse/formations. Pour créer, ouvrez /hse/formations/new."
+    },
+    {
+      "id": "hse.epi",
+      "labelKey": "nav.hse.epi",
+      "label": "Registre EPI",
+      "route": "/hse/epi",
+      "createRoute": null,
+      "detailRoute": "/hse/epi/{id}",
+      "keywords": [
+        "hse",
+        "epi",
+        "registre"
+      ],
+      "permissionKey": null,
+      "help": "Registre EPI : ouvrez /hse/epi."
+    },
+    {
+      "id": "hse.duer",
+      "labelKey": "nav.hse.duer",
+      "label": "DUER",
+      "route": "/hse/duer",
+      "createRoute": null,
+      "detailRoute": "/hse/duer/{id}",
+      "keywords": [
+        "hse",
+        "duer"
+      ],
+      "permissionKey": null,
+      "help": "DUER : ouvrez /hse/duer."
+    },
+    {
+      "id": "hse.phs",
+      "labelKey": "nav.hse.phs",
+      "label": "PHS société",
+      "route": "/hse/phs",
+      "createRoute": null,
+      "detailRoute": "/hse/phs/{id}",
+      "keywords": [
+        "hse",
+        "phs",
+        "societe"
+      ],
+      "permissionKey": null,
+      "help": "PHS société : ouvrez /hse/phs."
+    },
+    {
+      "id": "hse.ppsps",
+      "labelKey": "nav.hse.ppsps",
+      "label": "PPSPS",
+      "route": "/hse/ppsps",
+      "createRoute": null,
+      "detailRoute": "/hse/ppsps/{id}",
+      "keywords": [
+        "hse",
+        "ppsps",
+        "ppsp"
+      ],
+      "permissionKey": null,
+      "help": "PPSPS : ouvrez /hse/ppsps."
+    },
+    {
+      "id": "hse.visitesMedicales",
+      "labelKey": "nav.hse.visitesMedicales",
+      "label": "Visites médicales",
+      "route": "/hse/visites-medicales",
+      "createRoute": null,
+      "detailRoute": "/hse/visites-medicales/{id}",
+      "keywords": [
+        "hse",
+        "visitesmedicales",
+        "visitesmedicale",
+        "visites",
+        "visite",
+        "medicales",
+        "medicale"
+      ],
+      "permissionKey": null,
+      "help": "Visites médicales : ouvrez /hse/visites-medicales."
+    },
+    {
+      "id": "hse.registresLegaux",
+      "labelKey": "nav.hse.registresLegaux",
+      "label": "Registres légaux",
+      "route": "/hse/registres-legaux",
+      "createRoute": null,
+      "detailRoute": "/hse/registres-legaux/{id}",
+      "keywords": [
+        "hse",
+        "registreslegaux",
+        "registres",
+        "registre",
+        "legaux"
+      ],
+      "permissionKey": null,
+      "help": "Registres légaux : ouvrez /hse/registres-legaux."
+    },
+    {
+      "id": "pilotage.marges",
+      "labelKey": "nav.pilotage.marges",
+      "label": "Marges chantiers",
+      "route": "/pilotage/marges-chantier",
+      "createRoute": null,
+      "detailRoute": "/pilotage/marges-chantier/{id}",
+      "keywords": [
+        "pilotage",
+        "marges",
+        "marge",
+        "margeschantier",
+        "chantiers",
+        "chantier"
+      ],
+      "permissionKey": null,
+      "help": "Marges chantiers : ouvrez /pilotage/marges-chantier."
+    },
+    {
+      "id": "pilotage.margeConsolidee",
+      "labelKey": "nav.pilotage.margeConsolidee",
+      "label": "Marge consolidée",
+      "route": "/pilotage/marge-consolidee",
+      "createRoute": null,
+      "detailRoute": "/pilotage/marge-consolidee/{id}",
+      "keywords": [
+        "pilotage",
+        "margeconsolidee",
+        "marge",
+        "consolidee"
+      ],
+      "permissionKey": null,
+      "help": "Marge consolidée : ouvrez /pilotage/marge-consolidee."
+    },
+    {
+      "id": "pilotage.cashflow",
+      "labelKey": "nav.pilotage.cashflow",
+      "label": "Cash-flow prévisionnel",
+      "route": "/pilotage/cash-flow",
+      "createRoute": null,
+      "detailRoute": "/pilotage/cash-flow/{id}",
+      "keywords": [
+        "pilotage",
+        "cashflow",
+        "cash",
+        "flow",
+        "previsionnel"
+      ],
+      "permissionKey": null,
+      "help": "Cash-flow prévisionnel : ouvrez /pilotage/cash-flow."
+    },
+    {
+      "id": "pilotage.analysesRentabilite",
+      "labelKey": "nav.pilotage.analysesRentabilite",
+      "label": "Analyses — Rentabilité",
+      "route": "/pilotage-analyses/rentabilite",
+      "createRoute": null,
+      "detailRoute": "/pilotage-analyses/rentabilite/{id}",
+      "keywords": [
+        "pilotage",
+        "analysesrentabilite",
+        "pilotageanalyses",
+        "pilotageanalyse",
+        "rentabilite",
+        "analyses",
+        "analyse"
+      ],
+      "permissionKey": null,
+      "help": "Analyses — Rentabilité : ouvrez /pilotage-analyses/rentabilite."
+    },
+    {
+      "id": "pilotage.analysesFinancier",
+      "labelKey": "nav.pilotage.analysesFinancier",
+      "label": "Analyses — Financier",
+      "route": "/pilotage-analyses/financier",
+      "createRoute": null,
+      "detailRoute": "/pilotage-analyses/financier/{id}",
+      "keywords": [
+        "pilotage",
+        "analysesfinancier",
+        "pilotageanalyses",
+        "pilotageanalyse",
+        "financier",
+        "analyses",
+        "analyse"
+      ],
+      "permissionKey": null,
+      "help": "Analyses — Financier : ouvrez /pilotage-analyses/financier."
+    },
+    {
+      "id": "pilotage.analysesStock",
+      "labelKey": "nav.pilotage.analysesStock",
+      "label": "Analyses — Stock",
+      "route": "/pilotage-analyses/stock",
+      "createRoute": null,
+      "detailRoute": "/pilotage-analyses/stock/{id}",
+      "keywords": [
+        "pilotage",
+        "analysesstock",
+        "pilotageanalyses",
+        "pilotageanalyse",
+        "stock",
+        "analyses",
+        "analyse"
+      ],
+      "permissionKey": null,
+      "help": "Analyses — Stock : ouvrez /pilotage-analyses/stock."
+    },
+    {
+      "id": "pilotage.analysesAchats",
+      "labelKey": "nav.pilotage.analysesAchats",
+      "label": "Analyses — Achats",
+      "route": "/pilotage-analyses/achats",
+      "createRoute": null,
+      "detailRoute": "/pilotage-analyses/achats/{id}",
+      "keywords": [
+        "pilotage",
+        "analysesachats",
+        "analysesachat",
+        "pilotageanalyses",
+        "pilotageanalyse",
+        "achats",
+        "achat",
+        "analyses",
+        "analyse"
+      ],
+      "permissionKey": null,
+      "help": "Analyses — Achats : ouvrez /pilotage-analyses/achats."
+    },
+    {
+      "id": "pilotage.analysesRh",
+      "labelKey": "nav.pilotage.analysesRh",
+      "label": "Analyses — RH",
+      "route": "/pilotage-analyses/rh",
+      "createRoute": null,
+      "detailRoute": "/pilotage-analyses/rh/{id}",
+      "keywords": [
+        "pilotage",
+        "analysesrh",
+        "pilotageanalyses",
+        "pilotageanalyse",
+        "analyses",
+        "analyse"
+      ],
+      "permissionKey": null,
+      "help": "Analyses — RH : ouvrez /pilotage-analyses/rh."
+    },
+    {
+      "id": "pilotage.analysesWhatIf",
+      "labelKey": "nav.pilotage.analysesWhatIf",
+      "label": "Analyses — What-if",
+      "route": "/pilotage-analyses/what-if",
+      "createRoute": null,
+      "detailRoute": "/pilotage-analyses/what-if/{id}",
+      "keywords": [
+        "pilotage",
+        "analyseswhatif",
+        "pilotageanalyses",
+        "pilotageanalyse",
+        "whatif",
+        "analyses",
+        "analyse",
+        "what"
+      ],
+      "permissionKey": null,
+      "help": "Analyses — What-if : ouvrez /pilotage-analyses/what-if."
+    },
+    {
+      "id": "pilotage.analysesOpexCapex",
+      "labelKey": "nav.pilotage.analysesOpexCapex",
+      "label": "Analyses — OPEX / CAPEX",
+      "route": "/pilotage-analyses/opex-capex",
+      "createRoute": null,
+      "detailRoute": "/pilotage-analyses/opex-capex/{id}",
+      "keywords": [
+        "pilotage",
+        "analysesopexcapex",
+        "pilotageanalyses",
+        "pilotageanalyse",
+        "opexcapex",
+        "analyses",
+        "analyse",
+        "opex",
+        "capex"
+      ],
+      "permissionKey": null,
+      "help": "Analyses — OPEX / CAPEX : ouvrez /pilotage-analyses/opex-capex."
+    },
+    {
+      "id": "pilotage.analysesGroupe",
+      "labelKey": "nav.pilotage.analysesGroupe",
+      "label": "Analyses — Groupe",
+      "route": "/pilotage-analyses/groupe",
+      "createRoute": null,
+      "detailRoute": "/pilotage-analyses/groupe/{id}",
+      "keywords": [
+        "pilotage",
+        "analysesgroupe",
+        "pilotageanalyses",
+        "pilotageanalyse",
+        "groupe",
+        "analyses",
+        "analyse"
+      ],
+      "permissionKey": null,
+      "help": "Analyses — Groupe : ouvrez /pilotage-analyses/groupe."
+    },
+    {
+      "id": "analytics.chantiers",
+      "labelKey": "nav.analytics.chantiers",
+      "label": "Rentabilité chantiers",
+      "route": "/analytics/chantiers",
+      "createRoute": null,
+      "detailRoute": "/analytics/chantiers/{id}",
+      "keywords": [
+        "analytics",
+        "analytic",
+        "chantiers",
+        "chantier",
+        "rentabilite"
+      ],
+      "permissionKey": null,
+      "help": "Rentabilité chantiers : ouvrez /analytics/chantiers."
+    },
+    {
+      "id": "analytics.financier",
+      "labelKey": "nav.analytics.financier",
+      "label": "Analyse financière",
+      "route": "/analytics/financier",
+      "createRoute": null,
+      "detailRoute": "/analytics/financier/{id}",
+      "keywords": [
+        "analytics",
+        "analytic",
+        "financier",
+        "analyse",
+        "financiere"
+      ],
+      "permissionKey": null,
+      "help": "Analyse financière : ouvrez /analytics/financier."
+    },
+    {
+      "id": "analytics.stock",
+      "labelKey": "nav.analytics.stock",
+      "label": "Analyse stock",
+      "route": "/analytics/stock",
+      "createRoute": null,
+      "detailRoute": "/analytics/stock/{id}",
+      "keywords": [
+        "analytics",
+        "analytic",
+        "stock",
+        "analyse"
+      ],
+      "permissionKey": null,
+      "help": "Analyse stock : ouvrez /analytics/stock."
+    },
+    {
+      "id": "analytics.achats",
+      "labelKey": "nav.analytics.achats",
+      "label": "Analyse achats",
+      "route": "/analytics/achats",
+      "createRoute": null,
+      "detailRoute": "/analytics/achats/{id}",
+      "keywords": [
+        "analytics",
+        "analytic",
+        "achats",
+        "achat",
+        "analyse"
+      ],
+      "permissionKey": null,
+      "help": "Analyse achats : ouvrez /analytics/achats."
+    },
+    {
+      "id": "analytics.rh",
+      "labelKey": "nav.analytics.rh",
+      "label": "Analyse RH",
+      "route": "/analytics/rh",
+      "createRoute": null,
+      "detailRoute": "/analytics/rh/{id}",
+      "keywords": [
+        "analytics",
+        "analytic",
+        "analyse"
+      ],
+      "permissionKey": null,
+      "help": "Analyse RH : ouvrez /analytics/rh."
+    }
+  ]
+}

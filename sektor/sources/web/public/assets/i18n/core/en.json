@@ -239,6 +239,12 @@
     }
   },
   "administration": {
+    "documents": {
+      "title": "Documents & printing",
+      "identity": "Identity & page layout",
+      "models": "Templates",
+      "description": "Document branding, page layout and templates"
+    },
     "navigation": {
       "title": "Administration",
       "members": "Members",
@@ -1038,7 +1044,7 @@
     "tabs": {
       "general": "General",
       "localization": "Localization",
-      "branding": "Branding"
+      "branding": "Appearance"
     },
     "general": {
       "title": "General",
@@ -1066,15 +1072,16 @@
       "save.error": "Failed to update localization settings"
     },
     "branding": {
-      "title": "Branding",
+      "title": "Application appearance",
+      "appearanceHint": "App chrome (color, sidebar logo, favicon). Legal identity is configured from the company switcher.",
       "displayName": "Display Name",
       "displayName.hint": "Shown in the sidebar and browser title",
       "primaryColor": "Primary Color",
       "primaryColor.default": "Default",
       "primaryColor.reset": "Reset to default",
       "primaryColor.preview": "Preview",
-      "logo": "Logo",
-      "logo.hint": "PNG, JPG, or SVG. Max 2MB.",
+      "logo": "Logo (sidebar)",
+      "logo.hint": "App chrome logo — not the invoice / quote logo. PNG, JPG, or SVG. Max 2MB.",
       "logo.change": "Change",
       "logo.remove": "Remove",
       "favicon": "Favicon",
@@ -1251,6 +1258,11 @@
       "minChars": "Type at least 2 characters to search records",
       "clearRecent": "Clear Recent"
     },
+    "orgSwitcher": {
+      "orgs": "Company",
+      "sites": "Site",
+      "settings": "Company settings"
+    },
     "topbar": {
       "notifications": "Notifications",
       "mySettings": "My Settings",
@@ -1273,11 +1285,14 @@
       },
       "welcome": "Ask anything about this application. I can help you navigate, explain data, and trigger actions.",
       "loading": "Loading conversation...",
+      "refreshing": "Refreshing the thread…",
+      "preparingReply": "Preparing a reply…",
+      "emptyReply": "I could not prepare a reply. Try again, or rephrase.",
       "errorGeneric": "Conversation request failed.",
       "placeholder": "Type a message...",
       "send": "Send",
       "sendHint": "Enter to send · Shift+Enter for a new line",
-      "sendInProgress": "Sending...",
+      "sendInProgress": "Sending…",
       "newChat": "New conversation",
       "noHistory": "No conversations yet",
       "sessionDefault": "Conversation",

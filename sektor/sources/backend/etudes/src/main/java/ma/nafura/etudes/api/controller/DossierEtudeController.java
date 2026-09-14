@@ -7,6 +7,7 @@ import java.util.UUID;
 import ma.nafura.etudes.api.dto.DecompositionProposeDto;
 import ma.nafura.etudes.api.dto.DossierConversionResultDto;
 import ma.nafura.etudes.api.dto.DossierEtudeSyntheseDto;
+import ma.nafura.etudes.api.dto.StatusChangeDto;
 import ma.nafura.etudes.api.request.DossierConvertirDto;
 import ma.nafura.etudes.api.request.DossierEtudeCreateDto;
 import ma.nafura.etudes.api.request.DossierEtudeUpdateDto;
@@ -132,6 +133,13 @@ public class DossierEtudeController {
         return ResponseEntity.ok(service.synthese(id));
     }
 
+    /** Journal des changements de statut (Postgres ; store ES plus tard, même DTO). */
+    @GetMapping("/{id}/status-history")
+    @RequirePermission("etude.read")
+    public ResponseEntity<List<StatusChangeDto>> statusHistory(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.historiqueStatut(id));
+    }
+
     /** SEKTOR-211 — read model unique de complétude (AC-1 à AC-4). */
     @GetMapping("/{id}/completude")
     @RequirePermission("etude.read")
@@ -247,11 +255,41 @@ public class DossierEtudeController {
         return ResponseEntity.ok(service.valider(id, approbateur));
     }
 
+    @PostMapping("/{id}/valider-financier")
+    @RequirePermission("etude.approve")
+    public ResponseEntity<DossierEtude> validerFinancier(
+            @PathVariable UUID id, Authentication authentication) {
+        String approbateur = authentication != null ? authentication.getName() : null;
+        return ResponseEntity.ok(service.approuverFinancierement(id, approbateur));
+    }
+
+    @PostMapping("/{id}/valider-definitif")
+    @RequirePermission("etude.approve")
+    public ResponseEntity<DossierEtude> validerDefinitif(
+            @PathVariable UUID id, Authentication authentication) {
+        String approbateur = authentication != null ? authentication.getName() : null;
+        return ResponseEntity.ok(service.approuverDefinitivement(id, approbateur));
+    }
+
     @PostMapping("/{id}/refuser")
     @RequirePermission("etude.approve")
     public ResponseEntity<DossierEtude> refuser(
             @PathVariable UUID id, @Valid @RequestBody RefusRequest body) {
         return ResponseEntity.ok(service.refuser(id, body.getMotif()));
+    }
+
+    @PostMapping("/{id}/refuser-financier")
+    @RequirePermission("etude.approve")
+    public ResponseEntity<DossierEtude> refuserFinancier(
+            @PathVariable UUID id, @Valid @RequestBody RefusRequest body) {
+        return ResponseEntity.ok(service.refuserFinancierement(id, body.getMotif()));
+    }
+
+    @PostMapping("/{id}/refuser-definitif")
+    @RequirePermission("etude.approve")
+    public ResponseEntity<DossierEtude> refuserDefinitif(
+            @PathVariable UUID id, @Valid @RequestBody RefusRequest body) {
+        return ResponseEntity.ok(service.refuserDefinitivement(id, body.getMotif()));
     }
 
     @PostMapping("/{id}/reouvrir-bordereau")

@@ -200,7 +200,13 @@ export class DashboardPage implements OnInit {
   );
 
   async ngOnInit(): Promise<void> {
-    const { items: chantiers } = await this.chantierApi.getAll();
+    let chantiers: { budgetHt?: number; avancementPercent?: number; status?: string }[] = [];
+    try {
+      const listed = await this.chantierApi.getAll();
+      chantiers = listed.items ?? [];
+    } catch {
+      chantiers = [];
+    }
 
     const totalBudget = chantiers.reduce((s: number, c: { budgetHt?: number }) => s + (c.budgetHt ?? 0), 0);
     const avg =

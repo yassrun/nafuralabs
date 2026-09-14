@@ -28,8 +28,9 @@ public class NavigateAgentTool implements AgentTool {
         String target = trimToNull((String) args.get("target"));
         String entityType = trimToNull((String) args.get("entityType"));
         String entityId = trimToNull((String) args.get("entityId"));
+        String operation = trimToNull(asString(args.get("operation")));
 
-        return navigationResolver.resolve(target, entityType, entityId)
+        return navigationResolver.resolve(target, entityType, entityId, operation)
                 .map(this::toResult)
                 .orElseGet(() -> AgentToolResult.builder()
                         .success(false)
@@ -48,6 +49,10 @@ public class NavigateAgentTool implements AgentTool {
                         "navigated", true
                 ))
                 .build();
+    }
+
+    private String asString(Object value) {
+        return value == null ? null : value.toString();
     }
 
     private String trimToNull(String value) {

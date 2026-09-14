@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import ma.nafura.platform.framework.audit.Auditable;
 
 @Entity
 @Table(name = "tenant_custom_role", indexes = {
@@ -16,6 +17,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Auditable(entityType = "role", trackedFields = {"roleCode", "name"})
 public class TenantCustomRole {
 
     @Id

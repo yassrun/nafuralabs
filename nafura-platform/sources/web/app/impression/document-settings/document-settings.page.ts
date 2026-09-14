@@ -1,4 +1,7 @@
+import { DocumentNavigationComponent } from '../document-navigation.component';
 import { CommonModule } from '@angular/common';
+import { DocumentPreviewComponent } from '../document-preview.component';
+import { RouterLink } from '@angular/router';
 import { Component, DestroyRef, OnDestroy, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -41,8 +44,10 @@ const FONT_FAMILIES = ['sans-serif', 'serif'];
 @Component({
   selector: 'app-document-settings-page',
   standalone: true,
-  imports: [
+  imports: [DocumentNavigationComponent, 
     CommonModule,
+    DocumentPreviewComponent,
+    RouterLink,
     FormsModule,
     TranslateModule,
     MatButtonModule,
@@ -58,6 +63,7 @@ const FONT_FAMILIES = ['sans-serif', 'serif'];
   template: `
     <nf-page-shell>
       <nf-page-header [config]="headerConfig()"></nf-page-header>
+      <app-document-navigation>
 
       @if (settings(); as s) {
         <div class="doc-settings">
@@ -81,6 +87,9 @@ const FONT_FAMILIES = ['sans-serif', 'serif'];
                   </mat-slide-toggle>
                   <p class="doc-settings__hint">
                     {{ 'administration.documentSettings.header.logoHint' | translate }}
+                    <a mat-button routerLink="/administration/settings" [queryParams]="{ section: 'branding' }">
+                      {{ 'appSettings.branding.title' | translate }}
+                    </a>
                   </p>
 
                   <h4>{{ 'administration.documentSettings.header.fields' | translate }}</h4>
@@ -234,12 +243,9 @@ const FONT_FAMILIES = ['sans-serif', 'serif'];
               </mat-form-field>
             </div>
             @if (previewHtml()) {
-              <iframe
-                [srcdoc]="previewHtml()"
-                sandbox="allow-same-origin"
-                class="doc-settings__preview-frame"
-                [title]="'administration.templates.editor.preview' | translate">
-              </iframe>
+              <app-document-preview [html]="previewHtml()" class="doc-settings__preview-frame"
+                [marginTop]="s.page.marginTop" [marginRight]="s.page.marginRight"
+                [marginBottom]="s.page.marginBottom" [marginLeft]="s.page.marginLeft" />
             } @else {
               <p class="doc-settings__preview-empty">
                 {{ 'administration.documentSettings.previewEmpty' | translate }}
@@ -248,6 +254,7 @@ const FONT_FAMILIES = ['sans-serif', 'serif'];
           </div>
         </div>
       }
+    </app-document-navigation>
     </nf-page-shell>
   `,
   styles: [
@@ -297,7 +304,7 @@ const FONT_FAMILIES = ['sans-serif', 'serif'];
       }
       .doc-settings__preview-header { padding: 8px 12px; border-bottom: 1px solid var(--nf-border-default); }
       .doc-settings__preview-type { width: 100%; }
-      .doc-settings__preview-frame { flex: 1; min-height: 480px; border: none; background: #fff; }
+      .doc-settings__preview-frame { flex: 1; min-height: 480px; border: none; }
       .doc-settings__preview-empty { padding: 2rem; text-align: center; color: var(--nf-text-muted); }
     `,
   ],
@@ -335,10 +342,10 @@ export class DocumentSettingsPage implements OnDestroy, CanComponentDeactivate {
   private previewTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly headerConfig = computed(() => ({
-    title: this.i18n.instant('administration.documentSettings.title'),
+    title: this.i18n.instant('administration.documents.title'),
     breadcrumbs: [
-      { label: 'administration.title', route: '/administration' },
-      { label: 'administration.documentSettings.title' },
+      { label: 'administration.navigation.hub', route: '/admin' },
+      { label: 'administration.documents.identity' },
     ],
   }));
 

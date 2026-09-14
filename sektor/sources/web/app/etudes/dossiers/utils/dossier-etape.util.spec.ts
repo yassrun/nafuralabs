@@ -35,17 +35,16 @@ describe('dossier-etape.util', () => {
     expect(prevBackendEtape(1)).toBeNull();
   });
 
-  it('marque planning / ressources / synthèse comme locales', () => {
+  it('marque planning+ressources / synthèse comme locales', () => {
     expect(estEtapeUiLocale(3)).toBe(false);
     expect(estEtapeUiLocale(4)).toBe(true);
-    expect(estEtapeUiLocale(6)).toBe(true);
+    expect(estEtapeUiLocale(5)).toBe(true);
   });
 
   it('regroupe décomposition + consultation + chiffrage sur l’étape UI 3', () => {
     expect(backendGateEtapesForUi(3)).toEqual([3, 4, 5]);
     expect(backendGateEtapesForUi(4)).toEqual([]);
-    expect(backendGateEtapesForUi(5)).toEqual([]);
-    expect(backendGateEtapesForUi(6)).toEqual([3, 5]);
+    expect(backendGateEtapesForUi(5)).toEqual([3, 5]);
   });
 
   it('route la correction vers la bonne étape UI', () => {
@@ -67,7 +66,7 @@ describe('dossier-etape.util', () => {
 
   it('marque Coût incomplet à la Synthèse si des prix restent manuels', () => {
     expect(
-      incompleteUiStepIndexes(6, [
+      incompleteUiStepIndexes(5, [
         { etape: 5, problemes: [{ message: 'prix_manuel' }] },
       ]),
     ).toEqual([2]);
@@ -75,7 +74,7 @@ describe('dossier-etape.util', () => {
 
   it('n’utilise pas l’alerte qualité comme incomplet de Coût', () => {
     expect(
-      incompleteUiStepIndexes(6, [
+      incompleteUiStepIndexes(5, [
         { etape: 5, problemes: [{ message: 'part_couts_estimes 26%' }] },
       ]),
     ).toEqual([]);

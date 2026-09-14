@@ -16,18 +16,18 @@ class DossierEtudeListFilterTest {
 
     @Test
     void filtre_statut_et_client() {
-        DossierEtude d = dossier(StatutDossierEtude.EN_ETUDE, CLIENT, ING, TODAY.minusDays(2));
+        DossierEtude d = dossier(StatutDossierEtude.IN_PROGRESS, CLIENT, ING, TODAY.minusDays(2));
 
-        assertThat(match(d, StatutDossierEtude.EN_ETUDE, CLIENT, null, null, null, null, null)).isTrue();
-        assertThat(match(d, StatutDossierEtude.AFFECTE, CLIENT, null, null, null, null, null)).isFalse();
+        assertThat(match(d, StatutDossierEtude.IN_PROGRESS, CLIENT, null, null, null, null, null)).isTrue();
+        assertThat(match(d, StatutDossierEtude.ASSIGNED, CLIENT, null, null, null, null, null)).isFalse();
         assertThat(match(d, null, "autre", null, null, null, null, null)).isFalse();
     }
 
     @Test
     void mes_etudes_et_non_affectees() {
-        DossierEtude mienne = dossier(StatutDossierEtude.EN_ETUDE, CLIENT, ING, TODAY.plusDays(3));
-        DossierEtude autre = dossier(StatutDossierEtude.EN_ETUDE, CLIENT, UUID.randomUUID().toString(), TODAY.plusDays(3));
-        DossierEtude libre = dossier(StatutDossierEtude.A_DECIDER, CLIENT, null, TODAY.plusDays(3));
+        DossierEtude mienne = dossier(StatutDossierEtude.IN_PROGRESS, CLIENT, ING, TODAY.plusDays(3));
+        DossierEtude autre = dossier(StatutDossierEtude.IN_PROGRESS, CLIENT, UUID.randomUUID().toString(), TODAY.plusDays(3));
+        DossierEtude libre = dossier(StatutDossierEtude.PENDING_ASSIGNMENT, CLIENT, null, TODAY.plusDays(3));
 
         assertThat(match(mienne, null, null, null, "MOI", null, null, null)).isTrue();
         assertThat(match(autre, null, null, null, "MOI", null, null, null)).isFalse();
@@ -38,9 +38,9 @@ class DossierEtudeListFilterTest {
 
     @Test
     void mes_etudes_inclut_un_lot_delegue() {
-        DossierEtude delegue = dossier(StatutDossierEtude.EN_ETUDE, CLIENT, UUID.randomUUID().toString(), TODAY);
+        DossierEtude delegue = dossier(StatutDossierEtude.IN_PROGRESS, CLIENT, UUID.randomUUID().toString(), TODAY);
         delegue.setLotChargeUserIds(java.util.List.of(ING));
-        DossierEtude autreLot = dossier(StatutDossierEtude.EN_ETUDE, CLIENT, UUID.randomUUID().toString(), TODAY);
+        DossierEtude autreLot = dossier(StatutDossierEtude.IN_PROGRESS, CLIENT, UUID.randomUUID().toString(), TODAY);
         autreLot.setLotChargeUserIds(java.util.List.of(UUID.randomUUID().toString()));
 
         assertThat(match(delegue, null, null, null, "MOI", null, null, null)).isTrue();
@@ -50,9 +50,9 @@ class DossierEtudeListFilterTest {
 
     @Test
     void delai_en_retard_ignore_les_dossiers_clos() {
-        DossierEtude ouverte = dossier(StatutDossierEtude.EN_ETUDE, CLIENT, ING, TODAY.minusDays(1));
-        DossierEtude gagnee = dossier(StatutDossierEtude.GAGNE, CLIENT, ING, TODAY.minusDays(1));
-        DossierEtude aVenir = dossier(StatutDossierEtude.EN_ETUDE, CLIENT, ING, TODAY.plusDays(2));
+        DossierEtude ouverte = dossier(StatutDossierEtude.IN_PROGRESS, CLIENT, ING, TODAY.minusDays(1));
+        DossierEtude gagnee = dossier(StatutDossierEtude.FINAL_APPROVED, CLIENT, ING, TODAY.minusDays(1));
+        DossierEtude aVenir = dossier(StatutDossierEtude.IN_PROGRESS, CLIENT, ING, TODAY.plusDays(2));
 
         assertThat(match(ouverte, null, null, null, null, "EN_RETARD", null, null)).isTrue();
         assertThat(match(gagnee, null, null, null, null, "EN_RETARD", null, null)).isFalse();
@@ -61,10 +61,10 @@ class DossierEtudeListFilterTest {
 
     @Test
     void delai_j7_et_ce_mois_et_sans_date() {
-        DossierEtude j3 = dossier(StatutDossierEtude.AFFECTE, CLIENT, ING, TODAY.plusDays(3));
-        DossierEtude j10 = dossier(StatutDossierEtude.AFFECTE, CLIENT, ING, TODAY.plusDays(10));
-        DossierEtude moisSuivant = dossier(StatutDossierEtude.AFFECTE, CLIENT, ING, TODAY.plusMonths(1));
-        DossierEtude sans = dossier(StatutDossierEtude.BROUILLON, CLIENT, null, null);
+        DossierEtude j3 = dossier(StatutDossierEtude.ASSIGNED, CLIENT, ING, TODAY.plusDays(3));
+        DossierEtude j10 = dossier(StatutDossierEtude.ASSIGNED, CLIENT, ING, TODAY.plusDays(10));
+        DossierEtude moisSuivant = dossier(StatutDossierEtude.ASSIGNED, CLIENT, ING, TODAY.plusMonths(1));
+        DossierEtude sans = dossier(StatutDossierEtude.DRAFT, CLIENT, null, null);
 
         assertThat(match(j3, null, null, null, null, "J7", null, null)).isTrue();
         assertThat(match(j10, null, null, null, null, "J7", null, null)).isFalse();
@@ -76,8 +76,8 @@ class DossierEtudeListFilterTest {
 
     @Test
     void file_attente_exclut_le_chiffrage_en_cours() {
-        DossierEtude aAffecter = dossier(StatutDossierEtude.A_DECIDER, CLIENT, null, TODAY.plusDays(3));
-        DossierEtude enChiffrage = dossier(StatutDossierEtude.EN_ETUDE, CLIENT, ING, TODAY.plusDays(3));
+        DossierEtude aAffecter = dossier(StatutDossierEtude.PENDING_ASSIGNMENT, CLIENT, null, TODAY.plusDays(3));
+        DossierEtude enChiffrage = dossier(StatutDossierEtude.IN_PROGRESS, CLIENT, ING, TODAY.plusDays(3));
 
         assertThat(DossierEtudeListFilter.matches(
                 aAffecter, null, null, null, null, null, null, null, "OUI", ING, null, TODAY)).isTrue();
@@ -87,7 +87,7 @@ class DossierEtudeListFilterTest {
 
     @Test
     void recherche_numero_objet_client() {
-        DossierEtude d = dossier(StatutDossierEtude.EN_ETUDE, CLIENT, ING, TODAY);
+        DossierEtude d = dossier(StatutDossierEtude.IN_PROGRESS, CLIENT, ING, TODAY);
         d.setNumero("ET-0142");
         d.setObjet("Réhab. gare Kenitra");
         d.setClientNom("ONCF");

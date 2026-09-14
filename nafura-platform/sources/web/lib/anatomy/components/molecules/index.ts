@@ -27,4 +27,5 @@ export * from './action-grid';
 export * from './dashboard-panel';
 export * from './kpi-strip';
 export * from './status-machine';
+export * from './status-action-bar';
 export * from './form-error-summary';

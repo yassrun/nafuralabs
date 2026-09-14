@@ -139,7 +139,7 @@ class CompletudeEtudeServiceTest {
         DossierEtude d = new DossierEtude();
         d.setId(DOSSIER_ID);
         d.setDpgfId(DPGF_ID);
-        d.setStatus(StatutDossierEtude.DEVIS_GENERE);
+        d.setStatus(StatutDossierEtude.FINAL_APPROVED);
         d.setCurrentStep(DossierEtude.ETAPE_CHIFFRAGE);
         return d;
     }

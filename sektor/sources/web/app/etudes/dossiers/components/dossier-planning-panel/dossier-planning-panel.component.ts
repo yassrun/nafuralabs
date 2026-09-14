@@ -15,6 +15,7 @@ import type { DossierPlanningActivite, NoeudDPGF } from '@app/etudes/models';
 import { DpgfApiService } from '@app/etudes/services/dpgf-api.service';
 
 import { DossierEtudeApiService } from '../../services/dossier-etude-api.service';
+import { messagePlanningErreur } from '../../utils/planning-erreur.util';
 
 @Component({
   selector: 'app-dossier-planning-panel',
@@ -56,7 +57,7 @@ export class DossierPlanningPanelComponent {
     const debut = this.draftDebut();
     const fin = this.draftFin();
     if (!libelle || !debut || !fin) {
-      this.erreur.set('Libellé, date de début et date de fin sont requis.');
+      this.erreur.set('Événement, date de début et date de fin sont requis.');
       return;
     }
     if (fin < debut) {
@@ -81,7 +82,7 @@ export class DossierPlanningPanelComponent {
       this.draftFin.set('');
       this.activites.set(await this.api.listerPlanningActivites(this.dossierId()));
     } catch (e) {
-      this.erreur.set(this.messageErreur(e));
+      this.erreur.set(messagePlanningErreur(e));
     } finally {
       this.saving.set(false);
     }
@@ -95,7 +96,7 @@ export class DossierPlanningPanelComponent {
       await this.api.supprimerPlanningActivite(this.dossierId(), row.id);
       this.activites.set(this.activites().filter((a) => a.id !== row.id));
     } catch (e) {
-      this.erreur.set(this.messageErreur(e));
+      this.erreur.set(messagePlanningErreur(e));
     } finally {
       this.saving.set(false);
     }
@@ -119,7 +120,7 @@ export class DossierPlanningPanelComponent {
         ...this.collectLots(arbre?.hierarchie ?? []),
       ]);
     } catch (e) {
-      this.erreur.set(this.messageErreur(e));
+      this.erreur.set(messagePlanningErreur(e));
     } finally {
       this.chargement.set(false);
     }
@@ -136,10 +137,5 @@ export class DossierPlanningPanelComponent {
       if (n.enfants?.length) this.collectLots(n.enfants, acc);
     }
     return acc;
-  }
-
-  private messageErreur(e: unknown): string {
-    const err = e as { error?: { code?: string; message?: string }; message?: string };
-    return err?.error?.code ?? err?.error?.message ?? err?.message ?? 'Enregistrement impossible.';
   }
 }

@@ -9,7 +9,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * Injects {@link CrudAuditHook} into every {@link JpaCrudService} bean so that
- * entities annotated with {@link Auditable} are automatically audited on create/update/delete.
+ * entities annotated with {@link ma.nafura.platform.framework.audit.Auditable}
+ * are automatically audited on create/update/delete.
  */
 @Component
 public class JpaCrudServiceAuditPostProcessor implements BeanPostProcessor {

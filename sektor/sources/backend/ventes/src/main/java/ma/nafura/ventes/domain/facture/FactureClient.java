@@ -15,6 +15,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ma.nafura.ventes.domain.encaissement.EncaissementClient;
+import ma.nafura.platform.framework.audit.Auditable;
 
 @Entity
 @Table(name = "factures_client")
@@ -22,6 +23,7 @@ import ma.nafura.ventes.domain.encaissement.EncaissementClient;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "facture-client", trackedFields = {"numero", "type", "status", "clientName"})
 public class FactureClient {
 
     public static final String STATUS_BROUILLON = "BROUILLON";

@@ -369,21 +369,19 @@ export type AppelOffreClientUpdate = Partial<AppelOffreClientCreate>;
 // ─── DOSSIER D'ÉTUDE (lot 2) ──────────────────────────────────────────────────
 
 export type StatutDossierEtude =
-  | 'BROUILLON'
-  | 'A_DECIDER'
-  | 'AFFECTE'
-  | 'EN_ETUDE'
-  | 'EN_VALIDATION'
-  | 'VALIDEE'
-  | 'DEVIS_GENERE'
-  | 'GAGNE'
-  | 'PERDU'
-  | 'CONVERTIE'
-  | 'ANNULE'
-  | 'NE_PAS_ETUDIER'
-  | 'REJETE_CHIFFRAGE'
-  | 'SUSPENDU'
-  | 'A_AVIS_EXECUTION';
+  | 'DRAFT'
+  | 'PENDING_ASSIGNMENT'
+  | 'REJECTED'
+  | 'ASSIGNED'
+  | 'STUDY_REJECTED'
+  | 'IN_PROGRESS'
+  | 'SUSPENDED'
+  | 'COMPLETED'
+  | 'FINANCIALLY_APPROVED'
+  | 'FINANCIALLY_REJECTED'
+  | 'FINAL_APPROVED'
+  | 'FINAL_REJECTED'
+  | 'ARCHIVED';
 
 /**
  * Étapes métier affichées dans le wizard (4).

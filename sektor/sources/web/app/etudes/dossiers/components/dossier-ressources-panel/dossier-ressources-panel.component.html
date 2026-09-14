@@ -87,7 +87,7 @@
   }
 
   @if (modifiable()) {
-    <form class="res__form" (submit)="$event.preventDefault(); ajouter()">
+    <form class="res__form" novalidate (submit)="$event.preventDefault(); ajouter()">
       <nf-select
         name="resType"
         label="Type"
@@ -141,7 +141,15 @@
         />
       }
       <div class="res__submit">
-        <nf-button type="submit" [disabled]="saving()">Ajouter</nf-button>
+        <nf-button
+          type="button"
+          data-testid="res-ajouter"
+          [disabled]="saving()"
+          [loading]="saving()"
+          (clicked)="ajouter()"
+        >
+          Ajouter une ressource
+        </nf-button>
       </div>
     </form>
   }

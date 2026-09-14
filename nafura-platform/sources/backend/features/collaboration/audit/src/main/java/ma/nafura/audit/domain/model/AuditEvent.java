@@ -32,8 +32,8 @@ public class AuditEvent {
     @Column(name = "entity_type", nullable = false, length = 80)
     private String entityType;
 
-    @Column(name = "entity_id", nullable = false)
-    private UUID entityId;
+    @Column(name = "entity_id", nullable = false, length = 100)
+    private String entityId;
 
     @Column(name = "action", nullable = false, length = 80)
     private String action;

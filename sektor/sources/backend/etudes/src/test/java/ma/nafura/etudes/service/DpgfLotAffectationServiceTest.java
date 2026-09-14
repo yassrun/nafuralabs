@@ -3,6 +3,8 @@ package ma.nafura.etudes.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -17,6 +19,8 @@ import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.repository.DpgfNoeudRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
+import ma.nafura.platform.framework.event.EntityAssignedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,13 +45,20 @@ class DpgfLotAffectationServiceTest {
     @Mock
     private ChargeEtudeService chargeEtudeService;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private DpgfLotAffectationService service;
 
     @BeforeEach
     void setUp() {
         TenantContext.setTenantId(TENANT);
         service = new DpgfLotAffectationService(
-                noeudRepository, dossierEtudeRepository, chargeEtudeService, new EtudeSaisiePolicy());
+                noeudRepository,
+                dossierEtudeRepository,
+                chargeEtudeService,
+                new EtudeSaisiePolicy(),
+                eventPublisher);
     }
 
     @AfterEach
@@ -106,6 +117,25 @@ class DpgfLotAffectationServiceTest {
 
         assertThat(out.getChargeLotUserId()).isEqualTo(HASSAN.toString());
         assertThat(out.getChargeLotNom()).isEqualTo("Hassan");
+        verify(eventPublisher).publishEvent(org.mockito.ArgumentMatchers.isA(EntityAssignedEvent.class));
+    }
+
+    @Test
+    void affecter_meme_ingenieur_ne_renvoie_pas_de_notif() {
+        enTantQue(CHARGE, "BTP_INGENIEUR");
+        DpgfNoeud elec = lot("02", "Électricité", HASSAN.toString());
+        when(noeudRepository.findByIdAndTenantId(elec.getId(), TENANT)).thenReturn(Optional.of(elec));
+        when(dossierEtudeRepository.findByTenantIdAndDpgfId(TENANT, DPGF))
+                .thenReturn(Optional.of(dossierEnEtude()));
+        when(chargeEtudeService.requireIngenieur(HASSAN.toString(), "Hassan")).thenReturn("Hassan");
+        when(noeudRepository.save(any(DpgfNoeud.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        DpgfLotAffectationRequest req = new DpgfLotAffectationRequest();
+        req.setUserId(HASSAN.toString());
+        req.setNom("Hassan");
+        service.affecter(elec.getId(), req);
+
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @Test
@@ -189,8 +219,9 @@ class DpgfLotAffectationServiceTest {
     private static DossierEtude dossierEnEtude() {
         return DossierEtude.builder()
                 .id(UUID.randomUUID())
+                .numero("DE-0022")
                 .dpgfId(DPGF)
-                .status(StatutDossierEtude.EN_ETUDE)
+                .status(StatutDossierEtude.IN_PROGRESS)
                 .chargeEtudeUserId(CHARGE.toString())
                 .build();
     }

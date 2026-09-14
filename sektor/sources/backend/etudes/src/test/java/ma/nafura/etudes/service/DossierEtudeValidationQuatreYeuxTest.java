@@ -91,6 +91,7 @@ class DossierEtudeValidationQuatreYeuxTest {
     @BeforeEach
     void setUp() {
         TenantContext.setTenantId(TENANT);
+        UserContext.setUserRole("BTP_DAF");
         lenient().when(parametres.auteurPeutValider()).thenReturn(false);
         lenient().when(approvalPort.isAvailable()).thenReturn(false);
         service = new DossierEtudeService(
@@ -161,7 +162,7 @@ class DossierEtudeValidationQuatreYeuxTest {
 
         DossierEtude result = service.valider(DOSSIER_ID, AVIS_ONLY);
 
-        assertThat(result.getStatus()).isEqualTo(StatutDossierEtude.VALIDEE);
+        assertThat(result.getStatus()).isEqualTo(StatutDossierEtude.FINANCIALLY_APPROVED);
         verify(intervenantService).enregistrerApprobateur(eq(DOSSIER_ID), eq(AVIS_ONLY), eq(AVIS_ONLY));
     }
 
@@ -176,8 +177,8 @@ class DossierEtudeValidationQuatreYeuxTest {
 
         DossierEtude result = service.valider(DOSSIER_ID, DIRECTEUR);
 
-        assertThat(result.getStatus()).isEqualTo(StatutDossierEtude.VALIDEE);
-        assertThat(result.getValidationEtape()).isNull();
+        assertThat(result.getStatus()).isEqualTo(StatutDossierEtude.FINANCIALLY_APPROVED);
+        assertThat(result.getValidationEtape()).isEqualTo(DossierEtude.VALIDATION_N2);
     }
 
     @Test
@@ -191,7 +192,7 @@ class DossierEtudeValidationQuatreYeuxTest {
 
         DossierEtude n1 = service.valider(DOSSIER_ID, DIRECTEUR);
 
-        assertThat(n1.getStatus()).isEqualTo(StatutDossierEtude.EN_VALIDATION);
+        assertThat(n1.getStatus()).isEqualTo(StatutDossierEtude.FINANCIALLY_APPROVED);
         assertThat(n1.getValidationEtape()).isEqualTo(DossierEtude.VALIDATION_N2);
     }
 
@@ -200,13 +201,15 @@ class DossierEtudeValidationQuatreYeuxTest {
         when(approvalPort.isAvailable()).thenReturn(true);
         UserContext.setSuperAdmin(true);
         DossierEtude dossier = dossierEnValidation(1);
+        dossier.setStatus(StatutDossierEtude.FINANCIALLY_APPROVED);
+        dossier.setValidationEtape(DossierEtude.VALIDATION_N2);
         dossier.setApprovalRequestId("apr-walk");
         when(repository.findByIdAndTenantId(DOSSIER_ID, TENANT)).thenReturn(Optional.of(dossier));
         when(repository.save(any(DossierEtude.class))).thenAnswer(inv -> inv.getArgument(0));
 
         DossierEtude result = service.valider(DOSSIER_ID, "owner");
 
-        assertThat(result.getStatus()).isEqualTo(StatutDossierEtude.VALIDEE);
+        assertThat(result.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
         verify(approvalPort).cloreApprouvee("apr-walk", "owner", "owner", null);
         org.mockito.Mockito.verify(approvalPort, org.mockito.Mockito.never())
                 .approuverEtape(any(), any(), any(), any());
@@ -223,7 +226,7 @@ class DossierEtudeValidationQuatreYeuxTest {
 
         DossierEtude n1 = service.valider(DOSSIER_ID, "owner");
 
-        assertThat(n1.getStatus()).isEqualTo(StatutDossierEtude.EN_VALIDATION);
+        assertThat(n1.getStatus()).isEqualTo(StatutDossierEtude.FINANCIALLY_APPROVED);
         verify(approvalPort).approuverEtape("apr-walk", "owner", "owner", null);
         org.mockito.Mockito.verify(approvalPort, org.mockito.Mockito.never())
                 .cloreApprouvee(any(), any(), any(), any());
@@ -248,7 +251,7 @@ class DossierEtudeValidationQuatreYeuxTest {
                 .tenantId(TENANT)
                 .numero("ET-TEST")
                 .objet("Test")
-                .status(StatutDossierEtude.EN_VALIDATION)
+                .status(StatutDossierEtude.COMPLETED)
                 .validationEtape(DossierEtude.VALIDATION_N1)
                 .niveauxApprobation(niveaux)
                 .build();

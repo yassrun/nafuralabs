@@ -46,7 +46,7 @@ public class LlmProviderConfig {
     @Value("${ai.deepseek.base-url:https://api.deepseek.com}")
     private String deepseekBaseUrl;
 
-    @Value("${ai.deepseek.model:deepseek-v4-flash}")
+    @Value("${ai.deepseek.model:deepseek-flash}")
     private String deepseekModel;
 
     @Bean

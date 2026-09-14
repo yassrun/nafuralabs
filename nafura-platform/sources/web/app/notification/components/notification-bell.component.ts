@@ -53,7 +53,10 @@ import { NotificationListComponent } from './notification-list.component';
               </button>
             }
           </div>
-          @if (useErpDropdown()) {
+          @if (useMergedDropdown()) {
+            <nf-notification-list [compact]="true" (closed)="close()" />
+            <ng-container *ngComponentOutlet="erpDropdownComponent!" />
+          } @else if (useErpDropdown()) {
             <ng-container *ngComponentOutlet="erpDropdownComponent!" />
           } @else {
             <nf-notification-list [compact]="true" (closed)="close()" />
@@ -156,6 +159,10 @@ export class NotificationBellComponent {
 
   readonly useErpDropdown = computed(
     () => this.adapter?.mode === 'erp-alerts' && this.erpDropdownComponent != null,
+  );
+
+  readonly useMergedDropdown = computed(
+    () => this.adapter?.mode === 'merged' && this.erpDropdownComponent != null,
   );
 
   readonly dropdownTitleKey = computed(() =>

@@ -20,7 +20,19 @@ class IntentRouterTest {
     }
 
     @Test
-    void classifyActionIntentForCreateRequest() {
-        assertEquals(IntentType.ACTION, router.classify("Creer le fournisseur ACME").getIntent());
+    void classifyCreateRequestAsNavigateForAssistant() {
+        assertEquals(IntentType.NAVIGATE, router.classify("Creer le fournisseur ACME").getIntent());
+        assertEquals(IntentType.NAVIGATE, router.classify("ajoute moi un article qsq").getIntent());
+    }
+
+    @Test
+    void classifyHowToPriceAStudyAsNavigate() {
+        assertEquals(IntentType.NAVIGATE, router.classify("comment je peux chiffré une etude").getIntent());
+        assertEquals(IntentType.NAVIGATE, router.classify("comment je peux ajouter un article").getIntent());
+    }
+
+    @Test
+    void classifyIWillDoAStudyAsNavigate() {
+        assertEquals(IntentType.NAVIGATE, router.classify("non je vais faire une etude").getIntent());
     }
 }

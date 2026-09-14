@@ -6,9 +6,10 @@ import {
   DOSSIER_STATUT_LABELS,
   PIPELINE_STATUTS,
   estEnAttente,
+  normalizeStatutDossier,
 } from './dossier-status.util';
 
-export type MotifAttention = 'EN_RETARD' | 'J7' | 'ATTENTE' | 'SUSPENDU';
+export type MotifAttention = 'EN_RETARD' | 'J7' | 'ATTENTE' | 'SUSPENDED';
 
 export interface EtudesDashboardKpi {
   id: string;
@@ -50,14 +51,14 @@ const MOTIF_LABEL: Record<MotifAttention, string> = {
   EN_RETARD: 'En retard',
   J7: 'Échéance 7 j',
   ATTENTE: 'En attente',
-  SUSPENDU: 'Suspendu',
+  SUSPENDED: 'Suspendu',
 };
 
 const MOTIF_RANK: Record<MotifAttention, number> = {
   EN_RETARD: 0,
   J7: 1,
   ATTENTE: 2,
-  SUSPENDU: 3,
+  SUSPENDED: 3,
 };
 
 export function motifAttention(
@@ -67,7 +68,7 @@ export function motifAttention(
   const delai = kindDelaiListing(item, today);
   if (delai === 'EN_RETARD') return 'EN_RETARD';
   if (delai === 'J7') return 'J7';
-  if (item.status === 'SUSPENDU') return 'SUSPENDU';
+  if (normalizeStatutDossier(item.status) === 'SUSPENDED') return 'SUSPENDED';
   if (estEnAttente(item.status)) return 'ATTENTE';
   return null;
 }
@@ -82,14 +83,14 @@ export function buildEtudesDashboard(
   const enRetard = dossiers.filter((d) => kindDelaiListing(d, today) === 'EN_RETARD').length;
   const j7 = dossiers.filter((d) => kindDelaiListing(d, today) === 'J7').length;
   const enAttente = dossiers.filter((d) => estEnAttente(d.status)).length;
-  const aAffecter = dossiers.filter((d) => d.status === 'A_DECIDER').length;
-  const enChiffrage = dossiers.filter((d) => d.status === 'EN_ETUDE').length;
+  const aAffecter = dossiers.filter((d) => normalizeStatutDossier(d.status) === 'PENDING_ASSIGNMENT').length;
+  const enChiffrage = dossiers.filter((d) => normalizeStatutDossier(d.status) === 'IN_PROGRESS').length;
   const mesEtudes = dossiers.filter((d) =>
     estMesEtudes(d, currentUserId, currentUserEmail),
   ).length;
-  const suspendus = dossiers.filter((d) => d.status === 'SUSPENDU').length;
-  const avisExecution = dossiers.filter((d) => d.status === 'A_AVIS_EXECUTION').length;
-  const rejetChiffrage = dossiers.filter((d) => d.status === 'REJETE_CHIFFRAGE').length;
+  const suspendus = dossiers.filter((d) => normalizeStatutDossier(d.status) === 'SUSPENDED').length;
+  const avisExecution = dossiers.filter((d) => normalizeStatutDossier(d.status) === 'COMPLETED').length;
+  const rejetChiffrage = dossiers.filter((d) => normalizeStatutDossier(d.status) === 'STUDY_REJECTED').length;
   const nonAffectes = dossiers.filter((d) => !d.chargeEtudeUserId).length;
 
   const kpis: EtudesDashboardKpi[] = [
@@ -119,11 +120,11 @@ export function buildEtudesDashboard(
     },
     {
       id: 'a-affecter',
-      label: 'À affecter',
+      label: 'En attente d’affectation',
       count: aAffecter,
       variant: 'primary',
       icon: 'person_add',
-      queryParams: { status: 'A_DECIDER' },
+      queryParams: { status: 'PENDING_ASSIGNMENT' },
     },
     {
       id: 'en-chiffrage',
@@ -131,7 +132,7 @@ export function buildEtudesDashboard(
       count: enChiffrage,
       variant: 'primary',
       icon: 'calculate',
-      queryParams: { status: 'EN_ETUDE' },
+      queryParams: { status: 'IN_PROGRESS' },
     },
     {
       id: 'mes-etudes',
@@ -150,23 +151,23 @@ export function buildEtudesDashboard(
       count: suspendus,
       variant: 'warning',
       icon: 'pause',
-      queryParams: { status: 'SUSPENDU' },
+      queryParams: { status: 'SUSPENDED' },
     },
     {
       id: 'avis',
-      label: 'Avis d’exécution',
+      label: 'Chiffrages terminés',
       count: avisExecution,
       variant: 'warning',
       icon: 'engineering',
-      queryParams: { status: 'A_AVIS_EXECUTION' },
+      queryParams: { status: 'COMPLETED' },
     },
     {
       id: 'rejet',
-      label: 'Rejet chiffrage',
+      label: 'Refusées par l’étude',
       count: rejetChiffrage,
       variant: 'danger',
       icon: 'undo',
-      queryParams: { status: 'REJETE_CHIFFRAGE' },
+      queryParams: { status: 'STUDY_REJECTED' },
     },
     {
       id: 'non-affecte',
@@ -202,8 +203,8 @@ export function buildEtudesDashboard(
       numero: d.numero,
       objet: d.objet,
       clientNom: d.clientNom ?? '—',
-      status: d.status,
-      statusLabel: DOSSIER_STATUT_LABELS[d.status] ?? d.status,
+      status: normalizeStatutDossier(d.status) || d.status,
+      statusLabel: DOSSIER_STATUT_LABELS[normalizeStatutDossier(d.status)] ?? d.status,
       chargeEtudeNom: d.chargeEtudeNom ?? '—',
       aoDateLimiteDepot: d.aoDateLimiteDepot ?? null,
       motif,
@@ -220,7 +221,7 @@ export function buildEtudesDashboard(
   const pipeline: EtudesDashboardPipeline[] = PIPELINE_STATUTS.map((status) => ({
     status,
     label: DOSSIER_STATUT_LABELS[status] ?? status,
-    count: dossiers.filter((d) => d.status === status).length,
+    count: dossiers.filter((d) => normalizeStatutDossier(d.status) === status).length,
   }));
 
   return { ouverts, kpis, raccourcis, attention: attentionTop, pipeline };

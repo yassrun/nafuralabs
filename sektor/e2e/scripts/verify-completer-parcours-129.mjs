@@ -149,15 +149,12 @@ async function main() {
 
     await clickWizard(page, /Continuer vers le planning/i);
     await page.getByRole('heading', { name: /Planning prévisionnel/i }).waitFor({ timeout: 20000 });
+    await page.getByRole('heading', { name: /Ressources prévues/i }).waitFor({ timeout: 20000 });
     const afterChiffrage = await currentStep(h, id);
     if (afterChiffrage !== 5) {
       throw new Error(`après footer planning: currentStep=${afterChiffrage} (attendu 5)`);
     }
-    console.log('ok footer Continuer → planning (currentStep=5)');
-
-    await clickWizard(page, /Continuer vers les ressources/i);
-    await page.getByRole('heading', { name: /Ressources prévues/i }).waitFor({ timeout: 20000 });
-    console.log('ok footer Continuer → ressources');
+    console.log('ok footer Continuer → planning et ressources (currentStep=5)');
 
     await clickWizard(page, /Voir la synthèse/i);
     await page.locator('app-synthese-validation-panel').waitFor({ timeout: 20000 });

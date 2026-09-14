@@ -24,3 +24,12 @@ dependencies {
     implementation 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
+
+def webDir = file("${projectDir}/../../web")
+def catalogScript = new File(webDir, "scripts/generate-ai-screen-catalog.mjs")
+tasks.register('checkAiScreenCatalog', Exec) {
+    onlyIf { catalogScript.exists() }
+    workingDir = webDir
+    commandLine 'node', 'scripts/generate-ai-screen-catalog.mjs', '--check'
+}
+test.dependsOn checkAiScreenCatalog

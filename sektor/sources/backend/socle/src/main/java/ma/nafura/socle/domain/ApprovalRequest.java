@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.nafura.platform.framework.audit.Auditable;
 
 @Entity(name = "ErpApprovalRequest")
 @Table(name = "erp_approval_requests")
@@ -21,6 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "approval-request", trackedFields = {"entityType", "entityRef", "status"})
 public class ApprovalRequest {
 
     public static final String STATUS_EN_COURS = "EN_COURS";

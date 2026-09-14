@@ -36,11 +36,11 @@ function assertNavChrome() {
   const here = dirname(fileURLToPath(import.meta.url));
   const navPath = join(
     here,
-    '../../sources/web/app/socle/shell/erp-nav.generated.ts',
+    '../../sources/web/app/socle/shell/erp-sidebar.config.ts',
   );
   const nav = readFileSync(navPath, 'utf8');
   if (!nav.includes("route: '/achats/consultations'")) {
-    throw new Error('VU ROUGE chrome : route /achats/consultations absente de erp-nav');
+    throw new Error('VU ROUGE chrome : route /achats/consultations absente de erp-sidebar.config');
   }
   if (!nav.includes("id: 'achats.consultations'")) {
     throw new Error('VU ROUGE chrome : id achats.consultations absent');

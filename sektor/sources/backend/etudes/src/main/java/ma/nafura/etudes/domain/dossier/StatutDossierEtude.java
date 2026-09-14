@@ -5,59 +5,57 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Cycle de vie d'un dossier d'étude.
+ * Cycle de vie d'un dossier d'étude (BC Étude uniquement).
  *
- * <pre>
- * BROUILLON → A_DECIDER → AFFECTE → EN_ETUDE ⇄ SUSPENDU → [A_AVIS_EXECUTION] → EN_VALIDATION → …
- *      │           │          │          │
- *      └ archive    ├ archive  └ REJETE_CHIFFRAGE ⇄ AFFECTE
- *                                └ BROUILLON (réinitialiser)
- *                   └ NE_PAS_ETUDIER → ANNULE
- * </pre>
+ * <p>Hors périmètre : négociation commerciale, Gagné / Perdu, devis après validation,
+ * chantier. {@link #FINAL_APPROVED} est le terminal positif ; {@link #ARCHIVED} le
+ * terminal d'abandon.
  */
 public enum StatutDossierEtude {
-    BROUILLON,
-    A_DECIDER,
-    AFFECTE,
-    EN_ETUDE,
-    A_AVIS_EXECUTION,
-    EN_VALIDATION,
-    VALIDEE,
-    DEVIS_GENERE,
-    GAGNE,
-    PERDU,
-    CONVERTIE,
-    ANNULE,
-    NE_PAS_ETUDIER,
-    REJETE_CHIFFRAGE,
-    SUSPENDU;
+    DRAFT,
+    PENDING_ASSIGNMENT,
+    REJECTED,
+    ASSIGNED,
+    STUDY_REJECTED,
+    IN_PROGRESS,
+    SUSPENDED,
+    COMPLETED,
+    FINANCIALLY_APPROVED,
+    FINANCIALLY_REJECTED,
+    FINAL_APPROVED,
+    FINAL_REJECTED,
+    ARCHIVED;
 
     private static final Map<StatutDossierEtude, Set<StatutDossierEtude>> TRANSITIONS = Map.ofEntries(
-            Map.entry(BROUILLON, EnumSet.of(A_DECIDER, AFFECTE, ANNULE, NE_PAS_ETUDIER)),
-            Map.entry(A_DECIDER, EnumSet.of(AFFECTE, BROUILLON, ANNULE, NE_PAS_ETUDIER)),
-            Map.entry(AFFECTE, EnumSet.of(EN_ETUDE, REJETE_CHIFFRAGE)),
-            Map.entry(EN_ETUDE, EnumSet.of(EN_VALIDATION, A_AVIS_EXECUTION, SUSPENDU, BROUILLON, ANNULE)),
-            Map.entry(A_AVIS_EXECUTION, EnumSet.of(EN_VALIDATION, EN_ETUDE, ANNULE)),
-            Map.entry(EN_VALIDATION, EnumSet.of(VALIDEE, EN_ETUDE, ANNULE)),
-            Map.entry(VALIDEE, EnumSet.of(DEVIS_GENERE, EN_ETUDE, ANNULE)),
-            Map.entry(DEVIS_GENERE, EnumSet.of(GAGNE, PERDU, ANNULE)),
-            Map.entry(GAGNE, EnumSet.of(CONVERTIE)),
-            Map.entry(PERDU, EnumSet.noneOf(StatutDossierEtude.class)),
-            Map.entry(CONVERTIE, EnumSet.noneOf(StatutDossierEtude.class)),
-            Map.entry(ANNULE, EnumSet.noneOf(StatutDossierEtude.class)),
-            Map.entry(NE_PAS_ETUDIER, EnumSet.of(ANNULE)),
-            Map.entry(REJETE_CHIFFRAGE, EnumSet.of(AFFECTE, BROUILLON, ANNULE)),
-            Map.entry(SUSPENDU, EnumSet.of(EN_ETUDE, EN_VALIDATION, A_AVIS_EXECUTION)));
+            Map.entry(DRAFT, EnumSet.of(PENDING_ASSIGNMENT, ASSIGNED, ARCHIVED)),
+            Map.entry(PENDING_ASSIGNMENT, EnumSet.of(ASSIGNED, REJECTED, ARCHIVED)),
+            Map.entry(REJECTED, EnumSet.of(DRAFT, ARCHIVED)),
+            Map.entry(ASSIGNED, EnumSet.of(IN_PROGRESS, STUDY_REJECTED, ARCHIVED)),
+            Map.entry(STUDY_REJECTED, EnumSet.of(IN_PROGRESS, ARCHIVED)),
+            Map.entry(IN_PROGRESS, EnumSet.of(SUSPENDED, COMPLETED, ARCHIVED)),
+            Map.entry(SUSPENDED, EnumSet.of(IN_PROGRESS, ARCHIVED)),
+            Map.entry(COMPLETED, EnumSet.of(FINANCIALLY_APPROVED, FINANCIALLY_REJECTED, ARCHIVED)),
+            Map.entry(FINANCIALLY_REJECTED, EnumSet.of(IN_PROGRESS, ARCHIVED)),
+            Map.entry(FINANCIALLY_APPROVED, EnumSet.of(FINAL_APPROVED, FINAL_REJECTED, ARCHIVED)),
+            Map.entry(FINAL_REJECTED, EnumSet.of(IN_PROGRESS, ARCHIVED)),
+            Map.entry(FINAL_APPROVED, EnumSet.noneOf(StatutDossierEtude.class)),
+            Map.entry(ARCHIVED, EnumSet.noneOf(StatutDossierEtude.class)));
 
     public boolean estModifiable() {
-        return this == BROUILLON
-                || this == A_DECIDER
-                || this == EN_ETUDE
-                || this == REJETE_CHIFFRAGE;
+        return this == DRAFT
+                || this == PENDING_ASSIGNMENT
+                || this == IN_PROGRESS
+                || this == STUDY_REJECTED;
     }
 
+    public boolean enAttenteAffectation() {
+        return this == DRAFT || this == PENDING_ASSIGNMENT;
+    }
+
+    /** @deprecated préférer {@link #enAttenteAffectation()} */
+    @Deprecated
     public boolean enAttenteGo() {
-        return this == BROUILLON || this == A_DECIDER;
+        return enAttenteAffectation();
     }
 
     public boolean peutTransitionnerVers(StatutDossierEtude cible) {
@@ -65,6 +63,10 @@ public enum StatutDossierEtude {
     }
 
     public boolean estTerminal() {
-        return TRANSITIONS.getOrDefault(this, Set.of()).isEmpty();
+        return this == FINAL_APPROVED || this == ARCHIVED;
+    }
+
+    public boolean estClosPourDelai() {
+        return this == FINAL_APPROVED || this == ARCHIVED || this == REJECTED;
     }
 }

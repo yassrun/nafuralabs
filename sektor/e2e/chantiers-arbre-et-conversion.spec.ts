@@ -173,26 +173,51 @@ async function jusquAuDevis(
   });
   expect(etape.ok(), await etape.text()).toBeTruthy();
 
+  const go = await request.post(`${API_BASE}/api/v1/etudes/dossiers/${dossierId}/go`, {
+    headers: h,
+    data: { chargeEtudeUserId: session.userId },
+  });
+  expect(go.ok(), await go.text()).toBeTruthy();
+  const afterGo = (await go.json()) as { status?: string };
+  if (afterGo.status === 'ASSIGNED') {
+    const accept = await request.post(
+      `${API_BASE}/api/v1/etudes/dossiers/${dossierId}/accepter-affectation`,
+      { headers: h },
+    );
+    expect(accept.ok(), await accept.text()).toBeTruthy();
+  }
+
   const soumettre = await request.post(
     `${API_BASE}/api/v1/etudes/dossiers/${dossierId}/soumettre`,
     { headers: h },
   );
   expect(soumettre.ok(), await soumettre.text()).toBeTruthy();
 
-  // La validation peut demander deux passes (EN_VALIDATION puis VALIDEE).
+  // Financier puis définitif (COMPLETED → FINANCIALLY_APPROVED → FINAL_APPROVED).
   let valider = await request.post(`${API_BASE}/api/v1/etudes/dossiers/${dossierId}/valider`, {
     headers: h,
   });
   expect(valider.ok(), await valider.text()).toBeTruthy();
   let body = (await valider.json()) as { status?: string };
-  if (body.status === 'EN_VALIDATION') {
+  if (
+    body.status === 'EN_VALIDATION' ||
+    body.status === 'COMPLETED' ||
+    body.status === 'FINANCIALLY_APPROVED'
+  ) {
     valider = await request.post(`${API_BASE}/api/v1/etudes/dossiers/${dossierId}/valider`, {
       headers: h,
     });
     expect(valider.ok(), await valider.text()).toBeTruthy();
     body = (await valider.json()) as { status?: string };
   }
-  expect(body.status).toBe('VALIDEE');
+  if (body.status === 'FINANCIALLY_APPROVED') {
+    valider = await request.post(`${API_BASE}/api/v1/etudes/dossiers/${dossierId}/valider`, {
+      headers: h,
+    });
+    expect(valider.ok(), await valider.text()).toBeTruthy();
+    body = (await valider.json()) as { status?: string };
+  }
+  expect(body.status).toBe('FINAL_APPROVED');
 
   const devis = await request.post(
     `${API_BASE}/api/v1/etudes/dossiers/${dossierId}/generer-devis`,
@@ -216,7 +241,7 @@ async function marquerGagne(
     },
   });
   expect(res.ok(), await res.text()).toBeTruthy();
-  expect(((await res.json()) as { status?: string }).status).toBe('GAGNE');
+  expect(((await res.json()) as { status?: string }).status).toBe('FINAL_APPROVED');
 }
 
 /**
@@ -489,7 +514,7 @@ test.describe('SEKTOR-150 — arbre vendu / interne et conversion depuis GAGNE',
     expect(ok.status, JSON.stringify(ok.body)).toBe(200);
     const chantierId = ok.body['chantierId'] as string;
     expect(chantierId).toBeTruthy();
-    expect(ok.body['status']).toBe('CONVERTIE');
+    expect(ok.body['status']).toBe('FINAL_APPROVED');
 
     const chantier = await request.get(`${API_BASE}/api/v1/chantiers/${chantierId}`, {
       headers: headers(session),
@@ -659,7 +684,7 @@ test.describe('SEKTOR-150 — arbre vendu / interne et conversion depuis GAGNE',
     const dossier = await request.get(`${API_BASE}/api/v1/etudes/dossiers/${etude.dossierId}`, {
       headers: headers(session),
     });
-    expect(((await dossier.json()) as { status: string }).status).toBe('CONVERTIE');
+    expect(((await dossier.json()) as { status: string }).status).toBe('FINAL_APPROVED');
 
     // AC-9 — le rejeu renvoie le même chantier, avec un code différent qui est ignoré.
     const rejeu = await convertir(request, session, etude.dossierId, {
@@ -668,7 +693,7 @@ test.describe('SEKTOR-150 — arbre vendu / interne et conversion depuis GAGNE',
     });
     expect(rejeu.status, JSON.stringify(rejeu.body)).toBe(200);
     expect(rejeu.body['chantierId']).toBe(chantierId);
-    expect(rejeu.body['status']).toBe('CONVERTIE');
+    expect(rejeu.body['status']).toBe('FINAL_APPROVED');
 
     // AC-9 — deux appels concurrents ne produisent pas deux chantiers.
     const [a, b] = await Promise.all([
@@ -724,7 +749,7 @@ test.describe('SEKTOR-150 — arbre vendu / interne et conversion depuis GAGNE',
       headers: headers(session),
     });
     const dossierAvant = (await avant.json()) as { status: string; chantierGenereId?: string };
-    expect(dossierAvant.status).toBe('GAGNE');
+    expect(dossierAvant.status).toBe('FINAL_APPROVED');
     expect(dossierAvant.chantierGenereId).toBeFalsy();
 
     // AC-12 — l'humain place le poste, nommément, dans un lot d'accueil qu'il crée.
@@ -781,7 +806,7 @@ test.describe('SEKTOR-150 — arbre vendu / interne et conversion depuis GAGNE',
       headers: headers(session),
     });
     const apres = (await dossier.json()) as { status: string; chantierGenereId?: string };
-    expect(apres.status).toBe('GAGNE');
+    expect(apres.status).toBe('FINAL_APPROVED');
     expect(apres.chantierGenereId).toBeFalsy();
 
     // Aucun chantier ne porte le code demandé — ni arbre, ni budget derrière.
@@ -1024,7 +1049,7 @@ test.describe('SEKTOR-150 — arbre vendu / interne et conversion depuis GAGNE',
     const dossier = await request.get(`${API_BASE}/api/v1/etudes/dossiers/${etude.dossierId}`, {
       headers: h,
     });
-    expect(((await dossier.json()) as { status: string }).status).toBe('CONVERTIE');
+    expect(((await dossier.json()) as { status: string }).status).toBe('FINAL_APPROVED');
 
     // AC-6 — le lien retour des lignes vendues restantes tient toujours.
     const apres = await lireLots(request, session, chantierId);
