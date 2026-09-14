@@ -1,6 +1,7 @@
 package ma.nafura.etudes.api.controller;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,7 +21,10 @@ import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,6 +65,41 @@ public class DossierDocumentController {
     @RequirePermission("etude.read")
     public ResponseEntity<List<DossierDocument>> lister(@PathVariable UUID dossierId) {
         return ResponseEntity.ok(service.lister(dossierId));
+    }
+
+    /** Consultation / ouverture de la pièce originale (CPS, BDP, plans…). */
+    @GetMapping("/{documentId}/contenu")
+    @RequirePermission("etude.read")
+    public ResponseEntity<?> consulter(@PathVariable UUID dossierId, @PathVariable UUID documentId) {
+        try {
+            DossierDocumentService.DocumentContenu contenu = service.consulter(dossierId, documentId);
+            MediaType mediaType;
+            try {
+                mediaType = MediaType.parseMediaType(contenu.mimeType());
+            } catch (IllegalArgumentException ex) {
+                mediaType = MediaType.APPLICATION_OCTET_STREAM;
+            }
+            String nom = contenu.nomFichier() != null ? contenu.nomFichier() : "document";
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, mediaType.toString())
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            ContentDisposition.inline()
+                                    .filename(nom.replace("\"", "").replace("\r", "").replace("\n", ""), StandardCharsets.UTF_8)
+                                    .build()
+                                    .toString())
+                    .body(contenu.octets());
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of(
+                            "code",
+                            ex.getMessage() != null ? ex.getMessage() : "etudes.document.introuvable"));
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(Map.of(
+                            "code",
+                            ex.getMessage() != null ? ex.getMessage() : "etudes.document.telechargement_impossible"));
+        }
     }
 
     @PostMapping(consumes = "multipart/form-data")

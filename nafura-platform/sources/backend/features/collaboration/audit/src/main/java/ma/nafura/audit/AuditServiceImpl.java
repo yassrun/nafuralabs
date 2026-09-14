@@ -27,13 +27,16 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     @Transactional
-    public AuditEvent log(String entityType, UUID entityId, String action, Map<String, Object> payload) {
+    public AuditEvent log(String entityType, String entityId, String action, Map<String, Object> payload) {
         return log(entityType, entityId, action, null, payload);
     }
 
     @Override
     @Transactional
-    public AuditEvent log(String entityType, UUID entityId, String action, String details, Map<String, Object> payload) {
+    public AuditEvent log(String entityType, String entityId, String action, String details, Map<String, Object> payload) {
+        if (!StringUtils.hasText(entityType) || !StringUtils.hasText(entityId) || !StringUtils.hasText(action)) {
+            throw new IllegalArgumentException("entityType, entityId and action are required");
+        }
         UUID tenantId = TenantContext.getTenantId();
         String actor = UserContext.getUserEmail();
         if (actor == null || actor.isBlank()) {
@@ -54,7 +57,7 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AuditEvent> getTimeline(String entityType, UUID entityId, Pageable pageable) {
+    public Page<AuditEvent> getTimeline(String entityType, String entityId, Pageable pageable) {
         UUID tenantId = TenantContext.getTenantId();
         return auditEventRepository.findByTenantIdAndEntityTypeAndEntityIdOrderByEventAtDesc(
                 tenantId, entityType, entityId, pageable);

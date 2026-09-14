@@ -54,6 +54,7 @@ public class DpuService {
     private final GelPrixComposantService gelPrixService;
     private final OuvrageCompositeService compositeService;
     private final ObjectMapper objectMapper;
+    private final DpgfLotAffectationService lotAffectationService;
 
     public DpuService(
             PrixDpuRepository repository,
@@ -68,7 +69,8 @@ public class DpuService {
             DossierIntervenantService intervenantService,
             GelPrixComposantService gelPrixService,
             OuvrageCompositeService compositeService,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            DpgfLotAffectationService lotAffectationService) {
         this.repository = repository;
         this.versionRepository = versionRepository;
         this.ouvrageRepository = ouvrageRepository;
@@ -82,6 +84,7 @@ public class DpuService {
         this.gelPrixService = gelPrixService;
         this.compositeService = compositeService;
         this.objectMapper = objectMapper;
+        this.lotAffectationService = lotAffectationService;
     }
 
     @Transactional(readOnly = true)
@@ -159,6 +162,7 @@ public class DpuService {
     @Transactional
     public PrixDpu update(UUID id, PrixDpuUpdateDto request) {
         PrixDpu entity = requirePrixDpu(id);
+        lotAffectationService.assertPeutSaisirPrixDpu(entity);
         if (request.getFraisGenerauxPercent() != null) {
             entity.setFraisGenerauxPercent(request.getFraisGenerauxPercent());
         }
@@ -180,6 +184,7 @@ public class DpuService {
     @Transactional
     public ComposantDpu addComposant(UUID prixDpuId, ComposantDpuInputDto input) {
         PrixDpu entity = requirePrixDpu(prixDpuId);
+        lotAffectationService.assertPeutSaisirPrixDpu(entity);
         ComposantDpu line = buildComposant(entity, input, entity.getComposants().size());
         entity.getComposants().add(line);
         assertOuvrageGraph(entity);
@@ -199,6 +204,7 @@ public class DpuService {
     @Transactional
     public PrixDpu recompute(UUID id) {
         PrixDpu entity = requirePrixDpu(id);
+        lotAffectationService.assertPeutSaisirPrixDpu(entity);
         calculator.recomputeLineTotals(entity.getComposants());
         applyTotals(entity);
         PrixDpu saved = repository.save(entity);
@@ -209,6 +215,7 @@ public class DpuService {
     @Transactional
     public DpuHistoriqueEntryDto createVersion(UUID id) {
         PrixDpu entity = requirePrixDpu(id);
+        lotAffectationService.assertPeutSaisirPrixDpu(entity);
         attachComposantLinks(entity);
         calculator.recomputeLineTotals(entity.getComposants());
         applyTotals(entity);
@@ -308,6 +315,7 @@ public class DpuService {
         UUID tenantId = tenantId();
         UUID noeudId = request.getDpgfNoeudId();
         DpgfNoeud noeud = requireArticleNoeud(noeudId, tenantId);
+        lotAffectationService.assertPeutSaisirNoeud(noeud);
         if (repository.findByDpgfNoeudIdAndTenantId(noeudId, tenantId).isPresent()) {
             throw new IllegalArgumentException("DPU already exists for DPGF noeud");
         }
@@ -546,6 +554,7 @@ public class DpuService {
     public PrixDpu refreshPrices(UUID dpuId) {
         PrixDpu entity = requirePrixDpu(dpuId);
         assertDossierModifiablePourDpu(entity);
+        lotAffectationService.assertPeutSaisirPrixDpu(entity);
         boolean changed = false;
         for (ComposantDpu composant : entity.getComposants()) {
             if (!GelPrixComposantService.isItem(composant.getReferenceType())

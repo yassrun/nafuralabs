@@ -93,12 +93,6 @@
       "send": "Send invitations",
       "dismiss": "Later",
       "csv": "Import from CSV"
-    },
-    "completeness": {
-      "label": "Setup",
-      "tooltipTitle": "Company setup progress",
-      "panelTitle": "Finish setting up my company",
-      "loadDemo": "Load demo data →"
     }
   }
 }

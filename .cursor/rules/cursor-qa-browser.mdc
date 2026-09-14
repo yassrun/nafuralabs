@@ -14,7 +14,7 @@ Pas Keycloak. Auto-login **conservé** sur l’owner.
 | | |
 |---|---|
 | Tenant | `qa-local` |
-| Auto-login | `qa@nafuralabs.local` (`OWNER` + `SUPER_ADMIN` + `BTP_INGENIEUR`) |
+| Auto-login | `qa@nafuralabs.local` (`OWNER` + `SUPER_ADMIN` + `BTP_INGENIEUR` + `BTP_ADMIN_ETUDE`) |
 | Front | `npm run start:erp:cursor` → `POST /api/public/dev/cursor-session` |
 | Mot de passe | aucun — JWT HS256 local |
 
@@ -26,14 +26,19 @@ Seedés au boot sur le **même** tenant. Un rôle IAM chacun, **sans** SUPER_ADM
 
 | Alias `qa-token.sh` / `?role=` | Email | Rôle |
 |---|---|---|
-| `owner` (défaut) | `qa@nafuralabs.local` | OWNER |
+| `owner` (défaut) | `qa@nafuralabs.local` | OWNER · Admin étude |
 | `ingenieur` | `qa.ingenieur@nafuralabs.local` | `BTP_INGENIEUR` |
+| `ingenieur-2` | `qa.ingenieur2@nafuralabs.local` | `BTP_INGENIEUR` |
+| `utilisateur` | `qa.utilisateur@nafuralabs.local` | `BTP_LECTEUR_ETUDE` |
+| `assistant` (`secretaire`) | `qa.assistant@nafuralabs.local` | `BTP_ASSISTANT_ETUDE` |
 | `conducteur` | `qa.conducteur@nafuralabs.local` | `BTP_CONDUCTEUR_TRAVAUX` |
 | `directeur` | `qa.directeur@nafuralabs.local` | `BTP_DIRECTEUR_TRAVAUX` |
 | `daf` | `qa.daf@nafuralabs.local` | `BTP_DAF` |
 | `dg` | `qa.dg@nafuralabs.local` | `BTP_DG` |
 | `chef-chantier` | `qa.chef-chantier@nafuralabs.local` | `BTP_CHEF_CHANTIER` |
 | `magasinier` | `qa.magasinier@nafuralabs.local` | `BTP_MAGASINIER` |
+
+UI Mode B : premier boot = auto-login owner. **Déconnexion** → `/login` (dropdown des identités). Pas Keycloak. Agents / e2e : contexte neuf = auto-login inchangé.
 
 Chaque identité a un **employé RH** lié (`QaLocalEmployeProvisioner`) pour les affectations chantier.
 
@@ -62,7 +67,7 @@ Idempotent si 8082/4200 sont déjà up. Prérequis : infra staging (`bootstrap-e
 - UI : **`http://127.0.0.1:4200`** (pas `localhost` si flaky)
 - API : `http://localhost:8082`
 
-Changer d’identité = **nouveau token**, pas un login écran. Le front auto-login reste owner.
+Changer d’identité UI = **Déconnexion** → `/login` (dropdown). API / agents = **nouveau token** (`qa-token.sh` / `?role=`). Premier boot front = auto-login owner.
 
 ## Browser MCP — ordre obligatoire
 

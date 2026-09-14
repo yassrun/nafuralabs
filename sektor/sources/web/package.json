@@ -39,7 +39,10 @@
     "i18n:coverage": "node scripts/i18n-coverage.mjs",
     "i18n:coverage:write": "node scripts/i18n-coverage.mjs --write",
     "serve:ssr:sektor": "node dist/sektor/server/server.mjs",
-    "e2e:commerce": "playwright test ../../e2e/*commerce-flow*"
+    "e2e:commerce": "playwright test ../../e2e/*commerce-flow*",
+    "ai:catalog": "node scripts/generate-ai-screen-catalog.mjs",
+    "ai:catalog:check": "node scripts/generate-ai-screen-catalog.mjs --check",
+    "ai:catalog:test": "node --test scripts/generate-ai-screen-catalog.spec.mjs"
   },
   "private": true,
   "dependencies": {

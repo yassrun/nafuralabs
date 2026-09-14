@@ -40,8 +40,8 @@ public class AssignmentNotificationListener {
             NotificationEvent notificationEvent = NotificationEvent.builder()
                     .sourceObject(this)
                     .recipientId(assignee.getId())
-                    .title("Record assigned")
-                    .body(String.format("You were assigned to %s.", readableEntity(event.getEntityType())))
+                    .title(hasText(event.getTitle()) ? event.getTitle() : "Affectation")
+                    .body(hasText(event.getBody()) ? event.getBody() : defaultBody(event.getEntityType()))
                     .entityType(event.getEntityType())
                     .entityId(event.getEntityId())
                     .source("assignment")
@@ -75,9 +75,23 @@ public class AssignmentNotificationListener {
         }
     }
 
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
+
+    private String defaultBody(String entityType) {
+        if ("lot-etude".equals(entityType)) {
+            return "Un lot t'a été affecté.";
+        }
+        if ("dossier-etude".equals(entityType)) {
+            return "Une étude t'a été affectée.";
+        }
+        return readableEntity(entityType) + " t'a été affecté.";
+    }
+
     private String readableEntity(String entityType) {
         if (entityType == null || entityType.isBlank()) {
-            return "record";
+            return "un enregistrement";
         }
         return entityType.replace('-', ' ').replace('_', ' ');
     }

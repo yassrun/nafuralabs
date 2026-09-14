@@ -15,6 +15,9 @@ import {
   importArbreToTreeNodes,
   importKeyToPath,
   isArticleExploitable,
+  noeudsDpgfToTreeNodes,
+  retainExpandableKeys,
+  selectedRootRows,
   type BordereauTreeRow,
   type ImportNoeudPreview,
 } from './bordereau-tree.util';
@@ -261,11 +264,71 @@ describe('filtre arbre Coût', () => {
   });
 });
 
+describe('noeudsDpgfToTreeNodes', () => {
+  it('propage l’affectation du lot aux articles descendants', () => {
+    const nodes = noeudsDpgfToTreeNodes([
+      {
+        id: 'lot-1',
+        type: 'LOT',
+        code: '1',
+        libelle: 'Gros œuvre',
+        chargeLotUserId: 'hassan',
+        chargeLotNom: 'Hassan',
+        enfants: [
+          {
+            id: 'a-1',
+            type: 'ARTICLE',
+            code: '1.1',
+            libelle: 'Béton',
+            unite: 'm3',
+            quantite: 2,
+          },
+        ],
+      },
+    ]);
+    expect(nodes[0].data.chargeLotUserId).toBe('hassan');
+    expect(nodes[0].children?.[0].data.chargeLotUserId).toBe('hassan');
+    expect(nodes[0].children?.[0].data.chargeLotNom).toBe('Hassan');
+  });
+});
+
 describe('bordereauTableMinWidth', () => {
   it('réserve le libellé et les métriques sans forcer 100%', () => {
     expect(bordereauTableMinWidth({ selection: false, structureActions: false }))
       .toBe('30.2rem');
     expect(bordereauTableMinWidth({ selection: false, structureActions: true }))
       .toBe('38.7rem');
+    expect(bordereauTableMinWidth({ selection: false, structureActions: false, lotAffectation: true }))
+      .toBe('33.45rem');
+    expect(bordereauTableMinWidth({ selection: false, structureActions: true, bulkSelect: true }))
+      .toBe('41.45rem');
+  });
+});
+
+describe('selectedRootRows / retainExpandableKeys', () => {
+  const lot = (
+    key: string,
+    children: NfTreeNode<BordereauTreeRow>[] = [],
+  ): NfTreeNode<BordereauTreeRow> => ({
+    key,
+    leaf: children.length === 0,
+    data: { key, type: 'LOT', code: key, libelle: key, depth: 0 },
+    children,
+  });
+
+  it('ignore les enfants déjà couverts par un parent sélectionné', () => {
+    const sl = lot('sl');
+    const a = lot('a', [sl]);
+    const b = lot('b');
+    const roots = selectedRootRows([a, b], new Set(['a', 'sl', 'b']));
+    expect(roots.map((r) => r.key)).toEqual(['a', 'b']);
+  });
+
+  it('ne garde que les clés encore expansibles', () => {
+    const kept = retainExpandableKeys(
+      [lot('a', [lot('sl')]), lot('b')],
+      new Set(['a', 'gone', 'b']),
+    );
+    expect([...kept]).toEqual(['a']);
   });
 });

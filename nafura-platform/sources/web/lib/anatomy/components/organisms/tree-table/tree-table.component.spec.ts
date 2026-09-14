@@ -24,7 +24,9 @@ interface TestRow {
       [columns]="columns"
       treeColumnKey="name"
       [loading]="loading"
-      [showDetail]="showDetail">
+      [showDetail]="showDetail"
+      [selectable]="selectable"
+      [selectedKeys]="selected">
       <ng-template #cell let-row>{{ row.name }}</ng-template>
       <ng-template #detail let-row>
         <span class="test-detail">{{ row.detail }}</span>
@@ -49,6 +51,8 @@ class TreeTableHostComponent {
     }],
   }];
   showDetail = (row: TestRow): boolean => Boolean(row.detail);
+  selectable: boolean | 'multiple' = false;
+  selected = new Set<string>();
 }
 
 describe('TreeTableComponent', () => {
@@ -117,6 +121,13 @@ describe('TreeTableComponent', () => {
     expect(toggler).not.toBeNull();
     expect(toggler!.querySelectorAll('mat-icon').length).toBe(0);
     expect(toggler!.querySelectorAll('lucide-icon').length).toBe(1);
+  });
+
+  it('shows checkboxes in multiple selection mode', () => {
+    fixture.componentInstance.selectable = 'multiple';
+    fixture.detectChanges();
+    const boxes = (fixture.nativeElement as HTMLElement).querySelectorAll('mat-checkbox');
+    expect(boxes.length).toBeGreaterThan(0);
   });
 
   it('pins stickyEnd columns to the right', () => {

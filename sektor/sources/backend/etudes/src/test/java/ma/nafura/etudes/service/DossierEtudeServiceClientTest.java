@@ -136,6 +136,28 @@ class DossierEtudeServiceClientTest {
     }
 
     @Test
+    void create_sans_charge_etude() {
+        when(repository.countByTenantId(TENANT)).thenReturn(0L);
+        when(repository.save(any())).thenAnswer(inv -> {
+            DossierEtude d = inv.getArgument(0);
+            if (d.getId() == null) {
+                d.setId(UUID.randomUUID());
+            }
+            return d;
+        });
+
+        DossierEtudeCreateDto dto = new DossierEtudeCreateDto();
+        dto.setObjet("Cadrage sans ingénieur");
+        dto.setClientNom("MOA cadrage");
+
+        DossierEtude created = service.create(dto);
+
+        assertThat(created.getChargeEtudeUserId()).isNull();
+        assertThat(created.getStatus()).isEqualTo(StatutDossierEtude.DRAFT);
+        assertThat(created.getCurrentStep()).isEqualTo(DossierEtude.ETAPE_PREMIERE);
+    }
+
+    @Test
     void create_avecMoaTexte_sansPartner() {
         when(repository.countByTenantId(TENANT)).thenReturn(0L);
         when(repository.save(any())).thenAnswer(inv -> {
@@ -194,7 +216,7 @@ class DossierEtudeServiceClientTest {
                 .tenantId(TENANT)
                 .numero("DE-0001")
                 .objet("X")
-                .status(StatutDossierEtude.BROUILLON)
+                .status(StatutDossierEtude.DRAFT)
                 .clientId(CLIENT.toString())
                 .clientNom("OCP SA")
                 .build();
@@ -234,7 +256,7 @@ class DossierEtudeServiceClientTest {
                 .tenantId(TENANT)
                 .numero("DE-0009")
                 .objet("Sans client")
-                .status(StatutDossierEtude.VALIDEE)
+                .status(StatutDossierEtude.FINAL_APPROVED)
                 .dpgfId(UUID.randomUUID())
                 .clientNom("MOA texte")
                 .build();
@@ -256,7 +278,7 @@ class DossierEtudeServiceClientTest {
                 .tenantId(TENANT)
                 .numero("DE-0010")
                 .objet("Lier client")
-                .status(StatutDossierEtude.VALIDEE)
+                .status(StatutDossierEtude.FINAL_APPROVED)
                 .dpgfId(UUID.randomUUID())
                 .clientNom("Commune de Tanger")
                 .build();
@@ -275,7 +297,7 @@ class DossierEtudeServiceClientTest {
         assertThat(out.getClientId()).isEqualTo(CLIENT.toString());
         assertThat(out.getClientNom()).isEqualTo("Commune de Tanger");
         assertThat(out.getDevisGenereId()).isEqualTo(devisId);
-        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.DEVIS_GENERE);
+        assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.FINAL_APPROVED);
     }
 
     @Test
@@ -287,7 +309,7 @@ class DossierEtudeServiceClientTest {
                 .tenantId(TENANT)
                 .numero("DE-0320")
                 .objet("Cadrage AO")
-                .status(StatutDossierEtude.BROUILLON)
+                .status(StatutDossierEtude.DRAFT)
                 .clientNom("RRA")
                 .build();
         when(repository.findByIdAndTenantId(id, TENANT)).thenReturn(Optional.of(dossier));
@@ -334,7 +356,7 @@ class DossierEtudeServiceClientTest {
                 .tenantId(TENANT)
                 .numero("DE-0271")
                 .objet("Cadrage sans date")
-                .status(StatutDossierEtude.BROUILLON)
+                .status(StatutDossierEtude.DRAFT)
                 .clientNom("RRA")
                 .build();
         when(repository.findByIdAndTenantId(id, TENANT)).thenReturn(Optional.of(dossier));

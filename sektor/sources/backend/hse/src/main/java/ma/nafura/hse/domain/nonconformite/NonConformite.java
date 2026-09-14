@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.nafura.platform.framework.audit.Auditable;
 
 @Entity
 @Table(name = "non_conformites")
@@ -25,6 +26,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "non-conformite", trackedFields = {"numero", "status"})
 public class NonConformite {
 
     public static final String STATUS_OUVERTE = "OUVERTE";

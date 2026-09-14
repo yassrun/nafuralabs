@@ -28,12 +28,13 @@ public class AgentToolDescriptions {
                                 ),
                                 List.of("query")
                         )),
-                tool("navigate", "Resolve a route for pages and records",
+                tool("navigate", "Resolve a route for pages and records. Use operation=create to open the new-record screen when the user wants to add something.",
                         schema(
                                 List.of(
                                         property("target", "string", "Human target label"),
                                         property("entityType", "string", "Entity type"),
-                                        property("entityId", "string", "Entity identifier")
+                                        property("entityId", "string", "Entity identifier"),
+                                        property("operation", "string", "list, create, or detail")
                                 ),
                                 List.of()
                         )),

@@ -42,6 +42,7 @@ public class DpgfService {
     private final ParametresEtudeService parametresEtudeService;
     private final DpuCalculator dpuCalculator;
     private final DossierIntervenantService intervenantService;
+    private final DpgfLotAffectationService lotAffectationService;
 
     public DpgfService(
             DpgfRepository repository,
@@ -50,7 +51,8 @@ public class DpgfService {
             DpgfAgregationService agregationService,
             ParametresEtudeService parametresEtudeService,
             DpuCalculator dpuCalculator,
-            DossierIntervenantService intervenantService) {
+            DossierIntervenantService intervenantService,
+            DpgfLotAffectationService lotAffectationService) {
         this.repository = repository;
         this.noeudRepository = noeudRepository;
         this.dossierEtudeRepository = dossierEtudeRepository;
@@ -58,6 +60,7 @@ public class DpgfService {
         this.parametresEtudeService = parametresEtudeService;
         this.dpuCalculator = dpuCalculator;
         this.intervenantService = intervenantService;
+        this.lotAffectationService = lotAffectationService;
     }
 
     @Transactional(readOnly = true)
@@ -71,6 +74,10 @@ public class DpgfService {
     public Dpgf getById(UUID id) {
         Dpgf entity = requireDpgf(id);
         attachArbre(entity);
+        dossierEtudeRepository
+                .findByTenantIdAndDpgfId(tenantId(), entity.getId())
+                .ifPresent(dossier -> entity.setHierarchie(
+                        lotAffectationService.filtrerArbre(entity.getHierarchie(), dossier)));
         return entity;
     }
 
@@ -253,6 +260,7 @@ public class DpgfService {
     @Transactional
     public DpgfNoeud addNoeud(UUID dpgfId, DpgfNoeudCreateDto request) {
         assertStructureEditable(dpgfId);
+        assertStructureReserveeCharge(dpgfId);
         Dpgf dpgf = requireDpgf(dpgfId);
         UUID tenantId = tenantId();
         UUID parentId = parseUuidOrNull(request.getParentId());
@@ -319,8 +327,9 @@ public class DpgfService {
                 || request.getArticleId() != null;
         if (structureChange) {
             assertStructureEditable(noeud.getDpgf().getId());
+            assertStructureReserveeCharge(noeud.getDpgf().getId());
         } else {
-            assertDossierEditable(noeud.getDpgf().getId());
+            lotAffectationService.assertPeutSaisirNoeud(noeud);
         }
 
         if (request.getCode() != null) {
@@ -487,6 +496,7 @@ public class DpgfService {
                 .orElseThrow(() -> new IllegalArgumentException("DPGF noeud not found"));
         UUID dpgfId = noeud.getDpgf().getId();
         assertStructureEditable(dpgfId);
+        assertStructureReserveeCharge(dpgfId);
         deleteDescendants(noeudId, tenantId);
         noeudRepository.delete(noeud);
         recalcHeaderTotals(dpgfId);
@@ -503,14 +513,10 @@ public class DpgfService {
                 });
     }
 
-    private void assertDossierEditable(UUID dpgfId) {
+    private void assertStructureReserveeCharge(UUID dpgfId) {
         dossierEtudeRepository
                 .findByTenantIdAndDpgfId(tenantId(), dpgfId)
-                .ifPresent(dossier -> {
-                    if (!dossier.isModifiable()) {
-                        throw new IllegalStateException("etudes.dossier.verrouille");
-                    }
-                });
+                .ifPresent(dossier -> new EtudeSaisiePolicy().assertPeutSaisirApresGo(dossier));
     }
 
     private void deleteDescendants(UUID parentId, UUID tenantId) {

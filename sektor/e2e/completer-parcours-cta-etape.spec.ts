@@ -48,11 +48,7 @@ async function createDossier(
   session: CursorSession,
   suffix: string,
 ): Promise<string> {
-  const ing = await request.get(`${API_BASE}/api/v1/etudes/ingenieurs`, {
-    headers: headers(session),
-  });
-  const list = ing.ok() ? ((await ing.json()) as { userId?: string }[]) : [];
-  const chargeEtudeUserId = list[0]?.userId ?? session.userId;
+  const chargeEtudeUserId = session.userId;
   const created = await request.post(`${API_BASE}/api/v1/etudes/dossiers`, {
     headers: headers(session),
     data: {
@@ -62,7 +58,17 @@ async function createDossier(
     },
   });
   expect(created.status(), await created.text()).toBe(201);
-  return ((await created.json()) as { id: string }).id;
+  const id = ((await created.json()) as { id: string }).id;
+  const go = await request.post(`${API_BASE}/api/v1/etudes/dossiers/${id}/go`, {
+    headers: headers(session),
+    data: { chargeEtudeUserId },
+  });
+  expect(go.ok(), await go.text()).toBeTruthy();
+  const accept = await request.post(`${API_BASE}/api/v1/etudes/dossiers/${id}/accepter-affectation`, {
+    headers: headers(session),
+  });
+  expect(accept.ok(), await accept.text()).toBeTruthy();
+  return id;
 }
 
 async function currentStep(
@@ -133,11 +139,6 @@ test.describe('SEKTOR-129 — CTA avancent l’étape', () => {
     const id = await createDossier(request, session, suffix);
 
     await page.goto(`/etudes/dossiers/${id}`, { waitUntil: 'domcontentloaded' });
-    await expect(page.getByText(/Identité de l’étude|CPS/i).first()).toBeVisible({
-      timeout: 20000,
-    });
-
-    await clickWizardNext(page, /Continuer vers le bordereau/i);
     await page.getByRole('button', { name: /^Manuel$/i }).click();
     await page.getByRole('button', { name: /Créer l’arbre vide|Creer l'arbre vide/i }).click();
     await expect(page.getByRole('heading', { name: /Arbre du bordereau/i })).toBeVisible({
@@ -151,35 +152,23 @@ test.describe('SEKTOR-129 — CTA avancent l’étape', () => {
       timeout: 20000,
     });
 
-    await clickWizardNext(page, /Continuer vers le coût/i);
+    await clickWizardNext(page, /Continuer vers le (coût|chiffrage)/i);
     await expect(page.locator('app-consultation-etude-panel')).toBeVisible({ timeout: 20000 });
     expect(await currentStep(request, session, id)).toBe(3);
 
-    const headerSynthese = page
-      .locator('app-dossier-summary-header')
-      .getByRole('button', { name: /^Voir la synthèse$/i });
-    await expect(headerSynthese).toBeVisible({ timeout: 10000 });
-    await headerSynthese.click();
-    await expect(page.getByText(/Synthèse et validation/i).first()).toBeVisible({
+    await clickWizardNext(page, /Continuer vers le planning/i);
+    await expect(page.getByRole('heading', { name: /Planning prévisionnel/i })).toBeVisible({
       timeout: 20000,
     });
-    expect(await currentStep(request, session, id), 'header VOIR_SYNTHESE doit PUT etape 5').toBe(
-      5,
-    );
-
-    const back = page.locator('nf-wizard-shell .nf-wizard-shell__actions').getByRole('button', {
-      name: /Précédent/i,
+    await expect(page.getByRole('heading', { name: /Ressources prévues/i })).toBeVisible({
+      timeout: 20000,
     });
-    await expect(back).toBeEnabled();
-    await back.click();
-    await expect(page.locator('app-consultation-etude-panel')).toBeVisible({ timeout: 15000 });
+    expect(await currentStep(request, session, id), 'footer planning doit PUT etape 5').toBe(5);
 
     await clickWizardNext(page, /Voir la synthèse/i);
     await expect(page.getByText(/Synthèse et validation/i).first()).toBeVisible({
       timeout: 20000,
     });
-    expect(await currentStep(request, session, id), 'footer Voir la synthèse doit PUT etape 5').toBe(
-      5,
-    );
+    expect(await currentStep(request, session, id)).toBe(5);
   });
 });

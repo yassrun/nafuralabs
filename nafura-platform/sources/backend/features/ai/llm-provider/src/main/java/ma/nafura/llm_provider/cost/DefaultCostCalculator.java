@@ -15,7 +15,8 @@ public class DefaultCostCalculator implements CostCalculator {
         pricingMap.put("gemini-2.0-flash", new ModelPricing(0.10, 0.40));
         pricingMap.put("gemini-2.5-flash", new ModelPricing(0.15, 0.60));
         pricingMap.put("gemini-2.5-flash-lite", new ModelPricing(0.10, 0.40));
-        // DeepSeek V4 (indicative; see https://api-docs.deepseek.com/)
+        // DeepSeek V4.1-Flash canonical id is deepseek-flash (see api-docs.deepseek.com)
+        pricingMap.put("deepseek-flash", new ModelPricing(0.14, 0.28));
         pricingMap.put("deepseek-v4-flash", new ModelPricing(0.14, 0.28));
         pricingMap.put("deepseek-v4-pro", new ModelPricing(0.55, 2.19));
         // Legacy aliases still seen in older tenant settings
@@ -38,7 +39,7 @@ public class DefaultCostCalculator implements CostCalculator {
             } else if (model != null && model.startsWith("deepseek-v4-pro")) {
                 pricing = pricingMap.get("deepseek-v4-pro");
             } else if (model != null && model.startsWith("deepseek")) {
-                pricing = pricingMap.get("deepseek-v4-flash");
+                pricing = pricingMap.get("deepseek-flash");
             }
         }
         if (pricing == null) {

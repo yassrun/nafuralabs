@@ -17,6 +17,7 @@ import {
  */
 
 const STORAGE_KEY_SELECTION = 'nafura-current-societe';
+const STORAGE_KEY_IDENTITY = 'nafura-societe-identity-';
 
 interface PersistedSelection {
   societeId: string;
@@ -156,6 +157,26 @@ function loadSelection(societes: Societe[], etablissements: Etablissement[]): Pe
   }
 }
 
+function loadIdentityPatch(societeId: string): Partial<Societe> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_IDENTITY + societeId);
+    if (!raw) return {};
+    return JSON.parse(raw) as Partial<Societe>;
+  } catch {
+    return {};
+  }
+}
+
+function persistIdentityPatch(societeId: string, patch: Partial<Societe>): void {
+  try {
+    const next = { ...loadIdentityPatch(societeId), ...patch };
+    delete (next as Partial<Societe>).id;
+    localStorage.setItem(STORAGE_KEY_IDENTITY + societeId, JSON.stringify(next));
+  } catch {
+    /* noop */
+  }
+}
+
 function persistSelection(selection: PersistedSelection): void {
   try {
     localStorage.setItem(STORAGE_KEY_SELECTION, JSON.stringify(selection));
@@ -168,7 +189,9 @@ function persistSelection(selection: PersistedSelection): void {
 export class SocieteService {
   private readonly auth = inject(AuthFacade);
 
-  private readonly _societes = signal<Societe[]>(USE_DEMO_SOCIETES ? SEED_SOCIETES : []);
+  private readonly _societes = signal<Societe[]>(
+    (USE_DEMO_SOCIETES ? SEED_SOCIETES : []).map((s) => ({ ...s, ...loadIdentityPatch(s.id) })),
+  );
   private readonly _etablissements = signal<Etablissement[]>(USE_DEMO_SOCIETES ? SEED_ETABLISSEMENTS : []);
 
   private readonly _initialSelection = loadSelection(this._societes(), this._etablissements());
@@ -206,16 +229,18 @@ export class SocieteService {
     ) {
       return;
     }
+    const identity = loadIdentityPatch(societeId);
     const societe: Societe = {
       id: societeId,
-      raisonSociale: displayName,
-      formeJuridique: 'SARL',
-      ice: '',
-      if: '',
-      rc: '',
-      patente: '',
-      cnss: '',
-      siegeAdresse: '',
+      raisonSociale: identity.raisonSociale?.trim() || displayName,
+      formeJuridique: identity.formeJuridique ?? 'SARL',
+      ice: identity.ice ?? '',
+      if: identity.if ?? '',
+      rc: identity.rc ?? '',
+      patente: identity.patente ?? '',
+      cnss: identity.cnss ?? '',
+      tvaIntra: identity.tvaIntra,
+      siegeAdresse: identity.siegeAdresse ?? '',
       isActive: true,
     };
     const etablissement: Etablissement = {
@@ -257,6 +282,14 @@ export class SocieteService {
   /** Returns établissements bound to a specific société (utilities for listing pages). */
   getEtablissementsBySocieteId(societeId: string): Etablissement[] {
     return this._etablissements().filter((e) => e.societeId === societeId);
+  }
+
+  patchSociete(id: string, patch: Partial<Societe>): void {
+    const found = this._societes().find((s) => s.id === id);
+    if (!found) return;
+    const next = { ...found, ...patch, id };
+    this._societes.update((list) => list.map((s) => (s.id === id ? next : s)));
+    persistIdentityPatch(id, patch);
   }
 
   setCurrentSociete(id: string): void {

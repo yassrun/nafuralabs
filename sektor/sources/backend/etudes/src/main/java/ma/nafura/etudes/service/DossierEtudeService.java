@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import ma.nafura.etudes.api.dto.DossierConversionResultDto;
 import ma.nafura.etudes.api.dto.DossierEtudeSyntheseDto;
+import ma.nafura.etudes.api.dto.StatusChangeDto;
 import ma.nafura.etudes.api.request.AppelOffreClientCreateDto;
 import ma.nafura.etudes.api.request.DossierConvertirDto;
 import ma.nafura.etudes.api.request.DossierEtudeCreateDto;
@@ -36,6 +38,7 @@ import ma.nafura.etudes.domain.dossier.DossierDocument;
 import ma.nafura.etudes.domain.dossier.DossierEtude;
 import ma.nafura.etudes.domain.dossier.DossierPieceAttendue;
 import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
+import ma.nafura.etudes.domain.dossier.DossierEtudeAction;
 import ma.nafura.etudes.domain.dossier.StatutDossierEtude;
 import ma.nafura.etudes.repository.AppelOffreClientRepository;
 import ma.nafura.etudes.repository.AvisExecutionRepository;
@@ -98,6 +101,11 @@ public class DossierEtudeService {
     private final CompletudeEtudeService completudeEtudeService;
     private final DecisionCatalogueService decisionCatalogueService;
     private final Map<Integer, EtapeGate> gatesParEtape;
+    private final EtudeSaisiePolicy saisiePolicy = new EtudeSaisiePolicy();
+    private final DossierEtudeWorkflowPolicy workflowPolicy = new DossierEtudeWorkflowPolicy();
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     public DossierEtudeService(
             DossierEtudeRepository repository,
@@ -151,12 +159,41 @@ public class DossierEtudeService {
 
     @Transactional(readOnly = true)
     public List<DossierEtude> list(StatutDossierEtude status) {
+        return list(status, null, null, null, null, null, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DossierEtude> list(
+            StatutDossierEtude status,
+            String clientId,
+            String chargeEtudeUserId,
+            String affectation,
+            String delaiDepot,
+            String aoType,
+            String search,
+            String attente) {
         UUID tenant = tenantId();
-        List<DossierEtude> dossiers = status == null
-                ? repository.findByTenantIdOrderByCreatedAtDesc(tenant)
-                : repository.findByTenantIdAndStatusOrderByCreatedAtDesc(tenant, status);
+        List<DossierEtude> dossiers = repository.findByTenantIdOrderByCreatedAtDesc(tenant);
         enrichirAoListing(dossiers);
-        return dossiers;
+        enrichirLotAffectations(dossiers);
+        String moi = acteurUserId();
+        String email = UserContext.getUserEmail();
+        LocalDate today = LocalDate.now();
+        return dossiers.stream()
+                .filter(d -> DossierEtudeListFilter.matches(
+                        d,
+                        status,
+                        clientId,
+                        chargeEtudeUserId,
+                        affectation,
+                        delaiDepot,
+                        aoType,
+                        search,
+                        attente,
+                        moi,
+                        email,
+                        today))
+                .toList();
     }
 
     /** Bookmark legacy AOC → dossier lié. */
@@ -202,8 +239,10 @@ public class DossierEtudeService {
         }
 
         ResolvedMoa moa = resolveMoa(dto.getClientId(), dto.getClientNom());
-        String chargeNom = chargeEtudeService.requireIngenieur(
-                dto.getChargeEtudeUserId(), dto.getChargeEtudeNom());
+        String chargeId = trimOrNull(dto.getChargeEtudeUserId());
+        String chargeNom = chargeId != null
+                ? chargeEtudeService.requireIngenieur(chargeId, dto.getChargeEtudeNom())
+                : null;
 
         UUID aocId = dto.getAppelOffreClientId();
         if (aocId == null && dto.getDateLimiteDepot() != null) {
@@ -227,18 +266,33 @@ public class DossierEtudeService {
                 .build();
         dossier.setClientId(moa.clientId());
         dossier.setClientNom(moa.nom());
-        dossier.setChargeEtudeUserId(dto.getChargeEtudeUserId().trim());
-        dossier.setChargeEtudeNom(chargeNom);
+        if (chargeId != null) {
+            dossier.setChargeEtudeUserId(chargeId);
+            dossier.setChargeEtudeNom(chargeNom);
+        }
         DossierEtude saved = repository.save(dossier);
         pieceAttendueService.seedMinimalSiAbsent(saved.getId());
-        intervenantService.upsertChargeEtude(
-                saved.getId(), saved.getChargeEtudeUserId(), saved.getChargeEtudeNom());
+        if (chargeId != null) {
+            intervenantService.upsertChargeEtude(
+                    saved.getId(), saved.getChargeEtudeUserId(), saved.getChargeEtudeNom());
+        }
         return saved;
     }
 
     @Transactional
     public DossierEtude update(UUID id, DossierEtudeUpdateDto dto) {
         DossierEtude dossier = requireModifiable(id);
+        if (dossier.getStatus() == StatutDossierEtude.STUDY_REJECTED) {
+            if (dto.getCpsDocumentId() != null) {
+                dossier.setCpsDocumentId(trimOrNull(dto.getCpsDocumentId()));
+            }
+            if (dto.getBordereauDocumentId() != null) {
+                dossier.setBordereauDocumentId(trimOrNull(dto.getBordereauDocumentId()));
+            }
+            DossierEtude saved = repository.save(dossier);
+            enrichirAoListing(List.of(saved));
+            return saved;
+        }
         if (StringUtils.hasText(dto.getObjet())) {
             dossier.setObjet(dto.getObjet().trim());
         }
@@ -246,12 +300,20 @@ public class DossierEtudeService {
             appliquerMoa(dossier, dto.getClientId(), dto.getClientNom());
         }
         if (dto.getChargeEtudeUserId() != null) {
-            String chargeNom = chargeEtudeService.requireIngenieur(
-                    dto.getChargeEtudeUserId(), dto.getChargeEtudeNom());
-            dossier.setChargeEtudeUserId(dto.getChargeEtudeUserId().trim());
-            dossier.setChargeEtudeNom(chargeNom);
-            intervenantService.upsertChargeEtude(
-                    dossier.getId(), dossier.getChargeEtudeUserId(), dossier.getChargeEtudeNom());
+            if (dossier.getStatus() == StatutDossierEtude.DRAFT
+                    && !saisiePolicy.peutDeciderGo()) {
+                // Le chargé d'étude se pose à l'affectation, pas pendant le cadrage.
+            } else if (dossier.getStatus() == StatutDossierEtude.IN_PROGRESS
+                    && !saisiePolicy.peutDeciderGo()) {
+                throw new IllegalStateException("etudes.dossier.charge_etude.go_seul");
+            } else {
+                String chargeNom = chargeEtudeService.requireIngenieur(
+                        dto.getChargeEtudeUserId(), dto.getChargeEtudeNom());
+                dossier.setChargeEtudeUserId(dto.getChargeEtudeUserId().trim());
+                dossier.setChargeEtudeNom(chargeNom);
+                intervenantService.upsertChargeEtude(
+                        dossier.getId(), dossier.getChargeEtudeUserId(), dossier.getChargeEtudeNom());
+            }
         }
         intervenantService.enregistrerReviseur(dossier.getId());
         if (dto.getCpsDocumentId() != null) {
@@ -333,7 +395,11 @@ public class DossierEtudeService {
         if (etape < DossierEtude.ETAPE_PREMIERE || etape > DossierEtude.ETAPE_CHIFFRAGE) {
             throw new IllegalArgumentException("etudes.dossier.etape_invalide");
         }
-        DossierEtude dossier = requireModifiable(id);
+        DossierEtude dossier = requireDossier(id);
+        if (!dossier.getStatus().estModifiable()) {
+            throw new IllegalStateException("etudes.dossier.verrouille");
+        }
+        assertPeutAvancerEtape(dossier);
         int courante = dossier.getCurrentStep() != null
                 ? dossier.getCurrentStep()
                 : DossierEtude.ETAPE_PREMIERE;
@@ -354,10 +420,6 @@ public class DossierEtudeService {
             }
         }
         dossier.setCurrentStep(etape);
-        if (dossier.getStatus() == StatutDossierEtude.BROUILLON
-                && etape > DossierEtude.ETAPE_PREMIERE) {
-            dossier.setStatus(StatutDossierEtude.EN_ETUDE);
-        }
         DossierEtude saved = repository.save(dossier);
         enrichirAoListing(List.of(saved));
         return saved;
@@ -365,7 +427,8 @@ public class DossierEtudeService {
 
     @Transactional
     public DossierEtude soumettre(UUID id) {
-        DossierEtude dossier = requireModifiable(id);
+        DossierEtude dossier = requireDossier(id);
+        workflowPolicy.validateTransition(DossierEtudeAction.COMPLETE_STUDY, dossier);
         ContexteGate contexte = chargerContexte(dossier);
         for (int e = DossierEtude.ETAPE_PREMIERE; e <= DossierEtude.ETAPE_CHIFFRAGE; e++) {
             if (e == DossierEtude.ETAPE_DOCUMENTS) {
@@ -374,8 +437,8 @@ public class DossierEtudeService {
             assertGateFranchie(e, contexte);
         }
         dossier.setMotifRefus(null);
-        dossier.setValidationEtape(DossierEtude.VALIDATION_N1);
         dossier.setCurrentStep(DossierEtude.ETAPE_CHIFFRAGE);
+        dossier.setValidationEtape(DossierEtude.VALIDATION_N1);
         BigDecimal totalHt = totalHt(contexte.articles());
         int niveaux = parametres.niveauxApprobationPour(totalHt);
         dossier.setNiveauxApprobation(niveaux);
@@ -389,59 +452,107 @@ public class DossierEtudeService {
         if (StringUtils.hasText(snap.requestId())) {
             dossier.setApprovalRequestId(snap.requestId());
         }
-        // Aligner sur le workflow moteur seulement s'il est réellement branché.
         if (approvalPort.isAvailable() && snap.etapeCount() > 0) {
             dossier.setNiveauxApprobation(snap.etapeCount());
         }
-        return transitionner(dossier, StatutDossierEtude.EN_VALIDATION);
+        return executerAction(dossier, DossierEtudeAction.COMPLETE_STUDY, null);
+    }
+
+    @Transactional
+    public DossierEtude avisExecutionFavorable(UUID id) {
+        DossierEtude dossier = requireDossier(id);
+        if (dossier.getStatus() != StatutDossierEtude.IN_PROGRESS
+                && dossier.getStatus() != StatutDossierEtude.COMPLETED) {
+            throw new IllegalStateException("etudes.dossier.avis_hors_etat");
+        }
+        saisiePolicy.assertPeutAvisExecution(dossier);
+        enregistrerAvisDossier(dossier, "FAVORABLE", null);
+        return repository.save(dossier);
+    }
+
+    @Transactional
+    public DossierEtude avisExecutionRetour(UUID id, String commentaire) {
+        if (!StringUtils.hasText(commentaire)) {
+            throw new IllegalArgumentException("etudes.dossier.avis_commentaire_requis");
+        }
+        DossierEtude dossier = requireDossier(id);
+        if (dossier.getStatus() != StatutDossierEtude.IN_PROGRESS
+                && dossier.getStatus() != StatutDossierEtude.COMPLETED) {
+            throw new IllegalStateException("etudes.dossier.avis_hors_etat");
+        }
+        saisiePolicy.assertPeutAvisExecution(dossier);
+        enregistrerAvisDossier(dossier, "RETOUR", commentaire.trim());
+        dossier.setCurrentStep(DossierEtude.ETAPE_CHIFFRAGE);
+        return repository.save(dossier);
+    }
+
+    private void enregistrerAvisDossier(DossierEtude dossier, String decision, String commentaire) {
+        dossier.setAvisExecutionDossier(decision);
+        dossier.setAvisExecutionCommentaire(commentaire);
+        dossier.setAvisExecutionDecidePar(acteurUserId());
+        dossier.setAvisExecutionDecideAt(OffsetDateTime.now());
     }
 
     /**
-     * Validation interne : N+1 puis éventuellement N+2 selon {@link DossierEtude#getNiveauxApprobation()}.
-     *
-     * <p>N+1 avance {@code validationEtape} vers N2 sans changer le statut métier (si 2 niveaux).
-     * Le dernier niveau passe à {@code VALIDEE} puis tente la génération du devis.
+     * Dispatch compat : COMPLETED → financier, FINANCIALLY_APPROVED → définitif.
      */
     @Transactional
     public DossierEtude valider(UUID id, String approbateur) {
         DossierEtude dossier = requireDossier(id);
-        if (dossier.getStatus() != StatutDossierEtude.EN_VALIDATION) {
-            throw new IllegalStateException("etudes.dossier.validation_hors_etat");
+        if (dossier.getStatus() == StatutDossierEtude.COMPLETED) {
+            return approuverFinancierement(id, approbateur);
         }
+        if (dossier.getStatus() == StatutDossierEtude.FINANCIALLY_APPROVED) {
+            return approuverDefinitivement(id, approbateur);
+        }
+        throw new IllegalStateException("etudes.dossier.validation_hors_etat");
+    }
+
+    @Transactional
+    public DossierEtude approuverFinancierement(UUID id, String approbateur) {
+        DossierEtude dossier = requireDossier(id);
+        workflowPolicy.validateTransition(DossierEtudeAction.APPROVE_FINANCIALLY, dossier);
         assertPeutApprouver(dossier, approbateur);
-
-        String etape = dossier.getValidationEtape() != null
-                ? dossier.getValidationEtape()
-                : DossierEtude.VALIDATION_N1;
-
         intervenantService.enregistrerApprobateur(dossier.getId(), approbateur, approbateur);
+        synchroniserDecisionMoteur(dossier, approbateur, false);
+        dossier.setValidationEtape(DossierEtude.VALIDATION_N2);
+        dossier.setMotifRefus(null);
+        return executerAction(dossier, DossierEtudeAction.APPROVE_FINANCIALLY, null);
+    }
 
-        int niveaux = dossier.getNiveauxApprobation() != null ? dossier.getNiveauxApprobation() : 2;
-        boolean derniereEtape = !(DossierEtude.VALIDATION_N1.equals(etape) && niveaux > 1);
-        synchroniserDecisionMoteur(dossier, approbateur, derniereEtape);
-
-        if (!derniereEtape) {
-            dossier.setValidationEtape(DossierEtude.VALIDATION_N2);
-            dossier.setMotifRefus(null);
-            return repository.save(dossier);
-        }
-
+    @Transactional
+    public DossierEtude approuverDefinitivement(UUID id, String approbateur) {
+        DossierEtude dossier = requireDossier(id);
+        workflowPolicy.validateTransition(DossierEtudeAction.APPROVE_FINAL, dossier);
+        assertPeutApprouver(dossier, approbateur);
+        intervenantService.enregistrerApprobateur(dossier.getId(), approbateur, approbateur);
+        synchroniserDecisionMoteur(dossier, approbateur, true);
         dossier.setValidationEtape(null);
         dossier.setNiveauxApprobation(null);
         dossier.setMotifRefus(null);
-        DossierEtude validee = transitionner(dossier, StatutDossierEtude.VALIDEE);
+        DossierEtude validee = executerAction(dossier, DossierEtudeAction.APPROVE_FINAL, null);
         return tenterGenerationDevis(validee);
     }
 
     @Transactional
     public DossierEtude refuser(UUID id, String motif) {
+        DossierEtude dossier = requireDossier(id);
+        if (dossier.getStatus() == StatutDossierEtude.COMPLETED) {
+            return refuserFinancierement(id, motif);
+        }
+        if (dossier.getStatus() == StatutDossierEtude.FINANCIALLY_APPROVED) {
+            return refuserDefinitivement(id, motif);
+        }
+        throw new IllegalStateException("etudes.dossier.refus_hors_etat");
+    }
+
+    @Transactional
+    public DossierEtude refuserFinancierement(UUID id, String motif) {
         if (!StringUtils.hasText(motif)) {
             throw new IllegalArgumentException("etudes.dossier.motif_refus_requis");
         }
         DossierEtude dossier = requireDossier(id);
-        if (dossier.getStatus() != StatutDossierEtude.EN_VALIDATION) {
-            throw new IllegalStateException("etudes.dossier.refus_hors_etat");
-        }
+        workflowPolicy.validateTransition(DossierEtudeAction.REJECT_FINANCIALLY, dossier);
         if (StringUtils.hasText(dossier.getApprovalRequestId()) && approvalPort.isAvailable()) {
             approvalPort.refuser(dossier.getApprovalRequestId(), null, null, motif.trim());
         }
@@ -450,7 +561,25 @@ public class DossierEtudeService {
         dossier.setNiveauxApprobation(null);
         dossier.setApprovalRequestId(null);
         dossier.setCurrentStep(DossierEtude.ETAPE_CHIFFRAGE);
-        return transitionner(dossier, StatutDossierEtude.EN_ETUDE);
+        return executerAction(dossier, DossierEtudeAction.REJECT_FINANCIALLY, motif.trim());
+    }
+
+    @Transactional
+    public DossierEtude refuserDefinitivement(UUID id, String motif) {
+        if (!StringUtils.hasText(motif)) {
+            throw new IllegalArgumentException("etudes.dossier.motif_refus_requis");
+        }
+        DossierEtude dossier = requireDossier(id);
+        workflowPolicy.validateTransition(DossierEtudeAction.REJECT_FINAL, dossier);
+        if (StringUtils.hasText(dossier.getApprovalRequestId()) && approvalPort.isAvailable()) {
+            approvalPort.refuser(dossier.getApprovalRequestId(), null, null, motif.trim());
+        }
+        dossier.setMotifRefus(motif.trim());
+        dossier.setValidationEtape(null);
+        dossier.setNiveauxApprobation(null);
+        dossier.setApprovalRequestId(null);
+        dossier.setCurrentStep(DossierEtude.ETAPE_CHIFFRAGE);
+        return executerAction(dossier, DossierEtudeAction.REJECT_FINAL, motif.trim());
     }
 
     /**
@@ -470,7 +599,7 @@ public class DossierEtudeService {
         return repository.save(dossier);
     }
 
-    /** Relance idempotente : VALIDEE → DEVIS_GENERE si le devis n'existe pas encore. */
+    /** Relance idempotente après validation définitive — ne change pas le statut Étude. */
     @Transactional
     public DossierEtude genererDevis(UUID id) {
         return genererDevis(id, null);
@@ -478,16 +607,15 @@ public class DossierEtudeService {
 
     /**
      * {@code clientId} : Partner CLIENT déjà créé. Ignoré si le dossier en a déjà un.
-     * Permet de lier après validation (PUT en-tête refusé — {@code VALIDEE} n'est pas modifiable).
+     * Hors machine à états Étude : le statut reste {@code FINAL_APPROVED}.
      */
     @Transactional
     public DossierEtude genererDevis(UUID id, String clientId) {
         DossierEtude dossier = requireDossier(id);
-        if (dossier.getStatus() == StatutDossierEtude.DEVIS_GENERE && dossier.getDevisGenereId() != null) {
+        if (dossier.getDevisGenereId() != null) {
             return dossier;
         }
-        if (dossier.getStatus() != StatutDossierEtude.VALIDEE
-                && dossier.getStatus() != StatutDossierEtude.DEVIS_GENERE) {
+        if (dossier.getStatus() != StatutDossierEtude.FINAL_APPROVED) {
             throw new IllegalStateException("etudes.dossier.devis_hors_etat");
         }
         if (!StringUtils.hasText(dossier.getClientId()) && StringUtils.hasText(clientId)) {
@@ -495,6 +623,12 @@ public class DossierEtudeService {
             repository.save(dossier);
         }
         return exigenceGenerationDevis(dossier);
+    }
+
+    @Transactional(readOnly = true)
+    public List<StatusChangeDto> historiqueStatut(UUID id) {
+        requireDossier(id);
+        return transitionEtudeService.listerPourEntite(TransitionEtude.ENTITE_DOSSIER, id.toString());
     }
 
     @Transactional(readOnly = true)
@@ -514,7 +648,8 @@ public class DossierEtudeService {
         }
         String prochainRole = null;
         String prochainNom = null;
-        if (dossier.getStatus() == StatutDossierEtude.EN_VALIDATION) {
+        if (dossier.getStatus() == StatutDossierEtude.COMPLETED
+                || dossier.getStatus() == StatutDossierEtude.FINANCIALLY_APPROVED) {
             EtudeApprovalPort.ApprovalSnapshot snap = approvalPort
                     .trouverOuverte(dossier.getId())
                     .orElse(null);
@@ -537,6 +672,10 @@ public class DossierEtudeService {
                 .clientNom(dossier.getClientNom())
                 .chargeEtudeUserId(dossier.getChargeEtudeUserId())
                 .chargeEtudeNom(dossier.getChargeEtudeNom())
+                .responsableExecutionUserId(dossier.getResponsableExecutionUserId())
+                .responsableExecutionNom(dossier.getResponsableExecutionNom())
+                .avisExecutionDossier(dossier.getAvisExecutionDossier())
+                .avisExecutionCommentaire(dossier.getAvisExecutionCommentaire())
                 .appelOffreClientId(dossier.getAppelOffreClientId())
                 .status(dossier.getStatus())
                 .currentStep(dossier.getCurrentStep() != null ? dossier.getCurrentStep() : 1)
@@ -562,16 +701,156 @@ public class DossierEtudeService {
                 .updatedAt(dossier.getUpdatedAt())
                 .gates(gates)
                 .actionPrincipale(actionPrincipale(dossier, anomalies))
+                .availableActions(workflowPolicy.availableActionCodes(dossier))
                 .decisionsCatalogue(decisionCatalogueService.listerPourDossier(dossier))
                 .build();
     }
 
     @Transactional
+    public DossierEtude go(UUID id, String chargeEtudeUserId, String chargeEtudeNom) {
+        return go(id, chargeEtudeUserId, chargeEtudeNom, null, null);
+    }
+
+    @Transactional
+    public DossierEtude go(
+            UUID id,
+            String chargeEtudeUserId,
+            String chargeEtudeNom,
+            String responsableExecutionUserId,
+            String responsableExecutionNom) {
+        DossierEtude dossier = requireDossier(id);
+        if (dossier.getStatus() != StatutDossierEtude.DRAFT
+                && dossier.getStatus() != StatutDossierEtude.PENDING_ASSIGNMENT) {
+            throw new IllegalStateException("etudes.dossier.go_hors_etat");
+        }
+        appliquerAffectation(
+                dossier,
+                chargeEtudeUserId,
+                chargeEtudeNom,
+                responsableExecutionUserId,
+                responsableExecutionNom);
+        workflowPolicy.validateTransition(DossierEtudeAction.ASSIGN_STUDY, dossier);
+        executerActionSansSave(dossier, DossierEtudeAction.ASSIGN_STUDY, null);
+        if (dossier.getStatus() == StatutDossierEtude.ASSIGNED
+                && saisiePolicy.estChargeEtudeCourant(dossier)) {
+            workflowPolicy.validateTransition(DossierEtudeAction.START_STUDY, dossier);
+            executerActionSansSave(dossier, DossierEtudeAction.START_STUDY, null);
+        }
+        if (dossier.getCurrentStep() == null
+                || dossier.getCurrentStep() < DossierEtude.ETAPE_BORDEREAU) {
+            dossier.setCurrentStep(DossierEtude.ETAPE_BORDEREAU);
+        }
+        DossierEtude saved = repository.save(dossier);
+        enrichirAoListing(List.of(saved));
+        notifierAffectation(saved);
+        return saved;
+    }
+
+    @Transactional
+    public DossierEtude soumettreAuDg(UUID id) {
+        DossierEtude dossier = requireModifiable(id);
+        workflowPolicy.validateTransition(DossierEtudeAction.SUBMIT_FOR_ASSIGNMENT, dossier);
+        return executerAction(dossier, DossierEtudeAction.SUBMIT_FOR_ASSIGNMENT, null);
+    }
+
+    @Transactional
+    public DossierEtude revenirAuDraft(UUID id) {
+        DossierEtude dossier = requireDossier(id);
+        workflowPolicy.validateTransition(DossierEtudeAction.RETURN_TO_DRAFT, dossier);
+        return executerAction(dossier, DossierEtudeAction.RETURN_TO_DRAFT, null);
+    }
+
+    /** Reprise avec l'affectation existante (DRAFT → ASSIGNED) ou reprise d'étude. */
+    @Transactional
+    public DossierEtude renvoyerAuCharge(UUID id) {
+        DossierEtude dossier = requireDossier(id);
+        if (dossier.getStatus() == StatutDossierEtude.STUDY_REJECTED
+                || dossier.getStatus() == StatutDossierEtude.FINANCIALLY_REJECTED
+                || dossier.getStatus() == StatutDossierEtude.FINAL_REJECTED
+                || dossier.getStatus() == StatutDossierEtude.SUSPENDED) {
+            return reprendreChiffrage(id);
+        }
+        if (!StringUtils.hasText(dossier.getChargeEtudeUserId())) {
+            throw new IllegalArgumentException("etudes.charge_etude.requis");
+        }
+        workflowPolicy.validateTransition(DossierEtudeAction.ASSIGN_STUDY, dossier);
+        appliquerAffectation(
+                dossier,
+                dossier.getChargeEtudeUserId(),
+                dossier.getChargeEtudeNom(),
+                dossier.getResponsableExecutionUserId(),
+                dossier.getResponsableExecutionNom());
+        executerActionSansSave(dossier, DossierEtudeAction.ASSIGN_STUDY, null);
+        if (dossier.getCurrentStep() == null
+                || dossier.getCurrentStep() < DossierEtude.ETAPE_BORDEREAU) {
+            dossier.setCurrentStep(DossierEtude.ETAPE_BORDEREAU);
+        }
+        DossierEtude saved = repository.save(dossier);
+        enrichirAoListing(List.of(saved));
+        notifierAffectation(saved);
+        return saved;
+    }
+
+    @Transactional
+    public DossierEtude accepterAffectation(UUID id) {
+        DossierEtude dossier = requireDossier(id);
+        workflowPolicy.validateTransition(DossierEtudeAction.START_STUDY, dossier);
+        DossierEtude saved = executerAction(dossier, DossierEtudeAction.START_STUDY, null);
+        enrichirAoListing(List.of(saved));
+        return saved;
+    }
+
+    @Transactional
+    public DossierEtude suspendreChiffrage(UUID id) {
+        DossierEtude dossier = requireDossier(id);
+        workflowPolicy.validateTransition(DossierEtudeAction.SUSPEND_STUDY, dossier);
+        return executerAction(dossier, DossierEtudeAction.SUSPEND_STUDY, null);
+    }
+
+    @Transactional
+    public DossierEtude reprendreChiffrage(UUID id) {
+        DossierEtude dossier = requireDossier(id);
+        workflowPolicy.validateTransition(DossierEtudeAction.RESUME_STUDY, dossier);
+        dossier.setMotifRefus(null);
+        dossier.setMotifRefusCharge(null);
+        dossier.setMotifRefusChargeType(null);
+        return executerAction(dossier, DossierEtudeAction.RESUME_STUDY, null);
+    }
+
+    @Transactional
+    public DossierEtude refuserAffectation(UUID id, String type, String motif) {
+        if (!StringUtils.hasText(type) || !StringUtils.hasText(motif)) {
+            throw new IllegalArgumentException("etudes.dossier.motif_refus_charge_requis");
+        }
+        String code = type.trim().toUpperCase(Locale.ROOT);
+        if (!Set.of("CPS_INCOMPLET", "DOC_MANQUANT", "AUTRE").contains(code)) {
+            throw new IllegalArgumentException("etudes.dossier.motif_refus_charge_type");
+        }
+        DossierEtude dossier = requireDossier(id);
+        workflowPolicy.validateTransition(DossierEtudeAction.REJECT_BY_STUDY_TEAM, dossier);
+        dossier.setMotifRefusChargeType(code);
+        dossier.setMotifRefusCharge(motif.trim());
+        dossier.setCurrentStep(DossierEtude.ETAPE_PREMIERE);
+        return executerAction(dossier, DossierEtudeAction.REJECT_BY_STUDY_TEAM, motif.trim());
+    }
+
+    @Transactional
+    public DossierEtude nogo(UUID id, String motif) {
+        DossierEtude dossier = requireDossier(id);
+        workflowPolicy.validateTransition(DossierEtudeAction.REJECT_STUDY, dossier);
+        dossier.setMotifNoGo(StringUtils.hasText(motif) ? motif.trim() : null);
+        dossier.setGoDecidePar(acteurUserId());
+        dossier.setGoDecideAt(OffsetDateTime.now());
+        return executerAction(dossier, DossierEtudeAction.REJECT_STUDY, motif);
+    }
+
+    @Transactional
     public DossierEtude annuler(UUID id) {
         DossierEtude dossier = requireDossier(id);
+        workflowPolicy.validateTransition(DossierEtudeAction.ARCHIVE_STUDY, dossier);
         dossier.setValidationEtape(null);
-        annulerDemandeResiduelle(dossier, "Étude annulée");
-        return transitionner(dossier, StatutDossierEtude.ANNULE);
+        annulerDemandeResiduelle(dossier, "Étude archivée");
+        return executerAction(dossier, DossierEtudeAction.ARCHIVE_STUDY, null);
     }
 
     /** L13 — affaire gagnée (DEVIS_GENERE → GAGNE), AC-1 à AC-6 de continuite-etude-devis-chantier. */
@@ -580,15 +859,13 @@ public class DossierEtudeService {
         DossierEtude dossier = requireDossier(id);
         UUID devisIdCommande = body.getDevisId() != null ? body.getDevisId() : dossier.getDevisGenereId();
         String empreinteCommande = empreinteGain(devisIdCommande, body);
-        if (dossier.getStatus() == StatutDossierEtude.GAGNE
-                || dossier.getStatus() == StatutDossierEtude.CONVERTIE) {
-            if (StringUtils.hasText(dossier.getGainCommandeEmpreinte())
-                    && dossier.getGainCommandeEmpreinte().equals(empreinteCommande)) {
+        if (StringUtils.hasText(dossier.getGainCommandeEmpreinte())) {
+            if (dossier.getGainCommandeEmpreinte().equals(empreinteCommande)) {
                 return dossier;
             }
             throw new IllegalStateException("etudes.dossier.gain_rejeu_divergent");
         }
-        if (dossier.getStatus() != StatutDossierEtude.DEVIS_GENERE) {
+        if (dossier.getStatus() != StatutDossierEtude.FINAL_APPROVED) {
             throw new IllegalStateException("etudes.dossier.gagne_hors_etat");
         }
 
@@ -637,7 +914,7 @@ public class DossierEtudeService {
         // Le devis explicitement accepté devient immédiatement l'unique référence aval.
         dossier.setDevisGenereId(devis.getId());
         dossier.setGainCommandeEmpreinte(empreinteCommande);
-        DossierEtude gagne = transitionner(dossier, StatutDossierEtude.GAGNE);
+        DossierEtude gagne = repository.save(dossier);
 
         // AC-6 — les deux transitions sont consignées après les deux écritures, avec la même
         // corrélation : une panne avant ici n'écrit aucune ligne de journal.
@@ -657,8 +934,8 @@ public class DossierEtudeService {
         transitionEtudeService.consignerGain(
                 TransitionEtude.ENTITE_DOSSIER,
                 dossier.getId().toString(),
-                StatutDossierEtude.DEVIS_GENERE.name(),
-                StatutDossierEtude.GAGNE.name(),
+                dossier.getStatus().name(),
+                dossier.getStatus().name(),
                 correlationId,
                 motifAudit,
                 montant,
@@ -771,14 +1048,14 @@ public class DossierEtudeService {
     @Transactional
     public DossierEtude perdu(UUID id, DossierPerduDto body) {
         DossierEtude dossier = requireDossier(id);
-        if (dossier.getStatus() != StatutDossierEtude.DEVIS_GENERE) {
+        if (dossier.getStatus() != StatutDossierEtude.FINAL_APPROVED) {
             throw new IllegalStateException("etudes.dossier.perdu_hors_etat");
         }
         MotifPerte motif = MotifPerte.parse(body.getMotif());
         dossier.setMotifPerte(motif.name());
         dossier.setConcurrentRetenu(trimOrNull(body.getConcurrentRetenu()));
         dossier.setEcartPrixEstime(body.getEcartPrixEstime());
-        return transitionner(dossier, StatutDossierEtude.PERDU);
+        return repository.save(dossier);
     }
 
     /**
@@ -812,7 +1089,7 @@ public class DossierEtudeService {
                     .status(dossier.getStatus().name())
                     .build();
         }
-        if (dossier.getStatus() != StatutDossierEtude.GAGNE) {
+        if (dossier.getStatus() != StatutDossierEtude.FINAL_APPROVED) {
             throw new IllegalStateException("etudes.dossier.convertir_hors_etat");
         }
         if (!StringUtils.hasText(dossier.getClientId())) {
@@ -884,7 +1161,7 @@ public class DossierEtudeService {
                         devisRepository.save(d);
                     });
         }
-        DossierEtude converted = transitionner(dossier, StatutDossierEtude.CONVERTIE);
+        DossierEtude converted = repository.save(dossier);
         cloreDemandeResiduelle(converted, "Étude convertie en chantier");
         return DossierConversionResultDto.builder()
                 .dossierId(converted.getId())
@@ -1040,12 +1317,26 @@ public class DossierEtudeService {
 
     // ── Interne ──────────────────────────────────────────────────────────────
 
-    private DossierEtude transitionner(DossierEtude dossier, StatutDossierEtude cible) {
+    private DossierEtude executerAction(DossierEtude dossier, DossierEtudeAction action, String motif) {
+        executerActionSansSave(dossier, action, motif);
+        return repository.save(dossier);
+    }
+
+    private void executerActionSansSave(DossierEtude dossier, DossierEtudeAction action, String motif) {
+        StatutDossierEtude cible = action.statutCible();
         if (!dossier.getStatus().peutTransitionnerVers(cible)) {
             throw new IllegalStateException("etudes.dossier.transition_interdite");
         }
+        String ancien = dossier.getStatus().name();
         dossier.setStatus(cible);
-        return repository.save(dossier);
+        transitionEtudeService.consigner(
+                TransitionEtude.ENTITE_DOSSIER,
+                dossier.getId() != null ? dossier.getId().toString() : "unknown",
+                ancien,
+                cible.name(),
+                UUID.randomUUID(),
+                motif,
+                action.name());
     }
 
     private void assertGateFranchie(int etape, ContexteGate contexte) {
@@ -1270,6 +1561,33 @@ public class DossierEtudeService {
         }
     }
 
+    private void enrichirLotAffectations(List<DossierEtude> dossiers) {
+        List<UUID> dpgfIds = dossiers.stream()
+                .map(DossierEtude::getDpgfId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        if (dpgfIds.isEmpty()) {
+            return;
+        }
+        Map<UUID, LinkedHashSet<String>> byDpgf = new HashMap<>();
+        for (Object[] row : noeudRepository.findLotChargeUserIdsByDpgfIds(tenantId(), dpgfIds)) {
+            if (row == null || row.length < 2 || row[0] == null || row[1] == null) {
+                continue;
+            }
+            UUID dpgfId = (UUID) row[0];
+            String userId = String.valueOf(row[1]).trim();
+            if (!StringUtils.hasText(userId)) {
+                continue;
+            }
+            byDpgf.computeIfAbsent(dpgfId, k -> new LinkedHashSet<>()).add(userId);
+        }
+        for (DossierEtude d : dossiers) {
+            LinkedHashSet<String> ids = d.getDpgfId() == null ? null : byDpgf.get(d.getDpgfId());
+            d.setLotChargeUserIds(ids == null ? List.of() : List.copyOf(ids));
+        }
+    }
+
     private void enrichirAoListing(List<DossierEtude> dossiers) {
         List<UUID> aocIds = dossiers.stream()
                 .map(DossierEtude::getAppelOffreClientId)
@@ -1352,10 +1670,6 @@ public class DossierEtudeService {
 
     private DossierEtude exigenceGenerationDevis(DossierEtude dossier) {
         if (dossier.getDevisGenereId() != null) {
-            if (dossier.getStatus() == StatutDossierEtude.VALIDEE
-                    && dossier.getStatus().peutTransitionnerVers(StatutDossierEtude.DEVIS_GENERE)) {
-                return transitionner(dossier, StatutDossierEtude.DEVIS_GENERE);
-            }
             return dossier;
         }
         if (dossier.getDpgfId() == null) {
@@ -1363,11 +1677,7 @@ public class DossierEtudeService {
         }
         Devis devis = devisService.createFromDossier(dossier);
         dossier.setDevisGenereId(devis.getId());
-        repository.save(dossier);
-        if (dossier.getStatus() == StatutDossierEtude.VALIDEE) {
-            return transitionner(dossier, StatutDossierEtude.DEVIS_GENERE);
-        }
-        return dossier;
+        return repository.save(dossier);
     }
 
     private static BigDecimal totalHt(List<DpgfNoeud> articles) {
@@ -1379,40 +1689,50 @@ public class DossierEtudeService {
 
     private static String resoudrePhase(DossierEtude dossier) {
         return switch (dossier.getStatus()) {
-            case BROUILLON -> "BORDEREAU";
-            case EN_ETUDE -> {
+            case DRAFT, PENDING_ASSIGNMENT, REJECTED, ASSIGNED -> "BORDEREAU";
+            case IN_PROGRESS, SUSPENDED, STUDY_REJECTED -> {
                 int step = dossier.getCurrentStep() != null ? dossier.getCurrentStep() : 1;
                 yield step <= DossierEtude.ETAPE_BORDEREAU ? "BORDEREAU" : "CHIFFRAGE";
             }
-            case EN_VALIDATION ->
-                    DossierEtude.VALIDATION_N2.equals(dossier.getValidationEtape())
-                            ? "VALIDATION_N2"
-                            : "VALIDATION_N1";
-            case VALIDEE -> "VALIDEE";
-            case DEVIS_GENERE -> "DEVIS";
-            case GAGNE, CONVERTIE -> "TERMINE";
-            case PERDU, ANNULE -> dossier.getStatus().name();
+            case COMPLETED -> "VALIDATION_N1";
+            case FINANCIALLY_APPROVED, FINANCIALLY_REJECTED -> "VALIDATION_N2";
+            case FINAL_APPROVED ->
+                    dossier.getDevisGenereId() != null ? "DEVIS" : "VALIDEE";
+            case FINAL_REJECTED, ARCHIVED -> dossier.getStatus().name();
         };
     }
 
     private static String actionPrincipale(DossierEtude dossier, int anomalies) {
         return switch (dossier.getStatus()) {
-            case BROUILLON, EN_ETUDE -> {
+            case DRAFT ->
+                    DossierEtudeWorkflowPolicy.hasActiveStudyAssignments(dossier)
+                            ? "RENVOYER_AFFECTATION"
+                            : "SOUMETTRE_GO";
+            case PENDING_ASSIGNMENT -> "DECIDER_GO";
+            case REJECTED -> "REVENIR_DRAFT";
+            case ASSIGNED -> "ACCEPTER_AFFECTATION";
+            case STUDY_REJECTED, SUSPENDED, FINANCIALLY_REJECTED, FINAL_REJECTED -> "REPRENDRE_CHIFFRAGE";
+            case IN_PROGRESS -> {
                 int step = dossier.getCurrentStep() != null ? dossier.getCurrentStep() : 1;
                 if (step <= DossierEtude.ETAPE_BORDEREAU) {
                     yield anomalies > 0 ? "CORRIGER_BORDEREAU" : "SOUMETTRE_STRUCTURE";
                 }
                 yield anomalies > 0 ? "CORRIGER_CHIFFRAGE" : "SOUMETTRE_CHIFFRAGE";
             }
-            case EN_VALIDATION ->
-                    DossierEtude.VALIDATION_N2.equals(dossier.getValidationEtape())
-                            ? "VALIDER_N2"
-                            : "VALIDER_N1";
-            case VALIDEE -> "GENERER_DEVIS";
-            case DEVIS_GENERE -> "MARQUER_GAGNE";
-            case GAGNE -> "CONVERTIR";
-            case CONVERTIE ->
-                    StringUtils.hasText(dossier.getChantierGenereId()) ? "VOIR_CHANTIER" : "CONSULTER";
+            case COMPLETED -> "VALIDER_FINANCIER";
+            case FINANCIALLY_APPROVED -> "VALIDER_DEFINITIF";
+            case FINAL_APPROVED -> {
+                if (StringUtils.hasText(dossier.getChantierGenereId())) {
+                    yield "VOIR_CHANTIER";
+                }
+                if (dossier.getDevisGenereId() == null) {
+                    yield "GENERER_DEVIS";
+                }
+                if (StringUtils.hasText(dossier.getGainCommandeEmpreinte())) {
+                    yield "CONVERTIR";
+                }
+                yield "MARQUER_GAGNE";
+            }
             default -> "CONSULTER";
         };
     }
@@ -1509,7 +1829,118 @@ public class DossierEtudeService {
         if (!dossier.getStatus().estModifiable()) {
             throw new IllegalStateException("etudes.dossier.verrouille");
         }
+        saisiePolicy.assertPeutSaisirApresGo(dossier);
         return dossier;
+    }
+
+    private void appliquerAffectation(
+            DossierEtude dossier,
+            String chargeEtudeUserId,
+            String chargeEtudeNom,
+            String responsableExecutionUserId,
+            String responsableExecutionNom) {
+        String userId = trimOrNull(chargeEtudeUserId);
+        if (userId == null) {
+            userId = trimOrNull(dossier.getChargeEtudeUserId());
+        }
+        if (userId == null) {
+            var defaut = chargeEtudeService.findMatchingIngenieur(dossier.getCreatedBy());
+            if (defaut != null) {
+                userId = defaut.userId();
+                if (!StringUtils.hasText(chargeEtudeNom)) {
+                    chargeEtudeNom = defaut.displayName();
+                }
+            }
+        }
+        if (userId == null) {
+            throw new IllegalArgumentException("etudes.charge_etude.requis");
+        }
+        String nom = chargeEtudeService.requireIngenieur(userId, chargeEtudeNom);
+        dossier.setChargeEtudeUserId(userId);
+        dossier.setChargeEtudeNom(nom);
+        String execId = trimOrNull(responsableExecutionUserId);
+        if (execId == null) {
+            execId = trimOrNull(dossier.getResponsableExecutionUserId());
+        }
+        if (execId == null) {
+            execId = userId;
+            if (!StringUtils.hasText(responsableExecutionNom)) {
+                responsableExecutionNom = nom;
+            }
+        }
+        String execNom = chargeEtudeService.requireIngenieur(execId, responsableExecutionNom);
+        dossier.setResponsableExecutionUserId(execId);
+        dossier.setResponsableExecutionNom(execNom);
+        dossier.setGoDecidePar(acteurUserId());
+        dossier.setGoDecideAt(OffsetDateTime.now());
+        dossier.setMotifNoGo(null);
+        intervenantService.upsertChargeEtude(dossier.getId(), userId, nom);
+        dossier.setMotifRefusChargeType(null);
+        dossier.setMotifRefusCharge(null);
+    }
+
+    private void notifierAffectation(DossierEtude dossier) {
+        if (eventPublisher == null || !StringUtils.hasText(dossier.getChargeEtudeUserId())) {
+            return;
+        }
+        UUID assignee;
+        try {
+            assignee = UUID.fromString(dossier.getChargeEtudeUserId().trim());
+        } catch (IllegalArgumentException ex) {
+            return;
+        }
+        String numero = StringUtils.hasText(dossier.getNumero()) ? dossier.getNumero().trim() : "cette étude";
+        String objet = StringUtils.hasText(dossier.getObjet()) ? dossier.getObjet().trim() : "";
+        eventPublisher.publishEvent(new ma.nafura.platform.framework.event.EntityAssignedEvent(
+                this,
+                dossier.getTenantId(),
+                "dossier-etude",
+                dossier.getId(),
+                assignee,
+                null,
+                UserContext.getUserIdOrNull(),
+                UserContext.getUserEmail(),
+                "/etudes/dossiers/" + dossier.getId(),
+                "L'étude " + numero + " t'a été affectée",
+                StringUtils.hasText(objet)
+                        ? objet + " — tu es chargé d'étude."
+                        : "Tu es chargé d'étude."));
+    }
+
+    /**
+     * Chargé / DG, ou ingénieur à qui un lot est délégué (navigation vers le chiffrage).
+     */
+    private void assertPeutAvancerEtape(DossierEtude dossier) {
+        if (dossier.getStatus() != StatutDossierEtude.IN_PROGRESS
+                && dossier.getStatus() != StatutDossierEtude.SUSPENDED) {
+            return;
+        }
+        if (saisiePolicy.peutDeciderGo() || saisiePolicy.estChargeEtudeCourant(dossier)) {
+            return;
+        }
+        if (ingenieurALotAffecte(dossier)) {
+            return;
+        }
+        throw new IllegalStateException("etudes.dossier.saisie_reservee_charge");
+    }
+
+    private boolean ingenieurALotAffecte(DossierEtude dossier) {
+        if (dossier.getDpgfId() == null) {
+            return false;
+        }
+        return noeudRepository
+                .findByDpgfIdAndTenantIdOrderByOrdreAsc(dossier.getDpgfId(), tenantId())
+                .stream()
+                .anyMatch(n -> DpgfNoeud.TYPE_LOT.equals(n.getType())
+                        && saisiePolicy.estActeurCourant(n.getChargeLotUserId()));
+    }
+
+    private String acteurUserId() {
+        var userId = UserContext.getUserIdOrNull();
+        if (userId != null) {
+            return userId.toString();
+        }
+        return acteurCourant();
     }
 
     /**

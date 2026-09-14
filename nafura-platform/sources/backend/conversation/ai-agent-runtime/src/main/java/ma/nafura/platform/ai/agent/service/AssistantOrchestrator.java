@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import ma.nafura.platform.ai.agent.api.request.AgentProposeRequest;
 import ma.nafura.platform.ai.agent.api.request.AssistantTurnRequest;
@@ -24,6 +25,7 @@ import ma.nafura.platform.ai.agent.model.IntentType;
 import ma.nafura.platform.ai.agent.service.compose.AssistantBlockComposer;
 import ma.nafura.platform.ai.agent.service.intent.IntentRouter;
 import ma.nafura.platform.ai.agent.service.intent.IntentToolSelector;
+import ma.nafura.platform.ai.agent.service.navigation.NavigationResolver;
 import ma.nafura.platform.ai.agent.service.prompt.AssistantPromptProvider;
 import ma.nafura.platform.ai.agent.service.tool.AgentTool;
 import ma.nafura.platform.ai.agent.service.tool.AgentToolRegistry;
@@ -74,6 +76,7 @@ public class AssistantOrchestrator {
     private final AgentToolRegistry toolRegistry;
     private final AgentRuntimeService agentRuntimeService;
     private final List<AssistantPromptProvider> promptProviders;
+    private final NavigationResolver navigationResolver;
 
     @Autowired(required = false)
     private AiSchemaContextLoader schemaLoader;
@@ -90,13 +93,69 @@ public class AssistantOrchestrator {
             AssistantTurnRequest request
     ) {
         ConversationSession session = getOwnedSession(conversationId, applicationId);
-        IntentClassification classification = intentRouter.classify(request.getContent());
+        IntentClassification classification = asAssistantIntent(intentRouter.classify(request.getContent()));
+
+        if (classification.getIntent() == IntentType.NAVIGATE) {
+            java.util.Optional<ma.nafura.platform.ai.agent.service.navigation.NavigationTarget> known =
+                    navigationResolver.resolve(
+                            request.getContent(),
+                            request.getEntityType(),
+                            request.getEntityId()
+                    );
+            if (known.isPresent() && trimToNull(known.get().getRoute()) != null) {
+                return CompletableFuture.completedFuture(
+                        processKnownNavigateTurn(session, request, known.get())
+                );
+            }
+        }
 
         if (classification.getIntent() == IntentType.ACTION) {
             return CompletableFuture.completedFuture(processActionTurn(session, applicationId, request, classification));
         }
 
         return processReadOrNavigateTurn(session, request, classification);
+    }
+
+    private AssistantTurnResponse processKnownNavigateTurn(
+            ConversationSession session,
+            AssistantTurnRequest request,
+            ma.nafura.platform.ai.agent.service.navigation.NavigationTarget target
+    ) {
+        ConversationMessage userMessage = persistUserMessage(session, request);
+        boolean howto = looksLikeHowto(request.getContent());
+        boolean create = NavigationResolver.looksLikeCreate(request.getContent())
+                && trimToNull(target.getCreateRoute()) != null;
+        String label = trimToNull(target.getLabel()) != null ? target.getLabel() : target.getRoute();
+        String route = target.getRoute();
+        String summary = create
+                ? "Pour créer « " + label + " », ouvrez l’écran de création."
+                : "Voici l’écran « " + label + " ».";
+        String linkLabel = create ? "Créer — " + label : label;
+
+        LlmResponse stub = new LlmResponse();
+        stub.setContent(summary);
+        ConversationMessage assistantMessage = persistAssistantMessage(session, stub, summary);
+        if (session.getTitle() == null || session.getTitle().isBlank()) {
+            session.setTitle(create ? "Créer — " + label : label);
+            session.setUpdatedAt(Instant.now());
+            sessionRepository.save(session);
+        }
+
+        AssistantLink link = AssistantLink.builder()
+                .label(linkLabel)
+                .route(route)
+                .autoNavigate(create && !howto)
+                .build();
+
+        return AssistantTurnResponse.builder()
+                .intent(IntentType.NAVIGATE)
+                .summary(summary)
+                .blocks(List.of())
+                .links(List.of(link))
+                .actions(List.of())
+                .userMessage(toMessageResponse(userMessage))
+                .assistantMessage(toMessageResponse(assistantMessage))
+                .build();
     }
 
     private AssistantTurnResponse processActionTurn(
@@ -232,6 +291,13 @@ public class AssistantOrchestrator {
                         + "\n\nAVAILABLE DATABASE SCHEMA:\n"
                         + ctx.buildLlmContext(java.util.Set.of(), maxTables);
             }
+        }
+        if (classification.getIntent() == IntentType.NAVIGATE && navigationResolver != null) {
+            system = (system != null ? system + "\n\n" : "") + navigationResolver.buildLlmContext();
+        }
+        String currentScreen = describeCurrentScreen(request);
+        if (currentScreen != null) {
+            system = (system != null ? system + "\n\n" : "") + currentScreen;
         }
         llmRequest.setSystemInstruction(system);
         llmRequest.setTools(intentToolSelector.toolsFor(classification.getIntent()));
@@ -454,11 +520,57 @@ public class AssistantOrchestrator {
         }
     }
 
+    private IntentClassification asAssistantIntent(IntentClassification classification) {
+        if (classification == null || classification.getIntent() != IntentType.ACTION) {
+            return classification;
+        }
+        return IntentClassification.builder()
+                .intent(IntentType.NAVIGATE)
+                .confidence(classification.getConfidence())
+                .source((classification.getSource() != null ? classification.getSource() : "RULES") + "+ASSISTANT")
+                .build();
+    }
+
+    private String describeCurrentScreen(AssistantTurnRequest request) {
+        if (request == null) {
+            return null;
+        }
+        String route = trimToNull(request.getCurrentRoute());
+        if (route == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder(
+                "CURRENT SCREEN (background only — follow the user's last message if they change topic): "
+        ).append(route);
+        if (navigationResolver != null) {
+            navigationResolver.inferFromRoute(route).ifPresent(target -> {
+                sb.append(" (").append(target.getLabel() != null ? target.getLabel() : target.getRoute()).append(')');
+            });
+        }
+        if (trimToNull(request.getEntityType()) != null) {
+            sb.append(" entityType=").append(request.getEntityType());
+        }
+        if (trimToNull(request.getEntityId()) != null) {
+            sb.append(" entityId=").append(request.getEntityId());
+        }
+        sb.append('.');
+        return sb.toString();
+    }
+
     private String trimToNull(String value) {
         if (value == null) {
             return null;
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private static final Pattern HOWTO = Pattern.compile(
+            "\\b(comment|o[uù]|how|aide)\\b",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.UNICODE_CHARACTER_CLASS
+    );
+
+    private boolean looksLikeHowto(String content) {
+        return content != null && HOWTO.matcher(content).find();
     }
 }

@@ -1,9 +1,10 @@
 /**
- * Mapping entre étapes métier UI (4) et étapes techniques backend (5).
+ * Mapping entre étapes métier UI (5) et étapes techniques backend (5).
  *
  * Backend conserve 1..5 pour éviter une migration des dossiers existants.
- * UI : Cadrage → Bordereau → Chiffrage → Synthèse.
- * Correspondance : 1→1, 2→2, 3|4→3, 5→4.
+ * UI : Cadrage → Bordereau → Chiffrage → Planning et ressources → Synthèse.
+ * Correspondance persistée : 1→1, 2→2, 3|4→3, 5→3.
+ * Les étapes 4–5 sont locales (pas de gate, pas d’écriture currentStep).
  */
 
 export const ETAPES_UI_DOSSIER = [
@@ -12,14 +13,21 @@ export const ETAPES_UI_DOSSIER = [
   {
     ui: 3,
     libelle: 'Chiffrage',
-    nextLabel: 'Voir la synthèse',
+    nextLabel: 'Continuer vers le planning',
   },
   {
     ui: 4,
+    libelle: 'Planning et ressources',
+    nextLabel: 'Voir la synthèse',
+  },
+  {
+    ui: 5,
     libelle: 'Synthèse et validation',
     nextLabel: 'Soumettre à validation',
   },
 ] as const;
+
+export const UI_ETAPE_MAX = 5;
 
 /** Étapes backend techniques (numéros persistés dans `currentStep`). */
 export const BACKEND_ETAPE = {
@@ -33,11 +41,10 @@ export const BACKEND_ETAPE = {
 export function backendToUiEtape(backendStep: number): number {
   if (backendStep <= 1) return 1;
   if (backendStep === 2) return 2;
-  if (backendStep === 3 || backendStep === 4) return 3;
-  return 4;
+  return 3;
 }
 
-/** Étape backend cible quand on affiche / quitte une étape UI. */
+/** Étape backend cible quand on affiche / quitte une étape UI 1–3. */
 export function uiToBackendEtape(uiStep: number): number {
   if (uiStep <= 1) return BACKEND_ETAPE.DOCUMENTS;
   if (uiStep === 2) return BACKEND_ETAPE.BORDEREAU;
@@ -45,7 +52,7 @@ export function uiToBackendEtape(uiStep: number): number {
   return BACKEND_ETAPE.CHIFFRAGE;
 }
 
-/** Prochaine étape backend depuis l'étape UI courante. */
+/** Prochaine étape backend depuis l'étape UI courante (null = nav locale). */
 export function nextBackendEtape(uiStep: number): number | null {
   if (uiStep === 1) return BACKEND_ETAPE.BORDEREAU;
   if (uiStep === 2) return BACKEND_ETAPE.DECOMPOSITION;
@@ -53,20 +60,22 @@ export function nextBackendEtape(uiStep: number): number | null {
   return null;
 }
 
-/** Étape backend précédente depuis l'étape UI courante. */
+/** Étape backend précédente depuis l'étape UI courante (null = nav locale). */
 export function prevBackendEtape(uiStep: number): number | null {
   if (uiStep === 2) return BACKEND_ETAPE.DOCUMENTS;
   if (uiStep === 3) return BACKEND_ETAPE.BORDEREAU;
-  if (uiStep === 4) return BACKEND_ETAPE.DECOMPOSITION;
   return null;
+}
+
+/** True si l’étape UI n’écrit pas `currentStep` (planning+ressources / synthèse). */
+export function estEtapeUiLocale(uiStep: number): boolean {
+  return uiStep >= 4;
 }
 
 /** Étapes backend dont les gates s'affichent sur une étape UI. */
 export function backendGateEtapesForUi(uiStep: number): number[] {
   if (uiStep === 1) return [BACKEND_ETAPE.DOCUMENTS];
   if (uiStep === 2) return [BACKEND_ETAPE.BORDEREAU];
-  // Décomposition : structure + alertes consultation + prix de vente sur tous les postes
-  // (gate chiffrage) — requis pour « Voir la synthèse ».
   if (uiStep === 3) {
     return [
       BACKEND_ETAPE.DECOMPOSITION,
@@ -74,7 +83,8 @@ export function backendGateEtapesForUi(uiStep: number): number[] {
       BACKEND_ETAPE.CHIFFRAGE,
     ];
   }
-  return [BACKEND_ETAPE.DECOMPOSITION, BACKEND_ETAPE.CHIFFRAGE];
+  if (uiStep === UI_ETAPE_MAX) return [BACKEND_ETAPE.DECOMPOSITION, BACKEND_ETAPE.CHIFFRAGE];
+  return [];
 }
 
 export function libelleUiEtape(backendStep: number): string {
@@ -84,12 +94,11 @@ export function libelleUiEtape(backendStep: number): string {
 
 /**
  * Étape UI cible pour corriger un problème de gate.
- * Documents → 1, bordereau → 2, décomposition/consultation/chiffrage → 3 (sauf gate chiffrage → 3).
+ * Documents → 1, bordereau → 2, décomposition/consultation/chiffrage → 3.
  */
 export function uiEtapePourGate(backendGateEtape: number): number {
   if (backendGateEtape <= 1) return 1;
   if (backendGateEtape === 2) return 2;
-  // Consultation + décomposition + articles de chiffrage se corrigent dans le workspace poste.
   return 3;
 }
 
@@ -167,4 +176,17 @@ export function incompleteUiStepIndexes(
     if (uiStepHasGateIssues(ui, gates)) indexes.push(ui - 1);
   }
   return indexes;
+}
+
+/**
+ * « Chiffrage terminé » : au moins un poste, et la gate chiffrage n’a plus de bloquant
+ * (prix / taux manquants). Les alertes qualité (estimés, avis) ne comptent pas.
+ */
+export function chiffragePretATerminer(input: {
+  nombreArticles?: number | null;
+  gates?: readonly { etape: number; bloquant: boolean }[] | null;
+}): boolean {
+  if ((input.nombreArticles ?? 0) <= 0) return false;
+  const gate = (input.gates ?? []).find((g) => g.etape === BACKEND_ETAPE.CHIFFRAGE);
+  return !!gate && !gate.bloquant;
 }

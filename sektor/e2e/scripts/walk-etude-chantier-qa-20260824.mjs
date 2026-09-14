@@ -198,6 +198,18 @@ async function main() {
   const etape = await api(h, 'PUT', `/api/v1/etudes/dossiers/${dossierId}/etape`, { etape: 2 });
   if (!etape.ok) note('bug', 'études/etape', 'passage étape 2', '2xx', `${etape.status} ${etape.text}`);
 
+  const go = await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/go`, {
+    chargeEtudeUserId,
+  });
+  if (!go.ok) {
+    note('bug', 'études/go', 'affectation', '2xx', `${go.status} ${go.text}`);
+  } else if (go.body?.status === 'ASSIGNED') {
+    const accept = await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/accepter-affectation`);
+    if (!accept.ok) {
+      note('bug', 'études/accepter', 'démarrage', '2xx', `${accept.status} ${accept.text}`);
+    }
+  }
+
   const soumettre = await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/soumettre`);
   if (!soumettre.ok) {
     note('bug', 'études/soumettre', 'soumission', '2xx', `${soumettre.status} ${soumettre.text}`);
@@ -209,13 +221,20 @@ async function main() {
   if (!valider.ok) {
     note('bug', 'études/valider', '1ère validation', '2xx', `${valider.status} ${valider.text}`);
   }
-  if (valider.body?.status === 'EN_VALIDATION') {
+  if (
+    valider.body?.status === 'EN_VALIDATION' ||
+    valider.body?.status === 'COMPLETED' ||
+    valider.body?.status === 'FINANCIALLY_APPROVED'
+  ) {
     valider = await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/valider`);
   }
-  if (valider.body?.status !== 'VALIDEE') {
-    note('bug', 'études/valider', 'statut final', 'VALIDEE', valider.body?.status);
+  if (valider.body?.status === 'FINANCIALLY_APPROVED') {
+    valider = await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/valider`);
+  }
+  if (valider.body?.status !== 'FINAL_APPROVED') {
+    note('bug', 'études/valider', 'statut final', 'FINAL_APPROVED', valider.body?.status);
   } else {
-    pass('étude VALIDEE');
+    pass('étude FINAL_APPROVED');
   }
 
   const devis = await api(h, 'POST', `/api/v1/etudes/dossiers/${dossierId}/generer-devis`, {
@@ -232,10 +251,16 @@ async function main() {
     referenceMarche: `MA-WALK-${s}`,
     montantAttribue: 500000,
   });
-  if (!gagne.ok || gagne.body?.status !== 'GAGNE') {
-    note('bug', 'études/gagne', 'marquer gagné', 'GAGNE', `${gagne.status} ${gagne.body?.status}`);
+  if (!gagne.ok || gagne.body?.status !== 'FINAL_APPROVED') {
+    note(
+      'bug',
+      'études/gagne',
+      'marquer gagné (statut étude inchangé)',
+      'FINAL_APPROVED',
+      `${gagne.status} ${gagne.body?.status}`,
+    );
   } else {
-    pass('étude GAGNE');
+    pass('gain enregistré, étude FINAL_APPROVED');
   }
 
   // ── 3. Conversion chantier ────────────────────────────────────────────────

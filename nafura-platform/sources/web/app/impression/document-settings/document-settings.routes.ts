@@ -12,7 +12,7 @@ export const DOCUMENT_SETTINGS_ROUTES: Routes = [
     canDeactivate: [unsavedChangesGuard],
     data: {
       permissions: ['administration.templates.read'],
-      title: 'administration.documentSettings.title',
+      title: 'administration.documents.title',
     },
   },
 ];

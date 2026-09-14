@@ -23,7 +23,7 @@ class ReferenceConversationFlowTest {
     }
 
     @Test
-    void createSupplierIsActionIntent() {
-        assertEquals(IntentType.ACTION, router.classify("Creer le fournisseur ACME").getIntent());
+    void createSupplierIsNavigateIntent() {
+        assertEquals(IntentType.NAVIGATE, router.classify("Creer le fournisseur ACME").getIntent());
     }
 }

@@ -8,7 +8,7 @@ export const environment = {
   keycloakClientId: 'erp-web',
   onboardingV2Enabled: true,
   directKeycloakLogin: false,
-  /** Auto POST /api/public/dev/cursor-session on boot (requires NAFURA_DEV_CURSOR_AUTH_ENABLED). */
+  /** Auto POST /api/public/dev/cursor-session on first boot. Logout → /login picker (Mode B). */
   cursorAuthAutoLogin: true,
   devAuthBypass: false,
   devAuthEagerBootstrap: false,

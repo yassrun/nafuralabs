@@ -66,6 +66,8 @@ export class ListingControlsComponent {
   search = input<string>('');
   /** Hide search when the host only needs column and filter controls. */
   showSearch = input<boolean>(true);
+  /** When false, hide the filter control (e.g. tree toolbar that only needs multi-select). */
+  showFilterButton = input<boolean>(true);
   /** Show the filter-reset control next to the filter button. Default true. */
   showFilterReset = input<boolean>(true);
 

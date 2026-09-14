@@ -14,6 +14,7 @@ import { LookupReferenceNavigationService } from '@lib/anatomy/services/lookup-r
 
 import { environment } from '@env';
 import { AuthFacade } from '../../security/services/auth.facade';
+import { AuthApiService } from '../../security/services/auth-api.service';
 import { applicationDefaultRoute } from '../../application/application-config';
 
 @Component({
@@ -34,7 +35,44 @@ import { applicationDefaultRoute } from '../../application/application-config';
           <span class="logo-text">Nafura</span>
         </div>
 
-        @if (useDevWizard()) {
+        @if (useCursorPicker()) {
+          <p class="message">Mode B — choisir un utilisateur</p>
+          <p class="submessage">
+            Session locale, sans mot de passe. Après déconnexion vous revenez ici pour
+            tester un autre rôle.
+          </p>
+          @if (cursorLoading()) {
+            <p class="hint">Chargement des identités…</p>
+          } @else if (cursorUsers().length) {
+            <label class="field-label" for="cursor-user">Utilisateur et rôle</label>
+            <select
+              id="cursor-user"
+              class="field"
+              [ngModel]="cursorAlias()"
+              (ngModelChange)="cursorAlias.set($event)"
+            >
+              @for (user of cursorUsers(); track user.alias) {
+                <option [value]="user.alias">
+                  {{ user.name }} — {{ user.roleLabel || user.roleCode }}
+                </option>
+              }
+            </select>
+            <button
+              type="button"
+              class="primary-button"
+              [disabled]="!cursorAlias() || cursorBusy()"
+              (click)="connectCursor()"
+            >
+              {{ cursorBusy() ? 'Connexion…' : 'Se connecter' }}
+            </button>
+          }
+          @if (cursorError()) {
+            <p class="error">{{ cursorError() }}</p>
+            <button type="button" class="retry-button" (click)="loadCursorIdentities()">
+              Réessayer
+            </button>
+          }
+        } @else if (useDevWizard()) {
           @if (devStep() === 1) {
             <p class="message">Connexion démo — mot de passe</p>
             <input
@@ -151,6 +189,14 @@ import { applicationDefaultRoute } from '../../application/application-config';
       margin: 0 0 1.25rem;
       text-align: left;
     }
+    .field-label {
+      display: block;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      margin: 0 0 0.35rem;
+    }
     .field {
       width: 100%;
       box-sizing: border-box;
@@ -159,6 +205,7 @@ import { applicationDefaultRoute } from '../../application/application-config';
       border-radius: 8px;
       font-size: 14px;
       margin-bottom: 0.75rem;
+      background: #fff;
     }
     .hint {
       font-size: 12px;
@@ -182,6 +229,7 @@ import { applicationDefaultRoute } from '../../application/application-config';
       cursor: pointer;
     }
     .primary-button:hover { background: #0f766e; }
+    .primary-button:disabled { opacity: 0.55; cursor: not-allowed; }
     .secondary-button {
       flex: 1;
       min-width: 100px;
@@ -211,6 +259,7 @@ import { applicationDefaultRoute } from '../../application/application-config';
 })
 export class LoginPage implements OnInit {
   private readonly auth = inject(AuthFacade);
+  private readonly authApi = inject(AuthApiService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly lookupRefNav = inject(LookupReferenceNavigationService);
@@ -222,6 +271,14 @@ export class LoginPage implements OnInit {
 
   readonly useDevWizard = signal(false);
   readonly useDirectRedirect = signal(false);
+  readonly useCursorPicker = signal(false);
+  readonly cursorLoading = signal(false);
+  readonly cursorBusy = signal(false);
+  readonly cursorError = signal<string | null>(null);
+  readonly cursorAlias = signal('');
+  readonly cursorUsers = signal<
+    Array<{ alias: string; email: string; name: string; roleCode: string; roleLabel: string }>
+  >([]);
   readonly devStep = signal<1 | 2>(1);
   readonly devError = signal<string | null>(null);
 
@@ -261,6 +318,12 @@ export class LoginPage implements OnInit {
       return;
     }
 
+    if (this.auth.usesCursorAuthAutoLogin() && this.auth.usesCursorIdentityPicker()) {
+      this.useCursorPicker.set(true);
+      void this.loadCursorIdentities();
+      return;
+    }
+
     // Cursor QA / direct Keycloak: spinner only — never the SSO splash card.
     if (this.auth.usesCursorAuthAutoLogin() || this.auth.usesDirectKeycloakLogin()) {
       this.useDirectRedirect.set(true);
@@ -274,6 +337,36 @@ export class LoginPage implements OnInit {
 
     this.useDevWizard.set(false);
     void this.auth.login();
+  }
+
+  async loadCursorIdentities(): Promise<void> {
+    this.cursorLoading.set(true);
+    this.cursorError.set(null);
+    try {
+      const roster = await this.authApi.listCursorIdentities();
+      this.cursorUsers.set(roster.users);
+      const preferred =
+        roster.users.find((u) => u.defaultLogin)?.alias ?? roster.users[0]?.alias ?? '';
+      this.cursorAlias.set(preferred);
+    } catch {
+      this.cursorError.set('Impossible de charger les utilisateurs Mode B (API 8082).');
+    } finally {
+      this.cursorLoading.set(false);
+    }
+  }
+
+  async connectCursor(): Promise<void> {
+    const alias = this.cursorAlias();
+    if (!alias) return;
+    this.cursorBusy.set(true);
+    this.cursorError.set(null);
+    const ok = await this.auth.loginCursorAs(alias);
+    this.cursorBusy.set(false);
+    if (!ok) {
+      this.cursorError.set('Connexion refusée pour cet utilisateur.');
+      return;
+    }
+    await this.navigateToApplicationShell();
   }
 
   signIn(): void {

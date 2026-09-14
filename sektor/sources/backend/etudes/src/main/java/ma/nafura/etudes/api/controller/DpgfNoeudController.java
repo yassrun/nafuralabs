@@ -2,8 +2,10 @@ package ma.nafura.etudes.api.controller;
 
 import jakarta.validation.Valid;
 import java.util.UUID;
+import ma.nafura.etudes.api.request.DpgfLotAffectationRequest;
 import ma.nafura.etudes.api.request.DpgfNoeudUpdateDto;
 import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
+import ma.nafura.etudes.service.DpgfLotAffectationService;
 import ma.nafura.etudes.service.DpgfService;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
@@ -21,9 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class DpgfNoeudController {
 
     private final DpgfService service;
+    private final DpgfLotAffectationService lotAffectationService;
 
-    public DpgfNoeudController(DpgfService service) {
+    public DpgfNoeudController(DpgfService service, DpgfLotAffectationService lotAffectationService) {
         this.service = service;
+        this.lotAffectationService = lotAffectationService;
     }
 
     @PutMapping("/{id}")
@@ -38,5 +42,12 @@ public class DpgfNoeudController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteNoeud(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/affecter")
+    @RequirePermission("etudes.update")
+    public ResponseEntity<DpgfNoeud> affecter(
+            @PathVariable UUID id, @RequestBody(required = false) DpgfLotAffectationRequest body) {
+        return ResponseEntity.ok(lotAffectationService.affecter(id, body));
     }
 }

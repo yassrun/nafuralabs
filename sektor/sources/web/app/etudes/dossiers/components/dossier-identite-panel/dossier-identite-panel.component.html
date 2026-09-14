@@ -1,13 +1,12 @@
-<section class="identite" aria-labelledby="identite-titre">
+<section
+  class="identite"
+  aria-labelledby="identite-titre"
+  [attr.aria-busy]="cpsBlocking()"
+>
   <header class="identite__entete">
     <div>
       <h3 id="identite-titre" class="identite__titre">Identité de l’étude</h3>
-      <p class="identite__aide">
-        Objet, MOA et chargé restent corrigeables jusqu’à la soumission. Le badge
-        <strong>IA · CPS</strong> indique une valeur extraite du PDF. Accepter ou Refuser
-        seulement tant que ce n’est pas enregistré — Enregistrer et Continuer confirment
-        les valeurs affichées.
-      </p>
+      <p class="identite__aide">{{ aideCadrage() }}</p>
     </div>
     @if (hasPendingCps()) {
       <div class="identite__global">
@@ -17,14 +16,24 @@
     }
   </header>
 
-  <div class="identite__grille">
+  @if (cpsBlocking()) {
+    <div class="identite__wait" role="status" aria-live="polite">
+      <nf-spinner size="sm" />
+      <div>
+        <strong>Indexation du CPS</strong>
+        <p>Les champs sont verrouillés le temps que l’IA propose les données du marché.</p>
+      </div>
+    </div>
+  }
+
+  <div class="identite__grille" [class.identite__grille--attente]="cpsBlocking()">
     <div class="identite__objet identite__champ" [attr.data-ia]="iaStatus('objet')">
       <ng-container *ngTemplateOutlet="revue; context: { $implicit: 'objet' }" />
       <nf-input
         name="objet"
         label="Objet"
         [required]="true"
-        [disabled]="!modifiable() || saving()"
+        [disabled]="champsVerrouilles()"
         [ngModel]="objet()"
         (ngModelChange)="onChamp('objet', $event)"
       />
@@ -35,30 +44,47 @@
         name="clientNom"
         label="MOA"
         [required]="true"
-        [disabled]="!modifiable() || saving()"
+        [disabled]="champsVerrouilles()"
         [ngModel]="clientNom()"
         (ngModelChange)="onChamp('clientNom', $event)"
       />
     </div>
-    <div class="identite__champ">
-      <nf-select
-        name="chargeEtude"
-        label="Chargé d’étude"
-        placeholder="Sélectionner un ingénieur"
-        [required]="true"
-        [disabled]="!modifiable() || saving()"
-        [options]="chargeEtudeOptions()"
-        [ngModel]="chargeEtudeUserId() ?? ''"
-        (ngModelChange)="chargeEtudeUserId.set($event || null)"
-      />
-    </div>
+    @if (!enCadrage()) {
+      <div class="identite__champ">
+        @if (peutChangerCharge() && modifiable()) {
+          <nf-select
+            name="chargeEtude"
+            label="Responsable d’étude"
+            placeholder="Affecté au go"
+            [required]="true"
+            [disabled]="champsVerrouilles()"
+            [options]="chargeEtudeOptions()"
+            [ngModel]="chargeEtudeUserId() ?? ''"
+            (ngModelChange)="chargeEtudeUserId.set($event || null)"
+          />
+          <p class="identite__hint">Affecté au go — vous pouvez le changer.</p>
+        } @else {
+          <span class="identite__label">Responsable d’étude</span>
+          <p class="identite__valeur">{{ chargeEtudeLibelle() }}</p>
+          <p class="identite__hint">Affecté au go. Seul le DG peut le changer.</p>
+        }
+      </div>
+      @if (dossier().responsableExecutionNom || dossier().responsableExecutionUserId) {
+        <div class="identite__champ">
+          <span class="identite__label">Responsable d’exécution</span>
+          <p class="identite__valeur">
+            {{ dossier().responsableExecutionNom || dossier().responsableExecutionUserId }}
+          </p>
+        </div>
+      }
+    }
     <div class="identite__champ" [attr.data-ia]="iaStatus('aoType')">
       <ng-container *ngTemplateOutlet="revue; context: { $implicit: 'aoType' }" />
       <nf-select
         name="aoType"
         label="Type d’AO"
         placeholder="Public / privé"
-        [disabled]="!modifiable() || saving()"
+        [disabled]="champsVerrouilles()"
         [options]="aoTypeOptions"
         [ngModel]="aoType()"
         (ngModelChange)="onChamp('aoType', $event)"
@@ -70,7 +96,7 @@
         name="dateLimiteDepot"
         type="date"
         label="Date limite de dépôt"
-        [disabled]="!modifiable() || saving()"
+        [disabled]="champsVerrouilles()"
         [ngModel]="dateLimiteDepot()"
         (ngModelChange)="onChamp('dateLimiteDepot', $event)"
       />
@@ -80,7 +106,7 @@
       <nf-input
         name="aoReference"
         label="Référence AO"
-        [disabled]="!modifiable() || saving()"
+        [disabled]="champsVerrouilles()"
         [ngModel]="aoReference()"
         (ngModelChange)="onChamp('aoReference', $event)"
       />
@@ -90,7 +116,7 @@
       <nf-input
         name="ville"
         label="Ville"
-        [disabled]="!modifiable() || saving()"
+        [disabled]="champsVerrouilles()"
         [ngModel]="ville()"
         (ngModelChange)="onChamp('ville', $event)"
       />
@@ -101,7 +127,7 @@
         name="dateOuverturePlis"
         type="date"
         label="Ouverture des plis"
-        [disabled]="!modifiable() || saving()"
+        [disabled]="champsVerrouilles()"
         [ngModel]="dateOuverturePlis()"
         (ngModelChange)="onChamp('dateOuverturePlis', $event)"
       />
@@ -112,7 +138,7 @@
         name="delaiExecutionJours"
         type="number"
         label="Délai d’exécution (jours)"
-        [disabled]="!modifiable() || saving()"
+        [disabled]="champsVerrouilles()"
         [ngModel]="delaiExecutionJours() == null ? '' : ('' + delaiExecutionJours())"
         (ngModelChange)="onChamp('delaiExecutionJours', $event === '' || $event == null ? '' : +$event)"
       />
@@ -123,7 +149,7 @@
         name="estimationMoaHt"
         type="number"
         label="Estimation MOA HT"
-        [disabled]="!modifiable() || saving()"
+        [disabled]="champsVerrouilles()"
         [ngModel]="estimationMoaHt()"
         (ngModelChange)="onChamp('estimationMoaHt', $event === '' || $event == null ? '' : +$event)"
       />
@@ -134,7 +160,7 @@
         name="cautionProvisoire"
         type="number"
         label="Caution provisoire (%)"
-        [disabled]="!modifiable() || saving()"
+        [disabled]="champsVerrouilles()"
         [ngModel]="cautionProvisoire()"
         (ngModelChange)="onChamp('cautionProvisoire', $event === '' || $event == null ? '' : +$event)"
       />
@@ -146,13 +172,13 @@
   @if (iaPending(key)) {
     <div class="identite__revue">
       <span class="identite__badge identite__badge--ia">IA · CPS</span>
-      <nf-button size="sm" [disabled]="!modifiable() || saving()" (clicked)="accepter(key)">
+      <nf-button size="sm" [disabled]="champsVerrouilles()" (clicked)="accepter(key)">
         Accepter
       </nf-button>
       <nf-button
         size="sm"
         variant="secondary"
-        [disabled]="!modifiable() || saving()"
+        [disabled]="champsVerrouilles()"
         (clicked)="ignorer(key)"
       >
         Refuser

@@ -3,28 +3,38 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { ActionBarComponent, ButtonComponent } from '@platform/lib/anatomy';
+import { ButtonComponent, StatusActionBarComponent } from '@platform/lib/anatomy';
+import type { StatusChangeRecord } from '@platform/lib/anatomy';
 import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 
-import { headerCtaSlot } from '../../utils/dossier-header-cta.util';
-
-import type { DossierEtude } from '@app/etudes/models';
-import type { DossierEtudeSynthese } from '../../services/dossier-etude-api.service';
+import { chiffragePretATerminer } from '../../utils/dossier-etape.util';
+import { exigeAvisExecution } from '../../utils/dossier-responsables.util';
 import {
-  DOSSIER_STATUT_VARIANTS,
-  labelStatutDossier,
-} from '../../utils/dossier-status.util';
+  DOSSIER_STATUS_BAR,
+  DOSSIER_SUITE_ACTIONS,
+  type DossierStatusContext,
+} from '../../config/dossier-etude.workflow';
+
+import { AuthFacade } from '@platform/core/security/services/auth.facade';
+import type { DossierEtude } from '@app/etudes/models';
+import {
+  DossierEtudeApiService,
+  type DossierEtudeSynthese,
+} from '../../services/dossier-etude-api.service';
+import { normalizeStatutDossier } from '../../utils/dossier-status.util';
 
 @Component({
   selector: 'app-dossier-summary-header',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, MadCurrencyPipe, ButtonComponent, ActionBarComponent],
+  imports: [CommonModule, RouterLink, MadCurrencyPipe, ButtonComponent, StatusActionBarComponent],
   templateUrl: './dossier-summary-header.component.html',
   styleUrl: './dossier-summary-header.component.scss',
   host: {
@@ -32,28 +42,32 @@ import {
   },
 })
 export class DossierSummaryHeaderComponent {
+  private readonly api = inject(DossierEtudeApiService);
+  private readonly auth = inject(AuthFacade);
+
   readonly synthese = input.required<DossierEtudeSynthese>();
-  /** Identité dossier (délai AO, MOA à jour après enregistrement). */
   readonly dossier = input<DossierEtude | undefined>(undefined);
-  /** DPGF lié — conservé pour le retour des actions Imprimer. */
   readonly hasDpgf = input(false);
-  /**
-   * Anomalies de l’étape UI courante (prioritaire sur le total multi-gates backend).
-   * `undefined` = fallback `synthese.anomaliesBloquantes`.
-   */
   readonly anomaliesEtape = input<number | undefined>(undefined);
-  /** Étape UI wizard (1–4) — évite « Soumettre » trop tôt dans le header. */
   readonly etapeUi = input(1);
-  /** Lien invité : dès que le dossier existe (portail déjà branché). */
   readonly canShare = input(false);
+  readonly peutDeciderGo = input(false);
+  readonly peutAccepterAffectation = input(false);
+  readonly peutSaisirApresGo = input(false);
+  readonly peutRenvoyerAffectation = input(false);
+  readonly chargeDejaDesigne = input(false);
+  readonly peutAvisExecution = input(false);
+  readonly peutValiderFinancier = input(false);
+  readonly peutValiderDefinitif = input(false);
+  readonly canSave = input(false);
+  readonly saving = input(false);
 
   readonly action = output<string>();
   readonly focusAnomalies = output<void>();
 
-  readonly statutLabel = computed(() => labelStatutDossier(this.synthese().status));
-  readonly statutVariant = computed(
-    () => DOSSIER_STATUT_VARIANTS[this.synthese().status] ?? 'default',
-  );
+  readonly workflow = DOSSIER_STATUS_BAR;
+
+  readonly statut = computed(() => normalizeStatutDossier(this.synthese().status));
 
   readonly moaNom = computed(() => {
     const d = this.dossier();
@@ -71,6 +85,31 @@ export class DossierSummaryHeaderComponent {
     ).trim();
   });
 
+  readonly execNom = computed(() => {
+    const d = this.dossier();
+    return (
+      d?.responsableExecutionNom
+      ?? this.synthese().responsableExecutionNom
+      ?? d?.responsableExecutionUserId
+      ?? this.synthese().responsableExecutionUserId
+      ?? ''
+    ).trim();
+  });
+
+  readonly execDistinct = computed(() => {
+    const a = (this.dossier()?.chargeEtudeUserId ?? this.synthese().chargeEtudeUserId ?? '')
+      .trim()
+      .toLowerCase();
+    const b = (
+      this.dossier()?.responsableExecutionUserId
+      ?? this.synthese().responsableExecutionUserId
+      ?? ''
+    )
+      .trim()
+      .toLowerCase();
+    return !!b && a !== b;
+  });
+
   readonly delaiJours = computed(() => this.dossier()?.aoDelaiExecutionJours ?? null);
 
   readonly delaiLabel = computed(() => {
@@ -83,84 +122,93 @@ export class DossierSummaryHeaderComponent {
     return etape !== undefined ? etape : this.synthese().anomaliesBloquantes;
   });
 
-  /**
-   * Action header effective : sur Docs/Bordereau/Coût, « Soumettre le chiffrage »
-   * devient « Voir la synthèse » (parcours). Soumission réelle = étape 4.
-   */
-  readonly actionEffective = computed(() => {
-    const a = this.synthese().actionPrincipale;
-    if (a === 'SOUMETTRE_CHIFFRAGE' && this.etapeUi() < 4) {
-      return 'VOIR_SYNTHESE';
-    }
-    return a;
+  readonly statusContext = computed((): DossierStatusContext => {
+    const s = this.synthese();
+    return {
+      status: this.statut() || s.status,
+      availableActions: s.availableActions ?? [],
+      actionPrincipale: s.actionPrincipale,
+      peutDeciderGo: this.peutDeciderGo(),
+      peutAccepterAffectation: this.peutAccepterAffectation(),
+      peutSaisirApresGo: this.peutSaisirApresGo(),
+      peutRenvoyerAffectation: this.peutRenvoyerAffectation(),
+      chargeDejaDesigne: this.chargeDejaDesigne(),
+      peutAvisExecution: this.peutAvisExecution(),
+      chiffragePret: chiffragePretATerminer(s),
+      structureVerrouillee: s.structureVerrouillee,
+      modifiable: s.modifiable,
+      phase: s.phase,
+      avisExecutionDossier: s.avisExecutionDossier,
+      exigeAvis: exigeAvisExecution(this.dossier()),
+      peutValiderFinancier: this.peutValiderFinancier(),
+      peutValiderDefinitif: this.peutValiderDefinitif(),
+    };
   });
 
-  readonly ctaLabel = computed(() => {
-    switch (this.actionEffective()) {
-      case 'SOUMETTRE_STRUCTURE':
-        return 'Continuer vers le chiffrage';
-      case 'VOIR_SYNTHESE':
-        return 'Voir la synthèse';
-      case 'SOUMETTRE_CHIFFRAGE':
-        return 'Soumettre le chiffrage';
-      case 'VALIDER_N1':
-        return 'Valider N+1';
-      case 'VALIDER_N2':
-        return 'Valider N+2 et générer le devis';
-      case 'GENERER_DEVIS':
-        return 'Générer le devis';
-      case 'VOIR_DEVIS':
-        return 'Voir le devis';
-      case 'CORRIGER_BORDEREAU':
-        return 'Corriger le bordereau';
-      case 'CORRIGER_CHIFFRAGE':
-        return 'Corriger le chiffrage';
-      case 'REOUVRIR_BORDEREAU':
-        return 'Réouvrir le bordereau';
-      case 'MARQUER_GAGNE':
-        return 'Marquer gagné';
-      case 'CONVERTIR':
-        return 'Créer le chantier';
-      case 'VOIR_CHANTIER':
-        return 'Ouvrir le chantier';
-      default:
-        return '';
-    }
-  });
-
-  readonly ctaSlot = computed(() => {
-    if (!this.ctaLabel()) return 'hidden' as const;
-    return headerCtaSlot(this.actionEffective());
-  });
-
-  readonly showCta = computed(() => this.ctaSlot() !== 'hidden');
-
-  readonly showActionBar = computed(
-    () =>
-      this.showPartager() ||
-      this.showReouvrir() ||
-      this.showRefuser() ||
-      this.showMarquerPerdu() ||
-      this.showCta(),
+  readonly suiteActions = computed(() =>
+    DOSSIER_SUITE_ACTIONS.filter((action) => action.isVisible(this.statusContext())),
   );
 
-  readonly showReouvrir = computed(() => {
-    const s = this.synthese();
-    return s.modifiable && s.structureVerrouillee && s.phase === 'CHIFFRAGE';
-  });
+  readonly statusHistory = signal<StatusChangeRecord[]>([]);
+  readonly historyLoading = signal(false);
 
-  readonly showRefuser = computed(() => {
-    const a = this.synthese().actionPrincipale;
-    return a === 'VALIDER_N1' || a === 'VALIDER_N2';
-  });
-
-  /** L13 — issue commerciale : perdu en secondaire quand devis généré. */
-  readonly showMarquerPerdu = computed(() => this.synthese().status === 'DEVIS_GENERE');
-
-  readonly showPartager = computed(() => true);
-
-  emitAction(code?: string): void {
-    const action = code ?? this.actionEffective() ?? this.synthese().actionPrincipale;
-    if (action) this.action.emit(action);
+  emitAction(code: string): void {
+    if (code) this.action.emit(code);
   }
+
+  async loadHistory(): Promise<void> {
+    const id = this.synthese().id;
+    if (!id || this.historyLoading()) return;
+    this.historyLoading.set(true);
+    try {
+      const [rows, ingenieurs] = await Promise.all([
+        this.api.getStatusHistory(id),
+        this.api.listIngenieurs().catch(() => []),
+      ]);
+      const names = this.actorNames(ingenieurs);
+      this.statusHistory.set(rows.map((row) => ({ ...row, actor: this.labelActor(row.actor, names) })));
+    } catch {
+      this.statusHistory.set([]);
+    } finally {
+      this.historyLoading.set(false);
+    }
+  }
+
+  private actorNames(ingenieurs: { userId: string; email: string; displayName: string }[]): Map<string, string> {
+    const names = new Map<string, string>();
+    const put = (key: string | null | undefined, label: string | null | undefined) => {
+      const k = (key ?? '').trim().toLowerCase();
+      const v = (label ?? '').trim();
+      if (!k || !v || looksLikeUuid(v)) return;
+      names.set(k, v);
+    };
+    for (const ing of ingenieurs) {
+      put(ing.userId, ing.displayName || ing.email);
+      put(ing.email, ing.displayName || ing.email);
+    }
+    const d = this.dossier();
+    const s = this.synthese();
+    put(d?.chargeEtudeUserId ?? s.chargeEtudeUserId, d?.chargeEtudeNom ?? s.chargeEtudeNom);
+    put(d?.responsableExecutionUserId ?? s.responsableExecutionUserId, d?.responsableExecutionNom ?? s.responsableExecutionNom);
+    const user = this.auth.user();
+    if (user) {
+      const me = this.auth.displayName().trim() || user.email;
+      put(user.id, me);
+      put(user.email, me);
+    }
+    return names;
+  }
+
+  private labelActor(actor: string, names: Map<string, string>): string {
+    const raw = (actor ?? '').trim();
+    if (!raw || raw.toLowerCase() === 'system') return 'Système';
+    return names.get(raw.toLowerCase()) ?? raw;
+  }
+}
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function looksLikeUuid(value: string): boolean {
+  return UUID_RE.test(value.trim());
 }

@@ -11,6 +11,16 @@
         [anomaliesEtape]="anomaliesEtapeCourante()"
         [etapeUi]="etapeUi()"
         [canShare]="peutPartager()"
+        [peutDeciderGo]="peutDeciderGo()"
+        [peutAccepterAffectation]="estChargeEtude()"
+        [peutSaisirApresGo]="peutSaisirApresGo()"
+        [peutAvisExecution]="peutAvisExecution()"
+        [peutValiderFinancier]="peutValiderFinancier()"
+        [peutValiderDefinitif]="peutValiderDefinitif()"
+        [peutRenvoyerAffectation]="peutRenvoyerAffectation()"
+        [chargeDejaDesigne]="chargeDejaDesigne()"
+        [canSave]="peutEnregistrer()"
+        [saving]="cadrageSaving()"
         (action)="onHeaderAction($event)"
         (focusAnomalies)="focusPremierProblemeGate()"
       />
@@ -34,17 +44,15 @@
       [steps]="etapes"
       [currentStepIndex]="indexCourant()"
       [incompleteStepIndexes]="incompleteStepIndexes()"
-      [canProceed]="modifiable() ? peutContinuerUi() : true"
+      [canProceed]="dossier()?.status === 'STUDY_REJECTED' ? false : modifiable() ? peutContinuerUi() : true"
       [allowStepNavigation]="true"
       [backLabel]="backLabel()"
       [nextLabel]="nextLabel()"
       submitLabel="Soumettre le chiffrage"
-      [showSubmit]="peutSoumettre()"
-      [extraActions]="wizardExtraActions()"
+      [showSubmit]="false"
       (back)="precedent()"
       (next)="suivant()"
       (submit)="soumettre()"
-      (action)="onWizardAction($event)"
       (stepSelect)="allerAEtapeUi($event)"
     >
       <app-gate-blocage
@@ -65,14 +73,18 @@
           <app-pieces-marche
             [dossierId]="dossier()!.id"
             [dpgfId]="$safeNavigationMigration(dossier()?.dpgfId)"
-            [modifiable]="modifiable()"
-            [figeFichiersDeposes]="dossier()?.status !== 'BROUILLON'"
+            [modifiable]="piecesModifiables()"
+            [figeFichiersDeposes]="
+              dossier()?.status !== 'DRAFT' &&
+              dossier()?.status !== 'PENDING_ASSIGNMENT' &&
+              dossier()?.status !== 'STUDY_REJECTED'
+            "
             mode="documents"
             (change)="rechargerApresPieces()"
           />
           <app-dossier-identite-panel
             [dossier]="dossier()!"
-            [modifiable]="modifiable()"
+            [modifiable]="cadrageEditable()"
             (saved)="onIdentiteSaved($event)"
           />
         } @else if (etapeUi() === 2) {
@@ -85,8 +97,11 @@
             [focusNoeudId]="focusNoeudId()"
             [focusCode]="focusNoeudCode()"
             [focusToken]="focusTick()"
+            [peutAffecterLots]="peutSaisirApresGo()"
+            [vueLotsAffectes]="estIngenieurLotSeulement()"
             mode="bordereau"
             (change)="rechargerApresPieces()"
+            (dpgfPret)="onDpgfPret($event)"
           />
         } @else if (etapeUi() === 3) {
           <div class="dossier__etape3">
@@ -95,7 +110,7 @@
                 [dpgfId]="dpgfId"
                 [dossierId]="dossier()!.id"
                 [cpsDocumentId]="dossier()?.cpsDocumentId ?? null"
-                [modifiable]="modifiable()"
+                [modifiable]="peutChiffrerLots()"
                 [fgDefaut]="dossier()?.fraisGenerauxPercentDefaut ?? 10"
                 [margeDefaut]="dossier()?.margePercentDefaut ?? 17.5"
                 [tvaDefaut]="dossier()?.tvaTauxDefaut ?? 20"
@@ -103,6 +118,9 @@
                 [focusCode]="focusNoeudCode()"
                 [focusToken]="focusTick()"
                 [consultationGate]="gateCourant()"
+                [afficherAvisExecution]="afficherAvisPoste()"
+                [peutAffecterLots]="peutSaisirApresGo()"
+                [vueLotsAffectes]="estIngenieurLotSeulement()"
                 (change)="rechargerApresPieces()"
                 (dirtyChange)="onPosteDirty($event)"
               />
@@ -111,6 +129,18 @@
                 Créez d’abord le bordereau à l’étape précédente pour décomposer les postes.
               </p>
             }
+          </div>
+        } @else if (etapeUi() === 4) {
+          <div class="dossier__planif-res">
+            <app-dossier-planning-panel
+              [dossierId]="dossier()!.id"
+              [dpgfId]="dossier()?.dpgfId ?? null"
+              [modifiable]="modifiable()"
+            />
+            <app-dossier-ressources-panel
+              [dossierId]="dossier()!.id"
+              [modifiable]="modifiable()"
+            />
           </div>
         } @else {
           <app-synthese-validation-panel

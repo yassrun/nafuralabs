@@ -129,9 +129,15 @@
 .dsh__kpis {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.65rem 1.1rem;
   margin-left: auto;
   flex: 0 1 auto;
+}
+
+.dsh__save {
+  align-self: center;
+  flex-shrink: 0;
 }
 
 .dsh__kpi {
@@ -183,21 +189,7 @@
 .dsh__bar {
   display: block;
   width: 100%;
-  padding: 0.4rem 0;
   border-bottom: 1px solid var(--nf-color-border);
-}
-
-.dsh__bar-left,
-.dsh__bar-right {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  align-items: center;
-}
-
-.dsh__bar-right {
-  margin-left: auto;
-  justify-content: flex-end;
 }
 
 :host.dsh-host--compact .dsh__infos {
@@ -229,10 +221,5 @@
     width: 100%;
     margin-left: 0;
     justify-content: space-between;
-  }
-
-  .dsh__bar-left,
-  .dsh__bar-right {
-    width: 100%;
   }
 }

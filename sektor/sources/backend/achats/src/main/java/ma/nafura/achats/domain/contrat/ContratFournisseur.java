@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.nafura.platform.framework.audit.Auditable;
 
 @Entity
 @Table(name = "contrats_fournisseur")
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "contrat-fournisseur", trackedFields = {"numero", "status"})
 public class ContratFournisseur {
 
     public static final String TYPE_FOURNISSEUR = "FOURNISSEUR";

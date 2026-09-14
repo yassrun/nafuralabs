@@ -379,7 +379,8 @@ public class CapitalisationOuvrageService {
 
     private static boolean estValidePourCapitalisation(DossierEtude dossier) {
         StatutDossierEtude s = dossier.getStatus();
-        return s == StatutDossierEtude.VALIDEE || s == StatutDossierEtude.DEVIS_GENERE;
+        return s == StatutDossierEtude.FINAL_APPROVED
+                || s == StatutDossierEtude.FINANCIALLY_APPROVED;
     }
 
     private UUID tenantId() {

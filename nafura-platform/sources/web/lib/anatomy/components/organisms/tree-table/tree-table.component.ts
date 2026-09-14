@@ -9,6 +9,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableModule } from '@angular/material/table';
 import { TranslateModule } from '@ngx-translate/core';
 import { LucideAngularModule } from 'lucide-angular';
@@ -72,6 +73,7 @@ interface NfTreeFlatRow<T> {
     CommonModule,
     TranslateModule,
     MatTableModule,
+    MatCheckboxModule,
     LucideAngularModule,
     SpinnerComponent,
     EmptyStateComponent,
@@ -100,6 +102,35 @@ interface NfTreeFlatRow<T> {
             [style.min-width]="minWidth()"
             class="nf-tree-table__engine"
             multiTemplateDataRows>
+            @if (showSelectionColumn()) {
+              <ng-container matColumnDef="select">
+                <th
+                  mat-header-cell
+                  *matHeaderCellDef
+                  class="nf-tree-table__cell--select">
+                  <mat-checkbox
+                    [checked]="isAllVisibleSelected()"
+                    [indeterminate]="isSomeVisibleSelected()"
+                    [attr.aria-label]="'Select all'"
+                    (change)="toggleAllVisible($event.checked)"
+                    (click)="$event.stopPropagation()">
+                  </mat-checkbox>
+                </th>
+                <td
+                  mat-cell
+                  *matCellDef="let row"
+                  class="nf-tree-table__cell--select">
+                  @if (rowSelectable(row.data)) {
+                    <mat-checkbox
+                      [checked]="isSelected(row.key)"
+                      [attr.aria-label]="'Select row'"
+                      (click)="$event.stopPropagation()"
+                      (change)="toggleRow(row.key, $event.checked)">
+                    </mat-checkbox>
+                  }
+                </td>
+              </ng-container>
+            }
             @for (column of columns(); track column.key) {
               <ng-container [matColumnDef]="column.key">
                 <th
@@ -171,7 +202,7 @@ interface NfTreeFlatRow<T> {
               <td
                 mat-cell
                 *matCellDef="let row"
-                [attr.colspan]="columns().length">
+                [attr.colspan]="displayedColumns().length">
                 @if (detailTemplate(); as template) {
                   <ng-container
                     *ngTemplateOutlet="template; context: {
@@ -191,6 +222,7 @@ interface NfTreeFlatRow<T> {
               [attr.data-row-key]="row.key"
               [attr.title]="resolveRowTitle(row.data)"
               [class.nf-tree-table__row--clickable]="rowClickable()"
+              [class.nf-tree-table__row--selected]="isSelected(row.key)"
               (click)="onRowClicked(row.data)"
               (dblclick)="rowDblClick.emit(row.data)"></tr>
             <tr
@@ -279,7 +311,15 @@ interface NfTreeFlatRow<T> {
       justify-content: center;
       line-height: 0;
     }
+    .nf-tree-table__cell--select {
+      width: 2.75rem;
+      min-width: 2.75rem;
+      text-align: center;
+    }
     .nf-tree-table__row--clickable { cursor: pointer; }
+    .nf-tree-table__row--selected > td {
+      background: color-mix(in srgb, var(--nf-color-primary, #3b82f6) 8%, var(--nf-color-surface, #fff));
+    }
     .nf-tree-table__cell--center { text-align: center; }
     .nf-tree-table__cell--end {
       text-align: end;
@@ -331,15 +371,32 @@ export class TreeTableComponent<T = unknown> {
   readonly rowClass = input<((data: T) => RowClassValue) | null>(null);
   readonly rowTitle = input<((data: T) => string | null) | null>(null);
   readonly showDetail = input<((data: T) => boolean) | null>(null);
+  readonly selectable = input<boolean | 'multiple'>(false);
+  readonly selectedKeys = input<ReadonlySet<string>>(new Set());
+  readonly isSelectable = input<((data: T) => boolean) | null>(null);
 
   readonly expandedKeysChange = output<Set<string>>();
+  readonly selectedKeysChange = output<Set<string>>();
   readonly rowClick = output<T>();
   readonly rowDblClick = output<T>();
 
   /** Expand state when the parent does not bind `expandedKeys`. */
   private readonly unboundExpanded = signal<Set<string> | null>(null);
 
-  readonly displayedColumns = computed(() => this.columns().map((column) => column.key));
+  readonly showSelectionColumn = computed(
+    () => this.selectable() === true || this.selectable() === 'multiple',
+  );
+
+  readonly displayedColumns = computed(() => {
+    const cols = this.columns().map((column) => column.key);
+    return this.showSelectionColumn() ? ['select', ...cols] : cols;
+  });
+
+  readonly visibleSelectableKeys = computed(() =>
+    this.flatRows()
+      .filter((row) => this.rowSelectable(row.data))
+      .map((row) => row.key),
+  );
 
   readonly effectiveExpandedKeys = computed(() => this.expandedKeys() ?? this.unboundExpanded());
 
@@ -392,6 +449,41 @@ export class TreeTableComponent<T = unknown> {
 
   onRowClicked(data: T): void {
     if (this.rowClickable()) this.rowClick.emit(data);
+  }
+
+  rowSelectable(data: T): boolean {
+    return this.isSelectable()?.(data) ?? true;
+  }
+
+  isSelected(key: string): boolean {
+    return this.selectedKeys().has(key);
+  }
+
+  isAllVisibleSelected(): boolean {
+    const keys = this.visibleSelectableKeys();
+    return keys.length > 0 && keys.every((key) => this.selectedKeys().has(key));
+  }
+
+  isSomeVisibleSelected(): boolean {
+    const keys = this.visibleSelectableKeys();
+    const n = keys.filter((key) => this.selectedKeys().has(key)).length;
+    return n > 0 && n < keys.length;
+  }
+
+  toggleRow(key: string, checked: boolean): void {
+    const next = new Set(this.selectedKeys());
+    if (checked) next.add(key);
+    else next.delete(key);
+    this.selectedKeysChange.emit(next);
+  }
+
+  toggleAllVisible(checked: boolean): void {
+    const next = new Set(this.selectedKeys());
+    for (const key of this.visibleSelectableKeys()) {
+      if (checked) next.add(key);
+      else next.delete(key);
+    }
+    this.selectedKeysChange.emit(next);
   }
 
   onToggle(event: Event, row: NfTreeFlatRow<T>): void {

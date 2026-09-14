@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS audit_events (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id   UUID NOT NULL,
     entity_type VARCHAR(80) NOT NULL,
-    entity_id   UUID NOT NULL,
+    entity_id   VARCHAR(100) NOT NULL,
     action      VARCHAR(80) NOT NULL,
     actor       VARCHAR(120) NOT NULL,
     event_at    TIMESTAMPTZ NOT NULL,

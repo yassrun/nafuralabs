@@ -9,8 +9,10 @@ import ma.nafura.socle.onboarding.api.dto.OnboardingDtos.SocietePresetDto;
 import ma.nafura.socle.onboarding.service.TenantPresetOrchestratorService;
 import ma.nafura.platform.appsettings.domain.model.TenantSetting;
 import ma.nafura.platform.appsettings.repository.TenantSettingRepository;
+import ma.nafura.platform.authorization.domain.model.RolePermission;
 import ma.nafura.platform.authorization.domain.model.TenantUserRole;
 import ma.nafura.platform.authorization.domain.model.UserRole;
+import ma.nafura.platform.authorization.repository.RolePermissionRepository;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
 import ma.nafura.platform.authorization.repository.UserRoleRepository;
 import ma.nafura.platform.identity.domain.model.AppUser;
@@ -45,6 +47,7 @@ public class QaLocalProvisioner implements ApplicationRunner {
     private final TenantMembershipRepository tenantMembershipRepository;
     private final UserRoleRepository userRoleRepository;
     private final TenantUserRoleRepository tenantUserRoleRepository;
+    private final RolePermissionRepository rolePermissionRepository;
     private final TenantSettingRepository tenantSettingRepository;
     private final TenantPresetOrchestratorService presetOrchestrator;
 
@@ -57,8 +60,23 @@ public class QaLocalProvisioner implements ApplicationRunner {
         ensureGlobalRole(owner.getId(), "SUPER_ADMIN");
         ensureTenantRole(tenant.getId(), owner.getId(), "OWNER");
         ensureTenantRole(tenant.getId(), owner.getId(), "SUPER_ADMIN");
-        ensureTenantRole(tenant.getId(), owner.getId(), "BTP_INGENIEUR");
+        for (String extra : QaLocalConstants.OWNER_EXTRA_ROLES) {
+            ensureTenantRole(tenant.getId(), owner.getId(), extra);
+        }
         upsertSetting(tenant.getId(), "etudes.auteurPeutValider", "true");
+        ensureRolePermissions(QaLocalConstants.ROLE_ADMIN_ETUDE, QaLocalConstants.ADMIN_ETUDE_PERMISSIONS);
+        ensureRolePermissions("BTP_LECTEUR_ETUDE", QaLocalConstants.LECTEUR_ETUDE_PERMISSIONS);
+        ensureRolePermissions("BTP_ASSISTANT_ETUDE", QaLocalConstants.ASSISTANT_ETUDE_PERMISSIONS);
+        ensureRolePermissions("BTP_INGENIEUR", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_CONDUCTEUR_TRAVAUX", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_DIRECTEUR_TRAVAUX", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_DAF", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_DG", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_CHEF_CHANTIER", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_MAGASINIER", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions(QaLocalConstants.ROLE_ADMIN_ETUDE, QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_LECTEUR_ETUDE", QaLocalConstants.INBOX_PERMISSIONS);
+        ensureRolePermissions("BTP_ASSISTANT_ETUDE", QaLocalConstants.INBOX_PERMISSIONS);
 
         for (QaLocalConstants.RoleUser roleUser : QaLocalConstants.ROLE_USERS) {
             AppUser user = ensureUser(roleUser.email(), roleUser.name());
@@ -151,6 +169,18 @@ public class QaLocalProvisioner implements ApplicationRunner {
             .userId(userId)
             .roleCode(roleCode)
             .build());
+    }
+
+    private void ensureRolePermissions(String roleCode, List<String> permissions) {
+        for (String permission : permissions) {
+            if (rolePermissionRepository.existsByRoleCodeAndPermission(roleCode, permission)) {
+                continue;
+            }
+            rolePermissionRepository.save(RolePermission.builder()
+                .roleCode(roleCode)
+                .permission(permission)
+                .build());
+        }
     }
 
     private void ensureTenantRole(UUID tenantId, UUID userId, String roleCode) {

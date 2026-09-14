@@ -674,7 +674,7 @@
       },
       "nav": {
         "title": "Navigation racine accessible",
-        "hint": "Calcul basé sur les tags permissionsAny posés sur les nœuds racine de la nav (erp-nav.generated.ts). Un module sans tag reste visible par défaut.",
+        "hint": "Calcul basé sur les tags permissionsAny posés sur les nœuds racine de la sidebar (erp-sidebar.config.ts). Un module sans tag reste visible par défaut.",
         "module": "Module",
         "required": "Permission(s) requise(s) (OU)",
         "visible": "Visible",
@@ -745,8 +745,32 @@
     },
     "societe": {
       "breadcrumb": "Sociétés",
-      "title": "Sociétés du groupe",
-      "subtitle": "Multi-entité — sélectionnez une société pour éditer son identité légale, son logo et ses exercices comptables",
+      "title": "Entreprise",
+      "subtitle": "Identité légale, établissements et documents — import modèle J ou saisie",
+      "tabs": {
+        "identite": "Identité",
+        "identifiants": "Identifiants",
+        "etablissements": "Établissements",
+        "documents": "Documents"
+      },
+      "selector": {
+        "label": "Société"
+      },
+      "documents": {
+        "title": "Identité imprimée",
+        "hint": "Ces champs apparaissent sur les devis et factures. Ils peuvent différer de l'identité légale.",
+        "logoLink": "Logo de l'application",
+        "headerLink": "En-tête et pied de page",
+        "save": "Enregistrer l'identité des documents",
+        "saving": "Enregistrement…",
+        "saved": "Identité enregistrée",
+        "loadError": "Impossible de charger l'identité des documents.",
+        "saveError": "L'identité n'a pas été enregistrée. Vérifiez vos droits et réessayez."
+      },
+      "smartImport": {
+        "applied": "Identité mise à jour depuis le modèle J",
+        "empty": "Aucune identité extraite"
+      },
       "toasts": {
         "saved": "✓ Paramètres sauvegardés",
         "saveError": "⚠ Corrigez les champs en erreur avant de sauvegarder",
@@ -850,8 +874,8 @@
         "newNotes": "Nouvel exercice"
       },
       "extras": {
-        "title": "Paramètres de gestion (extras société)",
-        "hint": "Compléments audit multi-entité : persistance locale par société, complémentaires au modèle canonique ci-dessus.",
+        "title": "Gestion",
+        "hint": "Code groupe, devise et clôture d'exercice.",
         "fields": {
           "codeCourtGroupe": "Code court groupe",
           "codeCourtPlaceholder": "Ex. SOM-BTP",
@@ -891,7 +915,7 @@
         },
         "removeTitle": "Supprimer"
       },
-      "empty": "Sélectionnez une société dans le tableau ci-dessus.",
+      "empty": "Aucune société à afficher.",
       "errors": {
         "raisonSocialeRequired": "Raison sociale obligatoire",
         "siegeRequired": "Adresse du siège obligatoire",

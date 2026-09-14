@@ -54,7 +54,8 @@ class DpgfServiceImportIncompletePersistTest {
                 new DpgfAgregationService(),
                 mock(ParametresEtudeService.class),
                 new DpuCalculator(),
-                mock(DossierIntervenantService.class));
+                mock(DossierIntervenantService.class),
+                mock(DpgfLotAffectationService.class));
 
         when(repository.countByTenantIdAndNumeroStartingWith(any(), any())).thenReturn(0L);
         when(repository.save(any(Dpgf.class))).thenAnswer(inv -> {

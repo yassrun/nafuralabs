@@ -58,7 +58,7 @@ class AvisExecutionServiceTest {
                 .tenantId(TENANT)
                 .numero("ET-1")
                 .objet("x")
-                .status(StatutDossierEtude.EN_ETUDE)
+                .status(StatutDossierEtude.IN_PROGRESS)
                 .dpgfId(DPGF)
                 .build();
         when(dossierRepository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));

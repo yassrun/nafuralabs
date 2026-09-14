@@ -16,6 +16,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import ma.nafura.platform.framework.audit.Auditable;
 
 @Entity
 @Table(name = "devis")
@@ -23,6 +24,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "devis", trackedFields = {"numero", "objet", "status", "version", "clientName"})
 public class Devis {
 
     public static final String STATUS_BROUILLON = "BROUILLON";

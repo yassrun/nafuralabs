@@ -13,6 +13,7 @@ import {
   inject,
   input,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -24,8 +25,12 @@ import { SidebarIcon, SidebarNode, SidebarZoneGroup, ZoneConfig } from '../navig
 import { I18nService } from '../i18n';
 import { AuthFacade } from '../security/services/auth.facade';
 import { LanguageSelectorComponent } from '../components/language-selector/language-selector.component';
-import { AvatarComponent } from '../../lib/anatomy/components/atoms/avatar/avatar.component';
 import { NotificationBellComponent } from '../../app/notification';
+import { AiPanelService } from './ai-panel.service';
+import { AiToggleWidget } from './widgets/ai-toggle.widget';
+import { OrgSwitcherWidget } from './widgets/org-switcher.widget';
+import { UserMenuWidget } from './widgets/user-menu.widget';
+import { ORG_CONTEXT_PORT } from './org-context.port';
 import { ChatPanelComponent } from '../../features/ai-assistant/chat-panel.component';
 import { CommandPaletteComponent } from './command-palette/command-palette.component';
 import { CommandPaletteService } from './command-palette/command-palette.service';
@@ -38,7 +43,7 @@ import {
   AssistantBlock,
   AssistantLink,
 } from '../../app/conversation/services/conversation-api.service';
-import { ONBOARDING_WIDGETS_PORT, SHELL_EXTENSIONS } from './shell-extensions';
+import { ONBOARDING_WIDGETS_PORT, SHELL_EXTENSIONS, componentForSlot } from './shell-extensions';
 import { AssistantBlockRendererComponent } from '../../app/conversation/components/assistant-block-renderer.component';
 import {
   DEFAULT_PLATFORM_APP_SHELL_OPTIONS,
@@ -79,7 +84,7 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
   'layout-dashboard':'layout-dashboard',
   // `file-signature` does not exist in lucide-angular@0.563; fall back to file-pen.
   'file-signature':  'file-pen',
-  // Material-style nav ids from erp-nav.generated (materiel section)
+  // Material-style nav ids from erp-sidebar.config (materiel section)
   'calendar-range':  'calendar-clock',
   'schedule':        'clock',
   'verified-user':   'shield-check',
@@ -92,7 +97,7 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
 @Component({
   selector: 'app-platform-shell',
   standalone: true,
-  imports: [CommonModule, NgComponentOutlet, RouterModule, LucideAngularModule, LanguageSelectorComponent, AvatarComponent, NotificationBellComponent, CommandPaletteComponent, ChatPanelComponent, ShortcutsHelpComponent, OnboardingTourComponent, TooltipDirective, AssistantBlockRendererComponent],
+  imports: [CommonModule, NgComponentOutlet, RouterModule, LucideAngularModule, LanguageSelectorComponent, NotificationBellComponent, AiToggleWidget, UserMenuWidget, OrgSwitcherWidget, CommandPaletteComponent, ChatPanelComponent, ShortcutsHelpComponent, OnboardingTourComponent, TooltipDirective, AssistantBlockRendererComponent],
   template: `
     <div
       class="naf-shell"
@@ -140,76 +145,38 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
           @for (ext of headerExtensions(); track ext.component) {
             <ng-container *ngComponentOutlet="ext.component" />
           }
-          @if (onboardingMeterWidget()) {
-            <ng-container *ngComponentOutlet="onboardingMeterWidget()!" />
+          @if (showDefaultOrgSwitcher()) {
+            <nf-org-switcher />
           }
 
           <app-language-selector *ngIf="resolvedShellOptions().widgets.languageSwitch" />
 
-          <nf-notification-bell *ngIf="resolvedShellOptions().widgets.notifications" />
+          @if (resolvedShellOptions().widgets.notifications) {
+            @if (notificationWidget(); as ext) {
+              <ng-container *ngComponentOutlet="ext" />
+            } @else {
+              <nf-notification-bell />
+            }
+          }
 
-          <button
-            *ngIf="resolvedShellOptions().widgets.conversation && resolvedShellOptions().conversation.enabled"
-            type="button"
-            class="naf-shell__ai-toggle"
-            [class.is-active]="conversationOpen()"
-            [attr.aria-label]="translateLabel('core.conversation.toggle')"
-            (click)="toggleConversation()">
-            <lucide-icon name="sparkles" [size]="16" class="naf-shell__icon" aria-hidden="true"></lucide-icon>
-            <span class="naf-shell__ai-toggle-label">AI</span>
-          </button>
+          @if (resolvedShellOptions().widgets.conversation && resolvedShellOptions().conversation.enabled) {
+            @if (aiWidget(); as ext) {
+              <ng-container *ngComponentOutlet="ext" />
+            } @else {
+              <nf-ai-toggle />
+            }
+          }
 
-          <!-- User menu -->
-          <div *ngIf="resolvedShellOptions().widgets.userMenu" class="naf-shell__user-menu">
-            <button
-              type="button"
-              class="naf-shell__user-trigger"
-              (click)="toggleUserMenu($event)"
-              [attr.aria-expanded]="userMenuOpen()">
-              <nf-avatar [name]="displayName()" size="xs" />
-              <span class="naf-shell__user-name">{{ displayName() }}</span>
-              <lucide-icon name="chevron-down" [size]="18" class="naf-shell__icon naf-shell__user-chevron" aria-hidden="true"></lucide-icon>
-            </button>
-
-            <div class="naf-shell__user-panel" *ngIf="userMenuOpen()">
-              <div class="naf-shell__user-panel-header">
-                <nf-avatar [name]="displayName()" size="sm" />
-                <div class="naf-shell__user-panel-info">
-                  <div class="naf-shell__user-panel-name">{{ displayName() }}</div>
-                  <div class="naf-shell__user-panel-email">{{ userEmail() }}</div>
-                </div>
-              </div>
-
-              <div class="naf-shell__user-panel-divider"></div>
-
-              <a
-                *ngIf="userSettingsEnabled()"
-                [routerLink]="'/user-settings'"
-                class="naf-shell__user-panel-item"
-                (click)="closeUserMenu()">
-                <lucide-icon name="settings" [size]="18" class="naf-shell__icon" aria-hidden="true"></lucide-icon>
-                {{ translateLabel('core.topbar.mySettings') }}
-              </a>
-              <a
-                *ngIf="appSettingsEnabled()"
-                [routerLink]="'/administration/settings'"
-                class="naf-shell__user-panel-item"
-                (click)="closeUserMenu()">
-                <lucide-icon name="sliders-horizontal" [size]="18" class="naf-shell__icon" aria-hidden="true"></lucide-icon>
-                {{ translateLabel('core.topbar.appSettings') }}
-              </a>
-
-              <div class="naf-shell__user-panel-divider"></div>
-
-              <button
-                type="button"
-                class="naf-shell__user-panel-item naf-shell__user-panel-item--danger"
-                (click)="logout()">
-                <lucide-icon name="log-out" [size]="18" class="naf-shell__icon" aria-hidden="true"></lucide-icon>
-                {{ translateLabel('core.topbar.logout') }}
-              </button>
-            </div>
-          </div>
+          @if (resolvedShellOptions().widgets.userMenu) {
+            @if (userMenuWidget(); as ext) {
+              <ng-container *ngComponentOutlet="ext" />
+            } @else {
+              <nf-user-menu
+                [userSettingsEnabled]="userSettingsEnabled()"
+                [appSettingsEnabled]="appSettingsEnabled()"
+                [fallbackName]="applicationTitle()" />
+            }
+          }
         </div>
       </header>
 
@@ -396,9 +363,17 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
             </select>
           </div>
 
-          <div #conversationBody class="naf-shell__conversation-body">
-            <div *ngIf="conversationLoading()" class="naf-shell__conversation-state">
+          <div #conversationBody class="naf-shell__conversation-body" [attr.aria-busy]="conversationSending() || conversationLoading()">
+            <div
+              *ngIf="conversationLoading() && !conversationSending() && conversationMessages().length === 0"
+              class="naf-shell__conversation-state">
               {{ translateLabel('core.conversation.loading') }}
+            </div>
+
+            <div
+              *ngIf="conversationLoading() && !conversationSending() && conversationMessages().length > 0"
+              class="naf-shell__conversation-state">
+              {{ translateLabel('core.conversation.refreshing') }}
             </div>
 
             <div *ngIf="conversationError()" class="naf-shell__conversation-error">
@@ -413,12 +388,12 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
             </div>
 
             <div
-              *ngFor="let message of conversationMessages(); trackBy: trackByMessage"
+              *ngFor="let message of visibleConversationMessages(); trackBy: trackByMessage"
               class="naf-shell__message"
               [class.naf-shell__message--user]="message.role === 'user'"
               [class.naf-shell__message--assistant]="message.role === 'assistant'">
               <div class="naf-shell__message-role">{{ messageRoleLabel(message.role) }}</div>
-              <div class="naf-shell__message-text">{{ message.content }}</div>
+              <div class="naf-shell__message-text" *ngIf="displayAssistantContent(message)">{{ displayAssistantContent(message) }}</div>
               @if (hasStructuredAssistantExtras(message)) {
                 <nf-assistant-block-renderer
                   [summary]="assistantSummaryForRender(message)"
@@ -426,6 +401,16 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
                   [links]="message.links ?? []"
                   (navigate)="navigateConversationLink($event)" />
               }
+            </div>
+
+            <div
+              *ngIf="conversationSending()"
+              class="naf-shell__message naf-shell__message--assistant naf-shell__message--pending">
+              <div class="naf-shell__message-role">{{ translateLabel('core.conversation.agent') }}</div>
+              <div class="naf-shell__message-text naf-shell__message-pending">
+                <span class="naf-shell__pending-dots" aria-hidden="true"></span>
+                {{ translateLabel('core.conversation.preparingReply') }}
+              </div>
             </div>
 
             <div *ngIf="agentActions().length" class="naf-shell__agent-block">
@@ -487,6 +472,7 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
               rows="3"
               [value]="conversationDraft()"
               [placeholder]="translateLabel('core.conversation.placeholder')"
+              [disabled]="conversationSending()"
               (input)="onConversationDraftInput($event)"
               (keydown)="onConversationKeydown($event)"></textarea>
             <div class="naf-shell__conversation-composer-actions">
@@ -767,50 +753,6 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
         height: 40px;
       }
 
-      .naf-shell__ai-toggle {
-        height: 40px;
-      }
-    }
-
-    /* ─── AI Toggle Pill ─── */
-    .naf-shell__ai-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--nf-space-1, 0.25rem);
-      height: 34px;
-      padding: 0 var(--nf-space-2-5, 0.625rem);
-      border-radius: var(--nf-radius-full, 9999px);
-      border: 1px solid var(--nf-border-default, #e5e7eb);
-      background: var(--nf-color-surface, #ffffff);
-      color: var(--nf-text-secondary, #4b5563);
-      cursor: pointer;
-      font-size: var(--nf-font-size-xs, 0.75rem);
-      font-weight: var(--nf-font-weight-semibold, 600);
-      transition: background var(--nf-transition-fast, 100ms ease),
-                  border-color var(--nf-transition-fast, 100ms ease),
-                  color var(--nf-transition-fast, 100ms ease);
-    }
-
-    .naf-shell__ai-toggle:hover {
-      border-color: var(--nf-color-primary-300, #93c5fd);
-      background: var(--nf-primary-subtle, #eff6ff);
-      color: var(--nf-color-primary-700, #1d4ed8);
-    }
-
-    .naf-shell__ai-toggle.is-active {
-      border-color: var(--nf-color-primary, #3b82f6);
-      background: var(--nf-color-primary, #3b82f6);
-      color: var(--nf-color-text-inverse, #ffffff);
-    }
-
-    .naf-shell__ai-toggle .naf-shell__icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-
-    .naf-shell__ai-toggle-label {
-      letter-spacing: var(--nf-letter-spacing-wide, 0.025em);
     }
 
     /* ─── Tour button ─── */
@@ -833,130 +775,6 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
       background: #f1f5f9;
       border-color: #94a3b8;
       color: #0f172a;
-    }
-
-    /* ─── User Menu ─── */
-    .naf-shell__user-menu {
-      position: relative;
-    }
-
-    .naf-shell__user-trigger {
-      display: flex;
-      align-items: center;
-      gap: var(--nf-space-1, 0.25rem);
-      border: 1px solid var(--nf-border-default, #e5e7eb);
-      background: var(--nf-color-surface, #ffffff);
-      border-radius: var(--nf-radius-full, 9999px);
-      padding: var(--nf-space-1, 0.25rem) var(--nf-space-2, 0.5rem) var(--nf-space-1, 0.25rem) var(--nf-space-1, 0.25rem);
-      cursor: pointer;
-      transition: border-color var(--nf-transition-fast, 100ms ease);
-    }
-
-    .naf-shell__user-trigger:hover {
-      border-color: var(--nf-border-strong, #d1d5db);
-    }
-
-    .naf-shell__user-name {
-      font-size: var(--nf-font-size-sm, 0.875rem);
-      max-width: 120px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: var(--nf-text-primary, #111827);
-    }
-
-    .naf-shell__user-chevron {
-      font-size: 16px !important;
-      width: 16px !important;
-      height: 16px !important;
-      color: var(--nf-text-muted, #6b7280);
-      transition: transform var(--nf-transition-fast, 100ms ease);
-    }
-
-    .naf-shell__user-panel {
-      position: absolute;
-      top: calc(100% + var(--nf-space-1-5, 0.375rem));
-      inset-inline-end: 0;
-      min-width: 240px;
-      border: 1px solid var(--nf-border-default, #e5e7eb);
-      border-radius: var(--nf-radius-xl, 0.75rem);
-      background: var(--nf-color-surface, #ffffff);
-      box-shadow: var(--nf-shadow-lg);
-      padding: var(--nf-space-2, 0.5rem);
-      z-index: var(--nf-z-dropdown, 100);
-    }
-
-    .naf-shell__user-panel-header {
-      display: flex;
-      align-items: center;
-      gap: var(--nf-space-2-5, 0.625rem);
-      padding: var(--nf-space-2, 0.5rem);
-    }
-
-    .naf-shell__user-panel-info {
-      min-width: 0;
-    }
-
-    .naf-shell__user-panel-name {
-      font-size: var(--nf-font-size-sm, 0.875rem);
-      font-weight: var(--nf-font-weight-semibold, 600);
-      color: var(--nf-text-primary, #111827);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .naf-shell__user-panel-email {
-      font-size: var(--nf-font-size-xs, 0.75rem);
-      color: var(--nf-text-muted, #6b7280);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .naf-shell__user-panel-divider {
-      height: 1px;
-      background: var(--nf-border-subtle, #f3f4f6);
-      margin: var(--nf-space-1, 0.25rem) 0;
-    }
-
-    .naf-shell__user-panel-item {
-      display: flex;
-      align-items: center;
-      gap: var(--nf-space-2, 0.5rem);
-      width: 100%;
-      padding: var(--nf-space-2, 0.5rem);
-      border: none;
-      border-radius: var(--nf-radius-md, 0.375rem);
-      background: transparent;
-      color: var(--nf-text-primary, #111827);
-      font-size: var(--nf-font-size-sm, 0.875rem);
-      text-decoration: none;
-      cursor: pointer;
-      transition: background var(--nf-transition-fast, 100ms ease);
-    }
-
-    .naf-shell__user-panel-item:hover {
-      background: var(--nf-surface-hover, #f9fafb);
-    }
-
-    .naf-shell__user-panel-item .naf-shell__icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      color: var(--nf-text-muted, #6b7280);
-    }
-
-    .naf-shell__user-panel-item--danger {
-      color: var(--nf-danger, #ef4444);
-    }
-
-    .naf-shell__user-panel-item--danger:hover {
-      background: var(--nf-danger-subtle, #fef2f2);
-    }
-
-    .naf-shell__user-panel-item--danger .naf-shell__icon {
-      color: var(--nf-danger, #ef4444);
     }
 
     /* ═══════════════════════════════════════════════════════════════════════
@@ -1446,6 +1264,32 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
       line-height: var(--nf-line-height-normal, 1.5);
     }
 
+    .naf-shell__message--pending {
+      border-style: dashed;
+      opacity: 0.92;
+    }
+
+    .naf-shell__message-pending {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--nf-text-muted, #6b7280);
+      font-style: italic;
+    }
+
+    .naf-shell__pending-dots {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: var(--nf-color-primary-500, #2563eb);
+      animation: naf-shell-pending-pulse 0.9s ease-in-out infinite;
+    }
+
+    @keyframes naf-shell-pending-pulse {
+      0%, 100% { opacity: 0.35; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+
     .naf-shell__agent-block {
       margin-top: var(--nf-space-2, 0.5rem);
       border-top: 1px solid var(--nf-border-default, #e5e7eb);
@@ -1590,6 +1434,11 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
       box-shadow: var(--nf-shadow-focus);
     }
 
+    .naf-shell__conversation-input:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+
     .naf-shell__conversation-send {
       display: inline-flex;
       align-items: center;
@@ -1673,11 +1522,6 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
       }
     }
 
-    @media (max-width: 640px) {
-      .naf-shell__user-name { display: none; }
-      .naf-shell__user-chevron { display: none; }
-      .naf-shell__ai-toggle-label { display: none; }
-    }
   `],
 })
 export class PlatformAppShellComponent implements OnInit {
@@ -1686,7 +1530,7 @@ export class PlatformAppShellComponent implements OnInit {
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
   private readonly conversationApi = inject(ConversationApiService);
-  private readonly elementRef = inject(ElementRef);
+  readonly aiPanel = inject(AiPanelService);
   readonly commandPalette = inject(CommandPaletteService);
   readonly themeService = inject(ThemeService);
   /** Injected so theme mode (light/dark/system) is applied from storage on app init */
@@ -1700,6 +1544,19 @@ export class PlatformAppShellComponent implements OnInit {
   readonly headerExtensions = computed(() =>
     (this.shellExtensions ?? []).filter((e) => e.slot === 'header-tenant-switcher'),
   );
+  private readonly orgContext = inject(ORG_CONTEXT_PORT, { optional: true });
+  readonly showDefaultOrgSwitcher = computed(
+    () => !!this.orgContext && this.headerExtensions().length === 0,
+  );
+  readonly userMenuWidget = computed(() =>
+    componentForSlot(this.shellExtensions, 'header-user-menu'),
+  );
+  readonly notificationWidget = computed(() =>
+    componentForSlot(this.shellExtensions, 'header-notifications'),
+  );
+  readonly aiWidget = computed(() =>
+    componentForSlot(this.shellExtensions, 'header-ai'),
+  );
   private readonly shortcuts = inject(ShortcutsService);
   readonly onboarding = inject(OnboardingService);
   private loadVersion = 0;
@@ -1707,7 +1564,6 @@ export class PlatformAppShellComponent implements OnInit {
 
   readonly shortcutsHelpOpen = signal(false);
   readonly onboardingInviteWidget = signal<Type<unknown> | null>(null);
-  readonly onboardingMeterWidget = signal<Type<unknown> | null>(null);
 
   @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
@@ -1736,18 +1592,15 @@ export class PlatformAppShellComponent implements OnInit {
   readonly expandedDomains = signal<Set<string>>(new Set());
   /** Domains the user explicitly collapsed — auto-expand won't override these */
   private readonly manuallyCollapsed = new Set<string>();
-  readonly userMenuOpen = signal<boolean>(false);
 
   // ─── Conversation State ──────────────────────────────────────────
-  readonly conversationOpen = signal<boolean>((() => {
-    // F-18: default closed; restore from localStorage if user previously opened it
-    const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('shell.aiPanel.open') : null;
-    if (stored !== null) return stored === '1';
-    return Boolean(DEFAULT_PLATFORM_APP_SHELL_OPTIONS.conversation.initiallyOpen);
-  })());
+  readonly conversationOpen = this.aiPanel.open;
   readonly conversationMode = signal<ConversationMode>('ASSISTANT');
   readonly conversationDraft = signal<string>('');
   readonly conversationMessages = signal<UiConversationMessage[]>([]);
+  readonly visibleConversationMessages = computed(() =>
+    this.conversationMessages().filter((message) => this.messageHasVisibleBody(message))
+  );
   readonly conversationLoading = signal<boolean>(false);
   readonly conversationSending = signal<boolean>(false);
   readonly conversationError = signal<string | null>(null);
@@ -1842,7 +1695,6 @@ export class PlatformAppShellComponent implements OnInit {
   });
 
   readonly displayName = computed(() => this.auth.displayName() || this.applicationTitle());
-  readonly userEmail = computed(() => this.auth.user()?.email || '');
 
   constructor() {
     // Widgets d'onboarding fournis par l'application via ONBOARDING_WIDGETS_PORT.
@@ -1856,7 +1708,6 @@ export class PlatformAppShellComponent implements OnInit {
         if (widgets.inviteBanner) {
           this.onboardingInviteWidget.set(widgets.inviteBanner);
         }
-        this.onboardingMeterWidget.set(widgets.completenessMeter);
         this.cdr.markForCheck();
       });
     }
@@ -1920,15 +1771,8 @@ export class PlatformAppShellComponent implements OnInit {
     }, { allowSignalWrites: true });
 
     effect(() => {
-      const options = this.resolvedShellOptions();
-      if (!options.conversation.enabled && this.conversationOpen()) {
-        this.conversationOpen.set(false);
-        return;
-      }
-      if (options.conversation.enabled && options.conversation.initiallyOpen && !this.conversationOpen()) {
-        this.conversationOpen.set(true);
-      }
-    });
+      this.aiPanel.syncFromOptions(this.resolvedShellOptions().conversation);
+    }, { allowSignalWrites: true });
 
     effect(() => {
       const options = this.resolvedShellOptions();
@@ -1936,6 +1780,9 @@ export class PlatformAppShellComponent implements OnInit {
       const mode = this.conversationMode();
       const appId = this.applicationId();
       if (!options.conversation.enabled || !isOpen || !appId) {
+        return;
+      }
+      if (untracked(() => this.conversationSending())) {
         return;
       }
       this.restoreStoredSessionIds();
@@ -1963,19 +1810,6 @@ export class PlatformAppShellComponent implements OnInit {
     void this.approvalsFacade.refreshPendingCount();
   }
 
-  // ─── Click Outside (user menu) ───────────────────────────────────
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (!this.userMenuOpen()) {
-      return;
-    }
-    const target = event.target as HTMLElement;
-    const userMenu = this.elementRef.nativeElement.querySelector('.naf-shell__user-menu');
-    if (userMenu && !userMenu.contains(target)) {
-      this.userMenuOpen.set(false);
-    }
-  }
-
   // ─── Actions ─────────────────────────────────────────────────────
   toggleSidebar(): void {
     if (!this.resolvedShellOptions().sidebar.collapsible) {
@@ -1998,21 +1832,6 @@ export class PlatformAppShellComponent implements OnInit {
   private isMobileViewport(): boolean {
     return typeof window !== 'undefined' && window.matchMedia('(max-width: 980px)').matches;
   }
-
-  toggleUserMenu(event: MouseEvent): void {
-    event.stopPropagation();
-    this.userMenuOpen.update((v) => !v);
-  }
-
-  closeUserMenu(): void {
-    this.userMenuOpen.set(false);
-  }
-
-  /**
-   * Hook for SocieteSwitcher (Task 8.3). Today the switcher already mutates the
-   * service state ; we only re-trigger CD so any branding/title bound on the
-   * current société picks up the change immediately.
-   */
 
   toggleDomain(domainId: string): void {
     this.expandedDomains.update((set) => {
@@ -2076,20 +1895,8 @@ export class PlatformAppShellComponent implements OnInit {
     return this.expandedDomains().has(domainId);
   }
 
-  logout(): void {
-    this.closeUserMenu();
-    void this.auth.logout();
-  }
-
   toggleConversation(): void {
-    if (!this.resolvedShellOptions().conversation.enabled) {
-      return;
-    }
-    this.conversationOpen.update((v) => {
-      const next = !v;
-      try { localStorage.setItem('shell.aiPanel.open', next ? '1' : '0'); } catch {}
-      return next;
-    });
+    this.aiPanel.toggle(this.resolvedShellOptions().conversation.enabled);
   }
 
   setConversationMode(mode: ConversationMode): void {
@@ -2188,57 +1995,84 @@ export class PlatformAppShellComponent implements OnInit {
         domainKey,
         currentRoute: this.currentUrl(),
       });
-      if (turnResponse.actions?.length) {
+      if (turnResponse.actions?.length && !this.isPlannerDump(turnResponse.assistantMessage?.content ?? '')) {
         this.agentActions.set(turnResponse.actions);
       }
       if (turnResponse.assistantMessage) {
-        const assistantContent =
+        const rawAssistant =
           turnResponse.assistantMessage.content?.trim() ||
           turnResponse.summary?.trim() ||
           '';
-        // Backend often echoes the same reply as summary + TEXT block; the bubble
-        // already shows content — drop duplicates so they are not rendered twice.
+        const assistantContent = this.sanitizeAssistantContent(rawAssistant);
+        const fallbackLinks = this.fallbackCreateLinks(content, rawAssistant);
+        const links = (turnResponse.links?.length ? turnResponse.links : fallbackLinks) ?? [];
+        const emptyReply = this.translateLabel('core.conversation.emptyReply');
         const summary =
-          turnResponse.summary?.trim() && turnResponse.summary.trim() !== assistantContent
+          turnResponse.summary?.trim() &&
+          !this.isPlannerDump(turnResponse.summary) &&
+          turnResponse.summary.trim() !== assistantContent
             ? turnResponse.summary.trim()
             : undefined;
         const blocks = (turnResponse.blocks ?? []).filter(
           (block) =>
-            !(
-              (block.type === 'TEXT' || !block.type) &&
-              (block.content ?? '').trim() === assistantContent
-            )
+            !((block.type === 'TEXT' || !block.type) && this.isPlannerDump(block.content ?? '')) &&
+            !((block.type === 'TEXT' || !block.type) && (block.content ?? '').trim() === assistantContent)
         );
+        const userFromTurn = turnResponse.userMessage
+          ? this.mapConversationMessage({
+              id: turnResponse.userMessage.id,
+              role: turnResponse.userMessage.role || 'USER',
+              content: turnResponse.userMessage.content || content,
+              createdAt: turnResponse.userMessage.createdAt,
+            })
+          : { id: `user-${Date.now()}`, role: 'user' as const, content };
         this.conversationMessages.update((messages) => [
           ...messages.filter((m) => !m.id.startsWith('local-')),
+          userFromTurn,
           {
             id: turnResponse.assistantMessage!.id,
             role: 'assistant',
-            content: assistantContent,
+            content:
+              assistantContent ||
+              (links.length ? 'Voici l’écran pour continuer.' : emptyReply),
             summary,
             blocks,
-            links: turnResponse.links ?? [],
+            links,
             createdAt: turnResponse.assistantMessage!.createdAt,
           },
         ]);
+        const auto = links.find((link) => link.route && link.autoNavigate);
+        if (auto?.route && !this.looksLikeHowto(content)) {
+          this.navigateConversationLink(auto.route);
+        }
       } else {
         await this.loadConversationSessions(mode);
         await this.refreshConversation(mode);
+        if (!this.hasVisibleAssistantAfterUser(content)) {
+          this.appendFailedAssistantReply();
+          this.conversationError.set(this.translateLabel('core.conversation.emptyReply'));
+        }
       }
     } catch (error) {
       // A duplicate unauthenticated POST can return 401 while the real request still
       // completes on the backend — reload history before surfacing a false error.
       try {
         await this.refreshConversation(mode);
-        if (this.conversationMessages().some((m) => m.role === 'assistant')) {
+        if (this.hasVisibleAssistantAfterUser(content)) {
           this.conversationError.set(null);
           return;
         }
       } catch {
         // Fall through to error handling below.
       }
-      this.conversationDraft.set(content);
-      this.conversationMessages.update((messages) => messages.filter((m) => !m.id.startsWith('local-')));
+      this.conversationMessages.update((messages) => {
+        const kept = messages.filter((m) => !m.id.startsWith('local-'));
+        if (!kept.some((m) => m.role === 'user' && m.content.trim() === content)) {
+          kept.push({ id: `user-${Date.now()}`, role: 'user', content });
+        }
+        return kept;
+      });
+      this.appendFailedAssistantReply();
       this.conversationError.set(this.extractErrorMessage(error));
     } finally {
       this.conversationSending.set(false);
@@ -2291,6 +2125,13 @@ export class PlatformAppShellComponent implements OnInit {
   trackByAgentAction = (_index: number, action: AgentActionResponse): string => action.id;
   trackByZone = (index: number, group: SidebarZoneGroup): string => group.zone;
 
+  messageHasVisibleBody(message: UiConversationMessage): boolean {
+    if (message.role === 'user') {
+      return !!message.content?.trim();
+    }
+    return !!this.displayAssistantContent(message) || this.hasStructuredAssistantExtras(message);
+  }
+
   /** Avoid rendering summary/TEXT when they duplicate the bubble content. */
   hasStructuredAssistantExtras(message: UiConversationMessage): boolean {
     return (
@@ -2298,6 +2139,89 @@ export class PlatformAppShellComponent implements OnInit {
       this.assistantBlocksForRender(message).length > 0 ||
       (message.links?.length ?? 0) > 0
     );
+  }
+
+  displayAssistantContent(message: UiConversationMessage): string {
+    return this.formatAssistantText(this.sanitizeAssistantContent(message.content ?? ''));
+  }
+
+  private sanitizeAssistantContent(content: string): string {
+    const trimmed = content.trim();
+    if (!trimmed) {
+      return '';
+    }
+    if (this.isPlannerDump(trimmed)) {
+      return '';
+    }
+    return content;
+  }
+
+  private formatAssistantText(content: string): string {
+    return content
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/`([^`]+)`/g, '$1');
+  }
+
+  private hasVisibleAssistantAfterUser(userContent: string): boolean {
+    const messages = this.conversationMessages();
+    const userIndex = [...messages]
+      .map((message, index) => ({ message, index }))
+      .reverse()
+      .find(({ message }) => message.role === 'user' && message.content.trim() === userContent)
+      ?.index;
+    if (userIndex === undefined) {
+      return false;
+    }
+    return messages.slice(userIndex + 1).some((message) => this.messageHasVisibleBody(message));
+  }
+
+  private appendFailedAssistantReply(): void {
+    const text = this.translateLabel('core.conversation.emptyReply');
+    this.conversationMessages.update((messages) => {
+      const last = messages[messages.length - 1];
+      if (last?.role === 'assistant' && last.content.trim() === text) {
+        return messages;
+      }
+      return [
+        ...messages,
+        { id: `empty-${Date.now()}`, role: 'assistant', content: text },
+      ];
+    });
+  }
+
+  private isPlannerDump(content: string): boolean {
+    const trimmed = content.trim();
+    return (
+      trimmed.includes('toolKey') &&
+      (trimmed.includes('requiresApproval') ||
+        trimmed.includes('safetyAssessment') ||
+        trimmed.includes('"steps"') ||
+        trimmed.includes('"operation"'))
+    );
+  }
+
+  private fallbackCreateLinks(userText: string, assistantContent: string): AssistantLink[] {
+    if (!this.isPlannerDump(assistantContent)) {
+      return [];
+    }
+    const spoken = userText.toLowerCase();
+    if (!/(ajout|cré|cree|create|new)/i.test(spoken)) {
+      return [];
+    }
+    if (!/article/.test(spoken)) {
+      return [];
+    }
+    return [
+      {
+        label: 'Créer — Articles',
+        route: '/inventory/catalogue/articles/new',
+        autoNavigate: false,
+      },
+    ];
+  }
+
+  private looksLikeHowto(text: string): boolean {
+    return /\b(comment|o[uù]|how|aide)\b/i.test(text);
   }
 
   assistantSummaryForRender(message: UiConversationMessage): string | null {
@@ -2384,7 +2308,7 @@ export class PlatformAppShellComponent implements OnInit {
           : Promise.resolve<AgentActionResponse[]>([]),
       ]);
       if (version !== this.loadVersion) return;
-      this.conversationMessages.set(messages.map((m) => this.mapConversationMessage(m)));
+      this.conversationMessages.set(this.decorateLoadedMessages(messages));
       this.agentActions.set(actions);
     } catch (error) {
       if (version !== this.loadVersion) return;
@@ -2507,6 +2431,26 @@ export class PlatformAppShellComponent implements OnInit {
     }
   }
 
+  private decorateLoadedMessages(messages: ConversationMessage[]): UiConversationMessage[] {
+    const mapped = messages.map((m) => this.mapConversationMessage(m));
+    return mapped.map((message, index) => {
+      if (message.role !== 'assistant') {
+        return message;
+      }
+      const previous = mapped[index - 1];
+      const raw = messages[index]?.content ?? '';
+      const links = previous?.role === 'user' ? this.fallbackCreateLinks(previous.content, raw) : [];
+      if (!links.length) {
+        return message;
+      }
+      return {
+        ...message,
+        content: message.content || 'Voici l’écran pour continuer.',
+        links,
+      };
+    });
+  }
+
   private mapConversationMessage(message: ConversationMessage): UiConversationMessage {
     const role = (message.role || '').toUpperCase();
     return {
@@ -2516,7 +2460,7 @@ export class PlatformAppShellComponent implements OnInit {
         : role === 'SYSTEM' ? 'system'
         : role === 'TOOL' ? 'tool'
         : 'assistant',
-      content: message.content || '',
+      content: this.sanitizeAssistantContent(message.content || ''),
       createdAt: message.createdAt,
     };
   }

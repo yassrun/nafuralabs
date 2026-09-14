@@ -61,11 +61,7 @@ function buildAssetUrl(baseUrl: string, path: string | null): string {
       } @else {
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="grid">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>{{ 'appSettings.branding.displayName' | translate }}</mat-label>
-              <input matInput formControlName="tenantDisplayName" maxlength="100" />
-              <mat-hint align="start">{{ 'appSettings.branding.displayName.hint' | translate }}</mat-hint>
-            </mat-form-field>
+            <p class="hint appearance-hint">{{ 'appSettings.branding.appearanceHint' | translate }}</p>
 
             <div class="color-block full-width">
               <label class="field-label">{{ 'appSettings.branding.primaryColor' | translate }}</label>
@@ -313,6 +309,9 @@ function buildAssetUrl(baseUrl: string, path: string | null): string {
         font-size: 0.75rem;
         color: var(--nf-color-text-muted, #6b7280);
       }
+      .appearance-hint {
+        margin: 0 0 0.25rem;
+      }
       .actions {
         margin-top: 1.25rem;
         display: flex;
@@ -513,7 +512,7 @@ export class BrandingSectionComponent implements OnChanges {
     const primary = raw.primaryColor ? this.normalizeHex(raw.primaryColor) : null;
     this.save.emit({
       settings: {
-        tenantDisplayName: raw.tenantDisplayName?.trim() || null,
+        tenantDisplayName: (this.data?.tenantDisplayName ?? raw.tenantDisplayName?.trim()) || null,
         primaryColor: primary || null,
         logoUrl: raw.logoUrl?.trim() || null,
         faviconUrl: raw.faviconUrl?.trim() || null,

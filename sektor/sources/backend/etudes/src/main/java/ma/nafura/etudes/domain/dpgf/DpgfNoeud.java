@@ -105,6 +105,13 @@ public class DpgfNoeud {
     @Column(name = "prix_dpu_id")
     private UUID prixDpuId;
 
+    /** Ingénieur BTP chargé du chiffrage — renseigné uniquement sur un LOT. */
+    @Column(name = "charge_lot_user_id", length = 100)
+    private String chargeLotUserId;
+
+    @Column(name = "charge_lot_nom", length = 255)
+    private String chargeLotNom;
+
     @Column(name = "ordre", nullable = false)
     private Integer ordre;
 

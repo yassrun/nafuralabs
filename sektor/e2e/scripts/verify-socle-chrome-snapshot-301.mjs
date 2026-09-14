@@ -3,7 +3,6 @@
  *
  * Discrimination (rouge avant) :
  * - ErpNotificationsService importe FactureMarcheApiService / CautionApiService / FormationApiService
- * - CompletenessMeterComponent appelle getCompleteness
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,8 +27,6 @@ const snapshot =
   'sektor/sources/backend/socle/src/main/java/ma/nafura/socle/chrome/service/ErpChromeSnapshotService.java';
 const notif = 'sektor/sources/web/app/socle/shell/erp-notifications.service.ts';
 const chrome = 'sektor/sources/web/app/socle/shell/erp-chrome-snapshot.service.ts';
-const meter =
-  'sektor/sources/web/app/socle/onboarding/components/completeness-meter/completeness-meter.component.ts';
 const boot = 'sektor/sources/web/app/socle/app.config.ts';
 const testJava =
   'sektor/sources/backend/socle/src/test/java/ma/nafura/socle/chrome/service/ErpChromeSnapshotServiceTest.java';
@@ -38,7 +35,6 @@ const controllerSrc = read(controller);
 const snapshotSrc = read(snapshot);
 const notifSrc = read(notif);
 const chromeSrc = read(chrome);
-const meterSrc = read(meter);
 const bootSrc = read(boot);
 const testSrc = read(testJava);
 
@@ -70,12 +66,6 @@ if (!chromeSrc.includes('/api/v1/erp/chrome')) {
 }
 if (!bootSrc.includes('erpNotif.refresh()')) {
   fail('APP_INITIALIZER must still refresh chrome alerts at boot');
-}
-if (meterSrc.includes('getCompleteness') || meterSrc.includes('OnboardingApiService')) {
-  fail('completeness meter must read the chrome store, not call /completeness');
-}
-if (!meterSrc.includes('ErpChromeSnapshotService')) {
-  fail('completeness meter must inject ErpChromeSnapshotService');
 }
 if (!testSrc.includes('snapshotAssemblesAlertsFiltersDismissedAndCompleteness')) {
   fail('missing Java unit test for chrome snapshot');

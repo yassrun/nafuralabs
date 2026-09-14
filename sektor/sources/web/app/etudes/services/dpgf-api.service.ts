@@ -88,6 +88,18 @@ export class DpgfApiService extends FeatureApiService<DPGF> {
     );
   }
 
+  async affecterLot(
+    noeudId: string,
+    body: { userId?: string | null; nom?: string | null },
+  ): Promise<NoeudDPGF> {
+    return firstValueFrom(
+      this.http.put<NoeudDPGF>(
+        this.resolveUrl(`/api/v1/etudes/dpgf-noeuds/${noeudId}/affecter`),
+        body,
+      ),
+    );
+  }
+
   async getTotauxByLot(id: string): Promise<DpgfLotTotal[]> {
     return this.get<DpgfLotTotal[]>(`${this.basePath}/${id}/totaux`);
   }

@@ -17,6 +17,7 @@ export interface NotificationDto {
   channel: string;
   entityType?: string;
   entityId?: string;
+  actionUrl?: string;
   isRead?: boolean;
   readAt?: string;
   sentAt: string;

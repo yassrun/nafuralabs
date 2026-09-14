@@ -37,7 +37,7 @@ Contrat agents : [`.cursor/rules/cursor-qa-browser.mdc`](../.cursor/rules/cursor
 Un seul compte local pour humain + agents : **`qa@nafuralabs.local`** / tenant **`qa-local`**.
 **Auto-login conservé** (`start:erp:cursor` → `POST /api/public/dev/cursor-session`). Pas de mot de passe, pas Keycloak.
 
-Au boot (`NAFURA_DEV_CURSOR_AUTH_ENABLED=true`), `QaLocalProvisioner` (Java, idempotent) crée le tenant, l’owner (`OWNER` + `SUPER_ADMIN` + `BTP_INGENIEUR`), les **users par rôle** (ingénieur, conducteur, directeur, DAF, DG, chef de chantier, magasinier) et exécute le **même preset onboarding** qu’un owner réel (`applyPreset` / `seedReferenceData`) — sans wizard UI. Un employé RH est lié à chaque identité.
+Au boot (`NAFURA_DEV_CURSOR_AUTH_ENABLED=true`), `QaLocalProvisioner` (Java, idempotent) crée le tenant, l’owner (`OWNER` + `SUPER_ADMIN` + `BTP_INGENIEUR` + `BTP_ADMIN_ETUDE`), les **users par rôle** (2 ingénieurs, assistant saisie, utilisateur lecture étude, conducteur, directeur, DAF, DG, chef de chantier, magasinier) et exécute le **même preset onboarding** qu’un owner réel (`applyPreset` / `seedReferenceData`) — sans wizard UI. Un employé RH est lié à chaque identité. Premier boot : auto-login owner. Déconnexion UI : écran `/login` Mode B (dropdown), pas Keycloak.
 
 Le preset **ne contient pas** le graphe métier (chantier converti, BL, approbations) : ça se fabrique dans la preuve via l’API. Ne pas activer `NAFURA_DEMO_RUNTIME_SEED`.
 

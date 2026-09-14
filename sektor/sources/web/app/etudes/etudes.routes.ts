@@ -4,7 +4,9 @@ export const ETUDES_ROUTES: Routes = [
   {
     path: 'etudes',
     pathMatch: 'full',
-    redirectTo: 'etudes/dossiers',
+    loadComponent: () =>
+      import('./dashboard/etudes-dashboard.page').then((m) => m.EtudesDashboardPage),
+    data: { title: 'Tableau de bord études', breadcrumb: 'Études' },
   },
   {
     path: 'etudes/appels-offres',

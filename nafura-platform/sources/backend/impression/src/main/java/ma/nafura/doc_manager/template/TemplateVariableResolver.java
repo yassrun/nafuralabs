@@ -94,6 +94,13 @@ public class TemplateVariableResolver {
      */
     private Map<String, Object> fetchTenantData() {
         Map<String, Object> tenant = new LinkedHashMap<>();
+        // SpringEL map access throws for missing keys, even in th:if. Keep optional
+        // identity fields addressable when a tenant has not completed its profile.
+        for (TemplateVariableDescriptor field : describeTenantVariables()) {
+            if (field.getPath().startsWith("tenant.")) {
+                tenant.put(field.getPath().substring("tenant.".length()), null);
+            }
+        }
         UUID tenantId;
         try {
             tenantId = TenantContext.getTenantId();
@@ -119,6 +126,7 @@ public class TemplateVariableResolver {
                 // a failing provider must not break document rendering
             }
         }
+        tenant.replaceAll((key, value) -> value instanceof String text && text.isBlank() ? null : value);
         return tenant;
     }
 

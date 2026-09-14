@@ -19,7 +19,16 @@ import {
   type NfTreeNode,
   type NfTreeTableColumn,
 } from '@platform/lib/anatomy/components';
-import { ButtonComponent, ConfirmDialogService, TooltipDirective } from '@platform/lib/anatomy';
+import {
+  ButtonComponent,
+  ConfirmDialogService,
+  ListingControlsComponent,
+  SelectionBarComponent,
+  ToastService,
+  TooltipDirective,
+  type SelectionAction,
+} from '@platform/lib/anatomy';
+import { AuthFacade } from '@platform/core/security/services/auth.facade';
 
 import { UnitOfMeasuresApiService } from '@app/catalogue/configuration/unit-of-measures/services/unit-of-measure-api.service';
 
@@ -31,9 +40,9 @@ import {
   applyTreeRollupTotals,
   bordereauTableMinWidth,
   collectAllExpandableKeys,
-  collectNonExploitableArticleKeys,
   countArticlesInNodes,
   countExploitableInNodes,
+  estLotOuSousLot,
   expandAncestors,
   expandAncestorsOfNonExploitable,
   filterTreeByArticleIds,
@@ -43,6 +52,8 @@ import {
   importArbreToTreeNodes,
   importKeyToPath,
   noeudsDpgfToTreeNodes,
+  retainExpandableKeys,
+  selectedRootRows,
   type BordereauTreeRow,
   type ImportNoeudPreview,
 } from '../../utils/bordereau-tree.util';
@@ -56,6 +67,8 @@ import {
   type BordereauNoeudDialogResult,
   type BordereauNoeudType,
 } from '../bordereau-noeud-dialog/bordereau-noeud-dialog.component';
+import { DossierLotAffectationDialogComponent } from '../dossier-lot-affectation-dialog/dossier-lot-affectation-dialog.component';
+import { lotAssigneAUnAutre } from '../../utils/dossier-responsables.util';
 
 /**
  * Arbre DPGF — lecture / édition structurelle, ou brouillon d'import inline.
@@ -70,6 +83,8 @@ import {
     CommonModule,
     TreeTableComponent,
     ButtonComponent,
+    ListingControlsComponent,
+    SelectionBarComponent,
     TooltipDirective,
     EtudeBannerComponent,
   ],
@@ -81,6 +96,8 @@ export class BordereauArbreComponent {
   private readonly uomApi = inject(UnitOfMeasuresApiService);
   private readonly dialog = inject(MatDialog);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly auth = inject(AuthFacade);
+  private readonly toast = inject(ToastService);
 
   /** Requis hors mode brouillon. */
   readonly dpgfId = input<string | undefined>(undefined);
@@ -114,6 +131,10 @@ export class BordereauArbreComponent {
   readonly externalHierarchie = input<NoeudDPGF[] | null>(null);
   /** Clic simple ouvre le poste (invité) — sinon double-clic comme l’étape Coût. */
   readonly openOnClick = input(false);
+  /** Chargé / DG : affecter un LOT à un ingénieur BTP. */
+  readonly peutAffecterLots = input(false);
+  /** Ingénieur non chargé : arbre déjà filtré côté API. */
+  readonly vueLotsAffectes = input(false);
 
   readonly change = output<void>();
   readonly posteSelect = output<BordereauTreeRow | null>();
@@ -122,9 +143,15 @@ export class BordereauArbreComponent {
   readonly nodes = signal<NfTreeNode<BordereauTreeRow>[]>([]);
   readonly draftLocal = signal<ImportNoeudPreview[]>([]);
   readonly expandedKeys = signal<Set<string>>(new Set());
+  readonly bulkSelectMode = signal(false);
+  readonly selectedKeys = signal<Set<string>>(new Set());
   readonly uniteOptions = signal<UniteOption[]>([]);
   readonly chargement = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
+  readonly bulkActions: SelectionAction[] = [
+    { id: 'delete', label: 'Supprimer', icon: 'trash-2', variant: 'danger' },
+  ];
+  readonly isLotSelectable = (row: BordereauTreeRow): boolean => estLotOuSousLot(row.type);
   /** Force remount nf-tree-table (expand state / PU stale après mutation arbre). */
   readonly tableEpoch = signal(0);
 
@@ -205,11 +232,11 @@ export class BordereauArbreComponent {
         cssClass: 'arbre__col-metric',
       });
     }
-    if (this.showStructureActions()) {
+    if (this.showRowActions()) {
       cols.push({
         key: 'actions',
         label: 'Actions',
-        width: '8.5rem',
+        width: this.showStructureActions() && this.peutAffecterLots() ? '10.5rem' : this.showStructureActions() ? '8.5rem' : '3.25rem',
         align: 'center',
         stickyEnd: true,
         cssClass: 'arbre__col-actions',
@@ -222,6 +249,18 @@ export class BordereauArbreComponent {
     () => this.modifiable() && !this.selectionEnabled() && (this.isDraft() || this.editionStructure()),
   );
 
+  readonly showLotAffectation = computed(
+    () => this.peutAffecterLots() && !this.isDraft(),
+  );
+
+  readonly showRowActions = computed(
+    () => this.showStructureActions() || this.showLotAffectation(),
+  );
+
+  readonly emptyMessage = computed(() =>
+    this.vueLotsAffectes() ? 'Aucun lot ne vous est affecté.' : 'Aucun lot / article',
+  );
+
   /**
    * Plancher des colonnes fixes (Type…Actions). Le libellé prend le reste
    * et s’ellipse ; sous ce plancher le scroll H apparaît, sticky à droite.
@@ -230,6 +269,8 @@ export class BordereauArbreComponent {
     bordereauTableMinWidth({
       selection: this.selectionEnabled(),
       structureActions: this.showStructureActions(),
+      lotAffectation: this.showLotAffectation(),
+      bulkSelect: this.bulkSelectMode(),
     }),
   );
   /** Remplit le parent flex (dossier fill) — un seul scroll vertical. */
@@ -240,10 +281,14 @@ export class BordereauArbreComponent {
   readonly rowClass = computed(() => {
     const selected = this.selectedKey();
     const focused = this.focusedRowKey();
+    const checked = this.selectedKeys();
     return (row: BordereauTreeRow): string => {
       const classes = [`arbre__row--${(row.type || '').toLowerCase()}`];
       if (selected && (row.key === selected || row.id === selected)) {
         classes.push('arbre__row--selected');
+      }
+      if (checked.has(row.key)) {
+        classes.push('arbre__row--checked');
       }
       if (focused && row.key === focused) {
         classes.push('arbre__row--focus');
@@ -254,6 +299,8 @@ export class BordereauArbreComponent {
       return classes.join(' ');
     };
   });
+
+  readonly selectedCount = computed(() => this.selectedKeys().size);
 
   readonly rowTitle = (row: BordereauTreeRow): string | null => {
     if (row.nonExploitable) {
@@ -325,7 +372,7 @@ export class BordereauArbreComponent {
           applyTreeRollupTotals(nodes);
           applyTreeRollupPostes(nodes);
           this.nodes.set(nodes);
-          this.expandedKeys.set(collectAllExpandableKeys(nodes));
+          this.expandedKeys.set(retainExpandableKeys(nodes, this.expandedKeys()));
           this.tableEpoch.update((e) => e + 1);
           this.chargement.set(false);
           return;
@@ -356,33 +403,21 @@ export class BordereauArbreComponent {
       untracked(() => this.applyFocus(focusId, focusCode, nodes, token, false));
     });
     effect(() => {
-      const nodes = this.nodes();
       const fromGate = this.expandArticleIds();
-      const selectionOn = this.selectionEnabled();
+      const nodes = this.nodes();
       untracked(() => {
         if (!nodes.length) return;
-        const warnKeys = collectNonExploitableArticleKeys(nodes);
-        const costIds =
-          selectionOn && !this.isDraft()
-            ? collectIncompleteArticleIds(nodes).slice(0, 40)
-            : [];
-        const ids = fromGate.length > 0 ? [...fromGate] : costIds;
-        const fp = `${warnKeys.join(',')}|${ids.join(',')}|${nodes.length}`;
+        const fp = fromGate.join(',');
         if (fp === this.lastExpandFingerprint) return;
-        if (warnKeys.length === 0 && ids.length === 0) {
-          this.lastExpandFingerprint = fp;
-          return;
-        }
         this.lastExpandFingerprint = fp;
+        if (fromGate.length === 0) return;
         const keys = new Set(this.expandedKeys());
-        for (const k of expandAncestorsOfNonExploitable(nodes)) keys.add(k);
-        for (const id of ids) {
+        for (const id of fromGate) {
           const match = findRowById(nodes, id);
           if (!match) continue;
           for (const k of expandAncestors(nodes, match.key)) keys.add(k);
         }
         this.expandedKeys.set(keys);
-        if (warnKeys.length > 0) this.scrollToFirstIncomplete();
       });
     });
   }
@@ -466,8 +501,28 @@ export class BordereauArbreComponent {
   }
 
   onRowClick(row: BordereauTreeRow): void {
+    if (this.bulkSelectMode() && this.isLotSelectable(row)) {
+      const next = new Set(this.selectedKeys());
+      if (next.has(row.key)) next.delete(row.key);
+      else next.add(row.key);
+      this.selectedKeys.set(next);
+      return;
+    }
     if (!this.openOnClick()) return;
     this.emitPoste(row);
+  }
+
+  toggleBulkSelect(): void {
+    if (this.bulkSelectMode()) {
+      this.bulkSelectMode.set(false);
+      this.selectedKeys.set(new Set());
+      return;
+    }
+    this.bulkSelectMode.set(true);
+  }
+
+  onBulkAction(action: SelectionAction): void {
+    if (action.id === 'delete') void this.supprimerSelection();
   }
 
   onRowDblClick(row: BordereauTreeRow): void {
@@ -475,9 +530,51 @@ export class BordereauArbreComponent {
     this.emitPoste(row);
   }
 
+  lotReserveAUnAutre(row: BordereauTreeRow): boolean {
+    const me = this.auth.user();
+    return lotAssigneAUnAutre(row.chargeLotUserId, me?.id, me?.email);
+  }
+
   private emitPoste(row: BordereauTreeRow): void {
     if (row.type !== 'ARTICLE') return;
+    if (this.lotReserveAUnAutre(row)) {
+      const nom = row.chargeLotNom?.trim();
+      this.toast.info(
+        nom
+          ? `Chiffrage réservé à ${nom}. Retirez l’affectation pour le reprendre.`
+          : 'Chiffrage réservé à un autre ingénieur. Retirez l’affectation pour le reprendre.',
+      );
+      return;
+    }
     this.posteSelect.emit(row);
+  }
+
+  async affecterLot(row: BordereauTreeRow): Promise<void> {
+    if (!this.showLotAffectation() || row.type !== 'LOT' || !row.id) return;
+    const picked = await firstValueFrom(
+      this.dialog
+        .open(DossierLotAffectationDialogComponent, {
+          width: '28rem',
+          data: {
+            lotLibelle: [row.code, row.libelle].filter(Boolean).join(' — '),
+            chargeLotUserId: row.chargeLotUserId,
+            utilisateurCourantId: this.auth.user()?.id,
+            utilisateurCourantEmail: this.auth.user()?.email,
+          },
+        })
+        .afterClosed(),
+    );
+    if (picked === undefined) return;
+    try {
+      await this.dpgfApi.affecterLot(row.id, {
+        userId: picked.userId,
+        nom: picked.nom ?? null,
+      });
+      await this.charger(this.dpgfId()!);
+      this.change.emit();
+    } catch (e) {
+      this.erreur.set(this.msg(e));
+    }
   }
 
   async ajouterLot(): Promise<void> {
@@ -682,28 +779,65 @@ export class BordereauArbreComponent {
       confirmLabel: 'Supprimer',
     });
     if (!confirmed) return;
+    await this.supprimerNoeuds([row]);
+  }
+
+  async supprimerSelection(): Promise<void> {
+    if (!this.showStructureActions() || !this.bulkSelectMode()) return;
+    const roots = selectedRootRows(this.nodes(), this.selectedKeys()).filter((row) =>
+      this.isLotSelectable(row),
+    );
+    if (roots.length === 0) return;
+    const confirmed = await this.confirmDialog.confirm({
+      title: roots.length === 1 ? 'Supprimer le lot' : 'Supprimer les lots',
+      message:
+        roots.length === 1
+          ? `Supprimer « ${roots[0].code} — ${roots[0].libelle} » et ses éventuels enfants ?`
+          : `Supprimer ${roots.length} lots et leurs enfants ?`,
+      variant: 'danger',
+      confirmLabel: 'Supprimer',
+    });
+    if (!confirmed) return;
+    await this.supprimerNoeuds(roots);
+    this.selectedKeys.set(new Set());
+  }
+
+  private async supprimerNoeuds(rows: BordereauTreeRow[]): Promise<void> {
     if (this.isDraft()) {
-      const path = importKeyToPath(row.key);
-      if (!path) return;
       const root = structuredClone(this.draftLocal());
-      if (path.length === 1) {
-        root.splice(path[0], 1);
-      } else {
-        const parent = getImportNoeudAt(root, path.slice(0, -1));
-        if (!parent?.enfants) return;
-        parent.enfants.splice(path[path.length - 1], 1);
+      const paths = rows
+        .map((row) => importKeyToPath(row.key))
+        .filter((path): path is number[] => !!path);
+      paths.sort((a, b) => {
+        const n = Math.min(a.length, b.length);
+        for (let i = 0; i < n; i++) {
+          if (a[i] !== b[i]) return b[i] - a[i];
+        }
+        return b.length - a.length;
+      });
+      for (const path of paths) {
+        if (path.length === 1) {
+          root.splice(path[0], 1);
+        } else {
+          const parent = getImportNoeudAt(root, path.slice(0, -1));
+          if (!parent?.enfants) continue;
+          parent.enfants.splice(path[path.length - 1], 1);
+        }
       }
-      this.commitDraft(root);
+      this.commitDraft(root, false);
       return;
     }
-    if (!row.id) return;
     try {
-      await this.dpgfApi.deleteNoeud(row.id);
-      if (this.selectedKey() === row.key) this.posteSelect.emit(null);
+      for (const row of rows) {
+        if (!row.id) continue;
+        await this.dpgfApi.deleteNoeud(row.id);
+        if (this.selectedKey() === row.key) this.posteSelect.emit(null);
+      }
       await this.charger(this.dpgfId()!);
       this.change.emit();
     } catch (e) {
       this.erreur.set(this.msg(e));
+      if (this.dpgfId()) await this.charger(this.dpgfId()!);
     }
   }
 
@@ -739,8 +873,9 @@ export class BordereauArbreComponent {
     applyTreeRollupPostes(nodes);
     this.nodes.set(nodes);
     if (resetExpand) {
-      this.expandedKeys.set(expandAncestorsOfNonExploitable(nodes));
-      this.scrollToFirstIncomplete();
+      this.expandedKeys.set(new Set());
+    } else {
+      this.expandedKeys.set(retainExpandableKeys(nodes, this.expandedKeys()));
     }
   }
 
@@ -848,22 +983,7 @@ export class BordereauArbreComponent {
       const previous = this.expandedKeys();
       this.nodes.set(nodes);
       this.tableEpoch.update((e) => e + 1);
-      if (previous.size > 0) {
-        const valid = new Set<string>();
-        const walk = (list: NfTreeNode<BordereauTreeRow>[]) => {
-          for (const n of list) {
-            if (previous.has(n.key) && n.children?.length) valid.add(n.key);
-            if (n.children?.length) walk(n.children);
-          }
-        };
-        walk(nodes);
-        this.expandedKeys.set(valid);
-      } else if (this.selectionEnabled()) {
-        this.expandedKeys.set(collectAllExpandableKeys(nodes));
-      } else {
-        this.expandedKeys.set(expandAncestorsOfNonExploitable(nodes));
-        this.scrollToFirstIncomplete();
-      }
+      this.expandedKeys.set(retainExpandableKeys(nodes, previous));
     } catch (e) {
       this.erreur.set(this.msg(e));
       this.nodes.set([]);

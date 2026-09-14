@@ -3,18 +3,23 @@ import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { FeatureApiService } from '@platform/lib/anatomy';
+import type { StatusChangeRecord } from '@platform/lib/anatomy';
 import type {
   DossierDocument,
   DossierEtude,
   DossierEtudeCreate,
   DossierEtudeUpdate,
   DossierPieceAttendue,
+  DossierPlanningActivite,
+  DossierPlanningRessource,
+  DossierPlanningRessourceType,
   MarchePropose,
   ResultatGate,
   TypeDossierDocument,
 } from '@app/etudes/models';
 import type { ImportNoeudPreview } from '../utils/bordereau-tree.util';
 import type { GuestLinkCreate, GuestLinkCreated } from './guest-access-api.service';
+import { hydrateStatut } from '../utils/dossier-status.util';
 
 /** AC-12 — un poste du devis sans lot parent, nommé par le serveur pour que l'humain le place. */
 export interface PosteOrphelin {
@@ -323,6 +328,10 @@ export interface DossierEtudeSynthese {
   clientNom?: string | null;
   chargeEtudeUserId?: string | null;
   chargeEtudeNom?: string | null;
+  responsableExecutionUserId?: string | null;
+  responsableExecutionNom?: string | null;
+  avisExecutionDossier?: string | null;
+  avisExecutionCommentaire?: string | null;
   appelOffreClientId?: string | null;
   status: string;
   currentStep: number;
@@ -347,6 +356,7 @@ export interface DossierEtudeSynthese {
   updatedAt?: string | null;
   gates: ResultatGate[];
   actionPrincipale: string;
+  availableActions?: string[];
   decisionsCatalogue?: DecisionCatalogueTrace[];
 }
 
@@ -402,6 +412,35 @@ export class DossierEtudeApiService extends FeatureApiService<
   protected override basePath = '/api/v1/etudes/dossiers';
   protected override searchFields = ['numero', 'objet', 'clientNom'];
 
+  override async getById(id: string | number): Promise<DossierEtude> {
+    return hydrateStatut(await super.getById(id));
+  }
+
+  override async create(data: DossierEtudeCreate): Promise<DossierEtude> {
+    return hydrateStatut(await super.create(data));
+  }
+
+  override async update(id: string | number, data: DossierEtudeUpdate): Promise<DossierEtude> {
+    return hydrateStatut(await super.update(id, data));
+  }
+
+  protected override normalizeListResponse(payload: unknown) {
+    const page = super.normalizeListResponse(payload);
+    return { ...page, items: page.items.map((item) => hydrateStatut(item)) };
+  }
+
+  override async executeTransition<TResult = DossierEtude>(
+    id: string | number,
+    endpoint: string,
+    payload?: Record<string, unknown>,
+  ): Promise<TResult> {
+    const result = await super.executeTransition<TResult>(id, endpoint, payload);
+    if (result && typeof result === 'object' && 'status' in result) {
+      return hydrateStatut(result as { status?: string }) as TResult;
+    }
+    return result;
+  }
+
   /**
    * État des cinq gates, sans transition.
    *
@@ -414,6 +453,69 @@ export class DossierEtudeApiService extends FeatureApiService<
 
   allerAEtape(id: string, etape: number): Promise<DossierEtude> {
     return this.put<DossierEtude>(`${this.basePath}/${id}/etape`, { etape });
+  }
+
+  deciderGo(
+    id: string,
+    body?: {
+      chargeEtudeUserId?: string;
+      chargeEtudeNom?: string;
+      responsableExecutionUserId?: string;
+      responsableExecutionNom?: string;
+    },
+  ): Promise<DossierEtude> {
+    return this.executeTransition(id, 'go', body);
+  }
+
+  affecter(
+    id: string,
+    body?: {
+      chargeEtudeUserId?: string;
+      chargeEtudeNom?: string;
+      responsableExecutionUserId?: string;
+      responsableExecutionNom?: string;
+    },
+  ): Promise<DossierEtude> {
+    return this.executeTransition(id, 'affecter', body);
+  }
+
+  avisExecutionFavorable(id: string): Promise<DossierEtude> {
+    return this.executeTransition(id, 'avis-execution/favorable');
+  }
+
+  avisExecutionRetour(id: string, commentaire: string): Promise<DossierEtude> {
+    return this.executeTransition(id, 'avis-execution/retour', { commentaire });
+  }
+
+  deciderNoGo(id: string, motif?: string | null): Promise<DossierEtude> {
+    return this.executeTransition(id, 'nogo', { motif: motif?.trim() || null });
+  }
+
+  suspendreChiffrage(id: string): Promise<DossierEtude> {
+    return this.executeTransition(id, 'suspendre');
+  }
+
+  reprendreChiffrage(id: string): Promise<DossierEtude> {
+    return this.executeTransition(id, 'reprendre');
+  }
+
+  soumettreAuDg(id: string): Promise<DossierEtude> {
+    return this.executeTransition(id, 'soumettre-go');
+  }
+
+  revenirAuDraft(id: string): Promise<DossierEtude> {
+    return this.executeTransition(id, 'revenir-draft');
+  }
+
+  accepterAffectation(id: string): Promise<DossierEtude> {
+    return this.executeTransition(id, 'accepter-affectation');
+  }
+
+  refuserAffectation(
+    id: string,
+    body: { type: string; motif: string },
+  ): Promise<DossierEtude> {
+    return this.executeTransition(id, 'refuser-affectation', body);
   }
 
   soumettre(id: string): Promise<DossierEtude> {
@@ -432,8 +534,12 @@ export class DossierEtudeApiService extends FeatureApiService<
     return this.executeTransition(id, 'annuler');
   }
 
-  synthese(id: string): Promise<DossierEtudeSynthese> {
-    return this.get<DossierEtudeSynthese>(`${this.basePath}/${id}/synthese`);
+  async synthese(id: string): Promise<DossierEtudeSynthese> {
+    return hydrateStatut(await this.get<DossierEtudeSynthese>(`${this.basePath}/${id}/synthese`));
+  }
+
+  getStatusHistory(id: string): Promise<StatusChangeRecord[]> {
+    return this.get<StatusChangeRecord[]>(`${this.basePath}/${id}/status-history`);
   }
 
   /** Users tenant avec rôle BTP_INGENIEUR — candidats chargé d'étude. */
@@ -458,9 +564,16 @@ export class DossierEtudeApiService extends FeatureApiService<
       devisId?: string | null;
       montantAttribue?: number | null;
       motifDerogation?: string | null;
+      acceptWarnings?: boolean | null;
     },
   ): Promise<DossierEtude> {
     return this.executeTransition(id, 'gagne', body);
+  }
+
+  completude(id: string): Promise<{
+    controles?: { code?: string; severite?: string; messageKey?: string }[];
+  }> {
+    return this.get(`${this.basePath}/${id}/completude`);
   }
 
   /** L13 — affaire perdue (DEVIS_GENERE → PERDU). */
@@ -504,6 +617,16 @@ export class DossierEtudeApiService extends FeatureApiService<
 
   listerDocuments(dossierId: string): Promise<DossierDocument[]> {
     return this.get<DossierDocument[]>(`${this.basePath}/${dossierId}/documents`);
+  }
+
+  /** Octets de la pièce originale — consultation (CPS, BDP, plans…). */
+  telechargerDocument(dossierId: string, documentId: string): Promise<Blob> {
+    return firstValueFrom(
+      this.http.get(
+        this.resolveUrl(`${this.basePath}/${dossierId}/documents/${documentId}/contenu`),
+        { responseType: 'blob' },
+      ),
+    );
   }
 
   deposerDocument(
@@ -1022,5 +1145,88 @@ export class DossierEtudeApiService extends FeatureApiService<
     return this.post<ConsultationEtude>(`${this.basePath}/${dossierId}/consultation/identifier`, {
       cleStables,
     });
+  }
+
+  listerPlanningActivites(dossierId: string): Promise<DossierPlanningActivite[]> {
+    return this.get<DossierPlanningActivite[]>(`${this.basePath}/${dossierId}/planning-activites`);
+  }
+
+  creerPlanningActivite(
+    dossierId: string,
+    body: {
+      libelle: string;
+      dpgfNoeudId?: string | null;
+      lotLibelle?: string | null;
+      dateDebut: string;
+      dateFin: string;
+    },
+  ): Promise<DossierPlanningActivite> {
+    return this.post<DossierPlanningActivite>(`${this.basePath}/${dossierId}/planning-activites`, body);
+  }
+
+  modifierPlanningActivite(
+    dossierId: string,
+    activiteId: string,
+    body: {
+      libelle: string;
+      dpgfNoeudId?: string | null;
+      lotLibelle?: string | null;
+      dateDebut: string;
+      dateFin: string;
+    },
+  ): Promise<DossierPlanningActivite> {
+    return this.put<DossierPlanningActivite>(
+      `${this.basePath}/${dossierId}/planning-activites/${activiteId}`,
+      body,
+    );
+  }
+
+  supprimerPlanningActivite(dossierId: string, activiteId: string): Promise<void> {
+    return this.deleteRequest(`${this.basePath}/${dossierId}/planning-activites/${activiteId}`);
+  }
+
+  listerPlanningRessources(dossierId: string): Promise<DossierPlanningRessource[]> {
+    return this.get<DossierPlanningRessource[]>(`${this.basePath}/${dossierId}/planning-ressources`);
+  }
+
+  creerPlanningRessource(
+    dossierId: string,
+    body: {
+      type: DossierPlanningRessourceType | string;
+      libelle: string;
+      quantite: number;
+      unite?: string | null;
+      employeId?: string | null;
+      materielId?: string | null;
+      notes?: string | null;
+    },
+  ): Promise<DossierPlanningRessource> {
+    return this.post<DossierPlanningRessource>(
+      `${this.basePath}/${dossierId}/planning-ressources`,
+      body,
+    );
+  }
+
+  modifierPlanningRessource(
+    dossierId: string,
+    ressourceId: string,
+    body: {
+      type: DossierPlanningRessourceType | string;
+      libelle: string;
+      quantite: number;
+      unite?: string | null;
+      employeId?: string | null;
+      materielId?: string | null;
+      notes?: string | null;
+    },
+  ): Promise<DossierPlanningRessource> {
+    return this.put<DossierPlanningRessource>(
+      `${this.basePath}/${dossierId}/planning-ressources/${ressourceId}`,
+      body,
+    );
+  }
+
+  supprimerPlanningRessource(dossierId: string, ressourceId: string): Promise<void> {
+    return this.deleteRequest(`${this.basePath}/${dossierId}/planning-ressources/${ressourceId}`);
   }
 }

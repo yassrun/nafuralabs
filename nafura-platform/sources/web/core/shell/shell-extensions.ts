@@ -4,13 +4,19 @@ import { Routes } from '@angular/router';
 /**
  * Points d'extension du shell — appartiennent à la PLATEFORME.
  *
- * La plateforme déclare des emplacements nommés ; l'application hôte y enregistre
- * ce qu'elle veut y voir. Un emplacement sans extension ne rend rien — la plateforme
- * reste fonctionnelle seule.
+ * Deux familles :
+ * - Slots produit (vides sans extension) : tenant switcher, alertes métier.
+ * - Slots chrome (défaut plateforme, override optionnel) : user, notif, IA.
  */
 export type ShellSlot =
   /** En-tête, à gauche du sélecteur de langue (ex. sélecteur de société). */
   | 'header-tenant-switcher'
+  /** Remplace le menu utilisateur plateforme. */
+  | 'header-user-menu'
+  /** Remplace la cloche de notifications plateforme. */
+  | 'header-notifications'
+  /** Remplace le bouton IA plateforme. L'override injecte AiPanelService. */
+  | 'header-ai'
   /** Bandeau d'alertes du centre de notifications. */
   | 'notification-center-alerts';
 
@@ -23,6 +29,14 @@ export const SHELL_EXTENSIONS = new InjectionToken<readonly ShellExtension[]>(
   'SHELL_EXTENSIONS',
 );
 
+/** First component registered for a slot, or null if the app did not override it. */
+export function componentForSlot(
+  extensions: readonly ShellExtension[] | null | undefined,
+  slot: ShellSlot,
+): Type<unknown> | null {
+  return (extensions ?? []).find((e) => e.slot === slot)?.component ?? null;
+}
+
 /**
  * Widgets d'onboarding fournis par l'application.
  *
@@ -33,7 +47,6 @@ export const SHELL_EXTENSIONS = new InjectionToken<readonly ShellExtension[]>(
 export interface OnboardingWidgets {
   /** Absent = bandeau d'invitation collègues non affiché (réactiver plus tard). */
   readonly inviteBanner?: Type<unknown>;
-  readonly completenessMeter: Type<unknown>;
 }
 
 export interface OnboardingWidgetsPort {

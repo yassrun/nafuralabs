@@ -22,7 +22,7 @@ public class IntentRouter {
     );
 
     private static final Pattern NAVIGATE_PATTERN = Pattern.compile(
-            "\\b(o[uù]|am[eè]ne|navigue|go to|open|ouvre|acc[eè]de|comment (faire|acc[eé]der|cr[eé]er)|where|help|aide|documentation|doc|menu|écran|ecran|page|aller|configurer)\\b",
+            "\\b(o[uù]|am[eè]ne|navigue|go to|open|ouvre|acc[eè]de|comment|where|help|aide|documentation|doc|menu|écran|ecran|page|aller|configurer|chiffr\\w*|je (vais|veux|souhaite)|faire)\\b",
             PATTERN_FLAGS
     );
 
@@ -44,9 +44,9 @@ public class IntentRouter {
 
         if (startsWithActionVerb(normalized) || ACTION_PATTERN.matcher(normalized).find()) {
             return IntentClassification.builder()
-                    .intent(IntentType.ACTION)
+                    .intent(IntentType.NAVIGATE)
                     .confidence(1.0)
-                    .source("RULES")
+                    .source("RULES_ASSISTANT")
                     .build();
         }
 

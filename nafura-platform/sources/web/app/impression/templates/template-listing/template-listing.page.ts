@@ -1,3 +1,4 @@
+import { DocumentNavigationComponent } from '../../document-navigation.component';
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -21,10 +22,11 @@ import { CreateTemplateDialogComponent } from '../components/create-template-dia
 @Component({
   selector: 'app-template-listing-page',
   standalone: true,
-  imports: [...ConfigDrivenListingPageImports],
+  imports: [DocumentNavigationComponent, ...ConfigDrivenListingPageImports],
   template: `
     <nf-page-shell>
       <nf-page-header [config]="headerConfig"></nf-page-header>
+      <app-document-navigation class="fill">
       <nf-entity-listing
         #listing
         [config]="config"
@@ -33,6 +35,7 @@ import { CreateTemplateDialogComponent } from '../components/create-template-dia
         (rowOpen)="onRowOpen($event)"
         (action)="onAction($event)">
       </nf-entity-listing>
+    </app-document-navigation>
     </nf-page-shell>
   `,
   styles: [ConfigDrivenListingPageStyles],
@@ -45,10 +48,20 @@ export class TemplateListingPage extends ConfigDrivenListingPage<PrintTemplate> 
 
   readonly facade = inject(TemplatesFacade);
   readonly config = TEMPLATES_LISTING_CONFIG;
-  readonly headerTitle = 'administration.templates.title';
+  readonly headerTitle = 'administration.documents.title';
+
+  override get headerConfig() {
+    return {
+      ...super.headerConfig,
+      breadcrumbs: [
+        { label: 'administration.navigation.hub', route: '/admin' },
+        { label: 'administration.documents.models' },
+      ],
+    };
+  }
 
   async onRowOpen(item: PrintTemplate): Promise<void> {
-    await this.router.navigate(['/administration/templates', item.id]);
+    await this.router.navigate(['/administration/documents/templates', item.id]);
   }
 
   protected override async handleCustomAction(
@@ -82,7 +95,7 @@ export class TemplateListingPage extends ConfigDrivenListingPage<PrintTemplate> 
         this.i18n.instant('administration.templates.createSuccess', { name: result.name })
       );
       await this.refresh();
-      await this.router.navigate(['/administration/templates', result.id]);
+      await this.router.navigate(['/administration/documents/templates', result.id]);
     }
   }
 
@@ -98,7 +111,7 @@ export class TemplateListingPage extends ConfigDrivenListingPage<PrintTemplate> 
         this.i18n.instant('administration.templates.cloneSuccess', { name: result.name })
       );
       await this.refresh();
-      await this.router.navigate(['/administration/templates', result.id]);
+      await this.router.navigate(['/administration/documents/templates', result.id]);
     }
   }
 

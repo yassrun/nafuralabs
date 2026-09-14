@@ -191,16 +191,23 @@ export class NotificationCenterPage implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly confirmDialog = inject(ConfirmDialogService);
 
-  readonly hasErpAlerts = computed(() => this.bellAdapter?.mode === 'erp-alerts');
+  readonly hasErpAlerts = computed(() => {
+    const mode = this.bellAdapter?.mode;
+    return mode === 'erp-alerts' || mode === 'merged';
+  });
 
   /** Emplacement 'notification-center-alerts' — rempli par l'application, vide sinon. */
   private readonly shellExtensions = inject(SHELL_EXTENSIONS, { optional: true });
   readonly alertExtensions = computed(() =>
     (this.shellExtensions ?? []).filter((e) => e.slot === 'notification-center-alerts'),
   );
-  readonly totalPending = computed(
-    () => this.facade.unreadCount() + (this.bellAdapter?.count() ?? 0),
-  );
+  readonly totalPending = computed(() => {
+    const unread = this.facade.unreadCount();
+    const adapter = this.bellAdapter;
+    if (!adapter) return unread;
+    if (adapter.mode === 'merged') return adapter.count();
+    return unread + adapter.count();
+  });
 
   readonly sourceOptions = NOTIFICATION_SOURCE_OPTIONS;
   readonly statusOptions = NOTIFICATION_STATUS_OPTIONS;

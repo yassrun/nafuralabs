@@ -109,6 +109,9 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
   /** Whether to auto-load data on init */
   autoLoad = input<boolean>(true);
 
+  /** Prefill filters (ex. query params depuis un dashboard). */
+  initialFilters = input<Record<string, unknown>>({});
+
   /**
    * Master–Slave mode: single click opens item (emits rowOpen) instead of toggling selection.
    * When true, selection mode is effectively ignored for row click; use (rowOpen) to sync URL/detail.
@@ -501,8 +504,10 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
       this._visibleColumnKeys.set(new Set(defaultVisible));
     }, { allowSignalWrites: true });
 
-    // Auto-load data
+    // Auto-load data (applique initialFilters avant le premier fetch)
     effect(() => {
+      const init = this.initialFilters();
+      this._filterValues.set({ ...(init ?? {}) });
       if (this.autoLoad()) {
         this.loadData();
       }
@@ -1109,3 +1114,4 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
     return translated === key ? fallback : translated;
   }
 }
+

@@ -15,6 +15,8 @@ public final class QaLocalConstants {
     public static final String OWNER_EMAIL = "qa@nafuralabs.local";
     public static final String OWNER_NAME = "QA Owner";
     public static final String OWNER_ALIAS = "owner";
+    public static final String OWNER_ROLE_LABEL = "Owner · Admin étude";
+    public static final String ROLE_ADMIN_ETUDE = "BTP_ADMIN_ETUDE";
 
     /** Deprecated Mode B email — remapped to {@link #OWNER_EMAIL}. */
     public static final String DEPRECATED_CURSOR_QA_EMAIL = "cursor.qa@nafuralabs.local";
@@ -27,8 +29,47 @@ public final class QaLocalConstants {
      */
     public record RoleUser(String alias, String email, String name, String tenantRoleCode) {}
 
+    /** Extra tenant roles on the owner (full étude power besides OWNER / SUPER_ADMIN). */
+    public static final List<String> OWNER_EXTRA_ROLES = List.of("BTP_INGENIEUR", ROLE_ADMIN_ETUDE);
+
+    /** Inbox cloche — lecture de ses propres notifications. */
+    public static final String NOTIFICATION_READ = "collaboration.collaboration.notification.read";
+
+    public static final List<String> INBOX_PERMISSIONS = List.of(NOTIFICATION_READ);
+
+    public static final List<String> ADMIN_ETUDE_PERMISSIONS = List.of(
+        "etude.read", "etude.create", "etude.update", "etude.delete",
+        "etude.submit", "etude.approve", "etude.avis", "etude.go",
+        "etudes.read",
+        "etudes.etudes.dossier.etude.read",
+        "etudes.etudes.dossier.etude.create",
+        "etudes.etudes.dossier.etude.update",
+        "etudes.etudes.dossier.etude.submit",
+        "etudes.etudes.dossier.etude.avis",
+        "etudes.etudes.dossier.etude.go",
+        "etudes.etudes.dpgf.etudes.read",
+        "etudes.etudes.dpgf.etudes.update",
+        "etudes.etudes.dpu.etudes.read",
+        "etudes.etudes.dpu.etudes.update",
+        "etudes.etudes.dpu.etudes.create"
+    );
+
+    public static final List<String> LECTEUR_ETUDE_PERMISSIONS = List.of(
+        "etude.read", "etudes.read", "etudes.etudes.dossier.etude.read"
+    );
+
+    public static final List<String> ASSISTANT_ETUDE_PERMISSIONS = List.of(
+        "etude.read", "etude.create", "etude.update", "etudes.read",
+        "etudes.etudes.dossier.etude.read",
+        "etudes.etudes.dossier.etude.create",
+        "etudes.etudes.dossier.etude.update"
+    );
+
     public static final List<RoleUser> ROLE_USERS = List.of(
         new RoleUser("ingenieur", "qa.ingenieur@nafuralabs.local", "QA Ingenieur", "BTP_INGENIEUR"),
+        new RoleUser("ingenieur-2", "qa.ingenieur2@nafuralabs.local", "QA Ingenieur 2", "BTP_INGENIEUR"),
+        new RoleUser("utilisateur", "qa.utilisateur@nafuralabs.local", "QA Utilisateur", "BTP_LECTEUR_ETUDE"),
+        new RoleUser("assistant", "qa.assistant@nafuralabs.local", "QA Assistant Étude", "BTP_ASSISTANT_ETUDE"),
         new RoleUser("conducteur", "qa.conducteur@nafuralabs.local", "QA Conducteur", "BTP_CONDUCTEUR_TRAVAUX"),
         new RoleUser("directeur", "qa.directeur@nafuralabs.local", "QA Directeur", "BTP_DIRECTEUR_TRAVAUX"),
         new RoleUser("daf", "qa.daf@nafuralabs.local", "QA Daf", "BTP_DAF"),
@@ -74,6 +115,15 @@ public final class QaLocalConstants {
         }
         if ("chef".equals(key)) {
             key = "chef-chantier";
+        }
+        if ("ingenieur2".equals(key) || "ing2".equals(key)) {
+            key = "ingenieur-2";
+        }
+        if ("lecteur".equals(key) || "user".equals(key)) {
+            key = "utilisateur";
+        }
+        if ("secretaire".equals(key) || "secretary".equals(key)) {
+            key = "assistant";
         }
         String resolved = key;
         return ROLE_USERS.stream()

@@ -15,7 +15,7 @@ public final class DeepSeekProviderFactory {
             base = base + "/v1";
         }
         WebClient webClient = WebClient.builder().baseUrl(base).build();
-        String resolvedModel = (model == null || model.isBlank()) ? "deepseek-v4-flash" : model;
+        String resolvedModel = (model == null || model.isBlank()) ? "deepseek-flash" : model;
         return new OpenAiCompatibleProvider("deepseek", webClient, apiKey, resolvedModel);
     }
 }

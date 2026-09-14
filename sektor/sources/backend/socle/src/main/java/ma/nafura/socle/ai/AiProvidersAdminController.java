@@ -31,7 +31,7 @@ public class AiProvidersAdminController {
 
     private static final Map<String, List<String>> MODELS = Map.of(
         "gemini", List.of("gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"),
-        "deepseek", List.of("deepseek-v4-flash", "deepseek-v4-pro")
+        "deepseek", List.of("deepseek-flash", "deepseek-v4-flash", "deepseek-v4-pro")
     );
 
     private final AiProviderRegistry registry;

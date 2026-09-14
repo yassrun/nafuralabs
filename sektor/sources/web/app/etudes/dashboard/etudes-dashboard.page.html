@@ -1,0 +1,118 @@
+<nf-screen [header]="headerConfig()" [scroll]="true" (actionClick)="onHeaderAction($event)">
+  <nf-data-state
+    class="etudes-dash__state"
+    [state]="pageState()"
+    loadingVariant="inline"
+    [loadingMessage]="'etudes.dashboard.loading' | translate"
+    [errorMessage]="loadError() ?? ('etudes.dashboard.error' | translate)"
+    emptyIcon="calculate"
+    [emptyTitle]="'etudes.dashboard.empty.title' | translate"
+    [emptyMessage]="'etudes.dashboard.empty.message' | translate"
+    [emptyActionLabel]="'etudes.dashboard.actions.create' | translate"
+    (retry)="reload()"
+    (emptyAction)="onHeaderAction({ type: 'primary', action: { id: 'create' } })">
+
+    <div class="etudes-dash" data-testid="etudes-dashboard">
+      <section class="etudes-dash__kpis" aria-label="Raccourcis">
+        @for (kpi of vm().kpis; track kpi.id) {
+          <a
+            class="etudes-dash__kpi"
+            [routerLink]="['/etudes/dossiers']"
+            [queryParams]="kpi.queryParams"
+            [attr.data-testid]="'etudes-dash-kpi-' + kpi.id">
+            <nf-stat-card
+              [label]="kpi.label"
+              [value]="kpi.count"
+              [icon]="kpi.icon"
+              [variant]="kpi.variant" />
+          </a>
+        }
+      </section>
+
+      <div class="etudes-dash__grid">
+        <section class="etudes-dash__panel" data-testid="etudes-dash-attention">
+          <header class="etudes-dash__panel-head">
+            <h2>{{ 'etudes.dashboard.attention.title' | translate }}</h2>
+            @if (vm().kpis[0].count > 0) {
+              <span class="etudes-dash__hint">
+                {{ 'etudes.dashboard.attention.retard' | translate: { count: vm().kpis[0].count } }}
+              </span>
+            }
+          </header>
+
+          @if (vm().attention.length === 0) {
+            <p class="etudes-dash__muted">{{ 'etudes.dashboard.attention.empty' | translate }}</p>
+          } @else {
+            <ul class="etudes-dash__list">
+              @for (row of vm().attention; track row.id) {
+                <li>
+                  <a class="etudes-dash__row" [routerLink]="['/etudes/dossiers', row.id]">
+                    <span class="etudes-dash__num">{{ row.numero }}</span>
+                    <span class="etudes-dash__objet">{{ row.objet }}</span>
+                    <nf-badge
+                      [variant]="row.motif === 'EN_RETARD' ? 'danger' : row.motif === 'J7' ? 'warning' : 'info'">
+                      {{ row.motifLabel }}
+                    </nf-badge>
+                    <nf-badge [variant]="variantEtat(row.status)">{{ row.statusLabel }}</nf-badge>
+                    <span class="etudes-dash__date">
+                      @if (row.aoDateLimiteDepot) {
+                        {{ row.aoDateLimiteDepot | dateLocalized:'short' }}
+                      } @else {
+                        —
+                      }
+                    </span>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <div class="etudes-dash__side">
+          <section class="etudes-dash__panel">
+            <header class="etudes-dash__panel-head">
+              <h2>{{ 'etudes.dashboard.pipeline.title' | translate }}</h2>
+            </header>
+            <ul class="etudes-dash__pipeline">
+              @for (step of vm().pipeline; track step.status) {
+                <li>
+                  <a
+                    class="etudes-dash__pipe"
+                    [routerLink]="['/etudes/dossiers']"
+                    [queryParams]="{ status: step.status }">
+                    <span class="etudes-dash__pipe-label">{{ step.label }}</span>
+                    <span class="etudes-dash__bar" aria-hidden="true">
+                      <span
+                        class="etudes-dash__bar-fill"
+                        [style.width.%]="(step.count / pipelineMax()) * 100"></span>
+                    </span>
+                    <span class="etudes-dash__pipe-count">{{ step.count }}</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          </section>
+
+          <section class="etudes-dash__panel">
+            <header class="etudes-dash__panel-head">
+              <h2>{{ 'etudes.dashboard.more.title' | translate }}</h2>
+            </header>
+            <div class="etudes-dash__chips">
+              @for (kpi of vm().raccourcis; track kpi.id) {
+                <a
+                  class="etudes-dash__chip"
+                  [routerLink]="['/etudes/dossiers']"
+                  [queryParams]="kpi.queryParams">
+                  {{ kpi.label }} · {{ kpi.count }}
+                </a>
+              }
+              <a class="etudes-dash__chip" routerLink="/etudes/devis">
+                {{ 'nav.etudes.devis' | translate }}
+              </a>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </nf-data-state>
+</nf-screen>

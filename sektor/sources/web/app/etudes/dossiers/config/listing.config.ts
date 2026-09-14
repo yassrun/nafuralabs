@@ -1,8 +1,10 @@
 import { buildListingConfig } from '@platform/lib/anatomy';
-import type { ColumnConfig, ListingRouteConfig } from '@platform/lib/anatomy/types';
+import type { ColumnConfig, ListingRouteConfig, LookupItem } from '@platform/lib/anatomy/types';
 import type { DossierEtude } from '@app/etudes/models';
 
+import { labelDelaiListing, variantDelaiListing } from '../utils/dossier-listing-delai.util';
 import { labelEtatListing, variantEtatListing } from '../utils/dossier-status.util';
+import { buildDossierListingFilters } from './listing.filters';
 
 export const DOSSIER_ROUTES: ListingRouteConfig<DossierEtude> = {
   detail: (item) => ['/etudes/dossiers', item.id],
@@ -25,6 +27,14 @@ function buildColumns(): ColumnConfig[] {
     },
     { key: 'clientNom', label: 'Client', field: 'clientNom', type: 'text', sortable: true, width: '160px' },
     {
+      key: 'chargeEtudeNom',
+      label: 'Chargé',
+      field: 'chargeEtudeNom',
+      type: 'text',
+      sortable: true,
+      width: '140px',
+    },
+    {
       key: 'aoType',
       label: 'Type AO',
       field: 'aoType',
@@ -44,6 +54,16 @@ function buildColumns(): ColumnConfig[] {
       type: 'date',
       sortable: true,
       width: '130px',
+    },
+    {
+      key: 'delaiDepot',
+      label: 'Délai',
+      field: 'aoDateLimiteDepot',
+      type: 'badge',
+      sortable: false,
+      width: '110px',
+      badgeVariant: variantDelaiListing,
+      transform: labelDelaiListing,
     },
     {
       key: 'status',
@@ -69,7 +89,7 @@ function buildColumns(): ColumnConfig[] {
   ];
 }
 
-export function buildDossierListingConfig() {
+export function buildDossierListingConfig(ingenieurs: LookupItem[] = []) {
   return buildListingConfig<DossierEtude>(
     {
       entityName: "Étude / AO",
@@ -83,11 +103,12 @@ export function buildDossierListingConfig() {
       defaultSort: { column: 'updatedAt', direction: 'desc' },
       features: {
         search: true,
-        filters: false,
+        filters: true,
         columnToggle: true,
         viewModeToggle: false,
         refresh: true,
       },
+      filters: buildDossierListingFilters(ingenieurs),
       pagination: {
         defaultPageSize: 20,
         pageSizeOptions: [20],
@@ -96,7 +117,7 @@ export function buildDossierListingConfig() {
         icon: 'calculate',
         title: "Aucune étude / appel d'offres",
         message:
-          "Créez un dossier pour un marché entrant : pièces (CPS, bordereau), chiffrage et devis.",
+          "Créez une étude en brouillon, puis soumettez-la pour affectation. Le responsable affecte un ingénieur, qui démarre l’étude.",
         actionLabel: 'Nouvelle étude',
         actionId: 'create',
       },

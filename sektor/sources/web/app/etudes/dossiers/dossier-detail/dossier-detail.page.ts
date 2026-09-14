@@ -15,11 +15,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, map } from 'rxjs';
 
+import { AuthFacade } from '@platform/core/security/services/auth.facade';
 import {
   ConfirmDialogService,
   PrintDialogService,
   WizardShellComponent,
-  type ButtonListItem,
 } from '@platform/lib/anatomy';
 import type { WizardStepConfig } from '@platform/lib/anatomy';
 
@@ -38,6 +38,8 @@ import { DossierIdentitePanelComponent } from '../components/dossier-identite-pa
 import { ShareGuestLinkDialogComponent } from '../components/share-guest-link-dialog/share-guest-link-dialog.component';
 import { PiecesMarcheComponent } from '../components/pieces-marche/pieces-marche.component';
 import { SyntheseValidationPanelComponent } from '../components/synthese-validation-panel/synthese-validation-panel.component';
+import { DossierPlanningPanelComponent } from '../components/dossier-planning-panel/dossier-planning-panel.component';
+import { DossierRessourcesPanelComponent } from '../components/dossier-ressources-panel/dossier-ressources-panel.component';
 import { DossierAgentPanelComponent } from '../components/dossier-agent-panel/dossier-agent-panel.component';
 import {
   EtudeBannerComponent,
@@ -55,22 +57,35 @@ import {
   type ConversionChantierDialogResult,
 } from '../components/conversion-chantier-dialog/conversion-chantier-dialog.component';
 import { PostesOrphelinsDialogComponent } from '../components/postes-orphelins-dialog/postes-orphelins-dialog.component';
+import { DossierGoDialogComponent } from '../components/dossier-go-dialog/dossier-go-dialog.component';
+import { DossierRefusChargeDialogComponent } from '../components/dossier-refus-charge-dialog/dossier-refus-charge-dialog.component';
+import {
+  DossierGagneDialogComponent,
+  type DossierGagneDialogResult,
+} from '../components/dossier-gagne-dialog/dossier-gagne-dialog.component';
+import {
+  DossierPerduDialogComponent,
+  type DossierPerduDialogResult,
+} from '../components/dossier-perdu-dialog/dossier-perdu-dialog.component';
 import {
   backendGateEtapesForUi,
   backendToUiEtape,
   estAlerteQualiteChiffrage,
   estAnomaliePieceHorsCadrage,
+  estEtapeUiLocale,
   ETAPES_UI_DOSSIER,
   incompleteUiStepIndexes,
   nextBackendEtape,
   prevBackendEtape,
+  UI_ETAPE_MAX,
   uiEtapePourGate,
   uiToBackendEtape,
 } from '../utils/dossier-etape.util';
 import { labelStatutDossier } from '../utils/dossier-status.util';
+import { exigeAvisExecution, idsActeurEgaux } from '../utils/dossier-responsables.util';
 
 /**
- * Parcours d'étude en quatre étapes métier (backend 1..5 projeté).
+ * Parcours d'étude en cinq étapes métier (backend 1..5 projeté ; 4–5 locales).
  *
  * <p>1. Aucune règle de gate n'est rejouée ici — l'état vient de `GET /gates`.
  * <p>2. Pas de rechargement global de l'arbre DPGF après une transition.
@@ -85,6 +100,8 @@ import { labelStatutDossier } from '../utils/dossier-status.util';
     PiecesMarcheComponent,
     DecompositionWorkspaceComponent,
     SyntheseValidationPanelComponent,
+    DossierPlanningPanelComponent,
+    DossierRessourcesPanelComponent,
     DossierSummaryHeaderComponent,
     DossierIdentitePanelComponent,
     DossierAgentPanelComponent,
@@ -102,6 +119,7 @@ export class DossierDetailPage {
   private readonly printDialog = inject(PrintDialogService);
   private readonly translate = inject(TranslateService);
   private readonly partnersApi = inject(PartnersApiService);
+  private readonly auth = inject(AuthFacade);
   private readonly decomposition = viewChild(DecompositionWorkspaceComponent);
   private readonly identite = viewChild(DossierIdentitePanelComponent);
   private readonly piecesPanels = viewChildren(PiecesMarcheComponent);
@@ -147,10 +165,19 @@ export class DossierDetailPage {
   /** Étape technique backend (1..5) persistée. */
   readonly etapeBackend = computed(() => this.dossier()?.currentStep ?? 1);
 
-  /** Étape métier UI (1..4). */
+  /** Étape métier UI (1..5). Lecture locale prioritaire (planning+ressources / synthèse). */
   readonly etapeUi = computed(() => {
-    if (!this.modifiable()) {
-      return this.etapeUiLecture() ?? backendToUiEtape(this.etapeBackend());
+    if (this.etapeUiLecture() != null) return this.etapeUiLecture()!;
+    const statut = this.dossier()?.status;
+    if (
+      this.etapeBackend() >= 5 &&
+      (statut === 'COMPLETED' ||
+        statut === 'FINANCIALLY_APPROVED' ||
+        statut === 'FINANCIALLY_REJECTED' ||
+        statut === 'FINAL_APPROVED' ||
+        statut === 'FINAL_REJECTED')
+    ) {
+      return UI_ETAPE_MAX;
     }
     return backendToUiEtape(this.etapeBackend());
   });
@@ -232,22 +259,37 @@ export class DossierDetailPage {
    * Hard / autres étapes : suit la vérité gate.
    */
   readonly peutContinuerUi = computed(() => {
+    if (this.dossier()?.status === 'STUDY_REJECTED') return false;
     if (!this.modifiable()) return true;
+    if (estEtapeUiLocale(this.etapeUi())) return true;
     if (this.etapeUi() === 1 && this.identite()?.cpsBlocking()) return false;
-    if (this.etapeUi() === 3 && this.gatePresentation() === 'soft') return true;
-    if (this.etapeUi() === 3 && this.gatePresentation() === 'ok') return true;
+    if (this.etapeUi() === 3) return true;
     return this.peutContinuer();
+  });
+
+  readonly cadrageEditable = computed(() => this.dossier()?.status === 'DRAFT');
+
+  readonly piecesModifiables = computed(() => {
+    const statut = this.dossier()?.status;
+    return statut === 'DRAFT' || statut === 'PENDING_ASSIGNMENT' || statut === 'STUDY_REJECTED';
   });
 
   readonly modifiable = computed(() => {
     const statut = this.dossier()?.status;
-    return statut === 'BROUILLON' || statut === 'EN_ETUDE';
+    if (statut === 'DRAFT' || statut === 'PENDING_ASSIGNMENT') {
+      return true;
+    }
+    if (statut === 'IN_PROGRESS') return this.peutSaisirApresGo();
+    return false;
   });
 
   readonly statutLabel = computed(() => labelStatutDossier(this.dossier()?.status));
 
-  /** CTA « Soumettre » : footer wizard (dernier step) + header — seulement à la Synthèse. */
-  readonly peutSoumettre = computed(() => this.modifiable() && this.etapeUi() === 4);
+  readonly peutEnregistrer = computed(() => this.etapeUi() === 1 && this.cadrageEditable());
+
+  readonly cadrageSaving = computed(
+    () => (this.identite()?.saving() ?? false) || (this.identite()?.cpsBlocking() ?? false),
+  );
 
   /** Partager : dossier existant (portail invité déjà branché). Plus « always disabled ». */
   readonly peutPartager = computed(() => !!this.dossier()?.id);
@@ -255,18 +297,112 @@ export class DossierDetailPage {
   readonly messageVerrou = computed(() => {
     const statut = this.dossier()?.status;
     switch (statut) {
-      case 'EN_VALIDATION':
+      case 'COMPLETED':
         return 'Dossier transmis — en attente de validation. Les pièces, le bordereau et le chiffrage sont verrouillés.';
-      case 'VALIDEE':
-        return 'Dossier validé — consultation seule.';
-      case 'DEVIS_GENERE':
-        return 'Devis généré — consultation seule.';
-      case 'ANNULE':
-        return 'Dossier annulé — consultation seule.';
+      case 'FINANCIALLY_APPROVED':
+        return 'Validé financièrement — en attente de validation définitive.';
+      case 'FINAL_APPROVED':
+        return 'Validé définitivement — le workflow Étude est terminé.';
+      case 'ARCHIVED':
+        return 'Dossier archivé — consultation seule.';
+      case 'ASSIGNED':
+        return this.dossier()?.chargeEtudeNom
+          ? `Affecté à ${this.dossier()?.chargeEtudeNom} — en attente de prise en charge.`
+          : 'Affecté — le chargé d’étude doit prendre en charge ou rejeter.';
+      case 'IN_PROGRESS':
+        return this.dossier()?.chargeEtudeNom
+          ? `En cours — seul ${this.dossier()?.chargeEtudeNom} (ou le responsable) peut terminer ou suspendre.`
+          : 'En cours — le chargé d’étude peut terminer ou suspendre.';
+      case 'SUSPENDED':
+        return 'Étude suspendue — Reprendre pour continuer.';
+      case 'REJECTED':
+        return this.dossier()?.motifNoGo
+          ? `Rejeté — ${this.dossier()?.motifNoGo}`
+          : 'Rejeté — ce dossier ne sera pas étudié.';
+      case 'STUDY_REJECTED':
+        return 'Refusé par l’étude — corrigez les pièces puis Reprendre.';
+      case 'FINANCIALLY_REJECTED':
+      case 'FINAL_REJECTED':
+        return this.dossier()?.motifRefus
+          ? `Refus — ${this.dossier()?.motifRefus}`
+          : 'Refus de validation — Reprendre pour corriger.';
       default:
         return 'Ce dossier est en lecture seule à ce stade du parcours.';
     }
   });
+
+  readonly enAttenteGo = computed(() => {
+    const s = this.dossier()?.status;
+    return s === 'DRAFT' || s === 'PENDING_ASSIGNMENT';
+  });
+
+  readonly enAttenteAccept = computed(() => this.dossier()?.status === 'ASSIGNED');
+
+  readonly peutDeciderGo = computed(
+    () =>
+      this.auth.hasPermission('etude.go') ||
+      this.auth.hasRole('BTP_DG') ||
+      this.auth.hasRole('OWNER') ||
+      this.auth.hasRole('BTP_ADMIN_ETUDE'),
+  );
+
+  /** DAF / owner — pas l’ingénieur d’exécution. */
+  readonly peutValiderFinancier = computed(
+    () =>
+      this.auth.hasPermission('etude.approve') ||
+      this.auth.hasRole('BTP_DAF') ||
+      this.auth.hasRole('OWNER'),
+  );
+
+  readonly peutValiderDefinitif = computed(
+    () =>
+      this.auth.hasPermission('etude.go') ||
+      this.auth.hasRole('BTP_DG') ||
+      this.auth.hasRole('BTP_ADMIN_ETUDE') ||
+      this.auth.hasRole('OWNER'),
+  );
+
+  /** Personne nommée chargé d’étude — seule à prendre en charge / rejeter l’affectation. */
+  readonly estChargeEtude = computed(() => {
+    const charge = this.dossier()?.chargeEtudeUserId;
+    const me = this.auth.user()?.id;
+    const email = this.auth.user()?.email;
+    return idsActeurEgaux(charge, me) || idsActeurEgaux(charge, email);
+  });
+
+  readonly peutSaisirApresGo = computed(() => this.peutDeciderGo() || this.estChargeEtude());
+
+  readonly peutRenvoyerAffectation = computed(
+    () =>
+      this.auth.hasPermission('etude.update') ||
+      this.auth.hasPermission('etude.create') ||
+      this.peutDeciderGo(),
+  );
+
+  readonly chargeDejaDesigne = computed(
+    () => !!(this.dossier()?.chargeEtudeUserId ?? '').trim(),
+  );
+
+  /** Ingénieur BTP qui n’est pas le chargé : voit / chiffre seulement ses lots. */
+  readonly estIngenieurLotSeulement = computed(
+    () => !this.peutSaisirApresGo() && this.auth.hasRole('BTP_INGENIEUR'),
+  );
+
+  readonly peutChiffrerLots = computed(
+    () =>
+      this.peutSaisirApresGo() ||
+      (this.dossier()?.status === 'IN_PROGRESS' && this.estIngenieurLotSeulement()),
+  );
+
+  readonly peutAvisExecution = computed(() => {
+    if (this.peutDeciderGo()) return true;
+    const exec = this.dossier()?.responsableExecutionUserId;
+    const me = this.auth.user()?.id;
+    const email = this.auth.user()?.email;
+    return idsActeurEgaux(exec, me) || idsActeurEgaux(exec, email);
+  });
+
+  readonly afficherAvisPoste = computed(() => exigeAvisExecution(this.dossier()));
 
   readonly nextLabel = computed(() => {
     const ui = this.etapeUi();
@@ -274,21 +410,6 @@ export class DossierDetailPage {
   });
 
   readonly backLabel = computed(() => 'Précédent');
-
-  /** Bas de wizard : Enregistrer (cadrage) — les gestes hors formulaire restent en en-tête. */
-  readonly wizardExtraActions = computed((): ButtonListItem[] => {
-    if (this.etapeUi() !== 1 || !this.modifiable()) return [];
-    const saving = this.identite()?.saving() ?? false;
-    return [
-      {
-        id: 'save-identite',
-        label: 'Enregistrer',
-        variant: 'secondary',
-        disabled: saving,
-        loading: saving,
-      },
-    ];
-  });
 
   readonly wizardBanners = computed((): { tone: EtudeBannerTone; message: string }[] => {
     const banners: { tone: EtudeBannerTone; message: string }[] = [];
@@ -301,6 +422,37 @@ export class DossierDetailPage {
     };
     add('error', this.erreur());
     if (!this.modifiable()) add('info', this.messageVerrou());
+    if (this.enAttenteGo() && !this.peutDeciderGo()) {
+      add(
+        'info',
+        this.dossier()?.status === 'PENDING_ASSIGNMENT'
+          ? 'En attente d’affectation — le responsable d’études affecte un ingénieur ou rejette le dossier.'
+          : this.chargeDejaDesigne()
+            ? 'Brouillon — corrigez le cadrage si besoin, puis Reprendre avec l’affectation existante.'
+            : 'Brouillon — saisissez le cadrage, puis Soumettre pour affectation.',
+      );
+    }
+    if (this.enAttenteAccept() && !this.estChargeEtude() && !this.peutDeciderGo()) {
+      add('info', 'Affecté — en attente de prise en charge par le chargé d’étude.');
+    }
+    if (this.dossier()?.status === 'IN_PROGRESS' && this.estIngenieurLotSeulement()) {
+      add('info', 'Vous voyez uniquement les lots qui vous sont affectés.');
+    }
+    const avisRetour = this.dossier()?.avisExecutionCommentaire?.trim();
+    if (avisRetour && this.dossier()?.status === 'IN_PROGRESS' && this.dossier()?.avisExecutionDossier === 'RETOUR') {
+      add('warning', `Avis d’exécution — retour au chiffrage : ${avisRetour}`);
+    }
+    const refus = this.dossier()?.motifRefusCharge?.trim();
+    if (refus && this.dossier()?.status === 'STUDY_REJECTED') {
+      const type = this.dossier()?.motifRefusChargeType;
+      const typeLabel =
+        type === 'CPS_INCOMPLET'
+          ? 'CPS incomplet'
+          : type === 'DOC_MANQUANT'
+            ? 'Document manquant'
+            : 'Refus ingénieur';
+      add('warning', `${typeLabel} — ${refus}`);
+    }
     const identite = this.identite()?.banner();
     if (identite) add(identite.tone, identite.message);
     for (const panel of this.piecesPanels()) {
@@ -319,6 +471,12 @@ export class DossierDetailPage {
     this.posteDirty.set(dirty);
   }
 
+  onDpgfPret(dpgfId: string): void {
+    const dossier = this.dossier();
+    if (!dossier || !dpgfId || dossier.dpgfId === dpgfId) return;
+    this.dossier.set({ ...dossier, dpgfId });
+  }
+
   constructor() {
     effect(() => {
       this.etapeUi();
@@ -327,6 +485,12 @@ export class DossierDetailPage {
     effect(() => {
       const n = this.gateCourant()?.problemes.length ?? 0;
       if (n === 0) untracked(() => this.gateHardReveal.set(false));
+    });
+    effect(() => {
+      const ui = this.etapeUi();
+      const d = this.dossier();
+      if (ui !== 2 || !d || d.dpgfId || d.status !== 'IN_PROGRESS') return;
+      void this.assurerArbreBordereau();
     });
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -358,25 +522,39 @@ export class DossierDetailPage {
   }
 
   async suivant(): Promise<void> {
-    if (!this.modifiable()) {
-      const ui = this.etapeUi();
-      if (ui < 4) this.etapeUiLecture.set(ui + 1);
-      return;
-    }
-    // Coût soft → Continuer révèle le hard sans naviguer.
-    if (this.etapeUi() === 3 && !this.peutContinuer()) {
-      this.gateHardReveal.set(true);
-      return;
-    }
-    if (this.etapeUi() === 1) {
+    const ui = this.etapeUi();
+    if (ui >= UI_ETAPE_MAX) return;
+    if (this.peutEnregistrer()) {
       const ok = await this.identite()?.enregistrer();
       if (ok === false) return;
     }
-    const cible = nextBackendEtape(this.etapeUi());
-    if (cible == null) return;
     if (!(await this.confirmerSiPosteDirty())) return;
     this.gateHardReveal.set(false);
+
+    if (this.estIngenieurLotSeulement()) {
+      this.etapeUiLecture.set(Math.min(ui + 1, UI_ETAPE_MAX));
+      return;
+    }
+    if (ui === 3) {
+      const cible = nextBackendEtape(3);
+      if (this.modifiable() && this.peutContinuer() && cible != null) {
+        await this.changerEtape(cible);
+      }
+      this.etapeUiLecture.set(4);
+      return;
+    }
+    if (estEtapeUiLocale(ui)) {
+      this.etapeUiLecture.set(Math.min(ui + 1, UI_ETAPE_MAX));
+      return;
+    }
+
+    const cible = nextBackendEtape(ui);
+    if (cible == null) {
+      this.etapeUiLecture.set(ui + 1);
+      return;
+    }
     await this.changerEtape(cible);
+    this.etapeUiLecture.set(undefined);
   }
 
   /** CTA soft « Vérifier le chiffrage » → bannière hard. */
@@ -385,36 +563,46 @@ export class DossierDetailPage {
   }
 
   async precedent(): Promise<void> {
-    if (!this.modifiable()) {
-      const ui = this.etapeUi();
-      if (ui > 1) this.etapeUiLecture.set(ui - 1);
+    const ui = this.etapeUi();
+    if (ui <= 1) return;
+    if (!(await this.confirmerSiPosteDirty())) return;
+    if (this.estIngenieurLotSeulement() || estEtapeUiLocale(ui)) {
+      this.etapeUiLecture.set(ui - 1);
       return;
     }
-    const cible = prevBackendEtape(this.etapeUi());
-    if (cible == null) return;
-    if (!(await this.confirmerSiPosteDirty())) return;
+    const cible = prevBackendEtape(ui);
+    if (cible == null) {
+      this.etapeUiLecture.set(ui - 1);
+      return;
+    }
     await this.changerEtape(cible);
+    this.etapeUiLecture.set(undefined);
   }
 
   /** Stepper cliquable — index 0-based vers une étape UI déjà atteinte. */
   async allerAEtapeUi(index: number): Promise<void> {
     const ui = index + 1;
-    if (ui < 1 || ui > 4 || ui === this.etapeUi()) return;
+    if (ui < 1 || ui > UI_ETAPE_MAX || ui === this.etapeUi()) return;
     if (!(await this.confirmerSiPosteDirty())) return;
-    if (!this.modifiable()) {
-      this.etapeUiLecture.set(ui);
-      return;
-    }
-    if (this.etapeUi() === 1) {
+    if (this.peutEnregistrer()) {
       const ok = await this.identite()?.enregistrer();
       if (ok === false) return;
     }
+    if (this.estIngenieurLotSeulement()) {
+      this.etapeUiLecture.set(ui);
+      return;
+    }
+    if (estEtapeUiLocale(ui)) {
+      if (this.etapeBackend() < 3) return;
+      this.etapeUiLecture.set(ui);
+      return;
+    }
     const maxUi = backendToUiEtape(this.etapeBackend());
     if (ui > maxUi) {
-      // Voie manuelle : DPGF déjà créé à l’étape Documents — le stepper peut viser le bordereau.
       if (!(ui === 2 && this.dossier()?.dpgfId)) return;
     }
     await this.changerEtape(uiToBackendEtape(ui));
+    this.etapeUiLecture.set(undefined);
   }
 
   private async confirmerSiPosteDirty(): Promise<boolean> {
@@ -450,12 +638,13 @@ export class DossierDetailPage {
 
   async soumettre(): Promise<void> {
     const dossier = this.dossier();
-    if (!dossier || !this.modifiable()) return;
+    const statut = dossier?.status;
+    if (!dossier || statut !== 'IN_PROGRESS') return;
     this.erreur.set(undefined);
     try {
       this.dossier.set(await this.api.soumettre(dossier.id));
       await this.refreshSynthese(dossier.id);
-      this.etapeUiLecture.set(4);
+      this.etapeUiLecture.set(UI_ETAPE_MAX);
     } catch (e) {
       this.appliquerErreurTransition(e);
     }
@@ -467,6 +656,41 @@ export class DossierDetailPage {
     this.erreur.set(undefined);
     try {
       switch (action) {
+        case 'ENREGISTRER':
+          await this.identite()?.enregistrer();
+          break;
+        case 'DECIDER_GO':
+          if (this.etapeUi() === 1 && this.cadrageEditable()) {
+            const ok = await this.identite()?.enregistrer();
+            if (ok === false) return;
+          }
+          await this.ouvrirGo();
+          break;
+        case 'RENVOYER_AFFECTATION':
+          await this.renvoyerAuCharge();
+          break;
+        case 'SOUMETTRE_GO':
+          if (this.peutEnregistrer()) {
+            const ok = await this.identite()?.enregistrer();
+            if (ok === false) return;
+          }
+          await this.soumettreAuDg();
+          break;
+        case 'ACCEPTER_AFFECTATION':
+          await this.accepterAffectation();
+          break;
+        case 'NO_GO':
+          await this.confirmerNoGo();
+          break;
+        case 'REVENIR_DRAFT':
+          await this.revenirAuDraft();
+          break;
+        case 'ARCHIVER':
+          await this.archiverDossier();
+          break;
+        case 'REFUSER_AFFECTATION':
+          await this.ouvrirRefusCharge();
+          break;
         case 'PARTAGER':
           if (!this.peutPartager()) return;
           this.dialog.open(ShareGuestLinkDialogComponent, {
@@ -500,17 +724,37 @@ export class DossierDetailPage {
           await this.changerEtape(3);
           break;
         case 'VOIR_SYNTHESE':
-          // Même chemin que le footer — pas allerAEtapeUi(3) (maxUi bloque tant que backend < 5).
-          await this.suivant();
+          await this.allerAEtapeUi(UI_ETAPE_MAX - 1);
           break;
         case 'SOUMETTRE_CHIFFRAGE':
           await this.soumettre();
           break;
+        case 'AVIS_EXECUTION_FAVORABLE':
+          this.dossier.set(await this.api.avisExecutionFavorable(dossier.id));
+          await this.refreshSynthese(dossier.id);
+          this.etapeUiLecture.set(UI_ETAPE_MAX);
+          break;
+        case 'AVIS_EXECUTION_RETOUR': {
+          const motif = window.prompt('Avis d’exécution — motif du retour au chiffrage :');
+          if (!motif?.trim()) return;
+          this.dossier.set(await this.api.avisExecutionRetour(dossier.id, motif.trim()));
+          await this.refreshSynthese(dossier.id);
+          this.etapeUiLecture.set(3);
+          break;
+        }
+        case 'SUSPENDRE_CHIFFRAGE':
+          await this.suspendreChiffrage();
+          break;
+        case 'REPRENDRE_CHIFFRAGE':
+          await this.reprendreChiffrage();
+          break;
         case 'VALIDER_N1':
         case 'VALIDER_N2':
+        case 'VALIDER_FINANCIER':
+        case 'VALIDER_DEFINITIF':
           this.dossier.set(await this.api.valider(dossier.id));
           await this.refreshSynthese(dossier.id);
-          this.etapeUiLecture.set(4);
+          this.etapeUiLecture.set(UI_ETAPE_MAX);
           break;
         case 'REFUSER': {
           const motif = window.prompt('Motif du refus (obligatoire) :');
@@ -543,71 +787,11 @@ export class DossierDetailPage {
           break;
         }
         case 'MARQUER_GAGNE': {
-          // AC-3 — le gain approuve le devis lié ; le montant attribué est pré-rempli du total
-          // devis et doit lui correspondre. AC-4 — une marge négative demande un motif réservé.
-          const synthese = this.synthese();
-          const devisId = synthese?.devisGenereId ?? dossier.devisGenereId;
-          if (!devisId) {
-            this.erreur.set('Aucun devis lié : générez d’abord le devis (AC-2).');
-            return;
-          }
-          const totalDevis = synthese?.totalHt ?? 0;
-          const dateRaw = window.prompt(
-            "Date d'attribution (AAAA-MM-JJ) :",
-            new Date().toISOString().slice(0, 10),
-          );
-          if (!dateRaw?.trim()) return;
-          const referenceMarche = window.prompt('Référence marché (optionnel) :') ?? undefined;
-          const montantRaw =
-            window.prompt(
-              `Montant attribué HT — doit égaler le total devis ${totalDevis.toLocaleString('fr-FR')} MAD (AC-3) :`,
-              String(totalDevis),
-            ) ?? undefined;
-          const montantAttribue =
-            montantRaw?.trim() && !Number.isNaN(Number(montantRaw))
-              ? Number(montantRaw)
-              : undefined;
-          if (montantAttribue === undefined) {
-            this.erreur.set('Le montant attribué est obligatoire (AC-3).');
-            return;
-          }
-          const motifDerogation =
-            montantAttribue < totalDevis
-              ? (window.prompt(
-                  'Marge négative : motif de dérogation (réservé owner / dg, AC-4) :',
-                ) ?? undefined)
-              : undefined;
-          if (montantAttribue < totalDevis && !motifDerogation?.trim()) {
-            this.erreur.set('Motif de dérogation obligatoire pour une marge négative (AC-4).');
-            return;
-          }
-          this.dossier.set(
-            await this.api.marquerGagne(dossier.id, {
-              dateAttribution: dateRaw.trim(),
-              referenceMarche: referenceMarche?.trim() || undefined,
-              devisId,
-              montantAttribue,
-              motifDerogation: motifDerogation?.trim() || undefined,
-            }),
-          );
-          await this.refreshSynthese(dossier.id);
+          await this.ouvrirGagne(dossier);
           break;
         }
         case 'MARQUER_PERDU': {
-          const motif = window.prompt(
-            'Motif (PRIX | DELAI | TECHNIQUE | ADMINISTRATIF | SANS_SUITE) :',
-            'PRIX',
-          );
-          if (!motif?.trim()) return;
-          const concurrentRetenu =
-            window.prompt('Concurrent retenu (optionnel) :') ?? undefined;
-          this.dossier.set(
-            await this.api.marquerPerdu(dossier.id, {
-              motif: motif.trim().toUpperCase(),
-              concurrentRetenu: concurrentRetenu?.trim() || undefined,
-            }),
-          );
-          await this.refreshSynthese(dossier.id);
+          await this.ouvrirPerdu(dossier);
           break;
         }
         case 'CONVERTIR': {
@@ -673,8 +857,16 @@ export class DossierDetailPage {
         });
     };
 
-    if (dossier && backendToUiEtape(dossier.currentStep) !== uiCible) {
-      void this.changerEtape(backendCible).then(goFocus);
+    if (this.etapeUi() !== uiCible) {
+      if (estEtapeUiLocale(uiCible)) {
+        this.etapeUiLecture.set(uiCible);
+        goFocus();
+        return;
+      }
+      void this.changerEtape(backendCible).then(() => {
+        this.etapeUiLecture.set(undefined);
+        goFocus();
+      });
       return;
     }
     goFocus();
@@ -690,9 +882,230 @@ export class DossierDetailPage {
     void this.refreshSynthese(id);
   }
 
-  onWizardAction(actionId: string): void {
-    if (actionId === 'save-identite') {
-      void this.identite()?.enregistrer();
+  private async ouvrirGagne(dossier: DossierEtude): Promise<void> {
+    const synthese = this.synthese();
+    const devisId = synthese?.devisGenereId ?? dossier.devisGenereId;
+    if (!devisId) {
+      this.erreur.set('Aucun devis lié : générez d’abord le devis (AC-2).');
+      return;
+    }
+    const picked = await firstValueFrom(
+      this.dialog
+        .open<DossierGagneDialogComponent, unknown, DossierGagneDialogResult | undefined>(
+          DossierGagneDialogComponent,
+          {
+            data: {
+              dossierId: dossier.id,
+              devisId,
+              devisNumero: synthese?.devisNumero,
+              totalHt: synthese?.totalHt ?? 0,
+              peutDeroger:
+                this.auth.hasRole('OWNER') ||
+                this.auth.hasRole('BTP_DG') ||
+                this.auth.isSuperAdmin(),
+            },
+            autoFocus: 'first-tabbable',
+          },
+        )
+        .afterClosed(),
+    );
+    if (!picked?.dateAttribution) return;
+    this.erreur.set(undefined);
+    this.dossier.set(
+      await this.api.marquerGagne(dossier.id, {
+        dateAttribution: picked.dateAttribution,
+        referenceMarche: picked.referenceMarche,
+        devisId,
+        montantAttribue: picked.montantAttribue,
+        motifDerogation: picked.motifDerogation,
+        acceptWarnings: picked.acceptWarnings,
+      }),
+    );
+    await this.refreshSynthese(dossier.id);
+  }
+
+  private async ouvrirPerdu(dossier: DossierEtude): Promise<void> {
+    const picked = await firstValueFrom(
+      this.dialog
+        .open<DossierPerduDialogComponent, unknown, DossierPerduDialogResult | undefined>(
+          DossierPerduDialogComponent,
+          { autoFocus: 'first-tabbable' },
+        )
+        .afterClosed(),
+    );
+    if (!picked?.motif) return;
+    this.erreur.set(undefined);
+    this.dossier.set(
+      await this.api.marquerPerdu(dossier.id, {
+        motif: picked.motif,
+        concurrentRetenu: picked.concurrentRetenu,
+      }),
+    );
+    await this.refreshSynthese(dossier.id);
+  }
+
+  private async ouvrirGo(): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier) return;
+    const ref = this.dialog.open(DossierGoDialogComponent, {
+      data: {
+        dossierId: dossier.id,
+        createdBy: dossier.createdBy,
+        chargeEtudeUserId: dossier.chargeEtudeUserId,
+        responsableExecutionUserId: dossier.responsableExecutionUserId,
+      },
+    });
+    const picked = await firstValueFrom(ref.afterClosed());
+    if (!picked?.chargeEtudeUserId) return;
+    this.erreur.set(undefined);
+    try {
+      const body = {
+        chargeEtudeUserId: picked.chargeEtudeUserId,
+        chargeEtudeNom: picked.chargeEtudeNom,
+        responsableExecutionUserId: picked.responsableExecutionUserId,
+        responsableExecutionNom: picked.responsableExecutionNom,
+      };
+      const maj = await this.api.deciderGo(dossier.id, body);
+      this.dossier.set(conserverAoListing(dossier, maj));
+      await this.refreshSynthese(dossier.id);
+    } catch (e) {
+      this.appliquerErreurTransition(e);
+    }
+  }
+
+  private async renvoyerAuCharge(): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier || !this.peutRenvoyerAffectation()) return;
+    if (!(dossier.chargeEtudeUserId ?? '').trim()) {
+      if (this.peutDeciderGo()) {
+        await this.ouvrirGo();
+        return;
+      }
+      this.erreur.set('Aucun chargé d’étude nommé. Le DG doit d’abord affecter.');
+      return;
+    }
+    this.erreur.set(undefined);
+    try {
+      const maj = await this.api.affecter(dossier.id);
+      this.dossier.set(conserverAoListing(dossier, maj));
+      await this.refreshSynthese(dossier.id);
+    } catch (e) {
+      this.appliquerErreurTransition(e);
+    }
+  }
+
+  private async revenirAuDraft(): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier) return;
+    if (dossier.status === 'STUDY_REJECTED') {
+      const ok = window.confirm(
+        'Réinitialiser le cadrage ? Le dossier repasse en Draft. Le chargé d’étude déjà nommé est conservé.',
+      );
+      if (!ok) return;
+    }
+    this.erreur.set(undefined);
+    try {
+      this.dossier.set(await this.api.revenirAuDraft(dossier.id));
+      await this.refreshSynthese(dossier.id);
+    } catch (e) {
+      this.appliquerErreurTransition(e);
+    }
+  }
+
+  private async archiverDossier(): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier) return;
+    const ok = await this.confirmDialog.confirm({
+      title: 'Archiver le dossier',
+      message: 'Le dossier passera en Archivé. Cette action est définitive.',
+      variant: 'danger',
+      confirmLabel: 'Archiver',
+    });
+    if (!ok) return;
+    this.erreur.set(undefined);
+    try {
+      this.dossier.set(await this.api.annuler(dossier.id));
+      await this.refreshSynthese(dossier.id);
+    } catch (e) {
+      this.appliquerErreurTransition(e);
+    }
+  }
+
+  private async soumettreAuDg(): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier) return;
+    this.erreur.set(undefined);
+    try {
+      this.dossier.set(await this.api.soumettreAuDg(dossier.id));
+      await this.refreshSynthese(dossier.id);
+    } catch (e) {
+      this.appliquerErreurTransition(e);
+    }
+  }
+
+  private async accepterAffectation(): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier || !this.estChargeEtude()) return;
+    this.erreur.set(undefined);
+    try {
+      this.dossier.set(await this.api.accepterAffectation(dossier.id));
+      await this.refreshSynthese(dossier.id);
+      await this.assurerArbreBordereau();
+    } catch (e) {
+      this.appliquerErreurTransition(e);
+    }
+  }
+
+  private async suspendreChiffrage(): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier) return;
+    this.erreur.set(undefined);
+    try {
+      this.dossier.set(await this.api.suspendreChiffrage(dossier.id));
+      await this.refreshSynthese(dossier.id);
+    } catch (e) {
+      this.appliquerErreurTransition(e);
+    }
+  }
+
+  private async reprendreChiffrage(): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier) return;
+    this.erreur.set(undefined);
+    try {
+      this.dossier.set(await this.api.reprendreChiffrage(dossier.id));
+      await this.refreshSynthese(dossier.id);
+    } catch (e) {
+      this.appliquerErreurTransition(e);
+    }
+  }
+
+  private async ouvrirRefusCharge(): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier || !this.estChargeEtude()) return;
+    const ref = this.dialog.open(DossierRefusChargeDialogComponent);
+    const picked = await firstValueFrom(ref.afterClosed());
+    if (!picked?.type || !picked.motif) return;
+    this.erreur.set(undefined);
+    try {
+      this.dossier.set(await this.api.refuserAffectation(dossier.id, picked));
+      await this.refreshSynthese(dossier.id);
+    } catch (e) {
+      this.appliquerErreurTransition(e);
+    }
+  }
+
+  private async confirmerNoGo(): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier) return;
+    const motif = window.prompt('Motif du rejet (optionnel) :');
+    if (motif === null) return;
+    this.erreur.set(undefined);
+    try {
+      this.dossier.set(await this.api.deciderNoGo(dossier.id, motif));
+      await this.refreshSynthese(dossier.id);
+    } catch (e) {
+      this.appliquerErreurTransition(e);
     }
   }
 
@@ -705,6 +1118,18 @@ export class DossierDetailPage {
     void openGateProblemesDialog(this.dialog, problemes).then((picked) => {
       if (picked) this.corriger(picked);
     });
+  }
+
+  private async assurerArbreBordereau(): Promise<void> {
+    const dossier = this.dossier();
+    if (!dossier?.id || dossier.dpgfId) return;
+    if (dossier.status !== 'IN_PROGRESS' && dossier.status !== 'DRAFT') return;
+    try {
+      const res = await this.api.initBordereauManuel(dossier.id);
+      if (res?.dpgfId) this.onDpgfPret(res.dpgfId);
+    } catch {
+      /* le panneau Bordereau affiche le fallback manuel */
+    }
   }
 
   async rechargerApresPieces(): Promise<void> {
@@ -896,6 +1321,18 @@ export class DossierDetailPage {
       );
       return;
     }
+    if (err?.status === 422 && err.error?.code === 'etudes.dossier.warnings_non_acceptes') {
+      this.erreur.set(
+        'Des avertissements commerciaux restent à accepter, avec un motif, avant de marquer gagné.',
+      );
+      return;
+    }
+    if (err?.status === 422 && err.error?.code === 'ETU-GATE') {
+      this.erreur.set(
+        'Le chiffrage n’est pas assez établi pour marquer l’affaire gagnée. Revenez au chiffrage pour poser les coûts.',
+      );
+      return;
+    }
     this.erreur.set(this.messageErreur(e));
   }
 
@@ -918,6 +1355,39 @@ export class DossierDetailPage {
     }
     if (domain === 'etudes.bordereau.structure_verrouillee') {
       return 'La structure est figée. Réouvrez le bordereau pour modifier lots et postes.';
+    }
+    if (domain === 'etudes.dossier.revenir_draft_hors_etat') {
+      return 'Seul un dossier rejeté peut être renvoyé en brouillon.';
+    }
+    if (domain === 'etudes.dossier.renvoi_hors_etat') {
+      return 'Seuls un brouillon déjà affecté, ou un dossier à reprendre, peuvent être renvoyés au chargé.';
+    }
+    if (domain === 'etudes.dossier.archive_hors_etat') {
+      return 'Ce dossier ne peut pas être archivé dans son état actuel.';
+    }
+    if (domain === 'etudes.dossier.go_requis') {
+      return 'Le responsable d’études doit d’abord affecter un ingénieur.';
+    }
+    if (domain === 'etudes.dossier.go_reserve_dg') {
+      return 'Seul le responsable d’études (ou l’owner) peut affecter ou rejeter.';
+    }
+    if (domain === 'etudes.dossier.warnings_non_acceptes') {
+      return 'Des avertissements commerciaux restent à accepter, avec un motif, avant de marquer gagné.';
+    }
+    if (domain === 'etudes.dossier.derogation_motif_requis') {
+      return 'Motif de dérogation obligatoire pour une marge négative.';
+    }
+    if (domain === 'etudes.dossier.gagne_hors_etat') {
+      return 'Le devis doit d’abord être généré avant de marquer l’affaire gagnée.';
+    }
+    if (domain === 'etudes.charge_etude.requis') {
+      return 'Choisissez un ingénieur d’étude pour l’affectation.';
+    }
+    if (domain === 'etudes.dossier.saisie_reservee_charge') {
+      return 'Après prise en compte, seul le chargé d’étude affecté peut saisir le bordereau.';
+    }
+    if (domain === 'etudes.dossier.accept_reserve_charge' || domain === 'etudes.dossier.refus_reserve_charge') {
+      return 'Seul le chargé d’étude affecté peut prendre en charge ou rejeter ce dossier.';
     }
     if (domain) {
       return this.libelleErreur(domain) ?? domain;

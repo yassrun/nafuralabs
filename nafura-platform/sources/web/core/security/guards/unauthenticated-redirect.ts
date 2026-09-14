@@ -13,8 +13,14 @@ export function redirectUnauthenticated(returnUrl?: string | null): false | UrlT
   const auth = inject(AuthFacade);
   const router = inject(Router);
 
-  // Cursor QA: never show /login SSO splash — retry session mint.
+  // Cursor QA: auto-mint owner unless the user just logged out (picker).
   if (auth.usesCursorAuthAutoLogin()) {
+    if (auth.usesCursorIdentityPicker()) {
+      if (returnUrl?.startsWith('/')) {
+        return router.createUrlTree(['/login'], { queryParams: { returnUrl } });
+      }
+      return router.createUrlTree(['/login']);
+    }
     void auth.loginWithReturnUrl(returnUrl ?? undefined);
     return false;
   }

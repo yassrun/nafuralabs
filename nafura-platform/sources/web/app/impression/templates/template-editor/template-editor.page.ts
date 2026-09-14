@@ -1,4 +1,6 @@
+import { DocumentNavigationComponent } from '../../document-navigation.component';
 import { CommonModule } from '@angular/common';
+import { DocumentPreviewComponent } from '../../document-preview.component';
 import {
   Component,
   HostListener,
@@ -48,8 +50,9 @@ const PREVIEW_DEBOUNCE_MS = 400;
 @Component({
   selector: 'app-template-editor-page',
   standalone: true,
-  imports: [
+  imports: [DocumentNavigationComponent, 
     CommonModule,
+    DocumentPreviewComponent,
     ReactiveFormsModule,
     TranslateModule,
     MatButtonModule,
@@ -66,6 +69,7 @@ const PREVIEW_DEBOUNCE_MS = 400;
   template: `
     <nf-page-shell>
       <nf-page-header [config]="headerConfig()"></nf-page-header>
+      <app-document-navigation>
 
       <div class="template-editor">
         @if (isSystem()) {
@@ -137,7 +141,7 @@ const PREVIEW_DEBOUNCE_MS = 400;
               </div>
             </div>
 
-            <div class="template-editor__settings">
+            <div class="template-editor__settings" [formGroup]="form">
               <h4 class="template-editor__settings-title">{{ 'administration.templates.editor.settings' | translate }}</h4>
               <div class="template-editor__settings-row">
                 <mat-form-field appearance="outline">
@@ -183,25 +187,25 @@ const PREVIEW_DEBOUNCE_MS = 400;
               }
             </div>
             @if (safePreviewUrl()) {
+              <a mat-button [href]="previewUrl()" download="apercu-document.pdf">
+                Télécharger le PDF
+              </a>
               <iframe
                 [src]="safePreviewUrl()"
                 class="template-editor__preview-frame"
                 title="PDF">
               </iframe>
             } @else if (previewHtml()) {
-              <!-- Draft preview: sandboxed without allow-scripts. Rendered markup is data. -->
-              <iframe
-                [srcdoc]="previewHtml()"
-                sandbox="allow-same-origin"
-                class="template-editor__preview-frame"
-                [title]="'administration.templates.editor.preview' | translate">
-              </iframe>
+              <app-document-preview [html]="previewHtml()" class="template-editor__preview-frame"
+                [marginTop]="form.controls.marginTop.value" [marginRight]="form.controls.marginRight.value"
+                [marginBottom]="form.controls.marginBottom.value" [marginLeft]="form.controls.marginLeft.value" />
             } @else {
               <p class="template-editor__preview-empty">{{ 'administration.templates.editor.previewEmpty' | translate }}</p>
             }
           </div>
         </div>
       </div>
+    </app-document-navigation>
     </nf-page-shell>
   `,
   styles: [
@@ -346,7 +350,7 @@ export class TemplateEditorPage implements OnInit, OnDestroy, CanComponentDeacti
     return {
       title,
       breadcrumbs: [
-        { label: 'administration.templates.title', route: '/administration/templates' },
+        { label: 'administration.templates.title', route: '/administration/documents/templates' },
         { label: title },
       ],
     };
@@ -391,13 +395,13 @@ export class TemplateEditorPage implements OnInit, OnDestroy, CanComponentDeacti
 
   private async loadTemplate(id: string | null): Promise<void> {
     if (!id || id === 'new') {
-      await this.router.navigate(['/administration/templates']);
+      await this.router.navigate(['/administration/documents/templates']);
       return;
     }
     const template = await this.facade.loadOne(id);
     if (!template) {
       this.toast.error(this.i18n.instant('administration.templates.loadError'));
-      await this.router.navigate(['/administration/templates']);
+      await this.router.navigate(['/administration/documents/templates']);
       return;
     }
     // Silent patch: the catalog is loaded explicitly below, and the baseline is taken from
@@ -488,7 +492,7 @@ export class TemplateEditorPage implements OnInit, OnDestroy, CanComponentDeacti
       this.toast.success(
         this.i18n.instant('administration.templates.cloneSuccess', { name: created.name })
       );
-      await this.router.navigate(['/administration/templates', created.id]);
+      await this.router.navigate(['/administration/documents/templates', created.id]);
     }
   }
 

@@ -27,6 +27,12 @@ class QaLocalConstantsTest {
             .isEqualTo("qa.chef-chantier@nafuralabs.local");
         assertThat(QaLocalConstants.resolveSessionEmail(null, null, "owner"))
             .isEqualTo(QaLocalConstants.OWNER_EMAIL);
+        assertThat(QaLocalConstants.resolveSessionEmail(null, null, "ingenieur-2"))
+            .isEqualTo("qa.ingenieur2@nafuralabs.local");
+        assertThat(QaLocalConstants.resolveSessionEmail(null, null, "utilisateur"))
+            .isEqualTo("qa.utilisateur@nafuralabs.local");
+        assertThat(QaLocalConstants.resolveSessionEmail(null, null, "secretaire"))
+            .isEqualTo("qa.assistant@nafuralabs.local");
     }
 
     @Test
@@ -58,7 +64,16 @@ class QaLocalConstantsTest {
             assertThat(user.tenantRoleCode()).startsWith("BTP_");
             assertThat(QaLocalConstants.isAllowlistedEmail(user.email())).isTrue();
         }
-        assertThat(QaLocalConstants.ROLE_USERS).hasSize(7);
+        assertThat(QaLocalConstants.ROLE_USERS).hasSize(10);
+        assertThat(QaLocalConstants.emailForAlias("ingenieur-2"))
+            .contains("qa.ingenieur2@nafuralabs.local");
+        assertThat(QaLocalConstants.emailForAlias("utilisateur"))
+            .contains("qa.utilisateur@nafuralabs.local");
+        assertThat(QaLocalConstants.emailForAlias("assistant"))
+            .contains("qa.assistant@nafuralabs.local");
+        assertThat(QaLocalConstants.emailForAlias("secretaire"))
+            .contains("qa.assistant@nafuralabs.local");
+        assertThat(QaLocalConstants.OWNER_EXTRA_ROLES).contains(QaLocalConstants.ROLE_ADMIN_ETUDE);
         assertThat(QaLocalConstants.isOwnerEmail(QaLocalConstants.OWNER_EMAIL)).isTrue();
         assertThat(QaLocalConstants.isOwnerEmail("qa.magasinier@nafuralabs.local")).isFalse();
     }

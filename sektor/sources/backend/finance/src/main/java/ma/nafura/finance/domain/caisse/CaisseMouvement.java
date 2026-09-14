@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.nafura.platform.framework.audit.Auditable;
 
 @Entity
 @Table(name = "caisse_mouvements")
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "caisse-mouvement", trackedFields = {"movementType", "amount", "workflowStatus"})
 public class CaisseMouvement {
 
     public static final String TYPE_AVANCE_RECUE = "AVANCE_RECUE";

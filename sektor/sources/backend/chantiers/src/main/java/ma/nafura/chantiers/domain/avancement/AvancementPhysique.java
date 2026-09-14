@@ -16,6 +16,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
+import ma.nafura.platform.framework.audit.Auditable;
 
 @Entity
 @Table(name = "avancements_physiques")
@@ -23,6 +24,7 @@ import org.springframework.util.StringUtils;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Auditable(entityType = "avancement-physique", trackedFields = {"status"})
 public class AvancementPhysique {
 
     public static final String STATUS_BROUILLON = "BROUILLON";

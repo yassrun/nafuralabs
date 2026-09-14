@@ -486,7 +486,17 @@ public class DevisService {
             return false;
         }
         String statut = statuts.getFirst();
-        return "GAGNE".equals(statut) || "CONVERTIE".equals(statut);
+        return "FINAL_APPROVED".equals(statut) && estFigeeCommercialement(entity);
+    }
+
+    private boolean estFigeeCommercialement(Devis entity) {
+        List<Boolean> flags = jdbcTemplate.query(
+                "SELECT gain_commande_empreinte IS NOT NULL OR chantier_genere_id IS NOT NULL "
+                        + "FROM dossiers_etude WHERE id = ? AND tenant_id = ?",
+                (rs, i) -> rs.getBoolean(1),
+                entity.getDossierEtudeId(),
+                tenantId());
+        return !flags.isEmpty() && flags.getFirst();
     }
 
     private void assertDates(LocalDate emission, LocalDate validite) {

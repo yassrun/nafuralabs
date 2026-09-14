@@ -81,7 +81,7 @@ class CapitalisationOuvrageServiceTest {
         UUID noeudId = UUID.randomUUID();
         UUID dpuId = UUID.randomUUID();
 
-        DossierEtude dossier = dossier(dossierId, dpgfId, StatutDossierEtude.VALIDEE);
+        DossierEtude dossier = dossier(dossierId, dpgfId, StatutDossierEtude.FINAL_APPROVED);
         when(dossierRepository.findByIdAndTenantId(dossierId, TENANT)).thenReturn(Optional.of(dossier));
         when(ouvrageRepository.findByTenantIdAndSourceEtudeId(TENANT, dossierId)).thenReturn(List.of());
 
@@ -120,7 +120,7 @@ class CapitalisationOuvrageServiceTest {
     void verser_refuseSiDossierNonValide() {
         UUID dossierId = UUID.randomUUID();
         when(dossierRepository.findByIdAndTenantId(dossierId, TENANT))
-                .thenReturn(Optional.of(dossier(dossierId, UUID.randomUUID(), StatutDossierEtude.EN_ETUDE)));
+                .thenReturn(Optional.of(dossier(dossierId, UUID.randomUUID(), StatutDossierEtude.IN_PROGRESS)));
 
         CapitalisationVerserDto body = new CapitalisationVerserDto();
         CapitalisationVerserDto.Selection sel = new CapitalisationVerserDto.Selection();
@@ -139,7 +139,7 @@ class CapitalisationOuvrageServiceTest {
         UUID noeudId = UUID.randomUUID();
         UUID dpuId = UUID.randomUUID();
 
-        DossierEtude dossier = dossier(dossierId, dpgfId, StatutDossierEtude.VALIDEE);
+        DossierEtude dossier = dossier(dossierId, dpgfId, StatutDossierEtude.FINAL_APPROVED);
         when(dossierRepository.findByIdAndTenantId(dossierId, TENANT)).thenReturn(Optional.of(dossier));
         when(ouvrageRepository.findByTenantIdAndSourceEtudeId(TENANT, dossierId)).thenReturn(List.of());
 
@@ -188,7 +188,7 @@ class CapitalisationOuvrageServiceTest {
         UUID noeudId = UUID.randomUUID();
         UUID dpuId = UUID.randomUUID();
 
-        DossierEtude dossier = dossier(dossierId, dpgfId, StatutDossierEtude.VALIDEE);
+        DossierEtude dossier = dossier(dossierId, dpgfId, StatutDossierEtude.FINAL_APPROVED);
         when(dossierRepository.findByIdAndTenantId(dossierId, TENANT)).thenReturn(Optional.of(dossier));
         when(ouvrageRepository.findByTenantIdAndSourceEtudeId(TENANT, dossierId)).thenReturn(List.of());
 
