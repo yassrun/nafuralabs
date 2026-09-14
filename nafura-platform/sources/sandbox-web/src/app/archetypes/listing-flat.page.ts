@@ -11,6 +11,10 @@ import {
   type ListingSelectionAction,
 } from '@platform/lib/anatomy/components/organisms/listing-flat';
 import type { ListingActionItem } from '@platform/lib/anatomy/components/molecules/listing-actions';
+import {
+  ActionMenuComponent,
+  type ActionMenuNode,
+} from '@platform/lib/anatomy/components/molecules/action-menu';
 import type { ColumnConfig, FilterFieldConfig } from '@platform/lib/anatomy/types';
 
 import { ProductMockFacade, type Product } from '../mocks/product-mock.facade';
@@ -19,7 +23,7 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
 @Component({
   selector: 'sb-listing-flat',
   standalone: true,
-  imports: [FormsModule, ScreenComponent, ListingFlatComponent, SmartImportStubComponent],
+  imports: [FormsModule, ScreenComponent, ListingFlatComponent, SmartImportStubComponent, ActionMenuComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nf-screen [header]="headerConfig">
@@ -32,13 +36,31 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
             (actionClick)="onListingAction($event)"
             (selectionChange)="selection.set($event)"
           >
+            @if (optActStatus()) {
+              <nf-action-menu
+                label="Status"
+                size="xs"
+                [nodes]="statusMenuNodes"
+                (actionClick)="onListingAction($event)"
+              />
+            }
             @if (optActSmartImport()) {
               <sb-smart-import-stub />
             }
           </nf-listing-flat>
         </div>
-        <aside class="lab__opts">
-          <h2>Configuration</h2>
+        <aside class="lab__opts" [class.lab__opts--collapsed]="optsCollapsed()">
+          <button
+            type="button"
+            class="lab__opts-toggle"
+            [attr.aria-label]="optsCollapsed() ? 'Afficher la configuration' : 'Masquer la configuration'"
+            [title]="optsCollapsed() ? 'Afficher la configuration' : 'Masquer la configuration'"
+            (click)="optsCollapsed.update((v) => !v)"
+          >
+            {{ optsCollapsed() ? '«' : '»' }}
+          </button>
+          @if (!optsCollapsed()) {
+            <h2>Configuration</h2>
           <p class="lab__hint">Dupliquer = 1 ligne · Supprimer = 1+ lignes. Simple = clic ligne · multiple = cases.</p>
 
           <h3>Vue</h3>
@@ -50,11 +72,21 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
               <label><input type="checkbox" [ngModel]="optFilterStatus()" (ngModelChange)="optFilterStatus.set($event)" /> Status (select)</label>
               <label><input type="checkbox" [ngModel]="optFilterCode()" (ngModelChange)="optFilterCode.set($event)" /> Code (texte)</label>
               <label><input type="checkbox" [ngModel]="optFilterName()" (ngModelChange)="optFilterName.set($event)" /> Name (texte)</label>
+              <label><input type="checkbox" [ngModel]="optFilterCategory()" (ngModelChange)="optFilterCategory.set($event)" /> Catégorie (select)</label>
               <label><input type="checkbox" [ngModel]="optFilterActive()" (ngModelChange)="optFilterActive.set($event)" /> Filtre actif (Status = Active)</label>
+              <label><input type="checkbox" [ngModel]="optFilterCategoryActive()" (ngModelChange)="optFilterCategoryActive.set($event)" /> Filtre actif (Catégorie = Outillage)</label>
             </div>
           }
           <label><input type="checkbox" [ngModel]="optColumns()" (ngModelChange)="optColumns.set($event)" /> Visibilité colonnes</label>
+          <label><input type="checkbox" [ngModel]="optExport()" (ngModelChange)="optExport.set($event)" /> Feature Export (CSV)</label>
           <label><input type="checkbox" [ngModel]="optPagination()" (ngModelChange)="optPagination.set($event)" /> Pagination</label>
+          <label>
+            Layout toolbar
+            <select [ngModel]="optToolbarLayout()" (ngModelChange)="optToolbarLayout.set($event)">
+              <option value="chips">A · chips-first</option>
+              <option value="split">C · vue / actions</option>
+            </select>
+          </label>
           <label>
             Sélection
             <select [ngModel]="optSelection()" (ngModelChange)="optSelection.set($event)">
@@ -74,11 +106,14 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
           </label>
 
           <h3>Action bar</h3>
+          <label><input type="checkbox" [ngModel]="optActStatus()" (ngModelChange)="optActStatus.set($event)" /> Cascade Status (nf-action-menu)</label>
           <label><input type="checkbox" [ngModel]="optActSmartImport()" (ngModelChange)="optActSmartImport.set($event)" /> Import magique</label>
           <label><input type="checkbox" [ngModel]="optActNew()" (ngModelChange)="optActNew.set($event)" /> New</label>
-          <label><input type="checkbox" [ngModel]="optActExport()" (ngModelChange)="optActExport.set($event)" /> Export</label>
+          <label><input type="checkbox" [ngModel]="optActPrint()" (ngModelChange)="optActPrint.set($event)" /> Imprimer</label>
+          <label><input type="checkbox" [ngModel]="optActArchive()" (ngModelChange)="optActArchive.set($event)" /> Archiver</label>
           <label><input type="checkbox" [ngModel]="optActDuplicate()" (ngModelChange)="optActDuplicate.set($event)" /> Dupliquer (sélection)</label>
           <label><input type="checkbox" [ngModel]="optActDelete()" (ngModelChange)="optActDelete.set($event)" /> Supprimer (sélection)</label>
+          }
         </aside>
       </div>
     </nf-screen>
@@ -87,7 +122,7 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
     `
       .lab {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 240px;
+        grid-template-columns: minmax(0, 1fr) auto;
         gap: 16px;
         min-height: 0;
         height: 100%;
@@ -97,9 +132,33 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
         min-height: 0;
       }
       .lab__opts {
+        width: 240px;
         border-left: 1px solid var(--nf-color-border, #e5e7eb);
         padding-left: 14px;
         font-size: 13px;
+      }
+      .lab__opts--collapsed {
+        width: auto;
+        padding-left: 6px;
+      }
+      .lab__opts-toggle {
+        display: block;
+        margin: 0 0 8px auto;
+        border: 1px solid var(--nf-color-border, #e5e7eb);
+        background: transparent;
+        border-radius: 6px;
+        padding: 1px 7px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: var(--nf-text-muted, #6b7280);
+        cursor: pointer;
+      }
+      .lab__opts-toggle:hover {
+        background: var(--nf-bg-hover, #f3f4f6);
+        color: var(--nf-text-primary, #111827);
+      }
+      .lab__opts--collapsed .lab__opts-toggle {
+        margin: 0;
       }
       .lab__opts h2 {
         margin: 0 0 6px;
@@ -143,12 +202,20 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
       @media (max-width: 800px) {
         .lab {
           grid-template-columns: 1fr;
+          height: auto;
+          gap: 8px;
         }
         .lab__opts {
+          width: auto;
           border-left: 0;
           padding-left: 0;
           border-top: 1px solid var(--nf-color-border, #e5e7eb);
           padding-top: 12px;
+        }
+        .lab__opts--collapsed {
+          border-top: 0;
+          padding-top: 0;
+          margin-top: 4px;
         }
       }
     `,
@@ -163,14 +230,22 @@ export class ListingFlatPage {
   readonly optFilterStatus = signal(true);
   readonly optFilterCode = signal(true);
   readonly optFilterName = signal(false);
-  readonly optFilterActive = signal(false);
+  readonly optFilterCategory = signal(true);
+  readonly optFilterActive = signal(true);
+  readonly optFilterCategoryActive = signal(true);
   readonly optColumns = signal(true);
+  readonly optExport = signal(true);
   readonly optPagination = signal(true);
+  readonly optToolbarLayout = signal<'chips' | 'split'>('chips');
+  /** Config panel collapsed (mobile-layout testing). */
+  readonly optsCollapsed = signal(false);
   readonly optSelection = signal<ListingFlatSelection>('none');
   readonly optSelectionToggle = signal(false);
   readonly optActSmartImport = signal(true);
+  readonly optActStatus = signal(true);
   readonly optActNew = signal(true);
-  readonly optActExport = signal(true);
+  readonly optActPrint = signal(true);
+  readonly optActArchive = signal(true);
   readonly optActDuplicate = signal(true);
   readonly optActDelete = signal(true);
   readonly optPageSize = signal(10);
@@ -185,17 +260,44 @@ export class ListingFlatPage {
     ],
   };
 
+  private readonly categoryFilterField: FilterFieldConfig = {
+    key: 'category',
+    label: 'Catégorie',
+    type: 'select',
+    options: [
+      { label: 'Matériau', value: 'Matériau' },
+      { label: 'Outillage', value: 'Outillage' },
+      { label: 'Consommable', value: 'Consommable' },
+    ],
+  };
+
+  readonly statusMenuNodes: ActionMenuNode[] = [
+    { id: 'status-draft', label: 'Brouillon' },
+    { id: 'status-active', label: 'Active' },
+    { kind: 'divider' },
+    { id: 'status-archived', label: 'Archivé', icon: 'archive' },
+  ];
+
   readonly activeFilterFields = computed((): FilterFieldConfig[] => {
     const fields: FilterFieldConfig[] = [];
     if (this.optFilterStatus()) fields.push(this.statusFilterField);
+    if (this.optFilterCategory()) fields.push(this.categoryFilterField);
     if (this.optFilterCode()) fields.push({ key: 'code', label: 'Code', type: 'text' });
     if (this.optFilterName()) fields.push({ key: 'name', label: 'Name', type: 'text' });
     return fields;
   });
 
+  readonly initialFilters = computed((): Record<string, unknown> | undefined => {
+    const init: Record<string, unknown> = {};
+    if (this.optFilterActive()) init['status'] = 'Active';
+    if (this.optFilterCategoryActive()) init['category'] = 'Outillage';
+    return Object.keys(init).length > 0 ? init : undefined;
+  });
+
   readonly enabledActions = computed((): ListingActionItem[] => {
     const out: ListingActionItem[] = [];
-    if (this.optActExport()) out.push({ id: 'export', label: 'Export', variant: 'secondary', icon: 'download' });
+    if (this.optActPrint()) out.push({ id: 'print', label: 'Imprimer', variant: 'secondary', icon: 'printer' });
+    if (this.optActArchive()) out.push({ id: 'archive', label: 'Archiver', variant: 'secondary', icon: 'archive' });
     if (this.optActNew()) out.push({ id: 'new', label: 'New', variant: 'primary', icon: 'plus' });
     return out;
   });
@@ -208,9 +310,18 @@ export class ListingFlatPage {
   });
 
   private readonly columns: ColumnConfig[] = [
-    { key: 'code', field: 'code', label: 'Code', sortable: true },
+    { key: 'code', field: 'code', label: 'Code', sortable: true, width: '120px' },
     { key: 'name', field: 'name', label: 'Name', sortable: true },
-    { key: 'status', field: 'status', label: 'Status', sortable: true },
+    { key: 'category', field: 'category', label: 'Catégorie', sortable: true, width: '150px' },
+    {
+      key: 'status',
+      field: 'status',
+      label: 'Status',
+      sortable: true,
+      type: 'badge',
+      badgeVariant: (val) => (val === 'Active' ? 'success' : 'default'),
+      width: '130px',
+    },
     { key: 'description', field: 'description', label: 'Description', sortable: false },
   ];
 
@@ -220,6 +331,7 @@ export class ListingFlatPage {
 
   private buildItems(): Product[] {
     const base = this.facade.list();
+    const categories: Product['category'][] = ['Matériau', 'Outillage', 'Consommable'];
     const extra: Product[] = [];
     for (let i = 6; i <= 36; i++) {
       extra.push({
@@ -227,6 +339,7 @@ export class ListingFlatPage {
         code: `PRD-${String(i).padStart(2, '0')}`,
         name: `Article ${i}`,
         status: i % 3 === 0 ? 'Draft' : 'Active',
+        category: categories[i % categories.length],
         description: i % 4 === 0 ? 'Demo row' : undefined,
       });
     }
@@ -235,22 +348,25 @@ export class ListingFlatPage {
 
   readonly headerConfig: PageHeaderConfig = {
     title: 'Products',
-    subtitle: 'nf-listing-flat · toolbar + action bar (smart-import · Export · New) + table + pager',
+    subtitle: 'nf-listing-flat · ligne 1: recherche & filtres · ligne 2: actions & colonnes à droite',
   };
 
   readonly listingConfig = computed((): ListingFlatConfig => ({
     columns: this.columns,
+    toolbarLayout: this.optToolbarLayout(),
     filters: this.activeFilterFields(),
-    initialFilters: this.optFilterActive() ? { status: 'Active' } : undefined,
+    initialFilters: this.initialFilters(),
     pageSize: this.optPageSize(),
     emptyMessage: 'No products',
+    exportFilename: 'products',
     actions: this.enabledActions(),
     selectionActions: this.enabledSelectionActions(),
-    projectedActions: this.optActSmartImport(),
+    projectedActions: this.optActSmartImport() || this.optActStatus(),
     features: {
       search: this.optSearch(),
       filters: this.optFilters(),
       columnToggle: this.optColumns(),
+      export: this.optExport(),
       pagination: this.optPagination(),
       selection: this.optSelection(),
       selectionToggle: this.optSelectionToggle(),

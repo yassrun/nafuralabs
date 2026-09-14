@@ -1,7 +1,6 @@
 import { Component, input, output, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { ButtonComponent } from '../../atoms/button';
@@ -38,7 +37,6 @@ export interface ListingControlsColumn {
     ViewModeSwitcherComponent,
     LucideAngularModule,
     MatMenuModule,
-    MatCheckboxModule,
     TranslateModule,
   ],
   templateUrl: './listing-controls.component.html',

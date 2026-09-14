@@ -50,6 +50,7 @@ export const CATALOG_MOLECULES: CatalogEntry[] = [
   { id: 'listing-controls', selector: 'nf-listing-controls', layer: 'molecules', status: 'live' },
   { id: 'listing-actions', selector: 'nf-listing-actions', layer: 'molecules', status: 'live', note: 'top-right · + slot nf-smart-import-action' },
   { id: 'action-menu', selector: 'nf-action-menu', layer: 'molecules', status: 'live', note: 'cascade (Status ▸) + overflow ⋯ récursif' },
+  { id: 'toolbar', selector: 'nf-toolbar', layer: 'molecules', status: 'live', note: 'actions illimitées · overflow ⋯ auto · cascades' },
   { id: 'stat-card', selector: 'nf-stat-card', layer: 'molecules', status: 'stub' },
   { id: 'kpi-strip', selector: 'nf-kpi-strip', layer: 'molecules', status: 'stub' },
   { id: 'address', selector: 'nf-address-form', layer: 'molecules', status: 'stub', note: 'sandbox dédié plus tard' },

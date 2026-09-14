@@ -25,6 +25,7 @@ export interface ListingFlatFeatures {
   search: boolean;
   filters: boolean;
   columnToggle: boolean;
+  export: boolean;
   selection: ListingFlatSelection;
   /** Toolbar button that switches the table to multi-selection on demand. */
   selectionToggle: boolean;
@@ -33,6 +34,15 @@ export interface ListingFlatFeatures {
 
 export interface ListingFlatConfig {
   columns: ColumnConfig[];
+  /**
+   * Toolbar layout.
+   * - `chips` (default, proposal A): row 1 = filter chips + « + Filtre » + search,
+   *   row 2 = table controls + actions.
+   * - `split` (proposal C): row 1 = search + chips + « + Filtre » + table controls
+   *   (everything that changes the view), row 2 = actions only (selection pill on
+   *   the left). On mobile the actions row becomes a sticky bottom bar.
+   */
+  toolbarLayout?: 'chips' | 'split';
   filters?: FilterFieldConfig[];
   /** Filters applied at init (demo / saved view). Re-applied when the value changes. */
   initialFilters?: Record<string, unknown>;
@@ -42,6 +52,8 @@ export interface ListingFlatConfig {
   emptyMessage?: string;
   /** Fields used by the search box. Defaults to all column fields. */
   searchFields?: string[];
+  /** Export filename (without .csv). Defaults to 'export'. */
+  exportFilename?: string;
   /** Right-side listing action bar (New, Export, …). */
   actions?: ListingActionItem[];
   /** Actions shown when rows are selected (scope gates by selection count). */
@@ -57,6 +69,7 @@ export const DEFAULT_LISTING_FLAT_FEATURES: ListingFlatFeatures = {
   search: true,
   filters: true,
   columnToggle: true,
+  export: false,
   selection: 'none',
   selectionToggle: false,
   pagination: true,

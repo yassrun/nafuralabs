@@ -1,10 +1,6 @@
 import { Component, input, output, signal, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { FilterFieldConfig, LookupContext } from '../../../types';
 import { ButtonComponent } from '../../atoms/button';
@@ -18,7 +14,7 @@ import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
  * Filter Builder Component (nf-filter-builder)
  *
  * Compact form for building filters, intended for use inside a popup (e.g. mat-menu).
- * Renders fields from FilterFieldConfig, Apply and Clear actions.
+ * Renders fields from FilterFieldConfig with clean Anatomy tokens, Apply and Clear actions.
  * Internal state is synced from values when openCount changes (e.g. when menu opens).
  */
 @Component({
@@ -27,10 +23,6 @@ import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
   imports: [
     CommonModule,
     FormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatInputModule,
-    MatButtonModule,
     TranslateModule,
     ButtonComponent,
     NfSelectComponent,
@@ -56,7 +48,7 @@ import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
                         {{ pickerLabel(filter) || ((filter.placeholder ?? 'All') | translate) }}
                       </button>
                       @if (getValue(filter.key)) {
-                        <nf-button variant="ghost" size="sm" (clicked)="clearPicker(filter)">{{ 'Clear' | translate }}</nf-button>
+                        <nf-button variant="ghost" size="xs" (clicked)="clearPicker(filter)">{{ 'Clear' | translate }}</nf-button>
                       }
                     </div>
                   </div>
@@ -70,43 +62,74 @@ import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
                     (ngModelChange)="setValue(filter.key, $event)"
                   />
                 } @else {
-                <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                  <mat-label>{{ filter.label | translate }}</mat-label>
-                  <mat-select
-                    [ngModel]="getValue(filter.key)"
-                    (ngModelChange)="setValue(filter.key, $event)"
-                    [placeholder]="(filter.placeholder ?? 'All') | translate">
-                    <mat-option [value]="null">{{ (filter.placeholder ?? 'All') | translate }}</mat-option>
-                    @for (opt of getOptions(filter); track opt.value) {
-                      <mat-option [value]="opt.value">{{ opt.label | translate }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
+                  <div class="nf-filter-field">
+                    <label class="nf-filter-field__label" [for]="'filter-' + filter.key">{{ filter.label | translate }}</label>
+                    <select
+                      [id]="'filter-' + filter.key"
+                      class="nf-filter-field__control nf-filter-field__control--select"
+                      [ngModel]="getValue(filter.key)"
+                      (ngModelChange)="setValue(filter.key, $event)"
+                    >
+                      <option [ngValue]="null">{{ (filter.placeholder ?? 'All') | translate }}</option>
+                      @for (opt of getOptions(filter); track opt.value) {
+                        <option [ngValue]="opt.value">{{ opt.label | translate }}</option>
+                      }
+                    </select>
+                  </div>
                 }
               }
               @case ('text') {
-                <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                  <mat-label>{{ filter.label | translate }}</mat-label>
+                <div class="nf-filter-field">
+                  <label class="nf-filter-field__label" [for]="'filter-' + filter.key">{{ filter.label | translate }}</label>
                   <input
-                    matInput
+                    [id]="'filter-' + filter.key"
                     type="text"
+                    class="nf-filter-field__control"
                     [ngModel]="getValue(filter.key)"
                     (ngModelChange)="setValue(filter.key, $event)"
                     [placeholder]="(filter.placeholder ?? filter.label) | translate"
                   />
-                </mat-form-field>
+                </div>
               }
               @case ('number') {
-                <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                  <mat-label>{{ filter.label | translate }}</mat-label>
+                <div class="nf-filter-field">
+                  <label class="nf-filter-field__label" [for]="'filter-' + filter.key">{{ filter.label | translate }}</label>
                   <input
-                    matInput
+                    [id]="'filter-' + filter.key"
                     type="number"
+                    class="nf-filter-field__control"
                     [ngModel]="getValue(filter.key)"
-                    (ngModelChange)="setValue(filter.key, $event != null ? +$event : null)"
+                    (ngModelChange)="setValue(filter.key, $event != null && $event !== '' ? +$event : null)"
                     [placeholder]="(filter.placeholder ?? filter.label) | translate"
                   />
-                </mat-form-field>
+                </div>
+              }
+              @case ('date') {
+                <div class="nf-filter-field">
+                  <label class="nf-filter-field__label" [for]="'filter-' + filter.key">{{ filter.label | translate }}</label>
+                  <input
+                    [id]="'filter-' + filter.key"
+                    type="date"
+                    class="nf-filter-field__control"
+                    [ngModel]="getValue(filter.key)"
+                    (ngModelChange)="setValue(filter.key, $event)"
+                  />
+                </div>
+              }
+              @case ('boolean') {
+                <div class="nf-filter-field">
+                  <label class="nf-filter-field__label" [for]="'filter-' + filter.key">{{ filter.label | translate }}</label>
+                  <select
+                    [id]="'filter-' + filter.key"
+                    class="nf-filter-field__control nf-filter-field__control--select"
+                    [ngModel]="getValue(filter.key)"
+                    (ngModelChange)="setValue(filter.key, $event)"
+                  >
+                    <option [ngValue]="null">{{ (filter.placeholder ?? 'All') | translate }}</option>
+                    <option [ngValue]="true">{{ 'Yes' | translate }}</option>
+                    <option [ngValue]="false">{{ 'No' | translate }}</option>
+                  </select>
+                </div>
               }
               @default {
                 @if (isLookupPicker(filter)) {
@@ -122,7 +145,7 @@ import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
                         {{ pickerLabel(filter) || ((filter.placeholder ?? 'All') | translate) }}
                       </button>
                       @if (getValue(filter.key)) {
-                        <nf-button variant="ghost" size="sm" (clicked)="clearPicker(filter)">{{ 'Clear' | translate }}</nf-button>
+                        <nf-button variant="ghost" size="xs" (clicked)="clearPicker(filter)">{{ 'Clear' | translate }}</nf-button>
                       }
                     </div>
                   </div>
@@ -136,18 +159,20 @@ import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
                     (ngModelChange)="setValue(filter.key, $event)"
                   />
                 } @else {
-                <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                  <mat-label>{{ filter.label | translate }}</mat-label>
-                  <mat-select
-                    [ngModel]="getValue(filter.key)"
-                    (ngModelChange)="setValue(filter.key, $event)"
-                    [placeholder]="(filter.placeholder ?? 'All') | translate">
-                    <mat-option [value]="null">{{ 'All' | translate }}</mat-option>
-                    @for (opt of getOptions(filter); track opt.value) {
-                      <mat-option [value]="opt.value">{{ opt.label | translate }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
+                  <div class="nf-filter-field">
+                    <label class="nf-filter-field__label" [for]="'filter-' + filter.key">{{ filter.label | translate }}</label>
+                    <select
+                      [id]="'filter-' + filter.key"
+                      class="nf-filter-field__control nf-filter-field__control--select"
+                      [ngModel]="getValue(filter.key)"
+                      (ngModelChange)="setValue(filter.key, $event)"
+                    >
+                      <option [ngValue]="null">{{ (filter.placeholder ?? 'All') | translate }}</option>
+                      @for (opt of getOptions(filter); track opt.value) {
+                        <option [ngValue]="opt.value">{{ opt.label | translate }}</option>
+                      }
+                    </select>
+                  </div>
                 }
               }
             }
@@ -155,8 +180,8 @@ import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
         }
       </div>
       <div class="nf-filter-builder__actions">
-        <nf-button variant="tertiary" size="sm" (clicked)="onClear()">{{ 'Clear' | translate }}</nf-button>
-        <nf-button variant="primary" size="sm" (clicked)="onApply()">{{ 'Apply' | translate }}</nf-button>
+        <nf-button variant="secondary" size="xs" (clicked)="onClear()">{{ 'Clear' | translate }}</nf-button>
+        <nf-button variant="primary" size="xs" (clicked)="onApply()">{{ 'Apply' | translate }}</nf-button>
       </div>
     </div>
   `,
@@ -165,27 +190,28 @@ import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
       display: flex;
       flex-direction: column;
       gap: 0;
-      padding: var(--nf-space-3, 12px);
+      padding: 12px 14px;
       width: fit-content;
       min-width: 260px;
       max-width: min(560px, calc(100vw - 32px));
       box-sizing: border-box;
+      background: var(--nf-surface-section, #ffffff);
     }
 
     .nf-filter-builder__header {
-      margin: 0 0 var(--nf-space-2, 8px) 0;
-      padding: 0 0 var(--nf-space-2, 8px) 0;
-      font-size: var(--nf-font-size-sm);
+      margin: 0 0 10px 0;
+      padding: 0 0 8px 0;
+      font-size: 0.8125rem;
       font-weight: 600;
-      color: var(--nf-text-primary);
-      border-bottom: 1px solid var(--nf-border-default);
+      color: var(--nf-text-primary, #111827);
+      border-bottom: 1px solid var(--nf-border-default, #e5e7eb);
     }
 
     .nf-filter-builder__fields {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: var(--nf-space-2, 8px) var(--nf-space-3, 12px);
-      margin-bottom: var(--nf-space-3, 12px);
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px 12px;
+      margin-bottom: 12px;
       width: 100%;
     }
 
@@ -194,47 +220,96 @@ import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
       min-width: 0;
     }
 
-    .nf-filter-builder__field mat-form-field,
-    .nf-filter-builder__field nf-select {
+    /* ── Anatomy Pure Form Field ── */
+    .nf-filter-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
       width: 100%;
-      display: block;
+    }
+
+    .nf-filter-field__label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--nf-text-secondary, #4b5563);
+      line-height: 1.25;
+      cursor: pointer;
+    }
+
+    .nf-filter-field__control {
+      width: 100%;
+      height: 30px;
+      padding: 0 8px;
+      font-size: 0.8125rem;
+      font-family: inherit;
+      color: var(--nf-text-primary, #111827);
+      background: var(--nf-surface-section, #ffffff);
+      border: 1px solid var(--nf-border-default, #e5e7eb);
+      border-radius: 6px;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+      &::placeholder {
+        color: var(--nf-input-placeholder-color, var(--nf-text-muted, #9ca3af));
+      }
+
+      &:focus {
+        border-color: var(--nf-primary, #2563eb);
+        box-shadow: 0 0 0 2px var(--nf-primary-light, #eff6ff);
+      }
+    }
+
+    .nf-filter-field__control--select {
+      cursor: pointer;
+      appearance: none;
+      padding-right: 26px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-position: right 8px center;
+      background-repeat: no-repeat;
     }
 
     .nf-filter-builder__picker {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 4px;
       width: 100%;
     }
     .nf-filter-builder__picker-label {
-      font-size: var(--nf-font-size-sm, 0.875rem);
-      color: var(--nf-text-secondary, #6b7280);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--nf-text-secondary, #4b5563);
     }
     .nf-filter-builder__picker-row {
       display: flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 6px;
     }
     .nf-filter-builder__picker-btn {
       flex: 1;
       min-width: 0;
       text-align: left;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid var(--nf-border-default, #d1d5db);
-      border-radius: 8px;
-      background: var(--nf-color-surface, #fff);
-      font: inherit;
+      height: 30px;
+      padding: 0 8px;
+      border: 1px solid var(--nf-border-default, #e5e7eb);
+      border-radius: 6px;
+      background: var(--nf-surface-section, #fff);
+      font-size: 0.8125rem;
+      font-family: inherit;
+      color: var(--nf-text-primary, #111827);
       cursor: pointer;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
     }
 
     .nf-filter-builder__actions {
       display: flex;
       justify-content: flex-end;
       flex-wrap: wrap;
-      gap: var(--nf-space-2, 8px);
+      gap: 6px;
       flex-shrink: 0;
-      padding-top: var(--nf-space-2, 8px);
-      border-top: 1px solid var(--nf-border-default);
+      padding-top: 10px;
+      border-top: 1px solid var(--nf-border-default, #e5e7eb);
     }
   `],
 })

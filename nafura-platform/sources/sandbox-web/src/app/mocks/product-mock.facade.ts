@@ -5,15 +5,16 @@ export interface Product {
   code: string;
   name: string;
   status: 'Active' | 'Draft';
+  category?: 'Matériau' | 'Outillage' | 'Consommable';
   description?: string;
 }
 
 const SEED: Product[] = [
-  { id: 'prd-01', code: 'PRD-01', name: 'Ciment CPJ 45', status: 'Active', description: 'Sac 50 kg' },
-  { id: 'prd-02', code: 'PRD-02', name: 'Fer 12 mm', status: 'Active', description: 'Barre 12 m' },
-  { id: 'prd-03', code: 'PRD-03', name: 'Sable 0/2', status: 'Draft', description: 'm³' },
-  { id: 'prd-04', code: 'PRD-04', name: 'Gravier 5/15', status: 'Active' },
-  { id: 'prd-05', code: 'PRD-05', name: 'Béton C25/30', status: 'Draft' },
+  { id: 'prd-01', code: 'PRD-01', name: 'Ciment CPJ 45', status: 'Active', category: 'Matériau', description: 'Sac 50 kg' },
+  { id: 'prd-02', code: 'PRD-02', name: 'Fer 12 mm', status: 'Active', category: 'Matériau', description: 'Barre 12 m' },
+  { id: 'prd-03', code: 'PRD-03', name: 'Sable 0/2', status: 'Draft', category: 'Matériau', description: 'm³' },
+  { id: 'prd-04', code: 'PRD-04', name: 'Gravier 5/15', status: 'Active', category: 'Matériau' },
+  { id: 'prd-05', code: 'PRD-05', name: 'Béton C25/30', status: 'Draft', category: 'Matériau' },
 ];
 
 @Injectable({ providedIn: 'root' })

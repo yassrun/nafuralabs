@@ -13,7 +13,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { TranslateModule } from '@ngx-translate/core';
 import { LucideAngularModule } from 'lucide-angular';
 
-import { ButtonComponent } from '@lib/anatomy';
+import { ButtonComponent, type ButtonSize } from '@lib/anatomy';
 import type {
   ExtractionDefinition,
   ReviewedExtraction,
@@ -43,7 +43,7 @@ import { SmartImportFlowService } from '../services/smart-import-flow.service';
 
     <nf-button
       variant="secondary"
-      size="md"
+      [size]="size"
       icon="sparkles"
       iconLibrary="lucide"
       [loading]="isBusy()"
@@ -65,14 +65,17 @@ import { SmartImportFlowService } from '../services/smart-import-flow.service';
     </nf-button>
 
     <mat-menu #importMenu="matMenu" xPosition="before" class="nf-smart-import-action__menu">
-      <button mat-menu-item type="button" (click)="openHelp()">
-        {{ 'platform.smartImport.menu.fieldInfo' | translate }}
+      <button mat-menu-item type="button" class="nf-smart-import-menu-item" (click)="openHelp()">
+        <lucide-icon name="help-circle" [size]="14" class="nf-smart-import-menu-item__icon" />
+        <span>{{ 'platform.smartImport.menu.fieldInfo' | translate }}</span>
       </button>
-      <button mat-menu-item type="button" (click)="startImport('single')">
-        {{ 'platform.smartImport.menu.importSingle' | translate }}
+      <button mat-menu-item type="button" class="nf-smart-import-menu-item" (click)="startImport('single')">
+        <lucide-icon name="file-text" [size]="14" class="nf-smart-import-menu-item__icon" />
+        <span>{{ 'platform.smartImport.menu.importSingle' | translate }}</span>
       </button>
-      <button mat-menu-item type="button" (click)="startImport('bulk')">
-        {{ 'platform.smartImport.menu.importBulk' | translate }}
+      <button mat-menu-item type="button" class="nf-smart-import-menu-item" (click)="startImport('bulk')">
+        <lucide-icon name="upload" [size]="14" class="nf-smart-import-menu-item__icon" />
+        <span>{{ 'platform.smartImport.menu.importBulk' | translate }}</span>
       </button>
     </mat-menu>
   `,
@@ -90,6 +93,21 @@ import { SmartImportFlowService } from '../services/smart-import-flow.service';
       opacity: .85;
       flex-shrink: 0;
     }
+
+    .nf-smart-import-menu-item {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      font-size: 0.8125rem !important;
+      height: 32px !important;
+      min-height: 32px !important;
+      line-height: 32px !important;
+    }
+
+    .nf-smart-import-menu-item__icon {
+      color: var(--nf-text-muted, #6b7280);
+      flex-shrink: 0;
+    }
   `],
 })
 export class SmartImportActionComponent {
@@ -98,6 +116,8 @@ export class SmartImportActionComponent {
   @Input({ required: true }) definition!: ExtractionDefinition;
   @Input() disabled = false;
   @Input() accept = '.xlsx,.xls,.csv,.pdf';
+  /** Button size — use 'xs' inside compact listing toolbars. */
+  @Input() size: ButtonSize = 'md';
 
   @Output() readonly completed = new EventEmitter<ReviewedExtraction>();
   @Output() readonly cancelled = new EventEmitter<void>();

@@ -19,6 +19,7 @@ import { PRODUCT_IMPORT_DEFINITION } from '../mocks/product-import.definition';
   template: `
     <nf-smart-import-action
       [definition]="definition"
+      size="xs"
       (completed)="completed.emit($event)"
     />
   `,
