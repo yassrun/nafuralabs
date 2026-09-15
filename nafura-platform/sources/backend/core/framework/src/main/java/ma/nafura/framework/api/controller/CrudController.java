@@ -1,6 +1,9 @@
 package ma.nafura.platform.framework.api.controller;
 
+import ma.nafura.platform.framework.listing.ListingQuery;
+import ma.nafura.platform.framework.listing.ListingQueryParser;
 import ma.nafura.platform.framework.service.crud.CrudService;
+import org.springframework.data.jpa.domain.Specification;
 import ma.nafura.platform.framework.service.csv.CsvExportService;
 import ma.nafura.platform.framework.service.csv.CsvImportService;
 import org.springframework.data.domain.Page;
@@ -20,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -72,6 +76,14 @@ public abstract class CrudController<TId, TEntity, TCreate, TUpdate> {
     /** Natural key fields for import (determines create vs update); override when enabling import. */
     protected List<String> getNaturalKeyFields() { return List.of(); }
 
+    /**
+     * Allowlisted entity fields for structured {@code filter} query params.
+     * Default empty — filter params are ignored unless overridden.
+     */
+    protected Set<String> getFilterableFields() {
+        return Set.of();
+    }
+
     protected CsvImportService getCsvImportService() { return csvImportService; }
     protected CsvExportService getCsvExportService() { return csvExportService; }
 
@@ -94,14 +106,30 @@ public abstract class CrudController<TId, TEntity, TCreate, TUpdate> {
             @RequestParam(value = "sort", required = false) String sort,
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "q", required = false) String q,
-            @RequestParam(value = "searchFields", required = false) String searchFields) {
+            @RequestParam(value = "searchFields", required = false) String searchFields,
+            @RequestParam(value = "filter", required = false) List<String> filter,
+            @RequestParam(value = "scope", required = false) String scope) {
 
         List<TEntity> items;
         long total;
         String effectiveSearch = hasText(search) ? search : q;
         Sort sortObj = hasText(sort) ? parseSort(sort) : null;
 
-        if (hasText(effectiveSearch)) {
+        if (CrudService.usesStructuredListing(filter, scope)) {
+            ListingQuery listingQuery = ListingQueryParser.parse(
+                    filter, search, q, sort, page, size, scope);
+            Specification<TEntity> spec = getService().buildListSpecification(
+                    listingQuery,
+                    getFilterableFields(),
+                    effectiveSearch,
+                    parseSearchFields(searchFields));
+            total = getService().countByCriteria(spec);
+            if (sortObj != null) {
+                items = getService().findByCriteria(spec, page, size, sortObj);
+            } else {
+                items = getService().findByCriteria(spec, page, size);
+            }
+        } else if (hasText(effectiveSearch)) {
             List<String> fields = parseSearchFields(searchFields);
             total = getService().countSearch(effectiveSearch, fields);
             if (sortObj != null) {

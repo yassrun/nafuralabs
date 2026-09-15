@@ -91,6 +91,32 @@
   }
 }
 
+/* ── Filter Menu in Overlay (must be global — panel is outside component host) ── */
+.mat-mdc-menu-panel.nf-listing-flat-menu--filter {
+  --mat-menu-container-max-width: min(640px, calc(100vw - 24px));
+  width: max-content !important;
+  min-width: 440px !important;
+  max-width: min(640px, calc(100vw - 24px)) !important;
+  height: auto !important;
+  max-height: min(80vh, 640px) !important;
+  overflow-x: visible !important;
+  overflow-y: auto !important;
+  padding: 0 !important;
+
+  .mat-mdc-menu-content {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .mat-mdc-menu-panel.nf-listing-flat-menu--filter {
+    width: calc(100vw - 24px) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+}
+
 .nf-columns-menu {
   min-width: 200px;
   max-width: 260px;

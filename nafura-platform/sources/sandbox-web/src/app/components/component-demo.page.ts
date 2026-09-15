@@ -1062,7 +1062,7 @@ export class ComponentDemoPage {
   ]);
   readonly listingSearch = signal('');
   readonly listingFilterValues = signal<Record<string, unknown>>({});
-  readonly listingSelectionMode = signal(false);
+  readonly listingSelectionMode = signal(true);
 
   readonly listingFilterFields: FilterFieldConfig[] = [
     {

@@ -29,6 +29,8 @@ export interface ListingFlatFeatures {
   selection: ListingFlatSelection;
   /** Toolbar button that switches the table to multi-selection on demand. */
   selectionToggle: boolean;
+  /** When the selection toggle is shown, whether it starts in multi-select mode. */
+  selectionToggleDefaultActive?: boolean;
   pagination: boolean;
 }
 
@@ -44,8 +46,13 @@ export interface ListingFlatConfig {
    */
   toolbarLayout?: 'chips' | 'split';
   filters?: FilterFieldConfig[];
-  /** Filters applied at init (demo / saved view). Re-applied when the value changes. */
+  /**
+   * Filters applied at init (demo / saved view).
+   * @deprecated Prefer `query.filters` on the listing query input.
+   */
   initialFilters?: Record<string, unknown>;
+  /** Enables saved-views overflow when `resourceKey` is set on the component. */
+  savedViews?: boolean;
   features?: Partial<ListingFlatFeatures>;
   pageSize?: number;
   pageSizeOptions?: number[];
@@ -72,5 +79,6 @@ export const DEFAULT_LISTING_FLAT_FEATURES: ListingFlatFeatures = {
   export: false,
   selection: 'none',
   selectionToggle: false,
+  selectionToggleDefaultActive: true,
   pagination: true,
 };

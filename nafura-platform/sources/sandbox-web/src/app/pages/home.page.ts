@@ -14,7 +14,7 @@ import { SHOWROOM_NAV } from '../nav/showroom-nav.config';
         <h1>Anatomy Showroom</h1>
         <p>
           Exposition des archétypes d’écran et catalogue des composants
-          <code>nf-*</code>. Sidebar configurable · données mock · pas d’auth.
+          <code>nf-*</code>. Sidebar configurable · products via API H2 · pas d’auth.
         </p>
       </header>
 

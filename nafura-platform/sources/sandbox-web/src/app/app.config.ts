@@ -16,6 +16,12 @@ import { Observable, of } from 'rxjs';
 import { registerApplicationConfig } from '@platform/core/application/application-config';
 import { provideAppLucideIcons } from '@platform/core/icons/app-lucide-icons';
 import { TenantContextService } from '@platform/core/tenant/tenant.context';
+import {
+  LISTING_SAVED_VIEWS_ADAPTER,
+  LocalStorageListingSavedViewsAdapter,
+} from '@platform/lib/anatomy/components/organisms/listing-flat';
+
+import { environment } from '../environments/environment';
 
 import { APP_ROUTES, SandboxNoReuseStrategy } from './app.routes';
 import { SANDBOX_FR } from './i18n/sandbox-fr';
@@ -51,6 +57,14 @@ export const appConfig: ApplicationConfig = {
     provideRouter(APP_ROUTES, withComponentInputBinding()),
     { provide: RouteReuseStrategy, useClass: SandboxNoReuseStrategy },
     provideAppLucideIcons(),
+    {
+      provide: LISTING_SAVED_VIEWS_ADAPTER,
+      useFactory: () =>
+        new LocalStorageListingSavedViewsAdapter(
+          'nf-listing-saved-views',
+          environment.devAuthUser.id
+        ),
+    },
     {
       provide: APP_INITIALIZER,
       useFactory: bootstrapSandboxContext,

@@ -93,7 +93,7 @@ import {
             </button>
           }
           <div class="sb-topbar__crumb">{{ currentLabel() }}</div>
-          <div class="sb-topbar__hint">mocks · no auth · :4300</div>
+          <div class="sb-topbar__hint">H2 · api :8082 · no auth</div>
         </header>
         <div class="sb-content">
           <router-outlet />

@@ -1,5 +1,6 @@
 package ma.nafura.platform.configuration.sysconfig.api.controller.base;
 
+import java.util.Set;
 import java.util.UUID;
 import ma.nafura.platform.framework.api.controller.CrudController;
 import ma.nafura.platform.framework.service.crud.CrudService;
@@ -23,6 +24,11 @@ public abstract class CodeListControllerBase extends CrudController<UUID, CodeLi
     @Override
     protected CrudService<UUID, CodeList, CodeListCreateDto, CodeListUpdateDto> getService() {
         return service;
+    }
+
+    @Override
+    protected Set<String> getFilterableFields() {
+        return Set.of("code", "name", "description", "createdAt", "createdBy");
     }
 }
 

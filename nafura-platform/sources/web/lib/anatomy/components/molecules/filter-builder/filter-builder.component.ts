@@ -1,431 +1,577 @@
-import { Component, input, output, signal, effect, inject } from '@angular/core';
+import { Component, input, output, signal, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { FilterFieldConfig, LookupContext } from '../../../types';
+import type {
+  FilterClause,
+  FilterCombinator,
+  FilterFieldConfig,
+  FilterGroup,
+  FilterNode,
+  FilterOperator,
+  LookupContext,
+} from '../../../types';
+import { isFilterGroup } from '../../../types';
 import { ButtonComponent } from '../../atoms/button';
-import { NfSelectComponent } from '../../atoms/select';
-import { LOOKUP_SEARCHERS } from '../../../tokens/lookup-searchers.token';
-import type { LookupSearchFn } from '../../../tokens/lookup-searchers.token';
-import { LOOKUP_PICKERS } from '../../../tokens/lookup-pickers.token';
-import type { LookupPickerFn } from '../../../tokens/lookup-pickers.token';
+import {
+  defaultOperatorForFilterType,
+  emptyFilterGroup,
+  FILTER_OPERATOR_LABELS,
+  operatorsForFilterType,
+} from '../../organisms/listing-flat/listing-query-state.util';
 
 /**
- * Filter Builder Component (nf-filter-builder)
+ * Filter Builder (`nf-filter-builder`) — Notion-style rule builder.
  *
- * Compact form for building filters, intended for use inside a popup (e.g. mat-menu).
- * Renders fields from FilterFieldConfig with clean Anatomy tokens, Apply and Clear actions.
- * Internal state is synced from values when openCount changes (e.g. when menu opens).
+ * Rows: Property · Operator · Value. Groups support AND/OR with one nesting level.
+ * Apply emits a {@link FilterGroup}; Clear emits empty group via `clear`.
  */
 @Component({
   selector: 'nf-filter-builder',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    TranslateModule,
-    ButtonComponent,
-    NfSelectComponent,
-  ],
+  imports: [CommonModule, FormsModule, TranslateModule, ButtonComponent],
   template: `
     <div class="nf-filter-builder" (click)="$event.stopPropagation()">
       <div class="nf-filter-builder__header">{{ 'Filters' | translate }}</div>
-      <div class="nf-filter-builder__fields">
-        @for (filter of filters(); track filter.key) {
-          <div class="nf-filter-builder__field">
-            @switch (filter.type) {
-              @case ('select') {
-                @if (isLookupPicker(filter)) {
-                  <div class="nf-filter-builder__picker">
-                    <span class="nf-filter-builder__picker-label">{{ filter.label | translate }}</span>
-                    <div class="nf-filter-builder__picker-row">
-                      <button
-                        type="button"
-                        class="nf-filter-builder__picker-btn"
-                        data-testid="article-picker-open"
-                        (click)="openLookupPicker(filter)"
-                      >
-                        {{ pickerLabel(filter) || ((filter.placeholder ?? 'All') | translate) }}
-                      </button>
-                      @if (getValue(filter.key)) {
-                        <nf-button variant="ghost" size="xs" (clicked)="clearPicker(filter)">{{ 'Clear' | translate }}</nf-button>
-                      }
-                    </div>
-                  </div>
-                } @else if (isLookupCombobox(filter)) {
-                  <nf-select
-                    [label]="filter.label | translate"
-                    [placeholder]="(filter.placeholder ?? 'All') | translate"
-                    [lookupKey]="filter.lookupKey"
-                    [lookupSearch]="lookupSearchFn(filter)"
-                    [ngModel]="comboValue(filter.key)"
-                    (ngModelChange)="setValue(filter.key, $event)"
-                  />
-                } @else {
-                  <div class="nf-filter-field">
-                    <label class="nf-filter-field__label" [for]="'filter-' + filter.key">{{ filter.label | translate }}</label>
-                    <select
-                      [id]="'filter-' + filter.key"
-                      class="nf-filter-field__control nf-filter-field__control--select"
-                      [ngModel]="getValue(filter.key)"
-                      (ngModelChange)="setValue(filter.key, $event)"
-                    >
-                      <option [ngValue]="null">{{ (filter.placeholder ?? 'All') | translate }}</option>
-                      @for (opt of getOptions(filter); track opt.value) {
-                        <option [ngValue]="opt.value">{{ opt.label | translate }}</option>
-                      }
-                    </select>
-                  </div>
-                }
-              }
-              @case ('text') {
-                <div class="nf-filter-field">
-                  <label class="nf-filter-field__label" [for]="'filter-' + filter.key">{{ filter.label | translate }}</label>
-                  <input
-                    [id]="'filter-' + filter.key"
-                    type="text"
-                    class="nf-filter-field__control"
-                    [ngModel]="getValue(filter.key)"
-                    (ngModelChange)="setValue(filter.key, $event)"
-                    [placeholder]="(filter.placeholder ?? filter.label) | translate"
-                  />
-                </div>
-              }
-              @case ('number') {
-                <div class="nf-filter-field">
-                  <label class="nf-filter-field__label" [for]="'filter-' + filter.key">{{ filter.label | translate }}</label>
-                  <input
-                    [id]="'filter-' + filter.key"
-                    type="number"
-                    class="nf-filter-field__control"
-                    [ngModel]="getValue(filter.key)"
-                    (ngModelChange)="setValue(filter.key, $event != null && $event !== '' ? +$event : null)"
-                    [placeholder]="(filter.placeholder ?? filter.label) | translate"
-                  />
-                </div>
-              }
-              @case ('date') {
-                <div class="nf-filter-field">
-                  <label class="nf-filter-field__label" [for]="'filter-' + filter.key">{{ filter.label | translate }}</label>
-                  <input
-                    [id]="'filter-' + filter.key"
-                    type="date"
-                    class="nf-filter-field__control"
-                    [ngModel]="getValue(filter.key)"
-                    (ngModelChange)="setValue(filter.key, $event)"
-                  />
-                </div>
-              }
-              @case ('boolean') {
-                <div class="nf-filter-field">
-                  <label class="nf-filter-field__label" [for]="'filter-' + filter.key">{{ filter.label | translate }}</label>
-                  <select
-                    [id]="'filter-' + filter.key"
-                    class="nf-filter-field__control nf-filter-field__control--select"
-                    [ngModel]="getValue(filter.key)"
-                    (ngModelChange)="setValue(filter.key, $event)"
-                  >
-                    <option [ngValue]="null">{{ (filter.placeholder ?? 'All') | translate }}</option>
-                    <option [ngValue]="true">{{ 'Yes' | translate }}</option>
-                    <option [ngValue]="false">{{ 'No' | translate }}</option>
-                  </select>
-                </div>
-              }
-              @default {
-                @if (isLookupPicker(filter)) {
-                  <div class="nf-filter-builder__picker">
-                    <span class="nf-filter-builder__picker-label">{{ filter.label | translate }}</span>
-                    <div class="nf-filter-builder__picker-row">
-                      <button
-                        type="button"
-                        class="nf-filter-builder__picker-btn"
-                        data-testid="article-picker-open"
-                        (click)="openLookupPicker(filter)"
-                      >
-                        {{ pickerLabel(filter) || ((filter.placeholder ?? 'All') | translate) }}
-                      </button>
-                      @if (getValue(filter.key)) {
-                        <nf-button variant="ghost" size="xs" (clicked)="clearPicker(filter)">{{ 'Clear' | translate }}</nf-button>
-                      }
-                    </div>
-                  </div>
-                } @else if (isLookupCombobox(filter)) {
-                  <nf-select
-                    [label]="filter.label | translate"
-                    [placeholder]="(filter.placeholder ?? 'All') | translate"
-                    [lookupKey]="filter.lookupKey"
-                    [lookupSearch]="lookupSearchFn(filter)"
-                    [ngModel]="comboValue(filter.key)"
-                    (ngModelChange)="setValue(filter.key, $event)"
-                  />
-                } @else {
-                  <div class="nf-filter-field">
-                    <label class="nf-filter-field__label" [for]="'filter-' + filter.key">{{ filter.label | translate }}</label>
-                    <select
-                      [id]="'filter-' + filter.key"
-                      class="nf-filter-field__control nf-filter-field__control--select"
-                      [ngModel]="getValue(filter.key)"
-                      (ngModelChange)="setValue(filter.key, $event)"
-                    >
-                      <option [ngValue]="null">{{ (filter.placeholder ?? 'All') | translate }}</option>
-                      @for (opt of getOptions(filter); track opt.value) {
-                        <option [ngValue]="opt.value">{{ opt.label | translate }}</option>
-                      }
-                    </select>
-                  </div>
-                }
-              }
+
+      @if (draft().children.length === 0) {
+        <p class="nf-filter-builder__empty">{{ 'No filters yet' | translate }}</p>
+      } @else {
+        <div class="nf-filter-builder__rows">
+          @for (child of draft().children; track $index; let i = $index) {
+            @if (i > 0) {
+              <div class="nf-filter-builder__combinator">
+                <select
+                  class="nf-filter-builder__combinator-select"
+                  [ngModel]="draft().combinator"
+                  (ngModelChange)="setRootCombinator($event)"
+                >
+                  <option value="and">AND</option>
+                  <option value="or">OR</option>
+                </select>
+              </div>
             }
-          </div>
-        }
+
+            @if (isGroup(child)) {
+              <div class="nf-filter-builder__group">
+                <div class="nf-filter-builder__group-head">
+                  <span class="nf-filter-builder__group-label">{{ 'Group' | translate }}</span>
+                  <select
+                    class="nf-filter-builder__combinator-select"
+                    [ngModel]="child.combinator"
+                    (ngModelChange)="setNestedCombinator(i, $event)"
+                  >
+                    <option value="and">AND</option>
+                    <option value="or">OR</option>
+                  </select>
+                  <button type="button" class="nf-filter-builder__icon-btn" (click)="removeRootChild(i)" aria-label="Remove group">
+                    ×
+                  </button>
+                </div>
+                @for (nested of child.children; track $index; let j = $index) {
+                  @if (j > 0) {
+                    <div class="nf-filter-builder__combinator nf-filter-builder__combinator--nested">
+                      {{ child.combinator === 'or' ? 'OR' : 'AND' }}
+                    </div>
+                  }
+                  @if (!isGroup(nested)) {
+                    <ng-container
+                      *ngTemplateOutlet="clauseRow; context: { $implicit: nested, rootIndex: i, nestedIndex: j }"
+                    />
+                  }
+                }
+                <button type="button" class="nf-filter-builder__link" (click)="addNestedClause(i)">
+                  + {{ 'Add filter' | translate }}
+                </button>
+              </div>
+            } @else {
+              <ng-container
+                *ngTemplateOutlet="clauseRow; context: { $implicit: child, rootIndex: i, nestedIndex: null }"
+              />
+            }
+          }
+        </div>
+      }
+
+      <div class="nf-filter-builder__toolbar">
+        <button type="button" class="nf-filter-builder__link" (click)="addRootClause()">
+          + {{ 'Add filter' | translate }}
+        </button>
+        <button type="button" class="nf-filter-builder__link" (click)="addRootGroup()">
+          + {{ 'Add filter group' | translate }}
+        </button>
       </div>
+
       <div class="nf-filter-builder__actions">
         <nf-button variant="secondary" size="xs" (clicked)="onClear()">{{ 'Clear' | translate }}</nf-button>
         <nf-button variant="primary" size="xs" (clicked)="onApply()">{{ 'Apply' | translate }}</nf-button>
       </div>
     </div>
+
+    <ng-template #clauseRow let-clause let-rootIndex="rootIndex" let-nestedIndex="nestedIndex">
+      <div class="nf-filter-builder__row">
+        <select
+          class="nf-filter-field__control nf-filter-field__control--select nf-filter-builder__prop"
+          [ngModel]="clause.field"
+          (ngModelChange)="setClauseField(rootIndex, nestedIndex, $event)"
+        >
+          @for (f of fields(); track f.key) {
+            <option [ngValue]="f.key">{{ f.label | translate }}</option>
+          }
+        </select>
+        <select
+          class="nf-filter-field__control nf-filter-field__control--select nf-filter-builder__op"
+          [ngModel]="clause.op"
+          (ngModelChange)="setClauseOp(rootIndex, nestedIndex, $event)"
+        >
+          @for (op of opsForField(clause.field); track op) {
+            <option [ngValue]="op">{{ opLabel(op) }}</option>
+          }
+        </select>
+        @if (!isUnary(clause.op)) {
+          @if (clause.op === 'between') {
+            <div class="nf-filter-builder__between">
+              <input
+                class="nf-filter-field__control"
+                [type]="valueInputType(clause.field)"
+                [ngModel]="betweenPart(clause, 0)"
+                (ngModelChange)="setBetweenPart(rootIndex, nestedIndex, 0, $event)"
+              />
+              <span>—</span>
+              <input
+                class="nf-filter-field__control"
+                [type]="valueInputType(clause.field)"
+                [ngModel]="betweenPart(clause, 1)"
+                (ngModelChange)="setBetweenPart(rootIndex, nestedIndex, 1, $event)"
+              />
+            </div>
+          } @else if (fieldOf(clause.field)?.type === 'select' || fieldOf(clause.field)?.type === 'multiselect') {
+            <select
+              class="nf-filter-field__control nf-filter-field__control--select nf-filter-builder__value"
+              [ngModel]="clause.value"
+              (ngModelChange)="setClauseValue(rootIndex, nestedIndex, $event)"
+            >
+              <option [ngValue]="null">{{ 'All' | translate }}</option>
+              @for (opt of fieldOf(clause.field)?.options ?? []; track opt.value) {
+                <option [ngValue]="opt.value">{{ opt.label | translate }}</option>
+              }
+            </select>
+          } @else if (fieldOf(clause.field)?.type === 'boolean') {
+            <select
+              class="nf-filter-field__control nf-filter-field__control--select nf-filter-builder__value"
+              [ngModel]="clause.value"
+              (ngModelChange)="setClauseValue(rootIndex, nestedIndex, $event)"
+            >
+              <option [ngValue]="null">{{ 'All' | translate }}</option>
+              <option [ngValue]="true">{{ 'Yes' | translate }}</option>
+              <option [ngValue]="false">{{ 'No' | translate }}</option>
+            </select>
+          } @else {
+            <input
+              class="nf-filter-field__control nf-filter-builder__value"
+              [type]="valueInputType(clause.field)"
+              [ngModel]="clause.value"
+              (ngModelChange)="setClauseValue(rootIndex, nestedIndex, $event)"
+              [placeholder]="(fieldOf(clause.field)?.placeholder ?? fieldOf(clause.field)?.label ?? '') | translate"
+            />
+          }
+        }
+        <button
+          type="button"
+          class="nf-filter-builder__icon-btn"
+          (click)="removeClause(rootIndex, nestedIndex)"
+          aria-label="Remove filter"
+        >
+          ×
+        </button>
+      </div>
+    </ng-template>
   `,
-  styles: [`
-    .nf-filter-builder {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      padding: 12px 14px;
-      width: fit-content;
-      min-width: 260px;
-      max-width: min(560px, calc(100vw - 32px));
-      box-sizing: border-box;
-      background: var(--nf-surface-section, #ffffff);
-    }
-
-    .nf-filter-builder__header {
-      margin: 0 0 10px 0;
-      padding: 0 0 8px 0;
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: var(--nf-text-primary, #111827);
-      border-bottom: 1px solid var(--nf-border-default, #e5e7eb);
-    }
-
-    .nf-filter-builder__fields {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px 12px;
-      margin-bottom: 12px;
-      width: 100%;
-    }
-
-    .nf-filter-builder__field {
-      width: 100%;
-      min-width: 0;
-    }
-
-    /* ── Anatomy Pure Form Field ── */
-    .nf-filter-field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      width: 100%;
-    }
-
-    .nf-filter-field__label {
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: var(--nf-text-secondary, #4b5563);
-      line-height: 1.25;
-      cursor: pointer;
-    }
-
-    .nf-filter-field__control {
-      width: 100%;
-      height: 30px;
-      padding: 0 8px;
-      font-size: 0.8125rem;
-      font-family: inherit;
-      color: var(--nf-text-primary, #111827);
-      background: var(--nf-surface-section, #ffffff);
-      border: 1px solid var(--nf-border-default, #e5e7eb);
-      border-radius: 6px;
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-      outline: none;
-      box-sizing: border-box;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
-
-      &::placeholder {
-        color: var(--nf-input-placeholder-color, var(--nf-text-muted, #9ca3af));
+  styles: [
+    `
+      .nf-filter-builder {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        padding: 12px 14px;
+        width: max-content;
+        min-width: 420px;
+        max-width: min(640px, calc(100vw - 32px));
+        box-sizing: border-box;
+        background: var(--nf-surface-section, #ffffff);
       }
-
-      &:focus {
-        border-color: var(--nf-primary, #2563eb);
-        box-shadow: 0 0 0 2px var(--nf-primary-light, #eff6ff);
+      .nf-filter-builder__header {
+        margin: 0 0 10px;
+        padding: 0 0 8px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--nf-text-primary, #111827);
+        border-bottom: 1px solid var(--nf-border-default, #e5e7eb);
       }
-    }
-
-    .nf-filter-field__control--select {
-      cursor: pointer;
-      appearance: none;
-      padding-right: 26px;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-      background-position: right 8px center;
-      background-repeat: no-repeat;
-    }
-
-    .nf-filter-builder__picker {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      width: 100%;
-    }
-    .nf-filter-builder__picker-label {
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: var(--nf-text-secondary, #4b5563);
-    }
-    .nf-filter-builder__picker-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .nf-filter-builder__picker-btn {
-      flex: 1;
-      min-width: 0;
-      text-align: left;
-      height: 30px;
-      padding: 0 8px;
-      border: 1px solid var(--nf-border-default, #e5e7eb);
-      border-radius: 6px;
-      background: var(--nf-surface-section, #fff);
-      font-size: 0.8125rem;
-      font-family: inherit;
-      color: var(--nf-text-primary, #111827);
-      cursor: pointer;
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-    }
-
-    .nf-filter-builder__actions {
-      display: flex;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-      gap: 6px;
-      flex-shrink: 0;
-      padding-top: 10px;
-      border-top: 1px solid var(--nf-border-default, #e5e7eb);
-    }
-  `],
+      .nf-filter-builder__empty {
+        margin: 0 0 10px;
+        font-size: 0.8125rem;
+        color: var(--nf-text-muted, #6b7280);
+      }
+      .nf-filter-builder__rows {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .nf-filter-builder__row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+      }
+      .nf-filter-builder__prop {
+        min-width: 120px;
+        width: auto;
+        flex: 0 1 140px;
+      }
+      .nf-filter-builder__op {
+        min-width: 100px;
+        width: auto;
+        flex: 0 1 120px;
+      }
+      .nf-filter-builder__value {
+        min-width: 120px;
+        flex: 1 1 140px;
+      }
+      .nf-filter-builder__between {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex: 1 1 220px;
+        min-width: 200px;
+      }
+      .nf-filter-builder__between .nf-filter-field__control {
+        flex: 1;
+        min-width: 0;
+        width: auto;
+      }
+      .nf-filter-field__control {
+        height: 30px;
+        padding: 0 8px;
+        font-size: 0.8125rem;
+        font-family: inherit;
+        color: var(--nf-text-primary, #111827);
+        background: var(--nf-surface-section, #ffffff);
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        border-radius: 6px;
+        box-sizing: border-box;
+        outline: none;
+      }
+      .nf-filter-field__control--select {
+        cursor: pointer;
+        appearance: none;
+        padding-right: 22px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-position: right 6px center;
+        background-repeat: no-repeat;
+      }
+      .nf-filter-builder__combinator {
+        display: flex;
+        align-items: center;
+        padding-left: 2px;
+      }
+      .nf-filter-builder__combinator--nested {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--nf-primary, #2563eb);
+        padding: 2px 0 2px 8px;
+      }
+      .nf-filter-builder__combinator-select {
+        height: 24px;
+        padding: 0 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--nf-primary, #2563eb);
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        border-radius: 4px;
+        background: var(--nf-primary-light, #eff6ff);
+        cursor: pointer;
+      }
+      .nf-filter-builder__group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 8px;
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        border-radius: 8px;
+        background: var(--nf-color-gray-50, #f9fafb);
+      }
+      .nf-filter-builder__group-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .nf-filter-builder__group-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--nf-text-muted, #6b7280);
+      }
+      .nf-filter-builder__icon-btn {
+        width: 24px;
+        height: 24px;
+        border: none;
+        border-radius: 4px;
+        background: transparent;
+        color: var(--nf-text-muted, #9ca3af);
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 1;
+        flex: 0 0 auto;
+      }
+      .nf-filter-builder__icon-btn:hover {
+        background: var(--nf-color-gray-200, #e5e7eb);
+        color: var(--nf-text-primary, #111827);
+      }
+      .nf-filter-builder__toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      .nf-filter-builder__link {
+        border: none;
+        background: none;
+        padding: 0;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--nf-primary, #2563eb);
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .nf-filter-builder__link:hover {
+        text-decoration: underline;
+      }
+      .nf-filter-builder__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        padding-top: 10px;
+        border-top: 1px solid var(--nf-border-default, #e5e7eb);
+      }
+    `,
+  ],
 })
 export class FilterBuilderComponent {
-  private readonly lookupSearchers = inject(LOOKUP_SEARCHERS, { optional: true });
-  private readonly lookupPickers = inject(LOOKUP_PICKERS, { optional: true });
-
+  /** Field configs available for property picker. */
   filters = input.required<FilterFieldConfig[]>();
+  /** @deprecated Prefer `group` — kept for older call sites. */
   values = input<Record<string, unknown>>({});
   lookups = input<LookupContext>({});
-  /** When this changes (e.g. menu opened), pending state is synced from values(). */
-  openCount = input<number>(0);
+  /** Active filter tree. */
+  group = input<FilterGroup | null>(null);
+  /** Bump when menu opens to resync draft. */
+  openCount = input(0);
 
-  apply = output<Record<string, unknown>>();
+  /** Emits FilterGroup on Apply. */
+  apply = output<FilterGroup>();
+  /** Emits when Clear is clicked. */
   clear = output<void>();
 
-  private readonly pending = signal<Record<string, unknown>>({});
-  private readonly pickerLabels = signal<Record<string, string>>({});
+  readonly draft = signal<FilterGroup>(emptyFilterGroup());
+
+  readonly fields = computed(() => this.filters());
 
   constructor() {
     effect(() => {
       this.openCount();
-      this.pending.set({ ...this.values() });
+      const incoming = this.group();
+      if (incoming) {
+        this.draft.set(structuredClone(incoming));
+        return;
+      }
+      // Legacy: build AND group of eq clauses from values map
+      const vals = this.values();
+      const fields = this.filters();
+      const children: FilterClause[] = [];
+      for (const f of fields) {
+        const v = vals[f.key];
+        if (v === undefined || v === null || v === '') continue;
+        children.push({ field: f.key, op: defaultOperatorForFilterType(f.type), value: v });
+      }
+      this.draft.set({ combinator: 'and', children });
     });
   }
 
-  getValue(key: string): unknown {
-    return this.pending()[key] ?? null;
+  isGroup(node: FilterNode): node is FilterGroup {
+    return isFilterGroup(node);
   }
 
-  setValue(key: string, value: unknown): void {
-    this.pending.update((prev) => ({
-      ...prev,
-      [key]: value === '' || value === undefined ? null : value,
+  fieldOf(key: string): FilterFieldConfig | undefined {
+    return this.fields().find((f) => f.key === key);
+  }
+
+  opsForField(key: string): FilterOperator[] {
+    return operatorsForFilterType(this.fieldOf(key)?.type);
+  }
+
+  opLabel(op: FilterOperator): string {
+    return FILTER_OPERATOR_LABELS[op] ?? op;
+  }
+
+  isUnary(op: FilterOperator): boolean {
+    return op === 'isEmpty' || op === 'isNotEmpty';
+  }
+
+  valueInputType(fieldKey: string): string {
+    const t = this.fieldOf(fieldKey)?.type;
+    if (t === 'number') return 'number';
+    if (t === 'date' || t === 'daterange') return 'date';
+    return 'text';
+  }
+
+  betweenPart(clause: FilterClause, index: 0 | 1): string {
+    const v = clause.value;
+    if (!Array.isArray(v)) return '';
+    return v[index] != null ? String(v[index]) : '';
+  }
+
+  private defaultClause(): FilterClause {
+    const first = this.fields()[0];
+    const field = first?.key ?? 'id';
+    const op = defaultOperatorForFilterType(first?.type);
+    return { field, op, value: this.isUnary(op) ? undefined : '' };
+  }
+
+  addRootClause(): void {
+    this.draft.update((g) => ({ ...g, children: [...g.children, this.defaultClause()] }));
+  }
+
+  addRootGroup(): void {
+    this.draft.update((g) => ({
+      ...g,
+      children: [...g.children, { combinator: 'or' as const, children: [this.defaultClause()] }],
     }));
   }
 
-  isLookupPicker(filter: FilterFieldConfig): boolean {
-    const key = filter.lookupKey?.trim();
-    return !!key && !!this.lookupPickers?.[key];
-  }
-
-  isLookupCombobox(filter: FilterFieldConfig): boolean {
-    const key = filter.lookupKey?.trim();
-    if (!key || this.isLookupPicker(filter)) return false;
-    // Article = overlay picker (LOOKUP_PICKERS). Never typeahead dump.
-    if (key === 'items') return false;
-    return true;
-  }
-
-  lookupSearchFn(filter: FilterFieldConfig): LookupSearchFn | undefined {
-    const key = filter.lookupKey?.trim();
-    if (!key || !this.lookupSearchers) return undefined;
-    return this.lookupSearchers[key];
-  }
-
-  lookupPickerFn(filter: FilterFieldConfig): LookupPickerFn | undefined {
-    const key = filter.lookupKey?.trim();
-    if (!key || !this.lookupPickers) return undefined;
-    return this.lookupPickers[key];
-  }
-
-  pickerLabel(filter: FilterFieldConfig): string {
-    const value = this.getValue(filter.key);
-    if (value == null || value === '') return '';
-    return this.pickerLabels()[filter.key] || String(value);
-  }
-
-  async openLookupPicker(filter: FilterFieldConfig): Promise<void> {
-    const pick = this.lookupPickerFn(filter);
-    if (!pick) return;
-    const current = this.getValue(filter.key);
-    const result = await pick(current == null ? null : String(current));
-    if (!result) return;
-    this.setValue(filter.key, result.value);
-    this.pickerLabels.update((prev) => ({ ...prev, [filter.key]: result.label }));
-  }
-
-  clearPicker(filter: FilterFieldConfig): void {
-    this.setValue(filter.key, null);
-    this.pickerLabels.update((prev) => {
-      const next = { ...prev };
-      delete next[filter.key];
-      return next;
+  addNestedClause(rootIndex: number): void {
+    this.draft.update((g) => {
+      const children = [...g.children];
+      const node = children[rootIndex];
+      if (!isFilterGroup(node)) return g;
+      children[rootIndex] = { ...node, children: [...node.children, this.defaultClause()] };
+      return { ...g, children };
     });
   }
 
-  comboValue(key: string): string {
-    const value = this.getValue(key);
-    return value == null ? '' : String(value);
+  removeRootChild(index: number): void {
+    this.draft.update((g) => ({
+      ...g,
+      children: g.children.filter((_, i) => i !== index),
+    }));
   }
 
-  getOptions(filter: FilterFieldConfig): Array<{ label: string; value: unknown }> {
-    if (filter.lookupKey) {
-      const items = this.lookups()[filter.lookupKey];
-      if (Array.isArray(items)) {
-        return items.map((item) => ({ label: String(item.value), value: item.key }));
+  removeClause(rootIndex: number, nestedIndex: number | null): void {
+    this.draft.update((g) => {
+      const children = [...g.children];
+      if (nestedIndex == null) {
+        children.splice(rootIndex, 1);
+        return { ...g, children };
       }
+      const node = children[rootIndex];
+      if (!isFilterGroup(node)) return g;
+      const nested = [...node.children];
+      nested.splice(nestedIndex, 1);
+      if (nested.length === 0) {
+        children.splice(rootIndex, 1);
+      } else {
+        children[rootIndex] = { ...node, children: nested };
+      }
+      return { ...g, children };
+    });
+  }
+
+  setRootCombinator(combinator: FilterCombinator): void {
+    this.draft.update((g) => ({ ...g, combinator }));
+  }
+
+  setNestedCombinator(rootIndex: number, combinator: FilterCombinator): void {
+    this.draft.update((g) => {
+      const children = [...g.children];
+      const node = children[rootIndex];
+      if (!isFilterGroup(node)) return g;
+      children[rootIndex] = { ...node, combinator };
+      return { ...g, children };
+    });
+  }
+
+  private updateClause(
+    rootIndex: number,
+    nestedIndex: number | null,
+    patch: Partial<FilterClause>
+  ): void {
+    this.draft.update((g) => {
+      const children = [...g.children];
+      if (nestedIndex == null) {
+        const node = children[rootIndex];
+        if (isFilterGroup(node)) return g;
+        children[rootIndex] = { ...node, ...patch };
+        return { ...g, children };
+      }
+      const group = children[rootIndex];
+      if (!isFilterGroup(group)) return g;
+      const nested = [...group.children];
+      const leaf = nested[nestedIndex];
+      if (isFilterGroup(leaf)) return g;
+      nested[nestedIndex] = { ...leaf, ...patch };
+      children[rootIndex] = { ...group, children: nested };
+      return { ...g, children };
+    });
+  }
+
+  setClauseField(rootIndex: number, nestedIndex: number | null, field: string): void {
+    const cfg = this.fieldOf(field);
+    const op = defaultOperatorForFilterType(cfg?.type);
+    this.updateClause(rootIndex, nestedIndex, {
+      field,
+      op,
+      value: this.isUnary(op) ? undefined : '',
+    });
+  }
+
+  setClauseOp(rootIndex: number, nestedIndex: number | null, op: FilterOperator): void {
+    this.updateClause(rootIndex, nestedIndex, {
+      op,
+      value: this.isUnary(op) ? undefined : '',
+    });
+  }
+
+  setClauseValue(rootIndex: number, nestedIndex: number | null, value: unknown): void {
+    this.updateClause(rootIndex, nestedIndex, { value });
+  }
+
+  setBetweenPart(rootIndex: number, nestedIndex: number | null, index: 0 | 1, part: string): void {
+    const g = this.draft();
+    const node = g.children[rootIndex];
+    let clause: FilterClause | null = null;
+    if (nestedIndex == null) {
+      clause = isFilterGroup(node) ? null : node;
+    } else if (isFilterGroup(node)) {
+      const leaf = node.children[nestedIndex];
+      clause = isFilterGroup(leaf) ? null : leaf;
     }
-    return filter.options ?? [];
+    if (!clause) return;
+    const current: [string, string] = [
+      Array.isArray(clause.value) && clause.value[0] != null ? String(clause.value[0]) : '',
+      Array.isArray(clause.value) && clause.value[1] != null ? String(clause.value[1]) : '',
+    ];
+    current[index] = part;
+    this.updateClause(rootIndex, nestedIndex, { value: current });
   }
 
   onApply(): void {
-    const current = this.pending();
-    const cleaned: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(current)) {
-      if (v !== null && v !== undefined && v !== '') {
-        cleaned[k] = v;
-      }
-    }
-    this.apply.emit(cleaned);
+    this.apply.emit(structuredClone(this.draft()));
   }
 
   onClear(): void {
-    this.pending.set({});
-    this.pickerLabels.set({});
+    this.draft.set(emptyFilterGroup());
     this.clear.emit();
   }
 }

@@ -31,4 +31,4 @@ Status badges : `live` (matrices d’options) · `partial` · `stub` (deps lourd
 | `/archetypes/tree` | tree |
 | stubs | wizard · settings · dashboard · document-workspace |
 
-Mocks in-memory · pas d’auth · consomme Anatomy via `@platform/*`.
+Mocks in-memory retirés pour Products · API showroom H2 (`http://127.0.0.1:8082`) · pas d’auth.

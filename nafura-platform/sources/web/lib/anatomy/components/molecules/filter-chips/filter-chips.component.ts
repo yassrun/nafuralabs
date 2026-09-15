@@ -3,10 +3,15 @@ import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { LucideAngularModule } from 'lucide-angular';
 
-import type { FilterFieldConfig } from '../../../types';
+import type { FilterClause, FilterFieldConfig, FilterGroup } from '../../../types';
+import {
+  collectLeaves,
+  FILTER_OPERATOR_LABELS,
+} from '../../organisms/listing-flat/listing-query-state.util';
 
-/** One rendered chip: field key + translated label + display value. */
+/** One rendered chip: leaf index + translated label + display value. */
 export interface FilterChipEntry {
+  leafIndex: number;
   key: string;
   label: string;
   display: string;
@@ -15,17 +20,7 @@ export interface FilterChipEntry {
 /**
  * Filter Chips (`nf-filter-chips`)
  *
- * Renders the currently active filter values as removable pills
- * (« Statut: Actif × »). The × emits `remove(key)` — the parent owns the
- * filter state. Select/multiselect values are mapped back to their option
- * labels when the field config provides options.
- *
- * @example
- * <nf-filter-chips
- *   [fields]="config.filters ?? []"
- *   [values]="filterValues()"
- *   (remove)="removeFilter($event)"
- * />
+ * Renders active filter clauses as removable pills (« Status is Active × »).
  */
 @Component({
   selector: 'nf-filter-chips',
@@ -33,7 +28,7 @@ export interface FilterChipEntry {
   imports: [CommonModule, TranslateModule, LucideAngularModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @for (chip of chips(); track chip.key) {
+    @for (chip of chips(); track chip.leafIndex) {
       <span class="nf-filter-chip" [attr.data-filter-key]="chip.key">
         <span class="nf-filter-chip__label">{{ chip.label | translate }}:</span>
         <span class="nf-filter-chip__value">{{ chip.display | translate }}</span>
@@ -41,7 +36,7 @@ export interface FilterChipEntry {
           type="button"
           class="nf-filter-chip__remove"
           [attr.aria-label]="('Remove filter' | translate) + ' ' + (chip.label | translate)"
-          (click)="remove.emit(chip.key)"
+          (click)="removeLeaf.emit(chip.leafIndex)"
         >
           <lucide-icon name="x" [size]="12" />
         </button>
@@ -66,7 +61,6 @@ export interface FilterChipEntry {
         color: var(--nf-text-primary, #111827);
         white-space: nowrap;
         flex: 0 0 auto;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
       }
       .nf-filter-chip__label {
         color: var(--nf-text-muted, #6b7280);
@@ -88,7 +82,6 @@ export interface FilterChipEntry {
         background: transparent;
         color: var(--nf-text-muted, #9ca3af);
         cursor: pointer;
-        transition: all 0.1s ease;
       }
       .nf-filter-chip__remove:hover {
         background: var(--nf-color-gray-200, #e5e7eb);
@@ -98,19 +91,33 @@ export interface FilterChipEntry {
   ],
 })
 export class FilterChipsComponent {
-  /** Field configs — used for labels and option-label mapping. */
   readonly fields = input<FilterFieldConfig[]>([]);
-  /** Active filter values (parent-owned). */
+  /** @deprecated Prefer `group`. */
   readonly values = input<Record<string, unknown>>({});
+  readonly group = input<FilterGroup | null>(null);
 
-  /** Chip × clicked — remove this filter key. */
+  /** Chip × — remove leaf by depth-first index. */
+  readonly removeLeaf = output<number>();
+  /** @deprecated Prefer removeLeaf. */
   readonly remove = output<string>();
 
   readonly chips = computed((): FilterChipEntry[] => {
+    const group = this.group();
+    const fields = this.fields();
+    if (group) {
+      return collectLeaves(group).map((clause, leafIndex) => ({
+        leafIndex,
+        key: clause.field,
+        label: this.fieldFor(clause.field)?.label ?? clause.field,
+        display: this.clauseDisplay(clause),
+      }));
+    }
+    // Legacy values map → eq chips
     const values = this.values();
     return Object.keys(values)
       .filter((key) => this.isActive(values[key]))
-      .map((key) => ({
+      .map((key, leafIndex) => ({
+        leafIndex,
         key,
         label: this.fieldFor(key)?.label ?? key,
         display: this.displayValue(key, values[key]),
@@ -127,6 +134,15 @@ export class FilterChipsComponent {
     return true;
   }
 
+  private clauseDisplay(clause: FilterClause): string {
+    const opLabel = FILTER_OPERATOR_LABELS[clause.op] ?? clause.op;
+    if (clause.op === 'isEmpty' || clause.op === 'isNotEmpty') {
+      return opLabel;
+    }
+    const valueLabel = this.displayValue(clause.field, clause.value);
+    return `${opLabel} ${valueLabel}`.trim();
+  }
+
   private displayValue(key: string, value: unknown): string {
     const field = this.fieldFor(key);
     if (Array.isArray(value)) {
@@ -137,6 +153,6 @@ export class FilterChipsComponent {
 
   private optionLabel(field: FilterFieldConfig | undefined, value: unknown): string {
     const option = field?.options?.find((o) => o.value === value);
-    return option?.label ?? String(value);
+    return option?.label ?? String(value ?? '');
   }
 }

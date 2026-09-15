@@ -266,6 +266,7 @@ export interface RowActionEvent<T> {
 
     table {
       width: 100%;
+      min-width: 640px;
       border-collapse: collapse;
       background: var(--nf-surface-section, #ffffff);
       border-spacing: 0;

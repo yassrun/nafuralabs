@@ -55,7 +55,7 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
       </div>
 
       <nf-data-table
-        [items]="items()"
+        [items]="filteredItems()"
         [columns]="visibleColumns()"
         [rowClickable]="true"
         [selectable]="selectionMode() ? 'multiple' : false"
@@ -106,7 +106,7 @@ export class ProductListingPage {
   readonly search = signal('');
   readonly filterValues = signal<Record<string, unknown>>({});
   readonly sort = signal<{ column: string; direction: 'asc' | 'desc' } | null>(null);
-  readonly selectionMode = signal(false);
+  readonly selectionMode = signal(true);
 
   readonly filterFields: FilterFieldConfig[] = [
     {
@@ -137,8 +137,14 @@ export class ProductListingPage {
     return this.allColumns.filter((c) => visible.has(c.key));
   });
 
-  readonly items = computed(() => {
-    let rows = this.facade.list();
+  readonly items = signal<Product[]>([]);
+
+  constructor() {
+    void this.facade.refresh().then((rows) => this.items.set(rows));
+  }
+
+  readonly filteredItems = computed(() => {
+    let rows = this.items();
     const q = this.search().trim().toLowerCase();
     if (q) {
       rows = rows.filter(

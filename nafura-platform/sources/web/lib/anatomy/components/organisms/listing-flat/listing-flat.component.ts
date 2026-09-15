@@ -19,6 +19,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslateModule } from '@ngx-translate/core';
@@ -37,8 +38,34 @@ import {
   type ListingActionItem,
 } from '../../molecules/listing-actions';
 import type { ListingControlsColumn } from '../../molecules/listing-controls';
-import type { ColumnConfig } from '../../../types';
-import { matchesFilters, matchesSearch } from './listing-query.util';
+import type { ColumnConfig, FilterGroup, ListingQueryState } from '../../../types';
+import {
+  matchesFilterGroup,
+  matchesSearch,
+} from './listing-query.util';
+import {
+  clausesToGroup,
+  emptyFilterGroup,
+  filterGroupToPinnedValues,
+  filterValuesToClauses,
+  listingQuerySnapshotEqual,
+  mergeListingQuery,
+  removeLeafAt,
+  resolveFilterGroup,
+  sortItemsLocally,
+  upsertPinnedClause,
+  withSyncedFilters,
+  collectLeaves,
+  columnStateFromControls,
+  controlColumnsFromQuery,
+  createDefaultListingQuery,
+} from './listing-query-state.util';
+import {
+  LISTING_SAVED_VIEWS_ADAPTER,
+  type ListingSavedView,
+  type ListingSavedViewsAdapter,
+} from './listing-saved-views.adapter';
+import type { SortChangeEvent } from '../data-table';
 import { CsvService } from '../../services/csv.service';
 import {
   DEFAULT_LISTING_FLAT_FEATURES,
@@ -50,6 +77,7 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     TranslateModule,
     MatMenuModule,
     LucideAngularModule,
@@ -67,22 +95,131 @@ import {
       <!-- Row 1: Search + Filter Add + Filter Chips (starts left, flows right) -->
       @if (features().search || features().filters) {
         <div class="nf-listing-flat__filters">
-          @if (features().search) {
-            <div class="nf-listing-flat__search">
-              <lucide-icon name="search" [size]="14" class="nf-listing-flat__search-icon" />
-              <input
-                type="text"
-                class="nf-listing-flat__search-input"
-                [placeholder]="'Search' | translate"
-                [value]="search()"
-                (input)="onSearchChange($any($event.target).value)"
-                [attr.aria-label]="'Search' | translate"
-              />
-            </div>
-          }
-          @if (features().filters) {
+          <div class="nf-listing-flat__filters-row nf-listing-flat__filters-row--top">
+            @if (features().search) {
+              <div class="nf-listing-flat__search">
+                <lucide-icon name="search" [size]="14" class="nf-listing-flat__search-icon" />
+                <input
+                  type="text"
+                  class="nf-listing-flat__search-input"
+                  [placeholder]="'Search' | translate"
+                  [value]="search()"
+                  (input)="onSearchChange($any($event.target).value)"
+                  [attr.aria-label]="'Search' | translate"
+                />
+              </div>
+            }
+            @if (features().filters && pinnedFilters().length > 0) {
+              <div class="nf-listing-flat__pinned-filters">
+                @for (filter of pinnedFilters(); track filter.key) {
+                  <div class="nf-listing-flat__pinned-filter">
+                    <label class="nf-listing-flat__pinned-filter-label" [for]="'filter-' + filter.key">
+                      {{ filter.label | translate }}
+                    </label>
+                    @switch (filter.type) {
+                      @case ('select') {
+                        <select
+                          [id]="'filter-' + filter.key"
+                          class="nf-listing-flat__pinned-filter-control nf-listing-flat__pinned-filter-control--select"
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event)"
+                        >
+                          <option [ngValue]="null">{{ (filter.placeholder ?? 'All') | translate }}</option>
+                          @for (opt of filter.options ?? []; track opt.value) {
+                            <option [ngValue]="opt.value">{{ opt.label | translate }}</option>
+                          }
+                        </select>
+                      }
+                      @case ('text') {
+                        <input
+                          [id]="'filter-' + filter.key"
+                          type="text"
+                          class="nf-listing-flat__pinned-filter-control"
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event)"
+                          [placeholder]="(filter.placeholder ?? filter.label) | translate"
+                        />
+                      }
+                      @case ('number') {
+                        <input
+                          [id]="'filter-' + filter.key"
+                          type="number"
+                          class="nf-listing-flat__pinned-filter-control"
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event != null && $event !== '' ? +$event : null)"
+                          [placeholder]="(filter.placeholder ?? filter.label) | translate"
+                        />
+                      }
+                      @case ('date') {
+                        <input
+                          [id]="'filter-' + filter.key"
+                          type="date"
+                          class="nf-listing-flat__pinned-filter-control"
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event)"
+                        />
+                      }
+                      @case ('boolean') {
+                        <select
+                          [id]="'filter-' + filter.key"
+                          class="nf-listing-flat__pinned-filter-control nf-listing-flat__pinned-filter-control--select"
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event)"
+                        >
+                          <option [ngValue]="null">{{ (filter.placeholder ?? 'All') | translate }}</option>
+                          <option [ngValue]="true">{{ 'Yes' | translate }}</option>
+                          <option [ngValue]="false">{{ 'No' | translate }}</option>
+                        </select>
+                      }
+                      @case ('multiselect') {
+                        <select
+                          [id]="'filter-' + filter.key"
+                          class="nf-listing-flat__pinned-filter-control nf-listing-flat__pinned-filter-control--select"
+                          multiple
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event)"
+                        >
+                          @for (opt of filter.options ?? []; track opt.value) {
+                            <option [ngValue]="opt.value">{{ opt.label | translate }}</option>
+                          }
+                        </select>
+                      }
+                      @case ('daterange') {
+                        <div class="nf-listing-flat__pinned-range">
+                          <input
+                            type="date"
+                            class="nf-listing-flat__pinned-filter-control"
+                            [ngModel]="rangePart(filter.key, 0)"
+                            (ngModelChange)="setRangePart(filter.key, 0, $event)"
+                          />
+                          <span>—</span>
+                          <input
+                            type="date"
+                            class="nf-listing-flat__pinned-filter-control"
+                            [ngModel]="rangePart(filter.key, 1)"
+                            (ngModelChange)="setRangePart(filter.key, 1, $event)"
+                          />
+                        </div>
+                      }
+                      @default {
+                        <input
+                          [id]="'filter-' + filter.key"
+                          type="text"
+                          class="nf-listing-flat__pinned-filter-control"
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event)"
+                          [placeholder]="(filter.placeholder ?? filter.label) | translate"
+                        />
+                      }
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+          <div class="nf-listing-flat__filters-row nf-listing-flat__filters-row--bottom">
             <div class="nf-listing-flat__chips">
-              @if ((config().filters ?? []).length > 0) {
+              @if (popupFilters().length > 0) {
                 <button
                   type="button"
                   class="nf-listing-flat__add-filter"
@@ -103,7 +240,7 @@ import {
                   <div (click)="$event.stopPropagation()">
                     <nf-filter-builder
                       [filters]="config().filters ?? []"
-                      [values]="filterValues()"
+                      [group]="activeFilterGroup()"
                       [openCount]="filterMenuOpenCount()"
                       (apply)="onFilterApply($event)"
                       (clear)="onFilterClear()"
@@ -113,36 +250,32 @@ import {
               }
               <nf-filter-chips
                 [fields]="config().filters ?? []"
-                [values]="filterValues()"
-                (remove)="onRemoveFilter($event)"
+                [group]="activeFilterGroup()"
+                (removeLeaf)="onRemoveFilterLeaf($event)"
               />
             </div>
-          }
+          </div>
         </div>
       }
 
-      <!-- Row 2: Selection Pill (LEFT) ➔ Table Controls + Action Buttons (RIGHT) -->
+      <!-- Row 2: Selection pill + table controls (LEFT) ➔ Action buttons (RIGHT) -->
       <div class="nf-listing-flat__actions-row">
-        <!-- Left: Selection indicator & contextual bulk message -->
+        <!-- Left: Selection indicator + table controls -->
         <div class="nf-listing-flat__actions-left">
           @if (selection().length > 0) {
             <span class="nf-listing-flat__selcount">
               {{ selection().length }} {{ 'selected' | translate }}
             </span>
           }
-        </div>
-
-        <!-- Right: Table Controls (Columns / Multi-select) · Separator · Action Buttons -->
-        <div class="nf-listing-flat__actions-right">
-          @if (features().columnToggle || features().selectionToggle) {
+          @if (features().columnToggle || features().selectionToggle || savedViewsEnabled()) {
             <div class="nf-listing-flat__table-controls">
               <ng-container [ngTemplateOutlet]="controlsTpl" />
             </div>
-            @if (hasActions()) {
-              <div class="nf-listing-flat__actions-sep"></div>
-            }
           }
+        </div>
 
+        <!-- Right: Action buttons -->
+        <div class="nf-listing-flat__actions-right">
           <ng-content />
 
           @if (hasActions()) {
@@ -185,9 +318,12 @@ import {
           [rowClickable]="true"
           [selectable]="tableSelectable()"
           [selection]="selection()"
+          [sortColumn]="sortColumn()"
+          [sortDirection]="sortDirection()"
           [emptyMessage]="config().emptyMessage ?? 'No items'"
           [loading]="loading()"
           (selectionChange)="onTableSelectionChange($event)"
+          (sortChange)="onSortChange($event)"
           (rowClick)="onRowClick($event)"
           (rowDblClick)="rowDblClick.emit($event)"
         />
@@ -334,10 +470,10 @@ import {
         </div>
       }
 
-      @if (features().pagination && filteredItems().length > 0) {
+      @if (features().pagination && pagerTotal() > 0) {
         <div class="nf-listing-flat__pager">
           <nf-pagination
-            [total]="filteredItems().length"
+            [total]="pagerTotal()"
             [page]="page()"
             [pageSize]="pageSize()"
             [pageSizeOptions]="pageSizeOptions()"
@@ -362,6 +498,54 @@ import {
               "
               (clicked)="toggleSelectionOn.update((v) => !v)"
             />
+          }
+          @if (savedViewsEnabled()) {
+            <nf-button
+              variant="secondary"
+              size="xs"
+              iconLibrary="lucide"
+              icon="bookmark"
+              [active]="viewDirty()"
+              [matMenuTriggerFor]="viewsMenu"
+              [tooltip]="'Saved views' | translate"
+              [attr.aria-label]="'Saved views' | translate"
+            >
+              {{ 'Views' | translate }}
+              @if (viewDirty()) {
+                <span class="nf-listing-flat__dirty-dot" aria-hidden="true">•</span>
+              }
+            </nf-button>
+            <mat-menu #viewsMenu="matMenu" class="nf-listing-flat-menu nf-listing-flat-menu--views">
+              <div class="nf-views-menu" (click)="$event.stopPropagation()">
+                @if (savedViews().length === 0) {
+                  <p class="nf-views-menu__empty">{{ 'No saved views yet' | translate }}</p>
+                }
+                @for (view of savedViews(); track view.id) {
+                  <button type="button" class="nf-views-menu__item" (click)="applySavedView(view)">
+                    <span>{{ view.name }}</span>
+                    @if (view.isDefault) {
+                      <span class="nf-views-menu__badge">{{ 'Default' | translate }}</span>
+                    }
+                    @if (activeSavedViewId() === view.id) {
+                      <span class="nf-views-menu__active">{{ 'Active' | translate }}</span>
+                    }
+                  </button>
+                }
+                <div class="nf-views-menu__actions">
+                  <button type="button" class="nf-views-menu__action" (click)="promptSaveView(false)">
+                    {{ 'Save current' | translate }}
+                  </button>
+                  @if (activeSavedViewId()) {
+                    <button type="button" class="nf-views-menu__action" (click)="promptSaveView(true)">
+                      {{ 'Update view' | translate }}
+                    </button>
+                    <button type="button" class="nf-views-menu__action nf-views-menu__action--danger" (click)="deleteActiveView()">
+                      {{ 'Delete view' | translate }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </mat-menu>
           }
           @if (features().columnToggle) {
             <nf-button
@@ -440,10 +624,22 @@ import {
       /* ── Row 1: Search + Filter Chips ───────────────────────────────── */
       .nf-listing-flat__filters {
         display: flex;
-        flex-wrap: wrap;
-        align-items: center;
+        flex-direction: column;
+        align-items: stretch;
         gap: 8px;
         flex: 0 0 auto;
+      }
+      .nf-listing-flat__filters-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        min-width: 0;
+      }
+      .nf-listing-flat__filters-row--top {
+        align-items: flex-end;
+      }
+      .nf-listing-flat__filters-row--bottom {
+        align-items: center;
       }
       .nf-listing-flat__search {
         display: inline-flex;
@@ -467,12 +663,8 @@ import {
         align-items: center;
         gap: 6px;
         min-width: 0;
-        overflow-x: auto;
-        scrollbar-width: none;
         flex: 1 1 auto;
-      }
-      .nf-listing-flat__chips::-webkit-scrollbar {
-        display: none;
+        flex-wrap: wrap;
       }
       .nf-listing-flat__add-filter {
         display: inline-flex;
@@ -543,6 +735,127 @@ import {
         color: var(--nf-input-placeholder-color, var(--nf-text-muted, #9ca3af));
       }
 
+      .nf-listing-flat__pinned-filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 8px;
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+
+      .nf-listing-flat__pinned-filter {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 160px;
+        flex: 0 1 200px;
+      }
+
+      .nf-listing-flat__pinned-filter-label {
+        font-size: 0.6875rem;
+        font-weight: 500;
+        color: var(--nf-text-muted, #6b7280);
+        line-height: 1.1;
+      }
+
+      .nf-listing-flat__pinned-filter-control {
+        width: 100%;
+        height: 26px;
+        padding: 0 8px;
+        border-radius: 6px;
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        background: var(--nf-surface-section, #fff);
+        font: inherit;
+        font-size: 0.75rem;
+        color: var(--nf-text-primary, #111827);
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+        box-sizing: border-box;
+      }
+
+      .nf-listing-flat__pinned-filter-control--select {
+        appearance: none;
+        padding-right: 24px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-position: right 8px center;
+        background-repeat: no-repeat;
+      }
+
+      .nf-listing-flat__pinned-range {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .nf-listing-flat__pinned-range span {
+        font-size: 0.6875rem;
+        color: var(--nf-text-muted, #6b7280);
+      }
+
+      .nf-listing-flat__dirty-dot {
+        color: var(--nf-warning, #d97706);
+        margin-left: 2px;
+      }
+
+      .nf-views-menu {
+        min-width: 220px;
+        padding: 8px;
+      }
+      .nf-views-menu__empty {
+        margin: 0 0 8px;
+        font-size: 0.75rem;
+        color: var(--nf-text-muted, #6b7280);
+      }
+      .nf-views-menu__item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 6px 8px;
+        border-radius: 6px;
+        font: inherit;
+        font-size: 0.8125rem;
+        text-align: left;
+        cursor: pointer;
+      }
+      .nf-views-menu__item:hover {
+        background: var(--nf-surface-hover, #f9fafb);
+      }
+      .nf-views-menu__badge,
+      .nf-views-menu__active {
+        font-size: 0.625rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--nf-primary, #2563eb);
+      }
+      .nf-views-menu__actions {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--nf-border-default, #e5e7eb);
+      }
+      .nf-views-menu__action {
+        border: none;
+        background: transparent;
+        padding: 4px 8px;
+        font: inherit;
+        font-size: 0.75rem;
+        text-align: left;
+        color: var(--nf-primary, #2563eb);
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      .nf-views-menu__action:hover {
+        background: var(--nf-primary-light, #eff6ff);
+      }
+      .nf-views-menu__action--danger {
+        color: var(--nf-danger, #dc2626);
+      }
+
       /* ── Row 2: actions row (Left: Selection Info · Right: Controls & Actions) ── */
       .nf-listing-flat__actions-row {
         display: flex;
@@ -551,14 +864,14 @@ import {
         gap: 8px;
         flex: 0 0 auto;
       }
-      /* Left side: selection count pill */
+      /* Left side: selection count pill + table controls */
       .nf-listing-flat__actions-left {
         display: flex;
         align-items: center;
         gap: 6px;
         min-height: 26px;
       }
-      /* Right side: Table Controls (Columns, Multi-select) · Separator · Action buttons */
+      /* Right side: action buttons */
       .nf-listing-flat__actions-right {
         display: flex;
         flex-wrap: wrap;
@@ -570,12 +883,6 @@ import {
         display: flex;
         align-items: center;
         gap: 6px;
-      }
-      .nf-listing-flat__actions-sep {
-        width: 1px;
-        height: 16px;
-        background: var(--nf-border-default, #e5e7eb);
-        margin: 0 2px;
       }
 
       .nf-listing-flat__view {
@@ -717,16 +1024,18 @@ import {
           }
         }
         .mat-mdc-menu-panel.nf-listing-flat-menu--filter {
+          /* Beat Material's default ~280px max-width so daterange fits. */
           width: max-content !important;
-          min-width: 0 !important;
-          max-width: min(560px, calc(100vw - 24px));
-          height: auto;
-          max-height: min(80vh, 640px);
-          overflow-x: hidden;
-          overflow-y: auto;
+          min-width: 320px !important;
+          max-width: min(560px, calc(100vw - 24px)) !important;
+          height: auto !important;
+          max-height: min(80vh, 640px) !important;
+          overflow-x: visible !important;
+          overflow-y: auto !important;
 
           .mat-mdc-menu-content {
             padding: 0 !important;
+            overflow: visible !important;
           }
         }
       }
@@ -1000,6 +1309,13 @@ import {
           flex: 1 1 auto !important;
           min-width: 120px !important;
         }
+        .nf-listing-flat__pinned-filters {
+          flex: 1 1 100%;
+        }
+        .nf-listing-flat__pinned-filter {
+          flex: 1 1 100%;
+          min-width: 0;
+        }
         .nf-listing-flat__chips {
           flex: 1 1 100% !important;
           display: flex;
@@ -1048,13 +1364,8 @@ import {
       @media (max-width: 640px) {
         :host ::ng-deep .mat-mdc-menu-panel.nf-listing-flat-menu--filter {
           width: calc(100vw - 24px) !important;
-          max-width: calc(100vw - 24px);
-        }
-      }
-      @media (max-width: 640px) {
-        :host ::ng-deep .mat-mdc-menu-panel.nf-listing-flat-menu--filter {
-          width: calc(100vw - 24px) !important;
-          max-width: calc(100vw - 24px);
+          min-width: 0 !important;
+          max-width: calc(100vw - 24px) !important;
         }
       }
     `,
@@ -1066,6 +1377,15 @@ export class ListingFlatComponent<T = unknown> {
   readonly config = input.required<ListingFlatConfig>();
   readonly items = input<T[]>([]);
   readonly loading = input<boolean>(false);
+  /** Controlled listing query (URL / parent / saved view). */
+  readonly query = input<ListingQueryState | undefined>();
+  /** When true, items are already filtered/paged server-side — skip client refilter. */
+  readonly remote = input<boolean>(false);
+  readonly remoteTotal = input<number | undefined>(undefined);
+  readonly resourceKey = input<string | undefined>();
+
+  readonly queryChange = output<ListingQueryState>();
+  readonly load = output<ListingQueryState>();
 
   readonly rowClick = output<T>();
   readonly rowDblClick = output<T>();
@@ -1073,15 +1393,26 @@ export class ListingFlatComponent<T = unknown> {
   readonly selectionChange = output<T[]>();
   readonly exportClick = output<void>();
 
-  readonly search = signal('');
-  readonly filterValues = signal<Record<string, unknown>>({});
-  readonly page = signal(1);
-  readonly pageSize = signal(20);
+  private readonly savedViewsAdapter = inject(LISTING_SAVED_VIEWS_ADAPTER, { optional: true });
+
+  private readonly listingQuery = signal<ListingQueryState>(createDefaultListingQuery());
+  private readonly suppressQueryEmit = signal(false);
+
   readonly toggleSelectionOn = signal(false);
   readonly selection = signal<T[]>([]);
   readonly controlColumns = signal<ListingControlsColumn[]>([]);
-  /** Incremented each time the filter menu opens; builder syncs from values. */
   readonly filterMenuOpenCount = signal(0);
+  readonly savedViews = signal<ListingSavedView[]>([]);
+  readonly activeSavedViewId = signal<string | null>(null);
+  readonly activeSavedViewQuery = signal<ListingQueryState | null>(null);
+
+  readonly search = computed(() => this.listingQuery().search ?? '');
+  readonly activeFilterGroup = computed(() => resolveFilterGroup(this.listingQuery()));
+  readonly filterValues = computed(() => filterGroupToPinnedValues(this.activeFilterGroup()));
+  readonly page = computed(() => this.listingQuery().page);
+  readonly pageSize = computed(() => this.listingQuery().pageSize);
+  readonly sortColumn = computed(() => this.listingQuery().sort?.field);
+  readonly sortDirection = computed(() => this.listingQuery().sort?.direction);
 
   @ViewChild('filterMenuTrigger') private filterMenuTrigger?: MatMenuTrigger;
 
@@ -1095,11 +1426,24 @@ export class ListingFlatComponent<T = unknown> {
 
   readonly selectionKind = computed(() => this.features().selection);
 
+  readonly pinnedFilters = computed(() => (this.config().filters ?? []).filter((f) => f.pinned === true));
+  readonly popupFilters = computed(() => (this.config().filters ?? []).filter((f) => !f.pinned));
+
   readonly tableSelectable = computed((): false | 'single' | 'multiple' => {
     const sel = this.selectionKind();
     if (sel === 'single' || sel === 'multiple') return sel;
     if (this.features().selectionToggle && this.toggleSelectionOn()) return 'multiple';
     return false;
+  });
+
+  readonly savedViewsEnabled = computed(
+    () => !!this.resourceKey() && this.config().savedViews !== false && !!this.savedViewsAdapter
+  );
+
+  readonly viewDirty = computed(() => {
+    const baseline = this.activeSavedViewQuery();
+    if (!baseline) return false;
+    return !listingQuerySnapshotEqual(this.listingQuery(), baseline, { ignorePage: true });
   });
 
   constructor() {
@@ -1111,41 +1455,108 @@ export class ListingFlatComponent<T = unknown> {
 
     effect(() => {
       const cols = this.config().columns;
-      this.controlColumns.set(
-        cols.map((c) => ({
-          key: c.key,
-          label: c.label,
-          visible: true,
-        }))
+      const fromQuery = controlColumnsFromQuery(cols, this.listingQuery().columns);
+      this.controlColumns.set(fromQuery);
+    });
+
+    effect(() => {
+      const external = this.query();
+      if (external) {
+        this.suppressQueryEmit.set(true);
+        this.listingQuery.set(external);
+        this.controlColumns.set(
+          controlColumnsFromQuery(this.config().columns, external.columns)
+        );
+        this.suppressQueryEmit.set(false);
+      }
+    });
+
+    effect(() => {
+      if (this.query()) return;
+      const init = this.config().initialFilters;
+      const key = JSON.stringify(init ?? null);
+      if (key === this.lastInitialFilters) return;
+      this.lastInitialFilters = key;
+      if (!init || Object.keys(init).length === 0) return;
+      const fields = this.config().filters ?? [];
+      const clauses = filterValuesToClauses(init, fields);
+      this.patchQuery(
+        {
+          filterGroup: clausesToGroup(clauses),
+          filters: clauses,
+          page: 1,
+        },
+        false
       );
     });
+
     effect(() => {
-      this.pageSize.set(this.config().pageSize ?? 20);
-      this.page.set(1);
+      const size = this.config().pageSize ?? 20;
+      if (this.listingQuery().pageSize !== size) {
+        this.patchQuery({ pageSize: size, page: 1 });
+      }
     });
+
     effect(() => {
       this.selectionKind();
-      this.toggleSelectionOn.set(false);
+      this.toggleSelectionOn.set(this.features().selectionToggleDefaultActive ?? false);
       this.setSelection([]);
+    });
+
+    effect(() => {
+      const key = this.resourceKey();
+      if (!key || !this.savedViewsAdapter) {
+        this.savedViews.set([]);
+        return;
+      }
+      void this.refreshSavedViews(key);
     });
   }
 
-  /** Apply initialFilters only when its content actually changes (config is rebuilt often). */
+  private async refreshSavedViews(resourceKey: string): Promise<void> {
+    const adapter = this.savedViewsAdapter;
+    if (!adapter) return;
+    const views = await adapter.list(resourceKey);
+    this.savedViews.set(views);
+    const defaultView = views.find((v) => v.isDefault);
+    if (defaultView && !this.activeSavedViewId() && !this.query()) {
+      this.applySavedView(defaultView, false);
+    }
+  }
+
+  private emitQueryChange(): void {
+    if (this.suppressQueryEmit()) return;
+    const q = this.listingQuery();
+    this.queryChange.emit(q);
+    if (this.remote()) {
+      this.load.emit(q);
+    }
+  }
+
+  private patchQuery(patch: Partial<ListingQueryState>, resetPage = false): void {
+    this.listingQuery.update((current) => {
+      const next = mergeListingQuery(current, patch);
+      if (resetPage) next.page = 1;
+      return next;
+    });
+    this.emitQueryChange();
+  }
+
+  /**
+   * Replace the full filter group (Notion builder Apply / Clear / chip remove).
+   */
+  private replaceFilterGroup(group: FilterGroup, resetPage = true): void {
+    this.patchQuery(withSyncedFilters({ ...this.listingQuery(), filterGroup: group }), resetPage);
+  }
+
+  /** @deprecated initialFilters — kept via effect; use query input instead. */
   private lastInitialFilters = '';
-  readonly initialFiltersEffect = effect(() => {
-    const init = this.config().initialFilters;
-    const key = JSON.stringify(init ?? null);
-    if (key === this.lastInitialFilters) return;
-    this.lastInitialFilters = key;
-    this.filterValues.set({ ...(init ?? {}) });
-    this.page.set(1);
-  });
 
   readonly pageSizeOptions = computed(
     () => this.config().pageSizeOptions ?? [10, 20, 50, 100]
   );
 
-  readonly filterActive = computed(() => Object.keys(this.filterValues()).length > 0);
+  readonly filterActive = computed(() => collectLeaves(this.activeFilterGroup()).length > 0);
   readonly hiddenCount = computed(
     () => this.controlColumns().filter((c) => !c.visible).length
   );
@@ -1240,17 +1651,26 @@ export class ListingFlatComponent<T = unknown> {
     return this.config().columns.filter((c) => visible.has(c.key));
   });
 
+  readonly pagerTotal = computed(() =>
+    this.remote() ? (this.remoteTotal() ?? this.items().length) : this.filteredItems().length
+  );
+
   readonly filteredItems = computed(() => {
+    if (this.remote()) return this.items();
+    const q = this.listingQuery();
     const searchFields =
       this.config().searchFields ?? this.config().columns.map((c) => c.field || c.key);
-    return this.items().filter(
+    let rows = this.items().filter(
       (item) =>
-        matchesSearch(item, this.search(), searchFields) &&
-        matchesFilters(item, this.filterValues())
+        matchesSearch(item, q.search ?? '', searchFields) &&
+        matchesFilterGroup(item, resolveFilterGroup(q))
     );
+    rows = sortItemsLocally(rows, q.sort, this.config().columns);
+    return rows;
   });
 
   readonly pageItems = computed(() => {
+    if (this.remote()) return this.items();
     const rows = this.filteredItems();
     if (!this.features().pagination) return rows;
     const size = this.pageSize();
@@ -1262,49 +1682,141 @@ export class ListingFlatComponent<T = unknown> {
     this.controlColumns.update((cols) =>
       cols.map((c) => (c.key === key ? { ...c, visible } : c))
     );
+    this.patchQuery({ columns: columnStateFromControls(this.controlColumns()) }, false);
   }
 
   showAllColumns(): void {
     this.controlColumns.update((cols) => cols.map((c) => ({ ...c, visible: true })));
+    this.patchQuery({ columns: columnStateFromControls(this.controlColumns()) }, false);
   }
 
   resetDefaultColumns(): void {
     this.controlColumns.update((cols) => cols.map((c) => ({ ...c, visible: true })));
+    this.patchQuery({ columns: columnStateFromControls(this.controlColumns()) }, false);
   }
 
   onFilterMenuOpened(): void {
     this.filterMenuOpenCount.update((c) => c + 1);
   }
 
-  onFilterApply(values: Record<string, unknown>): void {
-    this.filterValues.set(values);
-    this.page.set(1);
+  onFilterApply(group: FilterGroup): void {
+    this.replaceFilterGroup(group);
     this.filterMenuTrigger?.closeMenu();
   }
 
   onFilterClear(): void {
-    this.filterValues.set({});
-    this.page.set(1);
+    this.replaceFilterGroup(emptyFilterGroup());
     this.filterMenuTrigger?.closeMenu();
   }
 
-  onRemoveFilter(key: string): void {
-    this.filterValues.update((values) => {
-      const next = { ...values };
-      delete next[key];
-      return next;
-    });
-    this.page.set(1);
+  onRemoveFilterLeaf(leafIndex: number): void {
+    const next = removeLeafAt(this.activeFilterGroup(), leafIndex);
+    this.replaceFilterGroup(next);
+  }
+
+  getFilterValue(key: string): unknown {
+    return this.filterValues()[key] ?? null;
+  }
+
+  setFilterValue(key: string, value: unknown): void {
+    const field = this.pinnedFilters().find((f) => f.key === key)
+      ?? (this.config().filters ?? []).find((f) => f.key === key);
+    if (!field) return;
+    const next = upsertPinnedClause(this.activeFilterGroup(), field, value);
+    this.replaceFilterGroup(next);
+  }
+
+  rangePart(key: string, index: 0 | 1): string {
+    const value = this.getFilterValue(key);
+    if (!Array.isArray(value)) return '';
+    return value[index] != null ? String(value[index]) : '';
+  }
+
+  setRangePart(key: string, index: 0 | 1, part: string): void {
+    const current = this.getFilterValue(key);
+    const next: [string, string] = [
+      Array.isArray(current) && current[0] != null ? String(current[0]) : '',
+      Array.isArray(current) && current[1] != null ? String(current[1]) : '',
+    ];
+    next[index] = part ?? '';
+    if (!next[0] && !next[1]) {
+      this.setFilterValue(key, null);
+      return;
+    }
+    this.setFilterValue(key, next);
   }
 
   onSearchChange(value: string): void {
-    this.search.set(value);
-    this.page.set(1);
+    this.patchQuery({ search: value }, true);
   }
 
   onPageChange(ev: { page: number; pageSize: number }): void {
-    this.page.set(ev.page);
-    this.pageSize.set(ev.pageSize);
+    this.patchQuery({ page: ev.page, pageSize: ev.pageSize }, false);
+  }
+
+  onSortChange(ev: SortChangeEvent): void {
+    this.patchQuery(
+      {
+        sort: ev.direction ? { field: ev.column, direction: ev.direction } : null,
+      },
+      true
+    );
+  }
+
+  applySavedView(view: ListingSavedView, markActive = true): void {
+    this.suppressQueryEmit.set(true);
+    this.listingQuery.set({ ...view.query, page: view.query.page ?? 1 });
+    this.controlColumns.set(
+      controlColumnsFromQuery(this.config().columns, view.query.columns)
+    );
+    this.suppressQueryEmit.set(false);
+    if (markActive) {
+      this.activeSavedViewId.set(view.id);
+      this.activeSavedViewQuery.set(view.query);
+    }
+    this.emitQueryChange();
+  }
+
+  async promptSaveView(update: boolean): Promise<void> {
+    const adapter = this.savedViewsAdapter;
+    const resourceKey = this.resourceKey();
+    if (!adapter || !resourceKey) return;
+    const defaultName = update
+      ? this.savedViews().find((v) => v.id === this.activeSavedViewId())?.name ?? 'My view'
+      : 'My view';
+    const name = window.prompt(update ? 'Update view name' : 'Save view as', defaultName);
+    if (!name?.trim()) return;
+    const query = { ...this.listingQuery(), page: 1 };
+    const isDefault = window.confirm('Set as your default view for this list?');
+    if (update && this.activeSavedViewId()) {
+      await adapter.update(this.activeSavedViewId()!, {
+        name: name.trim(),
+        isDefault,
+        query,
+      });
+    } else {
+      const created = await adapter.create({
+        resourceKey,
+        name: name.trim(),
+        isDefault,
+        query,
+      });
+      this.activeSavedViewId.set(created.id);
+      this.activeSavedViewQuery.set(created.query);
+    }
+    await this.refreshSavedViews(resourceKey);
+  }
+
+  async deleteActiveView(): Promise<void> {
+    const adapter = this.savedViewsAdapter;
+    const resourceKey = this.resourceKey();
+    const id = this.activeSavedViewId();
+    if (!adapter || !resourceKey || !id) return;
+    if (!window.confirm('Delete this saved view?')) return;
+    await adapter.delete(id);
+    this.activeSavedViewId.set(null);
+    this.activeSavedViewQuery.set(null);
+    await this.refreshSavedViews(resourceKey);
   }
 
   handleActionClick(id: string): void {
@@ -1434,7 +1946,7 @@ export class ListingFlatComponent<T = unknown> {
       danger: a.variant === 'danger',
       disabled: a.disabled,
       tooltip: a.tooltip,
-      confirm: a.id === 'delete',
+      confirm: a.id === 'delete' || a.id === 'delete-bulk' || a.variant === 'danger',
     };
   }
 }
