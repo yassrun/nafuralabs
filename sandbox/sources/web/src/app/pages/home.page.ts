@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { SHOWROOM_NAV } from '../nav/showroom-nav.config';
+import { SANDBOX_NAV } from '../nav/sandbox-nav.config';
 
 @Component({
   selector: 'sb-home',
@@ -11,7 +11,7 @@ import { SHOWROOM_NAV } from '../nav/showroom-nav.config';
   template: `
     <div class="home">
       <header class="home__hero">
-        <h1>Anatomy Showroom</h1>
+        <h1>Sandbox</h1>
         <p>
           Exposition des archétypes d’écran et catalogue des composants
           <code>nf-*</code>. Sidebar configurable · products via API H2 · pas d’auth.
@@ -108,5 +108,5 @@ import { SHOWROOM_NAV } from '../nav/showroom-nav.config';
   ],
 })
 export class HomePage {
-  readonly sections = SHOWROOM_NAV;
+  readonly sections = SANDBOX_NAV;
 }

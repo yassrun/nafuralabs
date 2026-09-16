@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  appName: 'Anatomy Showroom',
+  appName: 'Sandbox',
   apiBaseUrl: 'http://127.0.0.1:8082/api',
   keycloakUrl: '',
   keycloakRealm: '',
@@ -14,7 +14,7 @@ export const environment = {
     id: 'sandbox',
     email: 'sandbox@nafura.local',
     firstName: 'Sandbox',
-    lastName: 'Showroom',
+    lastName: 'Sandbox',
     tenantId: 'sandbox',
     tenantName: 'Sandbox',
     tenantSlug: 'sandbox',

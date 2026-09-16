@@ -2,38 +2,32 @@
 
 Backend Spring Boot + **H2** du produit `sandbox`.
 
-## Lancer (recommandé)
-
-Un seul script pour **back + front** :
+## Lancer
 
 ```powershell
-cd sandbox
-.\showroom-up.ps1          # back :8082 + front :4300  (Windows / agents)
-.\showroom-up.ps1 back     # back seul
-.\showroom-up.ps1 stop
-.\showroom-up.ps1 status
+$env:JAVA_HOME = 'C:\Users\karkafiy\Desktop\tools\jdk-25.0.4.1+1'
+$env:Path = 'C:\Users\karkafiy\Desktop\tools\gradle-9.7.1\bin;' + $env:Path
+gradle bootRun
 ```
 
-Équivalent bash (Git Bash / Linux) : [`../../showroom-up.sh`](../../showroom-up.sh).
-
-**Ne pas** passer par `./gradlew … bootRun` sur cette machine : proxy plugins Gradle **407**. Le script utilise `build/offline-classes` + `build/offline-classpath.txt`.
+Sur la machine avec proxy, les réglages Gradle vivent dans le profil utilisateur, pas dans ce dépôt.
 
 ## Ports / données
 
 - API : `http://127.0.0.1:8082`
-- H2 fichier : `./data/showroom` (cwd = ce dossier `app/`)
+- H2 fichier : `./data/sandbox` (cwd = ce dossier)
 - Console H2 : `http://127.0.0.1:8082/h2-console`  
-  JDBC `jdbc:h2:file:./data/showroom`, user `sa`, password vide
-- Logs back (script) : `build/showroom-backend.log`
+  JDBC `jdbc:h2:file:./data/sandbox`, user `sa`, password vide
+- Logs Spring Boot : sortie du terminal `bootRun`
 
 ## Endpoints
 
-- `GET /api/showroom/products`
-- `GET /api/showroom/products/{id}`
-- `POST /api/showroom/products`
-- `PUT /api/showroom/products/{id}`
-- `DELETE /api/showroom/products/{id}`
-- `GET /api/showroom/products/lookup`
-- `POST /api/showroom/products/batch`
-- `DELETE /api/showroom/products/batch`
+- `GET /api/sandbox/products`
+- `GET /api/sandbox/products/{id}`
+- `POST /api/sandbox/products`
+- `PUT /api/sandbox/products/{id}`
+- `DELETE /api/sandbox/products/{id}`
+- `GET /api/sandbox/products/lookup`
+- `POST /api/sandbox/products/batch`
+- `DELETE /api/sandbox/products/batch`
 - `GET /actuator/health`

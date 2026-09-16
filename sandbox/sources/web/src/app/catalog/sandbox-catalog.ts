@@ -1,5 +1,5 @@
 /**
- * Full Components catalog for the Anatomy showroom.
+ * Full Components catalog for the Sandbox.
  * Drives the sidebar + demo routing (`/components/{layer}/{id}`).
  */
 

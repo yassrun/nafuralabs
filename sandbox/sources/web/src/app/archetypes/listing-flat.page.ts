@@ -419,7 +419,7 @@ export class ListingFlatPage {
       const rows = await this.facade.refresh();
       this.items.set(rows);
     } catch (e) {
-      this.loadError.set(e instanceof Error ? e.message : 'API showroom unreachable');
+      this.loadError.set(e instanceof Error ? e.message : 'API Sandbox unreachable');
       this.items.set([]);
     }
   }

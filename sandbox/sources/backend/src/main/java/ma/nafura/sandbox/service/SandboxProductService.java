@@ -1,4 +1,4 @@
-package ma.nafura.sandbox.showroom.service;
+package ma.nafura.sandbox.service;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ma.nafura.platform.framework.service.crud.JpaCrudService;
-import ma.nafura.sandbox.showroom.api.request.CreateProductRequest;
-import ma.nafura.sandbox.showroom.api.request.UpdateProductRequest;
-import ma.nafura.sandbox.showroom.domain.ShowroomProduct;
-import ma.nafura.sandbox.showroom.domain.ShowroomProductRepository;
-import ma.nafura.sandbox.showroom.mapper.ShowroomProductMapper;
+import ma.nafura.sandbox.api.request.CreateProductRequest;
+import ma.nafura.sandbox.api.request.UpdateProductRequest;
+import ma.nafura.sandbox.domain.SandboxProduct;
+import ma.nafura.sandbox.domain.SandboxProductRepository;
+import ma.nafura.sandbox.mapper.SandboxProductMapper;
 
 @Service
-public class ShowroomProductService extends JpaCrudService<String, ShowroomProduct, CreateProductRequest, UpdateProductRequest> {
+public class SandboxProductService extends JpaCrudService<String, SandboxProduct, CreateProductRequest, UpdateProductRequest> {
 
     private static final String STATUS_ACTIVE = "Active";
     private static final String STATUS_DRAFT = "Draft";
@@ -23,9 +23,9 @@ public class ShowroomProductService extends JpaCrudService<String, ShowroomProdu
     private static final String CATEGORY_TOOL = "Outillage";
     private static final String CATEGORY_CONSUMABLE = "Consommable";
 
-    private final ShowroomProductRepository productRepository;
+    private final SandboxProductRepository productRepository;
 
-    public ShowroomProductService(ShowroomProductRepository productRepository, ShowroomProductMapper productMapper) {
+    public SandboxProductService(SandboxProductRepository productRepository, SandboxProductMapper productMapper) {
         super(productRepository, productMapper);
         this.productRepository = productRepository;
     }
@@ -59,7 +59,7 @@ public class ShowroomProductService extends JpaCrudService<String, ShowroomProdu
         }
     }
 
-    private static ShowroomProduct product(
+    private static SandboxProduct product(
         String id,
         String code,
         String name,
@@ -71,6 +71,6 @@ public class ShowroomProductService extends JpaCrudService<String, ShowroomProdu
         int day = (seed % 27) + 1;
         int month = (seed % 12) + 1;
         Instant createdAt = LocalDate.of(2025, month, day).atStartOfDay().toInstant(ZoneOffset.UTC);
-        return new ShowroomProduct(id, code, name, status, category, description, createdAt);
+        return new SandboxProduct(id, code, name, status, category, description, createdAt);
     }
 }

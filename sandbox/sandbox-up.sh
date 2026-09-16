@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Anatomy showroom — back (H2 :8082) + front (sandbox web :4300).
+# Sandbox — back (H2 :8082) + front (sandbox web :4300).
 #
 # Usage (Git Bash / Linux) :
-#   ./showroom-up.sh          # start back + front (front foreground)
-#   ./showroom-up.sh stop     # stop ports 8082 and 4300
-#   ./showroom-up.sh back     # back only
-#   ./showroom-up.sh status   # port health
+#   ./sandbox-up.sh          # start back + front (front foreground)
+#   ./sandbox-up.sh stop     # stop ports 8082 and 4300
+#   ./sandbox-up.sh back     # back only
+#   ./sandbox-up.sh status   # port health
 #
-# Windows (this machine): use the twin .\showroom-up.ps1 — system bash.exe is WSL, not Git Bash.
+# Windows (this machine): use the twin .\sandbox-up.ps1 — system bash.exe is WSL, not Git Bash.
 # Do NOT use Gradle here (plugin proxy 407). Back = offline java.
 set -euo pipefail
 
@@ -18,9 +18,9 @@ BACK_PORT=8082
 FRONT_PORT=4300
 HEALTH_URL="http://127.0.0.1:${BACK_PORT}/actuator/health"
 FRONT_URL="http://127.0.0.1:${FRONT_PORT}"
-PID_FILE="$APP/build/showroom-backend.pid"
-LOG_FILE="$APP/build/showroom-backend.log"
-MAIN_CLASS="ma.nafura.sandbox.showroom.bootstrap.ShowroomApplication"
+PID_FILE="$APP/build/sandbox-backend.pid"
+LOG_FILE="$APP/build/sandbox-backend.log"
+MAIN_CLASS="ma.nafura.sandbox.bootstrap.SandboxApplication"
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 
@@ -111,7 +111,7 @@ start_front() {
   command -v npm >/dev/null 2>&1 || die "npm introuvable dans PATH"
   kill_port "$FRONT_PORT"
   echo "→ start front  $FRONT_URL"
-  echo "   Ctrl+C arrête le front ; le back reste up (./showroom-up.sh stop pour tout couper)"
+  echo "   Ctrl+C arrête le front ; le back reste up (./sandbox-up.sh stop pour tout couper)"
   cd "$WEB"
   exec npm start
 }
@@ -135,7 +135,7 @@ cmd_stop() {
   kill_port "$FRONT_PORT"
   kill_port "$BACK_PORT"
   rm -f "$PID_FILE"
-  echo "✓ showroom stopped"
+  echo "✓ sandbox stopped"
 }
 
 cmd="${1:-up}"

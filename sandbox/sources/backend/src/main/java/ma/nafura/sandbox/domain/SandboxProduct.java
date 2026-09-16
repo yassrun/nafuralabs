@@ -1,4 +1,4 @@
-package ma.nafura.sandbox.showroom.domain;
+package ma.nafura.sandbox.domain;
 
 import java.time.Instant;
 
@@ -8,8 +8,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "showroom_product")
-public class ShowroomProduct {
+@Table(name = "sandbox_product")
+public class SandboxProduct {
 
     @Id
     @Column(length = 64, nullable = false)
@@ -33,10 +33,10 @@ public class ShowroomProduct {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    protected ShowroomProduct() {
+    protected SandboxProduct() {
     }
 
-    public ShowroomProduct(
+    public SandboxProduct(
         String id,
         String code,
         String name,

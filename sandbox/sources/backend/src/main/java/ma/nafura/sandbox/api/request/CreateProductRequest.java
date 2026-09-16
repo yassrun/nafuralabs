@@ -1,4 +1,4 @@
-package ma.nafura.sandbox.showroom.api.request;
+package ma.nafura.sandbox.api.request;
 
 import jakarta.validation.constraints.NotBlank;
 

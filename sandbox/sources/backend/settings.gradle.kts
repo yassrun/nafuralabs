@@ -18,5 +18,8 @@ pluginManagement {
 
 rootProject.name = "sandbox-backend"
 
-include(":framework")
-project(":framework").projectDir = file("../../../nafura-platform/sources/backend/core/framework")
+includeBuild("../../../nafura-platform/sources/backend") {
+    dependencySubstitution {
+        substitute(module("ma.nafuralabs:framework")).using(project(":platform:core:framework"))
+    }
+}

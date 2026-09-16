@@ -1,4 +1,4 @@
-/** Minimal FR strings so Import magique + help dialog are readable in the showroom. */
+/** Minimal FR strings so Import magique + help dialog are readable in the Sandbox. */
 export const SANDBOX_FR = {
   Filters: 'Filtres',
   Clear: 'Effacer',
@@ -53,7 +53,7 @@ export const SANDBOX_FR = {
         duplicates: 'Les doublons détectés sont ignorés.',
       },
       errors: {
-        tenantMissing: 'Tenant manquant (showroom).',
+        tenantMissing: 'Tenant manquant (Sandbox).',
         network: 'API extraction indisponible.',
         forbidden: 'Accès refusé.',
         timeout: 'Délai d’extraction dépassé.',

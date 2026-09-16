@@ -4,9 +4,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 
 import {
-  SHOWROOM_NAV,
-  type ShowroomNavSection,
-} from './nav/showroom-nav.config';
+  SANDBOX_NAV,
+  type SandboxNavSection,
+} from './nav/sandbox-nav.config';
 
 @Component({
   selector: 'sb-root',
@@ -18,7 +18,7 @@ import {
       <aside class="sb-sidebar">
         <header class="sb-sidebar__brand">
           <a routerLink="/" class="sb-sidebar__logo">Anatomy</a>
-          <span class="sb-sidebar__tag">Showroom</span>
+          <span class="sb-sidebar__tag">Sandbox</span>
           <button
             type="button"
             class="sb-sidebar__collapse"
@@ -29,7 +29,7 @@ import {
           </button>
         </header>
 
-        <nav class="sb-sidebar__nav" aria-label="Showroom">
+        <nav class="sb-sidebar__nav" aria-label="Sandbox">
           @for (menu of menus; track menu.id) {
             <section class="sb-menu">
               <button
@@ -294,12 +294,12 @@ export class AppComponent {
     {
       id: 'archetypes' as const,
       label: 'Archetypes',
-      sections: SHOWROOM_NAV.filter((s) => s.menu === 'archetypes'),
+      sections: SANDBOX_NAV.filter((s) => s.menu === 'archetypes'),
     },
     {
       id: 'components' as const,
       label: 'Components',
-      sections: SHOWROOM_NAV.filter((s) => s.menu === 'components'),
+      sections: SANDBOX_NAV.filter((s) => s.menu === 'components'),
     },
   ];
 
@@ -322,7 +322,7 @@ export class AppComponent {
 
   readonly currentLabel = computed(() => {
     const u = this.url();
-    for (const section of SHOWROOM_NAV) {
+    for (const section of SANDBOX_NAV) {
       for (const item of section.items) {
         if (item.route && u.startsWith(item.route.split('?')[0])) {
           return item.label;
@@ -330,7 +330,7 @@ export class AppComponent {
       }
     }
     if (u === '/' || u.startsWith('/?')) return 'Catalogue';
-    return 'Showroom';
+    return 'Sandbox';
   });
 
   isOpen(menuId: string): boolean {
@@ -342,7 +342,7 @@ export class AppComponent {
   }
 
   /** Exposed for tests / future settings panel */
-  sections(): ShowroomNavSection[] {
-    return SHOWROOM_NAV;
+  sections(): SandboxNavSection[] {
+    return SANDBOX_NAV;
   }
 }

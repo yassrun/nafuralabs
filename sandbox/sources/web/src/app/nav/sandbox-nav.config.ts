@@ -1,5 +1,5 @@
 /**
- * Configurable showroom sidebar.
+ * Configurable Sandbox sidebar.
  * Archetypes (screen exposition) · Components (full nf-* catalog).
  */
 
@@ -9,28 +9,28 @@ import {
   CATALOG_ORGANISMS,
   catalogRoute,
   type CatalogEntry,
-} from '../catalog/showroom-catalog';
+} from '../catalog/sandbox-catalog';
 
-export type ShowroomNavKind = 'group' | 'link' | 'stub';
+export type SandboxNavKind = 'group' | 'link' | 'stub';
 
-export interface ShowroomNavItem {
+export interface SandboxNavItem {
   id: string;
   label: string;
-  kind?: ShowroomNavKind;
+  kind?: SandboxNavKind;
   route?: string;
-  children?: ShowroomNavItem[];
+  children?: SandboxNavItem[];
   status?: 'live' | 'stub' | 'partial';
   description?: string;
 }
 
-export interface ShowroomNavSection {
+export interface SandboxNavSection {
   id: string;
   label: string;
   menu: 'archetypes' | 'components';
-  items: ShowroomNavItem[];
+  items: SandboxNavItem[];
 }
 
-function fromCatalog(entries: CatalogEntry[]): ShowroomNavItem[] {
+function fromCatalog(entries: CatalogEntry[]): SandboxNavItem[] {
   return entries.map((e) => ({
     id: e.id,
     label: e.selector,
@@ -40,7 +40,7 @@ function fromCatalog(entries: CatalogEntry[]): ShowroomNavItem[] {
   }));
 }
 
-export const SHOWROOM_NAV: ShowroomNavSection[] = [
+export const SANDBOX_NAV: SandboxNavSection[] = [
   {
     id: 'archetypes',
     label: 'Archetypes',
@@ -138,6 +138,6 @@ export const SHOWROOM_NAV: ShowroomNavSection[] = [
   },
 ];
 
-export function flattenNavLinks(sections: ShowroomNavSection[] = SHOWROOM_NAV): ShowroomNavItem[] {
+export function flattenNavLinks(sections: SandboxNavSection[] = SANDBOX_NAV): SandboxNavItem[] {
   return sections.flatMap((s) => s.items.filter((i) => !!i.route));
 }

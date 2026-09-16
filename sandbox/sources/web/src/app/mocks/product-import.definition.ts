@@ -1,14 +1,14 @@
 import type { ExtractionDefinition } from '@platform/app/document-extraction/smart-import';
 
 /**
- * Showroom ExtractionDefinition for the Products listing mock.
+ * Sandbox ExtractionDefinition for the Products listing mock.
  * Same shape as Sektor handlers — no API persistence here.
  */
 export const PRODUCT_IMPORT_DEFINITION: ExtractionDefinition = {
   key: 'product',
   name: 'Import products',
   description:
-    'Import magique showroom — Excel / CSV / PDF → lignes produit (code, name, status).',
+    'Import magique Sandbox — Excel / CSV / PDF → lignes produit (code, name, status).',
   arrayPath: 'products',
   instructions: `Extract product / article rows from the uploaded file.
 Return ONLY valid JSON matching the schema.

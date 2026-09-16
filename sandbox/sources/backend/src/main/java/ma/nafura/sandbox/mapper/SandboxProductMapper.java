@@ -1,4 +1,4 @@
-package ma.nafura.sandbox.showroom.mapper;
+package ma.nafura.sandbox.mapper;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -6,16 +6,16 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import ma.nafura.platform.framework.mapper.EntityMapper;
-import ma.nafura.sandbox.showroom.api.request.CreateProductRequest;
-import ma.nafura.sandbox.showroom.api.request.UpdateProductRequest;
-import ma.nafura.sandbox.showroom.domain.ShowroomProduct;
+import ma.nafura.sandbox.api.request.CreateProductRequest;
+import ma.nafura.sandbox.api.request.UpdateProductRequest;
+import ma.nafura.sandbox.domain.SandboxProduct;
 
 @Component
-public class ShowroomProductMapper implements EntityMapper<ShowroomProduct, CreateProductRequest, UpdateProductRequest> {
+public class SandboxProductMapper implements EntityMapper<SandboxProduct, CreateProductRequest, UpdateProductRequest> {
 
     @Override
-    public ShowroomProduct toEntity(CreateProductRequest request) {
-        return new ShowroomProduct(
+    public SandboxProduct toEntity(CreateProductRequest request) {
+        return new SandboxProduct(
             "prd-" + Long.toHexString(System.currentTimeMillis()),
             request.code(),
             request.name(),
@@ -27,7 +27,7 @@ public class ShowroomProductMapper implements EntityMapper<ShowroomProduct, Crea
     }
 
     @Override
-    public void updateEntity(UpdateProductRequest request, ShowroomProduct entity) {
+    public void updateEntity(UpdateProductRequest request, SandboxProduct entity) {
         if (request.code() != null) entity.setCode(request.code());
         if (request.name() != null) entity.setName(request.name());
         if (request.status() != null) entity.setStatus(request.status());
@@ -36,11 +36,11 @@ public class ShowroomProductMapper implements EntityMapper<ShowroomProduct, Crea
     }
 
     @Override
-    public void setTenantId(ShowroomProduct entity, UUID tenantId) {
+    public void setTenantId(SandboxProduct entity, UUID tenantId) {
     }
 
     @Override
-    public Object getId(ShowroomProduct entity) {
+    public Object getId(SandboxProduct entity) {
         return entity.getId();
     }
 }

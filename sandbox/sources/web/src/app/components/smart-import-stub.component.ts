@@ -8,7 +8,7 @@ import {
 import { PRODUCT_IMPORT_DEFINITION } from '../mocks/product-import.definition';
 
 /**
- * Showroom host for `nf-smart-import-action` with a Product ExtractionDefinition.
+ * Sandbox host for `nf-smart-import-action` with a Product ExtractionDefinition.
  * File import still needs extraction API + tenant; Info champs works offline from the schema.
  */
 @Component({

@@ -1,12 +1,12 @@
-# Anatomy showroom - back (H2 :8082) + front (sandbox web :4300).
+# Sandbox - back (H2 :8082) + front (sandbox web :4300).
 #
 # Usage (PowerShell) :
-#   .\showroom-up.ps1           # start back + front (front foreground)
-#   .\showroom-up.ps1 stop      # stop ports 8082 and 4300
-#   .\showroom-up.ps1 back      # back only
-#   .\showroom-up.ps1 status    # port health
+#   .\sandbox-up.ps1           # start back + front (front foreground)
+#   .\sandbox-up.ps1 stop      # stop ports 8082 and 4300
+#   .\sandbox-up.ps1 back      # back only
+#   .\sandbox-up.ps1 status    # port health
 #
-# Bash twin: .\showroom-up.sh (Git Bash / WSL / Linux).
+# Bash twin: .\sandbox-up.sh (Git Bash / WSL / Linux).
 # On this machine: do NOT use Gradle (plugin proxy 407).
 # Back = offline java (build/offline-classes + offline-classpath.txt).
 
@@ -23,9 +23,9 @@ $BackPort = 8082
 $FrontPort = 4300
 $HealthUrl = "http://127.0.0.1:$BackPort/actuator/health"
 $FrontUrl = "http://127.0.0.1:$FrontPort"
-$PidFile = Join-Path $App 'build\showroom-backend.pid'
-$LogFile = Join-Path $App 'build\showroom-backend.log'
-$MainClass = 'ma.nafura.sandbox.showroom.bootstrap.ShowroomApplication'
+$PidFile = Join-Path $App 'build\sandbox-backend.pid'
+$LogFile = Join-Path $App 'build\sandbox-backend.log'
+$MainClass = 'ma.nafura.sandbox.bootstrap.SandboxApplication'
 
 function Die([string]$Message) {
   Write-Error $Message
@@ -110,7 +110,7 @@ function Start-Front {
 
   Stop-Port $FrontPort
   Write-Host ("-> start front  {0}" -f $FrontUrl)
-  Write-Host '   Ctrl+C stops the front; back stays up (.\showroom-up.ps1 stop to kill both)'
+  Write-Host '   Ctrl+C stops the front; back stays up (.\sandbox-up.ps1 stop to kill both)'
   Set-Location $Web
   npm start
 }
@@ -129,11 +129,11 @@ function Show-Status {
   }
 }
 
-function Stop-Showroom {
+function Stop-Sandbox {
   Stop-Port $FrontPort
   Stop-Port $BackPort
   Remove-Item -Force -ErrorAction SilentlyContinue $PidFile
-  Write-Host 'OK showroom stopped'
+  Write-Host 'OK sandbox stopped'
 }
 
 switch ($Command) {
@@ -145,6 +145,6 @@ switch ($Command) {
     Start-Back
     Write-Host ("logs: {0}" -f $LogFile)
   }
-  'stop' { Stop-Showroom }
+  'stop' { Stop-Sandbox }
   'status' { Show-Status }
 }

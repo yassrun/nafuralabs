@@ -146,7 +146,7 @@ public class Specs {
      * Fluent builder for composing specifications.
      */
     public static class SpecBuilder<T> {
-        private Specification<T> spec = Specification.where(null);
+        private Specification<T> spec = Specification.unrestricted();
 
         public SpecBuilder<T> and(Specification<T> other) {
             if (other != null) {

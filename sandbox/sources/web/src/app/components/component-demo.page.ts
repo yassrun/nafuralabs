@@ -52,7 +52,7 @@ import { DataTableComponent } from '@platform/lib/anatomy/components/organisms/d
 import { PageShellComponent } from '@platform/lib/anatomy/components/organisms/page-shell';
 import type { ColumnConfig, FilterFieldConfig } from '@platform/lib/anatomy/types';
 
-import { CATALOG_ALL, type CatalogEntry } from '../catalog/showroom-catalog';
+import { CATALOG_ALL, type CatalogEntry } from '../catalog/sandbox-catalog';
 
 const BUTTON_VARIANTS = ['primary', 'secondary', 'tertiary', 'danger', 'ghost', 'stroked'] as const;
 const BUTTON_SIZES = ['sm', 'md', 'lg'] as const;
@@ -381,7 +381,7 @@ const ICON_COLORS = ['primary', 'success', 'warning', 'danger', 'info'] as const
 
         @case ('alert') {
           <section class="block stack">
-            <nf-alert variant="info" title="Info" message="Informational banner for the showroom." />
+            <nf-alert variant="info" title="Info" message="Informational banner for the Sandbox." />
             <nf-alert variant="success" title="Saved" message="Changes were persisted." />
             <nf-alert variant="warning" title="Attention" message="This action cannot be undone." [dismissible]="true" />
             <nf-alert variant="danger" message="Something went wrong — message only." />
@@ -891,7 +891,7 @@ export class ComponentDemoPage {
   password = 'secret';
   email = 'qa@nafuralabs.local';
   short = 'ABCDEFGHIJKL';
-  notes = 'Showroom notes…';
+  notes = 'Sandbox notes…';
 
   selectStatus = 'Active';
   selectClient = '';

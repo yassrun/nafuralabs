@@ -23,7 +23,7 @@ public final class ListingSpecificationBuilder {
             Set<String> allowedFields,
             UUID tenantId) {
 
-        Specification<T> spec = Specification.where(null);
+        Specification<T> spec = Specification.unrestricted();
 
         if (tenantId != null) {
             spec = spec.and(Specs.equal("tenantId", tenantId));

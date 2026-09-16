@@ -2,7 +2,7 @@
   "name": "@nafura/anatomy-sandbox",
   "version": "0.0.1",
   "private": true,
-  "description": "Anatomy showroom — sandbox for screen archetypes and nf-* components",
+  "description": "Sandbox — sandbox for screen archetypes and nf-* components",
   "scripts": {
     "stack:check": "node ../../../nafura-platform/scripts/sync-stack-versions.mjs --check",
     "stack:sync": "node ../../../nafura-platform/scripts/sync-stack-versions.mjs --write",

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 /**
- * Showroom: everything allowed. Real RBAC stays in product apps.
+ * Sandbox: everything allowed. Real RBAC stays in product apps.
  */
 @Injectable()
 export class SandboxPermissionService {

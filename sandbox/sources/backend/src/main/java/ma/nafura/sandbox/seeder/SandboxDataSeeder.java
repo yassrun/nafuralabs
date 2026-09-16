@@ -1,17 +1,17 @@
-package ma.nafura.sandbox.showroom.bootstrap;
+package ma.nafura.sandbox.seeder;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import ma.nafura.sandbox.showroom.service.ShowroomProductService;
+import ma.nafura.sandbox.service.SandboxProductService;
 
 @Component
-public class ShowroomDataSeeder implements ApplicationRunner {
+public class SandboxDataSeeder implements ApplicationRunner {
 
-    private final ShowroomProductService productService;
+    private final SandboxProductService productService;
 
-    public ShowroomDataSeeder(ShowroomProductService productService) {
+    public SandboxDataSeeder(SandboxProductService productService) {
         this.productService = productService;
     }
 

@@ -29,13 +29,13 @@ interface ProductPageDto {
 }
 
 /**
- * Products facade backed by the showroom Spring Boot API (H2).
+ * Products facade backed by the Sandbox Spring Boot API (H2).
  * Kept under `mocks/` path for stable imports; no in-memory seed.
  */
 @Injectable({ providedIn: 'root' })
 export class ProductMockFacade {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiBaseUrl}/showroom/products`;
+  private readonly baseUrl = `${environment.apiBaseUrl}/sandbox/products`;
   private readonly store = signal<Product[]>([]);
   private loaded = false;
 
