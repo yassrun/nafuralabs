@@ -8,6 +8,7 @@ import { FilterBuilderComponent } from '../filter-builder';
 import { FilterResetComponent } from '../filter-reset/filter-reset.component';
 import { ViewModeSwitcherComponent } from '../../organisms/entity-listing/view-mode-switcher.component';
 import type { FilterFieldConfig, FilterGroup, LookupContext, ViewMode } from '../../../types';
+import { isFilterGroup } from '../../../types';
 
 /** Column item for hide/show columns popup (key, label, visible). */
 export interface ListingControlsColumn {
@@ -128,8 +129,23 @@ export class ListingControlsComponent {
     // no-op; openCount is used so builder syncs on next open
   }
 
-  onFilterApply(values: FilterGroup): void {
-    this.filterChange.emit(values as unknown as Record<string, unknown>);
+  onFilterApply(group: FilterGroup): void {
+    // Bridge FilterGroup → flat values for legacy Record consumers (entity-listing / tree).
+    const flat: Record<string, unknown> = {};
+    const walk = (nodes: FilterGroup['children']) => {
+      for (const node of nodes) {
+        if (isFilterGroup(node)) {
+          walk(node.children);
+          continue;
+        }
+        if (node.op === 'isEmpty' || node.op === 'isNotEmpty') continue;
+        if (node.value !== undefined && node.value !== null && node.value !== '') {
+          flat[node.field] = node.value;
+        }
+      }
+    };
+    walk(group.children);
+    this.filterChange.emit(flat);
     this.filterMenuTrigger?.closeMenu();
   }
 

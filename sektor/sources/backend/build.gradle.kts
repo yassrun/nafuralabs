@@ -4,8 +4,12 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
-    id("org.springframework.boot") version "3.4.1" apply false
-    id("io.spring.dependency-management") version "1.1.6" apply false
+    id("org.springframework.boot") apply false
+    id("io.spring.dependency-management") apply false
+}
+
+val stackVersions = java.util.Properties().apply {
+    file("../../../nafura-platform/stack.versions.properties").inputStream().use(::load)
 }
 
 allprojects {
@@ -23,7 +27,7 @@ subprojects {
 
     configure<JavaPluginExtension> {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
+            languageVersion.set(JavaLanguageVersion.of(stackVersions.getProperty("java.version").toInt()))
         }
     }
 

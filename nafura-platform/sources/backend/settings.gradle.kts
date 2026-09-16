@@ -1,3 +1,21 @@
+pluginManagement {
+    val stackVersions = java.util.Properties().apply {
+        file("../../stack.versions.properties").inputStream().use(::load)
+    }
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    resolutionStrategy {
+        eachPlugin {
+            when (requested.id.id) {
+                "org.springframework.boot" -> useVersion(stackVersions.getProperty("spring-boot.version"))
+                "io.spring.dependency-management" -> useVersion(stackVersions.getProperty("spring-dependency-management.version"))
+            }
+        }
+    }
+}
+
 rootProject.name = "nafura-platform"
 
 fun includePlatform(path: String) {
@@ -59,4 +77,3 @@ includePlatform(":platform:features:foundation:geo")
 includePlatform(":platform:features:foundation")
 includePlatform(":platform:integrations:google-places")
 includePlatform(":platform:core:job-runner")
-includePlatform(":platform:app")

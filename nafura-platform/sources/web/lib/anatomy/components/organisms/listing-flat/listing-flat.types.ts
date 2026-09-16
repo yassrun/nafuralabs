@@ -77,7 +77,7 @@ export const DEFAULT_LISTING_FLAT_FEATURES: ListingFlatFeatures = {
   filters: true,
   columnToggle: true,
   export: false,
-  selection: 'none',
+  selection: 'single',
   selectionToggle: false,
   selectionToggleDefaultActive: true,
   pagination: true,

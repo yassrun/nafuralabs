@@ -166,27 +166,40 @@ export interface PageChangeEvent {
       min-height: 0 !important;
     }
 
-    @media (max-width: 600px) {
-      ::ng-deep {
-        .mat-mdc-paginator-container {
-          justify-content: space-between !important;
-          flex-wrap: nowrap !important;
-          padding: 2px 4px !important;
-          min-height: 32px !important;
-        }
-        .mat-mdc-paginator-page-size {
-          margin-right: 4px !important;
-        }
-        .mat-mdc-paginator-range-label {
-          margin: 0 4px !important;
-          font-size: 0.75rem !important;
-        }
-        .mat-mdc-icon-button.mat-mdc-button-base {
-          --mdc-icon-button-state-layer-size: 26px;
-          width: 26px;
-          height: 26px;
-          padding: 0;
-        }
+    :host {
+      display: block;
+      min-width: 0;
+      container-type: inline-size;
+    }
+
+    /* ── Container-driven compaction (pane width, not viewport) ── */
+    @container (max-width: 560px) {
+      .nf-pagination ::ng-deep .mat-mdc-paginator-container {
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        padding: 2px 4px;
+        min-height: 32px;
+        gap: 6px;
+      }
+      .nf-pagination ::ng-deep .mat-mdc-paginator-page-size {
+        margin-right: 4px;
+      }
+      .nf-pagination ::ng-deep .mat-mdc-paginator-range-label {
+        margin: 0 4px;
+      }
+    }
+    @container (max-width: 460px) {
+      .nf-pagination ::ng-deep .mat-mdc-paginator-page-size-label {
+        display: none;
+      }
+    }
+    @container (max-width: 380px) {
+      .nf-pagination ::ng-deep .mat-mdc-paginator-page-size {
+        display: none;
+      }
+      .nf-pagination ::ng-deep .mat-mdc-paginator-navigation-first,
+      .nf-pagination ::ng-deep .mat-mdc-paginator-navigation-last {
+        display: none;
       }
     }
   `],

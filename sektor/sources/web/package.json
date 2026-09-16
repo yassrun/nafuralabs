@@ -3,6 +3,8 @@
   "version": "0.0.1",
   "description": "Multi-tenant, modular SaaS platform",
   "scripts": {
+    "stack:check": "node ../../../nafura-platform/scripts/sync-stack-versions.mjs --check",
+    "stack:sync": "node ../../../nafura-platform/scripts/sync-stack-versions.mjs --write",
     "ng": "ng",
     "start": "ng serve",
     "start:erp": "ng serve --configuration=local-backend --port 4200",

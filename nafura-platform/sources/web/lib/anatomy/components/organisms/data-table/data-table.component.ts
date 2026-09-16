@@ -242,12 +242,20 @@ export interface RowActionEvent<T> {
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      min-width: 0;
+      container-type: inline-size;
+    }
+
     .nf-data-table {
       position: relative;
       display: block;
       width: 100%;
       min-width: 0;
       overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
     }
 
     .nf-data-table--loading {
@@ -407,8 +415,8 @@ export interface RowActionEvent<T> {
       text-decoration: underline;
     }
 
-    /* ── Mobile: compact cells for efficient screen usage ── */
-    @media (max-width: 600px) {
+    /* ── Compact container (≤600px): denser cells, table scrolls horizontally ── */
+    @container (max-width: 600px) {
       th.mat-mdc-header-cell {
         padding: 6px 10px;
         font-size: 0.75rem;

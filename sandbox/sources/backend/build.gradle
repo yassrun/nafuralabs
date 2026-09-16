@@ -1,0 +1,29 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
+plugins {
+    id 'org.springframework.boot'
+}
+
+def stackVersions = new Properties()
+file('../../../nafura-platform/stack.versions.properties').withInputStream { stackVersions.load(it) }
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of((findProperty('stack.java.version') ?: stackVersions.getProperty('java.version')).toString().toInteger())
+    }
+}
+
+dependencies {
+    implementation project(':framework')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'com.h2database:h2'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('bootJar') {
+    archiveBaseName = 'sandbox-backend'
+}

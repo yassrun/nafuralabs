@@ -11,9 +11,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
+  ElementRef,
   inject,
   input,
+  NgZone,
   output,
   signal,
   ViewChild,
@@ -262,7 +265,7 @@ import {
       <div class="nf-listing-flat__actions-row">
         <!-- Left: Selection indicator + table controls -->
         <div class="nf-listing-flat__actions-left">
-          @if (selection().length > 0) {
+          @if (selectionKind() === 'multiple' && selection().length > 0) {
             <span class="nf-listing-flat__selcount">
               {{ selection().length }} {{ 'selected' | translate }}
             </span>
@@ -276,7 +279,14 @@ import {
 
         <!-- Right: Action buttons -->
         <div class="nf-listing-flat__actions-right">
-          <ng-content />
+          <!--
+            Projected extras (Status, Import magique, …) stay in the bar.
+            Below the compact container breakpoint they go icon-only — same
+            density concept as primary / ⋯, instead of wrapping as a fat label.
+          -->
+          <div class="nf-listing-flat__projected-actions">
+            <ng-content />
+          </div>
 
           @if (hasActions()) {
             @if (isMobile()) {
@@ -299,12 +309,42 @@ import {
                 />
               }
             } @else {
-              <nf-listing-actions
-                [actions]="resolvedActions()"
-                [selectionActions]="visibleSelectionActions()"
-                size="xs"
-                (actionClick)="handleActionClick($event)"
-              />
+              <div class="nf-listing-flat__actions-wide">
+                <nf-listing-actions
+                  [actions]="resolvedActions()"
+                  [selectionActions]="visibleSelectionActions()"
+                  size="xs"
+                  (actionClick)="handleActionClick($event)"
+                />
+              </div>
+              <div class="nf-listing-flat__actions-compact">
+                @if (visibleSelectionActions().length > 0) {
+                  <nf-listing-actions
+                    [selectionActions]="visibleSelectionActions()"
+                    size="xs"
+                    (actionClick)="handleActionClick($event)"
+                  />
+                }
+                @if (primaryAction(); as primary) {
+                  <nf-button
+                    class="nf-listing-flat__compact-primary-label"
+                    [variant]="primary.variant ?? 'primary'"
+                    size="xs"
+                    [icon]="primary.icon"
+                    [tooltip]="(primary.label ?? primary.id) | translate"
+                    (clicked)="handleActionClick(primary.id)"
+                  >
+                    {{ (primary.label ?? primary.id) | translate }}
+                  </nf-button>
+                }
+                @if (compactMenuNodes().length > 0) {
+                  <nf-action-menu
+                    size="xs"
+                    [nodes]="compactMenuNodes()"
+                    (actionClick)="handleActionClick($event)"
+                  />
+                }
+              </div>
             }
           }
         </div>
@@ -496,7 +536,7 @@ import {
               [attr.aria-label]="
                 (toggleSelectionOn() ? 'Cancel selection' : 'Select rows') | translate
               "
-              (clicked)="toggleSelectionOn.update((v) => !v)"
+              (clicked)="toggleSelectionMode()"
             />
           }
           @if (savedViewsEnabled()) {
@@ -612,6 +652,8 @@ import {
         flex-direction: column;
         min-height: 0;
         height: 100%;
+        /* Host is the query container so \`.nf-listing-flat\` itself can respond too. */
+        container-type: inline-size;
       }
       .nf-listing-flat {
         display: flex;
@@ -874,10 +916,67 @@ import {
       /* Right side: action buttons */
       .nf-listing-flat__actions-right {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
         gap: 6px;
         margin-left: auto;
+        min-width: 0;
+      }
+      .nf-listing-flat__projected-actions {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 6px;
+        flex: 0 0 auto;
+        min-width: 0;
+      }
+      .nf-listing-flat__projected-actions:empty {
+        display: none;
+      }
+      .nf-listing-flat__actions-wide,
+      .nf-listing-flat__actions-compact {
+        align-items: center;
+        gap: 6px;
+        flex: 0 0 auto;
+      }
+      .nf-listing-flat__actions-wide {
+        display: flex;
+      }
+      .nf-listing-flat__actions-compact {
+        display: none;
+      }
+      .nf-listing-flat__actions-compact > * {
+        flex: 0 0 auto;
+      }
+      @container (max-width: 1000px) {
+        .nf-listing-flat__actions-wide {
+          display: none;
+        }
+        .nf-listing-flat__actions-compact {
+          display: flex;
+        }
+        /*
+          Same compact concept as primary→icon / secondary→⋯ :
+          projected triggers (Import magique, Status, …) drop their labels.
+        */
+        .nf-listing-flat__projected-actions ::ng-deep .nf-button__content {
+          display: none !important;
+        }
+        .nf-listing-flat__projected-actions ::ng-deep button {
+          width: 26px;
+          min-width: 26px;
+          padding-inline: 0;
+        }
+      }
+      @container (max-width: 700px) {
+        .nf-listing-flat__compact-primary-label ::ng-deep .nf-button__content {
+          display: none;
+        }
+        .nf-listing-flat__compact-primary-label ::ng-deep button {
+          width: 26px;
+          min-width: 26px;
+          padding-inline: 0;
+        }
       }
       .nf-listing-flat__table-controls {
         display: flex;
@@ -1299,57 +1398,71 @@ import {
         to { transform: translateY(0) scale(1); opacity: 1; }
       }
 
-      /* ── Mobile: compact 2-line header, horizontal scrolling actions ── */
-      @media (max-width: 600px) {
+      /* ── Narrow container (≤720px): stacked search + tidy filter grid ── */
+      @container (max-width: 720px) {
+        .nf-listing-flat__filters-row--top {
+          flex-direction: column;
+          /* nowrap is required: column+wrap breaks the grid's intrinsic height. */
+          flex-wrap: nowrap;
+          align-items: stretch;
+        }
+        .nf-listing-flat__search {
+          flex: 1 1 auto;
+        }
+        .nf-listing-flat__pinned-filters {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+          align-items: end;
+          align-content: start;
+          flex: none;
+          gap: 8px;
+        }
+        .nf-listing-flat__pinned-filter {
+          min-width: 0;
+          flex: none;
+        }
+      }
+
+      /* ── Compact container (≤600px): dense toolbar, scrolling chips & actions ── */
+      @container (max-width: 600px) {
         .nf-listing-flat {
           gap: 6px;
         }
-
-        .nf-listing-flat__search {
-          flex: 1 1 auto !important;
-          min-width: 120px !important;
-        }
-        .nf-listing-flat__pinned-filters {
-          flex: 1 1 100%;
-        }
-        .nf-listing-flat__pinned-filter {
-          flex: 1 1 100%;
-          min-width: 0;
-        }
         .nf-listing-flat__chips {
-          flex: 1 1 100% !important;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          min-width: 0;
+          flex-wrap: nowrap;
           overflow-x: auto;
           white-space: nowrap;
           scrollbar-width: none;
           padding: 2px 0;
         }
+        .nf-listing-flat__chips::-webkit-scrollbar {
+          display: none;
+        }
         .nf-listing-flat__actions-row {
-          display: flex !important;
-          align-items: center;
-          justify-content: space-between;
-          gap: 6px;
-          flex-wrap: nowrap !important;
+          flex-wrap: nowrap;
           overflow-x: auto;
           scrollbar-width: none;
-          padding: 2px 0;
           -webkit-overflow-scrolling: touch;
+          padding: 2px 0;
         }
-        .nf-listing-flat__actions-right {
-          display: flex !important;
-          align-items: center;
-          gap: 6px;
-          flex-wrap: nowrap !important;
-          margin-left: auto;
+        .nf-listing-flat__actions-row::-webkit-scrollbar {
+          display: none;
         }
+        .nf-listing-flat__actions-left,
+        .nf-listing-flat__actions-right,
         .nf-listing-flat__actions-right > * {
-          flex: 0 0 auto !important;
+          flex: 0 0 auto;
+        }
+        .nf-listing-flat__projected-actions ::ng-deep .nf-button__content {
+          display: none !important;
+        }
+        .nf-listing-flat__projected-actions ::ng-deep button {
+          width: 26px;
+          min-width: 26px;
+          padding-inline: 0;
         }
 
-        /* Split layout on mobile: sticky bottom action bar (thumb zone) */
+        /* Split layout: sticky bottom action bar (thumb zone) */
         .nf-listing-flat--split .nf-listing-flat__actions-row {
           order: 10;
           position: sticky;
@@ -1361,11 +1474,34 @@ import {
           box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
         }
       }
+
+      /* Overlay panels are viewport-positioned → media query stays correct here. */
       @media (max-width: 640px) {
         :host ::ng-deep .mat-mdc-menu-panel.nf-listing-flat-menu--filter {
           width: calc(100vw - 24px) !important;
           min-width: 0 !important;
           max-width: calc(100vw - 24px) !important;
+        }
+      }
+
+      /* Export dialog on small viewports: bottom-sheet presentation. */
+      @media (max-width: 520px) {
+        .nf-export-backdrop {
+          padding: 0;
+          align-items: flex-end;
+        }
+        .nf-export-dialog {
+          max-width: none;
+          max-height: 92dvh;
+          border-radius: var(--nf-radius-lg, 12px) var(--nf-radius-lg, 12px) 0 0;
+          border-bottom: none;
+        }
+        .nf-export-dialog__columns-grid {
+          grid-template-columns: 1fr;
+        }
+        .nf-export-dialog__footer {
+          flex-wrap: wrap;
+          gap: 8px;
         }
       }
     `,
@@ -1431,9 +1567,9 @@ export class ListingFlatComponent<T = unknown> {
 
   readonly tableSelectable = computed((): false | 'single' | 'multiple' => {
     const sel = this.selectionKind();
-    if (sel === 'single' || sel === 'multiple') return sel;
-    if (this.features().selectionToggle && this.toggleSelectionOn()) return 'multiple';
-    return false;
+    if (sel === 'none') return false;
+    if (this.features().selectionToggle) return this.toggleSelectionOn() ? 'multiple' : 'single';
+    return sel;
   });
 
   readonly savedViewsEnabled = computed(
@@ -1447,10 +1583,20 @@ export class ListingFlatComponent<T = unknown> {
   });
 
   constructor() {
-    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
-      const mql = window.matchMedia('(max-width: 600px)');
-      this.isMobile.set(mql.matches);
-      mql.addEventListener('change', (e) => this.isMobile.set(e.matches));
+    // Container-driven (not viewport-driven): the listing adapts to the pane
+    // it lives in (split layouts, drawers, dashboards), like the CSS container queries.
+    if (typeof ResizeObserver !== 'undefined') {
+      const zone = inject(NgZone);
+      const host = inject(ElementRef).nativeElement as HTMLElement;
+      const observer = new ResizeObserver((entries) => {
+        const width = entries.at(-1)?.contentRect.width ?? 0;
+        const mobile = width > 0 && width < 600;
+        if (mobile !== this.isMobile()) {
+          zone.run(() => this.isMobile.set(mobile));
+        }
+      });
+      observer.observe(host);
+      inject(DestroyRef).onDestroy(() => observer.disconnect());
     }
 
     effect(() => {
@@ -1498,8 +1644,9 @@ export class ListingFlatComponent<T = unknown> {
     });
 
     effect(() => {
-      this.selectionKind();
-      this.toggleSelectionOn.set(this.features().selectionToggleDefaultActive ?? false);
+      const selection = this.selectionKind();
+      const selectionToggleDefaultActive = this.features().selectionToggleDefaultActive ?? false;
+      this.toggleSelectionOn.set(selection !== 'none' && selectionToggleDefaultActive);
       this.setSelection([]);
     });
 
@@ -1613,7 +1760,7 @@ export class ListingFlatComponent<T = unknown> {
     });
   });
 
-  /** True below 600px — the toolbar condenses to primary action + ⋯ overflow. */
+  /** True when the host container is below 600px — toolbar condenses to primary action + ⋯ overflow. */
   readonly isMobile = signal(false);
 
   /** First visible primary action — stays a button on mobile. */
@@ -1640,6 +1787,14 @@ export class ListingFlatComponent<T = unknown> {
       nodes.push(this.toMenuNode(a));
     }
     return nodes;
+  });
+
+  /** Constrained desktop ⋯ menu: secondary actions; selection actions stay visible. */
+  readonly compactMenuNodes = computed((): ActionMenuNode[] => {
+    const primary = this.primaryAction();
+    return this.resolvedActions()
+      .filter((action) => action.visible !== false && action !== primary)
+      .map((action) => this.toMenuNode(action));
   });
 
   readonly visibleColumns = computed((): ColumnConfig[] => {
@@ -1922,7 +2077,7 @@ export class ListingFlatComponent<T = unknown> {
 
   /** Single mode: row click toggles the selected row (highlight, no checkboxes). */
   onRowClick(item: T): void {
-    if (this.selectionKind() === 'single') {
+    if (this.tableSelectable() === 'single') {
       const next = this.selection().includes(item) ? [] : [item];
       this.setSelection(next);
     }
@@ -1931,6 +2086,11 @@ export class ListingFlatComponent<T = unknown> {
 
   onTableSelectionChange(items: T[]): void {
     this.setSelection(items);
+  }
+
+  toggleSelectionMode(): void {
+    this.toggleSelectionOn.update((v) => !v);
+    this.setSelection([]);
   }
 
   private setSelection(items: T[]): void {

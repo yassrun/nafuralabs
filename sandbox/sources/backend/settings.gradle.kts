@@ -1,5 +1,3 @@
-rootProject.name = "venue-catalog"
-
 pluginManagement {
     val stackVersions = java.util.Properties().apply {
         file("../../../nafura-platform/stack.versions.properties").inputStream().use(::load)
@@ -18,17 +16,7 @@ pluginManagement {
     }
 }
 
-includeBuild("../../../nafura-platform/sources/backend")
+rootProject.name = "sandbox-backend"
 
-fun includeVenueCatalogModule(name: String) {
-    val path = ":venue-catalog:$name"
-    include(path)
-    project(path).projectDir = file("modules/$name")
-}
-
-include(":venue-catalog:app")
-project(":venue-catalog:app").projectDir = file("app")
-
-listOf("api", "source-adapter", "catalog-place", "catalog-job", "catalog-enrichment", "compliance").forEach {
-    includeVenueCatalogModule(it)
-}
+include(":framework")
+project(":framework").projectDir = file("../../../nafura-platform/sources/backend/core/framework")

@@ -5,6 +5,11 @@
 
 Agents : Raster et Pact sont **en pause** — ne pas les prendre comme cadre de travail. Ops K8s : [`nafura-platform/ops/AGENTS.md`](nafura-platform/ops/AGENTS.md).
 
+## Stack Versions
+
+La source de vérité de la stack est [`nafura-platform/stack.versions.properties`](nafura-platform/stack.versions.properties).
+Les builds Gradle héritent de Java et des plugins Spring Boot depuis ce fichier. Les manifests npm se contrôlent avec `npm run stack:check` et se synchronisent avec `npm run stack:sync`; une exception produit doit être déclarée dans `stack.versions.override.properties` avec sa raison.
+
 Docs historiques (non obligatoires pour un agent) : `RASTER_BLUEPRINT.md`, `ARCHI_BLUEPRINT.md`, `raster/AGENTS.md`.
 
 ---
@@ -48,6 +53,7 @@ BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging \
 |---------|--------|
 | Platform (SDK + infra lab) | [`nafura-platform/`](nafura-platform/) |
 | Sektor BTP (ERP) | [`sektor/`](sektor/) |
+| Sandbox (Anatomy Showroom) | [`sandbox/`](sandbox/) |
 | Venue Catalog | [`venue-catalog/`](venue-catalog/) |
 | MBS Studio | [`mbs-studio/`](mbs-studio/) |
 | Corporate | [`corporate/`](corporate/) |

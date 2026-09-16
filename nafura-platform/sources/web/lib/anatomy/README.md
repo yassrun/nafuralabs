@@ -66,7 +66,7 @@ anatomy/
 
 ## ERP Archetypes (Ready)
 
-Live demos (mocks, no auth): **[Anatomy Showroom](../../../sandbox-web/README.md)** → `npm start` → http://127.0.0.1:4300
+Live demos (mocks, no auth): **[Sandbox](../../../../../sandbox/sources/web/README.md)** → `npm start` → http://127.0.0.1:4300
 
 Use the config-driven base classes for all new ERP pages.
 

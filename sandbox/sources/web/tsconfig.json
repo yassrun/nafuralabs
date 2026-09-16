@@ -1,0 +1,42 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "outDir": "./dist/out-tsc",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "declaration": false,
+    "experimentalDecorators": true,
+    "moduleResolution": "bundler",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@platform/*": ["../../../nafura-platform/sources/web/*"],
+      "@core/*": ["../../../nafura-platform/sources/web/core/*"],
+      "@lib/*": ["../../../nafura-platform/sources/web/lib/*"],
+      "@app/*": ["./src/app/*"],
+      "@env": ["./src/environments/environment"],
+
+      // Pin Angular / i18n on this app's node_modules (avoids dual @angular → NG0203).
+      "@angular/*": ["./node_modules/@angular/*"],
+      "@ngx-translate/*": ["./node_modules/@ngx-translate/*"]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true,
+    "strictAttributeTypes": false,
+    "strictDomEventTypes": false
+  }
+}
