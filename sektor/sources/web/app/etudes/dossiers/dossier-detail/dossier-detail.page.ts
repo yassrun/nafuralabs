@@ -47,16 +47,8 @@ import {
 } from '../components/etude-banner/etude-banner.component';
 import {
   DossierEtudeApiService,
-  PostesOrphelinsError,
-  type ConversionRequest,
   type DossierEtudeSynthese,
-  type PlacementPosteOrphelin,
 } from '../services/dossier-etude-api.service';
-import {
-  ConversionChantierDialogComponent,
-  type ConversionChantierDialogResult,
-} from '../components/conversion-chantier-dialog/conversion-chantier-dialog.component';
-import { PostesOrphelinsDialogComponent } from '../components/postes-orphelins-dialog/postes-orphelins-dialog.component';
 import { DossierGoDialogComponent } from '../components/dossier-go-dialog/dossier-go-dialog.component';
 import { DossierRefusChargeDialogComponent } from '../components/dossier-refus-charge-dialog/dossier-refus-charge-dialog.component';
 import {
@@ -263,6 +255,8 @@ export class DossierDetailPage {
     if (!this.modifiable()) return true;
     if (estEtapeUiLocale(this.etapeUi())) return true;
     if (this.etapeUi() === 1 && this.identite()?.cpsBlocking()) return false;
+    // Bordereau (BPU) : accessible seulement une fois l'étude affectée à un chargé d'étude.
+    if (this.etapeUi() === 1 && !this.dossierAffecte()) return false;
     if (this.etapeUi() === 3) return true;
     return this.peutContinuer();
   });
@@ -379,9 +373,15 @@ export class DossierDetailPage {
       this.peutDeciderGo(),
   );
 
-  readonly chargeDejaDesigne = computed(
-    () => !!(this.dossier()?.chargeEtudeUserId ?? '').trim(),
+  /**
+   * Un chargé d'étude est désigné : l'affectation — et non le statut — ouvre le bordereau (BPU).
+   * Tant qu'aucun chargé n'est nommé, l'étude reste au cadrage.
+   */
+  readonly dossierAffecte = computed(() =>
+    !!(this.dossier()?.chargeEtudeUserId ?? '').trim(),
   );
+
+  readonly chargeDejaDesigne = this.dossierAffecte;
 
   /** Ingénieur BTP qui n’est pas le chargé : voit / chiffre seulement ses lots. */
   readonly estIngenieurLotSeulement = computed(
@@ -434,6 +434,12 @@ export class DossierDetailPage {
     }
     if (this.enAttenteAccept() && !this.estChargeEtude() && !this.peutDeciderGo()) {
       add('info', 'Affecté — en attente de prise en charge par le chargé d’étude.');
+    }
+    if (this.enAttenteGo() && !this.dossierAffecte() && this.peutDeciderGo()) {
+      add(
+        'info',
+        'Le bordereau s’ouvre à partir de l’affectation — affectez un chargé d’étude pour continuer.',
+      );
     }
     if (this.dossier()?.status === 'IN_PROGRESS' && this.estIngenieurLotSeulement()) {
       add('info', 'Vous voyez uniquement les lots qui vous sont affectés.');
@@ -583,6 +589,8 @@ export class DossierDetailPage {
   async allerAEtapeUi(index: number): Promise<void> {
     const ui = index + 1;
     if (ui < 1 || ui > UI_ETAPE_MAX || ui === this.etapeUi()) return;
+    // Bordereau et au-delà : jamais sans affectation préalable d'un chargé d'étude.
+    if (ui >= 2 && !this.dossierAffecte()) return;
     if (!(await this.confirmerSiPosteDirty())) return;
     if (this.peutEnregistrer()) {
       const ok = await this.identite()?.enregistrer();
@@ -625,6 +633,11 @@ export class DossierDetailPage {
   private async changerEtape(etape: number): Promise<void> {
     const dossier = this.dossier();
     if (!dossier || etape < 1 || etape > 5) return;
+    // Le bordereau (BPU) s'ouvre par l'affectation : aucun saut d'étape sans chargé d'étude.
+    if (etape >= 2 && !this.dossierAffecte()) {
+      this.erreur.set(BORDEREAU_SANS_AFFECTATION);
+      return;
+    }
     this.erreur.set(undefined);
     try {
       const maj = await this.api.allerAEtape(dossier.id, etape);
@@ -794,14 +807,6 @@ export class DossierDetailPage {
           await this.ouvrirPerdu(dossier);
           break;
         }
-        case 'CONVERTIR': {
-          const chantierId = await this.convertirEnChantier(dossier);
-          await this.refreshSynthese(dossier.id);
-          if (chantierId) {
-            void this.nav.navigate(['/chantiers', chantierId]);
-          }
-          break;
-        }
         case 'VOIR_CHANTIER': {
           const chantierId = this.synthese()?.chantierGenereId;
           if (chantierId) {
@@ -810,6 +815,11 @@ export class DossierDetailPage {
           break;
         }
         case 'CORRIGER_BORDEREAU': {
+          // Le bordereau s'ouvre par l'affectation — on ne crée rien avant le verrou.
+          if (!this.dossierAffecte()) {
+            this.erreur.set(BORDEREAU_SANS_AFFECTATION);
+            break;
+          }
           if (!dossier.dpgfId) {
             await this.api.initBordereauManuel(dossier.id);
             await this.rechargerApresPieces();
@@ -1199,59 +1209,6 @@ export class DossierDetailPage {
     return `CLI-${suffix}`;
   }
 
-  /**
-   * AC-13 — l'écran demande code chantier, date de démarrage et durée, puis convertit.
-   * AC-12 — si le devis contient des postes sans lot parent, le serveur s'arrête avant de rien
-   * créer et les nomme ; on les affiche, l'humain les place, et on rejoue. S'il abandonne, on
-   * n'appelle plus : rien n'est créé et l'étude reste gagnée.
-   *
-   * @returns l'identifiant du chantier créé, ou `null` si l'humain a abandonné.
-   */
-  private async convertirEnChantier(dossier: DossierEtude): Promise<string | null> {
-    const saisie = await firstValueFrom(
-      this.dialog
-        .open<
-          ConversionChantierDialogComponent,
-          unknown,
-          ConversionChantierDialogResult | null
-        >(ConversionChantierDialogComponent, {
-          // Laissé vide, le serveur retombe sur la date d'attribution de l'étude.
-          data: { defaultLabel: dossier.objet },
-          autoFocus: 'first-tabbable',
-        })
-        .afterClosed(),
-    );
-    if (!saisie) return null;
-
-    const body: ConversionRequest = { ...saisie };
-    for (;;) {
-      try {
-        const result = await this.api.convertir(dossier.id, body);
-        return result.chantierId;
-      } catch (err) {
-        if (!(err instanceof PostesOrphelinsError)) throw err;
-        const placements = await firstValueFrom(
-          this.dialog
-            .open<
-              PostesOrphelinsDialogComponent,
-              unknown,
-              PlacementPosteOrphelin[] | null
-            >(PostesOrphelinsDialogComponent, {
-              data: { postes: err.postes, lotsDisponibles: err.lotsDisponibles },
-              autoFocus: 'first-tabbable',
-            })
-            .afterClosed(),
-        );
-        // Abandon : rien n'a été créé côté serveur, l'étude reste GAGNE.
-        if (!placements) return null;
-        body.placementsPostesOrphelins = [
-          ...(body.placementsPostesOrphelins ?? []),
-          ...placements,
-        ];
-      }
-    }
-  }
-
   private async refreshSynthese(id: string): Promise<void> {
     const [gates, synthese] = await Promise.all([this.api.gates(id), this.api.synthese(id)]);
     this.gates.set(gates);
@@ -1371,6 +1328,9 @@ export class DossierDetailPage {
     if (domain === 'etudes.dossier.go_reserve_dg') {
       return 'Seul le responsable d’études (ou l’owner) peut affecter ou rejeter.';
     }
+    if (domain === 'etudes.dossier.action_reservee_gestionnaire') {
+      return 'Vous n’avez pas le droit de soumettre ce cadrage.';
+    }
     if (domain === 'etudes.dossier.warnings_non_acceptes') {
       return 'Des avertissements commerciaux restent à accepter, avec un motif, avant de marquer gagné.';
     }
@@ -1385,6 +1345,9 @@ export class DossierDetailPage {
     }
     if (domain === 'etudes.dossier.saisie_reservee_charge') {
       return 'Après prise en compte, seul le chargé d’étude affecté peut saisir le bordereau.';
+    }
+    if (domain === 'etudes.dossier.bordereau_non_affecte') {
+      return BORDEREAU_SANS_AFFECTATION;
     }
     if (domain === 'etudes.dossier.accept_reserve_charge' || domain === 'etudes.dossier.refus_reserve_charge') {
       return 'Seul le chargé d’étude affecté peut prendre en charge ou rejeter ce dossier.';
@@ -1405,6 +1368,13 @@ export class DossierDetailPage {
     return translated !== key ? translated : key;
   }
 }
+
+/**
+ * Verrou produit : le bordereau (BPU) s'ouvre par l'affectation d'un chargé d'étude.
+ * Message unique pour la navigation d'étape et les CTA qui y mènent.
+ */
+const BORDEREAU_SANS_AFFECTATION =
+  'Le bordereau s’ouvre à partir de l’affectation — soumettez le cadrage pour affectation.';
 
 /** PUT /etape ne renvoyait pas l’enrichissement AOC — on ne perd pas le cadrage déjà sauvé. */
 function conserverAoListing(prev: DossierEtude, maj: DossierEtude): DossierEtude {

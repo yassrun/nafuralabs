@@ -51,6 +51,7 @@ import {
   selector: 'app-chantier-lots-tab',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'chantier-lots-tab' },
   imports: [
     TranslateModule,
     ButtonComponent,
@@ -62,20 +63,22 @@ import {
 ],
   template: `
     <section class="tab-panel">
-      <div class="tab-panel__toolbar">
-        <nf-button variant="primary" icon="plus" iconLibrary="lucide" (clicked)="openForm('rootLot')">
-          {{ 'chantiers.chantier.detail.lots.addCta' | translate }}
-        </nf-button>
-        <nf-button variant="secondary" icon="plus" iconLibrary="lucide" (clicked)="openForm('sousLot')" [disabled]="!rootLots().length">
-          {{ 'chantiers.chantier.detail.lots.addSousLotCta' | translate }}
-        </nf-button>
-        <nf-button variant="secondary" icon="plus" iconLibrary="lucide" (clicked)="openForm('poste')" [disabled]="!lots().length">
-          {{ 'chantiers.chantier.detail.lots.addPosteCta' | translate }}
-        </nf-button>
-        <nf-smart-import-trigger
-          [definition]="importDefinition"
-          (completed)="onMagicImportComplete($event)" />
-      </div>
+      @if (!lectureSeule()) {
+        <div class="tab-panel__toolbar">
+          <nf-button variant="primary" icon="plus" iconLibrary="lucide" (clicked)="openForm('rootLot')">
+            {{ 'chantiers.chantier.detail.lots.addCta' | translate }}
+          </nf-button>
+          <nf-button variant="secondary" icon="plus" iconLibrary="lucide" (clicked)="openForm('sousLot')" [disabled]="!rootLots().length">
+            {{ 'chantiers.chantier.detail.lots.addSousLotCta' | translate }}
+          </nf-button>
+          <nf-button variant="secondary" icon="plus" iconLibrary="lucide" (clicked)="openForm('poste')" [disabled]="!lots().length">
+            {{ 'chantiers.chantier.detail.lots.addPosteCta' | translate }}
+          </nf-button>
+          <nf-smart-import-trigger
+            [definition]="importDefinition"
+            (completed)="onMagicImportComplete($event)" />
+        </div>
+      }
 
       @if (treeNodes().length || loading()) {
         <div class="lots-tablebar">
@@ -86,7 +89,7 @@ import {
         </div>
         <nf-tree-table
           [nodes]="treeNodes()"
-          [columns]="treeColumns"
+          [columns]="treeColumns()"
           treeColumnKey="designation"
           [loading]="loading()"
           [expandedKeys]="expandedKeys()"
@@ -140,14 +143,16 @@ import {
                 }
               }
               @case ('actions') {
-                <span class="actions-cell">
-                  <button type="button" class="row-action" (click)="editRow(row)"
-                    [attr.title]="'chantiers.chantier.detail.lots.editAction' | translate"
-                    [attr.aria-label]="'chantiers.chantier.detail.lots.editAction' | translate">✎</button>
-                  <button type="button" class="row-action row-action--danger" (click)="deleteRow(row)"
-                    [attr.title]="'chantiers.chantier.detail.lots.deleteAction' | translate"
-                    [attr.aria-label]="'chantiers.chantier.detail.lots.deleteAction' | translate">🗑</button>
-                </span>
+                @if (!lectureSeule()) {
+                  <span class="actions-cell">
+                    <button type="button" class="row-action" (click)="editRow(row)"
+                      [attr.title]="'chantiers.chantier.detail.lots.editAction' | translate"
+                      [attr.aria-label]="'chantiers.chantier.detail.lots.editAction' | translate">✎</button>
+                    <button type="button" class="row-action row-action--danger" (click)="deleteRow(row)"
+                      [attr.title]="'chantiers.chantier.detail.lots.deleteAction' | translate"
+                      [attr.aria-label]="'chantiers.chantier.detail.lots.deleteAction' | translate">🗑</button>
+                  </span>
+                }
               }
             }
           </ng-template>
@@ -163,7 +168,7 @@ import {
           icon="layers"
           [title]="'chantiers.chantier.detail.empty.lotsTitle' | translate"
           [message]="'chantiers.chantier.detail.empty.lotsMessage' | translate"
-          [actionLabel]="'chantiers.chantier.detail.lots.addCta' | translate"
+          [actionLabel]="lectureSeule() ? '' : ('chantiers.chantier.detail.lots.addCta' | translate)"
           (action)="openForm('rootLot')"></nf-empty-state>
       }
     </section>
@@ -189,6 +194,16 @@ import {
 })
 export class ChantierLotsTabComponent {
   readonly chantierId = input.required<string>();
+  /**
+   * Chiffrage du BDP du chantier : les quantités et les prix unitaires s'y corrigent, et une
+   * ligne chiffrée entre au bordereau. Hors chiffrage, l'arbre reste la saisie stricte d'interne.
+   */
+  readonly chiffrage = input(false);
+  /**
+   * Arbre repris d'une étude : pas d'ajout, d'import ni d'édition silencieuse.
+   * L'empreinte se pose uniquement par « Valider le BDP chiffré ».
+   */
+  readonly lectureSeule = input<boolean>(false);
 
   private readonly lotApi = inject(ChantierLotApiService);
   private readonly posteApi = inject(PosteBudgetaireApiService);
@@ -207,7 +222,7 @@ export class ChantierLotsTabComponent {
 
   readonly rootLots = computed(() => this.lots().filter((lot) => !lot.parentLotId));
 
-  readonly treeColumns: NfTreeTableColumn<LotHierarchyRow>[] = [
+  private readonly baseTreeColumns: NfTreeTableColumn<LotHierarchyRow>[] = [
     { key: 'type', label: 'chantiers.chantier.detail.lots.typeColumn', width: '7rem' },
     { key: 'designation', label: 'chantiers.chantier.detail.columns.designation', width: '22rem' },
     { key: 'code', label: 'chantiers.chantier.detail.columns.code', width: '7rem' },
@@ -219,6 +234,12 @@ export class ChantierLotsTabComponent {
     { key: 'avancement', label: 'chantiers.chantier.detail.columns.avancement', align: 'center', width: '8rem' },
     { key: 'actions', label: 'chantiers.chantier.detail.lots.actionsColumn', align: 'center', width: '7rem' },
   ];
+
+  readonly treeColumns = computed(() =>
+    this.lectureSeule()
+      ? this.baseTreeColumns.filter((column) => column.key !== 'actions')
+      : this.baseTreeColumns,
+  );
 
   readonly treeNodes = computed(() =>
     buildLotTreeNodes(this.lots(), this.postesByLotId()),
@@ -312,8 +333,9 @@ export class ChantierLotsTabComponent {
   }
 
   async openForm(mode: LotFormMode): Promise<void> {
+    if (this.lectureSeule()) return;
     const ref = this.dialog.open(LotFormDialogComponent, {
-      data: { mode, lots: this.lots() },
+      data: { mode, lots: this.lots(), chiffrage: this.chiffrage() },
       autoFocus: 'first-tabbable',
     });
     const result = await firstValueFrom(ref.afterClosed());
@@ -328,15 +350,29 @@ export class ChantierLotsTabComponent {
         const lotId = result.targetLotId;
         if (!lotId) return;
         const postes = this.postesByLotId()[lotId] ?? [];
-        // Saisie : le poste cree est interne (AC-3), il porte quantite et unite mais aucun
-        // prix de vente (AC-4). Le vendu ne naît que de la copie du devis validé.
-        await this.posteApi.createForLot(lotId, {
-          ...(result.code ? { code: result.code } : {}),
-          designation: result.designation,
-          quantite: result.quantite ?? 0,
-          unite: result.unite,
-          ordre: postes.length + 1,
-        });
+        if (this.chiffrage()) {
+          // Chiffrage du BDP : la ligne naît vendue dès qu'elle porte un prix ; sans prix, elle
+          // reste interne. L'écran de chiffrage est le seul à pouvoir créer du vendu hors étude.
+          await this.posteApi.createLigneBdp(chantierId, {
+            lotId,
+            ...(result.code ? { code: result.code } : {}),
+            designation: result.designation,
+            quantite: result.quantite ?? 0,
+            unite: result.unite,
+            ordre: postes.length + 1,
+            ...(result.prixUnitaireHt != null ? { prixUnitaireHt: result.prixUnitaireHt } : {}),
+          });
+        } else {
+          // Saisie : le poste cree est interne (AC-3), il porte quantite et unite mais aucun
+          // prix de vente (AC-4). Le vendu ne naît que de la copie du devis validé.
+          await this.posteApi.createForLot(lotId, {
+            ...(result.code ? { code: result.code } : {}),
+            designation: result.designation,
+            quantite: result.quantite ?? 0,
+            unite: result.unite,
+            ordre: postes.length + 1,
+          });
+        }
         this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.posteCreateSuccess'));
       } else {
         // A lot / sous-lot is a grouping: its amount is derived from its postes,
@@ -455,6 +491,7 @@ export class ChantierLotsTabComponent {
   }
 
   async editRow(row: LotHierarchyRow): Promise<void> {
+    if (this.lectureSeule()) return;
     if (row.poste) {
       await this.openEditPoste(row.poste);
     } else if (row.lot) {
@@ -496,6 +533,7 @@ export class ChantierLotsTabComponent {
         lots: this.lots(),
         isEdit: true,
         nature: poste.nature,
+        chiffrage: this.chiffrage(),
         initial: {
           code: poste.code,
           designation: poste.designation,
@@ -509,6 +547,28 @@ export class ChantierLotsTabComponent {
     const result = await firstValueFrom(ref.afterClosed());
     if (!result) return;
     const quantite = result.quantite ?? 0;
+    if (this.chiffrage()) {
+      // Chiffrage : la ligne copiée du devis garde son prix ; une ligne du bordereau peut entrer
+      // au vendu (prix saisi) ou en sortir (prix effacé → interne).
+      const prix = result.prixUnitaireHt ?? poste.prixUnitaireHt;
+      const resteVendue = !!poste.dpgfNoeudId || result.prixUnitaireHt != null;
+      try {
+        await this.posteApi.updateLigneBdp(this.chantierId(), poste.id, {
+          designation: result.designation,
+          unite: result.unite,
+          quantite,
+          nature: resteVendue ? 'VENDU' : 'INTERNE',
+          ...(resteVendue && prix != null
+            ? { prixUnitaireHt: prix, montantHt: Math.round(quantite * prix * 100) / 100 }
+            : {}),
+        });
+        this.toast.success(this.translate.instant('chantiers.chantier.detail.lots.updateSuccess'));
+        await this.reload();
+      } catch {
+        this.toast.error(this.translate.instant('chantiers.chantier.detail.lots.updateFailed'));
+      }
+      return;
+    }
     // AC-4 — le prix de vente n'existe que sur un poste vendu ; le dialogue ne le renvoie pas
     // pour un interne, et le service ne l'envoie pas non plus.
     const vendu = poste.nature === 'VENDU';
@@ -535,6 +595,7 @@ export class ChantierLotsTabComponent {
   }
 
   async deleteRow(row: LotHierarchyRow): Promise<void> {
+    if (this.lectureSeule()) return;
     if (row.poste) {
       const confirmed = await this.confirmDialog.confirm({
         title: this.translate.instant('chantiers.chantier.detail.lots.deleteConfirmTitle'),
@@ -594,6 +655,7 @@ export class ChantierLotsTabComponent {
   }
 
   async onMagicImportComplete(result: ReviewedExtraction): Promise<void> {
+    if (this.lectureSeule()) return;
     await this.lotImporter.import(this.chantierId(), result.data);
     await this.reload();
   }

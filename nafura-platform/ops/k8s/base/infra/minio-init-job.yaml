@@ -7,7 +7,9 @@ spec:
     spec:
       containers:
         - name: minio-mc
-          image: minio/mc:latest
+          # Même retrait Docker Hub que `minio/minio` — client `mc` servi par quay.io.
+          image: quay.io/minio/mc:latest
+          imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
             - -c

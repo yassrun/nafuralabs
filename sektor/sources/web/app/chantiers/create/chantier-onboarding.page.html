@@ -1,0 +1,281 @@
+<nf-screen [header]="header()" [scroll]="true">
+  @if (error()) { <div class="feedback error" role="alert">{{ error() }} <button type="button" (click)="workflow() ? refresh() : load()">Réessayer / actualiser</button></div> }
+  @if (notice()) { <p class="feedback success" role="status">{{ notice() }}</p> }
+  @if (loading()) { <p role="status">Chargement du dossier…</p> }
+  @else {
+    @if (workflow(); as w) {
+      <div class="toolbar">
+        <a [routerLink]="['/chantiers', w.chantier.id]">Ouvrir le cockpit</a>
+        @if (w.chantier.dossierEtudeId) { <a [routerLink]="['/etudes/dossiers', w.chantier.dossierEtudeId]">Consulter l'étude source</a> }
+        <a [routerLink]="['/chantiers/documents']" [queryParams]="{chantierId: w.chantier.id}">Documents du chantier</a>
+        <button type="button" (click)="refresh()" [disabled]="saving()">Actualiser les contrôles</button>
+      </div>
+      <nf-status-action-bar [status]="status()" [config]="statusBar" [context]="statusContext()" [history]="statusHistory()" [disabled]="saving()" (action)="openAction($event)" />
+      <div class="metrics">
+        <span><strong>{{ w.chantier.montantVenteInitialHt == null ? '—' : (w.chantier.montantVenteInitialHt | number:'1.0-2') }}</strong> Vente initiale HT</span>
+        <span><strong>{{ w.chantier.debourseInitialHt == null ? '—' : (w.chantier.debourseInitialHt | number:'1.0-2') }}</strong> Déboursé initial HT</span>
+        <span><strong>{{ openReserves() }}</strong> Réserves ouvertes</span>
+        <span><strong>{{ activeGaranties() }}</strong> Garanties à suivre</span>
+      </div>
+      @if (dueGaranties().length) { <p class="feedback" role="status">{{ dueGaranties().length }} garantie(s) à échéance à traiter. <button (click)="goTo(steps().length - 1)">Consulter les garanties</button></p> }
+    }
+
+    <ng-template #slotTpl let-slot>
+      <article class="document-slot" [class.drag-over]="dragOver() === slot.tag" (dragover)="$event.preventDefault(); dragOver.set(slot.tag)" (dragleave)="dragOver.set('')" (drop)="dropFile(slot.tag, $event)">
+        <div class="section-heading"><h3>{{ slot.label }}</h3>@if (slot.required) { <span class="slot-badge">Requis pour valider</span> }</div>
+        <p class="hint">{{ slot.hint }}</p>
+        @if (pendingFiles()[slot.tag]; as file) {
+          <p class="document-name">{{ file.name }}</p><small>À enregistrer · {{ file.size / 1024 | number:'1.0-0' }} Ko</small>
+          <button type="button" [disabled]="saving()" (click)="removePending(slot.tag)">Retirer le fichier choisi</button>
+        } @else if (documentFor(slot.tag); as doc) {
+          <button type="button" class="document-name" (click)="openDocument(doc)">{{ doc.fichier }}</button><p class="success">Pièce enregistrée</p>
+        } @else { <p>Glissez la pièce ici ou choisissez un fichier.</p> }
+        @if (!workflow() || phasePreparation()) { <label class="file-choice">{{ documentFor(slot.tag) ? 'Déposer une nouvelle version' : 'Choisir un fichier' }}<input type="file" [attr.aria-label]="slot.label" [disabled]="saving()" (change)="chooseFile(slot.tag, $event)" /></label> }
+      </article>
+    </ng-template>
+
+    <nf-wizard-shell [steps]="steps()" [currentStepIndex]="step()" [completedStepIndexes]="completedSteps()" [allowStepNavigation]="true" [allowFutureStepNavigation]="true" [canProceed]="!saving() && !selectingStudy()" [showSubmit]="false" backLabel="Précédent" nextLabel="Suivant" submitLabel="Enregistrer" (back)="goTo(step() - 1)" (next)="goTo(step() + 1)" (stepSelect)="goTo($event)">
+      @if (phasePreparation()) {
+        @if (step() === 0) {
+          <section class="panel"><h2>Cadrage et documents</h2>
+            <p>Le chantier constitue son propre dossier : le CPS et le BDP déposés ici sont ceux du chantier, jamais ceux de l’étude — ils peuvent avoir changé.</p>
+
+            @if (!workflow()) {
+              <p>Une étude en validation finale préremplit le nom, le client et la ville. Un pin déjà posé n’est pas écrasé. Le bordereau chiffré se consulte à l’étape suivante. La choisir ne crée aucun chantier et ne valide aucun prix.</p>
+              <nf-select lookupKey="etudes-final-approved" label="Étude (facultatif)" placeholder="Rechercher une étude validée définitivement" [ngModel]="selected()?.id ?? null" (ngModelChange)="selectStudy($event)" [lookupSearch]="searchStudies" [options]="studyOptions()" [selectedLabel]="selected() ? selected()!.numero + ' · ' + selected()!.objet : ''" [disabled]="saving() || selectingStudy()" />
+              @if (selectingStudy()) { <p role="status">Préremplissage…</p> }
+              @if (selected(); as source) { <p class="feedback">{{ source.numero }} · {{ source.clientNom }}. Étude choisie : le bordereau chiffré se verra à l’étape BDP. <button type="button" (click)="selectStudy(null)">Retirer la sélection</button></p> }
+              @else { <p>Aucune étude sélectionnée : renseignez le chantier et construisez son bordereau à l’étape suivante. Seules les études en validation finale apparaissent.</p> }
+            } @else if (workflow()!.chantier.dossierEtudeId) {
+              <p class="feedback">Informations préremplies depuis l’étude source. Le bordereau chiffré se consulte à l’étape BDP.</p>
+            }
+
+            <app-chantier-pieces
+              [primarySlots]="cadrageSlots"
+              [extraSlots]="extraSlots()"
+              [documents]="documents()"
+              [pendingFiles]="pendingFiles()"
+              [studyDocuments]="studyDocuments()"
+              [disabled]="saving() || (!!workflow() && !editableCadrage())"
+              [saving]="saving()"
+              [dragOver]="dragOver()"
+              (fileChosen)="onPieceChosen($event)"
+              (fileRemoved)="removePending($event)"
+              (extraAdded)="addExtraSlot($event)"
+              (extraRemoved)="removeExtraSlot($event)"
+              (reprise)="repriseStudyDoc($event)"
+              (openDoc)="openDocument($event)"
+              (dragOverChange)="dragOver.set($event)"
+            />
+
+            <h3>Identité du chantier</h3>
+            <p class="hint">Type, description et lieu. Les dates prévisionnelles restent à l’étape Démarrage.</p>
+            <fieldset [disabled]="saving() || (!!workflow() && !editableCadrage())"><div class="form-grid">
+              <label>Nom du chantier<input [(ngModel)]="draft.label" maxlength="255" required /></label>
+              @if (!workflow()) { <nf-select lookupKey="clients" label="Client" placeholder="Rechercher un client" [ngModel]="draft.clientId" (ngModelChange)="onClientChange($event)" [lookupSearch]="searchClients" [options]="clientOptions()" [selectedLabel]="draft.clientName" [required]="true" [disabled]="saving()" /> }
+              @else { <label>Client<input [value]="draft.clientName" readonly /></label> }
+              <label>Type de chantier
+                <select [(ngModel)]="draft.type">
+                  @for (opt of typeOptions; track opt.value) {
+                    <option [ngValue]="opt.value">{{ opt.label }}</option>
+                  }
+                </select>
+              </label>
+              <nf-ville-ma-select label="Ville" [required]="false" [(ngModel)]="draft.ville" [disabled]="saving() || (!!workflow() && !editableCadrage())" />
+              <label class="wide">Description<textarea [(ngModel)]="draft.description" rows="3" maxlength="2000" placeholder="Objet du chantier, hors pièces du dossier"></textarea></label>
+            </div>
+            <h3>Localisation</h3>
+            <nf-map-picker
+              class="wide"
+              [lat]="draft.latitude"
+              [lng]="draft.longitude"
+              [address]="draft.adresse"
+              [city]="draft.ville"
+              [disabled]="saving() || (!!workflow() && !editableCadrage())"
+              (latChange)="onMapLat($event)"
+              (lngChange)="onMapLng($event)"
+              (addressChange)="onMapAddress($event)"
+              (cityChange)="onMapCity($event)"
+            />
+            <div class="form-grid">
+              <label>Délai d’exécution (mois)<input type="number" min="1" [(ngModel)]="draft.dureeMois" (ngModelChange)="syncFinPrevue()" /></label>
+            </div></fieldset>
+
+            @if (!workflow()) {
+              <p class="hint">Les pièces seront envoyées à l’enregistrement du cadrage ; vous pouvez compléter le dossier progressivement.</p>
+              <nf-button variant="primary" [disabled]="saving() || selectingStudy()" (clicked)="saveCadrage()">{{ savingCadrage() ? 'Enregistrement…' : 'Enregistrer le cadrage' }}</nf-button>
+            } @else {
+              @if (editableCadrage()) { <nf-button variant="primary" [disabled]="saving()" (clicked)="saveInformations()">Enregistrer les informations</nf-button> }
+              @if (hasPendingFiles()) { <nf-button variant="primary" [disabled]="saving()" (clicked)="saveDocuments()">{{ saving() ? 'Envoi…' : 'Enregistrer les pièces' }}</nf-button> }
+            }
+          </section>
+        } @else if (step() === 1) {
+          <section class="panel"><h2>BDP chiffré</h2>
+            @if (!workflow()) {
+              @if (selected()) {
+                <p class="feedback">Repris de l’étude — à vérifier. Enregistrez le cadrage pour copier ce bordereau sur le chantier. Les prix ne sont pas validés.</p>
+                @if (selectingStudy()) { <p role="status">Chargement du bordereau…</p> }
+                @else if (studyBdpPreview(); as preview) {
+                  <aside class="bdp-preview" aria-label="Bordereau chiffré de l’étude">
+                    <strong>Bordereau chiffré de l’étude</strong>
+                    <p>{{ preview.nombreLots }} lot(s) · {{ preview.nombreArticles }} ligne(s) · {{ preview.totalHt | number:'1.0-2' }} DH HT. Lecture seule — la validation de l’empreinte se fera après enregistrement du cadrage.</p>
+                    @if (preview.rows.length) {
+                      <table class="bdp-preview__table">
+                        <caption>Arbre chiffré (lecture seule)</caption>
+                        <thead><tr><th>Ligne</th><th>Qté</th><th>Unité</th><th>PU HT</th><th>Total HT</th></tr></thead>
+                        <tbody>
+                          @for (row of preview.rows; track row.type + row.code + row.libelle + row.depth) {
+                            <tr [class.bdp-preview__group]="row.type !== 'ARTICLE'">
+                              <td class="bdp-preview__label" [style.padding-inline-start.rem]="0.5 + row.depth">{{ row.code }} · {{ row.libelle }}</td>
+                              <td>{{ row.quantite ?? '—' }}</td>
+                              <td>{{ row.unite || '—' }}</td>
+                              <td>{{ row.prixUnitaire != null ? (row.prixUnitaire | number:'1.0-2') : '—' }}</td>
+                              <td>{{ row.total != null ? (row.total | number:'1.0-2') : '—' }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    } @else {
+                      <p>Cette étude n’a pas encore de lignes chiffrées au bordereau.</p>
+                    }
+                  </aside>
+                }
+              } @else {
+                <p class="feedback">Enregistrez d’abord le cadrage : sans étude, vous construirez le bordereau ici par import ou saisie.</p>
+              }
+            } @else {
+              @if (bdpLectureSeule()) {
+                <p class="feedback">Repris de l’étude — à vérifier. Lots, quantités et prix sont repris en lecture seule. Valider le BDP chiffré pose l’empreinte ; elle n’est pas auto-validée.</p>
+                @if (!bdpLignes().length) {
+                  <p class="feedback" role="status">Le bordereau chiffré n’apparaît pas encore. Actualisez les contrôles.</p>
+                }
+              } @else {
+                <p>Le bordereau engage le chantier, pas l’étude. Importez le BDP du chantier, puis complétez les quantités et les prix — ou saisissez les lignes à la main.</p>
+              }
+              <div class="metrics">
+                <span><strong>{{ bdpLignes().length }}</strong> lignes vendues</span>
+                <span><strong>{{ bdpTotalHt() | number:'1.0-2' }}</strong> Total vendu HT</span>
+                <span><strong>{{ bdpValide() ? 'Vérifié' : 'À vérifier' }}</strong> Vérification</span>
+              </div>
+              @if (bdpValide()) { <p class="feedback success" role="status">BDP chiffré vérifié · empreinte {{ workflow()!.data.bdp!.empreinte }}</p> }
+              @else if (bdpManques().length) {
+                <ul class="manques">@for (manque of bdpManques(); track manque) { <li>{{ bdpManqueLabels[manque] || manque }}</li> }</ul>
+              }
+              @if (sansEtude()) {
+                <div class="form-grid">
+                  <label>Déboursé initial HT<input type="number" min="0" [(ngModel)]="draft.montant" /></label>
+                </div>
+                <nf-button variant="secondary" [disabled]="saving() || !editableCadrage()" (clicked)="saveInformations()">Enregistrer le déboursé initial</nf-button>
+              }
+              <app-chantier-lots-tab [chantierId]="workflow()!.chantier.id" [chiffrage]="chiffrageOuvert()" [lectureSeule]="bdpLectureSeule()" />
+              <div class="toolbar">
+                @if (allowed('VALIDATE_BDP')) { <nf-button variant="primary" [disabled]="saving() || !bdpValidable()" (clicked)="validateBdp()">Valider le BDP chiffré</nf-button> }
+                <nf-button variant="ghost" [disabled]="saving()" (clicked)="refresh()">Actualiser les contrôles</nf-button>
+              </div>
+              <p class="hint">Choisir une étude ne valide pas le bordereau : l’empreinte se pose uniquement par « Valider le BDP chiffré ».</p>
+            }
+          </section>
+        } @else if (step() === 2) {
+          <section class="panel"><h2>Équipe et responsables</h2>
+            @if (!workflow()) { <p class="feedback">Enregistrez d’abord le cadrage.</p> }
+            @else {
+              <p>Conducteur de travaux et chef de chantier sont exigés pour valider la préparation — même ajout que le cockpit.</p>
+              <app-chantier-equipe-tab [chantierId]="workflow()!.chantier.id" [requiredRoles]="requiredEquipeRoles" (changed)="refresh()" />
+            }
+          </section>
+        } @else {
+          @if (!workflow()) {
+            <section class="panel"><h2>Démarrage</h2><p class="feedback">Enregistrez d’abord le cadrage.</p></section>
+          } @else {
+            <section class="panel"><h2>Marché</h2>
+              <p>Le marché du chantier se crée ici ou se rattache : la référence commerciale de l’étude n’est pas un marché notifié.</p>
+              <div class="form-grid">
+                <label>Référence du marché<input [(ngModel)]="draft.marcheNumero" maxlength="100" /></label>
+              </div>
+              @if (marches().length) {
+                <ul class="register">@for (marche of marches(); track marche.id) { <li><a [routerLink]="['/marches/contrats', marche.id]">{{ marche.numero }}</a> · {{ marche.intitule }} · {{ marche.status }}</li> }</ul>
+              } @else { <p>Aucun marché rattaché à ce chantier.</p> }
+              <div class="toolbar">
+                @if (allowed('SAVE_PREPARATION')) { <nf-button variant="secondary" [disabled]="saving()" (clicked)="creerMarche()">Créer le marché depuis le chantier</nf-button> }
+                <a [routerLink]="['/marches/contrats']" [queryParams]="{ chantierId: workflow()!.chantier.id }">Voir les marchés</a>
+              </div>
+              <div class="document-slots">
+                <ng-container *ngTemplateOutlet="slotTpl; context: { $implicit: preparationSlots[0] }"></ng-container>
+              </div>
+            </section>
+
+            <section class="panel"><h2>Dates prévisionnelles</h2>
+              <p>Le délai retenu au cadrage commande la fin prévisionnelle : les deux doivent rester cohérents.</p>
+              <div class="form-grid">
+                <label>Début prévisionnel<input type="date" [(ngModel)]="draft.date" (ngModelChange)="syncFinPrevue()" /></label>
+                <label>Fin prévisionnelle<input type="date" [(ngModel)]="draft.dateFinPrevue" /></label>
+                <label>Délai retenu (mois)<input type="number" min="1" [(ngModel)]="draft.dureeMois" (ngModelChange)="syncFinPrevue()" /></label>
+              </div>
+              @if (draft.date && draft.dateFinPrevue && !datesCoherentes()) { <p class="feedback" role="alert">La fin prévisionnelle ne correspond pas au début plus le délai retenu.</p> }
+              @if (allowed('SAVE_PREPARATION')) { <nf-button variant="primary" [disabled]="saving()" (clicked)="saveInformations()">Enregistrer les informations</nf-button> }
+            </section>
+
+            <section class="panel"><h2>Ordre de service</h2>
+              <p>Référence, document et date d’effet. Enregistrer l’OS ne démarre pas le chantier : il ouvre le démarrage à partir de sa date d’effet.</p>
+              <div class="document-slots">
+                <ng-container *ngTemplateOutlet="slotTpl; context: { $implicit: preparationSlots[1] }"></ng-container>
+              </div>
+              <div class="form-grid">
+                <label>Référence de l’OS<input [(ngModel)]="osReference" maxlength="100" /></label>
+                <label>Date d’effet<input type="date" [ngModel]="osDateEffet()" (ngModelChange)="osDateEffet.set($event)" /></label>
+              </div>
+              @if (hasPendingFiles()) { <nf-button variant="secondary" [disabled]="saving()" (clicked)="saveDocuments()">Enregistrer les pièces</nf-button> }
+              @if (allowed('SAVE_OS')) { <nf-button variant="primary" [disabled]="saving() || !documentOs()" (clicked)="saveOs()">Enregistrer l’OS</nf-button> }
+              @if (workflow()!.chantier.osDateEffet && workflow()!.chantier.osDateEffet! > today) { <p class="feedback">Démarrage prévu le {{ workflow()!.chantier.osDateEffet | date:'dd/MM/yyyy' }}.</p> }
+              @if (allowed('START')) { <nf-button variant="primary" [disabled]="saving()" (clicked)="demarrer()">Démarrer le chantier</nf-button> }
+              @if (status() === 'EN_PREPARATION') { <p class="hint">La préparation doit être validée avant d’enregistrer l’OS.</p> }
+            </section>
+
+            <section class="panel"><h2>Vérification de la préparation</h2>
+              <p>Enregistrez vos informations et vos pièces, puis actualisez les contrôles.</p>
+              <ul>@for (blocker of blockers(); track blocker) { <li>{{ blockerLabels[blocker] || blocker }}</li> } @empty { <li class="success">La préparation est complète.</li> }</ul>
+              <div class="toolbar">
+                <nf-button [disabled]="saving()" (clicked)="refresh()">Vérifier la préparation</nf-button>
+                @if (allowed('VALIDATE_PREPARATION')) { <nf-button variant="primary" [disabled]="saving() || blockers().length > 0" (clicked)="validatePreparation()">Valider la préparation</nf-button> }
+                @if (allowed('CANCEL')) { <nf-button variant="ghost" (clicked)="openAction('CANCEL')">Annuler le chantier</nf-button> }
+              </div>
+            </section>
+          }
+        }
+      } @else {
+        @if (step() === 0) {
+          <section class="panel"><h2>Exécution des travaux</h2><p>{{ statusLabels[status()] }}. Le pilotage quotidien reste accessible dans le cockpit.</p>@if (workflow()) { <a [routerLink]="['/chantiers', workflow()!.chantier.id]">Ouvrir le cockpit</a> }</section>
+        } @else if (step() === 1 || step() === 2) {
+          <section class="panel"><h2>{{ step() === 1 ? 'Réception provisoire' : 'Réception définitive' }}</h2><p>{{ step() === 1 ? 'Enregistrez le PV et indiquez explicitement si la réception comporte des réserves.' : 'Vérifiez la levée des réserves avant d’enregistrer le PV de réception définitive.' }}</p><p>Les documents justificatifs se sélectionnent parmi les documents du chantier.</p>
+            @for (event of history(); track $index) { @if (event.action === 'PROVISIONAL_RECEPTION' || event.action === 'FINAL_RECEPTION') { <p>{{ actionLabels[event.action] }} · {{ event.reference }} · {{ event.date | date:'dd/MM/yyyy' }}</p> } }
+          </section>
+          <section class="panel"><div class="section-heading"><h2>Réserves <small>{{ openReserves() }} ouvertes</small></h2>@if (allowed('ADD_RESERVE')) { <nf-button (clicked)="openAction('ADD_RESERVE')">Ajouter une réserve</nf-button> }</div>
+            @for (r of workflow()?.data?.reserves; track r.id) { <article class="register-row"><div><strong>{{ r.label }}</strong><p>{{ r.responsable }} · Échéance {{ r.echeance | date:'dd/MM/yyyy' }}</p><p>{{ r.preuve }}</p></div><span>{{ itemStatus(r.status) }}</span>@if (allowed('UPDATE_RESERVE')) { @if (r.status === 'OUVERTE') { <button (click)="editReserve(r, 'A_VERIFIER')">Marquer traitée</button> } @else if (r.status === 'A_VERIFIER') { <button (click)="editReserve(r, 'LEVEE')">Valider la levée</button><button (click)="editReserve(r, 'OUVERTE')">Renvoyer</button> } @else { <button (click)="editReserve(r, 'OUVERTE')">Rouvrir</button> } }</article> } @empty { <p>Aucune réserve enregistrée.</p> }
+          </section>
+        } @else {
+          <section class="panel"><h2>Garanties & clôture</h2><p>Les garanties restent suivies après la clôture du chantier.</p>@if (allowed('ADD_GARANTIE')) { <nf-button variant="primary" (clicked)="openAction('ADD_GARANTIE')">Ajouter une garantie</nf-button> }
+            @for (g of workflow()?.data?.garanties; track g.id) { <article class="register-row"><div><strong>{{ g.label }}</strong><p>{{ g.responsable }} · {{ g.montant | number:'1.0-2' }} · Échéance {{ g.echeance | date:'dd/MM/yyyy' }}</p><p>{{ g.conditions }}</p></div><span>{{ itemStatus(g.status) }}</span>@if (allowed('UPDATE_GARANTIE') && g.status !== 'LIBEREE' && g.status !== 'EXPIREE') { <button (click)="editGarantie(g)">Faire évoluer</button> }</article> } @empty { <p>Aucune garantie enregistrée.</p> }
+          </section>
+        }
+      }
+    </nf-wizard-shell>
+
+    @if (pendingAction()) {
+      <section class="panel action-panel" aria-label="Action de cycle de vie"><h2>{{ actionLabels[pendingAction()] }}</h2>
+        <form (ngSubmit)="submitAction()"><fieldset [disabled]="saving()"><div class="form-grid">
+          @if (needsReference()) { <label>Référence<input name="reference" [ngModel]="form()['reference']" (ngModelChange)="setField('reference', $event)" required /></label> }
+          @if (needsDate()) { <label>{{ pendingAction() === 'SAVE_OS' ? "Date d'effet" : 'Date effective' }}<input name="date" type="date" [ngModel]="form()['date']" (ngModelChange)="setField('date', $event)" required /></label> }
+          @if (pendingAction() === 'ADD_RESERVE' || pendingAction() === 'ADD_GARANTIE') {
+            <label>Libellé / description<input name="label" [ngModel]="form()['label']" (ngModelChange)="setField('label', $event)" required /></label><label>Responsable / organisme<input name="responsable" [ngModel]="form()['responsable']" (ngModelChange)="setField('responsable', $event)" required /></label><label>Échéance<input name="echeance" type="date" [ngModel]="form()['echeance']" (ngModelChange)="setField('echeance', $event)" required /></label>
+          }
+          @if (pendingAction() === 'ADD_GARANTIE') { <label>Type<select name="kind" [ngModel]="form()['kind']" (ngModelChange)="setField('kind', $event)"><option value="CAUTION">Caution / retenue à libérer</option><option value="COUVERTURE">Couverture à durée</option></select></label><label>Montant<input name="montant" type="number" min="0" [ngModel]="form()['montant']" (ngModelChange)="setField('montant', $event)" /></label> }
+          @if (pendingAction() === 'PROVISIONAL_RECEPTION') { <label>Résultat<select name="sansReserves" [ngModel]="form()['sansReserves']" (ngModelChange)="setField('sansReserves', $event)" required><option [ngValue]="null">Choisir</option><option [ngValue]="true">Sans réserves</option><option [ngValue]="false">Avec réserves</option></select></label> }
+          @if (needsDocument()) { <label>Document justificatif<select name="documentId" [ngModel]="form()['documentId']" (ngModelChange)="setField('documentId', $event)"><option value="">Sélectionner un document</option>@for (doc of documents(); track doc.id) { <option [value]="doc.id">{{ doc.titre }}</option> }</select></label> }
+          @if (form()['status']) { <p>Nouvel état : <strong>{{ itemStatus(form()['status']) }}</strong></p> }
+          <label class="wide">{{ pendingAction() === 'ADD_GARANTIE' ? 'Conditions de garantie et de libération' : 'Note, motif ou justificatif' }}<textarea name="motif" rows="3" [ngModel]="form()['motif']" (ngModelChange)="setField('motif', $event)"></textarea></label>
+        </div><div class="toolbar"><nf-button type="submit" variant="primary" [disabled]="saving()">{{ saving() ? 'Enregistrement…' : 'Confirmer' }}</nf-button><button type="button" (click)="pendingAction.set('')">Fermer</button></div></fieldset></form>
+      </section>
+    }
+    @if (workflow()) { <details class="panel"><summary>Historique du cycle de vie · {{ history().length }} événements</summary>@for (event of history(); track $index) { <article class="register-row"><div><strong>{{ actionLabels[event.action] || event.action }}</strong><p>{{ event.recordedAt | date:'dd/MM/yyyy HH:mm' }} · {{ statusLabels[event.from] }} → {{ statusLabels[event.to] }}</p><p>{{ event.reference }} {{ event.motif }}</p></div></article> } @empty { <p>Aucun événement enregistré.</p> }</details> }
+  }
+</nf-screen>

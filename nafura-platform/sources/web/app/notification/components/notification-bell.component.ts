@@ -2,7 +2,7 @@
  * Notification bell – topbar widget; shows unread count and opens dropdown.
  */
 
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -144,7 +144,7 @@ import { NotificationListComponent } from './notification-list.component';
     }
   `],
 })
-export class NotificationBellComponent {
+export class NotificationBellComponent implements OnInit {
   private readonly api = inject(NotificationApiService);
   private readonly bellClose = inject(NotificationBellCloseService);
   private readonly adapter = inject(NOTIFICATION_BELL_ADAPTER, { optional: true });
@@ -152,6 +152,10 @@ export class NotificationBellComponent {
   readonly unreadCountStore = inject(NotificationUnreadService);
 
   readonly open = signal(false);
+
+  ngOnInit(): void {
+    void this.refresh();
+  }
 
   readonly displayCount = computed(() =>
     this.adapter ? this.adapter.count() : this.unreadCountStore.count(),

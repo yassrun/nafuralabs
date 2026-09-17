@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import ma.nafura.chantiers.api.request.LigneBdpUpdateDto;
 import ma.nafura.chantiers.api.request.PosteBudgetaireCreateDto;
 import ma.nafura.chantiers.api.request.PosteBudgetaireUpdateDto;
 import ma.nafura.chantiers.domain.chantier.ChantierLot;
@@ -53,8 +54,8 @@ public class PosteBudgetaireService {
     }
 
     /**
-     * Copie d'un poste du devis validé — seul producteur de lignes {@link NatureLigne#VENDU}
-     * (AC-3). Le lien retour vers le nœud DPGF est obligatoire (AC-2).
+     * Copie d'un poste du devis validé — producteur de lignes {@link NatureLigne#VENDU} (AC-3).
+     * Le lien retour vers le nœud DPGF est obligatoire (AC-2).
      */
     @Transactional
     public PosteBudgetaire copierPosteVendu(
@@ -63,6 +64,27 @@ public class PosteBudgetaireService {
             throw new IllegalArgumentException("chantiers.arbre.vendu_sans_origine");
         }
         return persist(lotId, request, NatureLigne.VENDU, dpgfNoeudId);
+    }
+
+    /**
+     * Ligne du BDP chiffré du chantier — second producteur de {@link NatureLigne#VENDU}.
+     *
+     * <p>Le bordereau du chantier ne vient pas toujours d'une étude : il peut être construit depuis
+     * le BDP importé ou saisi à la main. Une ligne vendue y porte une quantité et un prix ; sans
+     * prix, la ligne reste interne (elle ne sera jamais facturée au client). Un prix fourni sans
+     * nature déclarée suffit à en faire une ligne du bordereau.
+     */
+    @Transactional
+    public PosteBudgetaire creerLigneBdp(String lotId, PosteBudgetaireCreateDto request) {
+        NatureLigne demandee = NatureLigne.parse(request.getNature());
+        boolean vendu = demandee == NatureLigne.VENDU
+                || (demandee == null
+                        && (request.getPrixUnitaireHt() != null || request.getMontantHt() != null));
+        if (vendu) {
+            requireQuantiteEtPrix(request.getQuantite(), request.getPrixUnitaireHt());
+            return persist(lotId, request, NatureLigne.VENDU, null);
+        }
+        return create(lotId, request);
     }
 
     private PosteBudgetaire persist(
@@ -108,24 +130,6 @@ public class PosteBudgetaireService {
         PosteBudgetaire entity = repository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("Poste budgetaire not found: " + id));
 
-        if (StringUtils.hasText(request.getCode())) {
-            String code = request.getCode().trim();
-            repository.findByTenantIdAndLotIdAndCode(tenantId, entity.getLotId(), code)
-                    .filter(existing -> !existing.getId().equals(id))
-                    .ifPresent(existing -> {
-                        throw new IllegalArgumentException("Poste code already exists for lot: " + code);
-                    });
-            entity.setCode(code);
-        }
-        if (StringUtils.hasText(request.getDesignation())) {
-            entity.setDesignation(request.getDesignation().trim());
-        }
-        if (request.getUnite() != null) {
-            entity.setUnite(trimOrNull(request.getUnite()));
-        }
-        if (request.getQuantite() != null) {
-            entity.setQuantite(request.getQuantite());
-        }
         if (entity.getNature() == NatureLigne.INTERNE) {
             refuserVenteSurInterne(request.getPrixUnitaireHt(), request.getMontantHt());
         }
@@ -142,6 +146,50 @@ public class PosteBudgetaireService {
         if (request.getOrdre() != null) {
             entity.setOrdre(request.getOrdre());
         }
+        return repository.save(entity);
+    }
+
+    /**
+     * Chiffrage du BDP du chantier : corrige une ligne du bordereau — désignation, unité, quantité,
+     * prix unitaire et nature.
+     *
+     * <p>Une ligne peut entrer au bordereau ({@code VENDU}, quantité et prix exigés) ou en sortir
+     * ({@code INTERNE}, prix de vente effacé). Une ligne copiée du devis garde son origine : sa
+     * nature ne se convertit pas, le lien vers le nœud DPGF serait perdu.
+     */
+    @Transactional
+    public PosteBudgetaire majLigneBdp(String id, LigneBdpUpdateDto request) {
+        UUID tenantId = tenantId();
+        PosteBudgetaire entity = repository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new IllegalArgumentException("Poste budgetaire not found: " + id));
+
+        NatureLigne cible = natureCible(entity.getNature(), entity.getDpgfNoeudId(), request.getNature());
+        if (StringUtils.hasText(request.getDesignation())) {
+            entity.setDesignation(request.getDesignation().trim());
+        }
+        if (request.getUnite() != null) {
+            entity.setUnite(trimOrNull(request.getUnite()));
+        }
+        BigDecimal quantite = request.getQuantite() != null ? request.getQuantite() : entity.getQuantite();
+        BigDecimal prix = request.getPrixUnitaireHt() != null ? request.getPrixUnitaireHt() : entity.getPrixUnitaireHt();
+        BigDecimal montant = request.getMontantHt();
+        if (cible == NatureLigne.INTERNE) {
+            refuserVenteSurInterne(request.getPrixUnitaireHt(), request.getMontantHt());
+        } else {
+            requireQuantiteEtPrix(quantite, prix);
+            if (montant == null) {
+                montant = quantite.multiply(prix);
+            }
+        }
+        entity.setNature(cible);
+        if (cible == NatureLigne.INTERNE) {
+            entity.setPrixUnitaireHt(null);
+            entity.setMontantHt(null);
+        } else {
+            entity.setPrixUnitaireHt(prix);
+            entity.setMontantHt(montant);
+        }
+        entity.setQuantite(quantite);
         return repository.save(entity);
     }
 
@@ -177,8 +225,9 @@ public class PosteBudgetaireService {
     }
 
     /**
-     * AC-3 — une demande de créer un vendu à la main est refusée, avec un message explicite.
-     * Elle n'est pas silencieusement convertie en interne.
+     * AC-3 — une demande de créer un vendu par la saisie générique est refusée, avec un message
+     * explicite. Elle n'est pas silencieusement convertie en interne. Le chiffrage du BDP du
+     * chantier passe par {@link #creerLigneBdp}, où la ligne vendue porte quantité et prix.
      */
     private static void refuserVenduParSaisie(String natureDemandee) {
         NatureLigne demandee = NatureLigne.parse(natureDemandee);
@@ -191,6 +240,29 @@ public class PosteBudgetaireService {
     private static void refuserVenteSurInterne(BigDecimal prixUnitaireHt, BigDecimal montantHt) {
         if (prixUnitaireHt != null || montantHt != null) {
             throw new IllegalArgumentException("chantiers.arbre.interne_sans_prix_de_vente");
+        }
+    }
+
+    /**
+     * Nature après édition. Une ligne copiée du devis garde son origine : elle ne se convertit ni
+     * en interne ni en ligne de BDP à la main, parce que le lien retour vers le nœud DPGF serait
+     * perdu.
+     */
+    static NatureLigne natureCible(NatureLigne actuelle, UUID dpgfNoeudId, String demandee) {
+        NatureLigne cible = NatureLigne.parse(demandee);
+        if (cible == null || cible == actuelle) {
+            return actuelle;
+        }
+        if (dpgfNoeudId != null) {
+            throw new IllegalArgumentException("chantiers.bdp.ligne_etude_non_convertible");
+        }
+        return cible;
+    }
+
+    /** Une ligne vendue du BDP du chantier porte une quantité et un prix unitaire. */
+    static void requireQuantiteEtPrix(BigDecimal quantite, BigDecimal prixUnitaireHt) {
+        if (quantite == null || prixUnitaireHt == null) {
+            throw new IllegalArgumentException("chantiers.bdp.ligne_vendue_sans_quantite_ni_prix");
         }
     }
 

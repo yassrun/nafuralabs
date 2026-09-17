@@ -85,6 +85,7 @@ const STATUS_VARIANT: Record<ChantierStatus, BadgeVariant> = {
         <!-- AC-1 — une seule identité de page : le header porte code + nom. Ici seulement
              le statut, le client et la source, sans second H1 ni code dupliqué. -->
         <div class="chantier-meta">
+          <a class="chantier-meta__link" [routerLink]="['/chantiers', c.id, 'workflow']">Cycle de vie</a>
           <nf-badge [variant]="statusVariant(c.status)">{{ statusLabel(c.status) }}</nf-badge>
           <span class="chantier-meta__client">{{ c.clientName ?? '—' }}</span>
           @if (provenance(); as p) {
@@ -793,65 +794,17 @@ export class ChantierDetailPage {
 
   async receptionProvisoire(): Promise<void> {
     const c = this.chantier();
-    if (!c?.id || !this.canReceptionProvisoire()) return;
-    const confirmed = await this.confirmDialog.confirm({
-      title: this.translate.instant('chantiers.chantier.detail.actions.receptionProvisoireTitle'),
-      message: this.translate.instant('chantiers.chantier.detail.actions.receptionProvisoireConfirm', { code: c.code }),
-      confirmLabel: this.translate.instant('chantiers.chantier.detail.actions.receptionProvisoireAction'),
-      cancelLabel: this.translate.instant('chantiers.chantier.detail.cancel'),
-      icon: 'clipboard-check',
-    });
-    if (!confirmed) return;
-    try {
-      const updated = await this.chantierApi.receptionProvisoire(c.id);
-      this.chantier.set(updated);
-      this.audit.log('UPDATE', 'chantier', c.id, c.code, 'reception-provisoire');
-      this.toast.success(this.translate.instant('chantiers.chantier.detail.actions.receptionProvisoireSuccess'));
-    } catch {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.actions.receptionProvisoireFailed'));
-    }
+    if (c?.id) await this.router.navigate(['/chantiers', c.id, 'workflow']);
   }
 
   async receptionDefinitive(): Promise<void> {
     const c = this.chantier();
-    if (!c?.id || !this.canReceptionDefinitive()) return;
-    const confirmed = await this.confirmDialog.confirm({
-      title: this.translate.instant('chantiers.chantier.detail.actions.receptionDefinitiveTitle'),
-      message: this.translate.instant('chantiers.chantier.detail.actions.receptionDefinitiveConfirm', { code: c.code }),
-      confirmLabel: this.translate.instant('chantiers.chantier.detail.actions.receptionDefinitiveAction'),
-      cancelLabel: this.translate.instant('chantiers.chantier.detail.cancel'),
-      icon: 'badge-check',
-    });
-    if (!confirmed) return;
-    try {
-      const updated = await this.chantierApi.receptionDefinitive(c.id);
-      this.chantier.set(updated);
-      this.audit.log('UPDATE', 'chantier', c.id, c.code, 'reception-definitive');
-      this.toast.success(this.translate.instant('chantiers.chantier.detail.actions.receptionDefinitiveSuccess'));
-    } catch {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.actions.receptionDefinitiveFailed'));
-    }
+    if (c?.id) await this.router.navigate(['/chantiers', c.id, 'workflow']);
   }
 
   async cloreChantier(): Promise<void> {
     const c = this.chantier();
-    if (!c?.id || !this.canCloreChantier()) return;
-    const confirmed = await this.confirmDialog.confirm({
-      title: this.translate.instant('chantiers.chantier.detail.actions.cloreTitle'),
-      message: this.translate.instant('chantiers.chantier.detail.actions.cloreConfirm', { code: c.code }),
-      confirmLabel: this.translate.instant('chantiers.chantier.detail.actions.cloreAction'),
-      cancelLabel: this.translate.instant('chantiers.chantier.detail.cancel'),
-      icon: 'archive',
-    });
-    if (!confirmed) return;
-    try {
-      const updated = await this.chantierApi.clore(c.id);
-      this.chantier.set(updated);
-      this.audit.log('UPDATE', 'chantier', c.id, c.code, 'clore');
-      this.toast.success(this.translate.instant('chantiers.chantier.detail.actions.cloreSuccess'));
-    } catch {
-      this.toast.error(this.translate.instant('chantiers.chantier.detail.actions.cloreFailed'));
-    }
+    if (c?.id) await this.router.navigate(['/chantiers', c.id, 'workflow']);
   }
 
   async creerMarche(): Promise<void> {

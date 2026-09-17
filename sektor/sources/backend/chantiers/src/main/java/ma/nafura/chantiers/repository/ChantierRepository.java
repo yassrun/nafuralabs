@@ -10,6 +10,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ChantierRepository extends TenantScopedRepository<Chantier, String> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select c from Chantier c where c.id = :id and c.tenantId = :tenantId")
+    Optional<Chantier> lockWorkflow(@org.springframework.data.repository.query.Param("id") String id,
+            @org.springframework.data.repository.query.Param("tenantId") UUID tenantId);
+
     Optional<Chantier> findByTenantIdAndCode(UUID tenantId, String code);
 
     List<Chantier> findByTenantIdOrderByCodeAsc(UUID tenantId);

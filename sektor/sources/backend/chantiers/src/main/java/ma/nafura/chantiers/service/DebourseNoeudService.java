@@ -114,14 +114,16 @@ public class DebourseNoeudService {
      * Saisit le déboursé des quatre rubriques d'un nœud interne.
      *
      * <p>Un interne n'a pas de vendu mais il a un déboursé : il pèse sur le budget, la marge et
-     * l'écart de son lot et du chantier. Refusé sur un nœud vendu — là, le prévu est une copie
-     * et ne se réécrit pas (AC-7) ; la correction passe par {@link #reviser}.
+     * l'écart de son lot et du chantier. Refusé sur une ligne copiée du devis — là, le prévu est
+     * une copie et ne se réécrit pas (AC-7) ; la correction passe par {@link #reviser}. Une ligne
+     * du BDP propre au chantier ({@code VENDU} sans origine d'étude) n'a pas de copie à protéger :
+     * son déboursé prévu se saisit comme celui d'un interne.
      */
     @Transactional
     public DebourseNoeudDto saisirSurNoeudInterne(String posteId, DebourseNoeudSaisieDto request) {
         UUID tenantId = tenantId();
         PosteBudgetaire poste = requirePoste(tenantId, posteId);
-        if (poste.getNature() != null && poste.getNature().estVendu()) {
+        if (poste.getNature() != null && poste.getNature().estVendu() && poste.getDpgfNoeudId() != null) {
             throw new IllegalArgumentException("chantiers.debourse.prevu_vendu_non_modifiable");
         }
 

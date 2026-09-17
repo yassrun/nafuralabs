@@ -143,7 +143,7 @@ class ChantierLotServiceTest {
 
     @Test
     void createTreePersistsNestedLotsAndPostes() {
-        when(posteBudgetaireService.create(any(), any())).thenAnswer(invocation -> {
+        when(posteBudgetaireService.creerLigneBdp(any(), any())).thenAnswer(invocation -> {
             String lotId = invocation.getArgument(0);
             PosteBudgetaireCreateDto dto = invocation.getArgument(1);
             return PosteBudgetaire.builder()
@@ -160,8 +160,8 @@ class ChantierLotServiceTest {
                     .build();
         });
 
-        // Import d'arbre = saisie : le poste est interne (AC-3) et ne porte pas de prix de
-        // vente (AC-4).
+        // Import du bordereau : une ligne sans prix reste interne (AC-4), une ligne chiffrée entre
+        // au BDP du chantier.
         ChantierLotTreePosteCreateDto poste = new ChantierLotTreePosteCreateDto();
         poste.setDesignation("Porte bois");
         poste.setUnite("U");
@@ -304,7 +304,7 @@ class ChantierLotServiceTest {
     /** AC-1 — la nature et l'origine sont rendues par l'endpoint de lecture de l'arbre. */
     @Test
     void arbreRendLaNatureDeChaqueLigne() {
-        when(posteBudgetaireService.create(any(), any())).thenAnswer(invocation -> {
+        when(posteBudgetaireService.creerLigneBdp(any(), any())).thenAnswer(invocation -> {
             String lotId = invocation.getArgument(0);
             PosteBudgetaireCreateDto dto = invocation.getArgument(1);
             return PosteBudgetaire.builder()

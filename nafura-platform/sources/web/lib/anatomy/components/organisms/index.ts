@@ -35,6 +35,7 @@ export * from './print-dialog';
 export * from './send-email-dialog';
 export * from './matrix-grid';
 export * from './permission-picker';
+export * from './map-picker';
 export * from './tree-editor';
 export * from './tree-table';
 export * from './workflow-editor';

@@ -404,6 +404,14 @@ public class DossierEtudeService {
                 ? dossier.getCurrentStep()
                 : DossierEtude.ETAPE_PREMIERE;
 
+        // Le bordereau (BPU) s'ouvre par l'affectation : pas de progression au-delà du
+        // cadrage tant qu'aucun chargé d'étude n'est désigné (retour arrière toujours libre).
+        if (etape > courante
+                && etape >= DossierEtude.ETAPE_BORDEREAU
+                && !dossier.estAffectee()) {
+            throw new IllegalStateException("etudes.dossier.bordereau_non_affecte");
+        }
+
         // En avant seulement : on vérifie chaque étape franchie. En arrière : libre.
         if (etape > courante) {
             ContexteGate contexte = chargerContexte(dossier);

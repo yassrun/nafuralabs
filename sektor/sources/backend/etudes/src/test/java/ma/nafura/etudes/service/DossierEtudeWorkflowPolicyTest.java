@@ -97,6 +97,31 @@ class DossierEtudeWorkflowPolicyTest {
                 .hasMessage("etudes.dossier.accept_reserve_charge");
     }
 
+    @Test
+    void ingenieur_peut_soumettre_pour_affectation() {
+        UserContext.setUserRole("BTP_INGENIEUR");
+        UserContext.setUserId(INGE);
+        assertCan(StatutDossierEtude.DRAFT, DossierEtudeAction.SUBMIT_FOR_ASSIGNMENT);
+        assertCan(StatutDossierEtude.REJECTED, DossierEtudeAction.RETURN_TO_DRAFT);
+    }
+
+    @Test
+    void magasinier_ne_soumet_pas_pour_affectation() {
+        UserContext.setUserRole("BTP_MAGASINIER");
+        assertThatThrownBy(() ->
+                        policy.validateTransition(
+                                DossierEtudeAction.SUBMIT_FOR_ASSIGNMENT,
+                                dossier(StatutDossierEtude.DRAFT)))
+                .hasMessage("etudes.dossier.action_reservee_gestionnaire");
+    }
+
+    @Test
+    void ingenieur_parmi_plusieurs_roles_peut_soumettre() {
+        UserContext.setUserRoles(java.util.List.of("BTP_LECTEUR_ETUDE", "BTP_INGENIEUR"));
+        UserContext.setUserId(INGE);
+        assertCan(StatutDossierEtude.DRAFT, DossierEtudeAction.SUBMIT_FOR_ASSIGNMENT);
+    }
+
     private void assertCan(StatutDossierEtude status, DossierEtudeAction action) {
         DossierEtude dossier = dossier(status);
         if (action == DossierEtudeAction.ASSIGN_STUDY && status == StatutDossierEtude.DRAFT) {

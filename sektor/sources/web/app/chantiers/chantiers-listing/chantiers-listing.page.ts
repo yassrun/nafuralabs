@@ -24,6 +24,7 @@ import {
 } from '../services/portefeuille-api.service';
 import { buildPortefeuilleQueryParams, parsePortefeuilleState, portefeuilleReturnUrl } from './portefeuille-state';
 import { formatPercentDisplay } from '@app/socle/shared/utils/percent-display.util';
+import { CHANTIER_STATUS_LABELS } from '../create/chantier-workflow.config';
 
 /**
  * Portefeuille chantier décisionnel (cockpit-chantier AC-18/AC-19) — même read model que le
@@ -275,9 +276,7 @@ export class ChantiersListingPage {
   private readonly portefeuilleApi = inject(PortefeuilleApiService);
   private readonly fmt = new Intl.NumberFormat(this.locale, { maximumFractionDigits: 0 });
 
-  readonly allStatuses: ChantierStatus[] = [
-    'EN_PREPARATION', 'EN_COURS', 'PROSPECT', 'SUSPENDU', 'TERMINE', 'RECEPTIONNE', 'CLOTURE', 'ANNULE',
-  ];
+  readonly allStatuses = Object.keys(CHANTIER_STATUS_LABELS).filter(s => s !== 'BROUILLON');
 
   readonly statusFilterOptions = computed<NfSelectOption[]>(() => [
     { value: '', label: this.translate.instant('chantiers.common.filters.allStatuses') },
@@ -442,7 +441,8 @@ export class ChantiersListingPage {
       tri: f.tri, sens: f.sens ?? 'asc', enRetard: f.enRetard,
       margeNegative: f.margeNegative, page: this.page(),
     });
-    void this.router.navigate(['/chantiers', c.id], { queryParams: { returnUrl } });
+    void this.router.navigate(c.status === 'EN_COURS' || c.status === 'SUSPENDU'
+      ? ['/chantiers', c.id] : ['/chantiers', c.id, 'workflow'], { queryParams: { returnUrl } });
   }
 
   openAction(c: PortefeuilleRow, event: Event): void {
@@ -466,6 +466,7 @@ export class ChantiersListingPage {
   }
 
   statusLabel(s: ChantierStatus | string): string {
+    if (CHANTIER_STATUS_LABELS[s]) return CHANTIER_STATUS_LABELS[s];
     const key = CHANTIER_STATUS_KEYS[s as ChantierStatus];
     if (!key) return String(s);
     const resolved = this.translate.instant(key);

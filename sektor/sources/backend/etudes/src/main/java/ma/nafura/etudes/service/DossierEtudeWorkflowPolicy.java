@@ -15,7 +15,7 @@ import org.springframework.util.StringUtils;
  * <p>Rôles métier (codes IAM existants, pas de nouveaux rôles globaux) :
  * STUDY_COORDINATOR → {@code BTP_ASSISTANT_ETUDE} ;
  * STUDY_MANAGER → {@code BTP_ADMIN_ETUDE} / {@code BTP_DG} ;
- * BTP_ENGINEER → {@code BTP_INGENIEUR} ;
+ * BTP_ENGINEER → {@code BTP_INGENIEUR} (cadrage + soumission pour affectation) ;
  * FINANCIAL_APPROVER → {@code BTP_DAF}.
  */
 @Component
@@ -90,6 +90,16 @@ public class DossierEtudeWorkflowPolicy {
         return estOwner() || roleEst("BTP_INGENIEUR");
     }
 
+    /** Cadrage : saisie, soumission pour affectation, retour brouillon. */
+    public boolean peutSaisirCadrage() {
+        if (estStudyCoordinator() || estStudyManager() || estEngineer()) {
+            return true;
+        }
+        return UserContext.hasPermission("etude.create")
+                && (UserContext.hasPermission("etude.submit")
+                        || UserContext.hasPermission("etudes.etudes.dossier.etude.submit"));
+    }
+
     public boolean peutDeciderAffectation() {
         return estStudyManager();
     }
@@ -111,7 +121,7 @@ public class DossierEtudeWorkflowPolicy {
         }
         switch (action) {
             case SUBMIT_FOR_ASSIGNMENT, RETURN_TO_DRAFT -> {
-                if (!estStudyCoordinator() && !estStudyManager()) {
+                if (!peutSaisirCadrage()) {
                     throw new IllegalStateException("etudes.dossier.action_reservee_gestionnaire");
                 }
             }
@@ -222,12 +232,8 @@ public class DossierEtudeWorkflowPolicy {
     }
 
     private static boolean roleEst(String... roles) {
-        String role = UserContext.getUserRole();
-        if (role == null) {
-            return false;
-        }
         for (String attendu : roles) {
-            if (attendu.equalsIgnoreCase(role)) {
+            if (UserContext.hasRole(attendu)) {
                 return true;
             }
         }

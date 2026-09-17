@@ -31,6 +31,14 @@ describe('DOSSIER_STATUS_BAR', () => {
     expect(actions.map((a) => a.action)).not.toContain('RENVOYER_AFFECTATION');
   });
 
+  it('shows submit on draft when backend allows SUBMIT_FOR_ASSIGNMENT (ingénieur)', () => {
+    const actions = resolveStatusActions(
+      DOSSIER_STATUS_BAR,
+      ctx({ availableActions: ['SUBMIT_FOR_ASSIGNMENT', 'ARCHIVE_STUDY'] }),
+    );
+    expect(actions.map((a) => a.action)).toContain('SOUMETTRE_GO');
+  });
+
   it('shows assign + reject on pending assignment for the manager', () => {
     const actions = resolveStatusActions(
       DOSSIER_STATUS_BAR,

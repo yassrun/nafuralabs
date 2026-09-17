@@ -108,7 +108,6 @@ import { APP_SHELL_CONFIG } from '@app/socle/config/shell.config';
 import { ADMINISTRATION_CONFIG } from '@platform/features/administration/administration.token';
 import { USER_SETTINGS_CONFIG } from '@platform/features/user-settings/user-settings.token';
 import { APP_SETTINGS_CONFIG } from '@platform/features/app-settings/app-settings.token';
-import { ErpNotificationsService } from '@app/socle/shell/erp-notifications.service';
 import { ensurePublicHttpOrigin } from '@platform/core/config/public-web-origin';
 import { ErpNotificationBellAdapter } from '@app/socle/shell/erp-notification-bell.adapter';
 import { ErpNotificationBellListComponent } from '@app/socle/shell/erp-notification-bell-list.component';
@@ -117,8 +116,6 @@ import {
   NOTIFICATION_BELL_ADAPTER,
   NOTIFICATION_BELL_DROPDOWN,
 } from '@platform/app/notification/notification-bell.adapter';
-import { NotificationStreamService } from '@platform/app/notification/services/notification-stream.service';
-import { NotificationUnreadService } from '@platform/app/notification/services/notification-unread.service';
 import { CHANTIER_ROW_NAVIGATOR } from '@platform/lib/anatomy/tokens/chantier-row-navigator.token';
 import { LOOKUP_LIST_ROUTES } from '@platform/lib/anatomy/tokens/lookup-list-routes.token';
 import { LOOKUP_PICKERS } from '@platform/lib/anatomy/tokens/lookup-pickers.token';
@@ -147,9 +144,7 @@ function initializeApp(): () => Promise<void> {
   bindAuthTokenInterceptorDeps(auth, authState);
   const i18n = inject(I18nService);
   const locale = inject(LocaleService);
-  const erpNotif = inject(ErpNotificationsService);
-  const notifStream = inject(NotificationStreamService);
-  const unreadNotif = inject(NotificationUnreadService);
+  const bellAdapter = inject(ErpNotificationBellAdapter);
 
   return async () => {
     ensurePublicHttpOrigin();
@@ -158,18 +153,7 @@ function initializeApp(): () => Promise<void> {
     i18n.initialize();
     if (auth.isAuthenticated()) {
       await i18n.loadRemoteLanguagePreference();
-      notifStream.subscribe((event) => {
-        if (event.type === 'refresh') {
-          void erpNotif.refresh();
-          void unreadNotif.refresh();
-        } else if (event.type === 'new_notification') {
-          void unreadNotif.refresh();
-        }
-      });
-      notifStream.connect();
-      await erpNotif.refresh();
-      await unreadNotif.refresh();
-      erpNotif.startPolling();
+      await bellAdapter.refresh();
     }
   };
 }

@@ -31,6 +31,13 @@ import ma.nafura.platform.framework.audit.Auditable;
 @Auditable(entityType = "chantier", trackedFields = {"code", "label", "status", "clientName"})
 public class Chantier implements Persistable<String> {
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @Column(name = "workflow_data", columnDefinition = "text")
+    private String workflowData;
+
+    @Column(name = "workflow_revision", nullable = false)
+    private long workflowRevision;
+
     public static final String STATUS_BROUILLON = "BROUILLON";
     public static final String STATUS_EN_PREPARATION = "EN_PREPARATION";
     public static final String STATUS_EN_COURS = "EN_COURS";

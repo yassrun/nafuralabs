@@ -74,6 +74,8 @@ class QaLocalConstantsTest {
         assertThat(QaLocalConstants.emailForAlias("secretaire"))
             .contains("qa.assistant@nafuralabs.local");
         assertThat(QaLocalConstants.OWNER_EXTRA_ROLES).contains(QaLocalConstants.ROLE_ADMIN_ETUDE);
+        assertThat(QaLocalConstants.INGENIEUR_ETUDE_PERMISSIONS)
+            .contains("etude.create", "etude.submit", "etudes.etudes.dossier.etude.create");
         assertThat(QaLocalConstants.isOwnerEmail(QaLocalConstants.OWNER_EMAIL)).isTrue();
         assertThat(QaLocalConstants.isOwnerEmail("qa.magasinier@nafuralabs.local")).isFalse();
     }

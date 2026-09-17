@@ -8,14 +8,18 @@ import java.util.Locale;
  * <p>Une seule question les distingue : est-ce que le client paie ça ?
  *
  * <ul>
- *   <li>{@link #VENDU} — copié du devis validé, garde le lien vers le nœud DPGF d'origine.
- *       Entre en situation de travaux.
+ *   <li>{@link #VENDU} — ligne du BDP chiffré du chantier : elle porte une quantité et un prix
+ *       unitaire, et entre en situation de travaux. Elle vient soit de la copie du devis validé
+ *       (elle garde alors le lien vers le nœud DPGF d'origine), soit du BDP propre au chantier
+ *       (import du bordereau du marché ou saisie du chiffrage — {@code dpgfNoeudId} est alors
+ *       absent).
  *   <li>{@link #INTERNE} — ajouté au chantier (installation, repli, régie, base vie, aléas).
  *       N'entre jamais en situation, ne porte pas de prix de vente.
  * </ul>
  *
- * <p>La copie depuis le devis validé est le seul producteur de {@link #VENDU} : toute saisie
- * produit un {@link #INTERNE}.
+ * <p>Deux producteurs de {@link #VENDU} : la copie depuis le devis validé, et le chiffrage du BDP
+ * du chantier. Une ligne vendue sans quantité ni prix n'est pas une ligne vendue : le chiffrage la
+ * refuse au lieu de la dégrader en silence.
  */
 public enum NatureLigne {
     VENDU,

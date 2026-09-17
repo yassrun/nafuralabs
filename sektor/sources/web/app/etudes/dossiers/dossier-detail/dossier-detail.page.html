@@ -92,7 +92,7 @@
             [dossierId]="dossier()!.id"
             [dpgfId]="$safeNavigationMigration(dossier()?.dpgfId)"
             [bordereauDocumentId]="$safeNavigationMigration(dossier()?.bordereauDocumentId)"
-            [modifiable]="modifiable()"
+            [modifiable]="modifiable() && dossierAffecte()"
             [structureVerrouillee]="synthese()?.structureVerrouillee ?? false"
             [focusNoeudId]="focusNoeudId()"
             [focusCode]="focusNoeudCode()"

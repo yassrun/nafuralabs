@@ -142,16 +142,31 @@ class DebourseNoeudServiceTest {
                 .containsExactly("MATIERE", "MAIN_DOEUVRE", "MATERIEL", "SOUS_TRAITANCE");
     }
 
-    /** AC-7 — le prévu d'un nœud vendu est une copie : il ne se réécrit pas par saisie. */
+    /** AC-7 — le prévu d'une ligne copiée du devis est une copie : il ne se réécrit pas par saisie. */
     @Test
     void vendu_saisieDuPrevuRefusee() {
         PosteBudgetaire poste = poste(NatureLigne.VENDU);
+        poste.setDpgfNoeudId(java.util.UUID.randomUUID());
         when(posteRepository.findByIdAndTenantId(POSTE, TENANT)).thenReturn(Optional.of(poste));
 
         assertThatThrownBy(() ->
                         service.saisirSurNoeudInterne(POSTE, saisie(Map.of("MATIERE", "1.00"))))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("prevu_vendu_non_modifiable");
+    }
+
+    /**
+     * Le BDP propre au chantier n'a pas de copie à protéger : son déboursé prévu se saisit, même
+     * si la ligne est vendue et entre en situation.
+     */
+    @Test
+    void ligneBdpDuChantier_saisieDuPrevuAutorisee() {
+        PosteBudgetaire poste = poste(NatureLigne.VENDU);
+        when(posteRepository.findByIdAndTenantId(POSTE, TENANT)).thenReturn(Optional.of(poste));
+
+        DebourseNoeudDto dto = service.saisirSurNoeudInterne(POSTE, saisie(Map.of("MATIERE", "1.00")));
+
+        assertThat(dto.getRubriques()).isNotEmpty();
     }
 
     /** AC-7 — réviser ne touche que le révisé ; le prévu reste lisible et l'écart est visible. */

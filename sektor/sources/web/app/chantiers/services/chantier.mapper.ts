@@ -22,6 +22,12 @@ export interface ApiChantier {
   dateDemarrage?: string;
   dateFinPrevue?: string;
   dateFinReelle?: string;
+  /** Délai d'exécution retenu au cadrage, en mois. */
+  dureeMois?: number | null;
+  /** Référence de l'ordre de service de démarrage. */
+  osReference?: string | null;
+  /** Date d'effet de l'ordre de service. */
+  osDateEffet?: string | null;
   budgetHt?: number | string;
   montantHt?: number | string;
   tvaTaux?: number | string;
@@ -67,7 +73,12 @@ export function mapBackendStatusToUi(status: string | undefined): ChantierStatus
     case 'BROUILLON':
       return 'PROSPECT';
     case 'EN_PREPARATION':
+    case 'PRET_A_DEMARRER':
       return 'EN_PREPARATION';
+    case 'EN_ATTENTE_RECEPTION_PROVISOIRE':
+      return 'TERMINE';
+    case 'ANNULE':
+      return 'ANNULE';
     case 'EN_COURS':
       return 'EN_COURS';
     case 'SUSPENDU':
@@ -94,7 +105,7 @@ export function mapUiStatusToBackend(status: ChantierStatus | string | undefined
     case 'TERMINE':
       return 'EN_COURS';
     case 'ANNULE':
-      return 'CLOS';
+      return 'ANNULE';
     default:
       return status ?? 'EN_COURS';
   }
@@ -193,6 +204,8 @@ export function chantierUpdateToApi(input: Partial<Chantier>): Record<string, un
   if (input.marcheReference != null) body['marcheNumero'] = input.marcheReference;
   if (input.ville != null) body['ville'] = input.ville;
   if (input.adresse != null) body['adresse'] = input.adresse;
+  if (input.latitude != null) body['latitude'] = input.latitude;
+  if (input.longitude != null) body['longitude'] = input.longitude;
   if (input.dateDebut != null) body['dateDemarrage'] = input.dateDebut;
   if (input.dateFinPrevue != null) body['dateFinPrevue'] = input.dateFinPrevue;
   if (input.budgetHt != null) body['montantHt'] = input.budgetHt;

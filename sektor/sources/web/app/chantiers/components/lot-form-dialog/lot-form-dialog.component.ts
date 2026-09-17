@@ -22,6 +22,12 @@ export interface LotFormDialogData {
    * et un interne ne porte pas de prix de vente (AC-4) — le champ prix n'est alors pas offert.
    */
   nature?: NatureLigne;
+  /**
+   * Chiffrage du BDP du chantier : le prix unitaire est offert à la création comme à l'édition,
+   * et une ligne sans prix reste interne. Absent = saisie d'arbre, qui ne produit que de l'interne
+   * (AC-3), sans prix de vente (AC-4).
+   */
+  chiffrage?: boolean;
   initial?: {
     code?: string;
     designation?: string;
@@ -164,10 +170,10 @@ export class LotFormDialogComponent {
   readonly prixUnitaireHt = signal(this.data.initial?.prixUnitaireHt != null ? String(this.data.initial.prixUnitaireHt) : '');
   readonly parentLotId = signal(this.data.defaultParentLotId ?? '');
   /**
-   * AC-4 — seule une ligne deja vendue affiche et renvoie un prix de vente. Toute creation par
-   * saisie produit un interne (AC-3) : pas de champ prix, donc rien a refuser cote serveur.
+   * AC-4 — seule une ligne deja vendue affiche et renvoie un prix de vente. Le chiffrage du BDP
+   * l'offre aussi : c'est là que le bordereau du chantier se construit, étude ou pas.
    */
-  readonly showPrixVente = signal(this.data.nature === 'VENDU');
+  readonly showPrixVente = signal(this.data.nature === 'VENDU' || !!this.data.chiffrage);
   readonly targetLotId = signal(this.data.defaultTargetLotId ?? '');
 
   private readonly lotsById = computed(() => {
@@ -243,9 +249,13 @@ export class LotFormDialogComponent {
       if (!this.unite().trim()) return false;
       const q = this.parseNumber(this.quantite());
       if (!Number.isFinite(q) || q <= 0) return false;
+      // Une ligne déjà vendue exige son prix ; au chiffrage, un prix vide laisse la ligne interne.
       if (this.showPrixVente()) {
-        const pu = this.parseNumber(this.prixUnitaireHt());
-        if (!Number.isFinite(pu) || pu < 0) return false;
+        const saisi = this.prixUnitaireHt().trim();
+        if (this.data.nature === 'VENDU' || saisi) {
+          const pu = this.parseNumber(saisi);
+          if (!Number.isFinite(pu) || pu < 0) return false;
+        }
       }
     }
 
@@ -263,7 +273,9 @@ export class LotFormDialogComponent {
       quantite: isPoste ? this.parseNumber(this.quantite()) : undefined,
       unite: isPoste ? this.unite().trim() : undefined,
       prixUnitaireHt:
-        isPoste && this.showPrixVente() ? this.parseNumber(this.prixUnitaireHt()) : undefined,
+        isPoste && this.showPrixVente() && this.prixUnitaireHt().trim() !== ''
+          ? this.parseNumber(this.prixUnitaireHt())
+          : undefined,
       parentLotId: this.data.mode === 'sousLot' ? this.parentLotId() : undefined,
       targetLotId: isPoste ? this.targetLotId() : undefined,
     });

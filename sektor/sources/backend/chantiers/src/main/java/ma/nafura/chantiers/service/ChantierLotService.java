@@ -231,12 +231,13 @@ public class ChantierLotService {
             posteDto.setDesignation(posteNode.getDesignation());
             posteDto.setUnite(posteNode.getUnite());
             posteDto.setQuantite(posteNode.getQuantite());
-            // Saisie / import : la ligne est interne, elle ne porte pas de prix de vente (AC-4).
-            // Un prix envoyé ici est refusé par PosteBudgetaireService.create, pas ignoré.
+            // Import du bordereau du chantier : une ligne qui porte un prix entre dans le BDP
+            // chiffré (vendue), une ligne sans prix reste interne. La saisie générique, elle,
+            // continue de refuser une ligne vendue sans prix.
             posteDto.setPrixUnitaireHt(posteNode.getPrixUnitaireHt());
             posteDto.setMontantHt(posteNode.getMontantHt());
             posteDto.setOrdre(posteOrdre++);
-            PosteBudgetaire poste = posteBudgetaireService.create(created.getId(), posteDto);
+            PosteBudgetaire poste = posteBudgetaireService.creerLigneBdp(created.getId(), posteDto);
             postes.add(toPosteDto(poste));
         }
 

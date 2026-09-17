@@ -14,8 +14,10 @@ export function wizardStepVisualState(
   index: number,
   currentIndex: number,
   incompleteIndexes: readonly number[] = [],
+  completedIndexes: readonly number[] | null = null,
 ): WizardStepVisualState {
   if (index === currentIndex) return 'current';
+  if (completedIndexes !== null) return completedIndexes.includes(index) ? 'completed' : 'upcoming';
   if (index > currentIndex) return 'upcoming';
   if (incompleteIndexes.includes(index)) return 'incomplete';
   return 'completed';

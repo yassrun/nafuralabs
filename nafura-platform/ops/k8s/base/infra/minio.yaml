@@ -53,7 +53,11 @@ spec:
       serviceAccountName: minio
       containers:
         - name: minio
-          image: minio/minio:latest
+          # Docker Hub a retiré le dépôt `minio/minio` (2026-09-11) : le tag `latest` n'y existe
+          # plus, kubelet tombe en ImagePullBackOff. Images officielles servies par quay.io.
+          # IfNotPresent : un cache local suffit — plus de re-téléchargement à chaque restart.
+          image: quay.io/minio/minio:latest
+          imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-c"]
           args:
             - |

@@ -15,7 +15,9 @@ import ma.nafura.chantiers.domain.chantier.Chantier;
  *       ({@code sourceVente == DEVIS}) — en création directe il est {@code NON_APPLICABLE}
  *       (AC-17) ;</li>
  *   <li>{@code budget_initial} bloque dans tous les cas (déboursé initial absent) ;</li>
- *   <li>{@code dates_prevues} exige une fin <b>strictement postérieure</b> au début (AC-5).</li>
+ *   <li>{@code delai_execution} exige un délai d'exécution retenu au cadrage ;</li>
+ *   <li>{@code dates_prevues} exige une fin <b>strictement postérieure</b> au début (AC-5) et,
+ *       quand un délai est retenu, une fin égale au début plus ce délai.</li>
  * </ul>
  */
 public final class PreparationRegles {
@@ -42,9 +44,18 @@ public final class PreparationRegles {
         if (!aConducteur || !aChefChantier) {
             out.add("responsables");
         }
-        if (chantier.getDateDemarrage() == null
-                || chantier.getDateFinPrevue() == null
-                || !chantier.getDateFinPrevue().isAfter(chantier.getDateDemarrage())) {
+        Integer delai = chantier.getDureeMois();
+        if (delai == null || delai <= 0) {
+            out.add("delai_execution");
+        }
+        boolean datesManquantes = chantier.getDateDemarrage() == null || chantier.getDateFinPrevue() == null;
+        boolean datesIncoherentes = !datesManquantes
+                && !chantier.getDateFinPrevue().isAfter(chantier.getDateDemarrage());
+        if (!datesManquantes && delai != null && delai > 0) {
+            datesIncoherentes = datesIncoherentes
+                    || !chantier.getDateFinPrevue().equals(chantier.getDateDemarrage().plusMonths(delai));
+        }
+        if (datesManquantes || datesIncoherentes) {
             out.add("dates_prevues");
         }
         return out;

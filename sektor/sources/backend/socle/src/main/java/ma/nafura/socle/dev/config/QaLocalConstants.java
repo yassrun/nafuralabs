@@ -65,6 +65,15 @@ public final class QaLocalConstants {
         "etudes.etudes.dossier.etude.update"
     );
 
+    /** Cadrage + saisie d’étude (soumission pour affectation / chiffrage). */
+    public static final List<String> INGENIEUR_ETUDE_PERMISSIONS = List.of(
+        "etude.read", "etude.create", "etude.update", "etude.submit", "etudes.read",
+        "etudes.etudes.dossier.etude.read",
+        "etudes.etudes.dossier.etude.create",
+        "etudes.etudes.dossier.etude.update",
+        "etudes.etudes.dossier.etude.submit"
+    );
+
     public static final List<RoleUser> ROLE_USERS = List.of(
         new RoleUser("ingenieur", "qa.ingenieur@nafuralabs.local", "QA Ingenieur", "BTP_INGENIEUR"),
         new RoleUser("ingenieur-2", "qa.ingenieur2@nafuralabs.local", "QA Ingenieur 2", "BTP_INGENIEUR"),

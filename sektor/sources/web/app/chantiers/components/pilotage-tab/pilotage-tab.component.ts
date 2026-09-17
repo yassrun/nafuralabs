@@ -384,32 +384,7 @@ export class PilotageTabComponent {
 
   /** AC-6 — commande atomique de démarrage par OS ; recharge le cockpit après. */
   async demarrerOs(): Promise<void> {
-    const ref = this.osReference().trim();
-    const date = this.osDateEffet();
-    if (!ref || !date) {
-      this.osErreur.set(this.translate.instant('chantiers.cockpit.os.champsRequis'));
-      return;
-    }
-    this.osSubmitting.set(true);
-    this.osErreur.set(null);
-    try {
-      await this.chantierApi.demarrerAvecOs(this.chantierId(), {
-        osReference: ref,
-        osDateEffet: date,
-      });
-      this.recharger();
-    } catch (e) {
-      const err = e as { error?: { bloqueurs?: string[]; code?: string } };
-      if (err?.error?.bloqueurs?.length) {
-        this.osErreur.set(
-          this.translate.instant('chantiers.cockpit.os.bloqueurs') + ' : ' + err.error.bloqueurs.join(', '),
-        );
-      } else {
-        this.osErreur.set(this.translate.instant('chantiers.cockpit.os.echec'));
-      }
-    } finally {
-      this.osSubmitting.set(false);
-    }
+    await this.router.navigate(['/chantiers', this.chantierId(), 'workflow']);
   }
 
   readonly shortcuts = computed(() => cockpitNavShortcuts(this.chantierId()));

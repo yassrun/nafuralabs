@@ -1,6 +1,8 @@
 package ma.nafura.platform.framework.context;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -13,6 +15,7 @@ public class UserContext {
     private static final ThreadLocal<Boolean> IS_SUPER_ADMIN = new ThreadLocal<>();
     private static final ThreadLocal<String> USER_EMAIL = new ThreadLocal<>();
     private static final ThreadLocal<String> USER_ROLE = new ThreadLocal<>();
+    private static final ThreadLocal<Set<String>> USER_ROLES = new ThreadLocal<>();
     private static final ThreadLocal<UUID> USER_ID = new ThreadLocal<>();
 
     private UserContext() {
@@ -79,16 +82,60 @@ public class UserContext {
 
     public static void setUserRole(String role) {
         USER_ROLE.set(role);
+        if (role == null || role.isBlank()) {
+            USER_ROLES.set(Set.of());
+        } else {
+            USER_ROLES.set(Set.of(role.trim().toUpperCase()));
+        }
+    }
+
+    public static void setUserRoles(Collection<String> roles) {
+        if (roles == null || roles.isEmpty()) {
+            USER_ROLE.set(null);
+            USER_ROLES.set(Set.of());
+            return;
+        }
+        LinkedHashSet<String> normalized = new LinkedHashSet<>();
+        for (String role : roles) {
+            if (role != null && !role.isBlank()) {
+                normalized.add(role.trim().toUpperCase());
+            }
+        }
+        USER_ROLES.set(Set.copyOf(normalized));
+        String primary = null;
+        if (normalized.contains("SUPER_ADMIN")) {
+            primary = "SUPER_ADMIN";
+        } else if (normalized.contains("OWNER")) {
+            primary = "OWNER";
+        } else if (!normalized.isEmpty()) {
+            primary = normalized.iterator().next();
+        }
+        USER_ROLE.set(primary);
     }
 
     public static String getUserRole() {
         return USER_ROLE.get();
     }
 
+    public static Set<String> getUserRoles() {
+        Set<String> roles = USER_ROLES.get();
+        return roles != null ? roles : Collections.emptySet();
+    }
+
+    public static boolean hasRole(String role) {
+        if (role == null || role.isBlank()) {
+            return false;
+        }
+        if (getUserRoles().contains(role.trim().toUpperCase())) {
+            return true;
+        }
+        String primary = getUserRole();
+        return primary != null && primary.equalsIgnoreCase(role);
+    }
+
     /** Tenant OWNER — lab / PME : peut trancher une approbation sans être l'approbateur N+1. */
     public static boolean isTenantOwner() {
-        String role = getUserRole();
-        return role != null && "OWNER".equalsIgnoreCase(role);
+        return hasRole("OWNER");
     }
 
     /** Mode B QA owner is provisioned as SUPER_ADMIN; treat as owner for lab four-eyes bypass. */
@@ -117,6 +164,7 @@ public class UserContext {
         IS_SUPER_ADMIN.remove();
         USER_EMAIL.remove();
         USER_ROLE.remove();
+        USER_ROLES.remove();
         USER_ID.remove();
     }
 }

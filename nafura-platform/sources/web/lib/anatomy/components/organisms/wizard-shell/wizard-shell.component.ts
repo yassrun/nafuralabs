@@ -134,6 +134,11 @@ export class WizardShellComponent {
   /** Allow clicking completed / current steps to jump (opt-in). */
   allowStepNavigation = input<boolean>(false);
 
+  /** Optional explicit completion, independent of the displayed step. */
+  completedStepIndexes = input<readonly number[] | null>(null);
+  /** Allow consulting future steps without treating them as completed. */
+  allowFutureStepNavigation = input<boolean>(false);
+
   /** Back button icon */
   backIcon = input<string>('arrow_back');
 
@@ -215,11 +220,11 @@ export class WizardShellComponent {
   });
 
   stepState(index: number): WizardStepVisualState {
-    return wizardStepVisualState(index, this.currentStepIndex(), this.incompleteStepIndexes());
+    return wizardStepVisualState(index, this.currentStepIndex(), this.incompleteStepIndexes(), this.completedStepIndexes());
   }
 
   isStepClickable(index: number): boolean {
-    return this.allowStepNavigation() && index <= this.currentStepIndex();
+    return this.allowStepNavigation() && (this.allowFutureStepNavigation() || index <= this.currentStepIndex());
   }
 
   stepAriaLabel(step: WizardStepConfig, index: number): string {
@@ -248,7 +253,7 @@ export class WizardShellComponent {
 
   onStepClick(index: number): void {
     if (!this.allowStepNavigation()) return;
-    if (index > this.currentStepIndex()) return;
+    if (index > this.currentStepIndex() && !this.allowFutureStepNavigation()) return;
     if (index === this.currentStepIndex()) return;
     this.stepSelect.emit(index);
   }

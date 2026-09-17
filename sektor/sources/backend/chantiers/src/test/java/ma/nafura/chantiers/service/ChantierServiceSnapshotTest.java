@@ -148,67 +148,50 @@ class ChantierServiceSnapshotTest {
     private Chantier chantierPret() {
         Chantier c = service.createDirect(baseDto());
         c.setDebourseInitialHt(new BigDecimal("582600.00"));
+        // Délai retenu au cadrage : la fin prévue en découle (2026-09-01 + 8 mois = 2027-05-01).
+        c.setDureeMois(8);
         c.setDateDemarrage(LocalDate.of(2026, 9, 1));
         c.setDateFinPrevue(LocalDate.of(2027, 5, 1));
         return c;
     }
 
-    /** AC-5/AC-6 — tout est prêt, l'OS est fourni : démarrage atomique EN_COURS + journal. */
+    /**
+     * AC-5/AC-6 — le démarrage atomique EN_COURS + journal n'appartient plus à cette commande :
+     * la décision, l'OS, l'historique et le journal se prennent dans le cycle de vie de la fiche
+     * ({@code ChantierWorkflowService}). Ici, la commande historique se contente de refuser.
+     */
     @Test
-    void demarrerAvecOs_toutPret_aboutit() {
+    void demarrerAvecOs_neDemarrePlusDepuisLaCommandeHistorique() {
         Chantier c = chantierPret();
         when(repository.findByIdAndTenantId(any(), any())).thenReturn(java.util.Optional.of(c));
         when(lotRepository.countByTenantIdAndChantierId(TENANT, c.getId())).thenReturn(2L);
         ChantierAffectationDto conducteur = affectation("BTP_CONDUCTEUR_TRAVAUX");
         ChantierAffectationDto chef = affectation("BTP_CHEF_CHANTIER");
         when(affectationService.listByChantier(c.getId())).thenReturn(java.util.List.of(conducteur, chef));
-
-        ChantierDemarrerOsDto os = new ChantierDemarrerOsDto();
-        os.setOsReference("OS-2026-001");
-        os.setOsDateEffet(LocalDate.of(2026, 9, 1));
-
-        Chantier out = service.demarrerAvecOs(c.getId(), os);
-
-        assertThat(out.getStatus()).isEqualTo(Chantier.STATUS_EN_COURS);
-        assertThat(out.getOsReference()).isEqualTo("OS-2026-001");
-        assertThat(out.getOsDateEffet()).isEqualTo(LocalDate.of(2026, 9, 1));
-        verify(journalRepository).save(any(JournalChantier.class));
-    }
-
-    /** AC-5 — un bloqueur restant refuse le démarrage avec la liste stable des codes. */
-    @Test
-    void demarrerAvecOs_responsablesManquants_refuseAvecCodes() {
-        Chantier c = chantierPret();
-        when(repository.findByIdAndTenantId(any(), any())).thenReturn(java.util.Optional.of(c));
-        when(lotRepository.countByTenantIdAndChantierId(TENANT, c.getId())).thenReturn(2L);
-        // aucun responsable
-        when(affectationService.listByChantier(c.getId())).thenReturn(java.util.List.of());
 
         ChantierDemarrerOsDto os = new ChantierDemarrerOsDto();
         os.setOsReference("OS-2026-001");
         os.setOsDateEffet(LocalDate.of(2026, 9, 1));
 
         assertThatThrownBy(() -> service.demarrerAvecOs(c.getId(), os))
-                .isInstanceOf(ChantierService.PreparationIncompleteException.class)
-                .satisfies(ex -> assertThat(((ChantierService.PreparationIncompleteException) ex).getCodes())
-                        .contains("responsables"));
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                .hasMessageContaining("cycle de vie");
         assertThat(c.getStatus()).isEqualTo(Chantier.STATUS_EN_PREPARATION);
+        verify(journalRepository, org.mockito.Mockito.never()).save(any(JournalChantier.class));
     }
 
-    /** AC-6 — l'OS est obligatoire, même si la préparation est complète. */
+    /** AC-5 — les bloqueurs de préparation sont nommés par codes stables, jamais devinés. */
     @Test
-    void demarrerAvecOs_sansOs_refuse() {
+    void bloqueursDePreparation_nommentLesManques() {
         Chantier c = chantierPret();
         when(repository.findByIdAndTenantId(any(), any())).thenReturn(java.util.Optional.of(c));
         when(lotRepository.countByTenantIdAndChantierId(TENANT, c.getId())).thenReturn(2L);
-        ChantierAffectationDto conducteur = affectation("BTP_CONDUCTEUR_TRAVAUX");
-        ChantierAffectationDto chef = affectation("BTP_CHEF_CHANTIER");
-        when(affectationService.listByChantier(c.getId())).thenReturn(java.util.List.of(conducteur, chef));
+        // aucun responsable
+        when(affectationService.listByChantier(c.getId())).thenReturn(java.util.List.of());
 
-        assertThatThrownBy(() -> service.demarrerAvecOs(c.getId(), null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("chantiers.demarrage.os_requis");
-        assertThat(c.getStatus()).isEqualTo(Chantier.STATUS_EN_PREPARATION);
+        assertThat(service.bloqueursDePreparation(c))
+                .contains("responsables")
+                .doesNotContain("dates_prevues", "delai_execution");
     }
 
     /** AC-8 — le planning n'est jamais exigé au démarrage (aucun champ planning dans la commande). */
@@ -224,8 +207,9 @@ class ChantierServiceSnapshotTest {
     }
 
     @Test
-    void demarrerAvecOs_creationDirecteSansBudget_refuse() {
+    void bloqueursDePreparation_creationDirecteSansBudget_refuse() {
         Chantier c = service.create(baseDto());
+        c.setDureeMois(8);
         c.setDateDemarrage(LocalDate.of(2026, 9, 1));
         c.setDateFinPrevue(LocalDate.of(2027, 5, 1));
         when(repository.findByIdAndTenantId(any(), any())).thenReturn(java.util.Optional.of(c));
@@ -233,18 +217,11 @@ class ChantierServiceSnapshotTest {
         when(affectationService.listByChantier(c.getId())).thenReturn(java.util.List.of(
                 affectation("BTP_CONDUCTEUR_TRAVAUX"), affectation("BTP_CHEF_CHANTIER")));
 
-        ChantierDemarrerOsDto os = new ChantierDemarrerOsDto();
-        os.setOsReference("OS-2026-001");
-        os.setOsDateEffet(LocalDate.of(2026, 9, 1));
-
-        assertThatThrownBy(() -> service.demarrerAvecOs(c.getId(), os))
-                .isInstanceOf(ChantierService.PreparationIncompleteException.class)
-                .satisfies(ex -> assertThat(((ChantierService.PreparationIncompleteException) ex).getCodes())
-                        .contains("budget_initial"));
+        assertThat(service.bloqueursDePreparation(c)).contains("budget_initial");
     }
 
     @Test
-    void demarrerAvecOs_datesEgales_refuse() {
+    void bloqueursDePreparation_datesEgales_refuse() {
         Chantier c = chantierPret();
         c.setDateFinPrevue(c.getDateDemarrage());
         when(repository.findByIdAndTenantId(any(), any())).thenReturn(java.util.Optional.of(c));
@@ -252,29 +229,34 @@ class ChantierServiceSnapshotTest {
         when(affectationService.listByChantier(c.getId())).thenReturn(java.util.List.of(
                 affectation("BTP_CONDUCTEUR_TRAVAUX"), affectation("BTP_CHEF_CHANTIER")));
 
-        ChantierDemarrerOsDto os = new ChantierDemarrerOsDto();
-        os.setOsReference("OS-2026-001");
-        os.setOsDateEffet(c.getDateDemarrage());
-
-        assertThatThrownBy(() -> service.demarrerAvecOs(c.getId(), os))
-                .isInstanceOf(ChantierService.PreparationIncompleteException.class)
-                .satisfies(ex -> assertThat(((ChantierService.PreparationIncompleteException) ex).getCodes())
-                        .contains("dates_prevues"));
+        assertThat(service.bloqueursDePreparation(c)).contains("dates_prevues");
     }
 
+    /** Les dates prévisionnelles découlent du délai retenu au cadrage. */
     @Test
-    void demarrerAvecOs_brouillon_refuseMemeSiPret() {
+    void bloqueursDePreparation_datesHorsDelai_refuse() {
         Chantier c = chantierPret();
-        c.setStatus(Chantier.STATUS_BROUILLON);
+        c.setDureeMois(8);
+        c.setDateFinPrevue(LocalDate.of(2027, 6, 1));
         when(repository.findByIdAndTenantId(any(), any())).thenReturn(java.util.Optional.of(c));
+        when(lotRepository.countByTenantIdAndChantierId(TENANT, c.getId())).thenReturn(2L);
+        when(affectationService.listByChantier(c.getId())).thenReturn(java.util.List.of(
+                affectation("BTP_CONDUCTEUR_TRAVAUX"), affectation("BTP_CHEF_CHANTIER")));
 
-        ChantierDemarrerOsDto os = new ChantierDemarrerOsDto();
-        os.setOsReference("OS-2026-001");
-        os.setOsDateEffet(c.getDateDemarrage());
+        assertThat(service.bloqueursDePreparation(c)).contains("dates_prevues");
+    }
 
-        assertThatThrownBy(() -> service.demarrerAvecOs(c.getId(), os))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining(Chantier.STATUS_BROUILLON);
+    /** Sans délai retenu, le cadrage est incomplet : la règle le dit. */
+    @Test
+    void bloqueursDePreparation_sansDelai_refuse() {
+        Chantier c = chantierPret();
+        c.setDureeMois(null);
+        when(repository.findByIdAndTenantId(any(), any())).thenReturn(java.util.Optional.of(c));
+        when(lotRepository.countByTenantIdAndChantierId(TENANT, c.getId())).thenReturn(2L);
+        when(affectationService.listByChantier(c.getId())).thenReturn(java.util.List.of(
+                affectation("BTP_CONDUCTEUR_TRAVAUX"), affectation("BTP_CHEF_CHANTIER")));
+
+        assertThat(service.bloqueursDePreparation(c)).contains("delai_execution");
     }
 
     @Test

@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import ma.nafura.chantiers.api.request.LigneBdpUpdateDto;
 import ma.nafura.chantiers.api.request.PosteBudgetaireCreateDto;
 import ma.nafura.chantiers.domain.chantier.ChantierLot;
 import ma.nafura.chantiers.domain.chantier.NatureLigne;
@@ -135,6 +136,123 @@ class PosteBudgetaireServiceTest {
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class, () -> service.copierPosteVendu(LOT_ID, request, null));
         assertEquals("chantiers.arbre.vendu_sans_origine", ex.getMessage());
+    }
+
+    /** BDP chiffré — une ligne vendue, sans origine d'étude, entre au bordereau du chantier. */
+    @Test
+    void chiffrageCreeUneLigneVendueSansOrigine() {
+        PosteBudgetaireCreateDto request = request("Beton arme", "P-05");
+        request.setNature("VENDU");
+        request.setQuantite(new BigDecimal("12"));
+        request.setPrixUnitaireHt(new BigDecimal("900"));
+
+        PosteBudgetaire created = service.creerLigneBdp(LOT_ID, request);
+
+        assertEquals(NatureLigne.VENDU, created.getNature());
+        assertNull(created.getDpgfNoeudId());
+        assertEquals(0, new BigDecimal("10800").compareTo(created.getMontantHt()));
+    }
+
+    /** BDP chiffré — un prix déclaré suffit à faire entrer la ligne au bordereau. */
+    @Test
+    void chiffrageDeduitLeVenduDuPrixFourni() {
+        PosteBudgetaireCreateDto request = request("Enduit", "P-06");
+        request.setQuantite(new BigDecimal("30"));
+        request.setPrixUnitaireHt(new BigDecimal("45"));
+
+        PosteBudgetaire created = service.creerLigneBdp(LOT_ID, request);
+
+        assertEquals(NatureLigne.VENDU, created.getNature());
+        assertEquals(0, new BigDecimal("1350").compareTo(created.getMontantHt()));
+    }
+
+    /** BDP chiffré — une ligne vendue sans quantité ni prix est refusée, jamais devinée. */
+    @Test
+    void chiffrageRefuseUneLigneVendueSansQuantiteNiPrix() {
+        PosteBudgetaireCreateDto request = request("Faux vendu", "P-07");
+        request.setNature("VENDU");
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class, () -> service.creerLigneBdp(LOT_ID, request));
+        assertEquals("chantiers.bdp.ligne_vendue_sans_quantite_ni_prix", ex.getMessage());
+    }
+
+    /** BDP chiffré — une ligne sans prix reste interne, comme la saisie générique. */
+    @Test
+    void chiffrageSansPrixResteInterne() {
+        PosteBudgetaire created = service.creerLigneBdp(LOT_ID, request("Base vie", "P-08"));
+
+        assertEquals(NatureLigne.INTERNE, created.getNature());
+        assertNull(created.getPrixUnitaireHt());
+    }
+
+    /** Une ligne copiée du devis garde son origine : sa nature ne se convertit pas. */
+    @Test
+    void chiffrageNeConvertitPasUneLigneDOrigineEtude() {
+        UUID origine = UUID.fromString("00000000-0000-4000-8000-0000000000cc");
+        PosteBudgetaire existant = poste("01", 1);
+        existant.setNature(NatureLigne.VENDU);
+        existant.setDpgfNoeudId(origine);
+        when(repository.findByIdAndTenantId(existant.getId(), TENANT_ID)).thenReturn(Optional.of(existant));
+
+        LigneBdpUpdateDto maj = new LigneBdpUpdateDto();
+        maj.setNature("INTERNE");
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class, () -> service.majLigneBdp(existant.getId(), maj));
+        assertEquals("chantiers.bdp.ligne_etude_non_convertible", ex.getMessage());
+        assertEquals(NatureLigne.VENDU, existant.getNature());
+    }
+
+    /** Chiffrage — une ligne interne peut entrer au bordereau et porter son prix. */
+    @Test
+    void chiffrageFaitEntrerUneLigneInterneAuBordereau() {
+        PosteBudgetaire existant = poste("02", 2);
+        when(repository.findByIdAndTenantId(existant.getId(), TENANT_ID)).thenReturn(Optional.of(existant));
+
+        LigneBdpUpdateDto maj = new LigneBdpUpdateDto();
+        maj.setNature("VENDU");
+        maj.setQuantite(new BigDecimal("4"));
+        maj.setPrixUnitaireHt(new BigDecimal("250"));
+
+        PosteBudgetaire updated = service.majLigneBdp(existant.getId(), maj);
+
+        assertEquals(NatureLigne.VENDU, updated.getNature());
+        assertEquals(0, new BigDecimal("1000").compareTo(updated.getMontantHt()));
+    }
+
+    /** Une ligne vendue du bordereau sans quantité ni prix est refusée au chiffrage. */
+    @Test
+    void chiffrageRefuseUneMiseAJourVendueSansQuantiteNiPrix() {
+        PosteBudgetaire existant = poste("04", 4);
+        when(repository.findByIdAndTenantId(existant.getId(), TENANT_ID)).thenReturn(Optional.of(existant));
+
+        LigneBdpUpdateDto maj = new LigneBdpUpdateDto();
+        maj.setNature("VENDU");
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class, () -> service.majLigneBdp(existant.getId(), maj));
+        assertEquals("chantiers.bdp.ligne_vendue_sans_quantite_ni_prix", ex.getMessage());
+    }
+
+    /** Retour à l'interne : la ligne quitte le bordereau et son prix de vente. */
+    @Test
+    void chiffrageRessortUneLigneDuBordereau() {
+        PosteBudgetaire existant = poste("03", 3);
+        existant.setNature(NatureLigne.VENDU);
+        existant.setQuantite(new BigDecimal("4"));
+        existant.setPrixUnitaireHt(new BigDecimal("250"));
+        existant.setMontantHt(new BigDecimal("1000"));
+        when(repository.findByIdAndTenantId(existant.getId(), TENANT_ID)).thenReturn(Optional.of(existant));
+
+        LigneBdpUpdateDto maj = new LigneBdpUpdateDto();
+        maj.setNature("INTERNE");
+
+        PosteBudgetaire updated = service.majLigneBdp(existant.getId(), maj);
+
+        assertEquals(NatureLigne.INTERNE, updated.getNature());
+        assertNull(updated.getPrixUnitaireHt());
+        assertNull(updated.getMontantHt());
     }
 
     private static PosteBudgetaireCreateDto request(String designation, String code) {

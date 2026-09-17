@@ -130,14 +130,14 @@ public final class ChantierActionDecision {
             boolean pret = PreparationRegles.bloquants(c, nbLots, aConducteur, aChefChantier).isEmpty();
             out.add(action(1,
                     pret ? "chantiers.cockpit.action.demarrer" : "chantiers.cockpit.action.preparer",
-                    "/chantiers/{id}", "chantiers.update", id));
+                    "/chantiers/{id}/workflow", "chantiers.update", id));
             out.add(action(2, "chantiers.cockpit.action.equipe", "/chantiers/{id}?tab=equipe", "chantiers.update", id));
             out.add(action(3, "chantiers.cockpit.action.budget", "/chantiers/budget/{id}", "chantiers.budget.read", id));
             out.add(action(4, "chantiers.cockpit.action.planning", "/chantiers/planning?chantier={id}", "chantiers.read", id));
             return out;
         }
         if (Chantier.STATUS_SUSPENDU.equals(c.getStatus())) {
-            out.add(action(1, "chantiers.cockpit.action.reprendre", "/chantiers/{id}", "chantiers.update", id));
+            out.add(action(1, "chantiers.cockpit.action.reprendre", "/chantiers/{id}/workflow", "chantiers.update", id));
             out.add(action(2, "chantiers.cockpit.action.budget", "/chantiers/budget/{id}", "chantiers.budget.read", id));
             out.add(action(3, "chantiers.cockpit.action.planning", "/chantiers/planning?chantier={id}", "chantiers.read", id));
             return out;
@@ -165,6 +165,7 @@ public final class ChantierActionDecision {
             }
             return out;
         }
+        out.add(action(0, "Cycle de vie et garanties", "/chantiers/{id}/workflow", "chantiers.read", id));
         out.add(action(1, "chantiers.cockpit.action.budget", "/chantiers/budget/{id}", "chantiers.budget.read", id));
         out.add(action(2, "chantiers.cockpit.action.situations", "/chantiers/situations?chantierId={id}", "chantiers.read", id));
         out.add(action(3, "chantiers.cockpit.action.documents", "/chantiers/documents?chantierId={id}", "chantiers.read", id));

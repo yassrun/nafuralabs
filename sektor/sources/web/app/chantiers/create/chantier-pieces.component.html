@@ -1,0 +1,135 @@
+<section class="pieces pieces--cps" [attr.aria-label]="titre()">
+  <header class="pieces__entete">
+    <div class="pieces__entete-main">
+      <h3 class="pieces__titre">{{ titre() }}</h3>
+      <p class="pieces__aide">{{ aide() }}</p>
+    </div>
+  </header>
+
+  <div class="pieces__zones" role="group" aria-label="Pièces attendues">
+    @for (slot of primarySlots(); track slot.tag) {
+      @let piece = documentFor(slot.tag);
+      @let pending = pendingFor(slot.tag);
+      @let over = dragOver() === slot.tag;
+      @let studyDoc = studyDocFor(slot.tag);
+      @let filled = !!piece || !!pending;
+      <div
+        class="pieces__zone"
+        [class.pieces__zone--filled]="filled"
+        [class.pieces__zone--over]="over"
+        [class.pieces__zone--required]="slot.required && !filled"
+        (dragover)="onDragOver(slot.tag, $event)"
+        (dragleave)="dragOverChange.emit('')"
+        (drop)="onDrop(slot.tag, $event)"
+      >
+        <div class="pieces__zone-head">
+          <span class="pieces__zone-badge">{{ badge(slot) }}</span>
+          @if (slot.required) {
+            <span class="pieces__zone-req">Requis</span>
+          } @else {
+            <span class="pieces__zone-opt">Optionnel</span>
+          }
+        </div>
+
+        @if (pending) {
+          <div class="pieces__zone-fichier">
+            <nf-icon name="description" class="pieces__zone-icone" aria-hidden="true"></nf-icon>
+            <span class="pieces__nom">{{ pending.name }}</span>
+          </div>
+          <span class="pieces__zone-lock">À enregistrer</span>
+          @if (!disabled()) {
+            <nf-button type="button" variant="ghost" size="sm" [disabled]="saving()" (clicked)="fileRemoved.emit(slot.tag)">Retirer</nf-button>
+          }
+        } @else if (piece) {
+          <div class="pieces__zone-fichier">
+            <nf-icon name="description" class="pieces__zone-icone" aria-hidden="true"></nf-icon>
+            <button type="button" class="pieces__nom pieces__nom--lien" (click)="openDoc.emit(piece)">{{ piece.fichier }}</button>
+          </div>
+          <span class="pieces__zone-lock">Enregistré</span>
+          @if (!disabled()) {
+            <label class="pieces__zone-replace">
+              <span>{{ saving() ? 'Remplacement…' : 'Remplacer' }}</span>
+              <input type="file" [accept]="acceptFiles" [disabled]="saving()" [attr.aria-label]="slot.label" (change)="onFile(slot.tag, $event)" />
+            </label>
+          }
+        } @else if (!disabled()) {
+          <label class="pieces__zone-drop">
+            <nf-icon name="upload_file" aria-hidden="true"></nf-icon>
+            <span class="pieces__zone-drop-main">{{ dropLabel(slot) }}</span>
+            <input type="file" [accept]="acceptFiles" [disabled]="saving()" [attr.aria-label]="slot.label" (change)="onFile(slot.tag, $event)" />
+          </label>
+          <span class="pieces__zone-lock">À déposer</span>
+          @if (studyDoc) {
+            <nf-button type="button" variant="ghost" size="sm" [disabled]="saving()" (clicked)="emitReprise(slot.tag)">
+              Reprendre le fichier de l’étude
+            </nf-button>
+          }
+        } @else {
+          <p class="pieces__vide">Non déposé</p>
+          <span class="pieces__zone-lock">À déposer</span>
+        }
+      </div>
+    }
+  </div>
+
+  @if (showAutres()) {
+    <div class="pieces__autres">
+      <div class="pieces__autres-barre">
+        <button type="button" class="pieces__autres-toggle" [attr.aria-expanded]="autresOuverts()" (click)="toggleAutres()">
+          <span class="pieces__autres-chevron" [class.pieces__autres-chevron--open]="autresOuverts()">▸</span>
+          Autres documents
+          <span class="pieces__autres-count">{{ autresDeposes() }}/{{ extraSlots().length }}</span>
+        </button>
+        @if (!disabled() && !ajoutOuvert()) {
+          <nf-button type="button" variant="ghost" size="sm" (clicked)="ajoutOuvert.set(true); autresOuverts.set(true)">Ajouter</nf-button>
+        }
+      </div>
+      @if (autresOuverts()) {
+        <ul class="pieces__autres-liste">
+          @for (slot of extraSlots(); track slot.tag) {
+            @let piece = documentFor(slot.tag);
+            @let pending = pendingFor(slot.tag);
+            <li class="pieces__autres-ligne">
+              <span class="pieces__zone-badge">{{ badge(slot) }}</span>
+              <span class="pieces__autres-libelle">{{ slot.label }}</span>
+              @if (pending) {
+                <span class="pieces__autres-fichier">{{ pending.name }}</span>
+                @if (!disabled()) {
+                  <nf-button type="button" variant="ghost" size="sm" (clicked)="fileRemoved.emit(slot.tag)">Retirer</nf-button>
+                }
+              } @else if (piece) {
+                <button type="button" class="pieces__autres-fichier pieces__nom--lien" (click)="openDoc.emit(piece)">{{ piece.fichier }}</button>
+              } @else if (!disabled()) {
+                <label class="pieces__autres-lien">
+                  Déposer
+                  <input type="file" [accept]="acceptFiles" [disabled]="saving()" [attr.aria-label]="slot.label" (change)="onFile(slot.tag, $event)" />
+                </label>
+                @if (studyDocFor(slot.tag)) {
+                  <nf-button type="button" variant="ghost" size="sm" (clicked)="emitReprise(slot.tag)">Reprendre le fichier de l’étude</nf-button>
+                }
+              } @else {
+                <span class="pieces__autres-vide">—</span>
+              }
+              @if (!disabled()) {
+                <nf-button type="button" variant="ghost" size="sm" aria-label="Retirer la pièce" (clicked)="extraRemoved.emit(slot.tag)">Retirer</nf-button>
+              }
+            </li>
+          }
+        </ul>
+        @if (!disabled() && ajoutOuvert()) {
+          <div class="pieces__ajout-form pieces__ajout-form--compact">
+            <nf-select label="Type" [options]="ajoutTypeOptions" [ngModel]="ajoutType()" (ngModelChange)="ajoutType.set($event)" />
+            <label>
+              <span>Libellé</span>
+              <input type="text" [ngModel]="ajoutLibelle()" (ngModelChange)="ajoutLibelle.set($event)" placeholder="Ex. Plan de prévention" />
+            </label>
+            <div class="pieces__ajout-actions">
+              <nf-button type="button" variant="secondary" (clicked)="ajoutOuvert.set(false)">Annuler</nf-button>
+              <nf-button type="button" variant="primary" (clicked)="ajouter()">Ajouter</nf-button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+</section>

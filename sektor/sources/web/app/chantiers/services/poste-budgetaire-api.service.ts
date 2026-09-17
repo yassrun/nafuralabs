@@ -83,4 +83,33 @@ export class PosteBudgetaireApiService extends FeatureApiService<
   async deletePoste(posteId: string): Promise<void> {
     await this.deleteRequest(`/api/v1/postes-budgetaires/${posteId}`);
   }
+
+  /**
+   * Ajoute une ligne au BDP chiffré du chantier. C'est la seule voie d'écriture d'une ligne
+   * vendue hors copie du devis : la saisie générique d'arbre, elle, ne produit que de l'interne.
+   */
+  async createLigneBdp(
+    chantierId: string,
+    data: { lotId: string; designation: string; code?: string; unite?: string; quantite?: number; prixUnitaireHt?: number; montantHt?: number; ordre?: number },
+  ): Promise<PosteBudgetaire> {
+    const vendu = data.prixUnitaireHt != null || data.montantHt != null;
+    const row = await this.post<ApiPosteBudgetaire>(`/api/v1/chantiers/${chantierId}/bdp/lignes`, {
+      ...data,
+      nature: vendu ? 'VENDU' : 'INTERNE',
+    });
+    return posteToUi(row);
+  }
+
+  /**
+   * Corrige une ligne du BDP : quantité, prix unitaire et nature. Une ligne vendue sans quantité
+   * ni prix est refusée par le serveur, jamais dégradée en silence.
+   */
+  async updateLigneBdp(
+    chantierId: string,
+    posteId: string,
+    data: { designation?: string; unite?: string; quantite?: number; prixUnitaireHt?: number; montantHt?: number; nature?: NatureLigne },
+  ): Promise<PosteBudgetaire> {
+    const row = await this.put<ApiPosteBudgetaire>(`/api/v1/chantiers/${chantierId}/bdp/lignes/${posteId}`, data);
+    return posteToUi(row);
+  }
 }

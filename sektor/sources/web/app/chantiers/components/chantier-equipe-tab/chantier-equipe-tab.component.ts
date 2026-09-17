@@ -6,6 +6,7 @@ import {
   effect,
   inject,
   input,
+  output,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -51,11 +52,26 @@ const ROLE_LABELS: Record<string, string> = {
       <header class="equipe__header">
         <h3>{{ 'chantiers.chantier.detail.tabs.equipe' | translate }}</h3>
         @if (canAdd()) {
-          <nf-button variant="primary" size="sm" (click)="showForm.set(true)">
+          <nf-button variant="primary" size="sm" (click)="openAdd()">
             {{ 'chantiers.chantier.detail.equipe.add' | translate }}
           </nf-button>
         }
       </header>
+
+      @if (requiredRoles().length) {
+        <div class="equipe__required" role="group" aria-label="Rôles exigés">
+          @for (code of requiredRoles(); track code) {
+            @let holder = holderFor(code);
+            <article class="equipe__role" [class.equipe__role--ok]="!!holder">
+              <strong>{{ roleLabel(code) }}</strong>
+              <p>{{ holder ? 'Pourvu · ' + (holder.employeNom ?? holder.employeId) : 'Manquant' }}</p>
+              @if (canAdd() && !holder) {
+                <nf-button variant="secondary" size="sm" (click)="openAdd(code)">Ajouter</nf-button>
+              }
+            </article>
+          }
+        </div>
+      }
 
       @if (showForm() && canAdd()) {
         <form class="equipe__form" (ngSubmit)="submit()">
@@ -159,10 +175,17 @@ const ROLE_LABELS: Record<string, string> = {
     .equipe__table { width: 100%; border-collapse: collapse; }
     .equipe__table th, .equipe__table td { text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--nf-border, #e5e7eb); }
     .muted { color: var(--nf-muted, #6b7280); font-size: 0.85rem; }
+    .equipe__required { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; }
+    .equipe__role { border: 1px solid var(--nf-border, #e5e7eb); border-radius: 8px; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.35rem; }
+    .equipe__role--ok { border-color: var(--nf-color-success-500, #22c55e); }
+    .equipe__role p { margin: 0; font-size: 0.85rem; color: var(--nf-muted, #6b7280); }
   `,
 })
 export class ChantierEquipeTabComponent {
   readonly chantierId = input.required<string>();
+  /** Rôles à pourvoir avant de valider la préparation (conducteur + chef). */
+  readonly requiredRoles = input<string[]>([]);
+  readonly changed = output<void>();
 
   private readonly api = inject(ChantierAffectationApiService);
   private readonly toast = inject(ToastService);
@@ -198,6 +221,17 @@ export class ChantierEquipeTabComponent {
 
   roleLabel(code: string): string {
     return ROLE_LABELS[code] ?? code;
+  }
+
+  holderFor(code: string): ChantierAffectation | undefined {
+    return this.rows().find((r) => r.roleCode === code);
+  }
+
+  openAdd(roleCode?: string): void {
+    if (roleCode && this.roles().includes(roleCode)) {
+      this.draft.roleCode = roleCode;
+    }
+    this.showForm.set(true);
   }
 
   async reload(): Promise<void> {
@@ -250,6 +284,7 @@ export class ChantierEquipeTabComponent {
         dateFin: '',
       };
       await this.reload();
+      this.changed.emit();
       this.toast.success('Affectation créée');
     } catch (e) {
       this.toast.error(this.mutationError(e));
@@ -264,6 +299,7 @@ export class ChantierEquipeTabComponent {
     try {
       await this.api.deactivate(id, row.id);
       await this.reload();
+      this.changed.emit();
       this.toast.success('Affectation retirée');
     } catch (e) {
       this.toast.error(this.mutationError(e));

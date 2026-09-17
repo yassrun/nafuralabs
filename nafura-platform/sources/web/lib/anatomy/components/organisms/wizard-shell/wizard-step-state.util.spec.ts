@@ -1,6 +1,13 @@
 import { wizardStepVisualState } from './wizard-step-state.util';
 
 describe('wizardStepVisualState', () => {
+  it('does not mark consulted steps complete when explicit milestones are supplied', () => {
+    expect(wizardStepVisualState(1, 5, [], [0])).toBe('upcoming');
+    expect(wizardStepVisualState(0, 5, [], [0])).toBe('completed');
+  });
+  it('retains completed milestones when navigating back', () => {
+    expect(wizardStepVisualState(2, 0, [], [0, 1, 2])).toBe('completed');
+  });
   it('marks the current index as current', () => {
     expect(wizardStepVisualState(1, 1, [0])).toBe('current');
   });

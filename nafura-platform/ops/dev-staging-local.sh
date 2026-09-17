@@ -67,12 +67,12 @@ stop_app_processes() {
 
 http_up() {
   local url="$1"
-  curl -sf -o /dev/null --connect-timeout 2 "$url" 2>/dev/null
+  curl -sf -o /dev/null --connect-timeout 2 --max-time 3 "$url" 2>/dev/null
 }
 
 # Mode B is ready only when cursor-session mints (provisioner finished), not mere Tomcat up.
 session_up() {
-  curl -sf -o /dev/null --connect-timeout 2 -X POST \
+  curl -sf -o /dev/null --connect-timeout 2 --max-time 3 -X POST \
     "${BACK_URL%/}/api/public/dev/cursor-session" 2>/dev/null
 }
 
@@ -121,7 +121,32 @@ wait_tcp() {
   return 1
 }
 
+# Cursor agent sandboxes redirect GRADLE_USER_HOME to a temp cache, which
+# re-downloads Gradle 8.14 and starts a cold daemon (~minutes). Mode B is a
+# host process — always reuse the developer cache + daemon.
+pin_gradle_user_home() {
+  local real_home
+  if [[ -n "${USERPROFILE:-}" ]]; then
+    real_home="${USERPROFILE}/.gradle"
+  else
+    real_home="${HOME}/.gradle"
+  fi
+  case "${GRADLE_USER_HOME:-}" in
+    "$real_home") ;;
+    *cursor-sandbox-cache*|*"AppData/Local/Temp"*|*"AppData\\Local\\Temp"*|"")
+      export GRADLE_USER_HOME="$real_home"
+      echo "Gradle cache: $GRADLE_USER_HOME"
+      ;;
+  esac
+}
+
 gradlew_sektor() {
+  # Windows: prefer .bat so we share the same daemon as developer terminals.
+  if [[ -n "${WINDIR:-}" || "${OS:-}" == "Windows_NT" ]] \
+    && [[ -f "$ROOT/sektor/sources/backend/gradlew.bat" ]]; then
+    echo "$ROOT/sektor/sources/backend/gradlew.bat"
+    return
+  fi
   if [[ -f "$ROOT/sektor/sources/backend/gradlew" ]]; then
     echo "$ROOT/sektor/sources/backend/gradlew"
   elif [[ -f "$ROOT/sektor/sources/backend/gradlew.bat" ]]; then
@@ -132,7 +157,8 @@ gradlew_sektor() {
 }
 
 start_sektor_app() {
-  local gw
+  local gw back_pid="" front_pid=""
+  pin_gradle_user_home
   gw="$(gradlew_sektor)"
   : >"$APP_PID_FILE"
 
@@ -140,23 +166,21 @@ start_sektor_app() {
     if session_up; then
       echo "Backend already up: cursor-session"
     else
-      echo "Starting backend → $BACK_LOG"
+      : >"$BACK_LOG"
+      echo "Starting backend → $BACK_LOG (cache $GRADLE_USER_HOME)"
       (
         trap '' HUP
         set -a
         # shellcheck disable=SC1090
         source "$ENV_FILE"
         set +a
+        export GRADLE_USER_HOME
         cd "$ROOT/sektor/sources/backend"
         exec "$gw" :sektor:app:bootRun
       ) >>"$BACK_LOG" 2>&1 &
-      local back_pid=$!
+      back_pid=$!
       disown "$back_pid" 2>/dev/null || true
       echo "$back_pid" >>"$APP_PID_FILE"
-      wait_http "$BACK_HEALTH" 240 "cursor-session" "$back_pid" session || {
-        echo "See $BACK_LOG" >&2
-        exit 1
-      }
     fi
   fi
 
@@ -164,20 +188,30 @@ start_sektor_app() {
     if http_up "$FRONT_URL"; then
       echo "Frontend already up: $FRONT_URL"
     else
+      : >"$FRONT_LOG"
       echo "Starting frontend → $FRONT_LOG"
       (
         trap '' HUP
         cd "$ROOT/sektor/sources/web"
         exec npm run start:erp:cursor
       ) >>"$FRONT_LOG" 2>&1 &
-      local front_pid=$!
+      front_pid=$!
       disown "$front_pid" 2>/dev/null || true
       echo "$front_pid" >>"$APP_PID_FILE"
-      wait_http "$FRONT_URL" 180 "$FRONT_URL" "$front_pid" || {
-        echo "See $FRONT_LOG" >&2
-        exit 1
-      }
     fi
+  fi
+
+  if [[ -n "$back_pid" ]]; then
+    wait_http "$BACK_HEALTH" 240 "cursor-session" "$back_pid" session || {
+      echo "See $BACK_LOG" >&2
+      exit 1
+    }
+  fi
+  if [[ -n "$front_pid" ]]; then
+    wait_http "$FRONT_URL" 180 "$FRONT_URL" "$front_pid" || {
+      echo "See $FRONT_LOG" >&2
+      exit 1
+    }
   fi
 
   cat <<EOF

@@ -165,6 +165,7 @@ public class ChantierService {
         String code = StringUtils.hasText(request.getCode()) ? request.getCode().trim() : nextChantierCode(tenantId);
         OffsetDateTime now = OffsetDateTime.now();
         Chantier entity = Chantier.builder()
+                .workflowData("{}")
                 .id(id)
                 .tenantId(tenantId)
                 .code(code)
@@ -214,7 +215,17 @@ public class ChantierService {
 
     @Transactional
     public Chantier update(String id, ChantierUpdateDto request) {
-        Chantier entity = getById(id);
+        Chantier entity = repository.lockWorkflow(id, tenantId()).orElseThrow(() -> new IllegalArgumentException("Chantier introuvable"));
+        if (request.getStatus() != null && !request.getStatus().equals(entity.getStatus())) {
+            throw new IllegalArgumentException("Utilisez les actions du cycle de vie pour changer le statut.");
+        }
+        if (entity.getWorkflowData() != null) {
+            if (!"EN_PREPARATION".equals(entity.getStatus()) &&
+                    (request.getLabel() != null || request.getVille() != null || request.getDateDemarrage() != null || request.getDateFinPrevue() != null)) {
+                throw new IllegalArgumentException("Reprenez la préparation pour modifier les données validées.");
+            }
+            entity.setWorkflowRevision(entity.getWorkflowRevision() + 1);
+        }
         if (request.getCode() != null) {
             entity.setCode(request.getCode().trim());
         }
@@ -327,6 +338,10 @@ public class ChantierService {
     @Transactional
     public Chantier demarrerAvecOs(String id, ChantierDemarrerOsDto os) {
         Chantier entity = getById(id);
+        requireLegacyWorkflow(entity);
+        if (os != null && os.getOsDateEffet() != null && os.getOsDateEffet().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("La date d'effet de l'OS n'est pas encore atteinte.");
+        }
         if (!Chantier.STATUS_EN_PREPARATION.equals(entity.getStatus())) {
             throw new IllegalStateException(
                     "Chantier cannot be started from status " + entity.getStatus());
@@ -400,6 +415,7 @@ public class ChantierService {
     @Transactional
     public Chantier suspendre(String id) {
         Chantier entity = getById(id);
+        requireLegacyWorkflow(entity);
         if (!Chantier.STATUS_EN_COURS.equals(entity.getStatus())) {
             throw new IllegalStateException("Only active chantiers can be suspended");
         }
@@ -410,6 +426,7 @@ public class ChantierService {
     @Transactional
     public Chantier reprendre(String id) {
         Chantier entity = getById(id);
+        requireLegacyWorkflow(entity);
         if (!Chantier.STATUS_SUSPENDU.equals(entity.getStatus())) {
             throw new IllegalStateException("Only suspended chantiers can be resumed");
         }
@@ -420,6 +437,7 @@ public class ChantierService {
     @Transactional
     public Chantier receptionProvisoire(String id) {
         Chantier entity = getById(id);
+        requireLegacyWorkflow(entity);
         if (!Chantier.STATUS_EN_COURS.equals(entity.getStatus())) {
             throw new IllegalStateException("Provisional reception requires EN_COURS status");
         }
@@ -430,6 +448,7 @@ public class ChantierService {
     @Transactional
     public Chantier receptionDefinitive(String id) {
         Chantier entity = getById(id);
+        requireLegacyWorkflow(entity);
         if (!Chantier.STATUS_RECEPTION_PROVISOIRE.equals(entity.getStatus())) {
             throw new IllegalStateException("Final reception requires RECEPTIONNE_PROVISOIRE status");
         }
@@ -440,6 +459,7 @@ public class ChantierService {
     @Transactional
     public Chantier clore(String id) {
         Chantier entity = getById(id);
+        requireLegacyWorkflow(entity);
         if (!Chantier.STATUS_RECEPTION_DEFINITIF.equals(entity.getStatus())) {
             throw new IllegalStateException("Closing requires RECEPTIONNE_DEFINITIF status");
         }
@@ -449,6 +469,13 @@ public class ChantierService {
             entity.setDateFinReelle(LocalDate.now());
         }
         return repository.save(entity);
+    }
+
+    private static void requireLegacyWorkflow(Chantier chantier) {
+        if (chantier.getWorkflowData() != null) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,
+                    "Utilisez le cycle de vie du chantier pour enregistrer cette décision et ses justificatifs.");
+        }
     }
 
     private List<Chantier> loadRows(UUID tenantId, String status, String clientId, String societeId) {

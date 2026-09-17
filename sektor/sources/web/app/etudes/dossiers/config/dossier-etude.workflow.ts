@@ -273,12 +273,6 @@ export const DOSSIER_SUITE_ACTIONS: Array<{
     isVisible: (ctx) => ctx.actionPrincipale === 'VOIR_DEVIS',
   },
   {
-    action: 'CONVERTIR',
-    actionLabel: 'Créer le chantier',
-    variant: 'primary',
-    isVisible: (ctx) => ctx.actionPrincipale === 'CONVERTIR',
-  },
-  {
     action: 'VOIR_CHANTIER',
     actionLabel: 'Ouvrir le chantier',
     variant: 'primary',

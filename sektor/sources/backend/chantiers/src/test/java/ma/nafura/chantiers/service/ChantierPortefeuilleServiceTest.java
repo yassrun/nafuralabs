@@ -227,7 +227,7 @@ class ChantierPortefeuilleServiceTest {
 
         assertThat(row.getProchaineAction()).isNotNull();
         assertThat(row.getProchaineAction().getLibelle()).isEqualTo("chantiers.cockpit.action.preparer");
-        assertThat(row.getProchaineAction().getRoute()).isEqualTo("/chantiers/ch-1");
+        assertThat(row.getProchaineAction().getRoute()).isEqualTo("/chantiers/ch-1/workflow");
     }
 
     @Test

@@ -13,7 +13,7 @@ REGISTRY_PASS ?=
         onboard-app provision-db drop-db migrate deploy \
         deploy-backend deploy-frontend reset-app clean-app \
         release-app release-backend release-frontend \
-        dev-up stg-up prod-up mode-b mode-b-stop
+        dev-up stg-up prod-up mode-b mode-b-stop wipe-qa-metier
 
 NLops = ENV=$(ENV) BUILD_IMAGES=$(BUILD_IMAGES) PUSH_IMAGES=$(PUSH_IMAGES) RESET_DB=$(RESET_DB) \
 	KUBE_CONTEXT=$(KUBE_CONTEXT) REGISTRY_PASS=$(REGISTRY_PASS) \
@@ -27,6 +27,7 @@ help:
 	@echo "SCOPE=front|back|full  APP=$(APP)"
 	@echo "  make -C nafura-platform/ops mode-b                 # one-shot Sektor Mode B (bootRun + cursor front)"
 	@echo "  make -C nafura-platform/ops mode-b-stop"
+	@echo "  make -C nafura-platform/ops wipe-qa-metier         # dry-run wipe études/chantiers/docs (YES=1 to apply)"
 	@echo "  make -C nafura-platform/ops dev-up  SCOPE=front|back|full   # prep only (recette, ne lance pas)"
 	@echo "  make -C nafura-platform/ops stg-up  SCOPE=front|back|full   # build + deploy pods staging"
 	@echo "  make -C nafura-platform/ops prod-up SCOPE=front|back|full   # prod (front = image web only)"
@@ -66,6 +67,11 @@ mode-b:
 
 mode-b-stop:
 	bash ./mode-b.sh stop
+
+# Lab: wipe tenant qa-local métier, keep référentiels + QA users. Default dry-run; YES=1 to apply.
+wipe-qa-metier:
+	KUBE_CONTEXT=$(or $(KUBE_CONTEXT),docker-desktop) ENV=$(or $(ENV),staging) \
+	  bash ./scripts/wipe-qa-metier.sh $(if $(filter 1 true yes,$(YES)),--yes,)
 
 # Build images + deploy pods staging.
 stg-up:

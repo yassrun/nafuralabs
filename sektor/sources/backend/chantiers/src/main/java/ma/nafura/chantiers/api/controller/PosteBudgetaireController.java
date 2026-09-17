@@ -37,6 +37,8 @@ public class PosteBudgetaireController {
     @RequirePermission("chantiers.create")
     public ResponseEntity<PosteBudgetaire> create(
             @PathVariable String lotId, @Valid @RequestBody PosteBudgetaireCreateDto body) {
+        // Saisie d'arbre : la ligne est interne, sans prix de vente. Le chiffrage du bordereau du
+        // chantier passe par /api/v1/chantiers/{chantierId}/bdp/lignes.
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(lotId, body));
     }
 }

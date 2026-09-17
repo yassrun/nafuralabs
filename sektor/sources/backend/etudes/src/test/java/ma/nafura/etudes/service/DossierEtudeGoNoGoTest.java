@@ -173,6 +173,7 @@ class DossierEtudeGoNoGoTest {
     void allerAEtape_ne_change_pas_le_statut() {
         UserContext.setUserRole("BTP_INGENIEUR");
         DossierEtude dossier = brouillon();
+        dossier.setChargeEtudeUserId(INGE.toString());
         when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -180,6 +181,41 @@ class DossierEtudeGoNoGoTest {
 
         assertThat(out.getStatus()).isEqualTo(StatutDossierEtude.DRAFT);
         assertThat(out.getCurrentStep()).isEqualTo(DossierEtude.ETAPE_BORDEREAU);
+    }
+
+    @Test
+    void allerAEtape_refuse_le_bordereau_tant_que_l_etude_n_est_pas_affectee() {
+        DossierEtude dossier = brouillon();
+        when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
+
+        assertThatThrownBy(() -> service.allerAEtape(DOSSIER, DossierEtude.ETAPE_BORDEREAU))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("etudes.dossier.bordereau_non_affecte");
+        assertThat(dossier.getCurrentStep()).isEqualTo(DossierEtude.ETAPE_PREMIERE);
+    }
+
+    @Test
+    void allerAEtape_refuse_la_decomposition_tant_que_l_etude_n_est_pas_affectee() {
+        DossierEtude dossier = brouillon();
+        dossier.setCurrentStep(DossierEtude.ETAPE_BORDEREAU);
+        when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
+
+        assertThatThrownBy(() -> service.allerAEtape(DOSSIER, DossierEtude.ETAPE_DECOMPOSITION))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("etudes.dossier.bordereau_non_affecte");
+        assertThat(dossier.getCurrentStep()).isEqualTo(DossierEtude.ETAPE_BORDEREAU);
+    }
+
+    @Test
+    void allerAEtape_laisse_le_cadrage_accessible_sans_affectation() {
+        DossierEtude dossier = brouillon();
+        dossier.setCurrentStep(DossierEtude.ETAPE_BORDEREAU);
+        when(repository.findByIdAndTenantId(DOSSIER, TENANT)).thenReturn(Optional.of(dossier));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        DossierEtude out = service.allerAEtape(DOSSIER, DossierEtude.ETAPE_DOCUMENTS);
+
+        assertThat(out.getCurrentStep()).isEqualTo(DossierEtude.ETAPE_DOCUMENTS);
     }
 
     @Test

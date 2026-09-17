@@ -92,6 +92,14 @@ class DossierEtudeWorkflowServiceTest {
     }
 
     @Test
+    void ingenieur_peut_soumettre_pour_affectation() {
+        UserContext.setUserRole("BTP_INGENIEUR");
+        UserContext.setUserId(INGE);
+        given(StatutDossierEtude.DRAFT);
+        assertThat(service.soumettreAuDg(DOSSIER).getStatus()).isEqualTo(StatutDossierEtude.PENDING_ASSIGNMENT);
+    }
+
+    @Test
     void draft_vers_assigned_avec_affectation() {
         DossierEtude d = given(StatutDossierEtude.DRAFT);
         d.setChargeEtudeUserId(INGE.toString());

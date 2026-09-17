@@ -67,6 +67,7 @@ public class QaLocalProvisioner implements ApplicationRunner {
         ensureRolePermissions(QaLocalConstants.ROLE_ADMIN_ETUDE, QaLocalConstants.ADMIN_ETUDE_PERMISSIONS);
         ensureRolePermissions("BTP_LECTEUR_ETUDE", QaLocalConstants.LECTEUR_ETUDE_PERMISSIONS);
         ensureRolePermissions("BTP_ASSISTANT_ETUDE", QaLocalConstants.ASSISTANT_ETUDE_PERMISSIONS);
+        ensureRolePermissions("BTP_INGENIEUR", QaLocalConstants.INGENIEUR_ETUDE_PERMISSIONS);
         ensureRolePermissions("BTP_INGENIEUR", QaLocalConstants.INBOX_PERMISSIONS);
         ensureRolePermissions("BTP_CONDUCTEUR_TRAVAUX", QaLocalConstants.INBOX_PERMISSIONS);
         ensureRolePermissions("BTP_DIRECTEUR_TRAVAUX", QaLocalConstants.INBOX_PERMISSIONS);

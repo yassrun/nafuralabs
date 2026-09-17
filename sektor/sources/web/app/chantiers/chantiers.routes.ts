@@ -72,9 +72,16 @@ export const CHANTIERS_ROUTES: Routes = [
   },
   {
     path: 'chantiers/new',
+    canDeactivate: [(component: { canLeave(): boolean }) => component.canLeave()],
     loadComponent: () =>
-      import('./create/chantier-create.page').then((m) => m.ChantierCreatePage),
+      import('./create/chantier-onboarding.page').then((m) => m.ChantierOnboardingPage),
     data: { title: 'Nouveau chantier', breadcrumb: 'Création' },
+  },
+  {
+    path: 'chantiers/:id/workflow',
+    canDeactivate: [(component: { canLeave(): boolean }) => component.canLeave()],
+    loadComponent: () => import('./create/chantier-onboarding.page').then((m) => m.ChantierOnboardingPage),
+    data: { title: 'Cycle de vie du chantier', breadcrumb: 'Cycle de vie' },
   },
   {
     path: 'chantiers/:id/edit',

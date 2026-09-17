@@ -33,7 +33,7 @@ public class UserPermissionContextService {
             return;
         }
 
-        UserContext.setUserRole(normalized.get(0));
+        UserContext.setUserRoles(normalized);
         Set<String> permissions = resolvePermissionsForRoles(normalized);
         if (permissions.isEmpty() && normalized.contains("OWNER")) {
             log.warn("OWNER role resolved to no permissions for {}; applying wildcard", principal);

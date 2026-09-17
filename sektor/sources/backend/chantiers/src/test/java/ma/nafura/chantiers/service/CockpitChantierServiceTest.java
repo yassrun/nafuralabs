@@ -608,6 +608,7 @@ class CockpitChantierServiceTest {
         c.setDevisId(UUID.fromString("00000000-0000-0000-0000-0000000000d1"));
         c.setMontantVenteInitialHt(new BigDecimal("737106.00"));
         c.setDebourseInitialHt(new BigDecimal("582600.00"));
+        c.setDureeMois(8);
         c.setDateDemarrage(LocalDate.of(2026, 9, 1));
         c.setDateFinPrevue(LocalDate.of(2027, 5, 1));
         c.setOsReference("OS-2026-001");

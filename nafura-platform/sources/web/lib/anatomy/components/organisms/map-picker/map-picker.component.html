@@ -1,0 +1,80 @@
+<div class="nf-map-picker" [class.nf-map-picker--disabled]="disabled()">
+  <div class="nf-map-picker__search">
+    <nf-input
+      label="Adresse"
+      placeholder="Adresse, puis Localiser — ou cliquer la carte"
+      [disabled]="disabled()"
+      [ngModel]="draftAddress()"
+      (ngModelChange)="onAddressInput($event)"
+      (keydown.enter)="$event.preventDefault(); searchAddress()"
+    />
+    <nf-button size="sm" variant="secondary" [disabled]="disabled() || geocodeStatus() === 'loading'" (clicked)="searchAddress()">
+      Localiser
+    </nf-button>
+  </div>
+
+  @if (geocodeStatus() === 'error' || mapStatus() === 'error') {
+    <p class="nf-map-picker__alert" role="alert">
+      @if (geocodeStatus() === 'error') {
+        {{ geocodeMessage() }}
+        <button type="button" (click)="retryGeocode()">Réessayer</button>
+      } @else {
+        Tuiles indisponibles — saisissez l’adresse, ou cliquez quand même.
+        <button type="button" (click)="retryMap()">Réessayer</button>
+      }
+    </p>
+  }
+
+  <div class="nf-map-picker__map">
+    <div
+      #viewport
+      class="nf-map-picker__viewport"
+      role="application"
+      aria-label="Carte — cliquer pour poser un pin"
+      (click)="onMapClick($event)"
+      (wheel)="onWheel($event)"
+      (pointerdown)="onPointerDown($event)"
+      (pointermove)="onPointerMove($event)"
+      (pointerup)="onPointerUp()"
+      (pointercancel)="onPointerUp()"
+    >
+      @for (tile of tiles(); track tile.key) {
+        <img
+          class="nf-map-picker__tile"
+          [src]="tileSrc(tile)"
+          alt=""
+          draggable="false"
+          referrerpolicy="origin"
+          [style.left.px]="tile.left"
+          [style.top.px]="tile.top"
+          (load)="onTileLoad()"
+          (error)="onTileError()"
+        />
+      }
+      @if (pinStyle(); as pin) {
+        <span class="nf-map-picker__pin" [style.left]="pin.left" [style.top]="pin.top" aria-hidden="true"></span>
+      }
+      @if (empty() && geocodeStatus() !== 'loading') {
+        <p class="nf-map-picker__hint">Cliquez la carte ou localisez une adresse</p>
+      }
+      @if (geocodeStatus() === 'loading') {
+        <div class="nf-map-picker__overlay" role="status">
+          <nf-spinner size="sm" />
+        </div>
+      }
+    </div>
+    <div class="nf-map-picker__zoom">
+      <button type="button" [disabled]="disabled()" (click)="zoomBy(1)" aria-label="Zoom avant">+</button>
+      <button type="button" [disabled]="disabled()" (click)="zoomBy(-1)" aria-label="Zoom arrière">−</button>
+    </div>
+    <p class="nf-map-picker__attrib">© OpenStreetMap</p>
+  </div>
+
+  <div class="nf-map-picker__coords">
+    <label>Lat <input type="number" step="0.0001" [disabled]="disabled()" [ngModel]="lat()" (ngModelChange)="onLatTyped($event)" /></label>
+    <label>Lng <input type="number" step="0.0001" [disabled]="disabled()" [ngModel]="lng()" (ngModelChange)="onLngTyped($event)" /></label>
+    @if (hasPin()) {
+      <span class="nf-map-picker__coords-read">{{ formatCoord(lat()) }}, {{ formatCoord(lng()) }}</span>
+    }
+  </div>
+</div>

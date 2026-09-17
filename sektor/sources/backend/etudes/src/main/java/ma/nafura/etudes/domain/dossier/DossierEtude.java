@@ -333,6 +333,18 @@ public class DossierEtude implements AuditableEtude {
     }
 
     /**
+     * Un chargé d'étude est désigné (affectation posée).
+     *
+     * <p>C'est l'affectation — et non le statut — qui ouvre le bordereau (BPU) :
+     * {@code go} / {@code renvoyerAuCharge} posent {@code currentStep = ETAPE_BORDEREAU}
+     * en même temps que le chargé. Tant qu'aucun chargé n'est désigné, l'étude reste
+     * au cadrage et la navigation vers le bordereau est refusée.
+     */
+    public boolean estAffectee() {
+        return chargeEtudeUserId != null && !chargeEtudeUserId.isBlank();
+    }
+
+    /**
      * Structure du bordereau figée dès l'entrée en décomposition / chiffrage.
      * Les prix restent éditables tant que le dossier est modifiable.
      */
