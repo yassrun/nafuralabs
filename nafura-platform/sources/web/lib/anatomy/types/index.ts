@@ -101,6 +101,10 @@ export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 
 /**
  * List query parameters for API calls.
+ *
+ * @legacy Prefer {@link ListingQueryState} for listing-flat / ERP list contracts.
+ * Existing facades and `FeatureApiService` still use this shape; adapt to
+ * `ListingQueryState` in a later phase.
  */
 export interface ListQuery {
   [key: string]: unknown;
@@ -116,6 +120,98 @@ export interface ListQuery {
 
   /** Sort direction */
   sortDirection?: SortDirection;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Listing query (platform contract — mirrors framework Java listing DTO)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Filter operators supported in listing query V1 (AND-only clause list). */
+export type FilterOperator =
+  | 'eq'
+  | 'ne'
+  | 'contains'
+  | 'startsWith'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'in'
+  | 'between'
+  | 'isEmpty'
+  | 'isNotEmpty';
+
+/** Single filter clause: field + operator + optional value. */
+export interface FilterClause {
+  field: string;
+  op: FilterOperator;
+  /** Scalar, array (`in`), or `[from, to]` (`between`). */
+  value?: unknown;
+}
+
+/** AND / OR combinator for Notion-style filter groups. */
+export type FilterCombinator = 'and' | 'or';
+
+/** Leaf clause or nested group (V1: one nesting level in the UI). */
+export type FilterNode = FilterClause | FilterGroup;
+
+/** Notion-style filter group. */
+export interface FilterGroup {
+  combinator: FilterCombinator;
+  children: FilterNode[];
+}
+
+export function isFilterGroup(node: FilterNode): node is FilterGroup {
+  return (
+    node != null &&
+    typeof node === 'object' &&
+    'combinator' in node &&
+    'children' in node &&
+    Array.isArray((node as FilterGroup).children)
+  );
+}
+
+/** Listing scope (server applies tenant + scope rules). */
+export type ListingScope = 'all' | 'mine' | 'archived';
+
+/** Sort specification for listing query. */
+export interface ListingSort {
+  field: string;
+  direction: SortDirection;
+}
+
+/** Column visibility state (saved views / toolbar). */
+export interface ListingColumnState {
+  key: string;
+  visible: boolean;
+}
+
+/**
+ * Canonical listing query state (Anatomy 1-indexed pagination).
+ * Shared contract with backend `ListingQuery` / URL hydration (later phases).
+ */
+export interface ListingQueryState {
+  search?: string;
+  /**
+   * Flat AND clauses — kept for URL `filter=` + backend sync when
+   * `filterGroup` is a flat AND of leaves.
+   */
+  filters: FilterClause[];
+  /** Notion-style filter tree (source of truth for advanced builder). */
+  filterGroup?: FilterGroup;
+  sort?: ListingSort | null;
+  page: number;
+  pageSize: number;
+  scope?: ListingScope;
+  columns?: ListingColumnState[];
+}
+
+/** Paginated listing result (local or remote). */
+export interface ListingPage<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 /**
@@ -1156,6 +1252,9 @@ export interface FilterFieldConfig {
 
   /** Lookup key for dynamic options */
   lookupKey?: string;
+
+  /** When true, the filter is shown inline in the page and omitted from the +Filter popup. */
+  pinned?: boolean;
 
   /** Default value */
   defaultValue?: unknown;

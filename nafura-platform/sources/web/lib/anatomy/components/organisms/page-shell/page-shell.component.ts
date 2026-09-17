@@ -45,6 +45,12 @@ import { CommonModule } from '@angular/common';
       .nf-page-shell--no-padding {
         padding: 0;
       }
+
+      @media (max-width: 600px) {
+        .nf-page-shell {
+          padding: var(--nf-page-padding-mobile, var(--nf-space-2, 0.5rem));
+        }
+      }
     `,
   ],
 })

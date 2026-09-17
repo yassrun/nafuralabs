@@ -65,7 +65,6 @@ export interface RowActionEvent<T> {
     CommonModule,
     MatTableModule,
     MatSortModule,
-    MatCheckboxModule,
     TranslateModule,
     SpinnerComponent,
     BadgeComponent,
@@ -99,22 +98,26 @@ export interface RowActionEvent<T> {
           <!-- Selection column (checkboxes only in multiple mode; single mode uses row highlight only) -->
           @if (showSelectionColumn()) {
             <ng-container matColumnDef="select">
-              <th mat-header-cell *matHeaderCellDef>
+              <th mat-header-cell *matHeaderCellDef class="nf-data-table__select-col">
                 @if (selectable() === 'multiple') {
-                  <mat-checkbox
+                  <input
+                    type="checkbox"
+                    class="nf-table-checkbox"
                     [checked]="isAllSelected()"
                     [indeterminate]="isSomeSelected()"
                     (change)="toggleAllRows()"
-                  ></mat-checkbox>
+                  />
                 }
               </th>
-              <td mat-cell *matCellDef="let row">
-                <mat-checkbox
+              <td mat-cell *matCellDef="let row" class="nf-data-table__select-col">
+                <input
+                  type="checkbox"
+                  class="nf-table-checkbox"
                   [checked]="isSelected(row)"
                   data-no-click="true"
                   (click)="$event.stopPropagation()"
                   (change)="toggleRow(row)"
-                ></mat-checkbox>
+                />
               </td>
             </ng-container>
           }
@@ -262,8 +265,11 @@ export interface RowActionEvent<T> {
     }
 
     table {
-      width: max-content;
-      min-width: 100%;
+      width: 100%;
+      min-width: 640px;
+      border-collapse: collapse;
+      background: var(--nf-surface-section, #ffffff);
+      border-spacing: 0;
     }
 
     .nf-data-table__table--clickable tr {
@@ -271,22 +277,108 @@ export interface RowActionEvent<T> {
     }
 
     .nf-data-table__row--selected {
-      background-color: var(--nf-table-row-selected-bg);
+      background-color: var(--nf-primary-light, #eff6ff) !important;
+    }
+
+    .nf-data-table__row--selected td.mat-mdc-cell:first-child {
+      box-shadow: inset 3px 0 0 var(--nf-primary, #2563eb);
     }
 
     /* Selected row keeps selected background on hover so selection stays visually distinct */
     tr.mat-mdc-row.nf-data-table__row--selected:hover {
-      background-color: var(--nf-table-row-selected-bg);
+      background-color: #dbeafe !important;
     }
 
     th.mat-mdc-header-cell {
-      font-weight: var(--nf-table-header-font-weight);
-      color: var(--nf-table-header-color);
-      background-color: var(--nf-table-header-bg);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--nf-text-muted, #6b7280);
+      background-color: var(--nf-color-gray-50, #f9fafb);
+      border-bottom: 1px solid var(--nf-border-default, #e5e7eb);
+      padding: 0 16px;
+      height: 38px;
+      white-space: nowrap;
+      vertical-align: middle;
     }
 
     td.mat-mdc-cell {
-      color: var(--nf-text-primary);
+      font-size: 0.8125rem;
+      color: var(--nf-text-primary, #111827);
+      border-bottom: 1px solid var(--nf-color-gray-100, #f3f4f6);
+      padding: 0 16px;
+      height: 38px;
+      vertical-align: middle;
+    }
+
+    /* Checkbox styling — native Anatomy checkbox, no Material leak */
+    .nf-data-table__select-col {
+      width: 44px !important;
+      max-width: 44px !important;
+      min-width: 44px !important;
+      padding: 0 0 0 16px !important;
+      text-align: center;
+      vertical-align: middle !important;
+    }
+
+    .nf-table-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      margin: 0;
+      display: inline-block;
+      vertical-align: middle;
+      border: 1.5px solid var(--nf-border-default, #d1d5db);
+      border-radius: 4px;
+      background-color: var(--nf-surface-section, #ffffff);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.12s ease-in-out;
+      outline: none;
+
+      &:hover {
+        border-color: var(--nf-primary, #2563eb);
+      }
+
+      &:checked {
+        background-color: var(--nf-primary, #2563eb);
+        border-color: var(--nf-primary, #2563eb);
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.2 4.8L6.5 10.5L3.8 7.8' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-size: 11px 11px;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      &:indeterminate {
+        background-color: var(--nf-primary, #2563eb);
+        border-color: var(--nf-primary, #2563eb);
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 8H12' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-size: 11px 11px;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      &:focus-visible {
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+        border-color: var(--nf-primary, #2563eb);
+      }
+    }
+
+    tr.mat-mdc-header-row {
+      height: 38px;
+      background-color: var(--nf-color-gray-50, #f9fafb);
+    }
+
+    tr.mat-mdc-row {
+      height: 38px;
+      background-color: var(--nf-surface-section, #ffffff);
+      transition: background-color 0.1s ease;
+    }
+
+    tr.mat-mdc-row:hover {
+      background-color: var(--nf-color-gray-50, #f9fafb);
     }
 
     .nf-data-table__actions {
@@ -315,14 +407,43 @@ export interface RowActionEvent<T> {
       text-decoration: underline;
     }
 
+    /* ── Mobile: compact cells for efficient screen usage ── */
+    @media (max-width: 600px) {
+      th.mat-mdc-header-cell {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+      }
+      td.mat-mdc-cell {
+        padding: 6px 10px;
+        font-size: 0.8125rem;
+        white-space: nowrap;
+      }
+      tr.mat-mdc-row,
+      tr.mat-mdc-header-row {
+        height: 38px;
+      }
+    }
+
     .nf-data-table__cell-action:focus-visible {
       outline: 2px solid var(--nf-border-focus);
       outline-offset: 2px;
       border-radius: 6px;
     }
 
+    /* Selection column: fixed neat width */
+    th.mat-column-select,
+    td.mat-column-select {
+      width: 44px;
+      max-width: 44px;
+      padding: 0 0 0 16px !important;
+      text-align: center;
+      vertical-align: middle;
+      border-right: none;
+    }
+
     tr.mat-mdc-row:hover {
-      background-color: var(--nf-table-row-hover-bg);
+      background-color: var(--nf-color-gray-50, #f9fafb) !important;
     }
 
     tr.mat-mdc-row.nf-data-table__row--cv-auto {

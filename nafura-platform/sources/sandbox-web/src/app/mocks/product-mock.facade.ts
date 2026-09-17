@@ -1,58 +1,106 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+
+import { environment } from '../../environments/environment';
 
 export interface Product {
   id: string;
   code: string;
   name: string;
   status: 'Active' | 'Draft';
+  category?: 'Matériau' | 'Outillage' | 'Consommable';
   description?: string;
+  createdAt?: string;
 }
 
-const SEED: Product[] = [
-  { id: 'prd-01', code: 'PRD-01', name: 'Ciment CPJ 45', status: 'Active', description: 'Sac 50 kg' },
-  { id: 'prd-02', code: 'PRD-02', name: 'Fer 12 mm', status: 'Active', description: 'Barre 12 m' },
-  { id: 'prd-03', code: 'PRD-03', name: 'Sable 0/2', status: 'Draft', description: 'm³' },
-  { id: 'prd-04', code: 'PRD-04', name: 'Gravier 5/15', status: 'Active' },
-  { id: 'prd-05', code: 'PRD-05', name: 'Béton C25/30', status: 'Draft' },
-];
+interface ProductDto {
+  id: string;
+  code: string;
+  name: string;
+  status: string;
+  category: string;
+  description?: string | null;
+  createdAt?: string | null;
+}
 
+/**
+ * Products facade backed by the showroom Spring Boot API (H2).
+ * Kept under `mocks/` path for stable imports; no in-memory seed.
+ */
 @Injectable({ providedIn: 'root' })
 export class ProductMockFacade {
-  private readonly store = signal<Product[]>([...SEED]);
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiBaseUrl}/showroom/products`;
+  private readonly store = signal<Product[]>([]);
+  private loaded = false;
 
   list(): Product[] {
     return this.store();
   }
 
+  async refresh(): Promise<Product[]> {
+    const rows = await firstValueFrom(this.http.get<ProductDto[]>(this.baseUrl));
+    const mapped = rows.map((row) => this.fromDto(row));
+    this.store.set(mapped);
+    this.loaded = true;
+    return mapped;
+  }
+
+  async ensureLoaded(): Promise<Product[]> {
+    if (!this.loaded) {
+      return this.refresh();
+    }
+    return this.store();
+  }
+
   async getItem(id: string): Promise<Product> {
-    const item = this.store().find((p) => p.id === id);
-    if (!item) throw new Error(`Product ${id} not found`);
-    return { ...item };
+    const row = await firstValueFrom(this.http.get<ProductDto>(`${this.baseUrl}/${id}`));
+    return this.fromDto(row);
   }
 
   async createItem(input: Partial<Product>): Promise<Product> {
-    const id = `prd-${Date.now()}`;
-    const item: Product = {
-      id,
-      code: input.code ?? `PRD-${id.slice(-4)}`,
+    const body = {
+      code: input.code ?? `PRD-${Date.now().toString().slice(-4)}`,
       name: input.name ?? 'New product',
-      status: (input.status as Product['status']) ?? 'Draft',
-      description: input.description,
+      status: input.status ?? 'Draft',
+      category: input.category ?? 'Matériau',
+      description: input.description ?? null,
     };
-    this.store.update((xs) => [...xs, item]);
+    const created = await firstValueFrom(this.http.post<ProductDto>(this.baseUrl, body));
+    const item = this.fromDto(created);
+    this.store.update((xs) => [...xs, item].sort((a, b) => a.code.localeCompare(b.code)));
     return item;
   }
 
   async updateItem(id: string, input: Partial<Product>): Promise<Product> {
-    let updated: Product | undefined;
-    this.store.update((xs) =>
-      xs.map((p) => {
-        if (p.id !== id) return p;
-        updated = { ...p, ...input, id };
-        return updated;
-      })
-    );
-    if (!updated) throw new Error(`Product ${id} not found`);
-    return updated;
+    const body = {
+      code: input.code,
+      name: input.name,
+      status: input.status,
+      category: input.category,
+      description: input.description,
+    };
+    const updated = await firstValueFrom(this.http.put<ProductDto>(`${this.baseUrl}/${id}`, body));
+    const item = this.fromDto(updated);
+    this.store.update((xs) => xs.map((p) => (p.id === id ? item : p)));
+    return item;
+  }
+
+  async deleteItem(id: string): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${this.baseUrl}/${id}`));
+    this.store.update((xs) => xs.filter((p) => p.id !== id));
+  }
+
+  private fromDto(row: ProductDto): Product {
+    return {
+      id: row.id,
+      code: row.code,
+      name: row.name,
+      status: row.status === 'Draft' ? 'Draft' : 'Active',
+      category: (row.category as Product['category']) || undefined,
+      description: row.description ?? undefined,
+      createdAt: row.createdAt ? row.createdAt.slice(0, 10) : undefined,
+    };
   }
 }

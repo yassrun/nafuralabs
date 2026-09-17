@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, computed, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { ScreenComponent } from '@platform/lib/anatomy/components/organisms/page-screen';
 import type { PageHeaderConfig } from '@platform/lib/anatomy/components/molecules/page-header';
@@ -9,8 +10,16 @@ import {
   type ListingFlatConfig,
   type ListingFlatSelection,
   type ListingSelectionAction,
+  createDefaultListingQuery,
+  listingQueryToParams,
+  paramsToListingQuery,
 } from '@platform/lib/anatomy/components/organisms/listing-flat';
+import type { ListingQueryState } from '@platform/lib/anatomy/types';
 import type { ListingActionItem } from '@platform/lib/anatomy/components/molecules/listing-actions';
+import {
+  ActionMenuComponent,
+  type ActionMenuNode,
+} from '@platform/lib/anatomy/components/molecules/action-menu';
 import type { ColumnConfig, FilterFieldConfig } from '@platform/lib/anatomy/types';
 
 import { ProductMockFacade, type Product } from '../mocks/product-mock.facade';
@@ -19,7 +28,7 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
 @Component({
   selector: 'sb-listing-flat',
   standalone: true,
-  imports: [FormsModule, ScreenComponent, ListingFlatComponent, SmartImportStubComponent],
+  imports: [FormsModule, ScreenComponent, ListingFlatComponent, SmartImportStubComponent, ActionMenuComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nf-screen [header]="headerConfig">
@@ -28,33 +37,67 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
           <nf-listing-flat
             [config]="listingConfig()"
             [items]="items()"
+            [query]="listingQuery()"
+            [resourceKey]="resourceKey"
+            (queryChange)="onListingQueryChange($event)"
             (rowDblClick)="open($event)"
             (actionClick)="onListingAction($event)"
             (selectionChange)="selection.set($event)"
           >
+            @if (optActStatus()) {
+              <nf-action-menu
+                label="Status"
+                size="xs"
+                [nodes]="statusMenuNodes"
+                (actionClick)="onListingAction($event)"
+              />
+            }
             @if (optActSmartImport()) {
               <sb-smart-import-stub />
             }
           </nf-listing-flat>
         </div>
-        <aside class="lab__opts">
-          <h2>Configuration</h2>
-          <p class="lab__hint">Dupliquer = 1 ligne · Supprimer = 1+ lignes. Simple = clic ligne · multiple = cases.</p>
+        <aside class="lab__opts" [class.lab__opts--collapsed]="optsCollapsed()">
+          <button
+            type="button"
+            class="lab__opts-toggle"
+            [attr.aria-label]="optsCollapsed() ? 'Afficher la configuration' : 'Masquer la configuration'"
+            [title]="optsCollapsed() ? 'Afficher la configuration' : 'Masquer la configuration'"
+            (click)="optsCollapsed.update((v) => !v)"
+          >
+            {{ optsCollapsed() ? '«' : '»' }}
+          </button>
+          @if (!optsCollapsed()) {
+            <h2>Configuration</h2>
+          <p class="lab__hint">Dupliquer = 1 ligne. Supprimer / Supprimer tout se configurent séparément (1 vs 2+).</p>
 
           <h3>Vue</h3>
           <label><input type="checkbox" [ngModel]="optSearch()" (ngModelChange)="optSearch.set($event)" /> Search</label>
           <label><input type="checkbox" [ngModel]="optFilters()" (ngModelChange)="optFilters.set($event)" /> Filtres</label>
           @if (optFilters()) {
             <div class="lab__sub">
-              <span class="lab__sub-title">Champs filtrés</span>
-              <label><input type="checkbox" [ngModel]="optFilterStatus()" (ngModelChange)="optFilterStatus.set($event)" /> Status (select)</label>
-              <label><input type="checkbox" [ngModel]="optFilterCode()" (ngModelChange)="optFilterCode.set($event)" /> Code (texte)</label>
-              <label><input type="checkbox" [ngModel]="optFilterName()" (ngModelChange)="optFilterName.set($event)" /> Name (texte)</label>
-              <label><input type="checkbox" [ngModel]="optFilterActive()" (ngModelChange)="optFilterActive.set($event)" /> Filtre actif (Status = Active)</label>
+              <span class="lab__sub-title">Filtres épinglés</span>
+              <label><input type="checkbox" [ngModel]="optFilterStatus()" (ngModelChange)="optFilterStatus.set($event)" /> Status (pinné)</label>
+              <label><input type="checkbox" [ngModel]="optFilterCode()" (ngModelChange)="optFilterCode.set($event)" /> Code (pinné)</label>
+              <label><input type="checkbox" [ngModel]="optFilterName()" (ngModelChange)="optFilterName.set($event)" /> Name (pinné)</label>
+              <label><input type="checkbox" [ngModel]="optFilterCategory()" (ngModelChange)="optFilterCategory.set($event)" /> Catégorie (pinné)</label>
             </div>
           }
+          <div class="lab__sub">
+            <span class="lab__sub-title">Filtres actifs par défaut</span>
+            <label><input type="checkbox" [ngModel]="optFilterActive()" (ngModelChange)="optFilterActive.set($event)" /> Status = Active</label>
+            <label><input type="checkbox" [ngModel]="optFilterCategoryActive()" (ngModelChange)="optFilterCategoryActive.set($event)" /> Catégorie = Outillage</label>
+          </div>
           <label><input type="checkbox" [ngModel]="optColumns()" (ngModelChange)="optColumns.set($event)" /> Visibilité colonnes</label>
+          <label><input type="checkbox" [ngModel]="optExport()" (ngModelChange)="optExport.set($event)" /> Feature Export (CSV)</label>
           <label><input type="checkbox" [ngModel]="optPagination()" (ngModelChange)="optPagination.set($event)" /> Pagination</label>
+          <label>
+            Layout toolbar
+            <select [ngModel]="optToolbarLayout()" (ngModelChange)="optToolbarLayout.set($event)">
+              <option value="chips">A · chips-first</option>
+              <option value="split">C · vue / actions</option>
+            </select>
+          </label>
           <label>
             Sélection
             <select [ngModel]="optSelection()" (ngModelChange)="optSelection.set($event)">
@@ -74,11 +117,14 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
           </label>
 
           <h3>Action bar</h3>
+          <label><input type="checkbox" [ngModel]="optActStatus()" (ngModelChange)="optActStatus.set($event)" /> Cascade Status (nf-action-menu)</label>
           <label><input type="checkbox" [ngModel]="optActSmartImport()" (ngModelChange)="optActSmartImport.set($event)" /> Import magique</label>
           <label><input type="checkbox" [ngModel]="optActNew()" (ngModelChange)="optActNew.set($event)" /> New</label>
-          <label><input type="checkbox" [ngModel]="optActExport()" (ngModelChange)="optActExport.set($event)" /> Export</label>
-          <label><input type="checkbox" [ngModel]="optActDuplicate()" (ngModelChange)="optActDuplicate.set($event)" /> Dupliquer (sélection)</label>
-          <label><input type="checkbox" [ngModel]="optActDelete()" (ngModelChange)="optActDelete.set($event)" /> Supprimer (sélection)</label>
+          <label><input type="checkbox" [ngModel]="optActPrint()" (ngModelChange)="optActPrint.set($event)" /> Imprimer</label>
+          <label><input type="checkbox" [ngModel]="optActDuplicate()" (ngModelChange)="optActDuplicate.set($event)" /> Dupliquer (1 ligne)</label>
+          <label><input type="checkbox" [ngModel]="optActDelete()" (ngModelChange)="optActDelete.set($event)" /> Supprimer (1 ligne)</label>
+          <label><input type="checkbox" [ngModel]="optActDeleteBulk()" (ngModelChange)="optActDeleteBulk.set($event)" /> Supprimer tout (2+ lignes)</label>
+          }
         </aside>
       </div>
     </nf-screen>
@@ -87,7 +133,7 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
     `
       .lab {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 240px;
+        grid-template-columns: minmax(0, 1fr) auto;
         gap: 16px;
         min-height: 0;
         height: 100%;
@@ -97,9 +143,38 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
         min-height: 0;
       }
       .lab__opts {
+        width: 240px;
         border-left: 1px solid var(--nf-color-border, #e5e7eb);
         padding-left: 14px;
+        padding-bottom: 16px;
         font-size: 13px;
+        max-height: 100%;
+        overflow-y: auto;
+        align-self: stretch;
+        min-height: 0;
+      }
+      .lab__opts--collapsed {
+        width: auto;
+        padding-left: 6px;
+      }
+      .lab__opts-toggle {
+        display: block;
+        margin: 0 0 8px auto;
+        border: 1px solid var(--nf-color-border, #e5e7eb);
+        background: transparent;
+        border-radius: 6px;
+        padding: 1px 7px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: var(--nf-text-muted, #6b7280);
+        cursor: pointer;
+      }
+      .lab__opts-toggle:hover {
+        background: var(--nf-bg-hover, #f3f4f6);
+        color: var(--nf-text-primary, #111827);
+      }
+      .lab__opts--collapsed .lab__opts-toggle {
+        margin: 0;
       }
       .lab__opts h2 {
         margin: 0 0 6px;
@@ -143,12 +218,20 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
       @media (max-width: 800px) {
         .lab {
           grid-template-columns: 1fr;
+          height: auto;
+          gap: 8px;
         }
         .lab__opts {
+          width: auto;
           border-left: 0;
           padding-left: 0;
           border-top: 1px solid var(--nf-color-border, #e5e7eb);
           padding-top: 12px;
+        }
+        .lab__opts--collapsed {
+          border-top: 0;
+          padding-top: 0;
+          margin-top: 4px;
         }
       }
     `,
@@ -157,23 +240,48 @@ import { SmartImportStubComponent } from '../components/smart-import-stub.compon
 export class ListingFlatPage {
   private readonly facade = inject(ProductMockFacade);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly resourceKey = 'sandbox-products';
+
+  readonly listingQuery = signal<ListingQueryState>(createDefaultListingQuery(10));
 
   readonly optSearch = signal(true);
   readonly optFilters = signal(true);
   readonly optFilterStatus = signal(true);
   readonly optFilterCode = signal(true);
   readonly optFilterName = signal(false);
-  readonly optFilterActive = signal(false);
+  readonly optFilterCategory = signal(true);
+  readonly optFilterActive = signal(true);
+  readonly optFilterCategoryActive = signal(true);
   readonly optColumns = signal(true);
+  readonly optExport = signal(true);
   readonly optPagination = signal(true);
+  readonly optToolbarLayout = signal<'chips' | 'split'>('chips');
+  /** Config panel collapsed (mobile-layout testing). */
+  readonly optsCollapsed = signal(false);
   readonly optSelection = signal<ListingFlatSelection>('none');
-  readonly optSelectionToggle = signal(false);
+  readonly optSelectionToggle = signal(true);
   readonly optActSmartImport = signal(true);
+  readonly optActStatus = signal(true);
   readonly optActNew = signal(true);
-  readonly optActExport = signal(true);
+  readonly optActPrint = signal(true);
   readonly optActDuplicate = signal(true);
   readonly optActDelete = signal(true);
+  readonly optActDeleteBulk = signal(true);
   readonly optPageSize = signal(10);
+
+  onListingQueryChange(query: ListingQueryState): void {
+    this.listingQuery.set(query);
+    const params = listingQueryToParams(query);
+    // Explicitly null filter params so cleared chips drop from the URL.
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { filter: null, filterGroup: null, ...params },
+      replaceUrl: true,
+    });
+  }
 
   private readonly statusFilterField: FilterFieldConfig = {
     key: 'status',
@@ -185,75 +293,159 @@ export class ListingFlatPage {
     ],
   };
 
-  readonly activeFilterFields = computed((): FilterFieldConfig[] => {
-    const fields: FilterFieldConfig[] = [];
-    if (this.optFilterStatus()) fields.push(this.statusFilterField);
-    if (this.optFilterCode()) fields.push({ key: 'code', label: 'Code', type: 'text' });
-    if (this.optFilterName()) fields.push({ key: 'name', label: 'Name', type: 'text' });
-    return fields;
+  private readonly categoryFilterField: FilterFieldConfig = {
+    key: 'category',
+    label: 'Catégorie',
+    type: 'select',
+    options: [
+      { label: 'Matériau', value: 'Matériau' },
+      { label: 'Outillage', value: 'Outillage' },
+      { label: 'Consommable', value: 'Consommable' },
+    ],
+  };
+
+  private readonly categoryMultiFilterField: FilterFieldConfig = {
+    key: 'category',
+    label: 'Catégories (in)',
+    type: 'multiselect',
+    options: [
+      { label: 'Matériau', value: 'Matériau' },
+      { label: 'Outillage', value: 'Outillage' },
+      { label: 'Consommable', value: 'Consommable' },
+    ],
+  };
+
+  readonly statusMenuNodes: ActionMenuNode[] = [
+    { id: 'status-draft', label: 'Brouillon' },
+    { id: 'status-active', label: 'Active' },
+    { id: 'status-inactive', label: 'Inactive' },
+  ];
+
+  readonly filterFields = computed((): FilterFieldConfig[] => [
+    { ...this.statusFilterField, pinned: this.optFilterStatus() },
+    this.optFilterCategory()
+      ? { ...this.categoryFilterField, pinned: true }
+      : { ...this.categoryMultiFilterField, pinned: false },
+    { key: 'code', label: 'Code', type: 'text', pinned: this.optFilterCode() },
+    { key: 'name', label: 'Name', type: 'text', pinned: this.optFilterName() },
+    {
+      key: 'createdAt',
+      label: 'Créé le',
+      type: 'daterange',
+      pinned: false,
+    },
+  ]);
+
+  readonly popupFilterFields = computed((): FilterFieldConfig[] =>
+    this.filterFields().filter((field) => !field.pinned)
+  );
+
+  readonly pinnedFilterCount = computed(() => this.filterFields().filter((field) => field.pinned).length);
+
+  readonly initialFilterFields = computed((): FilterFieldConfig[] => [
+    { key: 'status', label: 'Status', type: 'select', defaultValue: 'Active' },
+    { key: 'category', label: 'Catégorie', type: 'select', defaultValue: 'Outillage' },
+  ]);
+
+  readonly initialFilters = computed((): Record<string, unknown> | undefined => {
+    const init: Record<string, unknown> = {};
+    if (this.optFilterActive()) init['status'] = 'Active';
+    if (this.optFilterCategoryActive()) init['category'] = 'Outillage';
+    return Object.keys(init).length > 0 ? init : undefined;
   });
 
   readonly enabledActions = computed((): ListingActionItem[] => {
     const out: ListingActionItem[] = [];
-    if (this.optActExport()) out.push({ id: 'export', label: 'Export', variant: 'secondary', icon: 'download' });
+    if (this.optActPrint()) out.push({ id: 'print', label: 'Imprimer', variant: 'secondary', icon: 'printer' });
     if (this.optActNew()) out.push({ id: 'new', label: 'New', variant: 'primary', icon: 'plus' });
     return out;
   });
 
   readonly enabledSelectionActions = computed((): ListingSelectionAction[] => {
     const out: ListingSelectionAction[] = [];
-    if (this.optActDuplicate()) out.push({ id: 'duplicate', label: 'Dupliquer', variant: 'secondary', icon: 'copy', scope: 'single' });
-    if (this.optActDelete()) out.push({ id: 'delete', label: 'Supprimer', variant: 'danger', icon: 'trash-2', scope: 'single+bulk' });
+    if (this.optActDuplicate()) {
+      out.push({ id: 'duplicate', label: 'Dupliquer', variant: 'secondary', icon: 'copy', scope: 'single' });
+    }
+    if (this.optActDelete()) {
+      out.push({ id: 'delete', label: 'Supprimer', variant: 'danger', icon: 'trash-2', scope: 'single' });
+    }
+    if (this.optActDeleteBulk()) {
+      out.push({ id: 'delete-bulk', label: 'Supprimer tout', variant: 'danger', icon: 'trash-2', scope: 'bulk' });
+    }
     return out;
   });
 
   private readonly columns: ColumnConfig[] = [
-    { key: 'code', field: 'code', label: 'Code', sortable: true },
+    { key: 'code', field: 'code', label: 'Code', sortable: true, width: '120px' },
     { key: 'name', field: 'name', label: 'Name', sortable: true },
-    { key: 'status', field: 'status', label: 'Status', sortable: true },
+    { key: 'category', field: 'category', label: 'Catégorie', sortable: true, width: '150px' },
+    {
+      key: 'status',
+      field: 'status',
+      label: 'Status',
+      sortable: true,
+      type: 'badge',
+      badgeVariant: (val) => (val === 'Active' ? 'success' : 'default'),
+      width: '130px',
+    },
     { key: 'description', field: 'description', label: 'Description', sortable: false },
+    { key: 'createdAt', field: 'createdAt', label: 'Créé le', sortable: true, width: '120px' },
   ];
 
   readonly selection = signal<Product[]>([]);
+  readonly items = signal<Product[]>([]);
+  readonly loadError = signal<string | null>(null);
 
-  readonly items = signal<Product[]>(this.buildItems());
+  constructor() {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((map) => {
+      const params: Record<string, string | string[] | undefined> = {};
+      for (const key of map.keys) {
+        const all = map.getAll(key);
+        params[key] = all.length > 1 ? all : all[0] ?? undefined;
+      }
+      const parsed = paramsToListingQuery(params, { pageSize: this.optPageSize() });
+      this.listingQuery.set(parsed);
+    });
+    void this.reloadProducts();
+  }
 
-  private buildItems(): Product[] {
-    const base = this.facade.list();
-    const extra: Product[] = [];
-    for (let i = 6; i <= 36; i++) {
-      extra.push({
-        id: `prd-${String(i).padStart(2, '0')}`,
-        code: `PRD-${String(i).padStart(2, '0')}`,
-        name: `Article ${i}`,
-        status: i % 3 === 0 ? 'Draft' : 'Active',
-        description: i % 4 === 0 ? 'Demo row' : undefined,
-      });
+  private async reloadProducts(): Promise<void> {
+    try {
+      this.loadError.set(null);
+      const rows = await this.facade.refresh();
+      this.items.set(rows);
+    } catch (e) {
+      this.loadError.set(e instanceof Error ? e.message : 'API showroom unreachable');
+      this.items.set([]);
     }
-    return [...base, ...extra];
   }
 
   readonly headerConfig: PageHeaderConfig = {
     title: 'Products',
-    subtitle: 'nf-listing-flat · toolbar + action bar (smart-import · Export · New) + table + pager',
+    subtitle: 'nf-listing-flat · ligne 1: recherche & filtres · ligne 2: actions & colonnes à droite',
   };
 
   readonly listingConfig = computed((): ListingFlatConfig => ({
     columns: this.columns,
-    filters: this.activeFilterFields(),
-    initialFilters: this.optFilterActive() ? { status: 'Active' } : undefined,
+    toolbarLayout: this.optToolbarLayout(),
+    filters: this.filterFields(),
+    initialFilters: this.initialFilters(),
     pageSize: this.optPageSize(),
     emptyMessage: 'No products',
+    exportFilename: 'products',
+    savedViews: true,
     actions: this.enabledActions(),
     selectionActions: this.enabledSelectionActions(),
-    projectedActions: this.optActSmartImport(),
+    projectedActions: this.optActSmartImport() || this.optActStatus(),
     features: {
       search: this.optSearch(),
       filters: this.optFilters(),
       columnToggle: this.optColumns(),
+      export: this.optExport(),
       pagination: this.optPagination(),
       selection: this.optSelection(),
       selectionToggle: this.optSelectionToggle(),
+      selectionToggleDefaultActive: true,
     },
   }));
 
@@ -263,32 +455,38 @@ export class ListingFlatPage {
       return;
     }
     if (id === 'duplicate') {
-      this.duplicateSelected();
+      void this.duplicateSelected();
       return;
     }
-    if (id === 'delete') {
-      this.deleteSelected();
+    if (id === 'delete' || id === 'delete-bulk') {
+      void this.deleteSelected();
     }
   }
 
-  private duplicateSelected(): void {
+  private async duplicateSelected(): Promise<void> {
     const selected = this.selection();
     if (selected.length === 0) return;
-    const copies = selected.map((p, i) => ({
-      ...p,
-      id: `prd-copy-${Date.now()}-${i}`,
-      code: `${p.code}-CP`,
-      status: 'Draft' as const,
-    }));
-    this.items.update((rows) => [...rows, ...copies]);
+    for (const p of selected) {
+      await this.facade.createItem({
+        code: `${p.code}-CP`,
+        name: p.name,
+        status: 'Draft',
+        category: p.category,
+        description: p.description,
+      });
+    }
     this.selection.set([]);
+    await this.reloadProducts();
   }
 
-  private deleteSelected(): void {
-    const ids = new Set(this.selection().map((p) => p.id));
-    if (ids.size === 0) return;
-    this.items.update((rows) => rows.filter((r) => !ids.has(r.id)));
+  private async deleteSelected(): Promise<void> {
+    const selected = this.selection();
+    if (selected.length === 0) return;
+    for (const p of selected) {
+      await this.facade.deleteItem(p.id);
+    }
     this.selection.set([]);
+    await this.reloadProducts();
   }
 
   open(item: Product): void {

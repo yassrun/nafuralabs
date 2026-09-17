@@ -1,6 +1,10 @@
 package ma.nafura.platform.framework.service.crud;
 
 import ma.nafura.platform.framework.context.TenantContext;
+import ma.nafura.platform.framework.context.UserContext;
+import ma.nafura.platform.framework.listing.ListingQuery;
+import ma.nafura.platform.framework.listing.ListingScope;
+import ma.nafura.platform.framework.listing.ListingSpecificationBuilder;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -340,6 +345,45 @@ public abstract class CrudService<TId, TEntity, TCreate, TUpdate> {
      */
     public long countByCriteria(Specification<TEntity> spec) {
         return countBySpec(spec);
+    }
+
+    /**
+     * Build a combined specification for structured listing (filters, scope, optional text search).
+     */
+    public Specification<TEntity> buildListSpecification(
+            ListingQuery listingQuery,
+            Set<String> filterableFields,
+            String search,
+            List<String> searchFields) {
+
+        UUID tenantId = isTenantEnabled() ? tenantId() : null;
+        Specification<TEntity> spec = ListingSpecificationBuilder.build(
+                listingQuery,
+                filterableFields != null ? filterableFields : Set.of(),
+                tenantId);
+
+        if (listingQuery != null && listingQuery.scope() == ListingScope.MINE) {
+            UUID userId = UserContext.getUserIdOrNull();
+            if (userId != null) {
+                spec = spec.and(Specs.equal("createdBy", userId));
+            }
+        }
+
+        if (hasText(search)) {
+            Specification<TEntity> searchSpec = buildSearchSpecification(search, searchFields);
+            spec = spec.and(searchSpec);
+        }
+
+        return spec;
+    }
+
+    /**
+     * Whether the list endpoint should use structured listing (filters or scope).
+     */
+    public static boolean usesStructuredListing(List<String> filterParams, String scope) {
+        boolean hasFilters = filterParams != null && !filterParams.isEmpty();
+        boolean hasScope = scope != null && !scope.isBlank() && !"all".equalsIgnoreCase(scope.trim());
+        return hasFilters || hasScope;
     }
 
     /**

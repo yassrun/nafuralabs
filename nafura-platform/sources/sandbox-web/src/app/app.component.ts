@@ -14,11 +14,19 @@ import {
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="sb-shell">
+    <div class="sb-shell" [class.sb-shell--collapsed]="sidebarCollapsed()">
       <aside class="sb-sidebar">
         <header class="sb-sidebar__brand">
           <a routerLink="/" class="sb-sidebar__logo">Anatomy</a>
           <span class="sb-sidebar__tag">Showroom</span>
+          <button
+            type="button"
+            class="sb-sidebar__collapse"
+            aria-label="Collapse sidebar"
+            (click)="sidebarCollapsed.set(true)"
+          >
+            «
+          </button>
         </header>
 
         <nav class="sb-sidebar__nav" aria-label="Showroom">
@@ -74,8 +82,18 @@ import {
 
       <main class="sb-main">
         <header class="sb-topbar">
+          @if (sidebarCollapsed()) {
+            <button
+              type="button"
+              class="sb-topbar__burger"
+              aria-label="Open sidebar"
+              (click)="sidebarCollapsed.set(false)"
+            >
+              ☰
+            </button>
+          }
           <div class="sb-topbar__crumb">{{ currentLabel() }}</div>
-          <div class="sb-topbar__hint">mocks · no auth · :4300</div>
+          <div class="sb-topbar__hint">H2 · api :8082 · no auth</div>
         </header>
         <div class="sb-content">
           <router-outlet />
@@ -94,6 +112,40 @@ import {
         grid-template-columns: 280px 1fr;
         height: 100vh;
         min-height: 100%;
+        transition: grid-template-columns 0.18s ease;
+      }
+      .sb-shell--collapsed {
+        grid-template-columns: 0 1fr;
+      }
+      .sb-shell--collapsed .sb-sidebar {
+        border-right: none;
+        visibility: hidden;
+      }
+      .sb-sidebar__collapse {
+        margin-left: auto;
+        border: 0;
+        background: transparent;
+        color: var(--nf-text-muted, #6b7280);
+        font-size: 0.9rem;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .sb-sidebar__collapse:hover {
+        background: var(--nf-bg-hover, #f3f4f6);
+        color: inherit;
+      }
+      .sb-topbar__burger {
+        border: 1px solid var(--nf-border-subtle, #e2e5ea);
+        background: transparent;
+        border-radius: 6px;
+        padding: 2px 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        color: inherit;
+      }
+      .sb-topbar__burger:hover {
+        background: var(--nf-bg-hover, #f3f4f6);
       }
       .sb-sidebar {
         display: flex;
@@ -223,6 +275,14 @@ import {
         overflow: auto;
         padding: 20px;
       }
+      @media (max-width: 600px) {
+        .sb-topbar {
+          padding: 6px 10px;
+        }
+        .sb-content {
+          padding: 8px 6px;
+        }
+      }
     `,
   ],
 })
@@ -247,6 +307,9 @@ export class AppComponent {
     archetypes: true,
     components: true,
   });
+
+  /** Left nav sidebar collapsed (mobile-layout testing). */
+  readonly sidebarCollapsed = signal(false);
 
   private readonly url = toSignal(
     this.router.events.pipe(

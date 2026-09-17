@@ -23,7 +23,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'g
 /**
  * Button size types.
  */
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 
 /**
  * Button Component
@@ -48,6 +48,8 @@ const LUCIDE_ICON_NAME_ALIASES: Record<string, string> = {
   arrow_back: 'arrow-left',
   arrow_forward: 'arrow-right',
   delete: 'trash-2',
+  more_horiz: 'more-horizontal',
+  more_vert: 'more-vertical',
   unfold_more: 'unfold-vertical',
   unfold_less: 'fold-vertical',
   subdirectory_arrow_right: 'corner-down-right',
@@ -146,6 +148,15 @@ const LUCIDE_ICON_NAME_ALIASES: Record<string, string> = {
     }
 
     /* Icon-only: symmetric padding and no line-height so icon centers vertically */
+    .nf-button--xs:has(.nf-button__content:empty) {
+      padding: 0;
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
     .nf-button--sm:has(.nf-button__content:empty) {
       padding: 4px;
     }
@@ -169,6 +180,16 @@ const LUCIDE_ICON_NAME_ALIASES: Record<string, string> = {
     }
 
     // Sizes
+    .nf-button--xs {
+      padding: 2px 9px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      min-height: 26px;
+      height: 26px;
+      border-radius: 6px;
+      --nf-button-icon-text-gap: 5px;
+    }
+
     .nf-button--sm {
       padding: 4px 12px;
       font-size: 0.8125rem;
@@ -192,6 +213,8 @@ const LUCIDE_ICON_NAME_ALIASES: Record<string, string> = {
     .nf-button--primary {
       background-color: var(--nf-primary);
       color: var(--nf-color-text-inverse, #fff) !important;
+      border: 1px solid var(--nf-primary);
+      box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.2);
 
       .mat-icon,
       .nf-button__content {
@@ -200,32 +223,46 @@ const LUCIDE_ICON_NAME_ALIASES: Record<string, string> = {
 
       &:hover:not(:disabled) {
         background-color: var(--nf-primary-hover);
+        border-color: var(--nf-primary-hover);
       }
 
       &:active:not(:disabled) {
         background-color: var(--nf-primary-active);
+        border-color: var(--nf-primary-active);
       }
     }
 
     .nf-button--secondary {
-      background-color: transparent;
-      color: var(--nf-color-gray-700, #374151) !important;
-      border: 1px solid var(--nf-primary);
+      background-color: var(--nf-surface-section, #ffffff);
+      color: var(--nf-text-primary, #111827) !important;
+      border: 1px solid var(--nf-border-default, #e5e7eb);
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
 
       .mat-icon,
       .nf-button__content {
-        color: inherit !important;
+        color: var(--nf-text-secondary, #4b5563) !important;
       }
 
       &:hover:not(:disabled) {
-        background-color: var(--nf-primary-subtle);
+        background-color: var(--nf-surface-hover, #f9fafb);
+        border-color: var(--nf-color-gray-300, #d1d5db);
+        color: var(--nf-text-primary, #111827) !important;
+
+        .mat-icon,
+        .nf-button__content {
+          color: var(--nf-text-primary, #111827) !important;
+        }
+      }
+
+      &:active:not(:disabled) {
+        background-color: var(--nf-color-gray-100, #f3f4f6);
       }
     }
 
     .nf-button--stroked {
       background-color: transparent;
-      color: var(--nf-color-gray-700, #374151) !important;
-      border: 1px solid var(--nf-primary);
+      color: var(--nf-text-primary, #111827) !important;
+      border: 1px solid var(--nf-border-default, #e5e7eb);
 
       .mat-icon,
       .nf-button__content {
@@ -233,20 +270,26 @@ const LUCIDE_ICON_NAME_ALIASES: Record<string, string> = {
       }
 
       &:hover:not(:disabled) {
-        background-color: var(--nf-primary-subtle);
+        background-color: var(--nf-surface-hover, #f9fafb);
       }
     }
 
     .nf-button--tertiary {
-      background-color: var(--nf-surface-hover);
-      color: var(--nf-text-primary);
+      background-color: var(--nf-surface-section, #ffffff);
+      color: var(--nf-text-secondary, #4b5563);
+      border: 1px solid var(--nf-border-default, #e5e7eb);
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
 
       &:hover:not(:disabled) {
-        background-color: var(--nf-color-gray-200);
+        background-color: var(--nf-surface-hover, #f9fafb);
+        color: var(--nf-text-primary, #111827);
+        border-color: var(--nf-color-gray-300, #d1d5db);
       }
 
       &.nf-button--active {
-        color: var(--nf-primary);
+        background-color: var(--nf-primary-light, #eff6ff);
+        border-color: var(--nf-primary, #2563eb);
+        color: var(--nf-primary, #2563eb);
 
         .mat-icon,
         .nf-button__content {
@@ -321,6 +364,16 @@ const LUCIDE_ICON_NAME_ALIASES: Record<string, string> = {
       margin: 0 auto;
     }
 
+    .nf-button--xs .nf-button__icon-slot {
+      width: 14px;
+      height: 14px;
+    }
+
+    .nf-button--xs .nf-button__icon-slot .nf-button__spinner {
+      width: 14px !important;
+      height: 14px !important;
+    }
+
     .nf-button--sm .nf-button__icon-slot {
       width: 18px;
       height: 18px;
@@ -365,6 +418,12 @@ const LUCIDE_ICON_NAME_ALIASES: Record<string, string> = {
     button:has(.nf-button__content:empty) .nf-button__icon--right {
       margin-left: 0;
       margin-right: 0;
+    }
+
+    .nf-button--xs .nf-button__icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
     }
 
     .nf-button--sm .nf-button__icon {
@@ -412,10 +471,10 @@ export class ButtonComponent implements AfterViewInit {
   /** Tooltip text shown on hover. */
   tooltip = input<string>('');
 
-  /** Icon size in px for Lucide (sm: 18, md: 20, lg: 24). */
+  /** Icon size in px for Lucide (xs: 14, sm: 18, md: 20, lg: 24). */
   iconSize = computed(() => {
     const s = this.size();
-    return s === 'sm' ? 18 : s === 'lg' ? 24 : 20;
+    return s === 'xs' ? 14 : s === 'sm' ? 18 : s === 'lg' ? 24 : 20;
   });
 
   resolvedLucideIcon = computed(() => {

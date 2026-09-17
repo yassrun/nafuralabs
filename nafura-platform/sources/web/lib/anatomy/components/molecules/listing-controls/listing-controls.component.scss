@@ -118,20 +118,40 @@
     }
   }
 
-  /* Tomic skin for checkboxes in columns popup */
-  .nf-listing-controls-menu--columns .mat-mdc-checkbox {
-    .mdc-label {
-      color: var(--nf-text-primary);
+  /* Pure Anatomy skin for checkboxes in columns popup */
+  .nf-listing-controls-menu--columns {
+    .nf-columns-menu__checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      margin: 0;
+      border: 1.5px solid var(--nf-border-default, #d1d5db);
+      border-radius: 4px;
+      background-color: var(--nf-surface-section, #ffffff);
+      cursor: pointer;
+      display: inline-grid;
+      place-content: center;
+      transition: all 0.12s ease-in-out;
+      flex-shrink: 0;
+
+      &:hover {
+        border-color: var(--nf-primary, #2563eb);
+      }
+
+      &:checked {
+        background-color: var(--nf-primary, #2563eb);
+        border-color: var(--nf-primary, #2563eb);
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.2 4.8L6.5 10.5L3.8 7.8' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-size: 11px 11px;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
     }
 
-    .mdc-checkbox__background {
-      border-color: var(--nf-border-default);
-    }
-
-    &.mat-mdc-checkbox-checked .mdc-checkbox__background,
-    &.mat-mdc-checkbox-indeterminate .mdc-checkbox__background {
-      border-color: var(--nf-primary);
-      background-color: var(--nf-primary);
+    .nf-columns-menu__label {
+      font-size: var(--nf-font-size-sm, 0.8125rem);
+      color: var(--nf-text-primary, #111827);
     }
   }
 }

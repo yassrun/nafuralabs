@@ -27,12 +27,14 @@
         <div class="nf-listing-controls-menu__header">{{ 'Columns' | translate }}</div>
         @for (col of columns(); track col.key) {
           <label class="nf-listing-controls-menu__row">
-            <mat-checkbox
+            <input
+              type="checkbox"
+              class="nf-columns-menu__checkbox"
               [checked]="col.visible"
-              (change)="setColumnVisibility(col.key, $event.checked)"
-              (click)="$event.stopPropagation()">
-              {{ col.label | translate }}
-            </mat-checkbox>
+              (change)="setColumnVisibility(col.key, $any($event.target).checked)"
+              (click)="$event.stopPropagation()"
+            />
+            <span class="nf-columns-menu__label">{{ col.label | translate }}</span>
           </label>
         }
         @if (columns().length === 0) {

@@ -284,6 +284,25 @@ export interface PageHeaderConfig {
       padding: 0 !important;
       margin: 0 0 var(--nf-page-header-breadcrumb-gap, 4px) 0 !important;
     }
+
+    @media (max-width: 600px) {
+      .nf-page-header {
+        margin-bottom: 8px !important;
+        padding-top: 2px !important;
+        padding-bottom: 4px !important;
+        gap: 4px !important;
+      }
+      .nf-page-header__title {
+        font-size: 1.25rem !important;
+      }
+      .nf-page-header__subtitle {
+        font-size: 0.75rem !important;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    }
   `],
 })
 export class PageHeaderComponent {

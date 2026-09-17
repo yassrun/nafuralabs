@@ -38,6 +38,14 @@ import { ProductMockFacade, type Product } from '../mocks/product-mock.facade';
             </select>
           </label>
           <label>
+            <span>Catégorie</span>
+            <select [(ngModel)]="draft.category" name="category">
+              <option value="Matériau">Matériau</option>
+              <option value="Outillage">Outillage</option>
+              <option value="Consommable">Consommable</option>
+            </select>
+          </label>
+          <label>
             <span>Description</span>
             <textarea [(ngModel)]="draft.description" name="description" rows="3"></textarea>
           </label>
@@ -91,7 +99,7 @@ export class ProductDetailPage {
   readonly isNew = signal(false);
   /** Bump to refresh header after load / edit */
   private readonly rev = signal(0);
-  draft: Product = { id: '', code: '', name: '', status: 'Draft', description: '' };
+  draft: Product = { id: '', code: '', name: '', status: 'Draft', category: 'Matériau', description: '' };
 
   readonly headerConfig = computed(() => {
     this.rev();
@@ -117,7 +125,7 @@ export class ProductDetailPage {
     this.error.set(null);
     if (!id || id === 'new') {
       this.isNew.set(true);
-      this.draft = { id: '', code: '', name: '', status: 'Draft', description: '' };
+      this.draft = { id: '', code: '', name: '', status: 'Draft', category: 'Matériau', description: '' };
       this.rev.update((n) => n + 1);
       return;
     }

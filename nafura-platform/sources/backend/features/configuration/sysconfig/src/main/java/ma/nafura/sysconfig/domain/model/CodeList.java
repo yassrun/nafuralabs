@@ -1,27 +1,23 @@
 package ma.nafura.platform.configuration.sysconfig.domain.model;
 
-import jakarta.persistence.*;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import ma.nafura.platform.framework.domain.TenantEntity;
 
 @Entity
 @Table(name = "code_list")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CodeList {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(name = "tenant_id", nullable = false)
-    private UUID tenantId;
+@SuperBuilder
+public class CodeList extends TenantEntity {
 
     @Column(name = "code", nullable = false, length = 50)
     private String code;
@@ -31,22 +27,4 @@ public class CodeList {
 
     @Column(name = "description")
     private String description;
-
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = OffsetDateTime.now();
-        this.updatedAt = OffsetDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = OffsetDateTime.now();
-    }
 }
-

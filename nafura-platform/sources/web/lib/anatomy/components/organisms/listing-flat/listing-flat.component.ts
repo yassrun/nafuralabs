@@ -1,28 +1,72 @@
 /**
  * nf-listing-flat — presentation for a flat collection.
- * Owns the view toolbar (search, filters, columns, listing actions) and pagination.
+ *
+ * Toolbar layout (proposal A « chips-first »):
+ * - Row 1: active filters as removable chips + « + Filtre » (filter-builder
+ *   popup) on the left, search on the right.
+ * - Row 2: table controls on the left (selection toggle, columns visibility),
+ *   listing actions on the right (size xs — compact 26px buttons).
  */
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   effect,
+  inject,
   input,
   output,
   signal,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
+import { LucideAngularModule } from 'lucide-angular';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { DataTableComponent } from '../data-table';
 import { PaginationComponent } from '../pagination';
+import { ButtonComponent } from '../../atoms/button';
 import {
-  ListingControlsComponent,
-  type ListingControlsColumn,
-} from '../../molecules/listing-controls';
-import { ListingActionsComponent } from '../../molecules/listing-actions';
-import type { ColumnConfig } from '../../../types';
-import { matchesFilters, matchesSearch } from './listing-query.util';
+  ActionMenuComponent,
+  type ActionMenuNode,
+} from '../../molecules/action-menu';
+import { FilterBuilderComponent } from '../../molecules/filter-builder';
+import { FilterChipsComponent } from '../../molecules/filter-chips';
+import {
+  ListingActionsComponent,
+  type ListingActionItem,
+} from '../../molecules/listing-actions';
+import type { ListingControlsColumn } from '../../molecules/listing-controls';
+import type { ColumnConfig, FilterGroup, ListingQueryState } from '../../../types';
+import {
+  matchesFilterGroup,
+  matchesSearch,
+} from './listing-query.util';
+import {
+  clausesToGroup,
+  emptyFilterGroup,
+  filterGroupToPinnedValues,
+  filterValuesToClauses,
+  listingQuerySnapshotEqual,
+  mergeListingQuery,
+  removeLeafAt,
+  resolveFilterGroup,
+  sortItemsLocally,
+  upsertPinnedClause,
+  withSyncedFilters,
+  collectLeaves,
+  columnStateFromControls,
+  controlColumnsFromQuery,
+  createDefaultListingQuery,
+} from './listing-query-state.util';
+import {
+  LISTING_SAVED_VIEWS_ADAPTER,
+  type ListingSavedView,
+  type ListingSavedViewsAdapter,
+} from './listing-saved-views.adapter';
+import type { SortChangeEvent } from '../data-table';
+import { CsvService } from '../../services/csv.service';
 import {
   DEFAULT_LISTING_FLAT_FEATURES,
   type ListingFlatConfig,
@@ -33,42 +77,237 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     TranslateModule,
-    ListingControlsComponent,
+    MatMenuModule,
+    LucideAngularModule,
+    ButtonComponent,
+    ActionMenuComponent,
+    FilterBuilderComponent,
+    FilterChipsComponent,
     ListingActionsComponent,
     DataTableComponent,
     PaginationComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="nf-listing-flat">
-      <div class="nf-listing-flat__toolbar">
-        <nf-listing-controls
-          [showSelectionToggle]="features().selectionToggle"
-          [selectionModeActive]="toggleSelectionOn()"
-          [columns]="controlColumns()"
-          [hiddenColumnsCount]="hiddenCount()"
-          [showColumnsButton]="features().columnToggle"
-          [filterActive]="filterActive()"
-          [filterFields]="features().filters ? (config().filters ?? []) : []"
-          [filterValues]="filterValues()"
-          [search]="search()"
-          [showSearch]="features().search"
-          (selectionToggleClick)="toggleSelectionOn.update((v) => !v)"
-          (columnsChange)="onColumnsChange($event)"
-          (filterChange)="onFilterChange($event)"
-          (filterReset)="onResetFilters()"
-          (searchChange)="onSearchChange($event)"
-        />
-        @if (hasActions()) {
-          <nf-listing-actions
-            [actions]="config().actions ?? []"
-            [selectionActions]="visibleSelectionActions()"
-            (actionClick)="actionClick.emit($event)"
-          >
-            <ng-content />
-          </nf-listing-actions>
-        }
+    <div class="nf-listing-flat" [class.nf-listing-flat--split]="layout() === 'split'">
+      <!-- Row 1: Search + Filter Add + Filter Chips (starts left, flows right) -->
+      @if (features().search || features().filters) {
+        <div class="nf-listing-flat__filters">
+          <div class="nf-listing-flat__filters-row nf-listing-flat__filters-row--top">
+            @if (features().search) {
+              <div class="nf-listing-flat__search">
+                <lucide-icon name="search" [size]="14" class="nf-listing-flat__search-icon" />
+                <input
+                  type="text"
+                  class="nf-listing-flat__search-input"
+                  [placeholder]="'Search' | translate"
+                  [value]="search()"
+                  (input)="onSearchChange($any($event.target).value)"
+                  [attr.aria-label]="'Search' | translate"
+                />
+              </div>
+            }
+            @if (features().filters && pinnedFilters().length > 0) {
+              <div class="nf-listing-flat__pinned-filters">
+                @for (filter of pinnedFilters(); track filter.key) {
+                  <div class="nf-listing-flat__pinned-filter">
+                    <label class="nf-listing-flat__pinned-filter-label" [for]="'filter-' + filter.key">
+                      {{ filter.label | translate }}
+                    </label>
+                    @switch (filter.type) {
+                      @case ('select') {
+                        <select
+                          [id]="'filter-' + filter.key"
+                          class="nf-listing-flat__pinned-filter-control nf-listing-flat__pinned-filter-control--select"
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event)"
+                        >
+                          <option [ngValue]="null">{{ (filter.placeholder ?? 'All') | translate }}</option>
+                          @for (opt of filter.options ?? []; track opt.value) {
+                            <option [ngValue]="opt.value">{{ opt.label | translate }}</option>
+                          }
+                        </select>
+                      }
+                      @case ('text') {
+                        <input
+                          [id]="'filter-' + filter.key"
+                          type="text"
+                          class="nf-listing-flat__pinned-filter-control"
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event)"
+                          [placeholder]="(filter.placeholder ?? filter.label) | translate"
+                        />
+                      }
+                      @case ('number') {
+                        <input
+                          [id]="'filter-' + filter.key"
+                          type="number"
+                          class="nf-listing-flat__pinned-filter-control"
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event != null && $event !== '' ? +$event : null)"
+                          [placeholder]="(filter.placeholder ?? filter.label) | translate"
+                        />
+                      }
+                      @case ('date') {
+                        <input
+                          [id]="'filter-' + filter.key"
+                          type="date"
+                          class="nf-listing-flat__pinned-filter-control"
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event)"
+                        />
+                      }
+                      @case ('boolean') {
+                        <select
+                          [id]="'filter-' + filter.key"
+                          class="nf-listing-flat__pinned-filter-control nf-listing-flat__pinned-filter-control--select"
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event)"
+                        >
+                          <option [ngValue]="null">{{ (filter.placeholder ?? 'All') | translate }}</option>
+                          <option [ngValue]="true">{{ 'Yes' | translate }}</option>
+                          <option [ngValue]="false">{{ 'No' | translate }}</option>
+                        </select>
+                      }
+                      @case ('multiselect') {
+                        <select
+                          [id]="'filter-' + filter.key"
+                          class="nf-listing-flat__pinned-filter-control nf-listing-flat__pinned-filter-control--select"
+                          multiple
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event)"
+                        >
+                          @for (opt of filter.options ?? []; track opt.value) {
+                            <option [ngValue]="opt.value">{{ opt.label | translate }}</option>
+                          }
+                        </select>
+                      }
+                      @case ('daterange') {
+                        <div class="nf-listing-flat__pinned-range">
+                          <input
+                            type="date"
+                            class="nf-listing-flat__pinned-filter-control"
+                            [ngModel]="rangePart(filter.key, 0)"
+                            (ngModelChange)="setRangePart(filter.key, 0, $event)"
+                          />
+                          <span>—</span>
+                          <input
+                            type="date"
+                            class="nf-listing-flat__pinned-filter-control"
+                            [ngModel]="rangePart(filter.key, 1)"
+                            (ngModelChange)="setRangePart(filter.key, 1, $event)"
+                          />
+                        </div>
+                      }
+                      @default {
+                        <input
+                          [id]="'filter-' + filter.key"
+                          type="text"
+                          class="nf-listing-flat__pinned-filter-control"
+                          [ngModel]="getFilterValue(filter.key)"
+                          (ngModelChange)="setFilterValue(filter.key, $event)"
+                          [placeholder]="(filter.placeholder ?? filter.label) | translate"
+                        />
+                      }
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+          <div class="nf-listing-flat__filters-row nf-listing-flat__filters-row--bottom">
+            <div class="nf-listing-flat__chips">
+              @if (popupFilters().length > 0) {
+                <button
+                  type="button"
+                  class="nf-listing-flat__add-filter"
+                  [class.nf-listing-flat__add-filter--active]="filterActive()"
+                  [matMenuTriggerFor]="filterMenu"
+                  #filterMenuTrigger="matMenuTrigger"
+                  (menuOpened)="onFilterMenuOpened()"
+                >
+                  <lucide-icon name="plus" [size]="12" />
+                  {{ 'Filter' | translate }}
+                </button>
+                <mat-menu
+                  #filterMenu="matMenu"
+                  class="nf-listing-flat-menu nf-listing-flat-menu--filter"
+                  xPosition="after"
+                  yPosition="below"
+                >
+                  <div (click)="$event.stopPropagation()">
+                    <nf-filter-builder
+                      [filters]="config().filters ?? []"
+                      [group]="activeFilterGroup()"
+                      [openCount]="filterMenuOpenCount()"
+                      (apply)="onFilterApply($event)"
+                      (clear)="onFilterClear()"
+                    />
+                  </div>
+                </mat-menu>
+              }
+              <nf-filter-chips
+                [fields]="config().filters ?? []"
+                [group]="activeFilterGroup()"
+                (removeLeaf)="onRemoveFilterLeaf($event)"
+              />
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Row 2: Selection pill + table controls (LEFT) ➔ Action buttons (RIGHT) -->
+      <div class="nf-listing-flat__actions-row">
+        <!-- Left: Selection indicator + table controls -->
+        <div class="nf-listing-flat__actions-left">
+          @if (selection().length > 0) {
+            <span class="nf-listing-flat__selcount">
+              {{ selection().length }} {{ 'selected' | translate }}
+            </span>
+          }
+          @if (features().columnToggle || features().selectionToggle || savedViewsEnabled()) {
+            <div class="nf-listing-flat__table-controls">
+              <ng-container [ngTemplateOutlet]="controlsTpl" />
+            </div>
+          }
+        </div>
+
+        <!-- Right: Action buttons -->
+        <div class="nf-listing-flat__actions-right">
+          <ng-content />
+
+          @if (hasActions()) {
+            @if (isMobile()) {
+              <!-- Mobile: primary action icon-only + everything else in ⋯ -->
+              @if (primaryAction(); as primary) {
+                <nf-button
+                  [variant]="primary.variant ?? 'primary'"
+                  size="xs"
+                  [icon]="primary.icon"
+                  [tooltip]="(primary.label ?? primary.id) | translate"
+                  [attr.aria-label]="(primary.label ?? primary.id) | translate"
+                  (clicked)="handleActionClick(primary.id)"
+                />
+              }
+              @if (mobileMenuNodes().length > 0) {
+                <nf-action-menu
+                  size="xs"
+                  [nodes]="mobileMenuNodes()"
+                  (actionClick)="handleActionClick($event)"
+                />
+              }
+            } @else {
+              <nf-listing-actions
+                [actions]="resolvedActions()"
+                [selectionActions]="visibleSelectionActions()"
+                size="xs"
+                (actionClick)="handleActionClick($event)"
+              />
+            }
+          }
+        </div>
       </div>
 
       <div class="nf-listing-flat__view">
@@ -79,18 +318,162 @@ import {
           [rowClickable]="true"
           [selectable]="tableSelectable()"
           [selection]="selection()"
+          [sortColumn]="sortColumn()"
+          [sortDirection]="sortDirection()"
           [emptyMessage]="config().emptyMessage ?? 'No items'"
           [loading]="loading()"
           (selectionChange)="onTableSelectionChange($event)"
+          (sortChange)="onSortChange($event)"
           (rowClick)="onRowClick($event)"
           (rowDblClick)="rowDblClick.emit($event)"
         />
       </div>
 
-      @if (features().pagination && filteredItems().length > 0) {
+      <!-- Export Configuration Dialog (Anatomy Modal) -->
+      @if (exportDialogOpen()) {
+        <div class="nf-export-backdrop" (click)="closeExportDialog()">
+          <div class="nf-export-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+            <div class="nf-export-dialog__header">
+              <div class="nf-export-dialog__header-left">
+                <div class="nf-export-dialog__icon-wrap">
+                  <lucide-icon name="download" [size]="16" />
+                </div>
+                <div>
+                  <h3 class="nf-export-dialog__title">{{ 'Export data' | translate }}</h3>
+                  <p class="nf-export-dialog__subtitle">{{ 'Configure the export scope and column selection' | translate }}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="nf-export-dialog__close"
+                (click)="closeExportDialog()"
+                [attr.aria-label]="'Close' | translate"
+              >
+                <lucide-icon name="x" [size]="16" />
+              </button>
+            </div>
+
+            <div class="nf-export-dialog__body">
+              <!-- Scope Selection -->
+              <div class="nf-export-dialog__section">
+                <span class="nf-export-dialog__section-title">{{ 'Export scope' | translate }}</span>
+                <div class="nf-export-dialog__scope-list">
+                  <label class="nf-export-dialog__scope-card" [class.nf-export-dialog__scope-card--active]="exportScope() === 'all'">
+                    <input
+                      type="radio"
+                      name="exportScope"
+                      value="all"
+                      class="nf-export-dialog__radio"
+                      [checked]="exportScope() === 'all'"
+                      (change)="exportScope.set('all')"
+                    />
+                    <div class="nf-export-dialog__scope-info">
+                      <span class="nf-export-dialog__scope-name">{{ 'All filtered rows' | translate }}</span>
+                      <span class="nf-export-dialog__scope-desc">{{ filteredItems().length }} {{ 'records matching active filters' | translate }}</span>
+                    </div>
+                  </label>
+
+                  <label class="nf-export-dialog__scope-card" [class.nf-export-dialog__scope-card--active]="exportScope() === 'page'">
+                    <input
+                      type="radio"
+                      name="exportScope"
+                      value="page"
+                      class="nf-export-dialog__radio"
+                      [checked]="exportScope() === 'page'"
+                      (change)="exportScope.set('page')"
+                    />
+                    <div class="nf-export-dialog__scope-info">
+                      <span class="nf-export-dialog__scope-name">{{ 'Current page only' | translate }}</span>
+                      <span class="nf-export-dialog__scope-desc">{{ pageItems().length }} {{ 'records on page' | translate }} {{ page() }}</span>
+                    </div>
+                  </label>
+
+                  @if (selection().length > 0) {
+                    <label class="nf-export-dialog__scope-card" [class.nf-export-dialog__scope-card--active]="exportScope() === 'selection'">
+                      <input
+                        type="radio"
+                        name="exportScope"
+                        value="selection"
+                        class="nf-export-dialog__radio"
+                        [checked]="exportScope() === 'selection'"
+                        (change)="exportScope.set('selection')"
+                      />
+                      <div class="nf-export-dialog__scope-info">
+                        <span class="nf-export-dialog__scope-name">{{ 'Selected rows' | translate }}</span>
+                        <span class="nf-export-dialog__scope-desc">{{ selection().length }} {{ 'currently selected rows' | translate }}</span>
+                      </div>
+                    </label>
+                  }
+                </div>
+              </div>
+
+              <!-- Columns Selection -->
+              <div class="nf-export-dialog__section">
+                <div class="nf-export-dialog__section-header">
+                  <span class="nf-export-dialog__section-title">
+                    {{ 'Columns' | translate }} ({{ selectedExportColumnsCount() }}/{{ exportColumns().length }})
+                  </span>
+                  <div class="nf-export-dialog__column-actions">
+                    <button type="button" class="nf-export-dialog__action-link" (click)="toggleAllExportColumns(true)">
+                      {{ 'Select all' | translate }}
+                    </button>
+                    <span class="nf-export-dialog__sep">·</span>
+                    <button type="button" class="nf-export-dialog__action-link" (click)="toggleAllExportColumns(false)">
+                      {{ 'Deselect all' | translate }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="nf-export-dialog__columns-grid">
+                  @for (col of exportColumns(); track col.key) {
+                    <label class="nf-export-dialog__column-item">
+                      <input
+                        type="checkbox"
+                        class="nf-columns-menu__checkbox"
+                        [checked]="col.selected"
+                        (change)="toggleExportColumn(col.key, $any($event.target).checked)"
+                      />
+                      <span class="nf-export-dialog__column-label">{{ col.label | translate }}</span>
+                    </label>
+                  }
+                </div>
+              </div>
+
+              <!-- Format note -->
+              <div class="nf-export-dialog__format-note">
+                <lucide-icon name="file-spreadsheet" [size]="14" />
+                <span>{{ 'Format: CSV (UTF-8 with BOM, compatible with Excel, Google Sheets and Calc)' | translate }}</span>
+              </div>
+            </div>
+
+            <div class="nf-export-dialog__footer">
+              <span class="nf-export-dialog__footer-count">
+                {{ exportTargetCount() }} {{ 'rows to be exported' | translate }}
+              </span>
+              <div class="nf-export-dialog__footer-btns">
+                <nf-button variant="secondary" size="xs" (clicked)="closeExportDialog()">
+                  {{ 'Cancel' | translate }}
+                </nf-button>
+                <nf-button
+                  variant="primary"
+                  size="xs"
+                  iconLibrary="lucide"
+                  icon="download"
+                  [disabled]="selectedExportColumnsCount() === 0 || exportTargetCount() === 0"
+                  (clicked)="confirmExport()"
+                >
+                  {{ 'Download CSV' | translate }}
+                </nf-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (features().pagination && pagerTotal() > 0) {
         <div class="nf-listing-flat__pager">
           <nf-pagination
-            [total]="filteredItems().length"
+            [total]="pagerTotal()"
             [page]="page()"
             [pageSize]="pageSize()"
             [pageSizeOptions]="pageSizeOptions()"
@@ -98,6 +481,128 @@ import {
           />
         </div>
       }
+
+      <!-- Table controls: columns visibility and multi-selection -->
+      <ng-template #controlsTpl>
+        <div class="nf-listing-flat__controls">
+          @if (features().selectionToggle) {
+            <nf-button
+              variant="secondary"
+              size="xs"
+              iconLibrary="lucide"
+              [icon]="toggleSelectionOn() ? 'x' : 'list-checks'"
+              [active]="toggleSelectionOn()"
+              [tooltip]="(toggleSelectionOn() ? 'Cancel selection' : 'Select rows') | translate"
+              [attr.aria-label]="
+                (toggleSelectionOn() ? 'Cancel selection' : 'Select rows') | translate
+              "
+              (clicked)="toggleSelectionOn.update((v) => !v)"
+            />
+          }
+          @if (savedViewsEnabled()) {
+            <nf-button
+              variant="secondary"
+              size="xs"
+              iconLibrary="lucide"
+              icon="bookmark"
+              [active]="viewDirty()"
+              [matMenuTriggerFor]="viewsMenu"
+              [tooltip]="'Saved views' | translate"
+              [attr.aria-label]="'Saved views' | translate"
+            >
+              {{ 'Views' | translate }}
+              @if (viewDirty()) {
+                <span class="nf-listing-flat__dirty-dot" aria-hidden="true">•</span>
+              }
+            </nf-button>
+            <mat-menu #viewsMenu="matMenu" class="nf-listing-flat-menu nf-listing-flat-menu--views">
+              <div class="nf-views-menu" (click)="$event.stopPropagation()">
+                @if (savedViews().length === 0) {
+                  <p class="nf-views-menu__empty">{{ 'No saved views yet' | translate }}</p>
+                }
+                @for (view of savedViews(); track view.id) {
+                  <button type="button" class="nf-views-menu__item" (click)="applySavedView(view)">
+                    <span>{{ view.name }}</span>
+                    @if (view.isDefault) {
+                      <span class="nf-views-menu__badge">{{ 'Default' | translate }}</span>
+                    }
+                    @if (activeSavedViewId() === view.id) {
+                      <span class="nf-views-menu__active">{{ 'Active' | translate }}</span>
+                    }
+                  </button>
+                }
+                <div class="nf-views-menu__actions">
+                  <button type="button" class="nf-views-menu__action" (click)="promptSaveView(false)">
+                    {{ 'Save current' | translate }}
+                  </button>
+                  @if (activeSavedViewId()) {
+                    <button type="button" class="nf-views-menu__action" (click)="promptSaveView(true)">
+                      {{ 'Update view' | translate }}
+                    </button>
+                    <button type="button" class="nf-views-menu__action nf-views-menu__action--danger" (click)="deleteActiveView()">
+                      {{ 'Delete view' | translate }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </mat-menu>
+          }
+          @if (features().columnToggle) {
+            <nf-button
+              variant="secondary"
+              size="xs"
+              iconLibrary="lucide"
+              [icon]="hiddenCount() > 0 ? 'eye-off' : 'columns'"
+              [active]="hiddenCount() > 0"
+              [matMenuTriggerFor]="columnsMenu"
+              [tooltip]="'Customize columns' | translate"
+              [attr.aria-label]="'Customize columns' | translate"
+            >{{ 'Columns' | translate }}</nf-button>
+            <mat-menu
+              #columnsMenu="matMenu"
+              class="nf-listing-flat-menu nf-listing-flat-menu--columns"
+              xPosition="before"
+              yPosition="below"
+            >
+              <div class="nf-columns-menu" (click)="$event.stopPropagation()">
+                <div class="nf-columns-menu__header">
+                  <span class="nf-columns-menu__title">{{ 'Columns' | translate }}</span>
+                  <div class="nf-columns-menu__actions">
+                    <button
+                      type="button"
+                      class="nf-columns-menu__action-btn"
+                      (click)="showAllColumns()"
+                    >
+                      {{ 'Show all' | translate }}
+                    </button>
+                    <span class="nf-columns-menu__sep">·</span>
+                    <button
+                      type="button"
+                      class="nf-columns-menu__action-btn"
+                      (click)="resetDefaultColumns()"
+                    >
+                      {{ 'Reset' | translate }}
+                    </button>
+                  </div>
+                </div>
+                <div class="nf-columns-menu__list">
+                  @for (col of controlColumns(); track col.key) {
+                    <label class="nf-columns-menu__item">
+                      <input
+                        type="checkbox"
+                        class="nf-columns-menu__checkbox"
+                        [checked]="col.visible"
+                        (change)="setColumnVisibility(col.key, $any($event.target).checked)"
+                      />
+                      <span class="nf-columns-menu__label">{{ col.label | translate }}</span>
+                    </label>
+                  }
+                </div>
+              </div>
+            </mat-menu>
+          }
+        </div>
+      </ng-template>
     </div>
   `,
   styles: [
@@ -115,104 +620,980 @@ import {
         height: 100%;
         gap: 8px;
       }
-      .nf-listing-flat__toolbar {
+
+      /* ── Row 1: Search + Filter Chips ───────────────────────────────── */
+      .nf-listing-flat__filters {
         display: flex;
-        flex-wrap: wrap;
-        align-items: center;
+        flex-direction: column;
+        align-items: stretch;
         gap: 8px;
         flex: 0 0 auto;
       }
+      .nf-listing-flat__filters-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        min-width: 0;
+      }
+      .nf-listing-flat__filters-row--top {
+        align-items: flex-end;
+      }
+      .nf-listing-flat__filters-row--bottom {
+        align-items: center;
+      }
+      .nf-listing-flat__search {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 26px;
+        padding: 0 9px;
+        border-radius: 6px;
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        background: var(--nf-surface-section, #fff);
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+        flex: 0 1 220px;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+      .nf-listing-flat__search:focus-within {
+        border-color: var(--nf-primary, #2563eb);
+        box-shadow: 0 0 0 2px var(--nf-primary-light, #eff6ff);
+      }
+      .nf-listing-flat__chips {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        flex: 1 1 auto;
+        flex-wrap: wrap;
+      }
+      .nf-listing-flat__add-filter {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        height: 26px;
+        padding: 0 9px;
+        border-radius: 6px;
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        background: var(--nf-surface-section, #fff);
+        color: var(--nf-text-secondary, #4b5563);
+        font-size: 0.75rem;
+        font-weight: 500;
+        font-family: inherit;
+        white-space: nowrap;
+        cursor: pointer;
+        flex: 0 0 auto;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+        transition: all 0.1s ease;
+      }
+      .nf-listing-flat__add-filter:hover {
+        background: var(--nf-surface-hover, #f9fafb);
+        border-color: var(--nf-color-gray-300, #d1d5db);
+        color: var(--nf-text-primary, #111827);
+      }
+      .nf-listing-flat__add-filter--active {
+        background: var(--nf-primary-light, #eff6ff);
+        border-color: var(--nf-primary, #2563eb);
+        color: var(--nf-primary, #2563eb);
+      }
+      .nf-listing-flat__controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      /* ── Selection count pill ────────────────────────── */
+      .nf-listing-flat__selcount {
+        display: inline-flex;
+        align-items: center;
+        height: 26px;
+        padding: 0 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        white-space: nowrap;
+        color: var(--nf-primary, #2563eb);
+        border: 1px solid var(--nf-primary-200, #bfdbfe);
+        background: var(--nf-primary-light, #eff6ff);
+      }
+      .nf-listing-flat__search-icon {
+        display: inline-flex;
+        color: var(--nf-text-muted, #9ca3af);
+        flex-shrink: 0;
+      }
+      .nf-listing-flat__search-input {
+        flex: 1;
+        min-width: 60px;
+        padding: 0;
+        font-size: 0.75rem;
+        font-family: inherit;
+        color: var(--nf-text-primary, #111827);
+        background: none;
+        border: none;
+        outline: none;
+      }
+      .nf-listing-flat__search-input::placeholder {
+        color: var(--nf-input-placeholder-color, var(--nf-text-muted, #9ca3af));
+      }
+
+      .nf-listing-flat__pinned-filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 8px;
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+
+      .nf-listing-flat__pinned-filter {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 160px;
+        flex: 0 1 200px;
+      }
+
+      .nf-listing-flat__pinned-filter-label {
+        font-size: 0.6875rem;
+        font-weight: 500;
+        color: var(--nf-text-muted, #6b7280);
+        line-height: 1.1;
+      }
+
+      .nf-listing-flat__pinned-filter-control {
+        width: 100%;
+        height: 26px;
+        padding: 0 8px;
+        border-radius: 6px;
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        background: var(--nf-surface-section, #fff);
+        font: inherit;
+        font-size: 0.75rem;
+        color: var(--nf-text-primary, #111827);
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+        box-sizing: border-box;
+      }
+
+      .nf-listing-flat__pinned-filter-control--select {
+        appearance: none;
+        padding-right: 24px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-position: right 8px center;
+        background-repeat: no-repeat;
+      }
+
+      .nf-listing-flat__pinned-range {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .nf-listing-flat__pinned-range span {
+        font-size: 0.6875rem;
+        color: var(--nf-text-muted, #6b7280);
+      }
+
+      .nf-listing-flat__dirty-dot {
+        color: var(--nf-warning, #d97706);
+        margin-left: 2px;
+      }
+
+      .nf-views-menu {
+        min-width: 220px;
+        padding: 8px;
+      }
+      .nf-views-menu__empty {
+        margin: 0 0 8px;
+        font-size: 0.75rem;
+        color: var(--nf-text-muted, #6b7280);
+      }
+      .nf-views-menu__item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 6px 8px;
+        border-radius: 6px;
+        font: inherit;
+        font-size: 0.8125rem;
+        text-align: left;
+        cursor: pointer;
+      }
+      .nf-views-menu__item:hover {
+        background: var(--nf-surface-hover, #f9fafb);
+      }
+      .nf-views-menu__badge,
+      .nf-views-menu__active {
+        font-size: 0.625rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--nf-primary, #2563eb);
+      }
+      .nf-views-menu__actions {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--nf-border-default, #e5e7eb);
+      }
+      .nf-views-menu__action {
+        border: none;
+        background: transparent;
+        padding: 4px 8px;
+        font: inherit;
+        font-size: 0.75rem;
+        text-align: left;
+        color: var(--nf-primary, #2563eb);
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      .nf-views-menu__action:hover {
+        background: var(--nf-primary-light, #eff6ff);
+      }
+      .nf-views-menu__action--danger {
+        color: var(--nf-danger, #dc2626);
+      }
+
+      /* ── Row 2: actions row (Left: Selection Info · Right: Controls & Actions) ── */
+      .nf-listing-flat__actions-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        flex: 0 0 auto;
+      }
+      /* Left side: selection count pill + table controls */
+      .nf-listing-flat__actions-left {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 26px;
+      }
+      /* Right side: action buttons */
+      .nf-listing-flat__actions-right {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin-left: auto;
+      }
+      .nf-listing-flat__table-controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
       .nf-listing-flat__view {
         /* Hug content: pager sits right under the table; shrinks + scrolls when space is tight. */
         flex: 0 1 auto;
         min-height: 0;
         overflow: auto;
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        border-radius: var(--nf-radius-md, 8px);
+        background: var(--nf-surface-section, #fff);
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
       }
       .nf-listing-flat__pager {
         flex: 0 0 auto;
+      }
+
+      /* ── Columns Menu (Anatomy custom styling) ──────────────────── */
+      .nf-columns-menu {
+        min-width: 190px;
+        max-width: 260px;
+      }
+      .nf-columns-menu__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--nf-border-default, #e5e7eb);
+        background: var(--nf-surface-section, #ffffff);
+      }
+      .nf-columns-menu__title {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--nf-text-muted, #6b7280);
+      }
+      .nf-columns-menu__actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .nf-columns-menu__action-btn {
+        background: none;
+        border: none;
+        padding: 1px 4px;
+        font-size: 0.6875rem;
+        font-weight: 500;
+        color: var(--nf-primary, #2563eb);
+        cursor: pointer;
+        border-radius: 3px;
+        line-height: 1.2;
+        transition: background 0.1s ease;
+
+        &:hover {
+          background: var(--nf-primary-light, #eff6ff);
+        }
+      }
+      .nf-columns-menu__sep {
+        color: var(--nf-border-default, #d1d5db);
+        font-size: 0.6875rem;
+      }
+      .nf-columns-menu__list {
+        padding: 4px;
+        max-height: 280px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+      }
+      .nf-columns-menu__item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border-radius: 5px;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.1s ease;
+
+        &:hover {
+          background-color: var(--nf-surface-hover, #f9fafb);
+        }
+      }
+      .nf-columns-menu__checkbox {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 15px;
+        height: 15px;
+        margin: 0;
+        border: 1.5px solid var(--nf-border-default, #d1d5db);
+        border-radius: 4px;
+        background-color: var(--nf-surface-section, #ffffff);
+        cursor: pointer;
+        display: inline-grid;
+        place-content: center;
+        transition: all 0.12s ease-in-out;
+        flex-shrink: 0;
+
+        &:hover {
+          border-color: var(--nf-primary, #2563eb);
+        }
+
+        &:checked {
+          background-color: var(--nf-primary, #2563eb);
+          border-color: var(--nf-primary, #2563eb);
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.2 4.8L6.5 10.5L3.8 7.8' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+          background-size: 11px 11px;
+          background-position: center;
+          background-repeat: no-repeat;
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--nf-primary, #2563eb);
+          outline-offset: 1px;
+        }
+      }
+      .nf-columns-menu__label {
+        font-size: 0.8125rem;
+        color: var(--nf-text-primary, #111827);
+        font-weight: 400;
+        line-height: 1.2;
+      }
+
+      /* Overlay panels live outside :host — pierce so sizing rules apply */
+      :host ::ng-deep {
+        .mat-mdc-menu-panel.nf-listing-flat-menu--columns,
+        .mat-mdc-menu-panel.nf-listing-flat-menu--filter {
+          background: var(--nf-surface-section, #fff);
+          border: 1px solid var(--nf-border-default, #e5e7eb);
+          border-radius: var(--nf-radius-md, 8px);
+          box-shadow: var(--nf-shadow-md, 0 8px 24px rgba(0, 0, 0, 0.12));
+        }
+        .mat-mdc-menu-panel.nf-listing-flat-menu--columns {
+          min-width: 190px !important;
+          max-width: 260px !important;
+
+          .mat-mdc-menu-content {
+            padding: 0 !important;
+          }
+        }
+        .mat-mdc-menu-panel.nf-listing-flat-menu--filter {
+          /* Beat Material's default ~280px max-width so daterange fits. */
+          width: max-content !important;
+          min-width: 320px !important;
+          max-width: min(560px, calc(100vw - 24px)) !important;
+          height: auto !important;
+          max-height: min(80vh, 640px) !important;
+          overflow-x: visible !important;
+          overflow-y: auto !important;
+
+          .mat-mdc-menu-content {
+            padding: 0 !important;
+            overflow: visible !important;
+          }
+        }
+      }
+
+      /* ── Export Modal Dialog ────────────────────────────────────────── */
+      .nf-export-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.45);
+        backdrop-filter: blur(2px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 16px;
+        animation: nfFadeIn 0.15s ease-out;
+      }
+      .nf-export-dialog {
+        background: var(--nf-surface-section, #ffffff);
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        border-radius: var(--nf-radius-lg, 12px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        width: 100%;
+        max-width: 520px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: nfSlideUp 0.15s ease-out;
+      }
+      .nf-export-dialog__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--nf-border-default, #e5e7eb);
+      }
+      .nf-export-dialog__header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .nf-export-dialog__icon-wrap {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--nf-primary-light, #eff6ff);
+        color: var(--nf-primary, #2563eb);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .nf-export-dialog__title {
+        margin: 0;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--nf-text-primary, #111827);
+      }
+      .nf-export-dialog__subtitle {
+        margin: 2px 0 0;
+        font-size: 0.75rem;
+        color: var(--nf-text-muted, #6b7280);
+      }
+      .nf-export-dialog__close {
+        background: none;
+        border: none;
+        padding: 4px;
+        border-radius: 6px;
+        color: var(--nf-text-muted, #6b7280);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.12s ease;
+
+        &:hover {
+          background: var(--nf-surface-hover, #f3f4f6);
+          color: var(--nf-text-primary, #111827);
+        }
+      }
+      .nf-export-dialog__body {
+        padding: 16px 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .nf-export-dialog__section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .nf-export-dialog__section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .nf-export-dialog__section-title {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--nf-text-muted, #6b7280);
+      }
+      .nf-export-dialog__column-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .nf-export-dialog__action-link {
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 0.6875rem;
+        font-weight: 500;
+        color: var(--nf-primary, #2563eb);
+        cursor: pointer;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+      .nf-export-dialog__sep {
+        color: var(--nf-border-default, #d1d5db);
+        font-size: 0.6875rem;
+      }
+      .nf-export-dialog__scope-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .nf-export-dialog__scope-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.12s ease;
+
+        &:hover {
+          background: var(--nf-surface-hover, #f9fafb);
+          border-color: var(--nf-color-gray-300, #d1d5db);
+        }
+
+        &--active {
+          border-color: var(--nf-primary, #2563eb);
+          background: var(--nf-primary-light, #eff6ff);
+        }
+      }
+      .nf-export-dialog__radio {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        border: 1.5px solid var(--nf-border-default, #d1d5db);
+        border-radius: 50%;
+        cursor: pointer;
+        display: grid;
+        place-content: center;
+        flex-shrink: 0;
+
+        &:checked {
+          border-color: var(--nf-primary, #2563eb);
+
+          &::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--nf-primary, #2563eb);
+          }
+        }
+      }
+      .nf-export-dialog__scope-info {
+        display: flex;
+        flex-direction: column;
+      }
+      .nf-export-dialog__scope-name {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--nf-text-primary, #111827);
+      }
+      .nf-export-dialog__scope-desc {
+        font-size: 0.6875rem;
+        color: var(--nf-text-muted, #6b7280);
+      }
+      .nf-export-dialog__columns-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+        max-height: 160px;
+        overflow-y: auto;
+        padding: 4px;
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        border-radius: 8px;
+        background: var(--nf-surface-hover, #f9fafb);
+      }
+      .nf-export-dialog__column-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 8px;
+        border-radius: 6px;
+        background: var(--nf-surface-section, #ffffff);
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        cursor: pointer;
+        user-select: none;
+        transition: border-color 0.12s ease;
+
+        &:hover {
+          border-color: var(--nf-primary, #2563eb);
+        }
+      }
+      .nf-export-dialog__column-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--nf-text-primary, #111827);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .nf-export-dialog__format-note {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: #f8fafc;
+        border-radius: 6px;
+        font-size: 0.6875rem;
+        color: var(--nf-text-secondary, #475569);
+      }
+      .nf-export-dialog__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        border-top: 1px solid var(--nf-border-default, #e5e7eb);
+        background: var(--nf-surface-section, #ffffff);
+      }
+      .nf-export-dialog__footer-count {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--nf-text-muted, #6b7280);
+      }
+      .nf-export-dialog__footer-btns {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      @keyframes nfFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes nfSlideUp {
+        from { transform: translateY(10px) scale(0.98); opacity: 0; }
+        to { transform: translateY(0) scale(1); opacity: 1; }
+      }
+
+      /* ── Mobile: compact 2-line header, horizontal scrolling actions ── */
+      @media (max-width: 600px) {
+        .nf-listing-flat {
+          gap: 6px;
+        }
+
+        .nf-listing-flat__search {
+          flex: 1 1 auto !important;
+          min-width: 120px !important;
+        }
+        .nf-listing-flat__pinned-filters {
+          flex: 1 1 100%;
+        }
+        .nf-listing-flat__pinned-filter {
+          flex: 1 1 100%;
+          min-width: 0;
+        }
+        .nf-listing-flat__chips {
+          flex: 1 1 100% !important;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          min-width: 0;
+          overflow-x: auto;
+          white-space: nowrap;
+          scrollbar-width: none;
+          padding: 2px 0;
+        }
+        .nf-listing-flat__actions-row {
+          display: flex !important;
+          align-items: center;
+          justify-content: space-between;
+          gap: 6px;
+          flex-wrap: nowrap !important;
+          overflow-x: auto;
+          scrollbar-width: none;
+          padding: 2px 0;
+          -webkit-overflow-scrolling: touch;
+        }
+        .nf-listing-flat__actions-right {
+          display: flex !important;
+          align-items: center;
+          gap: 6px;
+          flex-wrap: nowrap !important;
+          margin-left: auto;
+        }
+        .nf-listing-flat__actions-right > * {
+          flex: 0 0 auto !important;
+        }
+
+        /* Split layout on mobile: sticky bottom action bar (thumb zone) */
+        .nf-listing-flat--split .nf-listing-flat__actions-row {
+          order: 10;
+          position: sticky;
+          bottom: 0;
+          z-index: 10;
+          padding: 8px 10px;
+          background: var(--nf-surface-section, #fff);
+          border-top: 1px solid var(--nf-border-default, #e5e7eb);
+          box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+        }
+      }
+      @media (max-width: 640px) {
+        :host ::ng-deep .mat-mdc-menu-panel.nf-listing-flat-menu--filter {
+          width: calc(100vw - 24px) !important;
+          min-width: 0 !important;
+          max-width: calc(100vw - 24px) !important;
+        }
       }
     `,
   ],
 })
 export class ListingFlatComponent<T = unknown> {
+  private readonly csvService = inject(CsvService);
+
   readonly config = input.required<ListingFlatConfig>();
   readonly items = input<T[]>([]);
   readonly loading = input<boolean>(false);
+  /** Controlled listing query (URL / parent / saved view). */
+  readonly query = input<ListingQueryState | undefined>();
+  /** When true, items are already filtered/paged server-side — skip client refilter. */
+  readonly remote = input<boolean>(false);
+  readonly remoteTotal = input<number | undefined>(undefined);
+  readonly resourceKey = input<string | undefined>();
+
+  readonly queryChange = output<ListingQueryState>();
+  readonly load = output<ListingQueryState>();
 
   readonly rowClick = output<T>();
   readonly rowDblClick = output<T>();
   readonly actionClick = output<string>();
   readonly selectionChange = output<T[]>();
+  readonly exportClick = output<void>();
 
-  readonly search = signal('');
-  readonly filterValues = signal<Record<string, unknown>>({});
-  readonly page = signal(1);
-  readonly pageSize = signal(20);
+  private readonly savedViewsAdapter = inject(LISTING_SAVED_VIEWS_ADAPTER, { optional: true });
+
+  private readonly listingQuery = signal<ListingQueryState>(createDefaultListingQuery());
+  private readonly suppressQueryEmit = signal(false);
+
   readonly toggleSelectionOn = signal(false);
   readonly selection = signal<T[]>([]);
   readonly controlColumns = signal<ListingControlsColumn[]>([]);
+  readonly filterMenuOpenCount = signal(0);
+  readonly savedViews = signal<ListingSavedView[]>([]);
+  readonly activeSavedViewId = signal<string | null>(null);
+  readonly activeSavedViewQuery = signal<ListingQueryState | null>(null);
+
+  readonly search = computed(() => this.listingQuery().search ?? '');
+  readonly activeFilterGroup = computed(() => resolveFilterGroup(this.listingQuery()));
+  readonly filterValues = computed(() => filterGroupToPinnedValues(this.activeFilterGroup()));
+  readonly page = computed(() => this.listingQuery().page);
+  readonly pageSize = computed(() => this.listingQuery().pageSize);
+  readonly sortColumn = computed(() => this.listingQuery().sort?.field);
+  readonly sortDirection = computed(() => this.listingQuery().sort?.direction);
+
+  @ViewChild('filterMenuTrigger') private filterMenuTrigger?: MatMenuTrigger;
 
   readonly features = computed(() => ({
     ...DEFAULT_LISTING_FLAT_FEATURES,
     ...this.config().features,
   }));
 
+  /** Toolbar layout: 'chips' (A, default) or 'split' (C). */
+  readonly layout = computed(() => this.config().toolbarLayout ?? 'chips');
+
   readonly selectionKind = computed(() => this.features().selection);
 
+  readonly pinnedFilters = computed(() => (this.config().filters ?? []).filter((f) => f.pinned === true));
+  readonly popupFilters = computed(() => (this.config().filters ?? []).filter((f) => !f.pinned));
+
   readonly tableSelectable = computed((): false | 'single' | 'multiple' => {
-    if (this.features().selectionToggle && this.toggleSelectionOn()) return 'multiple';
     const sel = this.selectionKind();
-    return sel === 'none' ? false : sel;
+    if (sel === 'single' || sel === 'multiple') return sel;
+    if (this.features().selectionToggle && this.toggleSelectionOn()) return 'multiple';
+    return false;
+  });
+
+  readonly savedViewsEnabled = computed(
+    () => !!this.resourceKey() && this.config().savedViews !== false && !!this.savedViewsAdapter
+  );
+
+  readonly viewDirty = computed(() => {
+    const baseline = this.activeSavedViewQuery();
+    if (!baseline) return false;
+    return !listingQuerySnapshotEqual(this.listingQuery(), baseline, { ignorePage: true });
   });
 
   constructor() {
+    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+      const mql = window.matchMedia('(max-width: 600px)');
+      this.isMobile.set(mql.matches);
+      mql.addEventListener('change', (e) => this.isMobile.set(e.matches));
+    }
+
     effect(() => {
       const cols = this.config().columns;
-      this.controlColumns.set(
-        cols.map((c) => ({
-          key: c.key,
-          label: c.label,
-          visible: true,
-        }))
+      const fromQuery = controlColumnsFromQuery(cols, this.listingQuery().columns);
+      this.controlColumns.set(fromQuery);
+    });
+
+    effect(() => {
+      const external = this.query();
+      if (external) {
+        this.suppressQueryEmit.set(true);
+        this.listingQuery.set(external);
+        this.controlColumns.set(
+          controlColumnsFromQuery(this.config().columns, external.columns)
+        );
+        this.suppressQueryEmit.set(false);
+      }
+    });
+
+    effect(() => {
+      if (this.query()) return;
+      const init = this.config().initialFilters;
+      const key = JSON.stringify(init ?? null);
+      if (key === this.lastInitialFilters) return;
+      this.lastInitialFilters = key;
+      if (!init || Object.keys(init).length === 0) return;
+      const fields = this.config().filters ?? [];
+      const clauses = filterValuesToClauses(init, fields);
+      this.patchQuery(
+        {
+          filterGroup: clausesToGroup(clauses),
+          filters: clauses,
+          page: 1,
+        },
+        false
       );
     });
+
     effect(() => {
-      this.pageSize.set(this.config().pageSize ?? 20);
-      this.page.set(1);
+      const size = this.config().pageSize ?? 20;
+      if (this.listingQuery().pageSize !== size) {
+        this.patchQuery({ pageSize: size, page: 1 });
+      }
     });
+
     effect(() => {
       this.selectionKind();
-      this.features().selectionToggle;
-      this.toggleSelectionOn.set(false);
+      this.toggleSelectionOn.set(this.features().selectionToggleDefaultActive ?? false);
       this.setSelection([]);
+    });
+
+    effect(() => {
+      const key = this.resourceKey();
+      if (!key || !this.savedViewsAdapter) {
+        this.savedViews.set([]);
+        return;
+      }
+      void this.refreshSavedViews(key);
     });
   }
 
-  /** Apply initialFilters only when its content actually changes (config is rebuilt often). */
+  private async refreshSavedViews(resourceKey: string): Promise<void> {
+    const adapter = this.savedViewsAdapter;
+    if (!adapter) return;
+    const views = await adapter.list(resourceKey);
+    this.savedViews.set(views);
+    const defaultView = views.find((v) => v.isDefault);
+    if (defaultView && !this.activeSavedViewId() && !this.query()) {
+      this.applySavedView(defaultView, false);
+    }
+  }
+
+  private emitQueryChange(): void {
+    if (this.suppressQueryEmit()) return;
+    const q = this.listingQuery();
+    this.queryChange.emit(q);
+    if (this.remote()) {
+      this.load.emit(q);
+    }
+  }
+
+  private patchQuery(patch: Partial<ListingQueryState>, resetPage = false): void {
+    this.listingQuery.update((current) => {
+      const next = mergeListingQuery(current, patch);
+      if (resetPage) next.page = 1;
+      return next;
+    });
+    this.emitQueryChange();
+  }
+
+  /**
+   * Replace the full filter group (Notion builder Apply / Clear / chip remove).
+   */
+  private replaceFilterGroup(group: FilterGroup, resetPage = true): void {
+    this.patchQuery(withSyncedFilters({ ...this.listingQuery(), filterGroup: group }), resetPage);
+  }
+
+  /** @deprecated initialFilters — kept via effect; use query input instead. */
   private lastInitialFilters = '';
-  readonly initialFiltersEffect = effect(() => {
-    const init = this.config().initialFilters;
-    const key = JSON.stringify(init ?? null);
-    if (key === this.lastInitialFilters) return;
-    this.lastInitialFilters = key;
-    this.filterValues.set({ ...(init ?? {}) });
-    this.page.set(1);
-  });
 
   readonly pageSizeOptions = computed(
     () => this.config().pageSizeOptions ?? [10, 20, 50, 100]
   );
 
-  readonly filterActive = computed(() => Object.keys(this.filterValues()).length > 0);
+  readonly filterActive = computed(() => collectLeaves(this.activeFilterGroup()).length > 0);
   readonly hiddenCount = computed(
     () => this.controlColumns().filter((c) => !c.visible).length
   );
+  readonly resolvedActions = computed((): ListingActionItem[] => {
+    const configured = this.config().actions ?? [];
+    if (!this.features().export) {
+      return configured;
+    }
+    // If feature export is true and not already explicitly added, auto-insert Export action
+    const hasExport = configured.some((a) => a.id === 'export');
+    if (hasExport) {
+      return configured;
+    }
+    const exportItem: ListingActionItem = {
+      id: 'export',
+      label: 'Export',
+      variant: 'secondary',
+      icon: 'download',
+    };
+    // Place Export before primary (e.g. New) if present, or at the end
+    const primaryIdx = configured.findIndex((a) => a.variant === 'primary');
+    if (primaryIdx >= 0) {
+      return [
+        ...configured.slice(0, primaryIdx),
+        exportItem,
+        ...configured.slice(primaryIdx),
+      ];
+    }
+    return [...configured, exportItem];
+  });
+
   readonly hasActions = computed(() => {
-    const actions = this.config().actions ?? [];
+    const actions = this.resolvedActions();
     return (
-      !!this.config().projectedActions ||
       actions.some((a) => a.visible !== false) ||
-      this.visibleSelectionActions().length > 0
+      this.visibleSelectionActions().length > 0 ||
+      this.config().projectedActions === true
     );
   });
 
@@ -232,6 +1613,35 @@ export class ListingFlatComponent<T = unknown> {
     });
   });
 
+  /** True below 600px — the toolbar condenses to primary action + ⋯ overflow. */
+  readonly isMobile = signal(false);
+
+  /** First visible primary action — stays a button on mobile. */
+  readonly primaryAction = computed(() =>
+    this.resolvedActions().find(
+      (a) => a.visible !== false && a.variant === 'primary'
+    )
+  );
+
+  /** Mobile ⋯ menu: selection actions first, then non-primary bar actions. */
+  readonly mobileMenuNodes = computed((): ActionMenuNode[] => {
+    const primary = this.primaryAction();
+    const bar = this.resolvedActions().filter(
+      (a) => a.visible !== false && a !== primary
+    );
+    const nodes: ActionMenuNode[] = [];
+    for (const a of this.visibleSelectionActions()) {
+      nodes.push(this.toMenuNode(a));
+    }
+    if (nodes.length > 0 && bar.length > 0) {
+      nodes.push({ kind: 'divider' });
+    }
+    for (const a of bar) {
+      nodes.push(this.toMenuNode(a));
+    }
+    return nodes;
+  });
+
   readonly visibleColumns = computed((): ColumnConfig[] => {
     const visible = new Set(
       this.controlColumns()
@@ -241,17 +1651,26 @@ export class ListingFlatComponent<T = unknown> {
     return this.config().columns.filter((c) => visible.has(c.key));
   });
 
+  readonly pagerTotal = computed(() =>
+    this.remote() ? (this.remoteTotal() ?? this.items().length) : this.filteredItems().length
+  );
+
   readonly filteredItems = computed(() => {
+    if (this.remote()) return this.items();
+    const q = this.listingQuery();
     const searchFields =
       this.config().searchFields ?? this.config().columns.map((c) => c.field || c.key);
-    return this.items().filter(
+    let rows = this.items().filter(
       (item) =>
-        matchesSearch(item, this.search(), searchFields) &&
-        matchesFilters(item, this.filterValues())
+        matchesSearch(item, q.search ?? '', searchFields) &&
+        matchesFilterGroup(item, resolveFilterGroup(q))
     );
+    rows = sortItemsLocally(rows, q.sort, this.config().columns);
+    return rows;
   });
 
   readonly pageItems = computed(() => {
+    if (this.remote()) return this.items();
     const rows = this.filteredItems();
     if (!this.features().pagination) return rows;
     const size = this.pageSize();
@@ -259,29 +1678,246 @@ export class ListingFlatComponent<T = unknown> {
     return rows.slice(start, start + size);
   });
 
-  onColumnsChange(cols: ListingControlsColumn[]): void {
-    this.controlColumns.set(cols);
+  setColumnVisibility(key: string, visible: boolean): void {
+    this.controlColumns.update((cols) =>
+      cols.map((c) => (c.key === key ? { ...c, visible } : c))
+    );
+    this.patchQuery({ columns: columnStateFromControls(this.controlColumns()) }, false);
   }
 
-  onFilterChange(values: Record<string, unknown>): void {
-    this.filterValues.set(values);
-    this.page.set(1);
+  showAllColumns(): void {
+    this.controlColumns.update((cols) => cols.map((c) => ({ ...c, visible: true })));
+    this.patchQuery({ columns: columnStateFromControls(this.controlColumns()) }, false);
+  }
+
+  resetDefaultColumns(): void {
+    this.controlColumns.update((cols) => cols.map((c) => ({ ...c, visible: true })));
+    this.patchQuery({ columns: columnStateFromControls(this.controlColumns()) }, false);
+  }
+
+  onFilterMenuOpened(): void {
+    this.filterMenuOpenCount.update((c) => c + 1);
+  }
+
+  onFilterApply(group: FilterGroup): void {
+    this.replaceFilterGroup(group);
+    this.filterMenuTrigger?.closeMenu();
+  }
+
+  onFilterClear(): void {
+    this.replaceFilterGroup(emptyFilterGroup());
+    this.filterMenuTrigger?.closeMenu();
+  }
+
+  onRemoveFilterLeaf(leafIndex: number): void {
+    const next = removeLeafAt(this.activeFilterGroup(), leafIndex);
+    this.replaceFilterGroup(next);
+  }
+
+  getFilterValue(key: string): unknown {
+    return this.filterValues()[key] ?? null;
+  }
+
+  setFilterValue(key: string, value: unknown): void {
+    const field = this.pinnedFilters().find((f) => f.key === key)
+      ?? (this.config().filters ?? []).find((f) => f.key === key);
+    if (!field) return;
+    const next = upsertPinnedClause(this.activeFilterGroup(), field, value);
+    this.replaceFilterGroup(next);
+  }
+
+  rangePart(key: string, index: 0 | 1): string {
+    const value = this.getFilterValue(key);
+    if (!Array.isArray(value)) return '';
+    return value[index] != null ? String(value[index]) : '';
+  }
+
+  setRangePart(key: string, index: 0 | 1, part: string): void {
+    const current = this.getFilterValue(key);
+    const next: [string, string] = [
+      Array.isArray(current) && current[0] != null ? String(current[0]) : '',
+      Array.isArray(current) && current[1] != null ? String(current[1]) : '',
+    ];
+    next[index] = part ?? '';
+    if (!next[0] && !next[1]) {
+      this.setFilterValue(key, null);
+      return;
+    }
+    this.setFilterValue(key, next);
   }
 
   onSearchChange(value: string): void {
-    this.search.set(value);
-    this.page.set(1);
-  }
-
-  onResetFilters(): void {
-    this.filterValues.set({});
-    this.search.set('');
-    this.page.set(1);
+    this.patchQuery({ search: value }, true);
   }
 
   onPageChange(ev: { page: number; pageSize: number }): void {
-    this.page.set(ev.page);
-    this.pageSize.set(ev.pageSize);
+    this.patchQuery({ page: ev.page, pageSize: ev.pageSize }, false);
+  }
+
+  onSortChange(ev: SortChangeEvent): void {
+    this.patchQuery(
+      {
+        sort: ev.direction ? { field: ev.column, direction: ev.direction } : null,
+      },
+      true
+    );
+  }
+
+  applySavedView(view: ListingSavedView, markActive = true): void {
+    this.suppressQueryEmit.set(true);
+    this.listingQuery.set({ ...view.query, page: view.query.page ?? 1 });
+    this.controlColumns.set(
+      controlColumnsFromQuery(this.config().columns, view.query.columns)
+    );
+    this.suppressQueryEmit.set(false);
+    if (markActive) {
+      this.activeSavedViewId.set(view.id);
+      this.activeSavedViewQuery.set(view.query);
+    }
+    this.emitQueryChange();
+  }
+
+  async promptSaveView(update: boolean): Promise<void> {
+    const adapter = this.savedViewsAdapter;
+    const resourceKey = this.resourceKey();
+    if (!adapter || !resourceKey) return;
+    const defaultName = update
+      ? this.savedViews().find((v) => v.id === this.activeSavedViewId())?.name ?? 'My view'
+      : 'My view';
+    const name = window.prompt(update ? 'Update view name' : 'Save view as', defaultName);
+    if (!name?.trim()) return;
+    const query = { ...this.listingQuery(), page: 1 };
+    const isDefault = window.confirm('Set as your default view for this list?');
+    if (update && this.activeSavedViewId()) {
+      await adapter.update(this.activeSavedViewId()!, {
+        name: name.trim(),
+        isDefault,
+        query,
+      });
+    } else {
+      const created = await adapter.create({
+        resourceKey,
+        name: name.trim(),
+        isDefault,
+        query,
+      });
+      this.activeSavedViewId.set(created.id);
+      this.activeSavedViewQuery.set(created.query);
+    }
+    await this.refreshSavedViews(resourceKey);
+  }
+
+  async deleteActiveView(): Promise<void> {
+    const adapter = this.savedViewsAdapter;
+    const resourceKey = this.resourceKey();
+    const id = this.activeSavedViewId();
+    if (!adapter || !resourceKey || !id) return;
+    if (!window.confirm('Delete this saved view?')) return;
+    await adapter.delete(id);
+    this.activeSavedViewId.set(null);
+    this.activeSavedViewQuery.set(null);
+    await this.refreshSavedViews(resourceKey);
+  }
+
+  handleActionClick(id: string): void {
+    if (id === 'export') {
+      this.openExportDialog();
+      return;
+    }
+    this.actionClick.emit(id);
+  }
+
+  // ── Export Modal State & Logic ──────────────────────────────────────────
+  readonly exportDialogOpen = signal(false);
+  readonly exportScope = signal<'all' | 'page' | 'selection'>('all');
+  readonly exportColumns = signal<{ key: string; label: string; field: string; selected: boolean }[]>([]);
+
+  readonly selectedExportColumnsCount = computed(
+    () => this.exportColumns().filter((c) => c.selected).length
+  );
+
+  readonly exportTargetCount = computed(() => {
+    switch (this.exportScope()) {
+      case 'selection':
+        return this.selection().length;
+      case 'page':
+        return this.pageItems().length;
+      case 'all':
+      default:
+        return this.filteredItems().length;
+    }
+  });
+
+  openExportDialog(): void {
+    // Default scope: 'selection' if rows are selected, otherwise 'all'
+    this.exportScope.set(this.selection().length > 0 ? 'selection' : 'all');
+
+    // Initialize columns from config, defaulting to currently visible columns
+    const visibleKeys = new Set(this.visibleColumns().map((c) => c.key));
+    this.exportColumns.set(
+      this.config().columns.map((c) => ({
+        key: c.key,
+        label: c.label,
+        field: c.field ?? c.key,
+        selected: visibleKeys.has(c.key),
+      }))
+    );
+
+    this.exportDialogOpen.set(true);
+  }
+
+  closeExportDialog(): void {
+    this.exportDialogOpen.set(false);
+  }
+
+  toggleExportColumn(key: string, selected: boolean): void {
+    this.exportColumns.update((cols) =>
+      cols.map((c) => (c.key === key ? { ...c, selected } : c))
+    );
+  }
+
+  toggleAllExportColumns(select: boolean): void {
+    this.exportColumns.update((cols) =>
+      cols.map((c) => ({ ...c, selected: select }))
+    );
+  }
+
+  confirmExport(): void {
+    let rows: Record<string, unknown>[] = [];
+    switch (this.exportScope()) {
+      case 'selection':
+        rows = this.selection() as Record<string, unknown>[];
+        break;
+      case 'page':
+        rows = this.pageItems() as Record<string, unknown>[];
+        break;
+      case 'all':
+      default:
+        rows = this.filteredItems() as Record<string, unknown>[];
+        break;
+    }
+
+    const columns = this.exportColumns()
+      .filter((c) => c.selected)
+      .map((c) => ({
+        field: c.field,
+        label: c.label,
+      }));
+
+    if (columns.length === 0 || rows.length === 0) {
+      this.closeExportDialog();
+      return;
+    }
+
+    const filename = this.config().exportFilename ?? 'export';
+    this.csvService.exportToCsv(rows, columns, filename);
+    this.exportClick.emit();
+    this.actionClick.emit('export');
+    this.closeExportDialog();
+  }
+
+  exportFilteredData(): void {
+    this.openExportDialog();
   }
 
   /** Single mode: row click toggles the selected row (highlight, no checkboxes). */
@@ -300,5 +1936,17 @@ export class ListingFlatComponent<T = unknown> {
   private setSelection(items: T[]): void {
     this.selection.set(items);
     this.selectionChange.emit(items);
+  }
+
+  private toMenuNode(a: ListingActionItem): ActionMenuNode {
+    return {
+      id: a.id,
+      label: a.label ?? a.id,
+      icon: a.icon,
+      danger: a.variant === 'danger',
+      disabled: a.disabled,
+      tooltip: a.tooltip,
+      confirm: a.id === 'delete' || a.id === 'delete-bulk' || a.variant === 'danger',
+    };
   }
 }

@@ -44,6 +44,10 @@ import {
   ActionMenuComponent,
   type ActionMenuNode,
 } from '@platform/lib/anatomy/components/molecules/action-menu';
+import {
+  ToolbarComponent,
+  type ToolbarAction,
+} from '@platform/lib/anatomy/components/molecules/toolbar';
 import { DataTableComponent } from '@platform/lib/anatomy/components/organisms/data-table';
 import { PageShellComponent } from '@platform/lib/anatomy/components/organisms/page-shell';
 import type { ColumnConfig, FilterFieldConfig } from '@platform/lib/anatomy/types';
@@ -89,6 +93,7 @@ const ICON_COLORS = ['primary', 'success', 'warning', 'danger', 'info'] as const
     ListingControlsComponent,
     ListingActionsComponent,
     ActionMenuComponent,
+    ToolbarComponent,
     DataTableComponent,
     PageShellComponent,
   ],
@@ -679,6 +684,37 @@ const ICON_COLORS = ['primary', 'success', 'warning', 'danger', 'info'] as const
           </section>
         }
 
+        @case ('toolbar') {
+          <section class="block">
+            <h2>Beaucoup d'actions — overflow automatique dans « ⋯ »</h2>
+            <div class="row">
+              <span class="row__label">maxVisible</span>
+              <nf-button variant="secondary" size="sm" (clicked)="toolbarMaxVisible.set(2)">2</nf-button>
+              <nf-button variant="secondary" size="sm" (clicked)="toolbarMaxVisible.set(4)">4</nf-button>
+              <nf-button variant="secondary" size="sm" (clicked)="toolbarMaxVisible.set(99)">sans limite</nf-button>
+              <span class="muted">actuel : {{ toolbarMaxVisible() === 99 ? '∞' : toolbarMaxVisible() }}</span>
+            </div>
+            <nf-toolbar
+              [actions]="toolbarDemoActions"
+              [maxVisible]="toolbarMaxVisible()"
+              (actionClick)="onListAction($event)"
+            />
+            <p class="muted">
+              Last action: {{ lastAction() || '—' }} · « Approuver » (primary) et « Supprimer » (danger) sont
+              épinglés par défaut — ils ne partent jamais dans le ⋯ sauf pinned: false.
+            </p>
+          </section>
+          <section class="block">
+            <h2>Réutilisable hors listing — n'importe quel contexte</h2>
+            <nf-toolbar
+              [actions]="toolbarDetailActions"
+              size="sm"
+              (actionClick)="onListAction($event)"
+            />
+            <p class="muted">size="sm" · cascades et boutons mélangés au même niveau.</p>
+          </section>
+        }
+
         @default {
           <div class="stub">
             <p class="muted">
@@ -975,6 +1011,41 @@ export class ComponentDemoPage {
     { id: 'ok', label: 'Action visible', icon: 'check' },
   ];
 
+  readonly toolbarMaxVisible = signal(4);
+
+  readonly toolbarDemoActions: ToolbarAction[] = [
+    { id: 'approve', label: 'Approuver', variant: 'primary', icon: 'check' },
+    { id: 'postpone', label: 'Décaler', icon: 'calendar' },
+    {
+      id: 'status',
+      label: 'Status',
+      children: [
+        { id: 'status-draft', label: 'Brouillon' },
+        { id: 'status-approved', label: 'Approuvé' },
+        { id: 'status-closed', label: 'Clôturé' },
+      ],
+    },
+    { id: 'duplicate', label: 'Dupliquer', icon: 'copy' },
+    {
+      id: 'export',
+      label: 'Exporter',
+      icon: 'download',
+      children: [
+        { id: 'export-csv', label: 'CSV', icon: 'file' },
+        { id: 'export-xlsx', label: 'Excel (.xlsx)', icon: 'file' },
+      ],
+    },
+    { id: 'print', label: 'Imprimer', icon: 'printer' },
+    { id: 'archive', label: 'Archiver', icon: 'archive' },
+    { id: 'delete', label: 'Supprimer', icon: 'trash-2', danger: true, confirm: true },
+  ];
+
+  readonly toolbarDetailActions: ToolbarAction[] = [
+    { id: 'back', label: 'Retour', variant: 'ghost', icon: 'arrow-left', pinned: true },
+    { id: 'edit', label: 'Modifier', icon: 'pencil' },
+    { id: 'save', label: 'Enregistrer', variant: 'primary', icon: 'check' },
+  ];
+
   onListAction(id: string): void {
     this.lastAction.set(id);
   }
@@ -991,7 +1062,7 @@ export class ComponentDemoPage {
   ]);
   readonly listingSearch = signal('');
   readonly listingFilterValues = signal<Record<string, unknown>>({});
-  readonly listingSelectionMode = signal(false);
+  readonly listingSelectionMode = signal(true);
 
   readonly listingFilterFields: FilterFieldConfig[] = [
     {

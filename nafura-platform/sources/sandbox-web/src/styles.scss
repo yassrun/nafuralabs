@@ -5,6 +5,388 @@
 
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Angular Material Theme Overrides (Kill indigo-pink leak globally)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mat-mdc-checkbox {
+  --mdc-checkbox-selected-checkmark-color: #ffffff;
+  --mdc-checkbox-selected-focus-icon-color: var(--nf-primary, #2563eb);
+  --mdc-checkbox-selected-hover-icon-color: var(--nf-primary, #2563eb);
+  --mdc-checkbox-selected-icon-color: var(--nf-primary, #2563eb);
+  --mdc-checkbox-selected-pressed-icon-color: var(--nf-primary, #2563eb);
+  --mat-checkbox-selected-focus-state-layer-color: var(--nf-primary, #2563eb);
+  --mat-checkbox-selected-hover-state-layer-color: var(--nf-primary, #2563eb);
+  --mat-checkbox-selected-pressed-state-layer-color: var(--nf-primary, #2563eb);
+
+  --mdc-checkbox-unselected-focus-icon-color: var(--nf-color-gray-500, #6b7280);
+  --mdc-checkbox-unselected-hover-icon-color: var(--nf-color-gray-600, #4b5563);
+  --mdc-checkbox-unselected-icon-color: var(--nf-color-gray-400, #9ca3af);
+  --mdc-checkbox-unselected-pressed-icon-color: var(--nf-color-gray-600, #4b5563);
+  --mat-checkbox-unselected-focus-state-layer-color: var(--nf-color-gray-400, #9ca3af);
+  --mat-checkbox-unselected-hover-state-layer-color: var(--nf-color-gray-400, #9ca3af);
+  --mat-checkbox-unselected-pressed-state-layer-color: var(--nf-color-gray-400, #9ca3af);
+
+  --mdc-checkbox-state-layer-size: 28px;
+
+  .mdc-checkbox {
+    padding: 4px;
+    margin: 0;
+  }
+  .mdc-checkbox__background {
+    border-radius: 4px !important;
+    border-width: 1.5px !important;
+  }
+  .mat-mdc-checkbox-touch-target {
+    display: none;
+  }
+}
+
+/* ── Material Menu Override (Clean white surface, fine border, shadow) ── */
+.mat-mdc-menu-panel {
+  background: var(--nf-surface-section, #ffffff) !important;
+  border: 1px solid var(--nf-border-default, #e5e7eb) !important;
+  border-radius: var(--nf-radius-md, 8px) !important;
+  box-shadow: var(--nf-shadow-md, 0 8px 24px rgba(0, 0, 0, 0.12)) !important;
+  min-width: 160px !important;
+
+  .mat-mdc-menu-content {
+    padding: 4px !important;
+  }
+}
+
+.mat-mdc-menu-item {
+  min-height: 32px !important;
+  height: 32px !important;
+  padding: 0 10px !important;
+  border-radius: 6px !important;
+  font-size: 0.8125rem !important;
+  font-family: inherit !important;
+  color: var(--nf-text-primary, #111827) !important;
+  line-height: 32px !important;
+  transition: background-color 0.1s ease;
+
+  &:hover:not([disabled]) {
+    background: var(--nf-surface-hover, #f9fafb) !important;
+    color: var(--nf-text-primary, #111827) !important;
+  }
+
+  .mat-mdc-menu-item-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8125rem;
+  }
+}
+
+/* ── Columns Menu in Overlay ── */
+.mat-mdc-menu-panel.nf-listing-flat-menu--columns,
+.mat-mdc-menu-panel.nf-columns-menu-panel {
+  min-width: 200px !important;
+  max-width: 260px !important;
+  padding: 0 !important;
+
+  .mat-mdc-menu-content {
+    padding: 0 !important;
+  }
+}
+
+/* ── Filter Menu in Overlay (must be global — panel is outside component host) ── */
+.mat-mdc-menu-panel.nf-listing-flat-menu--filter {
+  --mat-menu-container-max-width: min(640px, calc(100vw - 24px));
+  width: max-content !important;
+  min-width: 440px !important;
+  max-width: min(640px, calc(100vw - 24px)) !important;
+  height: auto !important;
+  max-height: min(80vh, 640px) !important;
+  overflow-x: visible !important;
+  overflow-y: auto !important;
+  padding: 0 !important;
+
+  .mat-mdc-menu-content {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .mat-mdc-menu-panel.nf-listing-flat-menu--filter {
+    width: calc(100vw - 24px) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+}
+
+.nf-columns-menu {
+  min-width: 200px;
+  max-width: 260px;
+}
+.nf-columns-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--nf-border-default, #e5e7eb);
+  background: var(--nf-surface-section, #ffffff);
+}
+.nf-columns-menu__title {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--nf-text-muted, #6b7280);
+}
+.nf-columns-menu__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nf-columns-menu__action-btn {
+  background: none;
+  border: none;
+  padding: 1px 4px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--nf-primary, #2563eb);
+  cursor: pointer;
+  border-radius: 3px;
+  line-height: 1.2;
+  transition: background 0.1s ease;
+
+  &:hover {
+    background: var(--nf-primary-light, #eff6ff);
+  }
+}
+.nf-columns-menu__sep {
+  color: var(--nf-border-default, #d1d5db);
+  font-size: 0.6875rem;
+}
+.nf-columns-menu__list {
+  padding: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.nf-columns-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.1s ease;
+
+  &:hover {
+    background-color: var(--nf-surface-hover, #f9fafb);
+  }
+}
+.nf-columns-menu__checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  border: 1.5px solid var(--nf-border-default, #d1d5db);
+  border-radius: 4px;
+  background-color: var(--nf-surface-section, #ffffff);
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  transition: all 0.12s ease-in-out;
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: var(--nf-primary, #2563eb);
+  }
+
+  &:checked {
+    background-color: var(--nf-primary, #2563eb);
+    border-color: var(--nf-primary, #2563eb);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.2 4.8L6.5 10.5L3.8 7.8' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-size: 11px 11px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--nf-primary, #2563eb);
+    outline-offset: 1px;
+  }
+}
+.nf-columns-menu__label {
+  font-size: 0.8125rem;
+  color: var(--nf-text-primary, #111827);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+/* ── Material Select & Options Override ── */
+.mat-mdc-select {
+  font-family: inherit;
+  font-size: 0.8125rem;
+
+  .mat-mdc-select-trigger {
+    color: var(--nf-text-primary, #111827);
+  }
+
+  .mat-mdc-select-arrow svg {
+    fill: var(--nf-text-muted, #6b7280) !important;
+  }
+}
+
+.mat-mdc-select-panel {
+  background: var(--nf-surface-section, #ffffff) !important;
+  border: 1px solid var(--nf-border-default, #e5e7eb) !important;
+  border-radius: var(--nf-radius-md, 8px) !important;
+  box-shadow: var(--nf-shadow-md, 0 8px 24px rgba(0, 0, 0, 0.12)) !important;
+  padding: 4px !important;
+
+  .mat-mdc-option {
+    min-height: 32px !important;
+    height: 32px !important;
+    padding: 0 10px !important;
+    border-radius: 6px !important;
+    font-size: 0.8125rem !important;
+    font-family: inherit !important;
+    color: var(--nf-text-primary, #111827) !important;
+    line-height: 32px !important;
+
+    &:hover:not(.mdc-list-item--disabled) {
+      background: var(--nf-surface-hover, #f9fafb) !important;
+    }
+
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+      background: var(--nf-primary-light, #eff6ff) !important;
+      color: var(--nf-primary, #2563eb) !important;
+      font-weight: 500 !important;
+
+      .mdc-list-item__primary-text {
+        color: var(--nf-primary, #2563eb) !important;
+      }
+    }
+  }
+}
+
+/* ── Material Form Field Outlined Override ── */
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-outline-color: var(--nf-border-default, #e5e7eb);
+  --mdc-outlined-text-field-focus-outline-color: var(--nf-primary, #2563eb);
+  --mdc-outlined-text-field-hover-outline-color: var(--nf-color-gray-400, #9ca3af);
+  --mdc-outlined-text-field-label-text-color: var(--nf-text-secondary, #4b5563);
+  --mdc-outlined-text-field-focus-label-text-color: var(--nf-primary, #2563eb);
+  --mdc-outlined-text-field-input-text-color: var(--nf-text-primary, #111827);
+  --mdc-outlined-text-field-outline-width: 1px;
+  --mdc-outlined-text-field-focus-outline-width: 1.5px;
+
+  font-family: inherit;
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: var(--nf-border-default, #e5e7eb) !important;
+  }
+
+  &.mat-focused {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--nf-primary, #2563eb) !important;
+    }
+  }
+}
+
+/* ── Global Anatomy Export Backdrop & Dialog Fix ── */
+.nf-export-backdrop {
+  z-index: 1050 !important;
+}
+
+/* ── Global Anatomy Checkbox Fix (Universal styling for any native table/checkbox) ── */
+input[type="checkbox"].nf-table-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  display: inline-block;
+  vertical-align: middle;
+  border: 1.5px solid var(--nf-border-default, #d1d5db);
+  border-radius: 4px;
+  background-color: var(--nf-surface-section, #ffffff);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.12s ease-in-out;
+  outline: none;
+
+  &:hover {
+    border-color: var(--nf-primary, #2563eb);
+  }
+
+  &:checked {
+    background-color: var(--nf-primary, #2563eb);
+    border-color: var(--nf-primary, #2563eb);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.2 4.8L6.5 10.5L3.8 7.8' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-size: 11px 11px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  &:indeterminate {
+    background-color: var(--nf-primary, #2563eb);
+    border-color: var(--nf-primary, #2563eb);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 8H12' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-size: 11px 11px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+    border-color: var(--nf-primary, #2563eb);
+  }
+}
+
+/* ── Global Material Table Tightening & Theme Alignment ── */
+.mat-mdc-table {
+  background: var(--nf-surface-section, #ffffff) !important;
+  font-family: inherit !important;
+}
+
+.mat-mdc-header-row {
+  background: var(--nf-color-gray-50, #f9fafb) !important;
+  height: 38px !important;
+}
+
+.mat-mdc-header-cell {
+  font-family: inherit !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  color: var(--nf-text-muted, #6b7280) !important;
+  border-bottom: 1px solid var(--nf-border-default, #e5e7eb) !important;
+}
+
+.mat-mdc-row {
+  height: 38px !important;
+  font-family: inherit !important;
+  background-color: var(--nf-surface-section, #ffffff);
+  transition: background-color 0.1s ease;
+
+  &:hover {
+    background-color: var(--nf-color-gray-50, #f9fafb) !important;
+  }
+}
+
+.mat-mdc-cell {
+  font-family: inherit !important;
+  font-size: 0.8125rem !important;
+  color: var(--nf-text-primary, #111827) !important;
+  border-bottom: 1px solid var(--nf-color-gray-100, #f3f4f6) !important;
+}
+
 html,
 body {
   height: 100%;

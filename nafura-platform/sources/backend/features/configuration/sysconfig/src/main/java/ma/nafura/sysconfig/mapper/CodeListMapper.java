@@ -21,6 +21,8 @@ public interface CodeListMapper extends EntityMapper<CodeList, CodeListCreateDto
     @Mapping(target = "tenantId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     CodeList toEntity(CodeListCreateDto createDto);
 
     @Override
@@ -28,6 +30,8 @@ public interface CodeListMapper extends EntityMapper<CodeList, CodeListCreateDto
     @Mapping(target = "tenantId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     void updateEntity(CodeListUpdateDto updateDto, @MappingTarget CodeList entity);
 
     @Override

@@ -61,17 +61,84 @@ export interface PageChangeEvent {
   `,
   styles: [`
     :host { display: block; }
-    .nf-pag { display: flex; align-items: center; gap: 1rem; padding: 0.625rem 0; font-size: 13px; color: #475569; flex-wrap: wrap; }
-    .nf-pag__sizer { display: flex; align-items: center; gap: 6px; }
-    .nf-pag__sizer select { padding: 3px 6px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 12px; background: white; }
-    .nf-pag__counter { color: #64748b; white-space: nowrap; }
-    .nf-pag__nav { display: flex; align-items: center; gap: 3px; margin-left: auto; }
-    .nf-pag__btn { min-width: 28px; height: 28px; padding: 0 6px; border: 1px solid #e2e8f0; border-radius: 5px; background: white; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #475569; transition: all 80ms; }
-    .nf-pag__btn:hover:not(:disabled) { background: #f1f5f9; border-color: #cbd5e1; }
-    .nf-pag__btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .nf-pag__btn--active { background: #0d9488; color: white; border-color: #0d9488; font-weight: 700; }
-    .nf-pag__btn--active:hover { background: #0f766e; }
-    .nf-pag__ellipsis { padding: 0 4px; color: #94a3b8; }
+    .nf-pag {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 10px 16px;
+      font-size: 0.8125rem;
+      color: var(--nf-text-secondary, #4b5563);
+      flex-wrap: wrap;
+      background: var(--nf-surface-section, #ffffff);
+      border-top: 1px solid var(--nf-border-default, #e5e7eb);
+    }
+    .nf-pag__sizer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nf-pag__sizer select {
+      padding: 3px 8px;
+      border: 1px solid var(--nf-border-default, #d1d5db);
+      border-radius: var(--nf-radius-sm, 6px);
+      font-size: 0.8125rem;
+      background: var(--nf-surface-section, #ffffff);
+      color: var(--nf-text-primary, #111827);
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.12s ease;
+      &:focus {
+        border-color: var(--nf-primary, #2563eb);
+      }
+    }
+    .nf-pag__counter {
+      color: var(--nf-text-muted, #6b7280);
+      white-space: nowrap;
+    }
+    .nf-pag__nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+    }
+    .nf-pag__btn {
+      min-width: 28px;
+      height: 28px;
+      padding: 0 8px;
+      border: 1px solid var(--nf-border-default, #e5e7eb);
+      border-radius: var(--nf-radius-sm, 6px);
+      background: var(--nf-surface-section, #ffffff);
+      font-size: 0.8125rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--nf-text-primary, #111827);
+      transition: all 0.12s ease;
+      user-select: none;
+    }
+    .nf-pag__btn:hover:not(:disabled) {
+      background: var(--nf-surface-hover, #f9fafb);
+      border-color: var(--nf-border-default, #d1d5db);
+    }
+    .nf-pag__btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      border-color: var(--nf-border-default, #e5e7eb);
+    }
+    .nf-pag__btn--active {
+      background: var(--nf-primary, #2563eb) !important;
+      color: #ffffff !important;
+      border-color: var(--nf-primary, #2563eb) !important;
+      font-weight: 600;
+    }
+    .nf-pag__btn--active:hover {
+      background: var(--nf-primary-hover, #1d4ed8) !important;
+    }
+    .nf-pag__ellipsis {
+      padding: 0 4px;
+      color: var(--nf-text-muted, #9ca3af);
+    }
   `],
 })
 export class PaginationComponent {

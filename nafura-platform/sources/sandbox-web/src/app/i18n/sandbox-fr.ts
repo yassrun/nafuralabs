@@ -1,5 +1,16 @@
 /** Minimal FR strings so Import magique + help dialog are readable in the showroom. */
 export const SANDBOX_FR = {
+  Filters: 'Filtres',
+  Clear: 'Effacer',
+  Apply: 'Appliquer',
+  'No filters yet': 'Aucun filtre',
+  'Add filter': 'Ajouter un filtre',
+  'Add filter group': 'Ajouter un groupe',
+  Group: 'Groupe',
+  All: 'Tous',
+  Yes: 'Oui',
+  No: 'Non',
+  'Remove filter': 'Retirer le filtre',
   shared: {
     filters: {
       reset: 'Réinitialiser',

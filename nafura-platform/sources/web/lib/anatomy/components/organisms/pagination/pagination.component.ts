@@ -41,17 +41,116 @@ export interface PageChangeEvent {
   `,
   styles: [`
     .nf-pagination {
+      display: block;
       background-color: transparent;
+      font-size: 0.75rem;
 
       ::ng-deep {
         .mat-mdc-paginator-container {
-          padding: 0 var(--nf-space-1, 4px);
+          padding: 6px 4px;
           min-height: 36px;
           justify-content: flex-end;
+          align-items: center;
+          gap: 12px;
+          font-family: inherit;
+        }
+
+        .mat-mdc-paginator-page-size {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          margin-right: 4px;
+        }
+
+        .mat-mdc-paginator-page-size-label {
+          font-size: 0.75rem;
+          color: var(--nf-text-muted, #6b7280);
+          margin: 0;
+        }
+
+        .mat-mdc-paginator-page-size-select {
+          margin: 0 !important;
+          width: auto !important;
+
+          .mat-mdc-form-field-infix {
+            padding: 1px 0 !important;
+            min-height: 0 !important;
+          }
+
+          .mat-mdc-text-field-wrapper {
+            padding: 0 8px !important;
+            background: var(--nf-surface-section, #ffffff) !important;
+            border: 1px solid var(--nf-border-default, #e5e7eb) !important;
+            border-radius: 6px !important;
+            height: 26px !important;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+          }
+
+          .mat-mdc-form-field-subscript-wrapper,
+          .mdc-line-ripple {
+            display: none !important;
+          }
+
+          .mat-mdc-select-value {
+            font-size: 0.75rem !important;
+            font-weight: 500 !important;
+            color: var(--nf-text-primary, #111827) !important;
+          }
+
+          .mat-mdc-select-arrow svg {
+            fill: var(--nf-text-muted, #6b7280) !important;
+          }
         }
 
         .mat-mdc-paginator-range-label {
-          margin: 0 12px;
+          font-size: 0.75rem;
+          font-weight: 500;
+          color: var(--nf-text-muted, #6b7280);
+          margin: 0 8px;
+        }
+
+        .mat-mdc-paginator-range-actions {
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+        }
+
+        .mat-mdc-icon-button.mat-mdc-button-base {
+          --mdc-icon-button-state-layer-size: 26px;
+          width: 26px;
+          height: 26px;
+          padding: 0;
+          border-radius: 6px;
+          border: 1px solid var(--nf-border-default, #e5e7eb);
+          background: var(--nf-surface-section, #ffffff);
+          color: var(--nf-text-secondary, #4b5563);
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+          transition: all 0.1s ease;
+
+          &:hover:not(:disabled) {
+            background: var(--nf-surface-hover, #f9fafb);
+            border-color: var(--nf-color-gray-300, #d1d5db);
+            color: var(--nf-text-primary, #111827);
+          }
+
+          &:disabled {
+            opacity: 0.35;
+            background: transparent;
+            box-shadow: none;
+            border-color: transparent;
+          }
+
+          .mat-mdc-button-touch-target {
+            display: none;
+          }
+
+          svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+          }
         }
       }
     }
@@ -65,6 +164,30 @@ export interface PageChangeEvent {
       padding: 0 !important;
       margin: 0 !important;
       min-height: 0 !important;
+    }
+
+    @media (max-width: 600px) {
+      ::ng-deep {
+        .mat-mdc-paginator-container {
+          justify-content: space-between !important;
+          flex-wrap: nowrap !important;
+          padding: 2px 4px !important;
+          min-height: 32px !important;
+        }
+        .mat-mdc-paginator-page-size {
+          margin-right: 4px !important;
+        }
+        .mat-mdc-paginator-range-label {
+          margin: 0 4px !important;
+          font-size: 0.75rem !important;
+        }
+        .mat-mdc-icon-button.mat-mdc-button-base {
+          --mdc-icon-button-state-layer-size: 26px;
+          width: 26px;
+          height: 26px;
+          padding: 0;
+        }
+      }
     }
   `],
 })
