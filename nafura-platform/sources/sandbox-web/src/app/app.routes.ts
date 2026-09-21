@@ -13,6 +13,7 @@ import { ProductDetailPage } from './archetypes/product-detail.page';
 import { Details1nPage } from './archetypes/details-1n.page';
 import { MasterSlavePage } from './archetypes/master-slave.page';
 import { ListingTreePage } from './archetypes/listing-tree.page';
+import { FileSlotsPage } from './archetypes/file-slots.page';
 import { ComponentDemoPage } from './components/component-demo.page';
 
 /** Remount when params/data change so sidebar clicks always refresh the view. */
@@ -42,6 +43,7 @@ export const APP_ROUTES: Routes = [
   { path: '', component: HomePage },
   { path: 'archetypes/listing', component: ListingFlatPage },
   { path: 'archetypes/listing-tree', component: ListingTreePage },
+  { path: 'archetypes/file-slots', component: FileSlotsPage },
   { path: 'archetypes/details/:id', component: ProductDetailPage },
   { path: 'archetypes/details-1n/:id', component: Details1nPage },
   { path: 'archetypes/master-slave', component: MasterSlavePage },

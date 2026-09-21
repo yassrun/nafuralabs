@@ -1,7 +1,9 @@
 package ma.nafura.etudes.print;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -16,9 +18,12 @@ import ma.nafura.etudes.domain.devis.DevisLigne;
 import ma.nafura.etudes.domain.dossier.DossierEtude;
 import ma.nafura.etudes.domain.dpgf.Dpgf;
 import ma.nafura.etudes.domain.dpgf.DpgfNoeud;
+import ma.nafura.etudes.domain.planning.DossierPlanningActivite;
+import ma.nafura.etudes.domain.planning.DossierPlanningRessource;
 import ma.nafura.etudes.repository.DossierEtudeRepository;
 import ma.nafura.etudes.service.DevisService;
 import ma.nafura.etudes.service.DossierEtudeService;
+import ma.nafura.etudes.service.DossierPlanningService;
 import ma.nafura.etudes.service.DpgfService;
 import ma.nafura.etudes.service.gate.ResultatGate;
 import ma.nafura.platform.collaboration.docmanager.template.AmountInWords;
@@ -32,27 +37,34 @@ import org.springframework.stereotype.Component;
 @Component
 public class EtudesEntityDataProvider implements EntityDataProvider {
 
+    private static final BigDecimal CENT = new BigDecimal("100");
+
     private final DevisService devisService;
     private final DossierEtudeService dossierEtudeService;
     private final DossierEtudeRepository dossierRepository;
     private final DpgfService dpgfService;
+    private final DossierPlanningService planningService;
 
     public EtudesEntityDataProvider(
             DevisService devisService,
             DossierEtudeService dossierEtudeService,
             DossierEtudeRepository dossierRepository,
-            DpgfService dpgfService) {
+            DpgfService dpgfService,
+            DossierPlanningService planningService) {
         this.devisService = devisService;
         this.dossierEtudeService = dossierEtudeService;
         this.dossierRepository = dossierRepository;
         this.dpgfService = dpgfService;
+        this.planningService = planningService;
     }
 
     @Override
     public boolean supports(String entityType) {
         return EtudesPrintEntityTypes.DEVIS.equals(entityType)
                 || EtudesPrintEntityTypes.DOSSIER_BORDEREAU.equals(entityType)
-                || EtudesPrintEntityTypes.DOSSIER_SYNTHESE.equals(entityType);
+                || EtudesPrintEntityTypes.DOSSIER_SYNTHESE.equals(entityType)
+                || EtudesPrintEntityTypes.DOSSIER_PLANNING.equals(entityType)
+                || EtudesPrintEntityTypes.DOSSIER_RESSOURCES.equals(entityType);
     }
 
     @Override
@@ -64,6 +76,8 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
             case EtudesPrintEntityTypes.DEVIS -> mapDevis(entityId);
             case EtudesPrintEntityTypes.DOSSIER_BORDEREAU -> mapBordereau(entityId);
             case EtudesPrintEntityTypes.DOSSIER_SYNTHESE -> mapSynthese(entityId);
+            case EtudesPrintEntityTypes.DOSSIER_PLANNING -> mapPlanning(entityId);
+            case EtudesPrintEntityTypes.DOSSIER_RESSOURCES -> mapRessources(entityId);
             default -> Map.of();
         };
     }
@@ -77,6 +91,8 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
             case EtudesPrintEntityTypes.DEVIS -> sampleDevis();
             case EtudesPrintEntityTypes.DOSSIER_BORDEREAU -> sampleBordereau();
             case EtudesPrintEntityTypes.DOSSIER_SYNTHESE -> sampleSynthese();
+            case EtudesPrintEntityTypes.DOSSIER_PLANNING -> samplePlanning();
+            case EtudesPrintEntityTypes.DOSSIER_RESSOURCES -> sampleRessources();
             default -> Map.of();
         };
     }
@@ -231,6 +247,7 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
             m.put("totalTva", BigDecimal.ZERO);
             m.put("totalTtc", BigDecimal.ZERO);
             m.put("tvaTaux", null);
+            m.put("totalTtcEnLettres", AmountInWords.spellDirhams(BigDecimal.ZERO));
             return m;
         }
         Dpgf dpgf = dpgfService.getById(dossier.getDpgfId());
@@ -239,9 +256,66 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
         m.put("totalHt", dpgf.getTotalHt());
         m.put("totalTva", dpgf.getTotalTva());
         m.put("totalTtc", dpgf.getTotalTtc());
+        m.put("totalTtcEnLettres", AmountInWords.spellDirhams(dpgf.getTotalTtc()));
         List<Map<String, Object>> lignes = new ArrayList<>();
-        flattenNoeuds(dpgf.getHierarchie() != null ? dpgf.getHierarchie() : List.of(), 0, lignes);
+        flattenNoeuds(
+                dpgf.getHierarchie() != null ? dpgf.getHierarchie() : List.of(),
+                0,
+                dpgf.getTvaTaux(),
+                lignes);
         m.put("lignes", lignes);
+        return m;
+    }
+
+    private Map<String, Object> mapPlanning(UUID dossierId) {
+        DossierEtude dossier = requireDossier(dossierId);
+        Map<String, Object> m = baseDossier(dossier);
+        List<DossierPlanningActivite> rows = planningService.listerActivites(dossierId);
+        List<Map<String, Object>> activites = new ArrayList<>();
+        LocalDate debut = null;
+        LocalDate fin = null;
+        for (DossierPlanningActivite row : rows) {
+            Map<String, Object> a = new LinkedHashMap<>();
+            a.put("libelle", row.getLibelle());
+            a.put("lotLibelle", row.getLotLibelle());
+            a.put("dateDebut", row.getDateDebut());
+            a.put("dateFin", row.getDateFin());
+            a.put("dureeJours", dureeInclusive(row.getDateDebut(), row.getDateFin()));
+            activites.add(a);
+            if (row.getDateDebut() != null && (debut == null || row.getDateDebut().isBefore(debut))) {
+                debut = row.getDateDebut();
+            }
+            if (row.getDateFin() != null && (fin == null || row.getDateFin().isAfter(fin))) {
+                fin = row.getDateFin();
+            }
+        }
+        m.put("activites", activites);
+        m.put("dateDebut", debut);
+        m.put("dateFin", fin);
+        m.put("dureeJours", dureeInclusive(debut, fin));
+        return m;
+    }
+
+    private Map<String, Object> mapRessources(UUID dossierId) {
+        DossierEtude dossier = requireDossier(dossierId);
+        Map<String, Object> m = baseDossier(dossier);
+        List<Map<String, Object>> humaines = new ArrayList<>();
+        List<Map<String, Object>> materiel = new ArrayList<>();
+        for (DossierPlanningRessource row : planningService.listerRessources(dossierId)) {
+            Map<String, Object> r = new LinkedHashMap<>();
+            r.put("type", row.getType());
+            r.put("libelle", row.getLibelle());
+            r.put("quantite", row.getQuantite());
+            r.put("unite", row.getUnite());
+            r.put("notes", row.getNotes());
+            if (DossierPlanningRessource.TYPE_MATERIEL.equals(row.getType())) {
+                materiel.add(r);
+            } else {
+                humaines.add(r);
+            }
+        }
+        m.put("humaines", humaines);
+        m.put("materiel", materiel);
         return m;
     }
 
@@ -322,24 +396,46 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
         return m;
     }
 
-    private void flattenNoeuds(List<DpgfNoeud> nodes, int depth, List<Map<String, Object>> out) {
+    private void flattenNoeuds(
+            List<DpgfNoeud> nodes, int depth, BigDecimal tvaTaux, List<Map<String, Object>> out) {
         if (nodes == null) {
             return;
         }
         for (DpgfNoeud n : nodes) {
+            BigDecimal prixHt = n.getPrixUnitaire();
+            BigDecimal totalHt = n.getTotal();
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("type", n.getType());
             row.put("code", n.getCode());
             row.put("libelle", n.getLibelle());
             row.put("unite", n.getUnite());
             row.put("quantite", n.getQuantite());
-            row.put("prixUnitaire", n.getPrixUnitaire());
-            row.put("total", n.getTotal());
+            row.put("prixUnitaire", prixHt);
+            row.put("prixUnitaireHt", prixHt);
+            row.put("prixUnitaireTtc", ttc(prixHt, tvaTaux));
+            row.put("total", totalHt);
+            row.put("totalHt", totalHt);
+            row.put("totalTtc", ttc(totalHt, tvaTaux));
             row.put("depth", depth);
             row.put("indent", "  ".repeat(Math.max(0, depth)));
             out.add(row);
-            flattenNoeuds(n.getEnfants(), depth + 1, out);
+            flattenNoeuds(n.getEnfants(), depth + 1, tvaTaux, out);
         }
+    }
+
+    private static BigDecimal ttc(BigDecimal ht, BigDecimal tvaTaux) {
+        if (ht == null || tvaTaux == null) {
+            return null;
+        }
+        BigDecimal coef = BigDecimal.ONE.add(tvaTaux.divide(CENT, 8, RoundingMode.HALF_UP));
+        return ht.multiply(coef).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private static Long dureeInclusive(LocalDate debut, LocalDate fin) {
+        if (debut == null || fin == null || fin.isBefore(debut)) {
+            return null;
+        }
+        return ChronoUnit.DAYS.between(debut, fin) + 1;
     }
 
     private DossierEtude requireDossier(UUID id) {
@@ -393,48 +489,110 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
         Map<String, Object> m = new HashMap<>();
         m.put("code", "ETU-SAMPLE");
         m.put("numero", "ETU-SAMPLE");
-        m.put("objet", "Bordereau d'étude — échantillon");
+        m.put("objet", "BDP chiffré — échantillon");
         m.put("bordereauRevision", 1);
         m.put("tvaTaux", new BigDecimal("20"));
-        m.put("totalHt", new BigDecimal("50000"));
-        m.put("totalTva", new BigDecimal("10000"));
-        m.put("totalTtc", new BigDecimal("60000"));
+        m.put("totalHt", new BigDecimal("50000.00"));
+        m.put("totalTva", new BigDecimal("10000.00"));
+        m.put("totalTtc", new BigDecimal("60000.00"));
+        m.put("totalTtcEnLettres", AmountInWords.spellDirhams(new BigDecimal("60000.00")));
+        Map<String, Object> client = Map.of("name", "Client Exemple SA");
+        m.put("client", client);
+        m.put("customer", client);
+        Map<String, Object> lot = new LinkedHashMap<>();
+        lot.put("type", "LOT");
+        lot.put("code", "01");
+        lot.put("libelle", "Lot gros œuvre");
+        lot.put("unite", null);
+        lot.put("quantite", null);
+        lot.put("prixUnitaireHt", null);
+        lot.put("prixUnitaireTtc", null);
+        lot.put("depth", 0);
+        lot.put("indent", "");
+        lot.put("totalHt", new BigDecimal("50000.00"));
+        lot.put("totalTtc", new BigDecimal("60000.00"));
+        Map<String, Object> article = new LinkedHashMap<>();
+        article.put("type", "ARTICLE");
+        article.put("code", "01.01");
+        article.put("libelle", "Béton armé");
+        article.put("unite", "m³");
+        article.put("quantite", new BigDecimal("10"));
+        article.put("prixUnitaireHt", new BigDecimal("5000.00"));
+        article.put("totalHt", new BigDecimal("50000.00"));
+        article.put("prixUnitaireTtc", new BigDecimal("6000.00"));
+        article.put("totalTtc", new BigDecimal("60000.00"));
+        article.put("depth", 1);
+        article.put("indent", "  ");
+        m.put("lignes", List.of(lot, article));
+        return m;
+    }
+
+    private static Map<String, Object> samplePlanning() {
+        Map<String, Object> m = new HashMap<>();
+        m.put("code", "ETU-SAMPLE");
+        m.put("numero", "ETU-SAMPLE");
+        m.put("objet", "Planning prévisionnel — échantillon");
+        Map<String, Object> client = Map.of("name", "Client Exemple SA");
+        m.put("client", client);
+        m.put("customer", client);
+        LocalDate debut = LocalDate.of(2026, 10, 1);
+        LocalDate fin = LocalDate.of(2026, 11, 20);
+        m.put("dateDebut", debut);
+        m.put("dateFin", fin);
+        m.put("dureeJours", dureeInclusive(debut, fin));
+        m.put(
+                "activites",
+                List.of(
+                        Map.of(
+                                "libelle",
+                                "Installation de chantier",
+                                "lotLibelle",
+                                "—",
+                                "dateDebut",
+                                debut,
+                                "dateFin",
+                                LocalDate.of(2026, 10, 8),
+                                "dureeJours",
+                                8L),
+                        Map.of(
+                                "libelle",
+                                "Gros œuvre RDC",
+                                "lotLibelle",
+                                "01 — Lot gros œuvre",
+                                "dateDebut",
+                                LocalDate.of(2026, 10, 9),
+                                "dateFin",
+                                fin,
+                                "dureeJours",
+                                43L)));
+        return m;
+    }
+
+    private static Map<String, Object> sampleRessources() {
+        Map<String, Object> m = new HashMap<>();
+        m.put("code", "ETU-SAMPLE");
+        m.put("numero", "ETU-SAMPLE");
+        m.put("objet", "Ressources prévues — échantillon");
         Map<String, Object> client = Map.of("name", "Client Exemple SA");
         m.put("client", client);
         m.put("customer", client);
         m.put(
-                "lignes",
+                "humaines",
                 List.of(
+                        Map.of("libelle", "Ingénieur", "quantite", new BigDecimal("1"), "unite", "u", "notes", ""),
                         Map.of(
-                                "type",
-                                "LOT",
-                                "code",
-                                "01",
                                 "libelle",
-                                "Lot gros œuvre",
-                                "depth",
-                                0,
-                                "indent",
-                                ""),
-                        Map.of(
-                                "type",
-                                "ARTICLE",
-                                "code",
-                                "01.01",
-                                "libelle",
-                                "Béton armé",
-                                "unite",
-                                "m³",
+                                "Technicien",
                                 "quantite",
-                                new BigDecimal("10"),
-                                "prixUnitaire",
-                                new BigDecimal("5000"),
-                                "total",
-                                new BigDecimal("50000"),
-                                "depth",
-                                1,
-                                "indent",
-                                "  ")));
+                                new BigDecimal("2"),
+                                "unite",
+                                "u",
+                                "notes",
+                                "")));
+        m.put(
+                "materiel",
+                List.of(Map.of(
+                        "libelle", "Grue à tour", "quantite", new BigDecimal("1"), "unite", "u", "notes", "")));
         return m;
     }
 
@@ -448,6 +606,7 @@ public class EtudesEntityDataProvider implements EntityDataProvider {
         m.put("bordereauRevision", 1);
         m.put("nombreArticles", 12);
         m.put("anomaliesBloquantes", 0);
+        m.put("devisNumero", "DEV-SAMPLE");
         m.put("totalHt", new BigDecimal("50000"));
         Map<String, Object> client = Map.of("name", "Client Exemple SA");
         m.put("client", client);

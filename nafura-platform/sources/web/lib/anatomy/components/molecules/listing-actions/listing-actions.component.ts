@@ -14,6 +14,33 @@ export type ListingActionItem = ButtonListItem;
 /** List = Export/New… · Tree = expand/collapse + add node / add child / delete. */
 export type ListingActionsMode = 'list' | 'tree';
 
+const TREE_RESERVED_IDS = new Set([
+  'expand-all',
+  'collapse-all',
+  'toggle-select',
+  'add-node',
+  'add-child',
+  'delete',
+]);
+
+/** Extra with the same id overlays the built-in; reserved ids that are not built-in stay hidden. */
+function overlayTreeActions(
+  builtIn: ListingActionItem[],
+  extras: ListingActionItem[],
+): ListingActionItem[] {
+  const extraById = new Map(extras.map((a) => [a.id, a]));
+  const merged = builtIn
+    .map((base) => {
+      const extra = extraById.get(base.id);
+      return extra ? { ...base, ...extra, id: base.id } : base;
+    })
+    .filter((a) => a.visible !== false);
+  const extraOnly = extras.filter(
+    (a) => !TREE_RESERVED_IDS.has(a.id) && a.visible !== false
+  );
+  return [...extraOnly, ...merged];
+}
+
 /**
  * Listing Actions (`nf-listing-actions`)
  *
@@ -25,10 +52,12 @@ export type ListingActionsMode = 'list' | 'tree';
  *
  * Then selection actions, then resolved actions.
  *
- * Tree mode (2 add actions only):
- * - **add-node** — always: no selection → root; selection → same level (sibling)
- * - **add-child** — only if a node is selected and `canAddChild`
- * - expand-all / collapse-all / delete (when selected; delete → ConfirmDialog)
+ * Tree mode:
+ * - fold toggle + multi-select toggle — left of the toolbar
+ * - add-node / add-child / delete — right
+ *
+ * Same-id extras overlay built-ins (`add-node` → « Ajouter un article »).
+ * `{ visible: false }` hides a built-in. New ids are prepended.
  *
  * **Delete always goes through {@link ConfirmDialogService}** (platform rule)
  * before `actionClick` emits `'delete'`.
@@ -44,6 +73,9 @@ export type ListingActionsMode = 'list' | 'tree';
   selector: 'nf-listing-actions',
   standalone: true,
   imports: [CommonModule, TranslateModule, ButtonListComponent],
+  host: {
+    '[class.nf-listing-actions--start]': 'placement() === "start"',
+  },
   template: `
     <div class="nf-listing-actions" role="toolbar" [attr.aria-label]="'Actions' | translate">
       <ng-content />
@@ -73,12 +105,20 @@ export type ListingActionsMode = 'list' | 'tree';
         margin-left: auto;
       }
 
+      :host.nf-listing-actions--start {
+        margin-left: 0;
+      }
+
       .nf-listing-actions {
         display: flex;
         align-items: center;
         flex-wrap: wrap;
         justify-content: flex-end;
         gap: var(--nf-space-2, 8px);
+      }
+
+      :host.nf-listing-actions--start .nf-listing-actions {
+        justify-content: flex-start;
       }
     `,
   ],
@@ -97,11 +137,32 @@ export class ListingActionsComponent {
   /** Tree: selected node id (null = none). */
   selectedId = input<string | null>(null);
 
-  /** Tree: selected node may receive a child (false for leaf/article). */
+  /** Tree: selected node may receive a child (`node.allowsChildren`). */
   canAddChild = input<boolean>(true);
 
   /** Tree: allow delete on selection (default true). */
   canDelete = input<boolean>(true);
+
+  /** Include the expand/collapse toggle. Put it on the left via `placement="start"`. */
+  showFoldActions = input<boolean>(true);
+
+  /**
+   * Tree fold toggle: `true` = arbre ouvert → bouton « tout replier » (chevrons-up).
+   * `false` = arbre fermé → bouton « tout déplier » (chevrons-down).
+   */
+  treeExpanded = input<boolean>(false);
+
+  /** Include the multi-select toggle (list-checks). Put it on the left via `placement="start"`. */
+  showBulkSelect = input<boolean>(false);
+
+  /** Multi-select mode is on — icon flips to close. */
+  bulkSelectActive = input<boolean>(false);
+
+  /** Include add-node / add-child / delete. */
+  showMutateActions = input<boolean>(true);
+
+  /** `start` = left of the toolbar (no auto margin). `end` = right (default). */
+  placement = input<'start' | 'end'>('end');
 
   /**
    * Platform rule: delete always asks for confirmation before emit.
@@ -111,6 +172,8 @@ export class ListingActionsComponent {
 
   expandAllLabel = input<string>('Expand all');
   collapseAllLabel = input<string>('Collapse all');
+  bulkSelectLabel = input<string>('Select rows');
+  cancelSelectLabel = input<string>('Cancel selection');
   addNodeLabel = input<string>('Add node');
   addChildLabel = input<string>('Add child');
   deleteLabel = input<string>('Delete');
@@ -121,6 +184,7 @@ export class ListingActionsComponent {
     'Are you sure you want to delete this item? This action cannot be undone.'
   );
   deleteConfirmLabel = input<string>('Delete');
+  deleteConfirmCancelLabel = input<string>('Cancel');
 
   size = input<ButtonSize>('sm');
   iconLibrary = input<'material' | 'lucide'>('lucide');
@@ -128,61 +192,72 @@ export class ListingActionsComponent {
   actionClick = output<string>();
 
   readonly resolvedActions = computed((): ListingActionItem[] => {
-    const extras = this.actions().filter((a) => a.visible !== false);
+    const extras = this.actions();
 
     if (this.mode() !== 'tree') {
-      return extras;
+      return extras.filter((a) => a.visible !== false);
     }
 
     const selected = !!this.selectedId();
     const allowChild = selected && this.canAddChild();
     const allowDelete = selected && this.canDelete();
+    const treeBuiltIn: ListingActionItem[] = [];
 
-    const treeBuiltIn: ListingActionItem[] = [
-      {
-        id: 'expand-all',
+    if (this.showFoldActions()) {
+      const expanded = this.treeExpanded();
+      treeBuiltIn.push({
+        id: expanded ? 'collapse-all' : 'expand-all',
         label: '',
-        icon: 'unfold-vertical',
-        variant: 'ghost',
-        ariaLabel: this.expandAllLabel(),
-        tooltip: this.expandAllLabel(),
-      },
-      {
-        id: 'collapse-all',
+        icon: expanded ? 'chevrons-up' : 'chevrons-down',
+        variant: 'secondary',
+        order: 0,
+        ariaLabel: expanded ? this.collapseAllLabel() : this.expandAllLabel(),
+        tooltip: expanded ? this.collapseAllLabel() : this.expandAllLabel(),
+      });
+    }
+
+    if (this.showBulkSelect()) {
+      const on = this.bulkSelectActive();
+      treeBuiltIn.push({
+        id: 'toggle-select',
         label: '',
-        icon: 'fold-vertical',
-        variant: 'ghost',
-        ariaLabel: this.collapseAllLabel(),
-        tooltip: this.collapseAllLabel(),
-      },
-      {
+        icon: on ? 'x' : 'list-checks',
+        variant: 'secondary',
+        active: on,
+        order: 1,
+        ariaLabel: on ? this.cancelSelectLabel() : this.bulkSelectLabel(),
+        tooltip: on ? this.cancelSelectLabel() : this.bulkSelectLabel(),
+      });
+    }
+
+    if (this.showMutateActions()) {
+      treeBuiltIn.push({
         id: 'add-node',
         label: this.addNodeLabel(),
         variant: allowChild ? 'secondary' : 'primary',
         icon: 'plus',
-      },
-    ];
-
-    if (allowChild) {
-      treeBuiltIn.push({
-        id: 'add-child',
-        label: this.addChildLabel(),
-        variant: 'primary',
-        icon: 'corner-down-right',
       });
+
+      if (allowChild) {
+        treeBuiltIn.push({
+          id: 'add-child',
+          label: this.addChildLabel(),
+          variant: 'primary',
+          icon: 'corner-down-right',
+        });
+      }
+
+      if (allowDelete) {
+        treeBuiltIn.push({
+          id: 'delete',
+          label: this.deleteLabel(),
+          variant: 'danger',
+          icon: 'trash-2',
+        });
+      }
     }
 
-    if (allowDelete) {
-      treeBuiltIn.push({
-        id: 'delete',
-        label: this.deleteLabel(),
-        variant: 'danger',
-        icon: 'trash-2',
-      });
-    }
-
-    const reserved = new Set(treeBuiltIn.map((a) => a.id));
-    return [...extras.filter((a) => !reserved.has(a.id)), ...treeBuiltIn];
+    return overlayTreeActions(treeBuiltIn, extras);
   });
 
   async onActionClick(id: string): Promise<void> {
@@ -191,6 +266,7 @@ export class ListingActionsComponent {
         title: this.deleteConfirmTitle(),
         message: this.deleteConfirmMessage(),
         confirmLabel: this.deleteConfirmLabel(),
+        cancelLabel: this.deleteConfirmCancelLabel(),
         variant: 'danger',
         icon: 'delete',
       });

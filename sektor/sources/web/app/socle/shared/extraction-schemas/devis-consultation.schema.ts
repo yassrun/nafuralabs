@@ -10,8 +10,11 @@ Return ONLY valid JSON matching the provided JSON Schema.
 CRITICAL INSTRUCTIONS:
 - Output a single JSON object with a "lignes" array.
 - Each line is a priced item: identity (code / référence / cle_stable), libellé, quantité, unité, prix unitaire.
-- Map headers (Référence, Code, Désignation, Libellé, Qté, Quantité, Unité, PU, Prix, Prix unitaire, etc.) to schema fields.
-- Use null when a field is not present — do NOT invent values.
+- Map headers (Référence, Code, Désignation, Libellé, Qté, Quantité, Unité, PU, PU HT, Prix, Prix unitaire, Prix unitaire HT) to schema fields.
+- The unit price field name is "prixUnitaire" (number). Never "prixUnitaireHt".
+- If a line has several numbers, quantité is next to the unit (m3, t, kg, u). The MAD / PU / last price column is prixUnitaire.
+- Do NOT leave prixUnitaire null when a PU / prix unitaire / PU HT is printed on the line.
+- Use null only when the field is truly absent from the document.
 - Do NOT create catalogue articles. These are quote lines only.
 - A line needs at least identite or libelle.`,
   dataSchema: {

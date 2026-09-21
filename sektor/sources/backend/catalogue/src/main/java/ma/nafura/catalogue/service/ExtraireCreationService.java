@@ -38,9 +38,20 @@ public class ExtraireCreationService {
         }
         String natureCode = StringUtils.hasText(nature) ? nature.trim().toUpperCase() : "MATIERE";
         String unite = StringUtils.hasText(uniteCode) ? uniteCode.trim() : "U";
+        String designationSlug = slugOf(designation);
+        Item alreadyOnTenant = findExistingTenantItem(cleStableHint, designationSlug);
+        if (alreadyOnTenant != null) {
+            return new ExtraireCreerDto(
+                    alreadyOnTenant.getId().toString(),
+                    alreadyOnTenant.getCleStable(),
+                    alreadyOnTenant.getName(),
+                    false,
+                    false);
+        }
+
         String cle = StringUtils.hasText(cleStableHint)
                 ? cleStableHint.trim()
-                : CatalogSlug.from(designation.trim());
+                : (designationSlug != null ? designationSlug : CatalogSlug.from(designation.trim()));
 
         CatalogArticle article = articleRepository.findByCleStable(cle).orElse(null);
         boolean createdSektor = false;
@@ -92,5 +103,29 @@ public class ExtraireCreationService {
                 item.getName(),
                 createdSektor,
                 true);
+    }
+
+    private Item findExistingTenantItem(String cleHint, String designationSlug) {
+        if (StringUtils.hasText(cleHint)) {
+            Item byHint = itemService.findByCleStable(cleHint.trim()).orElse(null);
+            if (byHint != null) {
+                return byHint;
+            }
+        }
+        if (StringUtils.hasText(designationSlug)) {
+            return itemService.findByCleStable(designationSlug).orElse(null);
+        }
+        return null;
+    }
+
+    private static String slugOf(String designation) {
+        if (!StringUtils.hasText(designation)) {
+            return null;
+        }
+        try {
+            return CatalogSlug.from(designation.trim());
+        } catch (RuntimeException ex) {
+            return null;
+        }
     }
 }

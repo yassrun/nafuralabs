@@ -29,7 +29,14 @@ export function mapDevisConsultationLignes(
       continue;
     }
     const quantiteRaw = row['quantite'] ?? row['qty'];
-    const prixRaw = row['prixUnitaire'] ?? row['pu'] ?? row['unitPrice'];
+    const prixRaw =
+      row['prixUnitaire'] ??
+      row['prixUnitaireHt'] ??
+      row['prixHT'] ??
+      row['prixHt'] ??
+      row['pu'] ??
+      row['puHt'] ??
+      row['unitPrice'];
     lignes.push({
       identite,
       libelle: libelle ?? identite,
@@ -52,14 +59,26 @@ export const DEVIS_CONSULTATION_IMPORT_DEFINITION: ExtractionDefinition = {
   validateRow: (row, rowIndex) => {
     const identite = String(row['identite'] ?? '').trim();
     const libelle = String(row['libelle'] ?? '').trim();
-    return identite || libelle
-      ? []
-      : [{
-          path: `${schema.arrayPath}[${rowIndex}].libelle`,
-          rowIndex,
-          kind: 'MISSING_REQUIRED',
-          message: 'Identité ou libellé requis',
-        }];
+    const issues: { path: string; rowIndex: number; kind: 'MISSING_REQUIRED'; message: string }[] = [];
+    if (!identite && !libelle) {
+      issues.push({
+        path: `${schema.arrayPath}[${rowIndex}].libelle`,
+        rowIndex,
+        kind: 'MISSING_REQUIRED',
+        message: 'Identité ou libellé requis',
+      });
+    }
+    const pu = row['prixUnitaire'] ?? row['prixUnitaireHt'] ?? row['pu'];
+    const n = pu == null || String(pu).trim() === '' ? NaN : Number(pu);
+    if (!Number.isFinite(n) || n <= 0) {
+      issues.push({
+        path: `${schema.arrayPath}[${rowIndex}].prixUnitaire`,
+        rowIndex,
+        kind: 'MISSING_REQUIRED',
+        message: 'Prix unitaire HT requis',
+      });
+    }
+    return issues;
   },
 };
 

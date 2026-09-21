@@ -497,8 +497,8 @@ public class DpgfService {
         UUID dpgfId = noeud.getDpgf().getId();
         assertStructureEditable(dpgfId);
         assertStructureReserveeCharge(dpgfId);
-        deleteDescendants(noeudId, tenantId);
-        noeudRepository.delete(noeud);
+        noeudRepository.detachPrixDpuForSubtree(noeudId, tenantId);
+        noeudRepository.deleteSubtree(noeudId, tenantId);
         recalcHeaderTotals(dpgfId);
     }
 
@@ -517,14 +517,6 @@ public class DpgfService {
         dossierEtudeRepository
                 .findByTenantIdAndDpgfId(tenantId(), dpgfId)
                 .ifPresent(dossier -> new EtudeSaisiePolicy().assertPeutSaisirApresGo(dossier));
-    }
-
-    private void deleteDescendants(UUID parentId, UUID tenantId) {
-        List<DpgfNoeud> children = noeudRepository.findByParentIdAndTenantIdOrderByOrdreAsc(parentId, tenantId);
-        for (DpgfNoeud child : children) {
-            deleteDescendants(child.getId(), tenantId);
-            noeudRepository.delete(child);
-        }
     }
 
     private void attachArbre(Dpgf entity) {

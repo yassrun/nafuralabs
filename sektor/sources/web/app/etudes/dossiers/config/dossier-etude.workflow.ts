@@ -245,6 +245,11 @@ export const DOSSIER_STATUS_BAR: StatusActionBarConfig<StatutDossierEtude, Dossi
   ],
 };
 
+/** Livrables d’impression : visibles à la validation finale, pas avant. */
+export function peutImprimerLivrablesEtude(status: string | undefined | null): boolean {
+  return status === 'FINANCIALLY_APPROVED' || status === 'FINAL_APPROVED';
+}
+
 /** Hors FSM : devis / chantier / issue commerciale après Validé définitivement. */
 export const DOSSIER_SUITE_ACTIONS: Array<{
   action: string;

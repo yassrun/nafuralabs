@@ -19,256 +19,53 @@
     @if (chargement()) {
       <p class="pieces__etat">Chargement des pièces…</p>
     } @else {
-      <div class="pieces__zones" role="group" aria-label="Pièces attendues">
-        @for (slot of mode() === 'documents' ? slotsPrincipaux() : slotsVisibles(); track slot.id) {
-          @let piece = documentPourSlot(slot);
-          @let busy = envoiSlot() === slot.id;
-          @let over = dragOverSlot() === slot.id;
-          <div
-            class="pieces__zone"
-            [class.pieces__zone--filled]="!!piece"
-            [class.pieces__zone--over]="over"
-            [class.pieces__zone--busy]="busy"
-            [class.pieces__zone--required]="slot.obligatoire && !piece"
-            (dragover)="onDragOver($event, slot.id)"
-            (dragleave)="onDragLeave($event, slot.id)"
-            (drop)="onDrop($event, slot)"
-          >
-            <div class="pieces__zone-head">
-              <span class="pieces__zone-badge">{{ badgeSlot(slot) }}</span>
-              @if (mode() === 'destination') {
-                @if (slot.obligatoire) {
-                  <span class="pieces__zone-req" aria-hidden="true">Obligatoire</span>
-                } @else {
-                  <span class="pieces__zone-opt">Optionnel</span>
-                }
-              } @else {
-                <span class="pieces__zone-opt">Optionnel</span>
-              }
-              @if (slot.source === 'IA') {
-                <span class="pieces__zone-ia">IA</span>
-              }
-            </div>
-            @if (mode() === 'destination') {
-              <h4 class="pieces__zone-titre">{{ slot.libelle }}</h4>
-              <p class="pieces__zone-aide">{{ libelleType(slot.type) }}</p>
-            }
-
-            @if (piece) {
-              <div class="pieces__zone-fichier">
-                <nf-icon name="description" class="pieces__zone-icone" aria-hidden="true"></nf-icon>
-                <button
-                  type="button"
-                  class="pieces__nom pieces__nom--lien"
-                  data-testid="ouvrir-document"
-                  [disabled]="ouvertureId() === piece.id"
-                  [attr.aria-busy]="ouvertureId() === piece.id"
-                  [attr.title]="'Ouvrir ' + (nomFichierAffiche(piece.nomFichier) || 'le document')"
-                  (click)="ouvrir(piece)"
-                >
-                  {{
-                    ouvertureId() === piece.id
-                      ? 'Ouverture…'
-                      : nomFichierAffiche(piece.nomFichier) || piece.documentId
-                  }}
-                </button>
-                @if (modifiable() && !fichierDeposeFige(piece)) {
-                  <nf-button
-                    type="button"
-                    variant="danger"
-                    size="sm"
-                    icon="trash-2"
-                    iconLibrary="lucide"
-                    tooltip="Retirer"
-                    aria-label="Retirer le document"
-                    [disabled]="!!envoiSlot()"
-                    (clicked)="supprimer(piece)"
-                  ></nf-button>
-                }
-              </div>
-              @if (mode() === 'bordereau' && modifiable() && peutExtraire()) {
-                <nf-button
-                  type="button"
-                  class="pieces__extract"
-                  variant="primary"
-                  size="sm"
-                  [disabled]="extractionEnCours() || phase() === 'saving'"
-                  [loading]="extractionEnCours() && pieceExtraction()?.id === piece.id"
-                  (clicked)="extraire(piece)"
-                >
-                  {{ labelExtraction() }}
-                </nf-button>
-              }
-              @if (modifiable() && !fichierDeposeFige(piece)) {
-                <label class="pieces__zone-replace">
-                  <span>{{ busy ? 'Remplacement…' : 'Remplacer' }}</span>
-                  <input
-                    type="file"
-                    [accept]="acceptFiles"
-                    [disabled]="!!envoiSlot()"
-                    (change)="onFichierChoisi($event, slot)"
-                  />
-                </label>
-              } @else if (fichierDeposeFige(piece)) {
-                <span class="pieces__zone-lock">Figé après cadrage</span>
-              }
-            } @else if (modifiable()) {
-              <label class="pieces__zone-drop">
-                <nf-icon name="upload_file" aria-hidden="true"></nf-icon>
-                <span class="pieces__zone-drop-main">
-                  {{
-                    busy
-                      ? 'Envoi…'
-                      : slot.type === 'BORDEREAU'
-                        ? 'Déposer un BDP'
-                        : slot.type === 'PLAN' || slot.type === 'PLA'
-                          ? 'Déposer les plans (PLA)'
-                          : mode() === 'documents'
-                            ? 'Déposer le fichier'
-                            : mode() === 'bordereau'
-                              ? 'Déposer un BDP'
-                              : 'Glissez-déposez le fichier ici'
-                  }}
-                </span>
-                <span class="pieces__zone-drop-sub">ou cliquez pour parcourir</span>
-                <input
-                  type="file"
-                  [accept]="acceptFiles"
-                  [disabled]="!!envoiSlot()"
-                  (change)="onFichierChoisi($event, slot)"
-                />
-              </label>
-            } @else {
-              <p class="pieces__vide">Non déposé</p>
-            }
-
-            @if (modifiable() && (mode() === 'destination' || (mode() === 'documents' && slot.type !== 'CPS' && slot.type !== 'BORDEREAU'))) {
-              <div class="pieces__zone-meta">
-                @if (mode() === 'destination') {
-                  <nf-button type="button" variant="ghost" size="sm" (clicked)="basculerObligatoire(slot)">
-                    {{ slot.obligatoire ? 'Rendre optionnel' : 'Rendre obligatoire' }}
-                  </nf-button>
-                }
-                <nf-button
-                  type="button"
-                  variant="danger"
-                  size="sm"
-                  (clicked)="retirerSlot(slot)"
-                >
-                  Retirer le slot
-                </nf-button>
-              </div>
-            }
-          </div>
-        }
-      </div>
-
-      @if (mode() === 'documents') {
-        <div class="pieces__autres">
-          <div class="pieces__autres-barre">
-            <button
-              type="button"
-              class="pieces__autres-toggle"
-              [attr.aria-expanded]="autresOuverts()"
-              (click)="toggleAutres()"
-            >
-              <span class="pieces__autres-chevron" [class.pieces__autres-chevron--open]="autresOuverts()">▸</span>
-              Autres documents
-              <span class="pieces__autres-count">
-                {{ autresDeposes() }}/{{ slotsSecondaires().length }}
-              </span>
-            </button>
-            @if (modifiable() && !ajoutOuvert()) {
-              <nf-button type="button" variant="ghost" size="sm" (clicked)="ajoutOuvert.set(true); autresOuverts.set(true)">
+      <nf-file-slots
+        [slots]="fileSlots()"
+        [density]="slotsDensity()"
+        [columns]="slotsColumns()"
+        [readonly]="slotsReadonly()"
+        [accept]="acceptFiles"
+        [showGroupAdd]="modifiable() && mode() === 'documents'"
+        [groupOpen]="autresOuverts()"
+        (groupOpenChange)="autresOuverts.set($event)"
+        inlineLabel="Pièces attendues"
+        (file)="onSlotFile($event)"
+        (open)="onSlotOpen($event)"
+        (remove)="onSlotRemove($event)"
+        (extract)="onSlotExtract($event)"
+        (dismiss)="onSlotDismiss($event)"
+        (add)="ajoutOuvert.set(true)"
+      >
+        @if (modifiable() && mode() === 'documents' && ajoutOuvert()) {
+          <div fileSlotsGroup class="pieces__ajout-form pieces__ajout-form--compact">
+            <nf-select
+              label="Type"
+              [options]="ajoutTypeCadrageOptions"
+              [ngModel]="ajoutType()"
+              (ngModelChange)="ajoutType.set($event)"
+            />
+            <label>
+              <span>Libellé</span>
+              <input
+                type="text"
+                [ngModel]="ajoutLibelle()"
+                (ngModelChange)="ajoutLibelle.set($event)"
+                placeholder="Ex. Règlement de consultation"
+              />
+            </label>
+            <div class="pieces__ajout-actions">
+              <nf-button type="button" variant="secondary" (clicked)="ajoutOuvert.set(false)">
+                Annuler
+              </nf-button>
+              <nf-button type="button" variant="primary" [disabled]="propositionBusy()" (clicked)="ajouterPiece()">
                 Ajouter
               </nf-button>
-            }
+            </div>
           </div>
-          @if (autresOuverts()) {
-            <ul class="pieces__autres-liste">
-              @for (slot of slotsSecondaires(); track slot.id) {
-                @let piece = documentPourSlot(slot);
-                @let busy = envoiSlot() === slot.id;
-                <li class="pieces__autres-ligne" [class.pieces__autres-ligne--busy]="busy">
-                  <span class="pieces__zone-badge">{{ badgeSlot(slot) }}</span>
-                  <span class="pieces__autres-libelle">{{ libelleSlot(slot) }}</span>
-                  @if (slot.source === 'IA') {
-                    <span class="pieces__zone-ia">IA</span>
-                  }
-                  @if (piece) {
-                    <button
-                      type="button"
-                      class="pieces__autres-fichier pieces__nom--lien"
-                      data-testid="ouvrir-document-autre"
-                      [disabled]="ouvertureId() === piece.id"
-                      [attr.title]="'Ouvrir ' + (nomFichierAffiche(piece.nomFichier) || 'le document')"
-                      (click)="ouvrir(piece)"
-                    >
-                      {{
-                        ouvertureId() === piece.id
-                          ? 'Ouverture…'
-                          : nomFichierAffiche(piece.nomFichier) || 'Déposé'
-                      }}
-                    </button>
-                    @if (modifiable() && !fichierDeposeFige(piece)) {
-                      <label class="pieces__autres-lien">
-                        Remplacer
-                        <input type="file" [accept]="acceptFiles" [disabled]="!!envoiSlot()" (change)="onFichierChoisi($event, slot)" />
-                      </label>
-                    }
-                  } @else if (modifiable()) {
-                    <label class="pieces__autres-lien">
-                      {{ busy ? 'Envoi…' : 'Déposer' }}
-                      <input type="file" [accept]="acceptFiles" [disabled]="!!envoiSlot()" (change)="onFichierChoisi($event, slot)" />
-                    </label>
-                  } @else {
-                    <span class="pieces__autres-vide">—</span>
-                  }
-                  @if (modifiable()) {
-                    <nf-button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      icon="trash-2"
-                      iconLibrary="lucide"
-                      tooltip="Retirer"
-                      aria-label="Retirer la pièce"
-                      (clicked)="retirerSlot(slot)"
-                    ></nf-button>
-                  }
-                </li>
-              }
-            </ul>
-            @if (modifiable() && ajoutOuvert()) {
-              <div class="pieces__ajout-form pieces__ajout-form--compact">
-                <nf-select
-                  label="Type"
-                  [options]="ajoutTypeCadrageOptions"
-                  [ngModel]="ajoutType()"
-                  (ngModelChange)="ajoutType.set($event)"
-                />
-                <label>
-                  <span>Libellé</span>
-                  <input
-                    type="text"
-                    [ngModel]="ajoutLibelle()"
-                    (ngModelChange)="ajoutLibelle.set($event)"
-                    placeholder="Ex. Règlement de consultation"
-                  />
-                </label>
-                <div class="pieces__ajout-actions">
-                  <nf-button type="button" variant="secondary" (clicked)="ajoutOuvert.set(false)">
-                    Annuler
-                  </nf-button>
-                  <nf-button type="button" variant="primary" [disabled]="propositionBusy()" (clicked)="ajouterPiece()">
-                    Ajouter
-                  </nf-button>
-                </div>
-              </div>
-            }
-          }
-        </div>
-      } @else if (modifiable() && mode() === 'destination') {
+        }
+      </nf-file-slots>
+
+      @if (modifiable() && mode() === 'destination') {
         <div class="pieces__ajout">
           @if (!ajoutOuvert()) {
             <nf-button type="button" variant="secondary" (clicked)="ajoutOuvert.set(true)">
@@ -416,7 +213,7 @@
         [inlineBanner]="false"
         [peutAffecterLots]="peutAffecterLots()"
         [vueLotsAffectes]="vueLotsAffectes()"
-        (change)="change.emit()"
+        (change)="onArbrePersisteChange()"
       />
     } @else if (modifiable() && !extractionEnCours()) {
       <div class="pieces__arbre-vide">

@@ -1,6 +1,5 @@
 package ma.nafura.platform.framework.listing;
 
-import jakarta.persistence.criteria.Path;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -100,13 +99,11 @@ public final class ListingSpecificationBuilder {
         };
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static <T> Specification<T> between(String field, Comparable<?> from, Comparable<?> to) {
-        return (root, query, cb) -> {
-            Path<Comparable<Object>> path = root.get(field);
-            return cb.and(
-                    cb.greaterThanOrEqualTo(path, from),
-                    cb.lessThanOrEqualTo(path, to));
-        };
+        return (root, query, cb) -> cb.and(
+                cb.greaterThanOrEqualTo(root.get(field), (Comparable) from),
+                cb.lessThanOrEqualTo(root.get(field), (Comparable) to));
     }
 
     private static Object coerceScalar(String field, String raw) {

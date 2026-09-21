@@ -14,6 +14,8 @@ export interface ConsultationDecompoDialogData {
   dpgfId: string;
   preselectedCles?: string[];
   articleLibelle?: string;
+  /** Forfait ST : destinataires = sous-traitants, panier = le poste. */
+  objet?: 'composant' | 'forfait-st';
 }
 
 type OverlayPane = 'liste' | 'detail' | 'creer';
@@ -32,7 +34,7 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
 
       @if (articleCle(); as cle) {
         <p class="cs-hint">
-          Article courant : {{ articleLibelle() }}
+          {{ estForfaitSt() ? 'Poste forfait' : 'Article courant' }} : {{ articleLibelle() }}
           @if (articleLibelle() !== cle) {
             <span class="cs-cle">({{ cle }})</span>
           }
@@ -110,7 +112,7 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
             · {{ avancementLabel(sel) }}
             · liée à cette étude.
           </p>
-          <h3>Articles du panier</h3>
+          <h3>{{ estForfaitSt() ? 'Lots du panier' : 'Articles du panier' }}</h3>
           <ul class="cs-panier" data-cs-panier>
             @for (cle of sel.clesStables; track cle) {
               <li>
@@ -134,8 +136,13 @@ type OverlayPane = 'liste' | 'detail' | 'creer';
       @if (pane() === 'creer') {
         <div data-cs-pane="creer" class="cs-pane">
           <p class="cs-hint">
-            Article de départ : {{ articleLibelle() }} — déjà posé, pas tout l’arbre à cocher.
-            Les destinataires se saisissent ensuite sur la fiche Achats.
+            {{ estForfaitSt() ? 'Poste forfait' : 'Article de départ' }} : {{ articleLibelle() }} —
+            déjà posé, pas tout l’arbre à cocher.
+            {{
+              estForfaitSt()
+                ? 'Les sous-traitants se saisissent ensuite sur la fiche Achats.'
+                : 'Les destinataires se saisissent ensuite sur la fiche Achats.'
+            }}
           </p>
         </div>
       }
@@ -342,6 +349,8 @@ export class ConsultationDecompoDialogComponent {
   readonly saving = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
   readonly changed = signal(false);
+
+  readonly estForfaitSt = computed(() => this.data.objet === 'forfait-st');
 
   readonly articleCle = computed(() => {
     const raw = (this.data.preselectedCles ?? []).map((c) => c.trim()).filter(Boolean);

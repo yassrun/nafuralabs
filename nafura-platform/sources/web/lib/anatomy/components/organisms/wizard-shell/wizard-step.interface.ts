@@ -1,3 +1,6 @@
+/** Where Back / Next (or Submit) are rendered. */
+export type WizardActionsPlacement = 'footer' | 'stepper';
+
 /**
  * Wizard step definition.
  */

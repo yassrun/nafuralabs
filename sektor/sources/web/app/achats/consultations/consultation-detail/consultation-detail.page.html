@@ -253,12 +253,17 @@
             type="button"
             variant="primary"
             data-testid="consultation-envoyer"
-            [disabled]="envoyerSaving() || destSaving() || destDirty() || !canEnvoyer()"
+            [disabled]="envoyerSaving() || destSaving() || !canEnvoyer()"
             (clicked)="envoyer()"
           >
             {{ 'achats.consultation.envoyer' | translate }}
           </nf-button>
         </div>
+        @if (destDirty() && destDraft().length) {
+          <p class="cs-hint" data-testid="consultation-envoyer-hint">
+            {{ 'achats.consultation.envoyerNeedsSave' | translate }}
+          </p>
+        }
         @if (envoyerErreur(); as err) {
           <p class="cs-error" role="alert" data-testid="consultation-envoyer-error">{{ err }}</p>
         }

@@ -610,7 +610,9 @@
       },
       "entityTypes": {
         "devis": "Quote",
-        "dossier_etude_bordereau": "Study bill of quantities",
+        "dossier_etude_bordereau": "Priced bill of quantities",
+        "dossier_etude_planning": "Provisional schedule",
+        "dossier_etude_ressources": "Planned resources",
         "dossier_etude_synthese": "Study summary",
         "facture_client": "Client invoice"
       }

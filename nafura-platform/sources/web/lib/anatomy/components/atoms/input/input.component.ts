@@ -75,6 +75,12 @@ export class NfInputComponent implements ControlValueAccessor {
   /** Max length */
   @Input() maxlength?: number;
 
+  /** Native min (dates, numbers) */
+  @Input() min?: string | number | null;
+
+  /** Native max (dates, numbers) */
+  @Input() max?: string | number | null;
+
   /** Input ID (auto-generated if not provided) */
   @Input() id = `nf-input-${nextUniqueId++}`;
 
@@ -145,6 +151,6 @@ export class NfInputComponent implements ControlValueAccessor {
    * Check if error should be shown
    */
   shouldShowError(): boolean {
-    return !!(this.error && this.touched());
+    return !!this.error;
   }
 }

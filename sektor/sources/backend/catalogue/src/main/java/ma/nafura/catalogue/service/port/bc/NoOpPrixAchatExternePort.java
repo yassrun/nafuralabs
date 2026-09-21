@@ -39,4 +39,9 @@ public class NoOpPrixAchatExternePort implements PrixAchatExternePort {
     public List<PrixCandidat> allSources(UUID itemId, ContexteResolution ctx) {
         return List.of();
     }
+
+    @Override
+    public List<PrixCandidat> listHistorique(UUID itemId, String cleStable, ContexteResolution ctx) {
+        return List.of();
+    }
 }

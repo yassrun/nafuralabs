@@ -97,6 +97,8 @@
         type="date"
         label="Date limite de dépôt"
         [disabled]="champsVerrouilles()"
+        [min]="minSaisieDate(dateLimiteDepot())"
+        [error]="erreurDateLimiteDepot()"
         [ngModel]="dateLimiteDepot()"
         (ngModelChange)="onChamp('dateLimiteDepot', $event)"
       />
@@ -128,6 +130,8 @@
         type="date"
         label="Ouverture des plis"
         [disabled]="champsVerrouilles()"
+        [min]="minSaisieDate(dateOuverturePlis())"
+        [error]="erreurDateOuverturePlis()"
         [ngModel]="dateOuverturePlis()"
         (ngModelChange)="onChamp('dateOuverturePlis', $event)"
       />

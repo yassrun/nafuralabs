@@ -66,7 +66,10 @@ export class ConfirmDialogService {
         icon: options.icon,
       },
       disableClose: false,
-      autoFocus: false,
+      autoFocus: 'first-tabbable',
+      hasBackdrop: true,
+      width: '28rem',
+      maxWidth: 'calc(100vw - 2rem)',
       panelClass: 'nf-confirm-dialog-panel',
     };
 

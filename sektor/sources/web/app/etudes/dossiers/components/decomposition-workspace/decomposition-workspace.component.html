@@ -27,17 +27,8 @@
       </div>
     }
 
-    <div class="workspace__toolbar">
-      <label class="workspace__search">
-        <span class="sr-only">Rechercher un poste</span>
-        <input
-          type="search"
-          placeholder="Rechercher un poste…"
-          [ngModel]="search()"
-          (ngModelChange)="search.set($event)"
-        />
-      </label>
-      @if (modifiable()) {
+    @if (modifiable()) {
+      <div class="workspace__toolbar">
         <nf-button
           variant="secondary"
           size="sm"
@@ -46,8 +37,8 @@
         >
           Consultations
         </nf-button>
-      }
-    </div>
+      </div>
+    }
 
     <app-bordereau-arbre
       [dpgfId]="dpgfId()"
@@ -60,7 +51,6 @@
       [focusToken]="focusToken()"
       [expandArticleIds]="expandArticleIds()"
       [inlineBanner]="false"
-      [searchQuery]="search()"
       [reloadToken]="treeReloadToken()"
       [peutAffecterLots]="peutAffecterLots()"
       [vueLotsAffectes]="vueLotsAffectes()"

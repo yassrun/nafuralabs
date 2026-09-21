@@ -1,27 +1,5 @@
 <section class="arbre" aria-label="Arbre du bordereau">
   <header class="arbre__entete">
-    <div class="arbre__fold" role="group" aria-label="Déplier ou replier">
-      <nf-button
-        type="button"
-        variant="ghost"
-        size="sm"
-        icon="unfold-vertical"
-        iconLibrary="lucide"
-        tooltip="Tout déplier"
-        aria-label="Tout déplier"
-        (clicked)="expandAll()"
-      ></nf-button>
-      <nf-button
-        type="button"
-        variant="ghost"
-        size="sm"
-        icon="fold-vertical"
-        iconLibrary="lucide"
-        tooltip="Tout replier"
-        aria-label="Tout replier"
-        (clicked)="collapseAll()"
-      ></nf-button>
-    </div>
     <h4 class="arbre__titre">
       Arbre du bordereau
       @if (!chargement()) {
@@ -45,58 +23,27 @@
         </span>
       }
     </h4>
-    <div class="arbre__actions">
-      @if (showStructureActions()) {
-        <nf-listing-controls
-          [showSelectionToggle]="true"
-          [selectionModeActive]="bulkSelectMode()"
-          [showColumnsButton]="false"
-          [showSearch]="false"
-          [showFilterButton]="false"
-          [showFilterReset]="false"
-          (selectionToggleClick)="toggleBulkSelect()"
-        />
-        <nf-button type="button" variant="secondary" size="sm" (clicked)="ajouterLot()">
-          Ajouter un lot
-        </nf-button>
-      }
-    </div>
   </header>
-
-  @if (showStructureActions() && bulkSelectMode()) {
-    <nf-selection-bar
-      [count]="selectedCount()"
-      [actions]="bulkActions"
-      (actionClick)="onBulkAction($event)"
-      (clear)="toggleBulkSelect()"
-    />
-  }
 
   @if (inlineBanner() && erreur(); as message) {
     <app-etude-banner tone="error" [message]="message" />
   }
 
   <div class="arbre__table">
-    @for (epoch of [tableEpoch()]; track epoch) {
-    <nf-tree-table
+    <nf-listing-tree
+      [config]="listingConfig()"
       [nodes]="filteredNodes()"
-      [columns]="columns()"
-      treeColumnKey="libelle"
       [loading]="chargement()"
-      [expandedKeys]="expandedKeys()"
-      (expandedKeysChange)="expandedKeys.set($event)"
-      [selectable]="bulkSelectMode() ? 'multiple' : false"
-      [selectedKeys]="selectedKeys()"
-      (selectedKeysChange)="selectedKeys.set($event)"
-      [isSelectable]="isLotSelectable"
-      [rowClickable]="selectionEnabled() || openOnClick() || bulkSelectMode()"
+      [readonly]="!showStructureActions()"
+      [selectedKey]="selectedKey()"
+      [rowClickable]="true"
       [rowClass]="rowClass()"
       [rowTitle]="rowTitle"
-      (rowClick)="onRowClick($event)"
-      (rowDblClick)="onRowDblClick($event)"
       [minWidth]="tableMinWidth()"
       [scrollHeight]="tableScrollHeight"
-      [emptyMessage]="emptyMessage()"
+      (rowClick)="onRowClick($event)"
+      (rowDblClick)="onRowDblClick($event)"
+      (action)="onListingAction($event)"
     >
       <ng-template #cell let-row let-column="column">
         @switch (column.key) {
@@ -106,7 +53,6 @@
           @case ('code') {
             <span class="arbre__code" [attr.title]="row.code || null">{{ row.code }}</span>
           }
-          @case ('spacer') {}
           @case ('libelle') {
             <span class="arbre__libelle" [nfTooltip]="row.libelle || ''" position="bottom">
               <span class="arbre__libelle-text">{{ row.libelle }}</span>
@@ -166,69 +112,8 @@
               row.total != null ? (row.total | number: '1.2-2') : '—'
             }}</strong>
           }
-          @case ('actions') {
-            <span class="arbre__row-actions" (click)="stop($event)">
-              @if (showLotAffectation() && row.type === 'LOT') {
-                <nf-button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  icon="user-plus"
-                  iconLibrary="lucide"
-                  [tooltip]="row.chargeLotNom ? 'Changer l’affectation' : 'Affecter un ingénieur'"
-                  [attr.aria-label]="row.chargeLotNom ? 'Changer l’affectation' : 'Affecter un ingénieur'"
-                  (clicked)="affecterLot(row)"
-                ></nf-button>
-              }
-              @if (showStructureActions()) {
-                <nf-button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  icon="pencil"
-                  iconLibrary="lucide"
-                  tooltip="Modifier"
-                  aria-label="Modifier"
-                  (clicked)="modifier(row)"
-                ></nf-button>
-                @if (row.type !== 'ARTICLE') {
-                  <nf-button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    icon="corner-down-right"
-                    iconLibrary="lucide"
-                    tooltip="Ajouter un enfant"
-                    aria-label="Ajouter un enfant"
-                    (clicked)="ajouterEnfant(row)"
-                  ></nf-button>
-                }
-                <nf-button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  icon="plus"
-                  iconLibrary="lucide"
-                  tooltip="Ajouter au même niveau"
-                  aria-label="Ajouter au même niveau"
-                  (clicked)="ajouterMemeNiveau(row)"
-                ></nf-button>
-                <nf-button
-                  type="button"
-                  variant="danger"
-                  size="sm"
-                  icon="trash-2"
-                  iconLibrary="lucide"
-                  tooltip="Supprimer"
-                  aria-label="Supprimer"
-                  (clicked)="supprimer(row)"
-                ></nf-button>
-              }
-            </span>
-          }
         }
       </ng-template>
-    </nf-tree-table>
-    }
+    </nf-listing-tree>
   </div>
 </section>

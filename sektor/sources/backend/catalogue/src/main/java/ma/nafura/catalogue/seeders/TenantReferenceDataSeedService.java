@@ -94,6 +94,7 @@ public class TenantReferenceDataSeedService implements CatalogueOnboardingPort {
                     .name(name)
                     .description(node.has("description") ? node.get("description").asText() : null)
                     .cleStable(cle)
+                    .nature("MATIERE")
                     .isActive(true)
                     .build());
             }

@@ -2,8 +2,8 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 16rem;
-  flex: 1 1 auto;
+  min-height: 0;
+  flex: 1 1 0;
 }
 
 .arbre {
@@ -11,57 +11,23 @@
   border: 0;
   background: transparent;
   padding: 0;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-width: 0;
-  min-height: 16rem;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
 
 .arbre__entete,
-app-etude-banner,
-nf-selection-bar {
+app-etude-banner {
   flex-shrink: 0;
 }
 
-nf-selection-bar {
-  display: block;
-  margin-bottom: 0.35rem;
-}
-
 .arbre__entete {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
   gap: 0.5rem 0.75rem;
   margin-bottom: 0.35rem;
-}
-
-.arbre__fold,
-.arbre__actions {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 0.15rem;
-}
-
-@media (max-width: 640px) {
-  .arbre__entete {
-    grid-template-columns: 1fr auto;
-  }
-
-  .arbre__fold {
-    grid-column: 1;
-  }
-
-  .arbre__actions {
-    grid-column: 2;
-  }
-
-  .arbre__titre {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
 }
 
 .arbre__titre {
@@ -78,45 +44,6 @@ nf-selection-bar {
   font-weight: 500;
   font-size: 0.72rem;
   color: var(--nf-color-text-secondary);
-}
-
-.arbre__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem;
-  justify-content: flex-end;
-}
-
-.arbre__add-btn {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 1.85rem;
-  padding: 0 0.7rem;
-  margin-left: 0.15rem;
-  border-radius: 6px;
-  border: 1px solid var(--nf-color-border);
-  background: var(--nf-color-surface, #fff);
-  color: var(--nf-color-text-secondary);
-  font: inherit;
-  font-size: 0.72rem;
-  font-weight: 600;
-  line-height: 1;
-  cursor: pointer;
-  white-space: nowrap;
-  appearance: none;
-
-  &:hover {
-    color: var(--nf-color-text-primary);
-    border-color: color-mix(in srgb, var(--nf-color-primary-500, #0b6e7a) 45%, var(--nf-color-border));
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--nf-color-primary-600, #0b6e7a);
-    outline-offset: 1px;
-  }
 }
 
 .arbre__compte-warn {
@@ -190,9 +117,8 @@ nf-selection-bar {
 
 .arbre__table {
   min-width: 0;
-  flex: 1 1 auto;
-  min-height: 14rem;
-  /* Le scroll vit dans nf-tree-table — pas de 2e conteneur overflow. */
+  flex: 1 1 0;
+  min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -257,19 +183,6 @@ nf-selection-bar {
   color: var(--nf-color-text-secondary);
 }
 
-.arbre__row-actions {
-  display: inline-flex;
-  gap: 0;
-  white-space: nowrap;
-  justify-content: flex-end;
-  opacity: 0.55;
-}
-
-:host ::ng-deep tr:hover .arbre__row-actions,
-:host ::ng-deep .arbre__row--selected .arbre__row-actions {
-  opacity: 1;
-}
-
 .arbre__icon-btn {
   width: 1.85rem;
   height: 1.85rem;
@@ -313,13 +226,12 @@ nf-selection-bar {
   }
 
   .nf-tree-table__scroll {
-    border: 1px solid var(--nf-color-border);
-    border-radius: 8px;
+    border: 0;
+    border-radius: 0;
     background: var(--nf-color-surface, #fff);
     flex: 1 1 auto;
-    min-height: 12rem;
-    height: 100%;
-    max-height: 100%;
+    min-height: 0;
+    overflow: auto;
   }
 
   .nf-tree-table__engine {
@@ -363,27 +275,14 @@ nf-selection-bar {
 
   .nf-tree-table__engine .mat-mdc-header-cell.arbre__col-libelle,
   .nf-tree-table__engine .mat-mdc-cell.arbre__col-libelle {
-    width: 40%;
-    max-width: 40%;
     min-width: 0;
     overflow: hidden;
-  }
-
-  .nf-tree-table__engine .mat-mdc-header-cell.arbre__col-spacer,
-  .nf-tree-table__engine .mat-mdc-cell.arbre__col-spacer {
-    padding: 0;
-    border: 0;
   }
 
   /* Ombre sticky uniquement sur la 1re col sticky (Unité). */
   .nf-tree-table__engine .mat-mdc-header-cell.arbre__col-metric ~ .arbre__col-metric.nf-tree-table__cell--sticky-end,
   .nf-tree-table__engine .mat-mdc-cell.arbre__col-metric ~ .arbre__col-metric.nf-tree-table__cell--sticky-end {
     box-shadow: none;
-  }
-
-  .nf-tree-table__engine .mat-mdc-header-cell.arbre__col-actions,
-  .nf-tree-table__engine .mat-mdc-cell.arbre__col-actions {
-    overflow: visible;
   }
 
   .nf-tree-table__engine .mat-mdc-row:hover > .mat-mdc-cell {

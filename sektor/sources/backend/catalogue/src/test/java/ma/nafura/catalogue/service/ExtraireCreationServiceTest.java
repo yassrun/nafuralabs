@@ -2,6 +2,8 @@ package ma.nafura.catalogue.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +40,7 @@ class ExtraireCreationServiceTest {
     void setUp() {
         TenantContext.setTenantId(tenantId);
         service = new ExtraireCreationService(articleRepository, itemService, unitOfMeasureRepository);
+        lenient().when(itemService.findByCleStable(anyString())).thenReturn(Optional.empty());
     }
 
     @AfterEach
@@ -107,16 +110,7 @@ class ExtraireCreationServiceTest {
 
     @Test
     void identiteEtItemDejaLa_neDupliquePas() {
-        CatalogArticle published = CatalogArticle.builder()
-                .id(UUID.randomUUID())
-                .cleStable("ciment-cpj-45")
-                .libelle("Ciment CPJ 45")
-                .nature("MATIERE")
-                .uniteCode("T")
-                .statut("PUBLIE")
-                .build();
         Item item = Item.builder().id(itemId).cleStable("ciment-cpj-45").name("Ciment CPJ 45").build();
-        when(articleRepository.findByCleStable("ciment-cpj-45")).thenReturn(Optional.of(published));
         when(itemService.findByCleStable("ciment-cpj-45")).thenReturn(Optional.of(item));
 
         ExtraireCreerDto out = service.creer("Ciment CPJ 45", "MATIERE", "T", "ciment-cpj-45");
@@ -124,6 +118,26 @@ class ExtraireCreationServiceTest {
         assertThat(out.createdSektor()).isFalse();
         assertThat(out.createdItem()).isFalse();
         assertThat(out.itemId()).isEqualTo(itemId.toString());
+        verify(articleRepository, never()).save(any());
+        verify(itemService, never()).create(any());
+    }
+
+    @Test
+    void articleTenantDejaLa_neDupliquePasMemeSansIdentiteSektor() {
+        Item item = Item.builder()
+                .id(itemId)
+                .code("ART-BETON-B20")
+                .cleStable("beton-b20")
+                .name("Béton B20")
+                .build();
+        when(itemService.findByCleStable("beton-b20")).thenReturn(Optional.of(item));
+
+        ExtraireCreerDto out = service.creer("Béton B20", "MATIERE", "M3", null);
+
+        assertThat(out.createdSektor()).isFalse();
+        assertThat(out.createdItem()).isFalse();
+        assertThat(out.itemId()).isEqualTo(itemId.toString());
+        assertThat(out.cleStable()).isEqualTo("beton-b20");
         verify(articleRepository, never()).save(any());
         verify(itemService, never()).create(any());
     }

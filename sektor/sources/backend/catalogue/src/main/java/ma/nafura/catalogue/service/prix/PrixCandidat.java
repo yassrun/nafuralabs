@@ -15,7 +15,31 @@ public record PrixCandidat(
         LocalDate dateSource,
         UUID currencyId,
         String libelleSource,
-        boolean perime) {
+        boolean perime,
+        String kind,
+        String detail,
+        String supplierName) {
+
+    public PrixCandidat(
+            BigDecimal prixUnitaire,
+            String sourcePrix,
+            UUID sourceRefId,
+            LocalDate dateSource,
+            UUID currencyId,
+            String libelleSource,
+            boolean perime) {
+        this(
+                prixUnitaire,
+                sourcePrix,
+                sourceRefId,
+                dateSource,
+                currencyId,
+                libelleSource,
+                perime,
+                null,
+                null,
+                null);
+    }
 
     public PrixResolu toResolu() {
         return new PrixResolu(

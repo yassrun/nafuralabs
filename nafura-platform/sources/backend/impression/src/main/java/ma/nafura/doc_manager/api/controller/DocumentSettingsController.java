@@ -68,19 +68,43 @@ public class DocumentSettingsController {
     @RequirePermission(value = "administration.templates.read", fullPermission = true)
     public ResponseEntity<String> preview(
             @RequestParam String entityType, @Valid @RequestBody DocumentSettingsPayload payload) {
-        DocumentTemplate template = templateService.findDefaultForEntityType(entityType);
-        if (template == null || template.getTemplateBody() == null) {
-            return ResponseEntity.noContent().build();
+        try {
+            Map<String, String> fragments = settingsService.previewFragments(payload);
+            DocumentTemplate template = templateService.findDefaultForEntityType(entityType);
+            String body = template != null && template.getTemplateBody() != null
+                    ? template.getTemplateBody()
+                    : FALLBACK_PREVIEW_BODY;
+            String html = renderService.renderDraftHtml(body, entityType, null, fragments);
+            return htmlOk(html);
+        } catch (RuntimeException e) {
+            String message = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            String escaped = message.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+            return htmlOk("<p style=\"padding:1.5rem;color:#b42318\">" + escaped + "</p>");
         }
-        String html = renderService.renderDraftHtml(
-                template.getTemplateBody(),
-                entityType,
-                null,
-                settingsService.previewFragments(payload));
+    }
+
+    private static ResponseEntity<String> htmlOk(String html) {
         return ResponseEntity.ok()
                 .contentType(new MediaType(MediaType.TEXT_HTML, StandardCharsets.UTF_8))
                 .body(html);
     }
+
+    /** Letterhead-only stand-in so identity settings remain previewable before a type has a body. */
+    private static final String FALLBACK_PREVIEW_BODY =
+            """
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="UTF-8"/></head>
+            <body>
+              <div th:utext="${fragments.HEADER_DEFAULT}"></div>
+              <h1 style="font-family:Helvetica,Arial,sans-serif;font-size:14pt"
+                  th:text="${entity.numero != null ? entity.numero : 'Aperçu'}">Aperçu</h1>
+              <p style="font-family:Helvetica,Arial,sans-serif;color:#555"
+                 th:text="${entity.objet != null ? entity.objet : '—'}">—</p>
+              <div th:utext="${fragments.FOOTER_DEFAULT}"></div>
+            </body>
+            </html>
+            """;
 
     /** Data an administrator may insert into free text, for the "insert a value" menu. */
     @GetMapping("/tokens")

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, ViewEncapsulation, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -26,6 +26,7 @@ export interface ConfirmDialogData {
   selector: 'nf-confirm-dialog',
   standalone: true,
   imports: [CommonModule, MatDialogModule, MatIconModule, TranslateModule, ButtonComponent],
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div class="nf-confirm-dialog">
       <div class="nf-confirm-dialog__header">
@@ -55,6 +56,15 @@ export interface ConfirmDialogData {
     </div>
   `,
   styles: [`
+    .nf-confirm-dialog-panel .mat-mdc-dialog-container,
+    .nf-confirm-dialog-panel .mat-mdc-dialog-surface {
+      padding: 0;
+      overflow: hidden;
+      border-radius: 12px;
+      background: var(--nf-color-surface, #ffffff);
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22);
+    }
+
     .nf-confirm-dialog {
       width: 400px;
       max-width: 100%;

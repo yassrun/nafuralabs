@@ -61,6 +61,13 @@ export const SHOWROOM_NAV: ShowroomNavSection[] = [
         description: 'Hiérarchie · header colonnes',
       },
       {
+        id: 'file-slots',
+        label: 'nf-file-slots',
+        route: '/archetypes/file-slots',
+        status: 'live',
+        description: 'Slots documents typés · grouped · extract IA optionnel',
+      },
+      {
         id: 'details',
         label: 'nf-details',
         route: '/archetypes/details/prd-01',

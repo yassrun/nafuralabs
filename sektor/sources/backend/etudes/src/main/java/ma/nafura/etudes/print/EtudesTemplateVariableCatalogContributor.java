@@ -17,7 +17,9 @@ public class EtudesTemplateVariableCatalogContributor implements TemplateVariabl
         return Set.of(
                 EtudesPrintEntityTypes.DEVIS,
                 EtudesPrintEntityTypes.DOSSIER_BORDEREAU,
-                EtudesPrintEntityTypes.DOSSIER_SYNTHESE);
+                EtudesPrintEntityTypes.DOSSIER_SYNTHESE,
+                EtudesPrintEntityTypes.DOSSIER_PLANNING,
+                EtudesPrintEntityTypes.DOSSIER_RESSOURCES);
     }
 
     @Override
@@ -36,6 +38,16 @@ public class EtudesTemplateVariableCatalogContributor implements TemplateVariabl
                 new PrintEntityTypeDescriptor(
                         EtudesPrintEntityTypes.DOSSIER_BORDEREAU,
                         "administration.templates.entityTypes.dossier_etude_bordereau",
+                        "etudes",
+                        true),
+                new PrintEntityTypeDescriptor(
+                        EtudesPrintEntityTypes.DOSSIER_PLANNING,
+                        "administration.templates.entityTypes.dossier_etude_planning",
+                        "etudes",
+                        true),
+                new PrintEntityTypeDescriptor(
+                        EtudesPrintEntityTypes.DOSSIER_RESSOURCES,
+                        "administration.templates.entityTypes.dossier_etude_ressources",
                         "etudes",
                         true),
                 new PrintEntityTypeDescriptor(
@@ -69,8 +81,24 @@ public class EtudesTemplateVariableCatalogContributor implements TemplateVariabl
                     desc("entity.client.name", "Client", "string", null),
                     desc("entity.bordereauRevision", "Révision bordereau", "number", "1"),
                     desc("entity.totalHt", "Total HT", "number", null),
+                    desc("entity.totalTva", "Total TVA", "number", null),
                     desc("entity.totalTtc", "Total TTC", "number", null),
-                    desc("entity.lignes", "Lignes BDP aplaties (liste)", "list", null));
+                    desc("entity.totalTtcEnLettres", "Total TTC en lettres", "string", null),
+                    desc("entity.lignes", "Lignes BDP aplaties HT/TTC (liste)", "list", null));
+            case EtudesPrintEntityTypes.DOSSIER_PLANNING -> List.of(
+                    desc("entity.numero", "N° dossier", "string", "ETU-2026-001"),
+                    desc("entity.objet", "Objet", "string", null),
+                    desc("entity.client.name", "Client", "string", null),
+                    desc("entity.dateDebut", "Début du planning", "date", null),
+                    desc("entity.dateFin", "Fin du planning", "date", null),
+                    desc("entity.dureeJours", "Durée (j. calendaires)", "number", null),
+                    desc("entity.activites", "Activités (liste)", "list", null));
+            case EtudesPrintEntityTypes.DOSSIER_RESSOURCES -> List.of(
+                    desc("entity.numero", "N° dossier", "string", "ETU-2026-001"),
+                    desc("entity.objet", "Objet", "string", null),
+                    desc("entity.client.name", "Client", "string", null),
+                    desc("entity.humaines", "Ressources humaines (liste)", "list", null),
+                    desc("entity.materiel", "Matériel (liste)", "list", null));
             case EtudesPrintEntityTypes.DOSSIER_SYNTHESE -> List.of(
                     desc("entity.numero", "N° dossier", "string", "ETU-2026-001"),
                     desc("entity.objet", "Objet", "string", null),

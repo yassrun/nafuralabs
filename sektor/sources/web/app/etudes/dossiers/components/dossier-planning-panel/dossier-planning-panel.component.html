@@ -7,6 +7,9 @@
         sans rien saisir. Pas de Gantt ni de liaisons.
       </p>
     </div>
+    <nf-button size="sm" variant="ghost" [disabled]="chargement()" (clicked)="imprimer()">
+      Imprimer
+    </nf-button>
   </header>
 
   @if (erreur()) {

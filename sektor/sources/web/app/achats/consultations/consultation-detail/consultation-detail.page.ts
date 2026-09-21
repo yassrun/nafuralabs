@@ -94,7 +94,15 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
   private fournisseurHits: Array<{ value: string; label: string }> = [];
 
   readonly searchFournisseurs: LookupSearchFn = async (q) => {
-    const hits = await (this.lookupSearchers?.['fournisseurs']?.(q) ?? Promise.resolve([]));
+    const [frn, st] = await Promise.all([
+      this.lookupSearchers?.['fournisseurs']?.(q) ?? Promise.resolve([]),
+      this.lookupSearchers?.['sousTraitants']?.(q) ?? Promise.resolve([]),
+    ]);
+    const merged = new Map<string, { value: string; label: string }>();
+    for (const hit of [...frn, ...st]) {
+      if (hit?.value) merged.set(hit.value, hit);
+    }
+    const hits = [...merged.values()];
     this.fournisseurHits = hits;
     return hits;
   };
@@ -229,11 +237,8 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
   });
 
   canEnvoyer(): boolean {
-    if (this.destDirty()) {
-      return false;
-    }
     const sent = new Set(this.envois().map((e) => e.destinataireId));
-    return this.destDraft().some((d) => d.id && !sent.has(d.id));
+    return this.destDraft().some((d) => !d.sent && !sent.has(d.id ?? ''));
   }
 
   readonly canAddDestinataire = computed(() => {
@@ -351,9 +356,9 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
     this.destDraft.set(this.destDraft().filter((d) => d.key !== row.key));
   }
 
-  async saveDestinataires(): Promise<void> {
+  async saveDestinataires(): Promise<boolean> {
     const current = this.item();
-    if (!current || !this.destDirty()) return;
+    if (!current || !this.destDirty()) return true;
     this.destSaving.set(true);
     this.destErreur.set(undefined);
     try {
@@ -365,6 +370,7 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
         })),
       );
       this.applyItem(this.crud.enrich(saved));
+      return true;
     } catch (err) {
       const code = apiCode(err);
       if (code === 'consultation.destinataire.sans_email') {
@@ -380,6 +386,7 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
       } else {
         this.destErreur.set(this.translate.instant('achats.consultation.destinataires.saveError'));
       }
+      return false;
     } finally {
       this.destSaving.set(false);
     }
@@ -391,7 +398,18 @@ export class ConsultationDetailPage extends ConfigDrivenDetailPage<ConsultationA
     this.envoyerSaving.set(true);
     this.envoyerErreur.set(undefined);
     try {
-      const saved = await this.api.envoyer(current.id);
+      if (this.destDirty()) {
+        const ok = await this.saveDestinataires();
+        if (!ok) {
+          this.envoyerErreur.set(
+            this.destErreur() ?? this.translate.instant('achats.consultation.envoyerError'),
+          );
+          return;
+        }
+      }
+      const id = this.item()?.id;
+      if (!id) return;
+      const saved = await this.api.envoyer(id);
       this.applyItem(this.crud.enrich(saved));
     } catch {
       this.envoyerErreur.set(this.translate.instant('achats.consultation.envoyerError'));

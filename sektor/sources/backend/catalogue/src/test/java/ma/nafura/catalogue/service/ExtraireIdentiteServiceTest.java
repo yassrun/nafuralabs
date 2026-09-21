@@ -1,9 +1,12 @@
 package ma.nafura.catalogue.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +30,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 @ExtendWith(MockitoExtension.class)
 class ExtraireIdentiteServiceTest {
@@ -43,10 +49,15 @@ class ExtraireIdentiteServiceTest {
     void setUp() {
         TenantContext.setTenantId(tenantId);
         service = new ExtraireIdentiteService(articleRepository, itemRepository, llm);
-        when(articleRepository.findByStatutOrderByLibelleAsc("PUBLIE"))
+        lenient().when(articleRepository.findByStatutOrderByLibelleAsc("PUBLIE"))
                 .thenReturn(List.of(
                         article("peinture-acrylique-interieure", "Peinture acrylique intérieure"),
                         article("ciment-cpj-45", "Ciment CPJ 45")));
+        lenient().when(itemRepository.findByTenantIdAndCleStable(eq(tenantId), anyString()))
+                .thenReturn(Optional.empty());
+        lenient()
+                .when(itemRepository.findAll(org.mockito.ArgumentMatchers.<Specification<Item>>any(), any(Pageable.class)))
+                .thenReturn(Page.empty());
     }
 
     @AfterEach
@@ -103,7 +114,29 @@ class ExtraireIdentiteServiceTest {
         assertThat(classe.identitesCandidates())
                 .containsExactly("peinture-acrylique-interieure", "ciment-cpj-45");
         assertThat(classe.itemId()).isNull();
-        verify(itemRepository, never()).findByTenantIdAndCleStable(org.mockito.ArgumentMatchers.any(), anyString());
+        verify(itemRepository, never()).save(org.mockito.ArgumentMatchers.any());
+        verify(itemRepository, never()).findByTenantIdAndCleStable(eq(tenantId), eq("peinture-acrylique-interieure"));
+        verify(itemRepository, never()).findByTenantIdAndCleStable(eq(tenantId), eq("ciment-cpj-45"));
+    }
+
+    @Test
+    void dejaTenant_siArticleTenantExiste_sansLlm() {
+        when(itemRepository.findByTenantIdAndCleStable(tenantId, "beton-b20"))
+                .thenReturn(Optional.of(Item.builder()
+                        .id(itemId)
+                        .code("ART-BETON-B20")
+                        .cleStable("beton-b20")
+                        .name("Béton B20")
+                        .isActive(true)
+                        .build()));
+
+        IdentiteClasse classe = service.classer("Béton B20", "MATIERE");
+
+        assertThat(classe.seau()).isEqualTo(IdentiteClasse.DEJA_TENANT);
+        assertThat(classe.itemId()).isEqualTo(itemId.toString());
+        assertThat(classe.cleStable()).isEqualTo("beton-b20");
+        verify(llm, never()).isAvailable();
+        verify(llm, never()).suggerer(anyString(), anyList(), anyInt());
     }
 
     @Test

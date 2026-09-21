@@ -75,7 +75,9 @@ export interface ButtonListResponsiveConfig {
           [tooltip]="(action.tooltip ?? action.ariaLabel ?? '') | translate"
           [attr.aria-label]="(action.ariaLabel ?? action.label ?? action.id) | translate"
           (clicked)="onActionClick(action.id)">
-          {{ (action.label || '') | translate }}
+          @if (action.label) {
+            {{ action.label | translate }}
+          }
         </nf-button>
       }
     </div>

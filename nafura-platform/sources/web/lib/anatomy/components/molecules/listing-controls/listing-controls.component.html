@@ -1,7 +1,8 @@
 <div class="nf-listing-controls">
   @if (showSelectionToggle()) {
     <nf-button
-      variant="tertiary"
+      [variant]="size() === 'xs' ? 'secondary' : 'tertiary'"
+      [size]="size()"
       iconLibrary="lucide"
       [icon]="selectionModeActive() ? 'x' : 'list-checks'"
       [active]="selectionModeActive()"
@@ -11,7 +12,8 @@
   }
   @if (showColumnsButton()) {
     <nf-button
-      variant="tertiary"
+      [variant]="size() === 'xs' ? 'secondary' : 'tertiary'"
+      [size]="size()"
       iconLibrary="lucide"
       icon="eye-off"
       [active]="hiddenColumnsCount() > 0"
@@ -45,7 +47,8 @@
   }
   @if (showFilterButton() && filterFields().length > 0) {
     <nf-button
-      variant="tertiary"
+      [variant]="size() === 'xs' ? 'secondary' : 'tertiary'"
+      [size]="size()"
       iconLibrary="lucide"
       icon="filter"
       [active]="filterActive()"
@@ -74,7 +77,8 @@
     </mat-menu>
   } @else if (showFilterButton()) {
     <nf-button
-      variant="tertiary"
+      [variant]="size() === 'xs' ? 'secondary' : 'tertiary'"
+      [size]="size()"
       iconLibrary="lucide"
       icon="filter"
       [active]="filterActive()"
@@ -97,7 +101,11 @@
   }
   @if (showSearch()) {
   <div class="nf-listing-controls__search">
-    <lucide-icon name="search" size="20" class="nf-listing-controls__search-icon"></lucide-icon>
+    <lucide-icon
+      name="search"
+      [size]="size() === 'xs' ? 14 : 20"
+      class="nf-listing-controls__search-icon"
+    ></lucide-icon>
     <input
       type="text"
       class="nf-listing-controls__search-input"

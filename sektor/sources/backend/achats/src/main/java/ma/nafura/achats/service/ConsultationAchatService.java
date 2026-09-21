@@ -172,8 +172,7 @@ public class ConsultationAchatService {
         Partner fournisseur = partnerRepository
                 .findByIdAndTenantId(request.getFournisseurId(), tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("consultation.fournisseur.introuvable"));
-        if (!roleRepository.existsByTenantIdAndPartnerIdAndRole(
-                tenantId, fournisseur.getId(), PartnerRoleType.FOURNISSEUR)) {
+        if (!estPartenaireConsultable(tenantId, fournisseur.getId())) {
             throw new IllegalArgumentException("consultation.fournisseur.pas_fiche");
         }
         if (destinataireRepository.existsByConsultationIdAndFournisseurId(
@@ -397,11 +396,18 @@ public class ConsultationAchatService {
         Partner fournisseur = partnerRepository
                 .findByIdAndTenantId(fournisseurId, tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("consultation.fournisseur.introuvable"));
-        if (!roleRepository.existsByTenantIdAndPartnerIdAndRole(
-                tenantId, fournisseur.getId(), PartnerRoleType.FOURNISSEUR)) {
+        if (!estPartenaireConsultable(tenantId, fournisseur.getId())) {
             throw new IllegalArgumentException("consultation.fournisseur.pas_fiche");
         }
         return fournisseur;
+    }
+
+    /** Fournisseur matières ou sous-traitant — les deux peuvent répondre à une CS. */
+    private boolean estPartenaireConsultable(UUID tenantId, UUID partnerId) {
+        return roleRepository.existsByTenantIdAndPartnerIdAndRole(
+                        tenantId, partnerId, PartnerRoleType.FOURNISSEUR)
+                || roleRepository.existsByTenantIdAndPartnerIdAndRole(
+                        tenantId, partnerId, PartnerRoleType.SOUS_TRAITANT);
     }
 
     private ConsultationAchatDestinataire persistDestinataire(

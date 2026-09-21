@@ -744,6 +744,7 @@
         "error": "Ajout du destinataire impossible."
       },
       "envoyer": "Envoyer la consultation",
+      "envoyerNeedsSave": "Destinataire encore en brouillon : clique Enregistrer, puis Envoyer — ou Envoyer enregistre d’abord.",
       "envoyerError": "Envoi impossible.",
       "journal": {
         "title": "Journal d’envoi",

@@ -11,7 +11,6 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { MatDialog, type MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
@@ -39,7 +38,7 @@ import {
   selector: 'app-decomposition-workspace',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslateModule, BordereauArbreComponent, ButtonComponent],
+  imports: [TranslateModule, BordereauArbreComponent, ButtonComponent],
   templateUrl: './decomposition-workspace.component.html',
   styleUrl: './decomposition-workspace.component.scss',
 })
@@ -73,7 +72,6 @@ export class DecompositionWorkspaceComponent {
   readonly dirtyChange = output<boolean>();
 
   readonly selectedKey = signal<string | null>(null);
-  readonly search = signal('');
   readonly treeReloadToken = signal(0);
   readonly alerteFocusId = signal<string | null>(null);
   readonly totalComposants = signal(0);

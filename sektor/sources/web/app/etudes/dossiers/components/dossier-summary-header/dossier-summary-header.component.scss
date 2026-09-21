@@ -165,6 +165,14 @@
   color: var(--nf-color-danger-600, #c0392b);
 }
 
+.dsh__kpi--due .dsh__kpi-value {
+  color: var(--nf-color-warning-700, #92400e);
+}
+
+.dsh__kpi--late .dsh__kpi-value {
+  color: var(--nf-color-danger-600, #c0392b);
+}
+
 .dsh__kpi--clickable {
   cursor: pointer;
   border-radius: 6px;

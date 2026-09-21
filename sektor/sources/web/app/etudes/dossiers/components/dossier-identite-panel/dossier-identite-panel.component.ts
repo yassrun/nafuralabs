@@ -100,6 +100,8 @@ export class DossierIdentitePanelComponent {
   readonly aoReference = signal('');
   readonly ville = signal('');
   readonly dateOuverturePlis = signal('');
+  readonly erreurDateLimiteDepot = signal<string | undefined>(undefined);
+  readonly erreurDateOuverturePlis = signal<string | undefined>(undefined);
   readonly delaiExecutionJours = signal<number | null>(null);
   readonly estimationMoaHt = signal<number | null>(null);
   readonly cautionProvisoire = signal<number | null>(null);
@@ -239,7 +241,21 @@ export class DossierIdentitePanelComponent {
     });
   }
 
+  /** Calendrier : à partir d’aujourd’hui, sauf si une date CPS déjà passée est affichée. */
+  minSaisieDate(valeur: string): string | undefined {
+    const today = aujourdHuiIso();
+    if (!valeur || valeur >= today) return today;
+    return undefined;
+  }
+
   onChamp(key: IaFieldKey, raw: string | number | null): void {
+    if (
+      (key === 'dateLimiteDepot' || key === 'dateOuverturePlis') &&
+      this.refuserDateManuellePassee(key, raw)
+    ) {
+      return;
+    }
+    this.clearErreurDate(key);
     const numeric =
       key === 'delaiExecutionJours' ||
       key === 'estimationMoaHt' ||
@@ -281,6 +297,12 @@ export class DossierIdentitePanelComponent {
       this.erreur.set('Le chargé d’étude est affecté au go.');
       return false;
     }
+    const dates = this.messageDatesManuellesPassees();
+    if (dates) {
+      this.erreur.set(dates);
+      this.ok.set(false);
+      return false;
+    }
     this.saving.set(true);
     this.erreur.set(undefined);
     this.ok.set(false);
@@ -310,7 +332,12 @@ export class DossierIdentitePanelComponent {
       return true;
     } catch (e) {
       const err = e as { error?: { message?: string; code?: string } };
-      this.erreur.set(err?.error?.message ?? err?.error?.code ?? 'Enregistrement impossible.');
+      const code = err?.error?.message ?? err?.error?.code;
+      this.erreur.set(
+        code === 'etudes.dossier.verrouille'
+          ? 'Le dossier est verrouillé — saisie impossible dans cet état.'
+          : 'Enregistrement impossible.',
+      );
       return false;
     } finally {
       this.saving.set(false);
@@ -335,6 +362,8 @@ export class DossierIdentitePanelComponent {
     }
     this.ok.set(false);
     this.erreur.set(undefined);
+    this.erreurDateLimiteDepot.set(undefined);
+    this.erreurDateOuverturePlis.set(undefined);
   }
 
   private reapplyLocalIa(): void {
@@ -358,23 +387,27 @@ export class DossierIdentitePanelComponent {
         this.iaFields.set({});
         return;
       }
-      if (this.prefillPourCps === cps.id) return;
+      if (this.prefillEnCours && this.prefillPourCps === cps.id) return;
+      if (this.prefillPourCps === cps.id && this.cpsPhase() === 'ready') return;
       this.prefillPourCps = cps.id;
       this.prefillEnCours = true;
       this.cpsPhase.set('loading');
       this.iaFields.set({});
       try {
-        for (const delay of [0, 2500, 5000, 8000]) {
-          if (delay) await this.sleep(delay);
-          const prop = await this.api.proposerMarche(d.id, cps.id);
-          const meta = prop?.metadonnees;
-          if (!meta || !this.hasMeta(meta)) continue;
-          this.installerPropositions(meta);
-          const n = this.pendingCount();
-          this.cpsPhase.set(n > 0 ? 'ready' : 'partial');
+        const indexed = await this.attendreIndexCps(d.id, cps.id);
+        if (!indexed) {
+          this.cpsPhase.set('partial');
           return;
         }
-        this.cpsPhase.set('partial');
+        const prop = await this.api.proposerMarche(d.id, cps.id);
+        const meta = prop?.metadonnees;
+        if (!meta || !this.hasMeta(meta)) {
+          this.cpsPhase.set('partial');
+          return;
+        }
+        this.installerPropositions(meta);
+        const n = this.pendingCount();
+        this.cpsPhase.set(n > 0 ? 'ready' : 'partial');
       } finally {
         this.prefillEnCours = false;
       }
@@ -382,6 +415,43 @@ export class DossierIdentitePanelComponent {
       this.prefillPourCps = '';
       this.prefillEnCours = false;
       this.cpsPhase.set('idle');
+    }
+  }
+
+  /** Attend le job CPS_INDEX (déposé en async) avant de conclure « non trouvé ». */
+  private async attendreIndexCps(dossierId: string, cpsDocumentId: string): Promise<boolean> {
+    const deadline = Date.now() + 90_000;
+    while (Date.now() < deadline) {
+      let jobs: Awaited<ReturnType<DossierEtudeApiService['listExtractionJobs']>> = [];
+      try {
+        jobs = await this.api.listExtractionJobs(dossierId);
+      } catch {
+        jobs = [];
+      }
+      const job = jobs
+        .filter((j) => j.jobType === 'CPS_INDEX' && j.dossierDocumentId === cpsDocumentId)
+        .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))[0];
+      if (job?.status === 'SUCCEEDED') return true;
+      if (job?.status === 'FAILED' || job?.status === 'CANCELLED') return false;
+
+      try {
+        const prop = await this.api.proposerMarche(dossierId, cpsDocumentId);
+        if (prop?.metadonnees && this.hasMeta(prop.metadonnees)) return true;
+      } catch {
+        /* 204 / job pas prêt */
+      }
+
+      if (!job) {
+        await this.sleep(1500);
+        continue;
+      }
+      await this.sleep(job.status === 'RUNNING' ? 1500 : 2000);
+    }
+    try {
+      const prop = await this.api.proposerMarche(dossierId, cpsDocumentId);
+      return !!(prop?.metadonnees && this.hasMeta(prop.metadonnees));
+    } catch {
+      return false;
     }
   }
 
@@ -419,6 +489,60 @@ export class DossierIdentitePanelComponent {
     take('estimationMoaHt', this.estimationMoaHt(), meta.estimationMoaHt);
     take('cautionProvisoire', this.cautionProvisoire(), meta.cautionProvisoire);
     this.iaFields.set(next);
+  }
+
+  private refuserDateManuellePassee(
+    key: 'dateLimiteDepot' | 'dateOuverturePlis',
+    raw: string | number | null,
+  ): boolean {
+    const next = String(raw ?? '').trim();
+    if (!next || next >= aujourdHuiIso()) return false;
+    const keep =
+      key === 'dateLimiteDepot' ? this.dateLimiteDepot() : this.dateOuverturePlis();
+    const message =
+      'Saisie manuelle : à partir d’aujourd’hui. Une date extraite du CPS peut rester.';
+    if (key === 'dateLimiteDepot') this.erreurDateLimiteDepot.set(message);
+    else this.erreurDateOuverturePlis.set(message);
+    this.erreur.set(
+      'Date limite de dépôt et ouverture des plis : saisie manuelle à partir d’aujourd’hui (le CPS peut rester).',
+    );
+    this.ok.set(false);
+    this.applyValue(key, next);
+    queueMicrotask(() => this.applyValue(key, keep));
+    return true;
+  }
+
+  private clearErreurDate(key: IaFieldKey): void {
+    if (key === 'dateLimiteDepot') this.erreurDateLimiteDepot.set(undefined);
+    if (key === 'dateOuverturePlis') this.erreurDateOuverturePlis.set(undefined);
+  }
+
+  /** Une date passée n’est légitime que si elle vient du CPS (ou déjà enregistrée). */
+  private messageDatesManuellesPassees(): string | undefined {
+    const today = aujourdHuiIso();
+    const depot = this.dateLimiteDepot();
+    const ouv = this.dateOuverturePlis();
+    const depotHumaine = depot && depot < today && !this.dateAutoriseePassee('dateLimiteDepot', depot);
+    const ouvHumaine = ouv && ouv < today && !this.dateAutoriseePassee('dateOuverturePlis', ouv);
+    if (!depotHumaine && !ouvHumaine) return undefined;
+    return 'Date limite de dépôt et ouverture des plis : saisie manuelle à partir d’aujourd’hui (le CPS peut rester).';
+  }
+
+  private dateAutoriseePassee(key: 'dateLimiteDepot' | 'dateOuverturePlis', valeur: string): boolean {
+    const prop = this.iaFields()[key];
+    if (
+      prop &&
+      (prop.status === 'proposed' || prop.status === 'accepted') &&
+      toDateInput(String(prop.value)) === valeur
+    ) {
+      return true;
+    }
+    const d = this.dossier();
+    const enregistree =
+      key === 'dateLimiteDepot'
+        ? toDateInput(d.aoDateLimiteDepot)
+        : toDateInput(d.aoDateOuverturePlis);
+    return enregistree === valeur;
   }
 
   private applyValue(key: IaFieldKey, value: string | number): void {
@@ -538,6 +662,13 @@ export class DossierIdentitePanelComponent {
       this.ingenieurs.set([]);
     }
   }
+}
+
+function aujourdHuiIso(): string {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${day}`;
 }
 
 function toDateInput(value: string | null | undefined): string {

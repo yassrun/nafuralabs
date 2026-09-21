@@ -1,7 +1,9 @@
 /**
  * Wizard Shell Component
  *
- * Step-based flow: stepper (labels + current) + projected step body + action bar (Back / Next or Submit).
+ * Step-based flow: stepper (labels + current) + projected step body + Back / Next (or Submit).
+ * Actions can sit in a sticky footer, or at the far left/right of the step numbers
+ * (dossier étude : actionsPlacement="stepper").
  * Dedicated stepper semantics (progression + validation); not nf-tabs.
  *
  * Visual states: completed = check, current = filled number, upcoming = ghost,
@@ -23,7 +25,7 @@ import { Component, input, output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonListComponent, type ButtonListItem } from '../../molecules/button-list';
-import type { WizardStepConfig } from './wizard-step.interface';
+import type { WizardActionsPlacement, WizardStepConfig } from './wizard-step.interface';
 import {
   wizardStepVisualState,
   type WizardStepVisualState,
@@ -34,71 +36,97 @@ import {
   standalone: true,
   imports: [CommonModule, MatIconModule, ButtonListComponent],
   template: `
-    <div class="nf-wizard-shell">
-      <nav class="nf-wizard-shell__stepper" aria-label="Steps">
-        <ol class="nf-wizard-shell__steps">
-          @for (step of steps(); track step.id; let i = $index) {
-            <li
-              class="nf-wizard-shell__step"
-              [attr.data-state]="stepState(i)"
-              [class.nf-wizard-shell__step--current]="stepState(i) === 'current'"
-              [class.nf-wizard-shell__step--completed]="stepState(i) === 'completed'"
-              [class.nf-wizard-shell__step--incomplete]="stepState(i) === 'incomplete'"
-              [class.nf-wizard-shell__step--upcoming]="stepState(i) === 'upcoming'"
-              [class.nf-wizard-shell__step--clickable]="isStepClickable(i)"
-              [attr.aria-current]="stepState(i) === 'current' ? 'step' : null"
-              [attr.aria-label]="stepAriaLabel(step, i)"
-              [attr.role]="isStepClickable(i) ? 'button' : null"
-              [attr.tabindex]="isStepClickable(i) ? 0 : null"
-              (click)="onStepClick(i)"
-              (keydown.enter)="onStepClick(i)">
-              <span class="nf-wizard-shell__step-indicator">
-                @if (stepState(i) === 'completed' || stepState(i) === 'incomplete') {
-                  <svg
-                    class="nf-wizard-shell__check"
-                    viewBox="0 0 12 12"
-                    aria-hidden="true"
-                    focusable="false">
-                    <path
-                      d="M2.2 6.2 L4.6 8.6 L9.8 3.4"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round" />
-                  </svg>
-                } @else {
-                  {{ i + 1 }}
+    <div
+      class="nf-wizard-shell"
+      [class.nf-wizard-shell--actions-stepper]="actionsInStepper()">
+      <div
+        class="nf-wizard-shell__chrome"
+        [class.nf-wizard-shell__actions]="actionsInStepper()">
+        @if (actionsInStepper()) {
+          <div class="nf-wizard-shell__nav-slot nf-wizard-shell__nav-slot--start">
+            <nf-button-list
+              [actions]="leftActions()"
+              [size]="actionButtonSize()"
+              (actionClick)="onActionClick($event)">
+            </nf-button-list>
+          </div>
+        }
+        <nav class="nf-wizard-shell__stepper" aria-label="Steps">
+          <ol class="nf-wizard-shell__steps">
+            @for (step of steps(); track step.id; let i = $index) {
+              <li
+                class="nf-wizard-shell__step"
+                [attr.data-state]="stepState(i)"
+                [class.nf-wizard-shell__step--current]="stepState(i) === 'current'"
+                [class.nf-wizard-shell__step--completed]="stepState(i) === 'completed'"
+                [class.nf-wizard-shell__step--incomplete]="stepState(i) === 'incomplete'"
+                [class.nf-wizard-shell__step--upcoming]="stepState(i) === 'upcoming'"
+                [class.nf-wizard-shell__step--clickable]="isStepClickable(i)"
+                [attr.aria-current]="stepState(i) === 'current' ? 'step' : null"
+                [attr.aria-label]="stepAriaLabel(step, i)"
+                [attr.role]="isStepClickable(i) ? 'button' : null"
+                [attr.tabindex]="isStepClickable(i) ? 0 : null"
+                (click)="onStepClick(i)"
+                (keydown.enter)="onStepClick(i)">
+                <span class="nf-wizard-shell__step-indicator">
+                  @if (stepState(i) === 'completed' || stepState(i) === 'incomplete') {
+                    <svg
+                      class="nf-wizard-shell__check"
+                      viewBox="0 0 12 12"
+                      aria-hidden="true"
+                      focusable="false">
+                      <path
+                        d="M2.2 6.2 L4.6 8.6 L9.8 3.4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    </svg>
+                  } @else {
+                    {{ i + 1 }}
+                  }
+                  @if (stepState(i) === 'incomplete') {
+                    <span class="nf-wizard-shell__incomplete-badge" aria-hidden="true">!</span>
+                  }
+                </span>
+                @if (step.icon) {
+                  <mat-icon class="nf-wizard-shell__step-icon">{{ step.icon }}</mat-icon>
                 }
-                @if (stepState(i) === 'incomplete') {
-                  <span class="nf-wizard-shell__incomplete-badge" aria-hidden="true">!</span>
-                }
-              </span>
-              @if (step.icon) {
-                <mat-icon class="nf-wizard-shell__step-icon">{{ step.icon }}</mat-icon>
-              }
-              <span class="nf-wizard-shell__step-label">{{ step.label }}</span>
-            </li>
-          }
-        </ol>
-      </nav>
+                <span class="nf-wizard-shell__step-label">{{ step.label }}</span>
+              </li>
+            }
+          </ol>
+        </nav>
+        @if (actionsInStepper()) {
+          <div class="nf-wizard-shell__nav-slot nf-wizard-shell__nav-slot--end">
+            <nf-button-list
+              [actions]="rightActions()"
+              [size]="actionButtonSize()"
+              (actionClick)="onActionClick($event)">
+            </nf-button-list>
+          </div>
+        }
+      </div>
       <div class="nf-wizard-shell__content" role="region" [attr.aria-label]="currentStepLabel()">
         <ng-content select="[stepContent]"></ng-content>
         <!-- Fallback: project unmarked children (attribute selectors can miss in some builds). -->
         <ng-content></ng-content>
       </div>
-      <div class="nf-wizard-shell__actions">
-        <nf-button-list
-          [actions]="leftActions()"
-          [size]="'md'"
-          (actionClick)="onActionClick($event)">
-        </nf-button-list>
-        <nf-button-list
-          [actions]="rightActions()"
-          [size]="'md'"
-          (actionClick)="onActionClick($event)">
-        </nf-button-list>
-      </div>
+      @if (!actionsInStepper()) {
+        <div class="nf-wizard-shell__actions">
+          <nf-button-list
+            [actions]="leftActions()"
+            [size]="actionButtonSize()"
+            (actionClick)="onActionClick($event)">
+          </nf-button-list>
+          <nf-button-list
+            [actions]="rightActions()"
+            [size]="actionButtonSize()"
+            (actionClick)="onActionClick($event)">
+          </nf-button-list>
+        </div>
+      }
     </div>
   `,
   styleUrls: ['./wizard-shell.component.scss'],
@@ -130,6 +158,13 @@ export class WizardShellComponent {
 
   /** Whether to show the submit button on the last step (default true). */
   showSubmit = input<boolean>(true);
+
+  /**
+   * `footer` (default): sticky bar under the step body.
+   * `stepper`: Précédent à gauche et Continuer à droite de la rangée des numéros —
+   * the step body (tree, etc.) is no longer covered.
+   */
+  actionsPlacement = input<WizardActionsPlacement>('footer');
 
   /** Allow clicking completed / current steps to jump (opt-in). */
   allowStepNavigation = input<boolean>(false);
@@ -168,6 +203,10 @@ export class WizardShellComponent {
 
   /** Emitted when a navigable step is clicked (0-based index). */
   stepSelect = output<number>();
+
+  actionsInStepper = computed(() => this.actionsPlacement() === 'stepper');
+
+  actionButtonSize = computed(() => (this.actionsInStepper() ? 'sm' : 'md'));
 
   currentStepLabel = computed(() => {
     const stepsArray = this.steps();

@@ -9,6 +9,7 @@ import { ButtonComponent, NfSelectComponent, type NfSelectOption } from '@platfo
 import type { DpuComposantType } from '@app/etudes/models';
 import { NATURE_TYPE_DPU, normalizeNature, type Nature } from '@app/catalogue/models';
 import { ItemsApiService } from '@app/catalogue/items/services/item-api.service';
+import type { Item } from '@app/catalogue/items/models/item.model';
 import { ItemPricesApiService } from '@app/catalogue/item-prices/services/item-price-api.service';
 import type { ItemPriceCreate } from '@app/catalogue/item-prices/models';
 import { CurrenciesApiService } from '@app/finance/configuration/currencies/services/currency-api.service';
@@ -226,25 +227,33 @@ export class CreateMissingItemDialogComponent {
     }
 
     try {
+      const existing = await this.findExistingItem(this.name.trim());
+      if (existing?.id) {
+        this.dialogRef.close(this.toResult(existing, prix, existing.prixUnitaire));
+        return;
+      }
+
       const created = await this.itemsApi.extraireCreer({
         designation: this.name.trim().slice(0, 255),
         nature: this.nature,
         uniteCode: this.unite,
         cleStable: this.data.cleStable ?? undefined,
       });
-      try {
-        const today = new Date().toISOString().slice(0, 10);
-        const currencyId = await this.resolveReferenceCurrencyId();
-        const payload: ItemPriceCreate = {
-          itemId: created.itemId,
-          priceType: 'ACHAT_STANDARD',
-          currencyId,
-          unitPrice: prix,
-          effectiveFrom: today,
-        };
-        await this.pricesApi.create(payload);
-      } catch {
-        /* article créé — le PU du poste reste la source si le tarif échoue */
+      if (created.createdItem !== false && prix > 0) {
+        try {
+          const today = new Date().toISOString().slice(0, 10);
+          const currencyId = await this.resolveReferenceCurrencyId();
+          const payload: ItemPriceCreate = {
+            itemId: created.itemId,
+            priceType: 'ACHAT_STANDARD',
+            currencyId,
+            unitPrice: prix,
+            effectiveFrom: today,
+          };
+          await this.pricesApi.create(payload);
+        } catch {
+          /* article créé — le PU du poste reste la source si le tarif échoue */
+        }
       }
       this.dialogRef.close({
         itemId: created.itemId,
@@ -253,12 +262,46 @@ export class CreateMissingItemDialogComponent {
         type: this.dpuType(),
         unite: this.unite,
         prixUnitaire: prix,
-        sourcePrix: 'TARIF',
+        sourcePrix: created.createdItem === false ? 'CATALOGUE' : 'TARIF',
       });
     } catch (e) {
       this.erreur.set(catalogCreateError(e));
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  private toResult(item: Item, dialogPrix: number, catalogPrix?: number): CreateMissingItemDialogResult {
+    const prix = dialogPrix > 0 ? dialogPrix : catalogPrix ?? 0;
+    return {
+      itemId: item.id,
+      code: item.code ?? item.cleStable,
+      name: item.name,
+      type: this.dpuType(),
+      unite: this.unite,
+      prixUnitaire: prix,
+      sourcePrix: dialogPrix > 0 ? 'TARIF' : 'CATALOGUE',
+    };
+  }
+
+  private async findExistingItem(designation: string): Promise<Item | null> {
+    const q = designation.trim();
+    if (q.length < 2) {
+      return null;
+    }
+    try {
+      const page = await this.itemsApi.searchPicker({ q, page: 0, size: 10, isActive: true });
+      const target = foldLabel(q);
+      return (
+        page.items.find(
+          (item) =>
+            foldLabel(item.name) === target ||
+            foldLabel(item.code) === target ||
+            foldLabel(item.cleStable) === target,
+        ) ?? null
+      );
+    } catch {
+      return null;
     }
   }
 
@@ -294,6 +337,12 @@ function catalogCreateError(e: unknown): string {
         .filter(Boolean)
         .join(' · ');
       if (fields) return fields;
+      if (parsed.message === 'item.cle_stable.duplicate' || parsed.code === 'item.cle_stable.duplicate') {
+        return 'Cet article existe déjà dans le catalogue.';
+      }
+      if (parsed.code === 'INTERNAL_ERROR' || parsed.message === 'An unexpected error occurred') {
+        return 'Création catalogue indisponible — réessaie après rechargement du serveur.';
+      }
       if (parsed.message) return parsed.message;
       if (parsed.code) return parsed.code;
     }
@@ -302,4 +351,12 @@ function catalogCreateError(e: unknown): string {
   }
   if (e instanceof Error && e.message) return e.message;
   return 'Impossible de créer l’article catalogue.';
+}
+
+function foldLabel(value: string | null | undefined): string {
+  return (value ?? '')
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .trim();
 }

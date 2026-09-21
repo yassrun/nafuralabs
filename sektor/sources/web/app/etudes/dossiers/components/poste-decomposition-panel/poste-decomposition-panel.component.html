@@ -205,6 +205,34 @@
               }
             </div>
           }
+          @if (estForfait() && !guestReadOnly() && (modifiable() || forfaitAConsultation())) {
+            <div class="poste__section-actions">
+              @if (forfaitAConsultation()) {
+                <nf-button
+                  variant="secondary"
+                  size="sm"
+                  data-testid="voir-consultation-forfait"
+                  [loading]="consultationOuverture()"
+                  [disabled]="chargement() || consultationOuverture()"
+                  (clicked)="ouvrirConsultationForfait()"
+                >
+                  Voir la consultation
+                </nf-button>
+              }
+              @if (modifiable()) {
+                <nf-button
+                  variant="primary"
+                  size="sm"
+                  data-testid="consulter-forfait-st"
+                  [loading]="consultationForfait()"
+                  [disabled]="chargement() || sauvegarde() || consultationForfait()"
+                  (clicked)="consulterForfaitSt()"
+                >
+                  Consulter des sous-traitants
+                </nf-button>
+              }
+            </div>
+          }
         </div>
 
         @if (estEstime()) {
@@ -317,8 +345,159 @@
                 />
               </label>
             </div>
+            @if (forfaitItem(); as item) {
+              <p class="poste__catalog-chip">
+                Catalogue · {{ item.code || item.cleStable }} — {{ item.name }}
+              </p>
+            } @else if (forfaitSuggestions().length) {
+              <div class="poste__suggest">
+                <p>Lot catalogue possible — lier pour consulter et voir l’historique.</p>
+                <ul>
+                  @for (hit of forfaitSuggestions(); track hit.itemId) {
+                    <li>
+                      <button type="button" (click)="lierForfaitItem(hit)">
+                        {{ hit.code }} — {{ hit.name }}
+                        @if (hit.unite) {
+                          <span>· {{ hit.unite }}</span>
+                        }
+                      </button>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+            @if (forfaitPrixRetenu(); as retenu) {
+              <button
+                type="button"
+                class="poste__cs-link"
+                data-testid="forfait-prix-consulte"
+                [disabled]="consultationOuverture()"
+                (click)="ouvrirConsultationForfait()"
+              >
+                <span class="source-badge source-badge--consulte">Consulté</span>
+                <span class="poste__prix-source">{{ retenu.libelle || 'Offre retenue' }}</span>
+              </button>
+            }
+            <section class="poste__cs" aria-live="polite">
+              <div class="poste__hist-head">
+                <h5>Consultations de l’étude</h5>
+              </div>
+              @if (forfaitConsultationsLoading()) {
+                <p class="poste__fourni-hint">Chargement des consultations…</p>
+              } @else if (forfaitConsultations().length === 0) {
+                <p class="poste__fourni-hint">
+                  Aucune consultation liée à cette étude. Lancez-en une pour ce lot, ou réutilisez
+                  une CS existante.
+                </p>
+              } @else {
+                <ul class="poste__cs-list">
+                  @for (row of forfaitConsultations(); track row.id) {
+                    <li class="poste__cs-row">
+                      <button
+                        type="button"
+                        class="poste__cs-main"
+                        (click)="ouvrirFicheConsultationId(row.id)"
+                      >
+                        <span class="poste__cs-title">
+                          <strong>{{ row.numero }}</strong>
+                          <span class="cs-statut">{{ consultationStatutLabel(row) }}</span>
+                          @if (lotDansPanier(row)) {
+                            <span class="cs-flag cs-flag--in">ce lot</span>
+                          }
+                        </span>
+                        <span class="poste__cs-meta">
+                          {{ consultationDestinatairesLabel(row) }}
+                          · {{ consultationAvancementLabel(row) }}
+                          · {{ panierResume(row) }}
+                        </span>
+                      </button>
+                      <nf-button
+                        variant="ghost"
+                        size="sm"
+                        (clicked)="ouvrirFicheConsultationId(row.id)"
+                      >
+                        Voir
+                      </nf-button>
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
+            <section class="poste__hist" aria-live="polite">
+              <div class="poste__hist-head">
+                <h5>Historique de prix</h5>
+                @if (forfaitHistHasAchat()) {
+                  <span class="poste__hist-flag">Achat plus pertinent</span>
+                }
+              </div>
+              @if (forfaitHistLoading()) {
+                <p class="poste__fourni-hint">Recherche de l’historique…</p>
+              } @else if (forfaitHistError(); as err) {
+                <p class="poste__fourni-hint poste__fourni-hint--warn">{{ err }}</p>
+              } @else if (!forfaitItem() && !forfaitSuggestions().length) {
+                <p class="poste__fourni-hint">
+                  Pas encore dans le catalogue — consultez des sous-traitants ou saisissez le coût.
+                </p>
+              } @else if (!forfaitHistLignes().length) {
+                <p class="poste__fourni-hint">
+                  @if (forfaitConsultations().length) {
+                    Les devis importés sur ce lot apparaitront ici. Ouvrez la consultation, déposez
+                    le devis, puis cliquez le PU pour remplir le coût.
+                  } @else {
+                    Aucun achat ni devis pour ce lot. Saisissez le coût ou lancez une consultation.
+                  }
+                </p>
+              } @else {
+                <ul class="poste__hist-list">
+                  @for (groupe of forfaitHistVisibles(); track groupe.key) {
+                    <li class="poste__hist-item">
+                      <button
+                        type="button"
+                        class="poste__hist-apply"
+                        [class.poste__hist-row--achat]="estForfaitHistAchat(groupe.ligne)"
+                        [disabled]="!modifiable()"
+                        (click)="appliquerForfaitHist(groupe.ligne)"
+                      >
+                        <span class="poste__hist-kind">{{ groupe.partenaire }}</span>
+                        <span class="poste__hist-meta">
+                          {{ forfaitHistKindLabel(groupe.ligne) }}
+                          · {{ groupe.ligne.dateSource | date: 'dd/MM/yyyy' }}
+                          @if (groupe.count > 1) {
+                            · {{ groupe.count }} offres
+                          }
+                        </span>
+                        <strong>{{ groupe.ligne.prixUnitaire | number: '1.2-2' }} MAD</strong>
+                      </button>
+                      @if (groupe.ligne.kind === 'CONSULTATION') {
+                        <button
+                          type="button"
+                          class="poste__hist-open"
+                          [disabled]="consultationOuverture()"
+                          (click)="ouvrirConsultationDepuisHist(groupe.ligne, $event)"
+                        >
+                          Voir
+                        </button>
+                      }
+                    </li>
+                  }
+                </ul>
+                @if (forfaitHistReste() > 0) {
+                  <button
+                    type="button"
+                    class="poste__hist-more"
+                    (click)="forfaitHistExpanded.set(true)"
+                  >
+                    Voir {{ forfaitHistReste() }} autre{{ forfaitHistReste() > 1 ? 's' : '' }}
+                    partenaire{{ forfaitHistReste() > 1 ? 's' : '' }}
+                  </button>
+                }
+              }
+            </section>
             <details class="poste__optionnel">
               <summary>Liaison partenaire (optionnel)</summary>
+              <p class="poste__fourni-hint">
+                Remplie depuis un devis retenu. Inutile de coller un identifiant à la main.
+              </p>
               <div class="poste__optionnel-body poste__fourni-grid poste__fourni-grid--2">
                 <label class="poste__field">
                   <span>Partenaire</span>
@@ -416,14 +595,31 @@
                       }
                     </td>
                     <td>
-                      <span
-                        class="source-badge"
-                        [class.source-badge--consulte]="row.sourcePrix === 'CONSULTE'"
-                      >
-                        {{ sourceLabel(row.sourcePrix) }}
-                      </span>
-                      @if (prixSourceDetail(row); as gel) {
-                        <p class="poste__prix-source" [title]="gel">{{ gel }}</p>
+                      @if (estPrixConsulte(row) && !guestReadOnly()) {
+                        <button
+                          type="button"
+                          class="poste__cs-link"
+                          data-testid="ouvrir-consultation-source"
+                          [disabled]="consultationOuverture()"
+                          (click)="ouvrirConsultationDepuisComposant(row)"
+                        >
+                          <span class="source-badge source-badge--consulte">{{
+                            sourceLabel(row.sourcePrix)
+                          }}</span>
+                          @if (prixSourceDetail(row); as gel) {
+                            <span class="poste__prix-source" [title]="gel">{{ gel }}</span>
+                          }
+                        </button>
+                      } @else {
+                        <span
+                          class="source-badge"
+                          [class.source-badge--consulte]="estPrixConsulte(row)"
+                        >
+                          {{ sourceLabel(row.sourcePrix) }}
+                        </span>
+                        @if (prixSourceDetail(row); as gel) {
+                          <p class="poste__prix-source" [title]="gel">{{ gel }}</p>
+                        }
                       }
                     </td>
                     <td class="num">{{ row.quantite | number: '1.2-4' }}</td>
@@ -446,9 +642,17 @@
                               variant="ghost"
                               size="sm"
                               data-testid="ouvrir-consultation-composant"
-                              (clicked)="ajouterAConsultation(row)"
+                              (clicked)="
+                                estPrixConsulte(row)
+                                  ? ouvrirConsultationDepuisComposant(row)
+                                  : ajouterAConsultation(row)
+                              "
                             >
-                              Ajouter à une consultation
+                              {{
+                                estPrixConsulte(row)
+                                  ? 'Voir la consultation'
+                                  : 'Ajouter à une consultation'
+                              }}
                             </nf-button>
                           }
                           <nf-button
@@ -496,12 +700,25 @@
               <li class="card">
                 <div class="card__top">
                   <span class="badge">{{ typeLabel(row.type) }}</span>
-                  <span
-                    class="source-badge"
-                    [class.source-badge--consulte]="row.sourcePrix === 'CONSULTE'"
-                  >
-                    {{ sourceLabel(row.sourcePrix) }}
-                  </span>
+                  @if (estPrixConsulte(row) && !guestReadOnly()) {
+                    <button
+                      type="button"
+                      class="poste__cs-link"
+                      [disabled]="consultationOuverture()"
+                      (click)="ouvrirConsultationDepuisComposant(row)"
+                    >
+                      <span class="source-badge source-badge--consulte">{{
+                        sourceLabel(row.sourcePrix)
+                      }}</span>
+                    </button>
+                  } @else {
+                    <span
+                      class="source-badge"
+                      [class.source-badge--consulte]="estPrixConsulte(row)"
+                    >
+                      {{ sourceLabel(row.sourcePrix) }}
+                    </span>
+                  }
                   <strong>{{ libelleComposant(row) }}</strong>
                   @if (estSuggereParIa(row)) {
                     <span class="source-badge source-badge--ia">IA</span>
@@ -512,7 +729,17 @@
                   {{ row.prixUnitaire | number: '1.2-2' }}
                 </p>
                 @if (prixSourceDetail(row); as gel) {
-                  <p class="poste__prix-source" [title]="gel">{{ gel }}</p>
+                  @if (estPrixConsulte(row) && !guestReadOnly()) {
+                    <button
+                      type="button"
+                      class="poste__cs-link poste__cs-link--inline"
+                      (click)="ouvrirConsultationDepuisComposant(row)"
+                    >
+                      {{ gel }}
+                    </button>
+                  } @else {
+                    <p class="poste__prix-source" [title]="gel">{{ gel }}</p>
+                  }
                 }
                 <p class="card__total">{{ row.total | number: '1.2-2' }} MAD</p>
                 @if (modifiable()) {
@@ -524,6 +751,22 @@
                         (clicked)="ajouterComposantAuCatalogue(row)"
                       >
                         Créer dans le catalogue
+                      </nf-button>
+                    } @else if (dossierId()) {
+                      <nf-button
+                        variant="ghost"
+                        size="sm"
+                        (clicked)="
+                          estPrixConsulte(row)
+                            ? ouvrirConsultationDepuisComposant(row)
+                            : ajouterAConsultation(row)
+                        "
+                      >
+                        {{
+                          estPrixConsulte(row)
+                            ? 'Voir la consultation'
+                            : 'Ajouter à une consultation'
+                        }}
                       </nf-button>
                     }
                     <nf-button

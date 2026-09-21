@@ -10,23 +10,25 @@ import {
   output,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 
 import {
-  TreeTableComponent,
+  ListingTreeComponent,
+  findTreeNode,
+  type ListingActionItem,
+  type ListingTreeAction,
+  type ListingTreeConfig,
   type NfTreeNode,
   type NfTreeTableColumn,
 } from '@platform/lib/anatomy/components';
 import {
   ButtonComponent,
   ConfirmDialogService,
-  ListingControlsComponent,
-  SelectionBarComponent,
   ToastService,
   TooltipDirective,
-  type SelectionAction,
 } from '@platform/lib/anatomy';
 import { AuthFacade } from '@platform/core/security/services/auth.facade';
 
@@ -39,7 +41,6 @@ import {
   applyTreeRollupPostes,
   applyTreeRollupTotals,
   bordereauTableMinWidth,
-  collectAllExpandableKeys,
   countArticlesInNodes,
   countExploitableInNodes,
   estLotOuSousLot,
@@ -52,8 +53,6 @@ import {
   importArbreToTreeNodes,
   importKeyToPath,
   noeudsDpgfToTreeNodes,
-  retainExpandableKeys,
-  selectedRootRows,
   type BordereauTreeRow,
   type ImportNoeudPreview,
 } from '../../utils/bordereau-tree.util';
@@ -81,10 +80,8 @@ import { lotAssigneAUnAutre } from '../../utils/dossier-responsables.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    TreeTableComponent,
+    ListingTreeComponent,
     ButtonComponent,
-    ListingControlsComponent,
-    SelectionBarComponent,
     TooltipDirective,
     EtudeBannerComponent,
   ],
@@ -122,7 +119,6 @@ export class BordereauArbreComponent {
    * Ciblé (≤40) pour éviter un expand-all coûteux sur gros bordereau.
    */
   readonly expandArticleIds = input<readonly string[]>([]);
-  readonly searchQuery = input('');
   /** Incrémente pour forcer un rechargement (ex. après chiffrage d’un poste). */
   readonly reloadToken = input(0);
   /** Filtre articles avec composants non consultés (ids). */
@@ -142,18 +138,10 @@ export class BordereauArbreComponent {
 
   readonly nodes = signal<NfTreeNode<BordereauTreeRow>[]>([]);
   readonly draftLocal = signal<ImportNoeudPreview[]>([]);
-  readonly expandedKeys = signal<Set<string>>(new Set());
-  readonly bulkSelectMode = signal(false);
-  readonly selectedKeys = signal<Set<string>>(new Set());
   readonly uniteOptions = signal<UniteOption[]>([]);
   readonly chargement = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
-  readonly bulkActions: SelectionAction[] = [
-    { id: 'delete', label: 'Supprimer', icon: 'trash-2', variant: 'danger' },
-  ];
-  readonly isLotSelectable = (row: BordereauTreeRow): boolean => estLotOuSousLot(row.type);
-  /** Force remount nf-tree-table (expand state / PU stale après mutation arbre). */
-  readonly tableEpoch = signal(0);
+  private readonly listing = viewChild(ListingTreeComponent);
 
   readonly isDraft = computed(() => this.draftArbre() != null);
 
@@ -174,9 +162,57 @@ export class BordereauArbreComponent {
       }
       list = filterTreeByArticleIds(list, allowed);
     }
-    const q = this.searchQuery().trim().toLowerCase();
-    if (!q) return list;
-    return filterTree(list, q);
+    return list;
+  });
+
+  readonly listingConfig = computed((): ListingTreeConfig<BordereauTreeRow> => {
+    const selected = this.selectedRow();
+    const extras: ListingActionItem[] = [];
+    if (this.showStructureActions() && selected) {
+      extras.push({
+        id: 'edit',
+        label: 'Modifier',
+        icon: 'pencil',
+        variant: 'secondary',
+      });
+      extras.push({
+        id: 'add-sibling',
+        label: 'Ajouter au même niveau',
+        icon: 'plus',
+        variant: 'secondary',
+      });
+    }
+    if (this.showLotAffectation() && selected?.type === 'LOT') {
+      extras.push({
+        id: 'affecter-lot',
+        label: selected.chargeLotNom ? 'Changer l’affectation' : 'Affecter un ingénieur',
+        icon: 'user-plus',
+        variant: 'secondary',
+      });
+    }
+    return {
+      columns: this.columns(),
+      treeColumnKey: 'libelle',
+      searchFields: ['code', 'libelle'],
+      emptyMessage: this.emptyMessage(),
+      initialExpand: 'none',
+      allowsChildren: (n) => estLotOuSousLot(n.data.type),
+      actionLabels: {
+        addNode: 'Ajouter un lot',
+        addChild: ({ selected: row }) => {
+          if (row?.type === 'LOT') return 'Ajouter un sous-lot';
+          if (row?.type === 'SOUS_LOT') return 'Ajouter un article';
+          return 'Ajouter un enfant';
+        },
+      },
+      actions: extras,
+      features: {
+        search: true,
+        columnToggle: true,
+        treeActions: true,
+        bulkSelect: this.showStructureActions(),
+      },
+    };
   });
 
   readonly columns = computed<NfTreeTableColumn<BordereauTreeRow>[]>(() => {
@@ -184,8 +220,7 @@ export class BordereauArbreComponent {
     const cols: NfTreeTableColumn<BordereauTreeRow>[] = [
       { key: 'type', label: 'Type', width: selection ? '3.75rem' : '4.25rem' },
       { key: 'code', label: 'Code', width: selection ? '5rem' : '5.5rem', cssClass: 'arbre__col-code' },
-      { key: 'libelle', label: 'Libellé', width: '40%', cssClass: 'arbre__col-libelle' },
-      { key: 'spacer', label: '', cssClass: 'arbre__col-spacer' },
+      { key: 'libelle', label: 'Libellé', cssClass: 'arbre__col-libelle' },
       {
         key: 'unite',
         label: 'Unité',
@@ -232,16 +267,6 @@ export class BordereauArbreComponent {
         cssClass: 'arbre__col-metric',
       });
     }
-    if (this.showRowActions()) {
-      cols.push({
-        key: 'actions',
-        label: 'Actions',
-        width: this.showStructureActions() && this.peutAffecterLots() ? '10.5rem' : this.showStructureActions() ? '8.5rem' : '3.25rem',
-        align: 'center',
-        stickyEnd: true,
-        cssClass: 'arbre__col-actions',
-      });
-    }
     return cols;
   });
 
@@ -253,9 +278,11 @@ export class BordereauArbreComponent {
     () => this.peutAffecterLots() && !this.isDraft(),
   );
 
-  readonly showRowActions = computed(
-    () => this.showStructureActions() || this.showLotAffectation(),
-  );
+  readonly selectedRow = computed((): BordereauTreeRow | null => {
+    const id = this.listing()?.selectedId() ?? this.selectedKey();
+    if (!id) return null;
+    return findTreeNode(this.nodes(), id)?.data ?? findRowById(this.nodes(), id);
+  });
 
   readonly emptyMessage = computed(() =>
     this.vueLotsAffectes() ? 'Aucun lot ne vous est affecté.' : 'Aucun lot / article',
@@ -268,9 +295,9 @@ export class BordereauArbreComponent {
   readonly tableMinWidth = computed(() =>
     bordereauTableMinWidth({
       selection: this.selectionEnabled(),
-      structureActions: this.showStructureActions(),
-      lotAffectation: this.showLotAffectation(),
-      bulkSelect: this.bulkSelectMode(),
+      structureActions: false,
+      lotAffectation: false,
+      bulkSelect: this.listing()?.bulkSelectMode() ?? false,
     }),
   );
   /** Remplit le parent flex (dossier fill) — un seul scroll vertical. */
@@ -281,14 +308,14 @@ export class BordereauArbreComponent {
   readonly rowClass = computed(() => {
     const selected = this.selectedKey();
     const focused = this.focusedRowKey();
-    const checked = this.selectedKeys();
     return (row: BordereauTreeRow): string => {
       const classes = [`arbre__row--${(row.type || '').toLowerCase()}`];
       if (selected && (row.key === selected || row.id === selected)) {
         classes.push('arbre__row--selected');
       }
-      if (checked.has(row.key)) {
-        classes.push('arbre__row--checked');
+      const listed = this.listing()?.selectedId();
+      if (listed && (row.key === listed || row.id === listed)) {
+        classes.push('arbre__row--selected');
       }
       if (focused && row.key === focused) {
         classes.push('arbre__row--focus');
@@ -299,8 +326,6 @@ export class BordereauArbreComponent {
       return classes.join(' ');
     };
   });
-
-  readonly selectedCount = computed(() => this.selectedKeys().size);
 
   readonly rowTitle = (row: BordereauTreeRow): string | null => {
     if (row.nonExploitable) {
@@ -372,8 +397,6 @@ export class BordereauArbreComponent {
           applyTreeRollupTotals(nodes);
           applyTreeRollupPostes(nodes);
           this.nodes.set(nodes);
-          this.expandedKeys.set(retainExpandableKeys(nodes, this.expandedKeys()));
-          this.tableEpoch.update((e) => e + 1);
           this.chargement.set(false);
           return;
         }
@@ -411,13 +434,14 @@ export class BordereauArbreComponent {
         if (fp === this.lastExpandFingerprint) return;
         this.lastExpandFingerprint = fp;
         if (fromGate.length === 0) return;
-        const keys = new Set(this.expandedKeys());
+        const listing = this.listing();
+        const keys = new Set(listing?.expandedKeys() ?? []);
         for (const id of fromGate) {
           const match = findRowById(nodes, id);
           if (!match) continue;
           for (const k of expandAncestors(nodes, match.key)) keys.add(k);
         }
-        this.expandedKeys.set(keys);
+        listing?.setExpandedKeys(keys);
       });
     });
   }
@@ -446,13 +470,11 @@ export class BordereauArbreComponent {
     if (!match) return;
     this.lastFocusFingerprint = fingerprint;
     this.focusedRowKey.set(match.key);
-    const keys = new Set(this.expandedKeys());
-    for (const k of expandAncestors(nodes, match.key)) keys.add(k);
-    this.expandedKeys.set(keys);
+    const revealed = this.listing()?.reveal(match.key);
+    if (!revealed) this.scrollToRowKey(match.key);
     if (match.type === 'ARTICLE' && this.selectionEnabled()) {
       this.posteSelect.emit(match);
     }
-    this.scrollToRowKey(match.key);
   }
 
   /**
@@ -497,32 +519,49 @@ export class BordereauArbreComponent {
     if (!walk(next)) return;
     applyTreeRollupTotals(next);
     this.nodes.set(next);
-    this.tableEpoch.update((e) => e + 1);
   }
 
   onRowClick(row: BordereauTreeRow): void {
-    if (this.bulkSelectMode() && this.isLotSelectable(row)) {
-      const next = new Set(this.selectedKeys());
-      if (next.has(row.key)) next.delete(row.key);
-      else next.add(row.key);
-      this.selectedKeys.set(next);
-      return;
-    }
     if (!this.openOnClick()) return;
     this.emitPoste(row);
   }
 
-  toggleBulkSelect(): void {
-    if (this.bulkSelectMode()) {
-      this.bulkSelectMode.set(false);
-      this.selectedKeys.set(new Set());
+  onListingAction(ev: ListingTreeAction): void {
+    const row = ev.selectedId ? this.rowFromKey(ev.selectedId) : null;
+    if (ev.id === 'add-node') {
+      void this.ajouterLot();
       return;
     }
-    this.bulkSelectMode.set(true);
-  }
-
-  onBulkAction(action: SelectionAction): void {
-    if (action.id === 'delete') void this.supprimerSelection();
+    if (ev.id === 'add-child' && row) {
+      void this.ajouterEnfant(row);
+      return;
+    }
+    if (ev.id === 'add-sibling' && row) {
+      void this.ajouterMemeNiveau(row);
+      return;
+    }
+    if (ev.id === 'edit' && row) {
+      void this.modifier(row);
+      return;
+    }
+    if (ev.id === 'affecter-lot' && row) {
+      void this.affecterLot(row);
+      return;
+    }
+    if (ev.id === 'delete' && row) {
+      void this.supprimerNoeuds([row]);
+      return;
+    }
+    if (ev.id === 'delete-many' && ev.selectedIds?.length) {
+      const rows = ev.selectedIds
+        .map((id) => this.rowFromKey(id))
+        .filter((item): item is BordereauTreeRow => !!item);
+      if (!rows.length) {
+        this.erreur.set('Impossible de retrouver les lignes à supprimer.');
+        return;
+      }
+      void this.supprimerNoeuds(rows);
+    }
   }
 
   onRowDblClick(row: BordereauTreeRow): void {
@@ -701,7 +740,7 @@ export class BordereauArbreComponent {
       if (!parent.enfants) parent.enfants = [];
       parent.enfants.push(this.toImportNoeud(result));
       this.commitDraft(root, false);
-      this.expandedKeys.update((keys) => new Set([...keys, row.key]));
+      this.expandKey(row.key);
       return;
     }
     if (!row.id) return;
@@ -715,7 +754,7 @@ export class BordereauArbreComponent {
         quantite: result.quantite,
       });
       await this.charger(this.dpgfId()!);
-      this.expandedKeys.update((keys) => new Set([...keys, row.key]));
+      this.expandKey(row.key);
       this.change.emit();
     } catch (e) {
       this.erreur.set(this.msg(e));
@@ -782,26 +821,6 @@ export class BordereauArbreComponent {
     await this.supprimerNoeuds([row]);
   }
 
-  async supprimerSelection(): Promise<void> {
-    if (!this.showStructureActions() || !this.bulkSelectMode()) return;
-    const roots = selectedRootRows(this.nodes(), this.selectedKeys()).filter((row) =>
-      this.isLotSelectable(row),
-    );
-    if (roots.length === 0) return;
-    const confirmed = await this.confirmDialog.confirm({
-      title: roots.length === 1 ? 'Supprimer le lot' : 'Supprimer les lots',
-      message:
-        roots.length === 1
-          ? `Supprimer « ${roots[0].code} — ${roots[0].libelle} » et ses éventuels enfants ?`
-          : `Supprimer ${roots.length} lots et leurs enfants ?`,
-      variant: 'danger',
-      confirmLabel: 'Supprimer',
-    });
-    if (!confirmed) return;
-    await this.supprimerNoeuds(roots);
-    this.selectedKeys.set(new Set());
-  }
-
   private async supprimerNoeuds(rows: BordereauTreeRow[]): Promise<void> {
     if (this.isDraft()) {
       const root = structuredClone(this.draftLocal());
@@ -827,38 +846,42 @@ export class BordereauArbreComponent {
       this.commitDraft(root, false);
       return;
     }
+    const ids = rows
+      .map((row) => row.id ?? row.key)
+      .filter((id): id is string => !!id);
+    if (!ids.length) {
+      this.erreur.set('Impossible de supprimer : identifiant manquant.');
+      return;
+    }
     try {
-      for (const row of rows) {
-        if (!row.id) continue;
-        await this.dpgfApi.deleteNoeud(row.id);
-        if (this.selectedKey() === row.key) this.posteSelect.emit(null);
+      for (const id of ids) {
+        await this.dpgfApi.deleteNoeud(id);
+        const row = rows.find((item) => item.id === id || item.key === id);
+        if (row && this.selectedKey() === row.key) this.posteSelect.emit(null);
       }
       await this.charger(this.dpgfId()!);
       this.change.emit();
     } catch (e) {
-      this.erreur.set(this.msg(e));
+      const message = this.msg(e);
       if (this.dpgfId()) await this.charger(this.dpgfId()!);
+      this.erreur.set(message);
+      this.toast.error(message);
     }
   }
 
   expandAll(): void {
-    this.expandedKeys.set(collectAllExpandableKeys(this.nodes()));
+    this.listing()?.onTreeAction('expand-all');
   }
 
   collapseAll(): void {
-    this.expandedKeys.set(new Set());
+    this.listing()?.onTreeAction('collapse-all');
   }
 
   /** Déplie le chemin jusqu’aux articles « incomplet » et scroll vers le premier. */
   revelerIncomplets(): void {
-    const nodes = this.nodes();
-    const keys = expandAncestorsOfNonExploitable(nodes);
-    this.expandedKeys.set(keys);
+    const keys = expandAncestorsOfNonExploitable(this.nodes());
+    this.listing()?.setExpandedKeys(keys);
     this.scrollToFirstIncomplete();
-  }
-
-  stop(event: Event): void {
-    event.stopPropagation();
   }
 
   private commitDraft(root: ImportNoeudPreview[], resetExpand = true): void {
@@ -873,9 +896,7 @@ export class BordereauArbreComponent {
     applyTreeRollupPostes(nodes);
     this.nodes.set(nodes);
     if (resetExpand) {
-      this.expandedKeys.set(new Set());
-    } else {
-      this.expandedKeys.set(retainExpandableKeys(nodes, this.expandedKeys()));
+      this.listing()?.setExpandedKeys(new Set());
     }
   }
 
@@ -912,6 +933,18 @@ export class BordereauArbreComponent {
       if (tryScroll()) return;
       setTimeout(tryScroll, 80);
     });
+  }
+
+  private rowFromKey(id: string): BordereauTreeRow | null {
+    return findTreeNode(this.nodes(), id)?.data ?? findRowById(this.nodes(), id);
+  }
+
+  private expandKey(key: string): void {
+    const listing = this.listing();
+    if (!listing) return;
+    const next = new Set(listing.expandedKeys());
+    next.add(key);
+    listing.setExpandedKeys(next);
   }
 
   private toImportNoeud(result: BordereauNoeudDialogResult): ImportNoeudPreview {
@@ -980,10 +1013,7 @@ export class BordereauArbreComponent {
       remap(nodes);
       applyTreeRollupTotals(nodes);
       applyTreeRollupPostes(nodes);
-      const previous = this.expandedKeys();
       this.nodes.set(nodes);
-      this.tableEpoch.update((e) => e + 1);
-      this.expandedKeys.set(retainExpandableKeys(nodes, previous));
     } catch (e) {
       this.erreur.set(this.msg(e));
       this.nodes.set([]);
@@ -993,28 +1023,26 @@ export class BordereauArbreComponent {
   }
 
   private msg(e: unknown): string {
-    const err = e as { error?: { message?: string; code?: string } };
-    return err?.error?.code ?? err?.error?.message ?? 'Impossible de charger l’arbre.';
-  }
-}
-
-function filterTree(
-  nodes: NfTreeNode<BordereauTreeRow>[],
-  query: string,
-): NfTreeNode<BordereauTreeRow>[] {
-  const out: NfTreeNode<BordereauTreeRow>[] = [];
-  for (const node of nodes) {
-    const children = node.children?.length ? filterTree(node.children, query) : [];
-    const hay = `${node.data.code} ${node.data.libelle}`.toLowerCase();
-    if (hay.includes(query) || children.length) {
-      out.push({
-        ...node,
-        children: children.length ? children : undefined,
-        leaf: !children.length,
-      });
+    const err = e as {
+      error?: { message?: string; code?: string } | string;
+      message?: string;
+    };
+    const body = err?.error;
+    const code =
+      typeof body === 'object' && body ? (body.code ?? body.message) : undefined;
+    if (code === 'etudes.bordereau.structure_verrouillee') {
+      return 'La structure du bordereau est verrouillée.';
     }
+    if (code === 'etudes.dossier.saisie_reservee_charge') {
+      return 'Saisie réservée au chargé d’étude.';
+    }
+    if (code === 'etudes.dossier.verrouille') {
+      return 'Le dossier est verrouillé — saisie impossible dans cet état.';
+    }
+    if (typeof body === 'string' && body.trim()) return body;
+    if (typeof body === 'object' && body?.message) return body.message;
+    return err?.message ?? 'Impossible de mettre à jour l’arbre.';
   }
-  return out;
 }
 
 /** Articles sans coût / origine — fallback expand si la gate n’a pas encore de noeudId. */

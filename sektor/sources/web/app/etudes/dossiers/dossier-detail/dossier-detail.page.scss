@@ -11,7 +11,7 @@
   height: 100%;
   min-height: 0;
   overflow: hidden;
-  padding: 0.35rem 0.15rem 0.5rem;
+  padding: 0.35rem 0.15rem 0.15rem;
   box-sizing: border-box;
 }
 
@@ -99,9 +99,54 @@
   flex-direction: column;
 }
 
-:host ::ng-deep nf-wizard-shell.dossier__wizard--fill .nf-wizard-shell {
+:host ::ng-deep nf-wizard-shell.dossier__wizard .nf-wizard-shell {
   flex: 1 1 0;
   min-height: 0;
+}
+
+/*
+ * Footer sticky recouvre l’arbre. Tant que le wizard n’a pas
+ * actionsPlacement=stepper compilé, on hisse Précédent / Continuer
+ * aux extrémités de la rangée des numéros.
+ */
+:host ::ng-deep nf-wizard-shell.dossier__wizard .nf-wizard-shell:not(.nf-wizard-shell--actions-stepper) {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    'back steps next'
+    'body body body';
+  align-items: center;
+  column-gap: 0.75rem;
+}
+
+:host ::ng-deep nf-wizard-shell.dossier__wizard .nf-wizard-shell:not(.nf-wizard-shell--actions-stepper) .nf-wizard-shell__stepper {
+  grid-area: steps;
+  min-width: 0;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+:host ::ng-deep nf-wizard-shell.dossier__wizard .nf-wizard-shell:not(.nf-wizard-shell--actions-stepper) .nf-wizard-shell__content {
+  grid-area: body;
+  align-self: stretch;
+  padding-bottom: var(--nf-space-2, 8px);
+}
+
+:host ::ng-deep nf-wizard-shell.dossier__wizard .nf-wizard-shell:not(.nf-wizard-shell--actions-stepper) .nf-wizard-shell__actions {
+  display: contents;
+}
+
+:host ::ng-deep nf-wizard-shell.dossier__wizard .nf-wizard-shell:not(.nf-wizard-shell--actions-stepper) .nf-wizard-shell__actions nf-button-list:first-child {
+  grid-area: back;
+  align-self: center;
+  margin: 0;
+}
+
+:host ::ng-deep nf-wizard-shell.dossier__wizard .nf-wizard-shell:not(.nf-wizard-shell--actions-stepper) .nf-wizard-shell__actions nf-button-list:last-child {
+  grid-area: next;
+  align-self: center;
+  margin: 0;
 }
 
 /* Bordereau / Coût : un seul scroll (arbre), pas page + table. */
@@ -110,11 +155,11 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding-top: 0.35rem;
-  padding-bottom: var(--nf-space-2, 8px);
+  padding-top: 0.15rem;
+  padding-bottom: 0;
 }
 
-:host ::ng-deep .dossier__wizard--fill .nf-wizard-shell__stepper {
+:host ::ng-deep .dossier__wizard--fill .nf-wizard-shell__chrome {
   padding-top: 0.35rem;
   padding-bottom: 0.35rem;
 }
@@ -135,6 +180,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding-top: 0;
 }
 
 :host ::ng-deep .dossier__wizard--fill .dossier__etape > * {

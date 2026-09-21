@@ -50,6 +50,8 @@ public class DossierEtudeController {
     private final ma.nafura.etudes.service.DpuService dpuService;
     private final ma.nafura.etudes.service.guest.GuestAccessService guestAccessService;
     private final CompletudeEtudeService completudeEtudeService;
+    private final ma.nafura.etudes.service.PrixComposantProposeService prixComposantProposeService;
+    private final ma.nafura.etudes.service.HistoriquePrixComposantService historiquePrixComposantService;
 
     public DossierEtudeController(
             DossierEtudeService service,
@@ -57,13 +59,17 @@ public class DossierEtudeController {
             ma.nafura.etudes.service.SyntheseCoutAffaireService syntheseCoutAffaireService,
             ma.nafura.etudes.service.DpuService dpuService,
             ma.nafura.etudes.service.guest.GuestAccessService guestAccessService,
-            CompletudeEtudeService completudeEtudeService) {
+            CompletudeEtudeService completudeEtudeService,
+            ma.nafura.etudes.service.PrixComposantProposeService prixComposantProposeService,
+            ma.nafura.etudes.service.HistoriquePrixComposantService historiquePrixComposantService) {
         this.service = service;
         this.decompositionProposeService = decompositionProposeService;
         this.syntheseCoutAffaireService = syntheseCoutAffaireService;
         this.dpuService = dpuService;
         this.guestAccessService = guestAccessService;
         this.completudeEtudeService = completudeEtudeService;
+        this.prixComposantProposeService = prixComposantProposeService;
+        this.historiquePrixComposantService = historiquePrixComposantService;
     }
 
     @GetMapping
@@ -368,6 +374,42 @@ public class DossierEtudeController {
             return ResponseEntity.ok(result);
         } catch (IllegalStateException ex) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("code", ex.getMessage()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));
+        }
+    }
+
+    /**
+     * Historique de prix d'un composant (achats + consultations). Jamais persisté.
+     */
+    @GetMapping("/{id}/historique-prix-composant")
+    @RequirePermission("etude.read")
+    public ResponseEntity<?> historiquePrixComposant(
+            @PathVariable UUID id,
+            @RequestParam(required = false) UUID itemId,
+            @RequestParam(required = false) String designation,
+            @RequestParam(required = false) String type) {
+        try {
+            return ResponseEntity.ok(historiquePrixComposantService.historique(id, itemId, designation, type));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));
+        }
+    }
+
+    /**
+     * Propose un PU composant : catalogue interne, sinon estimation IA marché MA.
+     * Jamais persisté — le champ n’est écrit que si le chargé accepte.
+     */
+    @PostMapping("/{id}/proposer-prix-composant")
+    @RequirePermission("etude.update")
+    public ResponseEntity<?> proposerPrixComposant(
+            @PathVariable UUID id,
+            @RequestBody(required = false) ma.nafura.etudes.api.request.PrixComposantProposeRequest body) {
+        try {
+            return prixComposantProposeService
+                    .proposer(id, body != null ? body : new ma.nafura.etudes.api.request.PrixComposantProposeRequest())
+                    .<ResponseEntity<?>>map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.noContent().build());
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("code", ex.getMessage()));
         }

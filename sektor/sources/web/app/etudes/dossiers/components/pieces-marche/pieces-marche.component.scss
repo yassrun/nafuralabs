@@ -32,30 +32,50 @@
 
   .pieces__entete,
   .pieces__zones,
+  nf-file-slots,
   .pieces__progress,
   .pieces__review-banner,
   .pieces__etat {
     flex-shrink: 0;
   }
 
+  .pieces__entete,
   .pieces__entete--compact {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.5rem 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 0.25rem;
+    align-items: baseline;
+    gap: 0.5rem 0.75rem;
+    flex-wrap: nowrap;
+    margin-bottom: 0;
   }
 
-  .pieces__entete--compact .pieces__entete-main {
+  .pieces__entete-main {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: baseline;
+    gap: 0.5rem 0.75rem;
     min-width: 0;
-    flex: 1 1 14rem;
+    flex: 1 1 auto;
   }
 
-  .pieces__entete--compact .pieces__titre {
+  .pieces__entete--compact .pieces__titre,
+  .pieces__titre {
     margin: 0;
     font-size: 0.8125rem;
-    line-height: 1.75rem; /* aligne avec la hauteur des boutons */
+    line-height: 1.3;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
+  .pieces__aide {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    max-width: none;
+    min-width: 0;
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .pieces__provenance {
@@ -711,10 +731,6 @@
   gap: 8px;
 }
 
-.pieces--bordereau.pieces--inline-doc {
-  margin-bottom: 0;
-}
-
 .pieces--cps,
 .pieces--inline-doc {
   margin-top: 0;
@@ -742,6 +758,11 @@
   .pieces__zones {
     grid-template-columns: 1fr;
     gap: 6px;
+    margin-top: 6px;
+  }
+
+  nf-file-slots {
+    display: block;
     margin-top: 6px;
   }
 
@@ -837,6 +858,16 @@
   .pieces__prop-actions {
     flex-shrink: 0;
     margin-left: auto;
+  }
+}
+
+.pieces--bordereau.pieces--inline-doc {
+  margin-bottom: 0;
+  padding-bottom: 0;
+
+  .pieces__entete,
+  .pieces__entete-main {
+    flex-wrap: nowrap;
   }
 }
 

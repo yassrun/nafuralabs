@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import ma.nafura.platform.framework.domain.TenantEntity;
 
 @Entity
@@ -16,7 +15,6 @@ import ma.nafura.platform.framework.domain.TenantEntity;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
 public class CodeList extends TenantEntity {
 
     @Column(name = "code", nullable = false, length = 50)

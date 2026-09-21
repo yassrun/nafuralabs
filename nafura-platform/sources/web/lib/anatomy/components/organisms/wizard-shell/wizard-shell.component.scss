@@ -1,5 +1,5 @@
 /**
- * Wizard Shell — Stepper + content + sticky actions
+ * Wizard Shell — Stepper + content + Back / Next
  *
  * Step states: current (accent fill + number), completed (neutral check),
  * upcoming (ghost number), incomplete (check + badge on a visited step).
@@ -12,11 +12,39 @@
   min-height: 0;
 }
 
-.nf-wizard-shell__stepper {
+.nf-wizard-shell__chrome {
   flex-shrink: 0;
   padding: var(--nf-space-3, 12px) 0;
   border-bottom: 1px solid var(--nf-color-border, #e5e7eb);
   background: var(--nf-color-surface, #fff);
+}
+
+.nf-wizard-shell--actions-stepper .nf-wizard-shell__chrome {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--nf-space-2, 8px) var(--nf-space-3, 12px);
+}
+
+.nf-wizard-shell--actions-stepper .nf-wizard-shell__stepper {
+  flex: 1 0 100%;
+  order: -1;
+}
+
+.nf-wizard-shell__nav-slot {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.nf-wizard-shell__nav-slot--end {
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.nf-wizard-shell__stepper {
+  min-width: 0;
 }
 
 .nf-wizard-shell__steps {
@@ -152,7 +180,11 @@
   padding-bottom: calc(var(--nf-space-4, 16px) + 4.5rem);
 }
 
-.nf-wizard-shell__actions {
+.nf-wizard-shell--actions-stepper .nf-wizard-shell__content {
+  padding-bottom: var(--nf-space-4, 16px);
+}
+
+.nf-wizard-shell__actions:not(.nf-wizard-shell__chrome) {
   position: sticky;
   bottom: 0;
   z-index: 40;
@@ -169,7 +201,7 @@
   background: var(--nf-color-surface, #fff);
 }
 
-.nf-wizard-shell__actions nf-button-list:last-child {
+.nf-wizard-shell__actions:not(.nf-wizard-shell__chrome) nf-button-list:last-child {
   margin-left: auto;
 }
 

@@ -306,6 +306,8 @@ NAFURA_ONBOARDING_SKIP_EMAIL_VERIFICATION=true
 # Owner qa@nafuralabs.local / tenant qa-local provisioned on boot when enabled
 NAFURA_DEV_CURSOR_AUTH_ENABLED=true
 NAFURA_DEV_CURSOR_AUTH_EMAIL=qa@nafuralabs.local
+# Gotenberg is in-cluster; Mode B reaches it via the local port-forward.
+NAFURA_GOTENBERG_URL=http://127.0.0.1:3000
 AI_GEMINI_API_KEY=$gemini_key
 AI_DEEPSEEK_API_KEY=$deepseek_key
 AI_PROVIDER=deepseek
@@ -425,6 +427,22 @@ start_port_forwards() {
       die "postgres port-forward failed — see /tmp/nafura-pf-postgres.log"
     fi
     echo "Port-forward: localhost:5432 → $INFRA_NS/postgres (pid $postgres_pid)"
+  fi
+
+  if netstat -ano 2>/dev/null | grep -qE ':3000[ ].*LISTENING'; then
+    echo "Port-forward already listening on 3000 — leaving it."
+  else
+    nohup kubectl --context="$CTX" -n "$INFRA_NS" port-forward svc/gotenberg 3000:3000 \
+      >/tmp/nafura-pf-gotenberg.log 2>&1 &
+    local gotenberg_pid=$!
+    disown "$gotenberg_pid" 2>/dev/null || true
+    echo "$gotenberg_pid" >>"$PF_PID_FILE"
+    sleep 1
+    if ! kill -0 "$gotenberg_pid" 2>/dev/null; then
+      echo "WARN: gotenberg port-forward failed — PDF print will fail. See /tmp/nafura-pf-gotenberg.log" >&2
+    else
+      echo "Port-forward: localhost:3000 → $INFRA_NS/gotenberg (pid $gotenberg_pid)"
+    fi
   fi
 
   if [[ "$APP_ID" == "venue-catalog" ]]; then

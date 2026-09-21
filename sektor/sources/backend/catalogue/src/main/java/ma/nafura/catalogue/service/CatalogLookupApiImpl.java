@@ -10,6 +10,7 @@ import ma.nafura.catalogue.api.CatalogCandidate;
 import ma.nafura.catalogue.api.CatalogItemSnapshot;
 import ma.nafura.catalogue.api.CatalogLookupApi;
 import ma.nafura.catalogue.api.CatalogPriceContext;
+import ma.nafura.catalogue.api.CatalogPriceHistoryEntry;
 import ma.nafura.catalogue.api.CatalogPriceSnapshot;
 import ma.nafura.catalogue.api.IdentiteClasse;
 import ma.nafura.catalogue.domain.article.Item;
@@ -18,8 +19,10 @@ import ma.nafura.catalogue.repository.ItemRepository;
 import ma.nafura.catalogue.repository.UnitOfMeasureRepository;
 import ma.nafura.catalogue.service.ItemService;
 import ma.nafura.catalogue.service.prix.ContexteResolution;
+import ma.nafura.catalogue.service.prix.PrixCandidat;
 import ma.nafura.catalogue.service.prix.PrixResolu;
 import ma.nafura.catalogue.service.prix.ResolutionPrixService;
+import ma.nafura.catalogue.service.port.bc.PrixAchatExternePort;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,6 +35,7 @@ public class CatalogLookupApiImpl implements CatalogLookupApi {
     private final ItemRepository itemRepository;
     private final UnitOfMeasureRepository unitOfMeasureRepository;
     private final ResolutionPrixService resolutionPrixService;
+    private final PrixAchatExternePort prixAchatExternePort;
     private final ItemService itemService;
     private final ExtraireIdentiteService extraireIdentiteService;
 
@@ -39,11 +43,13 @@ public class CatalogLookupApiImpl implements CatalogLookupApi {
             ItemRepository itemRepository,
             UnitOfMeasureRepository unitOfMeasureRepository,
             ResolutionPrixService resolutionPrixService,
+            PrixAchatExternePort prixAchatExternePort,
             ItemService itemService,
             ExtraireIdentiteService extraireIdentiteService) {
         this.itemRepository = itemRepository;
         this.unitOfMeasureRepository = unitOfMeasureRepository;
         this.resolutionPrixService = resolutionPrixService;
+        this.prixAchatExternePort = prixAchatExternePort;
         this.itemService = itemService;
         this.extraireIdentiteService = extraireIdentiteService;
     }
@@ -60,7 +66,9 @@ public class CatalogLookupApiImpl implements CatalogLookupApi {
             preds.add(cb.equal(root.get("tenantId"), tenantId));
             preds.add(cb.or(cb.isTrue(root.get("isActive")), cb.isNull(root.get("isActive"))));
             if (natureFilter != null) {
-                preds.add(cb.equal(root.get("nature"), natureFilter));
+                preds.add(cb.or(
+                        cb.equal(root.get("nature"), natureFilter),
+                        cb.isNull(root.get("nature"))));
             }
             if (StringUtils.hasText(term)) {
                 String like = "%" + term + "%";
@@ -128,6 +136,32 @@ public class CatalogLookupApiImpl implements CatalogLookupApi {
     }
 
     @Override
+    public List<CatalogPriceHistoryEntry> listPurchasePriceHistory(UUID itemId, CatalogPriceContext context) {
+        if (itemId == null) {
+            return List.of();
+        }
+        CatalogPriceContext ctx = context != null
+                ? context
+                : new CatalogPriceContext(null, null, null, null, null);
+        ContexteResolution resoluCtx = new ContexteResolution(
+                TenantContext.getTenantId(),
+                ctx.referenceDate(),
+                ctx.preferredSupplierId(),
+                ctx.chantierId(),
+                ctx.pivotCurrencyId(),
+                ctx.pricingBase());
+        String cle = getItem(itemId).map(CatalogItemSnapshot::cleStable).orElse(null);
+        List<PrixCandidat> rows = prixAchatExternePort.listHistorique(itemId, cle, resoluCtx);
+        if (rows == null || rows.isEmpty()) {
+            return List.of();
+        }
+        return rows.stream()
+                .filter(p -> p != null && p.prixUnitaire() != null && p.prixUnitaire().signum() > 0)
+                .map(CatalogLookupApiImpl::toHistoryEntry)
+                .toList();
+    }
+
+    @Override
     public CatalogItemSnapshot createAllege(String libelle, String nature, String uomCode) {
         Item item = itemService.createAllege(libelle, nature, uomCode);
         return new CatalogItemSnapshot(
@@ -191,13 +225,54 @@ public class CatalogLookupApiImpl implements CatalogLookupApi {
         if (!StringUtils.hasText(term) || item.getName() == null) {
             return 0.0;
         }
-        String name = item.getName().toLowerCase(Locale.ROOT);
-        if (name.equals(term)) {
+        String name = fold(item.getName());
+        String foldedTerm = fold(term);
+        if (name.equals(foldedTerm)) {
             return 1.0;
         }
-        if (name.startsWith(term)) {
+        String code = item.getCode() != null ? fold(item.getCode()) : "";
+        if (StringUtils.hasText(code) && code.equals(foldedTerm)) {
+            return 1.0;
+        }
+        if (name.startsWith(foldedTerm)) {
             return 0.8;
         }
         return 0.5;
+    }
+
+    private static String fold(String raw) {
+        if (raw == null) {
+            return "";
+        }
+        return java.text.Normalizer.normalize(raw.trim(), java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "")
+                .toLowerCase(Locale.ROOT);
+    }
+
+    private static CatalogPriceHistoryEntry toHistoryEntry(PrixCandidat p) {
+        String kind = StringUtils.hasText(p.kind()) ? p.kind() : kindFromSource(p.sourcePrix());
+        String detail = StringUtils.hasText(p.detail()) ? p.detail() : kind;
+        return new CatalogPriceHistoryEntry(
+                kind,
+                detail,
+                p.sourcePrix(),
+                p.prixUnitaire(),
+                p.dateSource(),
+                p.sourceRefId(),
+                p.libelleSource(),
+                p.supplierName(),
+                p.perime());
+    }
+
+    private static String kindFromSource(String source) {
+        if (source == null) {
+            return CatalogPriceHistoryEntry.KIND_CATALOGUE;
+        }
+        return switch (source) {
+            case "CONSULTE" -> CatalogPriceHistoryEntry.KIND_CONSULTATION;
+            case "HISTORIQUE" -> CatalogPriceHistoryEntry.KIND_ACHATS;
+            case "TARIF" -> CatalogPriceHistoryEntry.KIND_TARIF;
+            default -> CatalogPriceHistoryEntry.KIND_CATALOGUE;
+        };
     }
 }

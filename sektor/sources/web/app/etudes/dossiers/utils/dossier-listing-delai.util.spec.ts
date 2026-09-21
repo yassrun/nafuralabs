@@ -2,6 +2,7 @@ import {
   estOuvertPourDelai,
   kindDelaiListing,
   labelDelaiListing,
+  labelDepotRestantHeader,
   variantDelaiListing,
 } from './dossier-listing-delai.util';
 
@@ -32,5 +33,20 @@ describe('dossier-listing-delai', () => {
   it('reste neutre sans date', () => {
     expect(kindDelaiListing({ status: 'DRAFT', aoDateLimiteDepot: null }, TODAY)).toBe('SANS_DATE');
     expect(labelDelaiListing(null, { status: 'DRAFT' }, TODAY)).toBe('—');
+  });
+
+  it('compte les jours restants pour l’en-tête', () => {
+    expect(labelDepotRestantHeader({ status: 'IN_PROGRESS', aoDateLimiteDepot: '2026-09-25' }, TODAY)).toBe(
+      '14 j restants',
+    );
+    expect(labelDepotRestantHeader({ status: 'IN_PROGRESS', aoDateLimiteDepot: '2026-09-12' }, TODAY)).toBe(
+      '1 j restant',
+    );
+    expect(labelDepotRestantHeader({ status: 'IN_PROGRESS', aoDateLimiteDepot: '2026-09-09' }, TODAY)).toBe(
+      '2 j de retard',
+    );
+    expect(labelDepotRestantHeader({ status: 'FINAL_APPROVED', aoDateLimiteDepot: '2026-09-01' }, TODAY)).toBe(
+      'Clos',
+    );
   });
 });

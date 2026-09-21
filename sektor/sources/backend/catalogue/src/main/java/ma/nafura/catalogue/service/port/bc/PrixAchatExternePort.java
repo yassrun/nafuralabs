@@ -21,4 +21,10 @@ public interface PrixAchatExternePort {
     Optional<PrixCandidat> findDerniereFacture(UUID itemId, ContexteResolution ctx);
 
     List<PrixCandidat> allSources(UUID itemId, ContexteResolution ctx);
+
+    /**
+     * Historique brut pour le chiffreur : devis de consultation, commandes, factures, catalogue.
+     * {@code cleStable} sert à matcher le panier / les lignes de devis.
+     */
+    List<PrixCandidat> listHistorique(UUID itemId, String cleStable, ContexteResolution ctx);
 }

@@ -744,6 +744,7 @@
         "error": "Could not add the recipient."
       },
       "envoyer": "Send the consultation",
+      "envoyerNeedsSave": "A recipient is still a draft: save first, or send — we’ll save, then send.",
       "envoyerError": "Could not send.",
       "journal": {
         "title": "Send log",

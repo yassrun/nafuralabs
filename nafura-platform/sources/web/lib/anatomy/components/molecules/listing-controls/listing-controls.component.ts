@@ -3,11 +3,11 @@ import { CommonModule } from '@angular/common';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslateModule } from '@ngx-translate/core';
-import { ButtonComponent } from '../../atoms/button';
+import { ButtonComponent, type ButtonSize } from '../../atoms/button';
 import { FilterBuilderComponent } from '../filter-builder';
 import { FilterResetComponent } from '../filter-reset/filter-reset.component';
 import { ViewModeSwitcherComponent } from '../../organisms/entity-listing/view-mode-switcher.component';
-import type { FilterFieldConfig, LookupContext, ViewMode } from '../../../types';
+import type { FilterFieldConfig, FilterGroup, LookupContext, ViewMode } from '../../../types';
 
 /** Column item for hide/show columns popup (key, label, visible). */
 export interface ListingControlsColumn {
@@ -41,8 +41,14 @@ export interface ListingControlsColumn {
   ],
   templateUrl: './listing-controls.component.html',
   styleUrl: './listing-controls.component.scss',
+  host: {
+    '[class.nf-listing-controls--xs]': 'size() === "xs"',
+    style: 'display: inline-flex; align-items: center;',
+  },
 })
 export class ListingControlsComponent {
+  /** Compact 26px chrome to match `nf-listing-flat`. Default `md` keeps entity-listing unchanged. */
+  size = input<ButtonSize>('md');
   /** When true, show the multi-select toggle as the first button (before columns). */
   showSelectionToggle = input<boolean>(false);
   /** When true, table is in selection mode — multi-select button shows active and "Cancel" icon. */
@@ -122,8 +128,8 @@ export class ListingControlsComponent {
     // no-op; openCount is used so builder syncs on next open
   }
 
-  onFilterApply(values: Record<string, unknown>): void {
-    this.filterChange.emit(values);
+  onFilterApply(values: FilterGroup): void {
+    this.filterChange.emit(values as unknown as Record<string, unknown>);
     this.filterMenuTrigger?.closeMenu();
   }
 

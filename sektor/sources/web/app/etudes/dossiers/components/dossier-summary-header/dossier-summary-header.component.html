@@ -52,6 +52,17 @@
       </div>
 
       <div class="dsh__kpis">
+        <div
+          class="dsh__kpi"
+          [class.dsh__kpi--due]="depotKind() === 'J7'"
+          [class.dsh__kpi--late]="depotKind() === 'EN_RETARD'"
+          [attr.title]="depotTitle()"
+        >
+          <span class="dsh__kpi-label">Dépôt</span>
+          <span class="dsh__kpi-value" [class.dsh__empty]="depotKind() === 'SANS_DATE'">
+            {{ depotRestantLabel() }}
+          </span>
+        </div>
         <div class="dsh__kpi">
           <span class="dsh__kpi-label">Total HT</span>
           <span class="dsh__kpi-value">{{ s.totalHt | mad }}</span>
@@ -84,6 +95,29 @@
             (clicked)="emitAction('ENREGISTRER')"
           >
             Enregistrer
+          </nf-button>
+        }
+        @if (peutImprimerLivrables()) {
+          <nf-button
+            class="dsh__save"
+            type="button"
+            variant="secondary"
+            size="sm"
+            data-testid="dossier-print-bdp"
+            [disabled]="!hasDpgf()"
+            (clicked)="emitAction('IMPRIMER_BORDEREAU')"
+          >
+            Imprimer le BDP
+          </nf-button>
+          <nf-button
+            class="dsh__save"
+            type="button"
+            variant="secondary"
+            size="sm"
+            data-testid="dossier-print-planning"
+            (clicked)="emitAction('IMPRIMER_PLANNING')"
+          >
+            Imprimer le planning
           </nf-button>
         }
         @for (action of suiteActions(); track action.action) {

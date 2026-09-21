@@ -32,6 +32,47 @@ public interface DpgfNoeudRepository extends TenantScopedRepository<DpgfNoeud, U
             nativeQuery = true)
     int deleteAllByDpgfIdAndTenantId(@Param("dpgfId") UUID dpgfId, @Param("tenantId") UUID tenantId);
 
+    /**
+     * Break the prix_dpu ↔ dpgf_noeuds cycle before a subtree delete
+     * ({@code dpgf_noeuds.prix_dpu_id} vs {@code prix_dpu.dpgf_noeud_id}).
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+            value =
+                    """
+                    WITH RECURSIVE subtree AS (
+                      SELECT id FROM dpgf_noeuds WHERE id = :id AND tenant_id = :tenantId
+                      UNION ALL
+                      SELECT n.id FROM dpgf_noeuds n
+                        INNER JOIN subtree s ON n.parent_id = s.id
+                      WHERE n.tenant_id = :tenantId
+                    )
+                    UPDATE dpgf_noeuds SET prix_dpu_id = NULL
+                    WHERE id IN (SELECT id FROM subtree)
+                    """,
+            nativeQuery = true)
+    int detachPrixDpuForSubtree(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
+
+    /**
+     * One-shot subtree delete. Hibernate entity deletes race with
+     * {@code parent_id ON DELETE CASCADE} (StaleStateException).
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+            value =
+                    """
+                    WITH RECURSIVE subtree AS (
+                      SELECT id FROM dpgf_noeuds WHERE id = :id AND tenant_id = :tenantId
+                      UNION ALL
+                      SELECT n.id FROM dpgf_noeuds n
+                        INNER JOIN subtree s ON n.parent_id = s.id
+                      WHERE n.tenant_id = :tenantId
+                    )
+                    DELETE FROM dpgf_noeuds WHERE id IN (SELECT id FROM subtree)
+                    """,
+            nativeQuery = true)
+    int deleteSubtree(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
+
     @Query(
             """
             select n.dpgf.id, n.chargeLotUserId

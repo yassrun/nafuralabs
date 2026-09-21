@@ -15,6 +15,8 @@ public interface CatalogLookupApi {
 
     CatalogPriceSnapshot resolvePurchasePrice(UUID itemId, CatalogPriceContext context);
 
+    List<CatalogPriceHistoryEntry> listPurchasePriceHistory(UUID itemId, CatalogPriceContext context);
+
     CatalogItemSnapshot createAllege(String libelle, String nature, String uomCode);
 
     Optional<CatalogItemSnapshot> findByCleStable(String cleStable);

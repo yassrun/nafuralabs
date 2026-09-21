@@ -46,6 +46,7 @@
       [incompleteStepIndexes]="incompleteStepIndexes()"
       [canProceed]="dossier()?.status === 'STUDY_REJECTED' ? false : modifiable() ? peutContinuerUi() : true"
       [allowStepNavigation]="true"
+      [actionsPlacement]="'stepper'"
       [backLabel]="backLabel()"
       [nextLabel]="nextLabel()"
       submitLabel="Soumettre le chiffrage"
@@ -134,11 +135,13 @@
           <div class="dossier__planif-res">
             <app-dossier-planning-panel
               [dossierId]="dossier()!.id"
+              [dossierNumero]="dossier()?.numero"
               [dpgfId]="dossier()?.dpgfId ?? null"
               [modifiable]="modifiable()"
             />
             <app-dossier-ressources-panel
               [dossierId]="dossier()!.id"
+              [dossierNumero]="dossier()?.numero"
               [modifiable]="modifiable()"
             />
           </div>

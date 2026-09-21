@@ -1,5 +1,5 @@
 export { WizardShellComponent } from './wizard-shell.component';
-export type { WizardStepConfig } from './wizard-step.interface';
+export type { WizardActionsPlacement, WizardStepConfig } from './wizard-step.interface';
 export {
   wizardStepVisualState,
   type WizardStepVisualState,

@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewEncapsulation, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ViewEncapsulation, inject, signal, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 
 import { ButtonComponent } from '@platform/lib/anatomy';
 
+import { ItemsApiService } from '@app/catalogue/items/services/item-api.service';
+import type { Item } from '@app/catalogue/items/models/item.model';
 import type {
   DecompositionComposantIncertain,
   DecompositionComposantMatched,
@@ -264,7 +266,7 @@ export interface DecompositionSuggestionDialogResult {
     }
   `,
 })
-export class DecompositionSuggestionDialogComponent {
+export class DecompositionSuggestionDialogComponent implements OnInit {
   private readonly dialogRef = inject(
     MatDialogRef<
       DecompositionSuggestionDialogComponent,
@@ -272,6 +274,7 @@ export class DecompositionSuggestionDialogComponent {
     >,
   );
   private readonly dialog = inject(MatDialog);
+  private readonly itemsApi = inject(ItemsApiService);
   readonly data = inject<DecompositionSuggestionDialogData>(MAT_DIALOG_DATA);
 
   readonly matched = signal<DecompositionComposantMatched[]>([...(this.data.propose.matched ?? [])]);
@@ -280,6 +283,66 @@ export class DecompositionSuggestionDialogComponent {
     ...(this.data.propose.uncertain ?? []),
   ]);
   readonly selected = signal<boolean[]>(this.matched().map(() => true));
+
+  ngOnInit(): void {
+    void this.relierManquantsDejaAuCatalogue();
+  }
+
+  private async relierManquantsDejaAuCatalogue(): Promise<void> {
+    const leftover: DecompositionComposantMissing[] = [];
+    const already = new Set(
+      this.matched()
+        .map((row) => row.itemId)
+        .filter((id): id is string => !!id),
+    );
+    for (const row of this.missing()) {
+      const item = await this.findExistingItem(row.designation);
+      if (!item?.id || already.has(item.id)) {
+        leftover.push(row);
+        continue;
+      }
+      already.add(item.id);
+      this.matched.update((list) => [
+        ...list,
+        {
+          type: row.type,
+          itemId: item.id,
+          cleStable: item.cleStable,
+          code: item.code,
+          name: item.name,
+          unite: row.unite,
+          rendement: row.rendement,
+          prixUnitaire: item.prixUnitaire,
+          sourcePrix: item.prixUnitaire != null ? 'CATALOGUE' : undefined,
+          confiance: row.confiance,
+          suggereParIa: true,
+        },
+      ]);
+      this.selected.update((flags) => [...flags, true]);
+    }
+    this.missing.set(leftover);
+  }
+
+  private async findExistingItem(designation: string): Promise<Item | null> {
+    const q = designation.trim();
+    if (q.length < 2) {
+      return null;
+    }
+    try {
+      const page = await this.itemsApi.searchPicker({ q, page: 0, size: 10, isActive: true });
+      const target = foldLabel(q);
+      return (
+        page.items.find(
+          (item) =>
+            foldLabel(item.name) === target ||
+            foldLabel(item.code) === target ||
+            foldLabel(item.cleStable) === target,
+        ) ?? null
+      );
+    } catch {
+      return null;
+    }
+  }
 
   selectedCount(): number {
     return this.selected().filter(Boolean).length;
@@ -369,4 +432,12 @@ export class DecompositionSuggestionDialogComponent {
   close(): void {
     this.dialogRef.close(null);
   }
+}
+
+function foldLabel(value: string | null | undefined): string {
+  return (value ?? '')
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .trim();
 }

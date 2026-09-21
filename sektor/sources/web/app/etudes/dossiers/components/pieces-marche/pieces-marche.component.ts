@@ -14,8 +14,12 @@ import { FormsModule } from '@angular/forms';
 import {
   ButtonComponent,
   ConfirmDialogService,
-  IconComponent,
+  FileSlotsComponent,
   NfSelectComponent,
+  type FileSlotDensity,
+  type FileSlotFileEvent,
+  type FileSlotIdEvent,
+  type FileSlotModel,
   type NfSelectOption,
 } from '@platform/lib/anatomy';
 
@@ -76,8 +80,8 @@ export function slotMatchesMode(type: string | undefined, mode: PiecesMarcheMode
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ButtonComponent,
-    IconComponent,
     NfSelectComponent,
+    FileSlotsComponent,
     BordereauArbreComponent,
     FormsModule,
   ],
@@ -141,17 +145,31 @@ export class PiecesMarcheComponent {
   readonly chargement = signal(false);
   readonly ouvertureId = signal<string | null>(null);
   readonly envoiSlot = signal<string | null>(null);
-  readonly dragOverSlot = signal<string | null>(null);
   readonly initManuel = signal(false);
   readonly erreur = signal<string | undefined>(undefined);
   readonly info = signal<string | undefined>(undefined);
+  readonly arbreTick = signal(0);
 
   readonly banner = computed(
     (): { tone: 'error' | 'info'; message: string } | undefined => {
+      this.arbreTick();
       if (this.erreur()) return { tone: 'error', message: this.erreur()! };
-      if (this.info()) return { tone: 'info', message: this.info()! };
       const arbreErr = this.arbre()?.erreur();
       if (arbreErr) return { tone: 'error', message: arbreErr };
+      if (this.mode() === 'bordereau' && !this.enRevue()) {
+        const arbre = this.arbre();
+        if (arbre) {
+          const ignores = arbre.compteIgnores();
+          if (ignores > 0) {
+            return {
+              tone: 'info',
+              message: this.messageArticlesACorriger(arbre.compteExploitables(), ignores),
+            };
+          }
+          return undefined;
+        }
+      }
+      if (this.info()) return { tone: 'info', message: this.info()! };
       return undefined;
     },
   );
@@ -195,17 +213,15 @@ export class PiecesMarcheComponent {
     this.slotsAttendus().filter((s) => slotMatchesMode(s.type, this.mode())),
   );
 
-  readonly slotsPrincipaux = computed(() =>
-    this.slotsVisibles().filter((s) => estSlotCadragePrincipal(s.type)),
+  readonly fileSlots = computed((): FileSlotModel[] =>
+    this.slotsVisibles().map((slot) => this.toFileSlot(slot)),
   );
 
-  readonly slotsSecondaires = computed(() =>
-    this.slotsVisibles().filter((s) => !estSlotCadragePrincipal(s.type)),
+  readonly slotsDensity = computed((): FileSlotDensity =>
+    this.mode() === 'destination' ? 'comfortable' : 'compact',
   );
 
-  readonly autresDeposes = computed(
-    () => this.slotsSecondaires().filter((s) => !!this.documentPourSlot(s)).length,
-  );
+  readonly slotsColumns = computed(() => (this.mode() === 'destination' ? 2 : 1));
 
   readonly autresOuverts = signal(false);
 
@@ -284,8 +300,15 @@ export class PiecesMarcheComponent {
 
   readonly labelExtraction = computed(() => (this.aDejaUnArbre() ? 'Ré-extraire' : 'Extraire'));
 
+  /** Dépôt / remplacement / suppression : cadrage seulement, pas l’étape Bordereau. */
+  readonly slotsReadonly = computed(
+    () => !this.modifiable() || this.mode() === 'bordereau',
+  );
+
   fichierDeposeFige(piece: DossierDocument | undefined): boolean {
-    return this.mode() === 'documents' && this.figeFichiersDeposes() && !!piece;
+    if (!piece) return false;
+    if (this.mode() === 'bordereau') return true;
+    return this.mode() === 'documents' && this.figeFichiersDeposes();
   }
 
   /** Arbre toujours éditable, sauf structure figée après chiffrage. */
@@ -321,10 +344,6 @@ export class PiecesMarcheComponent {
     const lib = (slot.libelle ?? '').trim();
     if (lib) return lib;
     return this.libelleType(slot.type);
-  }
-
-  toggleAutres(): void {
-    this.autresOuverts.update((v) => !v);
   }
 
   /** Corrige le mojibake fréquent UTF-8 lu en Latin-1 (ex. NÂ° → N°). */
@@ -424,38 +443,86 @@ export class PiecesMarcheComponent {
     return this.pieces().find((p) => p.type === slot.type);
   }
 
-  onDragOver(event: DragEvent, slotKey: string): void {
-    if (!this.modifiable() || this.envoiSlot()) return;
-    const slot = this.slotsAttendus().find((s) => s.id === slotKey);
-    if (slot && this.fichierDeposeFige(this.documentPourSlot(slot))) return;
-    event.preventDefault();
-    event.stopPropagation();
-    this.dragOverSlot.set(slotKey);
+  private toFileSlot(slot: DossierPieceAttendue): FileSlotModel {
+    const piece = this.documentPourSlot(slot);
+    const grouped = this.mode() === 'documents' && !estSlotCadragePrincipal(slot.type);
+    const locked = this.fichierDeposeFige(piece);
+    const extractable =
+      !!piece &&
+      this.peutExtraire() &&
+      (slot.type === 'BORDEREAU' || slot.type === 'CPS_ET_BORDEREAU');
+    return {
+      id: slot.id,
+      type: this.badgeSlot(slot),
+      label:
+        grouped || this.mode() === 'destination' ? this.libelleSlot(slot) : undefined,
+      required: !!slot.obligatoire,
+      grouped,
+      fileId: piece?.id,
+      fileName: piece
+        ? this.nomFichierAffiche(piece.nomFichier) || piece.documentId
+        : null,
+      busy: this.envoiSlot() === slot.id,
+      opening: !!piece && this.ouvertureId() === piece.id,
+      locked,
+      lockedLabel:
+        locked && this.mode() === 'documents' ? 'Figé après cadrage' : undefined,
+      dropLabel: this.dropLabel(slot),
+      emptyStatus: this.modifiable() ? 'À déposer' : 'Non déposé',
+      hint: slot.source === 'IA' ? 'IA' : undefined,
+      dismissible:
+        this.modifiable() &&
+        (this.mode() === 'destination' || (this.mode() === 'documents' && grouped)),
+      extract:
+        extractable && piece
+          ? {
+              label: this.labelExtraction(),
+              loading: this.extractionEnCours() && this.pieceExtraction()?.id === piece.id,
+              disabled: this.extractionEnCours() || this.phase() === 'saving',
+              icon: 'sparkles',
+            }
+          : undefined,
+    };
   }
 
-  onDragLeave(event: DragEvent, slotKey: string): void {
-    event.preventDefault();
-    event.stopPropagation();
-    if (this.dragOverSlot() === slotKey) this.dragOverSlot.set(null);
+  private dropLabel(slot: DossierPieceAttendue): string {
+    if (slot.type === 'BORDEREAU') return 'Déposer un BDP';
+    if (slot.type === 'PLAN' || slot.type === 'PLA') return 'Déposer les plans (PLA)';
+    if (this.mode() === 'documents') return 'Déposer le fichier';
+    if (this.mode() === 'bordereau') return 'Déposer un BDP';
+    return 'Glissez-déposez le fichier ici';
   }
 
-  async onDrop(event: DragEvent, slot: DossierPieceAttendue): Promise<void> {
-    event.preventDefault();
-    event.stopPropagation();
-    this.dragOverSlot.set(null);
-    const file = event.dataTransfer?.files?.[0];
-    if (file) await this.deposer(file, slot);
+  onSlotFile(event: FileSlotFileEvent): void {
+    const slot = this.slotsAttendus().find((s) => s.id === event.slotId);
+    if (slot) void this.deposer(event.file, slot);
   }
 
-  async onFichierChoisi(event: Event, slot: DossierPieceAttendue): Promise<void> {
-    const inputEl = event.target as HTMLInputElement | null;
-    const file = inputEl?.files?.[0];
-    if (file) await this.deposer(file, slot);
-    if (inputEl) inputEl.value = '';
+  onSlotOpen(event: FileSlotIdEvent): void {
+    const slot = this.slotsAttendus().find((s) => s.id === event.slotId);
+    const piece = slot ? this.documentPourSlot(slot) : undefined;
+    if (piece) void this.ouvrir(piece);
+  }
+
+  onSlotRemove(event: FileSlotIdEvent): void {
+    const slot = this.slotsAttendus().find((s) => s.id === event.slotId);
+    const piece = slot ? this.documentPourSlot(slot) : undefined;
+    if (piece) void this.supprimer(piece);
+  }
+
+  onSlotExtract(event: FileSlotIdEvent): void {
+    const slot = this.slotsAttendus().find((s) => s.id === event.slotId);
+    const piece = slot ? this.documentPourSlot(slot) : undefined;
+    if (piece) void this.extraire(piece);
+  }
+
+  onSlotDismiss(event: FileSlotIdEvent): void {
+    const slot = this.slotsAttendus().find((s) => s.id === event.slotId);
+    if (slot) void this.retirerSlot(slot);
   }
 
   private async deposer(file: File, slot: DossierPieceAttendue): Promise<void> {
-    if (!this.modifiable() || this.envoiSlot()) return;
+    if (!this.modifiable() || this.envoiSlot() || this.mode() === 'bordereau') return;
 
     const existante = this.documentPourSlot(slot);
     if (this.fichierDeposeFige(existante)) return;
@@ -565,31 +632,57 @@ export class PiecesMarcheComponent {
     const cps = this.pieceCps();
     if (!cps?.id || this.capturedForCps === cps.id) return;
     this.capturedForCps = cps.id;
-    for (const delay of [0, 2500, 5000, 8000]) {
-      if (delay) await this.sleep(delay);
-      if (this.pieceCps()?.id !== cps.id) return;
+    const indexed = await this.attendreIndexCpsPourDestination(cps.id);
+    if (!indexed) {
+      this.capturedForCps = '';
+      return;
+    }
+    try {
+      const prop = await this.api.proposerMarche(this.dossierId(), cps.id);
+      const dest = (prop?.piecesAttendues ?? []).filter((p) =>
+        slotMatchesMode(p.type, 'destination'),
+      );
+      if (dest.length) {
+        await this.api.appliquerPropositionMarche(this.dossierId(), {
+          piecesAttendues: dest,
+        });
+        this.slotsAttendus.set(await this.api.listerPiecesAttendues(this.dossierId()));
+      }
+      this.change.emit();
+    } catch {
+      this.capturedForCps = '';
+    }
+  }
+
+  private async attendreIndexCpsPourDestination(cpsDocumentId: string): Promise<boolean> {
+    const deadline = Date.now() + 90_000;
+    while (Date.now() < deadline) {
+      let jobs: ExtractionJobDto[] = [];
       try {
-        const prop = await this.api.proposerMarche(this.dossierId(), cps.id);
+        jobs = await this.api.listExtractionJobs(this.dossierId());
+      } catch {
+        jobs = [];
+      }
+      const job = jobs
+        .filter((j) => j.jobType === 'CPS_INDEX' && j.dossierDocumentId === cpsDocumentId)
+        .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))[0];
+      if (job?.status === 'SUCCEEDED') return true;
+      if (job?.status === 'FAILED' || job?.status === 'CANCELLED') return false;
+      try {
+        const prop = await this.api.proposerMarche(this.dossierId(), cpsDocumentId);
         const meta = prop?.metadonnees;
         const hasMeta =
           !!meta && Object.values(meta).some((v) => v != null && String(v).trim() !== '');
         const dest = (prop?.piecesAttendues ?? []).filter((p) =>
           slotMatchesMode(p.type, 'destination'),
         );
-        if (!hasMeta && dest.length === 0) continue;
-        if (dest.length) {
-          await this.api.appliquerPropositionMarche(this.dossierId(), {
-            piecesAttendues: dest,
-          });
-          this.slotsAttendus.set(await this.api.listerPiecesAttendues(this.dossierId()));
-        }
-        this.change.emit();
-        return;
+        if (hasMeta || dest.length) return true;
       } catch {
-        /* index CPS async — retry silencieux */
+        /* 204 */
       }
+      await this.sleep(job?.status === 'RUNNING' ? 1500 : 2000);
     }
-    this.capturedForCps = '';
+    return false;
   }
 
   async extraire(piece?: DossierDocument): Promise<void> {
@@ -653,6 +746,11 @@ export class PiecesMarcheComponent {
     this.draftArbre.set(arbre);
   }
 
+  onArbrePersisteChange(): void {
+    this.arbreTick.update((n) => n + 1);
+    this.change.emit();
+  }
+
   async validerExtraction(): Promise<void> {
     const arbre = this.draftArbre();
     const piece = this.pieceExtraction();
@@ -685,19 +783,11 @@ export class PiecesMarcheComponent {
       );
       this.dpgfIdLocal.set(saved.dpgfId);
       this.resetExtractionState();
-      if (saved.articlesIgnores > 0) {
-        this.info.set(
-          `${saved.articlesAcceptes} article${saved.articlesAcceptes > 1 ? 's' : ''} importé${
-            saved.articlesAcceptes > 1 ? 's' : ''
-          } — ${saved.articlesIgnores} à corriger (unité ou quantité manquante). Les lignes restent dans l’arbre, marquées « incomplet ». Cliquez « ${saved.articlesIgnores} à corriger » pour les voir.`,
-        );
-      } else {
-        this.info.set(
-          `${saved.articlesAcceptes} article${saved.articlesAcceptes > 1 ? 's' : ''} importé${
-            saved.articlesAcceptes > 1 ? 's' : ''
-          }.`,
-        );
-      }
+      this.info.set(
+        saved.articlesIgnores > 0
+          ? this.messageArticlesACorriger(saved.articlesAcceptes, saved.articlesIgnores)
+          : undefined,
+      );
       this.change.emit();
     } catch (e) {
       this.phase.set('review');
@@ -841,7 +931,7 @@ export class PiecesMarcheComponent {
   }
 
   async supprimer(piece: DossierDocument): Promise<void> {
-    if (!this.modifiable() || this.envoiSlot()) return;
+    if (!this.modifiable() || this.envoiSlot() || this.mode() === 'bordereau') return;
     if (this.fichierDeposeFige(piece)) return;
     this.erreur.set(undefined);
     try {
@@ -949,5 +1039,10 @@ export class PiecesMarcheComponent {
       return 'Extraction encore en cours après plusieurs minutes — réessayez plus tard.';
     }
     return (typeof code === 'string' ? code : undefined) ?? 'Échec de l’opération.';
+  }
+
+  private messageArticlesACorriger(exploitables: number, ignores: number): string {
+    const art = `${exploitables} article${exploitables > 1 ? 's' : ''}`;
+    return `${art} — ${ignores} à corriger (unité ou quantité manquante). Les lignes restent dans l’arbre, marquées « incomplet ». Cliquez « ${ignores} à corriger » pour les voir.`;
   }
 }

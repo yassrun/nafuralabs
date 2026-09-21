@@ -45,6 +45,29 @@ export function kindDelaiListing(
   return 'OK';
 }
 
+export function joursAvantDepot(
+  item: Pick<DossierEtude, 'aoDateLimiteDepot'>,
+  today = new Date(),
+): number | null {
+  const limite = parseDate(item.aoDateLimiteDepot ?? null);
+  if (!limite) return null;
+  return daysUntil(limite, today);
+}
+
+export function labelDepotRestantHeader(
+  item: Pick<DossierEtude, 'aoDateLimiteDepot' | 'status'>,
+  today = new Date(),
+): string {
+  const kind = kindDelaiListing(item, today);
+  const n = joursAvantDepot(item, today);
+  if (kind === 'SANS_DATE' || n == null) return '—';
+  if (kind === 'CLOS') return 'Clos';
+  if (n === 0) return "Aujourd'hui";
+  if (n > 0) return n === 1 ? '1 j restant' : `${n} j restants`;
+  const late = Math.abs(n);
+  return late === 1 ? '1 j de retard' : `${late} j de retard`;
+}
+
 export function labelDelaiListing(
   _value: unknown,
   item: unknown,

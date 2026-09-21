@@ -163,6 +163,48 @@ export interface DecompositionPropose {
   confiance?: number;
 }
 
+export interface PrixComposantPropose {
+  prixUnitaire: number;
+  unite?: string | null;
+  sourcePrix: string;
+  libelleSource?: string | null;
+  confiance?: number | null;
+  aVerifier: boolean;
+  justification?: string | null;
+}
+
+export interface HistoriquePrixComposantLigne {
+  kind: string;
+  detail?: string | null;
+  sourcePrix: string;
+  prixUnitaire: number;
+  dateSource?: string | null;
+  sourceRefId?: string | null;
+  libelle?: string | null;
+  fournisseur?: string | null;
+  perime?: boolean;
+}
+
+export interface HistoriquePrixComposant {
+  item?: {
+    itemId: string;
+    code?: string | null;
+    name?: string | null;
+    unite?: string | null;
+    nature?: string | null;
+    cleStable?: string | null;
+  } | null;
+  suggestions?: Array<{
+    itemId: string;
+    code?: string | null;
+    name?: string | null;
+    unite?: string | null;
+    nature?: string | null;
+    score?: number | null;
+  }>;
+  lignes?: HistoriquePrixComposantLigne[];
+}
+
 /** Synthèse des coûts d'affaire (L1/L6) — projection. */
 export interface SyntheseCoutAffaire {
   montantTotalHt: number;
@@ -872,6 +914,54 @@ export class DossierEtudeApiService extends FeatureApiService<
           `${this.basePath}/${dossierId}/articles/${articleId}/decomposition-propose`,
         ),
         {},
+        { params },
+      ),
+    );
+  }
+
+  /**
+   * Propose un PU (catalogue interne, sinon estimation IA). Jamais persisté.
+   * `null` si 204 (rien de fiable).
+   */
+  async proposerPrixComposant(
+    dossierId: string,
+    body: {
+      designation: string;
+      type?: string;
+      unite?: string;
+      articleLibelle?: string;
+      articleCode?: string;
+    },
+  ): Promise<PrixComposantPropose | null> {
+    try {
+      const row = await firstValueFrom(
+        this.http.post<PrixComposantPropose | null>(
+          this.resolveUrl(`${this.basePath}/${dossierId}/proposer-prix-composant`),
+          body,
+        ),
+      );
+      return row ?? null;
+    } catch (e) {
+      const err = e as { status?: number };
+      if (err?.status === 204) return null;
+      throw e;
+    }
+  }
+
+  /**
+   * Historique de prix (achats + consultations). Jamais persisté.
+   */
+  historiquePrixComposant(
+    dossierId: string,
+    query: { itemId?: string | null; designation?: string; type?: string },
+  ): Promise<HistoriquePrixComposant> {
+    let params = new HttpParams();
+    if (query.itemId?.trim()) params = params.set('itemId', query.itemId.trim());
+    if (query.designation?.trim()) params = params.set('designation', query.designation.trim());
+    if (query.type?.trim()) params = params.set('type', query.type.trim());
+    return firstValueFrom(
+      this.http.get<HistoriquePrixComposant>(
+        this.resolveUrl(`${this.basePath}/${dossierId}/historique-prix-composant`),
         { params },
       ),
     );

@@ -6,6 +6,8 @@ import { ListingControlsComponent } from '@platform/lib/anatomy/components/molec
 import { ListingActionsComponent } from '@platform/lib/anatomy/components/molecules/listing-actions';
 import {
   TreeTableComponent,
+  findTreeNode,
+  nodeAllowsChildren,
   type NfTreeNode,
   type NfTreeTableColumn,
 } from '@platform/lib/anatomy/components/organisms/tree-table';
@@ -21,6 +23,35 @@ export interface BordereauRow {
   libelle: string;
   unite?: string;
   quantite?: number;
+}
+
+const NODE_KINDS: Record<BordereauType, { allowsChildren: boolean }> = {
+  LOT: { allowsChildren: true },
+  SOUS_LOT: { allowsChildren: true },
+  ARTICLE: { allowsChildren: false },
+};
+
+function makeKindNode(data: BordereauRow): NfTreeNode<BordereauRow> {
+  const allows = NODE_KINDS[data.type].allowsChildren;
+  return {
+    key: data.id,
+    data,
+    allowsChildren: allows,
+    leaf: !allows,
+    children: allows ? [] : undefined,
+  };
+}
+
+function stampKind(nodes: NfTreeNode<BordereauRow>[]): NfTreeNode<BordereauRow>[] {
+  return nodes.map((n) => {
+    const allows = NODE_KINDS[n.data.type].allowsChildren;
+    return {
+      ...n,
+      allowsChildren: allows,
+      leaf: !allows,
+      children: n.children?.length ? stampKind(n.children) : n.children,
+    };
+  });
 }
 
 @Component({
@@ -39,6 +70,15 @@ export interface BordereauRow {
       <nf-page-header [config]="headerConfig" />
 
       <div class="toolbar">
+        <nf-listing-actions
+          mode="tree"
+          placement="start"
+          [showMutateActions]="false"
+          [treeExpanded]="expandedKeys().size > 0"
+          expandAllLabel="Tout déplier"
+          collapseAllLabel="Tout replier"
+          (actionClick)="onAction($event)"
+        />
         <nf-listing-controls
           [showColumnsButton]="false"
           [filterActive]="filterActive()"
@@ -50,6 +90,7 @@ export interface BordereauRow {
         />
         <nf-listing-actions
           mode="tree"
+          [showFoldActions]="false"
           [selectedId]="selectedId()"
           [canAddChild]="canAddChild()"
           addNodeLabel="Ajouter un nœud"
@@ -58,8 +99,6 @@ export interface BordereauRow {
           deleteConfirmTitle="Confirmer la suppression"
           deleteConfirmMessage="Supprimer ce nœud et ses enfants ? Cette action est irréversible."
           deleteConfirmLabel="Supprimer"
-          expandAllLabel="Tout déplier"
-          collapseAllLabel="Tout replier"
           (actionClick)="onAction($event)"
         />
       </div>
@@ -69,7 +108,7 @@ export interface BordereauRow {
         [columns]="columns"
         treeColumnKey="libelle"
         [rowClickable]="true"
-        [rowClass]="rowClass"
+        [activeKey]="selectedId()"
         [expandedKeys]="expandedKeys()"
         (expandedKeysChange)="expandedKeys.set($event)"
         (rowClick)="onRowClick($event)"
@@ -136,9 +175,6 @@ export interface BordereauRow {
       .libelle {
         font-weight: 500;
       }
-      :host ::ng-deep tr.row--selected {
-        background: var(--nf-color-primary-50, #eff6ff) !important;
-      }
     `,
   ],
 })
@@ -153,7 +189,7 @@ export class TreePage {
   readonly selectedId = signal<string | null>('lot-1');
   readonly expandedKeys = signal<ReadonlySet<string>>(new Set(['lot-1', 'sl-1']));
 
-  readonly nodes = signal<NfTreeNode<BordereauRow>[]>([
+  readonly nodes = signal<NfTreeNode<BordereauRow>[]>(stampKind([
     {
       key: 'lot-1',
       data: { id: 'lot-1', type: 'LOT', code: '01', libelle: 'Gros œuvre' },
@@ -226,7 +262,7 @@ export class TreePage {
         },
       ],
     },
-  ]);
+  ]));
 
   readonly columns: NfTreeTableColumn<BordereauRow>[] = [
     { key: 'type', label: 'Type', width: '5rem' },
@@ -256,10 +292,9 @@ export class TreePage {
     return id ? this.findRow(this.nodes(), id) : null;
   });
 
-  readonly canAddChild = computed(() => {
-    const row = this.selectedRow();
-    return !!row && row.type !== 'ARTICLE';
-  });
+  readonly canAddChild = computed(() =>
+    nodeAllowsChildren(findTreeNode(this.nodes(), this.selectedId())),
+  );
 
   readonly filteredNodes = computed(() => {
     const q = this.search().trim().toLowerCase();
@@ -273,10 +308,6 @@ export class TreePage {
       }
       return true;
     });
-  });
-
-  readonly rowClass = (row: BordereauRow): Record<string, boolean> => ({
-    'row--selected': row.id === this.selectedId(),
   });
 
   typeLabel(type: BordereauType): string {
@@ -324,38 +355,30 @@ export class TreePage {
     const id = `lot-${Date.now()}`;
     this.nodes.update((xs) => [
       ...xs,
-      {
-        key: id,
-        data: {
-          id,
-          type: 'LOT',
-          code: String(xs.length + 1).padStart(2, '0'),
-          libelle: 'Nouveau lot',
-        },
-        children: [],
-      },
+      makeKindNode({
+        id,
+        type: 'LOT',
+        code: String(xs.length + 1).padStart(2, '0'),
+        libelle: 'Nouveau lot',
+      }),
     ]);
     this.selectedId.set(id);
   }
 
   onAddChild(parentId: string): void {
-    const parent = this.findRow(this.nodes(), parentId);
-    if (!parent || parent.type === 'ARTICLE') return;
+    const parentNode = findTreeNode(this.nodes(), parentId);
+    if (!parentNode || !nodeAllowsChildren(parentNode)) return;
+    const parent = parentNode.data;
     const id = `n-${Date.now()}`;
     const childType: BordereauType = parent.type === 'LOT' ? 'SOUS_LOT' : 'ARTICLE';
-    const child: NfTreeNode<BordereauRow> = {
-      key: id,
-      leaf: childType === 'ARTICLE',
-      data: {
-        id,
-        type: childType,
-        code: `${parent.code}.01`,
-        libelle: childType === 'SOUS_LOT' ? 'Nouveau sous-lot' : 'Nouvel article',
-        unite: childType === 'ARTICLE' ? 'u' : undefined,
-        quantite: childType === 'ARTICLE' ? 1 : undefined,
-      },
-      children: childType === 'ARTICLE' ? undefined : [],
-    };
+    const child = makeKindNode({
+      id,
+      type: childType,
+      code: `${parent.code}.01`,
+      libelle: childType === 'SOUS_LOT' ? 'Nouveau sous-lot' : 'Nouvel article',
+      unite: childType === 'ARTICLE' ? 'u' : undefined,
+      quantite: childType === 'ARTICLE' ? 1 : undefined,
+    });
     this.nodes.update((xs) =>
       this.mapTree(xs, parentId, (node) => ({
         ...node,

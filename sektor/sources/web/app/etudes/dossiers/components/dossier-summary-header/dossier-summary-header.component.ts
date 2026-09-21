@@ -17,8 +17,14 @@ import { MadCurrencyPipe } from '@platform/lib/anatomy/pipes/mad-currency.pipe';
 import { chiffragePretATerminer } from '../../utils/dossier-etape.util';
 import { exigeAvisExecution } from '../../utils/dossier-responsables.util';
 import {
+  kindDelaiListing,
+  labelDepotRestantHeader,
+  type KindDelaiListing,
+} from '../../utils/dossier-listing-delai.util';
+import {
   DOSSIER_STATUS_BAR,
   DOSSIER_SUITE_ACTIONS,
+  peutImprimerLivrablesEtude,
   type DossierStatusContext,
 } from '../../config/dossier-etude.workflow';
 
@@ -117,6 +123,29 @@ export class DossierSummaryHeaderComponent {
     return n == null ? '—' : `${n} j`;
   });
 
+  readonly depotItem = computed((): Pick<DossierEtude, 'aoDateLimiteDepot' | 'status'> => {
+    const d = this.dossier();
+    const status = d?.status ?? (this.statut() || 'DRAFT');
+    return {
+      aoDateLimiteDepot: d?.aoDateLimiteDepot ?? null,
+      status,
+    };
+  });
+
+  readonly depotKind = computed((): KindDelaiListing => kindDelaiListing(this.depotItem()));
+
+  readonly depotRestantLabel = computed(() => labelDepotRestantHeader(this.depotItem()));
+
+  readonly depotTitle = computed(() => {
+    const day = (this.depotItem().aoDateLimiteDepot ?? '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+      return 'Date limite de dépôt non renseignée';
+    }
+    const [y, m, d] = day.split('-').map(Number);
+    const formatted = new Date(y, m - 1, d).toLocaleDateString('fr-FR');
+    return `Date limite de dépôt : ${formatted}`;
+  });
+
   readonly anomaliesAffichees = computed(() => {
     const etape = this.anomaliesEtape();
     return etape !== undefined ? etape : this.synthese().anomaliesBloquantes;
@@ -148,6 +177,8 @@ export class DossierSummaryHeaderComponent {
   readonly suiteActions = computed(() =>
     DOSSIER_SUITE_ACTIONS.filter((action) => action.isVisible(this.statusContext())),
   );
+
+  readonly peutImprimerLivrables = computed(() => peutImprimerLivrablesEtude(this.statut()));
 
   readonly statusHistory = signal<StatusChangeRecord[]>([]);
   readonly historyLoading = signal(false);

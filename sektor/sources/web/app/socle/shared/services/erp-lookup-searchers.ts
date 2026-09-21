@@ -31,6 +31,10 @@ export function buildErpLookupSearchers(
     (q) => erp.partnersByRole('FOURNISSEUR', q),
     partnerSelectOptions,
   );
+  const sousTraitants = typeahead(
+    (q) => erp.partnersByRole('SOUS_TRAITANT', q),
+    partnerSelectOptions,
+  );
   const chantiers = typeahead((q) => erp.chantiers(q));
   const employes = typeahead((q) => erp.employes('ACTIF', q));
   const rhPostes = typeahead((q) => erp.rhPostes(q));
@@ -67,6 +71,7 @@ export function buildErpLookupSearchers(
     clients,
     fournisseurs,
     fournisseursLookup: fournisseurs,
+    sousTraitants,
     chantiers,
     chantiersLookup: chantiers,
     chantiersBudget: chantiers,

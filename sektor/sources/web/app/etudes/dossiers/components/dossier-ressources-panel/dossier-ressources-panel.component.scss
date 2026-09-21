@@ -8,6 +8,13 @@
   background: var(--nf-color-surface, #fff);
 }
 
+.res__entete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
 .res__titre {
   margin: 0;
   font-size: 0.95rem;

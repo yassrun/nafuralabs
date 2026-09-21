@@ -1,6 +1,5 @@
 package ma.nafura.catalogue.api.controller;
 
-import jakarta.validation.Valid;
 import java.util.UUID;
 import ma.nafura.catalogue.api.CatalogLookupApi;
 import ma.nafura.catalogue.api.IdentiteClasse;
@@ -8,8 +7,6 @@ import ma.nafura.catalogue.api.controller.base.ItemControllerBase;
 import ma.nafura.catalogue.api.dto.ExtraireCreerDto;
 import ma.nafura.catalogue.api.dto.ExtraireCreerRequest;
 import ma.nafura.catalogue.api.dto.IdentiteClasserRequest;
-import ma.nafura.catalogue.api.dto.ItemFournisseurBindDto;
-import ma.nafura.catalogue.api.request.ItemFournisseurRefDto;
 import ma.nafura.catalogue.domain.article.Item;
 import ma.nafura.catalogue.service.ExtraireCreationService;
 import ma.nafura.catalogue.service.ItemService;
@@ -94,19 +91,5 @@ public class ItemController extends ItemControllerBase {
                 .findByCleStable(cleStable)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    /**
-     * Pointe une ref fournisseur sur l'identité existante. Ne crée jamais d'Item.
-     */
-    @PostMapping("/identites/{cleStable}/fournisseur-ref")
-    public ResponseEntity<ItemFournisseurBindDto> bindFournisseurRef(
-            @PathVariable String cleStable, @Valid @RequestBody ItemFournisseurRefDto body) {
-        Item item = service.bindFournisseurRef(cleStable, body.getRefFournisseur());
-        return ResponseEntity.ok(new ItemFournisseurBindDto(
-                item.getId().toString(),
-                item.getCleStable(),
-                body.getRefFournisseur().trim(),
-                false));
     }
 }

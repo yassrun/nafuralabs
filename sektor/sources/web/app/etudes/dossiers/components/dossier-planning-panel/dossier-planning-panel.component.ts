@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ButtonComponent, NfInputComponent, NfSelectComponent, type NfSelectOption } from '@platform/lib/anatomy';
+import { ButtonComponent, NfInputComponent, NfSelectComponent, PrintDialogService, type NfSelectOption } from '@platform/lib/anatomy';
 
 import type { DossierPlanningActivite, NoeudDPGF } from '@app/etudes/models';
 import { DpgfApiService } from '@app/etudes/services/dpgf-api.service';
@@ -28,8 +28,10 @@ import { messagePlanningErreur } from '../../utils/planning-erreur.util';
 export class DossierPlanningPanelComponent {
   private readonly api = inject(DossierEtudeApiService);
   private readonly dpgfApi = inject(DpgfApiService);
+  private readonly printDialog = inject(PrintDialogService);
 
   readonly dossierId = input.required<string>();
+  readonly dossierNumero = input<string | undefined>(undefined);
   readonly dpgfId = input<string | null>(null);
   readonly modifiable = input(true);
 
@@ -104,6 +106,14 @@ export class DossierPlanningPanelComponent {
 
   lotAffiche(row: DossierPlanningActivite): string {
     return row.lotLibelle?.trim() || 'Hors lot';
+  }
+
+  async imprimer(): Promise<void> {
+    await this.printDialog.open(
+      'dossier_etude_planning',
+      this.dossierId(),
+      this.dossierNumero() ?? this.dossierId(),
+    );
   }
 
   private async charger(dossierId: string, dpgfId: string | null): Promise<void> {

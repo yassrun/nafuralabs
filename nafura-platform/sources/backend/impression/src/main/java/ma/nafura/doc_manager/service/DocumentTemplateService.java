@@ -32,6 +32,7 @@ public class DocumentTemplateService {
         this.fragmentService = fragmentService;
     }
 
+    @Transactional
     public Page<DocumentTemplate> list(String entityType, Pageable pageable) {
         UUID tenantId = TenantContext.getTenantId();
         ensureDefaults(tenantId);
@@ -45,15 +46,28 @@ public class DocumentTemplateService {
      * Template used when printing a record of this type: the one flagged default, else the first
      * available. Null when the type has none.
      */
+    @Transactional
     public DocumentTemplate findDefaultForEntityType(String entityType) {
         UUID tenantId = TenantContext.getTenantId();
         ensureDefaults(tenantId);
         List<DocumentTemplate> candidates =
                 repository.findByTenantIdAndEntityType(tenantId, entityType, Pageable.unpaged()).getContent();
         return candidates.stream()
+                .filter(t -> Boolean.TRUE.equals(t.getIsActive()) || t.getIsActive() == null)
                 .filter(t -> Boolean.TRUE.equals(t.getIsDefault()))
                 .findFirst()
-                .orElseGet(() -> candidates.isEmpty() ? null : candidates.get(0));
+                .orElseGet(() -> {
+                    List<DocumentTemplate> active = candidates.stream()
+                            .filter(t -> Boolean.TRUE.equals(t.getIsActive()) || t.getIsActive() == null)
+                            .toList();
+                    return active.isEmpty() ? null : active.get(0);
+                });
+    }
+
+    /** Seed system templates for the current tenant so admin screens can preview them. */
+    @Transactional
+    public void ensureDefaultsForCurrentTenant() {
+        ensureDefaults(TenantContext.getTenantId());
     }
 
     public DocumentTemplate get(UUID id) {

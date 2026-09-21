@@ -264,6 +264,50 @@ class ConsultationAchatServiceTest {
     }
 
     @Test
+    void addDestinataireAccepteSousTraitant() {
+        ConsultationAchat entity = consultationPrep();
+        when(repository.findByIdAndTenantId(CONSULTATION, TENANT)).thenReturn(Optional.of(entity));
+        when(partnerRepository.findByIdAndTenantId(FOURNISSEUR, TENANT))
+                .thenReturn(Optional.of(Partner.builder().id(FOURNISSEUR).raisonSociale("Atlas ST").build()));
+        when(roleRepository.existsByTenantIdAndPartnerIdAndRole(
+                        TENANT, FOURNISSEUR, PartnerRoleType.FOURNISSEUR))
+                .thenReturn(false);
+        when(roleRepository.existsByTenantIdAndPartnerIdAndRole(
+                        TENANT, FOURNISSEUR, PartnerRoleType.SOUS_TRAITANT))
+                .thenReturn(true);
+        when(destinataireRepository.existsByConsultationIdAndFournisseurId(CONSULTATION, FOURNISSEUR))
+                .thenReturn(false);
+        PartnerContact contactA = PartnerContact.builder()
+                .id(CONTACT_A)
+                .partnerId(FOURNISSEUR)
+                .nom("A. Benali")
+                .email("etude@atlas-st.example")
+                .build();
+        when(contactRepository.findByTenantIdAndPartnerIdOrderByNomAsc(TENANT, FOURNISSEUR))
+                .thenReturn(List.of(contactA));
+        when(contactRepository.findByIdAndTenantId(CONTACT_A, TENANT)).thenReturn(Optional.of(contactA));
+        List<ConsultationAchatDestinataire> saved = new ArrayList<>();
+        when(destinataireRepository.save(any(ConsultationAchatDestinataire.class))).thenAnswer(inv -> {
+            ConsultationAchatDestinataire row = inv.getArgument(0);
+            if (row.getId() == null) {
+                row.setId(UUID.randomUUID());
+            }
+            saved.add(row);
+            return row;
+        });
+        when(destinataireRepository.findByConsultationIdOrderByCreatedAtAsc(CONSULTATION))
+                .thenAnswer(inv -> List.copyOf(saved));
+        when(devisRepository.findByConsultationIdOrderByCreatedAtAsc(CONSULTATION)).thenReturn(List.of());
+
+        ConsultationDestinataireCreateDto dto = new ConsultationDestinataireCreateDto();
+        dto.setFournisseurId(FOURNISSEUR);
+        ConsultationAchatDto after = service.addDestinataire(CONSULTATION, dto);
+
+        assertThat(after.getDestinataires()).hasSize(1);
+        assertThat(after.getDestinataires().get(0).getFournisseurId()).isEqualTo(FOURNISSEUR);
+    }
+
+    @Test
     void addDeuxDestinataires() {
         ConsultationAchat entity = consultationPrep();
         when(repository.findByIdAndTenantId(CONSULTATION, TENANT)).thenReturn(Optional.of(entity));

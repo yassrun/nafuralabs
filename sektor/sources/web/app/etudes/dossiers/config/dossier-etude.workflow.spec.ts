@@ -1,6 +1,10 @@
 import { resolveStatusActions } from '@platform/lib/anatomy';
 
-import { DOSSIER_STATUS_BAR, type DossierStatusContext } from './dossier-etude.workflow';
+import {
+  DOSSIER_STATUS_BAR,
+  peutImprimerLivrablesEtude,
+  type DossierStatusContext,
+} from './dossier-etude.workflow';
 
 function ctx(over: Partial<DossierStatusContext> = {}): DossierStatusContext {
   return {
@@ -106,6 +110,13 @@ describe('DOSSIER_STATUS_BAR', () => {
       }),
     );
     expect(withApi.map((a) => a.action)).toEqual([]);
+  });
+
+  it('shows print buttons only at final validation', () => {
+    expect(peutImprimerLivrablesEtude('IN_PROGRESS')).toBe(false);
+    expect(peutImprimerLivrablesEtude('COMPLETED')).toBe(false);
+    expect(peutImprimerLivrablesEtude('FINANCIALLY_APPROVED')).toBe(true);
+    expect(peutImprimerLivrablesEtude('FINAL_APPROVED')).toBe(true);
   });
 
   it('does not put quote or outcome actions on the status bar', () => {

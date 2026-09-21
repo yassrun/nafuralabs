@@ -78,6 +78,7 @@ import { exigeAvisExecution, idsActeurEgaux } from '../utils/dossier-responsable
 
 /**
  * Parcours d'étude en cinq étapes métier (backend 1..5 projeté ; 4–5 locales).
+ * Wizard : Précédent / Continuer collés aux extrémités du stepper.
  *
  * <p>1. Aucune règle de gate n'est rejouée ici — l'état vient de `GET /gates`.
  * <p>2. Pas de rechargement global de l'arbre DPGF après une transition.
@@ -118,13 +119,24 @@ export class DossierDetailPage {
   private readonly synthesePanel = viewChild(SyntheseValidationPanelComponent);
 
   readonly dossier = signal<DossierEtude | undefined>(undefined);
-  /** En-tête : durée d’exécution lue sur le formulaire de cadrage dès qu’elle est connue. */
+  /** En-tête : dates et durée lues sur le cadrage dès qu’elles sont connues. */
   readonly dossierPourEntete = computed((): DossierEtude | undefined => {
     const d = this.dossier();
     if (!d) return undefined;
-    const live = this.identite()?.delaiExecutionJours();
-    if (live == null || live === d.aoDelaiExecutionJours) return d;
-    return { ...d, aoDelaiExecutionJours: live };
+    const identite = this.identite();
+    const liveDelai = identite?.delaiExecutionJours();
+    const liveDepot = identite?.dateLimiteDepot()?.trim() || undefined;
+    const next: DossierEtude = { ...d };
+    let dirty = false;
+    if (liveDelai != null && liveDelai !== d.aoDelaiExecutionJours) {
+      next.aoDelaiExecutionJours = liveDelai;
+      dirty = true;
+    }
+    if (liveDepot && liveDepot !== (d.aoDateLimiteDepot ?? '').slice(0, 10)) {
+      next.aoDateLimiteDepot = liveDepot;
+      dirty = true;
+    }
+    return dirty ? next : d;
   });
   readonly synthese = signal<DossierEtudeSynthese | undefined>(undefined);
   readonly gates = signal<ResultatGate[]>([]);
@@ -726,6 +738,20 @@ export class DossierDetailPage {
             dossier.numero,
           );
           break;
+        case 'IMPRIMER_PLANNING':
+          await this.printDialog.open(
+            'dossier_etude_planning',
+            dossier.id,
+            dossier.numero,
+          );
+          break;
+        case 'IMPRIMER_RESSOURCES':
+          await this.printDialog.open(
+            'dossier_etude_ressources',
+            dossier.id,
+            dossier.numero,
+          );
+          break;
         case 'IMPRIMER_SYNTHESE':
           await this.printDialog.open(
             'dossier_etude_synthese',
@@ -1312,6 +1338,9 @@ export class DossierDetailPage {
     }
     if (domain === 'etudes.bordereau.structure_verrouillee') {
       return 'La structure est figée. Réouvrez le bordereau pour modifier lots et postes.';
+    }
+    if (domain === 'etudes.dossier.verrouille') {
+      return 'Le dossier est verrouillé — saisie impossible dans cet état.';
     }
     if (domain === 'etudes.dossier.revenir_draft_hors_etat') {
       return 'Seul un dossier rejeté peut être renvoyé en brouillon.';

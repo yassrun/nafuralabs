@@ -29,11 +29,21 @@ import {
 } from '@app/etudes/utils/composant-reference.util';
 import { DpuApiService } from '@app/catalogue/bibliotheque-prix/services/dpu-api.service';
 import { ItemsApiService } from '@app/catalogue/services/items-api.service';
+import { AuthFacade } from '@platform/core/security/services/auth.facade';
+import {
+  ConsultationAchatApiService,
+  type ConsultationAchat,
+} from '@app/achats/consultations/services/consultation-achat-api.service';
 import { openConsultationDecompoDialog } from '../consultation-decompo-dialog/consultation-decompo-dialog.component';
 import { UnitOfMeasuresApiService } from '@app/catalogue/configuration/unit-of-measures/services/unit-of-measure-api.service';
 import { DpgfApiService } from '../../../services/dpgf-api.service';
 import { DossierEtudeApiService } from '../../services/dossier-etude-api.service';
-import type { DecompositionComposantMatched, DecompositionPropose } from '../../services/dossier-etude-api.service';
+import type {
+  DecompositionComposantMatched,
+  DecompositionPropose,
+  HistoriquePrixComposant,
+  HistoriquePrixComposantLigne,
+} from '../../services/dossier-etude-api.service';
 import { DecompositionProposeCache } from '../../services/decomposition-propose.cache';
 
 import type { BordereauTreeRow } from '../../utils/bordereau-tree.util';
@@ -49,6 +59,7 @@ import {
   type OrigineCoutUi,
 } from '../../utils/poste-chiffrage-mode.util';
 import { buildComposantDirtyKey } from '../../utils/poste-dirty.util';
+import { compactHistoriquePrix, historiquePrixPreview } from '../../utils/historique-prix.util';
 import { toUniteOptions, type UniteOption } from '../../utils/unite-options.util';
 import { CpsDescriptifDialogComponent } from '../cps-descriptif-dialog/cps-descriptif-dialog.component';
 import {
@@ -128,6 +139,8 @@ export class PosteDecompositionPanelComponent {
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toast = inject(ToastService);
   private readonly itemsApi = inject(ItemsApiService);
+  private readonly consultationsApi = inject(ConsultationAchatApiService);
+  private readonly auth = inject(AuthFacade);
 
   readonly poste = input<BordereauTreeRow | null>(null);
   readonly dossierId = input<string | null>(null);
@@ -180,6 +193,16 @@ export class PosteDecompositionPanelComponent {
   readonly propositionCps = signal(false);
   readonly extractionComposants = signal(false);
   readonly rafraichissementPrix = signal(false);
+  readonly consultationForfait = signal(false);
+  readonly consultationOuverture = signal(false);
+  readonly forfaitItem = signal<NonNullable<HistoriquePrixComposant['item']> | null>(null);
+  readonly forfaitSuggestions = signal<NonNullable<HistoriquePrixComposant['suggestions']>>([]);
+  readonly forfaitHistLignes = signal<HistoriquePrixComposantLigne[]>([]);
+  readonly forfaitHistLoading = signal(false);
+  readonly forfaitHistError = signal<string | undefined>(undefined);
+  readonly forfaitConsultations = signal<ConsultationAchat[]>([]);
+  readonly forfaitConsultationsLoading = signal(false);
+  private forfaitHistSeq = 0;
   readonly composantsIaIds = signal<Set<string>>(new Set());
   readonly composantsLabels = signal<Map<string, string>>(new Map());
   readonly erreur = signal<string | undefined>(undefined);
@@ -217,6 +240,27 @@ export class PosteDecompositionPanelComponent {
       this.estDecompose() &&
       !!this.dpu()?.id &&
       this.composants().some((c) => estComposantItem(c)),
+  );
+
+  readonly forfaitPrixRetenu = computed(() => {
+    const offre = this.forfaitOffreId();
+    if (!offre) return null;
+    return this.forfaitHistLignes().find((row) => row.sourceRefId === offre) ?? null;
+  });
+
+  readonly forfaitAConsultation = computed(
+    () =>
+      this.forfaitConsultations().length > 0 ||
+      this.forfaitHistLignes().some((row) => row.kind === 'CONSULTATION') ||
+      !!this.forfaitOffreId(),
+  );
+  readonly forfaitHistExpanded = signal(false);
+  readonly forfaitHistGroupes = computed(() => compactHistoriquePrix(this.forfaitHistLignes()));
+  readonly forfaitHistVisibles = computed(() =>
+    historiquePrixPreview(this.forfaitHistGroupes(), this.forfaitHistExpanded()),
+  );
+  readonly forfaitHistReste = computed(() =>
+    Math.max(0, this.forfaitHistGroupes().length - this.forfaitHistVisibles().length),
   );
 
   readonly commentDirty = computed(
@@ -448,6 +492,7 @@ export class PosteDecompositionPanelComponent {
       );
       this.forfaitPartnerId.set(poste.forfaitPartnerId ?? null);
       this.forfaitOffreId.set(poste.forfaitOffreId ?? null);
+      this.resetForfaitHist();
       this.fgFourniLocal.set(poste.fraisGenerauxPercent ?? null);
       this.margeFourniLocal.set(poste.margePercent ?? null);
       const comment = poste.descriptif ?? '';
@@ -474,6 +519,7 @@ export class PosteDecompositionPanelComponent {
       this.coutEstime.set(null);
       this.forfaitPartnerId.set(null);
       this.forfaitOffreId.set(null);
+      this.resetForfaitHist();
       this.fgFourniLocal.set(null);
       this.margeFourniLocal.set(null);
       this.commentaire.set('');
@@ -817,6 +863,353 @@ export class PosteDecompositionPanelComponent {
     }
   }
 
+  estPrixConsulte(row: ComposantDPU): boolean {
+    return row.sourcePrix === 'CONSULTE';
+  }
+
+  async ouvrirConsultationDepuisComposant(row: ComposantDPU): Promise<void> {
+    if (this.guestReadOnly()) return;
+    const opened = await this.ouvrirFicheConsultation({
+      devisId: row.prixSourceRefId || row.offreFournisseurId,
+      itemId: row.itemId,
+    });
+    if (!opened && this.estComposantCatalogue(row)) {
+      await this.ajouterAConsultation(row);
+    }
+  }
+
+  async ouvrirConsultationForfait(): Promise<void> {
+    if (this.guestReadOnly()) return;
+    const retenu = this.forfaitPrixRetenu();
+    const histCs = this.forfaitHistLignes().find((row) => row.kind === 'CONSULTATION');
+    const opened = await this.ouvrirFicheConsultation({
+      devisId: retenu?.sourceRefId || this.forfaitOffreId() || histCs?.sourceRefId,
+      itemId: this.forfaitItem()?.itemId,
+      cle: this.forfaitItem()?.cleStable,
+    });
+    if (!opened) await this.consulterForfaitSt();
+  }
+
+  async ouvrirConsultationDepuisHist(row: HistoriquePrixComposantLigne, event?: Event): Promise<void> {
+    event?.preventDefault();
+    event?.stopPropagation();
+    if (this.guestReadOnly() || row.kind !== 'CONSULTATION') return;
+    const opened = await this.ouvrirFicheConsultation({
+      devisId: row.sourceRefId,
+      itemId: this.forfaitItem()?.itemId,
+      cle: this.forfaitItem()?.cleStable,
+    });
+    if (!opened) this.toast.info('Consultation introuvable pour cette offre.');
+  }
+
+  private ouvrirOngletConsultation(id: string): void {
+    this.auth.persistSessionForNewTab();
+    window.open(`${window.location.origin}/achats/consultations/${id}`, '_blank', 'noopener');
+  }
+
+  private async ouvrirFicheConsultation(opts: {
+    devisId?: string | null;
+    itemId?: string | null;
+    cle?: string | null;
+  }): Promise<boolean> {
+    const dossierId = this.dossierId();
+    if (!dossierId || this.consultationOuverture()) return false;
+    this.consultationOuverture.set(true);
+    try {
+      const id = await this.resolveConsultationId({
+        dossierId,
+        devisId: opts.devisId,
+        itemId: opts.itemId,
+        cle: opts.cle,
+      });
+      if (!id) return false;
+      this.ouvrirOngletConsultation(id);
+      return true;
+    } catch {
+      this.toast.error('Impossible d’ouvrir la consultation.');
+      return false;
+    } finally {
+      this.consultationOuverture.set(false);
+    }
+  }
+
+  private async resolveConsultationId(opts: {
+    dossierId: string;
+    devisId?: string | null;
+    itemId?: string | null;
+    cle?: string | null;
+  }): Promise<string | null> {
+    const devisId = opts.devisId?.trim() || '';
+    if (devisId) {
+      try {
+        const direct = await this.consultationsApi.getById(devisId);
+        if (direct?.id && (!direct.dossierEtudeId || direct.dossierEtudeId === opts.dossierId)) {
+          return direct.id;
+        }
+      } catch {
+        /* devis id, pas une CS */
+      }
+    }
+
+    let cle = (opts.cle || '').trim();
+    if (!cle && opts.itemId) {
+      const item = await this.itemsApi.getById(opts.itemId).catch(() => null);
+      cle = (item?.cleStable || item?.code || '').trim();
+    }
+
+    const listed = ((await this.consultationsApi.list('liee')) ?? []).filter(
+      (row) => row.dossierEtudeId === opts.dossierId,
+    );
+    if (devisId) {
+      for (const row of listed) {
+        const full = await this.loadConsultation(row);
+        if ((full.devis ?? []).some((d) => d.id === devisId)) return full.id;
+      }
+    }
+    if (cle) {
+      const matches = listed.filter((row) => (row.clesStables ?? []).includes(cle));
+      if (matches.length) return matches[0].id;
+    }
+    return listed.length === 1 ? listed[0].id : null;
+  }
+
+  private async loadConsultation(row: ConsultationAchat): Promise<ConsultationAchat> {
+    if (row.devis?.length) return row;
+    try {
+      return await this.consultationsApi.getById(row.id);
+    } catch {
+      return row;
+    }
+  }
+
+  async consulterForfaitSt(): Promise<void> {
+    if (!this.modifiable() || this.guestReadOnly()) return;
+    const dossierId = this.dossierId();
+    if (!dossierId) return;
+    this.consultationForfait.set(true);
+    try {
+      const identite = await this.assurerIdentiteForfaitSt();
+      if (!identite) return;
+      const dossier = await this.dossierApi.getById(dossierId);
+      const dpgfId = dossier.dpgfId;
+      if (!dpgfId) {
+        this.toast.info('Aucun bordereau pour ouvrir une consultation.');
+        return;
+      }
+      const ok = await openConsultationDecompoDialog(this.dialog, {
+        dossierId,
+        dpgfId,
+        preselectedCles: [identite.cle],
+        articleLibelle: identite.libelle,
+        objet: 'forfait-st',
+      });
+      await this.refreshForfaitHist();
+      if (ok) this.change.emit();
+    } catch {
+      this.toast.error('Impossible d’ouvrir la consultation.');
+    } finally {
+      this.consultationForfait.set(false);
+    }
+  }
+
+  lierForfaitItem(hit: NonNullable<HistoriquePrixComposant['suggestions']>[number]): void {
+    this.forfaitItem.set({
+      itemId: hit.itemId,
+      code: hit.code,
+      name: hit.name,
+      unite: hit.unite,
+      nature: hit.nature,
+      cleStable: null,
+    });
+    this.forfaitSuggestions.set([]);
+    void this.refreshForfaitHist();
+  }
+
+  forfaitHistHasAchat(): boolean {
+    return this.forfaitHistLignes().some((row) => this.estForfaitHistAchat(row));
+  }
+
+  estForfaitHistAchat(row: HistoriquePrixComposantLigne): boolean {
+    return row.kind === 'ACHATS';
+  }
+
+  forfaitHistKindLabel(row: HistoriquePrixComposantLigne): string {
+    if (row.kind === 'ACHATS' && row.detail === 'FACTURE') return 'Achat facturé';
+    if (row.kind === 'ACHATS') return 'Commande';
+    if (row.kind === 'CONSULTATION') return 'Consultation';
+    if (row.kind === 'TARIF') return 'Tarif';
+    return 'Catalogue';
+  }
+
+  appliquerForfaitHist(row: HistoriquePrixComposantLigne): void {
+    if (!this.canMutate() || !this.estForfait()) return;
+    this.onPrixFourniChange(row.prixUnitaire);
+    this.forfaitOffreId.set(row.kind === 'CONSULTATION' ? (row.sourceRefId ?? null) : this.forfaitOffreId());
+    this.markDpuDirty();
+  }
+
+  private resetForfaitHist(): void {
+    this.forfaitHistSeq++;
+    this.forfaitItem.set(null);
+    this.forfaitSuggestions.set([]);
+    this.forfaitHistLignes.set([]);
+    this.forfaitHistError.set(undefined);
+    this.forfaitHistLoading.set(false);
+    this.forfaitHistExpanded.set(false);
+    this.forfaitConsultations.set([]);
+    this.forfaitConsultationsLoading.set(false);
+  }
+
+  private async refreshForfaitHist(): Promise<void> {
+    if (!this.estForfait()) return;
+    const dossierId = this.dossierId()?.trim();
+    const poste = this.poste();
+    if (!dossierId || !poste?.libelle?.trim()) return;
+    const seq = ++this.forfaitHistSeq;
+    this.forfaitHistLoading.set(true);
+    this.forfaitHistError.set(undefined);
+    try {
+      const row = await this.dossierApi.historiquePrixComposant(dossierId, {
+        itemId: this.forfaitItem()?.itemId,
+        designation: poste.libelle.trim(),
+        type: 'SOUS_TRAITANCE',
+      });
+      if (seq !== this.forfaitHistSeq) return;
+      this.forfaitItem.set(row.item ?? null);
+      this.forfaitSuggestions.set(row.item ? [] : (row.suggestions ?? []));
+      this.forfaitHistLignes.set(row.lignes ?? []);
+    } catch {
+      if (seq !== this.forfaitHistSeq) return;
+      this.forfaitHistError.set('Historique indisponible — saisissez le coût ou consultez.');
+      this.forfaitHistLignes.set([]);
+    } finally {
+      if (seq === this.forfaitHistSeq) this.forfaitHistLoading.set(false);
+      void this.refreshForfaitConsultations();
+    }
+  }
+
+  private async refreshForfaitConsultations(): Promise<void> {
+    const dossierId = this.dossierId()?.trim();
+    if (!this.estForfait() || !dossierId || this.guestReadOnly()) {
+      this.forfaitConsultations.set([]);
+      return;
+    }
+    this.forfaitConsultationsLoading.set(true);
+    try {
+      const listed = await this.consultationsApi.list('liee');
+      this.forfaitConsultations.set(
+        (listed ?? []).filter((row) => row.dossierEtudeId === dossierId),
+      );
+    } catch {
+      this.forfaitConsultations.set([]);
+    } finally {
+      this.forfaitConsultationsLoading.set(false);
+    }
+  }
+
+  lotDansPanier(row: ConsultationAchat): boolean {
+    const cle = this.forfaitCleNormale();
+    if (!cle) return false;
+    return (row.clesStables ?? []).some((c) => c.trim().toLowerCase() === cle);
+  }
+
+  panierResume(row: ConsultationAchat): string {
+    const cles = (row.clesStables ?? []).map((c) => c.trim()).filter(Boolean);
+    if (!cles.length) return 'Panier vide';
+    if (cles.length <= 2) return cles.join(', ');
+    return `${cles.slice(0, 2).join(', ')} +${cles.length - 2}`;
+  }
+
+  consultationDestinatairesLabel(row: ConsultationAchat): string {
+    const names = (row.destinataires ?? [])
+      .map((d) => (d.fournisseurNom || '').trim())
+      .filter(Boolean);
+    if (names.length) return names.join(', ');
+    return (row.fournisseurNom || '').trim() || 'Aucun destinataire';
+  }
+
+  consultationAvancementLabel(row: ConsultationAchat): string {
+    const n = (row.destinataires ?? []).length;
+    const k = row.devisRecus ?? 0;
+    return `${k}/${n} devis`;
+  }
+
+  consultationStatutLabel(row: ConsultationAchat): string {
+    const code = (row.statut ?? '').toUpperCase();
+    switch (code) {
+      case 'COMPLETE':
+        return 'Complète';
+      case 'PARTIELLE':
+        return 'Partielle';
+      case 'OUVERTE':
+        return 'En attente de réponses';
+      case 'PREPARATION':
+        return 'Préparation';
+      case 'DEVIS_RECU':
+        return (row.devisRecus ?? 0) > 1 ? `${row.devisRecus} devis reçus` : 'Devis reçu';
+      default:
+        return code || 'Préparation';
+    }
+  }
+
+  ouvrirFicheConsultationId(id: string, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    if (!id) return;
+    this.ouvrirOngletConsultation(id);
+  }
+
+  private forfaitCleNormale(): string {
+    const item = this.forfaitItem();
+    return (item?.cleStable || item?.code || '').trim().toLowerCase();
+  }
+
+  private async assurerIdentiteForfaitSt(): Promise<{
+    itemId: string;
+    cle: string;
+    libelle: string;
+  } | null> {
+    const poste = this.poste();
+    const designation = poste?.libelle?.trim();
+    if (!designation) return null;
+    await this.refreshForfaitHist();
+    const linked = this.forfaitItem();
+    if (linked?.itemId) {
+      const item = await this.itemsApi.getById(linked.itemId).catch(() => null);
+      const cle = (item?.cleStable || item?.code || linked.cleStable || '').trim();
+      if (cle) {
+        return {
+          itemId: linked.itemId,
+          cle,
+          libelle: item?.name || linked.name || designation,
+        };
+      }
+    }
+    const created = await this.itemsApi.extraireCreer({
+      designation,
+      nature: 'SOUS_TRAITANCE',
+      uniteCode: poste?.unite?.trim() || undefined,
+    });
+    const cle = (created.cleStable || '').trim();
+    if (!cle || !created.itemId) {
+      this.toast.info('Impossible de publier ce lot dans le catalogue.');
+      return null;
+    }
+    this.forfaitItem.set({
+      itemId: created.itemId,
+      code: created.cleStable,
+      name: created.libelle || designation,
+      nature: 'SOUS_TRAITANCE',
+      cleStable: created.cleStable,
+    });
+    this.forfaitSuggestions.set([]);
+    return {
+      itemId: created.itemId,
+      cle,
+      libelle: created.libelle || designation,
+    };
+  }
+
   async ajouterComposantAuCatalogue(row: ComposantDPU): Promise<void> {
     if (!this.canMutate() || this.estComposantCatalogue(row)) return;
     const ref = this.dialog.open(CreateMissingItemDialogComponent, {
@@ -930,6 +1323,7 @@ export class PosteDecompositionPanelComponent {
     this.prixFourni.set(this.coutForfait());
     this.origineLocal.set('FORFAIT');
     this.markDpuDirty();
+    void this.refreshForfaitHist();
     return true;
   }
 
@@ -977,7 +1371,9 @@ export class PosteDecompositionPanelComponent {
         {
           id: safeRandomUUID(),
           type: result.type,
-          referenceType: 'LIBRE',
+          referenceType: result.itemId ? 'ITEM' : 'LIBRE',
+          itemId: result.itemId ?? null,
+          ouvrageId: null,
           libelle: result.designation,
           articleOuPosteId: result.designation,
           quantite: result.quantite,
@@ -986,6 +1382,9 @@ export class PosteDecompositionPanelComponent {
           total: result.total,
           sourcePrix: result.sourcePrix ?? 'MANUEL',
           offreFournisseurId: result.offreFournisseurId ?? null,
+          prixSourceRefId: result.prixSourceRefId ?? null,
+          prixDateSource: result.prixDateSource ?? null,
+          prixLibelleSource: result.prixLibelleSource ?? null,
         },
       ]),
     );
@@ -1056,8 +1455,8 @@ export class PosteDecompositionPanelComponent {
             ? {
                 ...c,
                 type: result.type,
-                referenceType: 'LIBRE' as const,
-                itemId: null,
+                referenceType: result.itemId ? ('ITEM' as const) : ('LIBRE' as const),
+                itemId: result.itemId ?? null,
                 ouvrageId: null,
                 libelle: result.designation,
                 articleOuPosteId: result.designation,
@@ -1067,10 +1466,9 @@ export class PosteDecompositionPanelComponent {
                 total: result.total,
                 sourcePrix: result.sourcePrix ?? c.sourcePrix ?? 'MANUEL',
                 offreFournisseurId: result.offreFournisseurId ?? c.offreFournisseurId ?? null,
-                prixSourceRefId: null,
-                prixDateSource: null,
-                prixCurrencyId: null,
-                prixLibelleSource: null,
+                prixSourceRefId: result.prixSourceRefId ?? null,
+                prixDateSource: result.prixDateSource ?? null,
+                prixLibelleSource: result.prixLibelleSource ?? null,
               }
             : c,
         ),
@@ -1331,13 +1729,16 @@ export class PosteDecompositionPanelComponent {
     row?: ComposantDPU,
   ): Promise<SousDetailDialogResult | null> {
     const ref = this.dialog.open(SousDetailDialogComponent, {
-      width: '32rem',
+      width: '36rem',
       autoFocus: false,
       restoreFocus: true,
       data: {
         mode,
         premier: mode === 'create' && this.composants().length === 0,
         uniteOptions: this.uniteOptions(),
+        dossierId: this.dossierId(),
+        articleLibelle: this.poste()?.libelle ?? null,
+        articleCode: this.poste()?.code ?? null,
         initial: row
           ? {
               type: row.type,
@@ -1347,6 +1748,7 @@ export class PosteDecompositionPanelComponent {
               prixUnitaire: row.prixUnitaire,
               sourcePrix: row.sourcePrix ?? 'MANUEL',
               offreFournisseurId: row.offreFournisseurId ?? null,
+              itemId: row.itemId ?? null,
             }
           : {
               unite: this.poste()?.unite ?? this.uniteOptions()[0]?.code ?? 'U',
@@ -1417,6 +1819,7 @@ export class PosteDecompositionPanelComponent {
       if (seq === this.loadSeq) {
         this.chargement.set(false);
         this.captureDpuInitial();
+        if (this.estForfait()) void this.refreshForfaitHist();
       }
     }
   }

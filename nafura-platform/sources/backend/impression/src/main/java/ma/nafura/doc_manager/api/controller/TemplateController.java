@@ -68,6 +68,7 @@ public class TemplateController {
     @GetMapping("/entity-types")
     @RequirePermission(value = "administration.templates.read", fullPermission = true)
     public ResponseEntity<Map<String, List<PrintEntityTypeDescriptor>>> entityTypes() {
+        templateService.ensureDefaultsForCurrentTenant();
         return ResponseEntity.ok(
                 Map.of("entityTypes", variableCatalogService.listEntityTypeDescriptors()));
     }

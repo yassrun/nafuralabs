@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ButtonComponent, NfInputComponent, NfSelectComponent, type NfSelectOption } from '@platform/lib/anatomy';
+import { ButtonComponent, NfInputComponent, NfSelectComponent, PrintDialogService, type NfSelectOption } from '@platform/lib/anatomy';
 
 import type { DossierPlanningRessource } from '@app/etudes/models';
 import { ErpLookupService } from '@app/socle/shared/services/erp-lookup.service';
@@ -34,8 +34,10 @@ const TYPE_OPTIONS: NfSelectOption[] = [
 export class DossierRessourcesPanelComponent {
   private readonly api = inject(DossierEtudeApiService);
   private readonly erpLookup = inject(ErpLookupService);
+  private readonly printDialog = inject(PrintDialogService);
 
   readonly dossierId = input.required<string>();
+  readonly dossierNumero = input<string | undefined>(undefined);
   readonly modifiable = input(true);
 
   readonly ressources = signal<DossierPlanningRessource[]>([]);
@@ -108,6 +110,14 @@ export class DossierRessourcesPanelComponent {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  async imprimer(): Promise<void> {
+    await this.printDialog.open(
+      'dossier_etude_ressources',
+      this.dossierId(),
+      this.dossierNumero() ?? this.dossierId(),
+    );
   }
 
   private async charger(dossierId: string): Promise<void> {

@@ -2,14 +2,16 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   TemplateRef,
   computed,
   contentChild,
+  inject,
   input,
+  linkedSignal,
   output,
   signal,
 } from '@angular/core';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableModule } from '@angular/material/table';
 import { TranslateModule } from '@ngx-translate/core';
 import { LucideAngularModule } from 'lucide-angular';
@@ -22,7 +24,85 @@ export interface NfTreeNode<T> {
   data: T;
   children?: NfTreeNode<T>[];
   expanded?: boolean;
+  /** Display: no expand chevron. Prefer deriving from `children` + `allowsChildren`. */
   leaf?: boolean;
+  /**
+   * Whether this node **kind** may receive children.
+   * Independent of whether children exist today. Default `true`.
+   * `false` = terminal node → hide « add child ».
+   */
+  allowsChildren?: boolean;
+}
+
+/** Selected node may receive a child (toolbar « add child »). */
+export function nodeAllowsChildren<T>(
+  node: NfTreeNode<T> | null | undefined,
+  policy?: (node: NfTreeNode<T>) => boolean,
+): boolean {
+  if (!node) return false;
+  if (policy) return policy(node);
+  return node.allowsChildren !== false;
+}
+
+export function selectedRootKeys<T>(
+  nodes: NfTreeNode<T>[],
+  selected: ReadonlySet<string>,
+): string[] {
+  const out: string[] = [];
+  const walk = (list: NfTreeNode<T>[], ancestorSelected: boolean) => {
+    for (const node of list) {
+      const sel = selected.has(node.key);
+      if (sel && !ancestorSelected) out.push(node.key);
+      if (node.children?.length) walk(node.children, ancestorSelected || sel);
+    }
+  };
+  walk(nodes, false);
+  return out;
+}
+
+export function findTreeNode<T>(
+  nodes: NfTreeNode<T>[],
+  key: string | null | undefined,
+): NfTreeNode<T> | null {
+  if (!key) return null;
+  for (const node of nodes) {
+    if (nodeMatches(node, key)) return node;
+    const found = node.children?.length ? findTreeNode(node.children, key) : null;
+    if (found) return found;
+  }
+  return null;
+}
+
+/** Ancestor keys to expand so `targetKey` becomes a visible row. */
+export function expandAncestorKeys<T>(
+  nodes: NfTreeNode<T>[],
+  targetKey: string,
+): Set<string> {
+  const keys = new Set<string>();
+  const walk = (list: NfTreeNode<T>[], trail: string[]): boolean => {
+    for (const node of list) {
+      if (nodeMatches(node, targetKey)) {
+        trail.forEach((k) => keys.add(k));
+        return true;
+      }
+      if (node.children?.length && walk(node.children, [...trail, node.key])) {
+        keys.add(node.key);
+        return true;
+      }
+    }
+    return false;
+  };
+  walk(nodes, []);
+  return keys;
+}
+
+function nodeMatches<T>(node: NfTreeNode<T>, key: string): boolean {
+  if (node.key === key) return true;
+  if (node.data != null && typeof node.data === 'object' && 'id' in node.data) {
+    const id = (node.data as { id: unknown }).id;
+    return id != null && String(id) === key;
+  }
+  return false;
 }
 
 export interface NfTreeTableColumn<T = unknown> {
@@ -73,7 +153,6 @@ interface NfTreeFlatRow<T> {
     CommonModule,
     TranslateModule,
     MatTableModule,
-    MatCheckboxModule,
     LucideAngularModule,
     SpinnerComponent,
     EmptyStateComponent,
@@ -108,25 +187,29 @@ interface NfTreeFlatRow<T> {
                   mat-header-cell
                   *matHeaderCellDef
                   class="nf-tree-table__cell--select">
-                  <mat-checkbox
+                  <input
+                    type="checkbox"
+                    class="nf-table-checkbox"
                     [checked]="isAllVisibleSelected()"
                     [indeterminate]="isSomeVisibleSelected()"
                     [attr.aria-label]="'Select all'"
-                    (change)="toggleAllVisible($event.checked)"
-                    (click)="$event.stopPropagation()">
-                  </mat-checkbox>
+                    (change)="toggleAllVisible($any($event.target).checked)"
+                    (click)="$event.stopPropagation()"
+                  />
                 </th>
                 <td
                   mat-cell
                   *matCellDef="let row"
                   class="nf-tree-table__cell--select">
                   @if (rowSelectable(row.data)) {
-                    <mat-checkbox
+                    <input
+                      type="checkbox"
+                      class="nf-table-checkbox"
                       [checked]="isSelected(row.key)"
                       [attr.aria-label]="'Select row'"
                       (click)="$event.stopPropagation()"
-                      (change)="toggleRow(row.key, $event.checked)">
-                    </mat-checkbox>
+                      (change)="toggleRow(row.key, $any($event.target).checked)"
+                    />
                   }
                 </td>
               </ng-container>
@@ -221,8 +304,9 @@ interface NfTreeFlatRow<T> {
               [ngClass]="resolveRowClass(row.data)"
               [attr.data-row-key]="row.key"
               [attr.title]="resolveRowTitle(row.data)"
+              [attr.aria-selected]="isHighlighted(row)"
               [class.nf-tree-table__row--clickable]="rowClickable()"
-              [class.nf-tree-table__row--selected]="isSelected(row.key)"
+              [class.nf-tree-table__row--selected]="isHighlighted(row)"
               (click)="onRowClicked(row.data)"
               (dblclick)="rowDblClick.emit(row.data)"></tr>
             <tr
@@ -312,13 +396,61 @@ interface NfTreeFlatRow<T> {
       line-height: 0;
     }
     .nf-tree-table__cell--select {
-      width: 2.75rem;
-      min-width: 2.75rem;
+      width: 44px !important;
+      max-width: 44px !important;
+      min-width: 44px !important;
+      padding: 0 0 0 16px !important;
       text-align: center;
+      vertical-align: middle !important;
+    }
+    .nf-table-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      margin: 0;
+      display: inline-block;
+      vertical-align: middle;
+      border: 1.5px solid var(--nf-border-default, #d1d5db);
+      border-radius: 4px;
+      background-color: var(--nf-surface-section, #ffffff);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.12s ease-in-out;
+      outline: none;
+    }
+    .nf-table-checkbox:hover {
+      border-color: var(--nf-primary, #2563eb);
+    }
+    .nf-table-checkbox:checked {
+      background-color: var(--nf-primary, #2563eb);
+      border-color: var(--nf-primary, #2563eb);
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.2 4.8L6.5 10.5L3.8 7.8' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-size: 11px 11px;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .nf-table-checkbox:indeterminate {
+      background-color: var(--nf-primary, #2563eb);
+      border-color: var(--nf-primary, #2563eb);
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 8H12' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-size: 11px 11px;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .nf-table-checkbox:focus-visible {
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+      border-color: var(--nf-primary, #2563eb);
     }
     .nf-tree-table__row--clickable { cursor: pointer; }
-    .nf-tree-table__row--selected > td {
-      background: color-mix(in srgb, var(--nf-color-primary, #3b82f6) 8%, var(--nf-color-surface, #fff));
+    :host ::ng-deep .nf-tree-table__engine .mat-mdc-row.nf-tree-table__row--selected > .mat-mdc-cell {
+      background: var(--nf-primary-light, #eff6ff);
+    }
+    :host ::ng-deep .nf-tree-table__engine .mat-mdc-row.nf-tree-table__row--selected > .mat-mdc-cell:first-child {
+      box-shadow: inset 3px 0 0 var(--nf-primary, #2563eb);
+    }
+    :host ::ng-deep .nf-tree-table__engine .mat-mdc-row.nf-tree-table__row--selected:hover > .mat-mdc-cell {
+      background: #dbeafe;
     }
     .nf-tree-table__cell--center { text-align: center; }
     .nf-tree-table__cell--end {
@@ -353,6 +485,8 @@ interface NfTreeFlatRow<T> {
   `],
 })
 export class TreeTableComponent<T = unknown> {
+  private readonly host = inject(ElementRef<HTMLElement>);
+
   readonly cellTemplate =
     contentChild<TemplateRef<NfTreeTableCellContext<T>>>('cell');
   readonly detailTemplate =
@@ -373,12 +507,20 @@ export class TreeTableComponent<T = unknown> {
   readonly showDetail = input<((data: T) => boolean) | null>(null);
   readonly selectable = input<boolean | 'multiple'>(false);
   readonly selectedKeys = input<ReadonlySet<string>>(new Set());
+  /** Current row (click) — independent from checkbox `selectedKeys`. */
+  readonly activeKey = input<string | null>(null);
   readonly isSelectable = input<((data: T) => boolean) | null>(null);
 
   readonly expandedKeysChange = output<Set<string>>();
   readonly selectedKeysChange = output<Set<string>>();
   readonly rowClick = output<T>();
   readonly rowDblClick = output<T>();
+
+  /**
+   * Live checkbox set. Parent `[selectedKeys]` is one CD behind, so toggles
+   * must not re-read the input or rapid checks overwrite each other.
+   */
+  private readonly localSelected = linkedSignal(() => new Set(this.selectedKeys()));
 
   /** Expand state when the parent does not bind `expandedKeys`. */
   private readonly unboundExpanded = signal<Set<string> | null>(null);
@@ -428,8 +570,9 @@ export class TreeTableComponent<T = unknown> {
 
   cellValue(data: T, column: NfTreeTableColumn<T>): unknown {
     if (column.value) return column.value(data);
-    if (!column.field) return '';
-    return column.field.split('.').reduce<unknown>((value, segment) => {
+    const path = column.field ?? column.key;
+    if (!path) return '';
+    return path.split('.').reduce<unknown>((value, segment) => {
       if (value == null || typeof value !== 'object') return undefined;
       return (value as Record<string, unknown>)[segment];
     }, data);
@@ -456,33 +599,53 @@ export class TreeTableComponent<T = unknown> {
   }
 
   isSelected(key: string): boolean {
-    return this.selectedKeys().has(key);
+    return this.localSelected().has(key);
+  }
+
+  isActiveRow(row: NfTreeFlatRow<T>): boolean {
+    const active = this.activeKey();
+    if (!active) return false;
+    if (row.key === active) return true;
+    if (row.data && typeof row.data === 'object') {
+      const rec = row.data as Record<string, unknown>;
+      const id = rec['id'];
+      if (id != null && String(id) === active) return true;
+    }
+    return false;
+  }
+
+  isHighlighted(row: NfTreeFlatRow<T>): boolean {
+    return this.isSelected(row.key) || this.isActiveRow(row);
   }
 
   isAllVisibleSelected(): boolean {
     const keys = this.visibleSelectableKeys();
-    return keys.length > 0 && keys.every((key) => this.selectedKeys().has(key));
+    const selected = this.localSelected();
+    return keys.length > 0 && keys.every((key) => selected.has(key));
   }
 
   isSomeVisibleSelected(): boolean {
     const keys = this.visibleSelectableKeys();
-    const n = keys.filter((key) => this.selectedKeys().has(key)).length;
+    const selected = this.localSelected();
+    const n = keys.filter((key) => selected.has(key)).length;
     return n > 0 && n < keys.length;
   }
 
   toggleRow(key: string, checked: boolean): void {
-    const next = new Set(this.selectedKeys());
+    const next = new Set(this.localSelected());
     if (checked) next.add(key);
     else next.delete(key);
+    this.localSelected.set(next);
     this.selectedKeysChange.emit(next);
   }
 
   toggleAllVisible(checked: boolean): void {
-    const next = new Set(this.selectedKeys());
+    const next = new Set(this.localSelected());
     for (const key of this.visibleSelectableKeys()) {
       if (checked) next.add(key);
       else next.delete(key);
     }
+    this.localSelected.set(next);
     this.selectedKeysChange.emit(next);
   }
 
@@ -490,6 +653,31 @@ export class TreeTableComponent<T = unknown> {
     event.stopPropagation();
     if (!row.expandable) return;
     this.updateExpandedKey(row.key, !row.expanded);
+  }
+
+  /**
+   * Navigate to a node: isolate its branch, expand ancestors, scroll into view.
+   * `key` is `node.key` (or `data.id` when present).
+   */
+  reveal(key: string | null | undefined): boolean {
+    if (!key) return false;
+    const node = findTreeNode(this.nodes(), key);
+    if (!node) return false;
+    this.setExpandedKeys(expandAncestorKeys(this.nodes(), node.key));
+    this.scrollToKey(node.key);
+    return true;
+  }
+
+  scrollToKey(key: string): void {
+    const tryScroll = (): boolean => {
+      const el = this.host.nativeElement.querySelector(`[data-row-key="${CSS.escape(key)}"]`);
+      el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      return !!el;
+    };
+    queueMicrotask(() => {
+      if (tryScroll()) return;
+      setTimeout(tryScroll, 80);
+    });
   }
 
   private parseWidthPx(width: string | undefined): number {
@@ -506,6 +694,10 @@ export class TreeTableComponent<T = unknown> {
     const next = new Set(current);
     if (expanded) next.add(key);
     else next.delete(key);
+    this.setExpandedKeys(next);
+  }
+
+  private setExpandedKeys(next: Set<string>): void {
     if (this.expandedKeys()) {
       this.expandedKeysChange.emit(next);
     } else {
@@ -516,7 +708,8 @@ export class TreeTableComponent<T = unknown> {
 }
 
 function isExpandable<T>(node: NfTreeNode<T>): boolean {
-  return !node.leaf && (node.children?.length ?? 0) > 0;
+  if (node.allowsChildren === false || node.leaf) return false;
+  return (node.children?.length ?? 0) > 0;
 }
 
 function flattenVisible<T>(
