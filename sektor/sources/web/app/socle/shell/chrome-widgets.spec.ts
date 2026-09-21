@@ -1,5 +1,4 @@
-import { AiPanelService } from '@platform/core/shell/ai-panel.service';
-import { componentForSlot } from '@platform/core/shell/shell-extensions';
+import { AiPanelService, componentForSlot } from '@platform/platform/app-shell';
 
 describe('chrome widgets', () => {
   describe('AiPanelService', () => {
@@ -47,7 +46,7 @@ describe('chrome widgets', () => {
     });
 
     it('returns null when the app did not override the slot', () => {
-      expect(componentForSlot([], 'header-user-menu')).toBeNull();
+      expect(componentForSlot([], 'sidebar-user-menu')).toBeNull();
       expect(componentForSlot(null, 'header-notifications')).toBeNull();
     });
   });

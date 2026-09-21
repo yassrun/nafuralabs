@@ -25,13 +25,13 @@ import { registerApplicationConfig } from '@platform/core/application/applicatio
 import { INTEGRATION_AUDIT_PORT } from '@platform/core/integrations/audit.port';
 import {
   ONBOARDING_WIDGETS_PORT,
+  ORG_CONTEXT_PORT,
   SHELL_EXTENSIONS,
   type OnboardingWidgetsPort,
   type ShellExtension,
-} from '@platform/core/shell/shell-extensions';
+} from '@platform/platform/app-shell';
 import { OnboardingService } from '@platform/core/onboarding/onboarding.service';
 import { ShortcutsService } from '@platform/core/shortcuts/shortcuts.service';
-import { ORG_CONTEXT_PORT } from '@platform/core/shell/org-context.port';
 import { SektorOrgContextAdapter } from '@app/socle/shell/sektor-org-context.adapter';
 import { ErpNotificationCenterAlertsComponent } from '@app/socle/shell/erp-notification-center-alerts.component';
 import {
@@ -185,7 +185,7 @@ export const appConfig: ApplicationConfig = {
 
     // Emplacements du shell : la plateforme expose des slots nommés, l'ERP les remplit.
     // User menu, cloche et bouton IA ont un défaut plateforme — ne les override
-    // (header-user-menu / header-notifications / header-ai) que pour un chrome différent.
+    // (sidebar-user-menu / header-notifications / header-ai) que pour un chrome différent.
     // Switcher entreprise = nf-org-switcher + ORG_CONTEXT_PORT (pas un slot custom).
     {
       provide: SHELL_EXTENSIONS,

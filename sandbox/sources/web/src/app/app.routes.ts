@@ -15,6 +15,7 @@ import { MasterSlavePage } from './archetypes/master-slave.page';
 import { ListingTreePage } from './archetypes/listing-tree.page';
 import { FileSlotsPage } from './archetypes/file-slots.page';
 import { ComponentDemoPage } from './components/component-demo.page';
+import { PlatformNotificationCenterComponent } from '@platform/platform/notifications';
 
 /** Remount when params/data change so sidebar clicks always refresh the view. */
 @Injectable()
@@ -41,6 +42,7 @@ export class SandboxNoReuseStrategy implements RouteReuseStrategy {
 
 export const APP_ROUTES: Routes = [
   { path: '', component: HomePage },
+  { path: 'notifications', component: PlatformNotificationCenterComponent },
   { path: 'archetypes/listing', component: ListingFlatPage },
   { path: 'archetypes/listing-tree', component: ListingTreePage },
   { path: 'archetypes/file-slots', component: FileSlotsPage },

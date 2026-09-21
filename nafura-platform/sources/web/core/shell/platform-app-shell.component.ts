@@ -166,17 +166,6 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
               <nf-ai-toggle />
             }
           }
-
-          @if (resolvedShellOptions().widgets.userMenu) {
-            @if (userMenuWidget(); as ext) {
-              <ng-container *ngComponentOutlet="ext" />
-            } @else {
-              <nf-user-menu
-                [userSettingsEnabled]="userSettingsEnabled()"
-                [appSettingsEnabled]="appSettingsEnabled()"
-                [fallbackName]="applicationTitle()" />
-            }
-          }
         </div>
       </header>
 
@@ -314,6 +303,19 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
               </ng-container>
             </ng-container>
           </nav>
+
+          @if (resolvedShellOptions().widgets.userMenu) {
+            <footer class="naf-shell__sidebar-footer">
+              @if (userMenuWidget(); as ext) {
+                <ng-container *ngComponentOutlet="ext" />
+              } @else {
+                <nf-user-menu
+                  [userSettingsEnabled]="userSettingsEnabled()"
+                  [appSettingsEnabled]="appSettingsEnabled()"
+                  [fallbackName]="applicationTitle()" />
+              }
+            </footer>
+          }
         </aside>
 
         <!-- ═══ MAIN CONTENT ═══ -->
@@ -879,7 +881,9 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
     .naf-shell__sidebar {
       border-inline-end: 1px solid var(--nf-border-default, #e5e7eb);
       background: var(--nf-color-surface, #ffffff);
-      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       overflow-x: hidden;
       padding: var(--nf-space-3, 0.75rem) var(--nf-space-2, 0.5rem);
       /* Scroll shadow indicators */
@@ -897,6 +901,16 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
       display: flex;
       flex-direction: column;
       gap: var(--nf-space-1, 0.25rem);
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .naf-shell__sidebar-footer {
+      flex: 0 0 auto;
+      margin-top: var(--nf-space-3, 0.75rem);
+      padding-top: var(--nf-space-3, 0.75rem);
+      border-top: 1px solid var(--nf-border-default, #e5e7eb);
     }
 
     /* ─── Zone Divider ─── */
@@ -1549,7 +1563,8 @@ export class PlatformAppShellComponent implements OnInit {
     () => !!this.orgContext && this.headerExtensions().length === 0,
   );
   readonly userMenuWidget = computed(() =>
-    componentForSlot(this.shellExtensions, 'header-user-menu'),
+    componentForSlot(this.shellExtensions, 'sidebar-user-menu')
+      ?? componentForSlot(this.shellExtensions, 'header-user-menu'),
   );
   readonly notificationWidget = computed(() =>
     componentForSlot(this.shellExtensions, 'header-notifications'),

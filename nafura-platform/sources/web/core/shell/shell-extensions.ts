@@ -11,8 +11,10 @@ import { Routes } from '@angular/router';
 export type ShellSlot =
   /** En-tête, à gauche du sélecteur de langue (ex. sélecteur de société). */
   | 'header-tenant-switcher'
-  /** Remplace le menu utilisateur plateforme. */
+  /** @deprecated Le menu utilisateur est désormais rendu dans le footer de sidebar. */
   | 'header-user-menu'
+  /** Remplace le menu utilisateur plateforme dans le footer de sidebar. */
+  | 'sidebar-user-menu'
   /** Remplace la cloche de notifications plateforme. */
   | 'header-notifications'
   /** Remplace le bouton IA plateforme. L'override injecte AiPanelService. */

@@ -1,7 +1,7 @@
 import {
   AppShellConfig,
   DEFAULT_APP_SHELL_CONFIG,
-} from '@platform/core/shell/platform-app-shell.types';
+} from '@platform/platform/app-shell';
 import {
   ACTIVE_APPLICATION_ID,
   APPLICATION_DISPLAY_NAMES,

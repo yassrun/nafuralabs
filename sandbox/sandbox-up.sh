@@ -2,27 +2,40 @@
 # Sandbox — back (H2 :8082) + front (sandbox web :4300).
 #
 # Usage (Git Bash / Linux) :
-#   ./sandbox-up.sh          # start back + front (front foreground)
+#   ./sandbox-up.sh          # start back + front and wait for both
 #   ./sandbox-up.sh stop     # stop ports 8082 and 4300
 #   ./sandbox-up.sh back     # back only
 #   ./sandbox-up.sh status   # port health
 #
-# Windows (this machine): use the twin .\sandbox-up.ps1 — system bash.exe is WSL, not Git Bash.
-# Do NOT use Gradle here (plugin proxy 407). Back = offline java.
+# Windows Git Bash is supported when Java 25 and Gradle are available in PATH
+# or through JAVA_HOME and GRADLE_HOME.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP="$ROOT/sources/backend"
 WEB="$ROOT/sources/web"
+
+# Use the workspace's documented JDK when the caller has not selected one.
+if [[ -d "/c/Users/karkafiy/Desktop/tools/jdk-25.0.4.1+1" && "${JAVA_HOME:-}" != *jdk-25* ]]; then
+  export JAVA_HOME="/c/Users/karkafiy/Desktop/tools/jdk-25.0.4.1+1"
+fi
+if [[ -n "${JAVA_HOME:-}" ]]; then
+  export PATH="$JAVA_HOME/bin:$PATH"
+  hash -r 2>/dev/null || true
+fi
+
 BACK_PORT=8082
 FRONT_PORT=4300
 HEALTH_URL="http://127.0.0.1:${BACK_PORT}/actuator/health"
 FRONT_URL="http://127.0.0.1:${FRONT_PORT}"
 PID_FILE="$APP/build/sandbox-backend.pid"
 LOG_FILE="$APP/build/sandbox-backend.log"
-MAIN_CLASS="ma.nafura.sandbox.bootstrap.SandboxApplication"
-
+FRONT_PID_FILE="$WEB/.sandbox-web.pid"
+FRONT_LOG_FILE="$WEB/.sandbox-web.log"
 die() { echo "ERROR: $*" >&2; exit 1; }
+
+ERROR_LOG_FILE="$APP/build/sandbox-backend-error.log"
+
 
 port_pids() {
   local port="$1"
@@ -79,29 +92,81 @@ wait_health() {
   die "back pas UP après ~20s — voir $LOG_FILE"
 }
 
-require_offline() {
-  [[ -d "$APP/build/offline-classes" ]] || die "manque $APP/build/offline-classes (build offline une fois)"
-  [[ -f "$APP/build/offline-classpath.txt" ]] || die "manque $APP/build/offline-classpath.txt"
-  command -v java >/dev/null 2>&1 || die "java introuvable dans PATH"
+front_ok() {
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsS --max-time 2 "$FRONT_URL" >/dev/null 2>&1
+  elif command -v powershell.exe >/dev/null 2>&1; then
+    powershell.exe -NoProfile -Command \
+      "try { (Invoke-WebRequest '$FRONT_URL' -UseBasicParsing -TimeoutSec 2).StatusCode -eq 200 } catch { exit 1 }" \
+      >/dev/null 2>&1
+  else
+    return 1
+  fi
+}
+
+wait_front() {
+  local i
+  for i in $(seq 1 120); do
+    if front_ok; then
+      echo "✓ front UP $FRONT_URL"
+      return 0
+    fi
+    sleep 0.5
+  done
+  die "front pas UP après ~60s — voir $FRONT_LOG_FILE"
+}
+
+resolve_gradle() {
+  local gradle_bin=""
+  if command -v gradle >/dev/null 2>&1; then
+    gradle_bin="$(command -v gradle)"
+  elif [[ -n "${GRADLE_HOME:-}" && -x "$GRADLE_HOME/bin/gradle" ]]; then
+    gradle_bin="$GRADLE_HOME/bin/gradle"
+  elif [[ -f "/c/Users/karkafiy/Desktop/tools/gradle-9.7.1/bin/gradle.bat" ]]; then
+    gradle_bin="/c/Users/karkafiy/Desktop/tools/gradle-9.7.1/bin/gradle.bat"
+  else
+    die "Gradle introuvable (définir GRADLE_HOME ou ajouter Gradle au PATH)"
+  fi
+  local java_bin="java"
+  if [[ -n "${JAVA_HOME:-}" && -x "$JAVA_HOME/bin/java" ]]; then
+    java_bin="$JAVA_HOME/bin/java"
+  elif ! command -v java >/dev/null 2>&1; then
+    die "java introuvable dans PATH"
+  fi
+  local java_major
+  java_major="$("$java_bin" -version 2>&1 | sed -nE 's/.*version "([0-9]+)(\..*)?".*/\1/p' | head -1)"
+  [[ "$java_major" =~ ^[0-9]+$ && "$java_major" -ge 25 ]] || \
+    die "Java 25 requis pour le backend Sandbox (Java détecté: ${java_major:-inconnu})"
+  printf '%s' "$gradle_bin"
 }
 
 start_back() {
-  require_offline
+  local gradle_bin
+  gradle_bin="$(resolve_gradle)"
   mkdir -p "$APP/build"
   kill_port "$BACK_PORT"
-  # Le fichier contient déjà offline-classes + jars (.m2), séparateur Windows ;
-  local cp
-  cp="$(tr -d '\r\n' <"$APP/build/offline-classpath.txt")"
-  [[ -n "$cp" ]] || die "offline-classpath.txt vide"
-  cp="$APP/build/offline-classes;$cp"
+  local app_dir="$APP"
+  local log_file="$LOG_FILE"
+  local error_log_file="$ERROR_LOG_FILE"
+  if command -v cygpath >/dev/null 2>&1; then
+    app_dir="$(cygpath -w "$app_dir")"
+    gradle_bin="$(cygpath -w "$gradle_bin")"
+    log_file="$(cygpath -w "$log_file")"
+    error_log_file="$(cygpath -w "$error_log_file")"
+  fi
 
-  echo "→ start back (java offline) cwd=$APP"
-  (
-    cd "$APP"
-    # nohup pour survivre si le shell parent ferme ; logs dédiés
-    nohup java -cp "$cp" "$MAIN_CLASS" >"$LOG_FILE" 2>&1 &
-    echo $! >"$PID_FILE"
-  )
+  echo "→ start back (gradle bootRun) cwd=$APP"
+  if command -v powershell.exe >/dev/null 2>&1; then
+    powershell.exe -NoProfile -Command \
+      "\$args = @('--no-daemon', 'bootRun'); \$p = Start-Process -FilePath '$gradle_bin' -ArgumentList \$args -WorkingDirectory '$app_dir' -RedirectStandardOutput '$log_file' -RedirectStandardError '$error_log_file' -WindowStyle Hidden -PassThru; \$p.Id" \
+      | tr -d '\r' | awk 'NF && $1 ~ /^[0-9]+$/ { print $1; exit }' >"$PID_FILE"
+  else
+    (
+      cd "$APP"
+      nohup "$gradle_bin" --no-daemon bootRun >"$LOG_FILE" 2>&1 &
+      echo $! >"$PID_FILE"
+    )
+  fi
   wait_health
 }
 
@@ -111,9 +176,13 @@ start_front() {
   command -v npm >/dev/null 2>&1 || die "npm introuvable dans PATH"
   kill_port "$FRONT_PORT"
   echo "→ start front  $FRONT_URL"
-  echo "   Ctrl+C arrête le front ; le back reste up (./sandbox-up.sh stop pour tout couper)"
-  cd "$WEB"
-  exec npm start
+  (
+    cd "$WEB"
+    export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=8192}"
+    nohup npm start >"$FRONT_LOG_FILE" 2>&1 &
+    echo $! >"$FRONT_PID_FILE"
+  )
+  wait_front
 }
 
 cmd_status() {
@@ -134,6 +203,7 @@ cmd_status() {
 cmd_stop() {
   kill_port "$FRONT_PORT"
   kill_port "$BACK_PORT"
+  rm -f "$FRONT_PID_FILE"
   rm -f "$PID_FILE"
   echo "✓ sandbox stopped"
 }

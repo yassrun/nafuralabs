@@ -9,6 +9,31 @@ Produit de démonstration et de validation des composants et archetypes UI Nafur
 
 ## Lancer localement
 
+Depuis Git Bash ou Linux, lancer les deux runtimes et attendre leurs health checks :
+
+```bash
+./sandbox-up.sh
+```
+
+Le script sélectionne automatiquement le JDK 25 local documenté et utilise le proxy Gradle configuré.
+
+Le script vérifie `GET /actuator/health` sur le backend et une réponse HTTP sur le frontend avant de terminer.
+Les logs sont écrits dans `sources/backend/build/sandbox-backend.log` et `sources/web/.sandbox-web.log`.
+
+Pour arrêter les deux processus :
+
+```bash
+./sandbox-up.sh stop
+```
+
+Pour vérifier leur état :
+
+```bash
+./sandbox-up.sh status
+```
+
+Lancement manuel, dans deux terminaux :
+
 ```powershell
 $env:JAVA_HOME = 'C:\Users\karkafiy\Desktop\tools\jdk-25.0.4.1+1'
 $env:Path = 'C:\Users\karkafiy\Desktop\tools\gradle-9.7.1\bin;' + $env:Path

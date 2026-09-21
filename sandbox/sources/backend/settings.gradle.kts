@@ -21,5 +21,6 @@ rootProject.name = "sandbox-backend"
 includeBuild("../../../nafura-platform/sources/backend") {
     dependencySubstitution {
         substitute(module("ma.nafuralabs:framework")).using(project(":platform:core:framework"))
+        substitute(module("ma.nafuralabs:notification")).using(project(":platform:notification"))
     }
 }

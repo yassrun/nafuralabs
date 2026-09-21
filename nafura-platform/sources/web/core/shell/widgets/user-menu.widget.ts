@@ -16,9 +16,9 @@ import { AvatarComponent } from '../../../lib/anatomy/components/atoms/avatar/av
 import { AuthFacade } from '../../security/services/auth.facade';
 
 /**
- * Default topbar user menu — reusable chrome for any platform app.
+ * Default sidebar-footer user menu — reusable chrome for any platform app.
  *
- * Override via SHELL_EXTENSIONS slot `header-user-menu`.
+ * Override via SHELL_EXTENSIONS slot `sidebar-user-menu`.
  */
 @Component({
   selector: 'nf-user-menu',
@@ -131,6 +131,22 @@ import { AuthFacade } from '../../security/services/auth.facade';
       box-shadow: var(--nf-shadow-lg);
       padding: var(--nf-space-2, 0.5rem);
       z-index: var(--nf-z-dropdown, 100);
+    }
+
+    :host-context(.naf-shell__sidebar-footer) {
+      display: flex;
+    }
+
+    :host-context(.naf-shell__sidebar-footer) .naf-shell__user-trigger {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    :host-context(.naf-shell__sidebar-footer) .naf-shell__user-panel {
+      top: auto;
+      bottom: calc(100% + var(--nf-space-1-5, 0.375rem));
+      inset-inline-start: 0;
+      inset-inline-end: auto;
     }
 
     .naf-shell__user-panel-header {

@@ -25,6 +25,9 @@ import { environment } from '../environments/environment';
 
 import { APP_ROUTES, SandboxNoReuseStrategy } from './app.routes';
 import { SANDBOX_FR } from './i18n/sandbox-fr';
+import { buildSandboxNavigation } from './sandbox-shell.component';
+import { provideAppShell } from '@platform/platform/app-shell';
+import { providePlatformIdentity } from '@platform/platform/identity';
 
 registerApplicationConfig({
   applicationId: 'anatomy-sandbox',
@@ -57,6 +60,13 @@ export const appConfig: ApplicationConfig = {
     provideRouter(APP_ROUTES, withComponentInputBinding()),
     { provide: RouteReuseStrategy, useClass: SandboxNoReuseStrategy },
     provideAppLucideIcons(),
+    providePlatformIdentity({ mode: 'sandbox-keycloak-mock' }),
+    provideAppShell({
+      product: { name: 'Anatomy', tagline: 'Platform lab' },
+      topBar: { enabled: true, pageContext: true },
+      sidebar: { enabled: true, navigation: buildSandboxNavigation(), userMenu: true },
+      notifications: { enabled: true },
+    }),
     {
       provide: LISTING_SAVED_VIEWS_ADAPTER,
       useFactory: () =>

@@ -1,6 +1,6 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 
-import { AppComponent } from './app/app.component';
+import { SandboxShellComponent } from './app/sandbox-shell.component';
 import { appConfig } from './app/app.config';
 
-bootstrapApplication(AppComponent, appConfig).catch((err) => console.error(err));
+bootstrapApplication(SandboxShellComponent, appConfig).catch((err) => console.error(err));
