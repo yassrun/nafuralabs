@@ -1,0 +1,344 @@
+{
+  "core": {
+    "topbar": {
+      "mySettings": "Mes paramètres",
+      "orgSettings": "Paramètres de l'organisation",
+      "orgIdentity": "Identité organisation",
+      "tenantMenu": "Organisation",
+      "logout": "Déconnexion"
+    },
+    "conversation": {
+      "title": "Assistant",
+      "toggle": "Afficher ou masquer l'assistant",
+      "close": "Fermer l'assistant",
+      "welcome": "Posez une question sur la plateforme. L'agent live sera branché ensuite."
+    }
+  },
+  "organizationIdentity": {
+    "title": "Identité organisation",
+    "subtitle": "Identité légale utilisée sur les documents PDF",
+    "loading": "Chargement de l'identité…",
+    "retry": "Réessayer",
+    "loadError": "Impossible de charger l'identité organisation.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saveSuccess": "Identité enregistrée.",
+    "saveError": "Échec de l'enregistrement.",
+    "tabs": {
+      "identite": "Identité",
+      "identifiants": "Identifiants",
+      "banque": "Banque",
+      "documents": "Documents"
+    },
+    "fields": {
+      "raisonSociale": "Raison sociale",
+      "formeJuridique": "Forme juridique",
+      "capital": "Capital social",
+      "adresse": "Adresse du siège",
+      "ville": "Ville",
+      "telephone": "Téléphone",
+      "email": "E-mail",
+      "siteWeb": "Site web",
+      "ice": "ICE",
+      "identifiantFiscal": "Identifiant fiscal (IF)",
+      "rc": "Registre de commerce (RC)",
+      "patente": "Patente",
+      "cnss": "CNSS",
+      "tvaIntra": "N° TVA",
+      "banque": "Banque",
+      "rib": "RIB"
+    },
+    "wizard": {
+      "title": "Configurer l'identité légale",
+      "hint": "Scannez un modèle J / certificat ICE, ou saisissez manuellement.",
+      "scanTitle": "Import magique",
+      "scanHint": "OCR d'un PDF registre de commerce, attestation ICE ou statuts.",
+      "manualTitle": "Saisie manuelle",
+      "manualHint": "Remplir le formulaire puis compléter plus tard.",
+      "manualCta": "Continuer manuellement"
+    },
+    "documents": {
+      "hint": "Le logo chrome et la mise en page PDF se paramètrent ailleurs. Ici : identité légale via Import magique.",
+      "logoLink": "Logo / branding app",
+      "templatesLink": "Modèles d'impression"
+    },
+    "smartImport": {
+      "empty": "Aucune identité extraite.",
+      "applied": "Champs préremplis depuis le document — enregistrez pour persister."
+    },
+    "validation": {
+      "raisonSociale": "La raison sociale est requise."
+    }
+  },
+  "appSettings": {
+    "subtitle": "Configurer les options de l'application pour le tenant",
+    "tabs": {
+      "general": "General",
+      "localization": "Localisation",
+      "branding": "Apparence"
+    },
+    "general": {
+      "title": "General",
+      "tenantName": "Nom de l'organisation",
+      "tenantName.hint": "Affiché dans toute la plateforme",
+      "timezone": "Fuseau horaire",
+      "contactEmail": "Email de contact",
+      "supportEmail": "Email de support",
+      "save": "Enregistrer les parametres generaux",
+      "save.success": "Parametres generaux mis a jour",
+      "save.error": "Echec de la mise a jour des parametres generaux"
+    },
+    "localization": {
+      "title": "Localisation",
+      "defaultLocale": "Langue par defaut",
+      "supportedLocales": "Langues prises en charge",
+      "supportedLocalesMustIncludeDefault": "Les langues prises en charge doivent inclure la langue par defaut.",
+      "defaultCurrency": "Devise par defaut",
+      "dateFormat": "Format de date",
+      "dateFormat.preview": "Apercu : {value}",
+      "numberFormat": "Format des nombres",
+      "numberFormat.preview": "Apercu : {value}",
+      "save": "Enregistrer les parametres de localisation",
+      "save.success": "Parametres de localisation mis a jour",
+      "save.error": "Echec de la mise a jour des parametres de localisation"
+    },
+    "branding": {
+      "title": "Apparence de l'application",
+      "appearanceHint": "Thème de l'app (couleur, logo sidebar, favicon). L'identité légale se paramètre depuis le switcher entreprise.",
+      "displayName": "Nom d'affichage",
+      "displayName.hint": "Affiché dans la barre latérale et le titre du navigateur",
+      "primaryColor": "Couleur principale",
+      "primaryColor.default": "Par défaut",
+      "primaryColor.reset": "Réinitialiser",
+      "primaryColor.preview": "Aperçu",
+      "logo": "Logo (barre latérale)",
+      "logo.hint": "Logo chrome de l'app — pas le logo des devis / factures. PNG, JPG ou SVG. Max 2 Mo.",
+      "logo.change": "Changer",
+      "logo.remove": "Supprimer",
+      "favicon": "Favicon",
+      "favicon.hint": "PNG, ICO ou SVG. Max 500 Ko.",
+      "save": "Enregistrer l'image de marque",
+      "save.success": "Image de marque mise à jour",
+      "save.error": "Échec de la mise à jour de l'image de marque"
+    }
+  },
+  "userSettings": {
+    "subtitle": "Gérer votre profil, préférences et sécurité",
+    "tabs": {
+      "profile": "Profil",
+      "preferences": "Préférences",
+      "security": "Sécurité",
+      "notifications": "Notifications"
+    },
+    "profile": {
+      "title": "Profil",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "displayName": "Nom d'affichage",
+      "displayName.hint": "Affiché à la place de votre prénom et nom",
+      "phone": "Téléphone",
+      "email": "E-mail",
+      "email.hint": "Géré par votre fournisseur d'identité",
+      "save": "Enregistrer le profil",
+      "save.success": "Profil mis à jour",
+      "save.error": "Échec de la mise à jour du profil"
+    },
+    "preferences": {
+      "title": "Préférences",
+      "locale": "Langue",
+      "timezone": "Fuseau horaire",
+      "theme": "Thème",
+      "theme.light": "Clair",
+      "theme.dark": "Sombre",
+      "theme.system": "Système",
+      "dateFormat": "Format de date",
+      "dateFormat.preview": "Aperçu : {value}",
+      "defaultHint": "Par défaut : paramètre de l'organisation ({value})",
+      "defaultOption": "Utiliser le défaut de l'organisation",
+      "save": "Enregistrer les préférences",
+      "save.success": "Préférences mises à jour",
+      "save.error": "Échec de la mise à jour des préférences",
+      "load.error": "Échec du chargement des préférences"
+    },
+    "security": {
+      "title": "Sécurité",
+      "password": {
+        "title": "Changer le mot de passe",
+        "comingSoon": "Le changement de mot de passe sera bientôt disponible. Votre mot de passe est géré par votre fournisseur d'identité.",
+        "current": "Mot de passe actuel",
+        "new": "Nouveau mot de passe",
+        "confirm": "Confirmer le nouveau mot de passe",
+        "mismatch": "Les mots de passe ne correspondent pas",
+        "strength": {
+          "weak": "Faible",
+          "fair": "Moyen",
+          "strong": "Fort",
+          "veryStrong": "Très fort"
+        }
+      },
+      "sessions": {
+        "title": "Sessions actives",
+        "comingSoon": "La gestion des sessions arrive bientôt.",
+        "comingSoonHint": "Vous pouvez gérer vos sessions depuis votre fournisseur d'identité.",
+        "current": "Cet appareil",
+        "revoke": "Révoquer",
+        "revokeAll": "Révoquer toutes les autres sessions"
+      },
+      "twoFactor": {
+        "title": "Authentification à deux facteurs",
+        "comingSoon": "L'authentification à deux facteurs arrive bientôt"
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "banner": "La diffusion des notifications n'est pas encore active. Vos préférences seront appliquées lorsque les notifications seront activées pour votre organisation.",
+      "email": "Notifications par e-mail",
+      "email.hint": "Recevoir les notifications par e-mail",
+      "inApp": "Notifications dans l'application",
+      "inApp.hint": "Recevoir les notifications dans l'application",
+      "digest": "Fréquence du résumé",
+      "digest.hint": "À quelle fréquence recevoir un résumé",
+      "digest.disabled": "Activez les notifications par e-mail pour configurer le résumé",
+      "digest.none": "Aucun",
+      "digest.daily": "Quotidien",
+      "digest.weekly": "Hebdomadaire",
+      "save": "Enregistrer les préférences",
+      "save.success": "Préférences de notifications mises à jour"
+    }
+  },
+  "administration": {
+    "navigation": {
+      "templates": "Modèles d'impression",
+      "numberingSequences": "Séquences de numérotation"
+    },
+    "templates": {
+      "title": "Modèles d'impression",
+      "create": "Nouveau modèle",
+      "clone": "Dupliquer le modèle",
+      "editor": {
+        "title": "Éditeur de modèle",
+        "variables": "Variables",
+        "variablesEmpty": "Sélectionnez un type d'entité pour charger les variables.",
+        "settings": "Paramètres de page",
+        "preview": "Aperçu",
+        "previewEmpty": "Cliquez sur Aperçu pour générer le PDF d'exemple.",
+        "previewError": "Impossible de générer l'aperçu PDF.",
+        "save": "Enregistrer le modèle",
+        "system": "Modèle système (lecture seule)",
+        "systemHint": "Dupliquez-le pour éditer l'HTML (logo, en-tête, tableaux…). Le logo vient aussi de Administration → Paramètres → Branding.",
+        "logoHint": "Logo : uploadez-le dans Paramètres → Branding. Dans le HTML, utilisez <img th:src=\"$'{'tenant.logo'}'\" />.",
+        "unsavedChanges": "Modifications non enregistrées.",
+        "noEntityTypes": "Aucun type de document déclaré par les modules installés.",
+        "variableGroups": {
+          "entity": "Document",
+          "tenant": "Société",
+          "system": "Système"
+        },
+        "previewLoading": "Génération…",
+        "previewPdf": "Aperçu PDF",
+        "renderError": "Erreur de rendu",
+        "goToLine": "Aller à la ligne {line}"
+      },
+      "paperSize": "Format",
+      "orientation": "Orientation",
+      "margins": "Marges",
+      "columns": {
+        "name": "Nom",
+        "entityType": "Type d'entité",
+        "type": "Type",
+        "paperSize": "Format",
+        "updatedAt": "Modifié"
+      },
+      "type": {
+        "system": "Système",
+        "custom": "Personnalisé"
+      },
+      "filters": {
+        "search": "Recherche",
+        "entityType": "Type d'entité",
+        "type": "Type"
+      },
+      "fields": {
+        "name": "Nom",
+        "code": "Code",
+        "entityType": "Type d'entité"
+      },
+      "validation": {
+        "nameRequired": "Le nom est requis",
+        "codeRequired": "Le code est requis",
+        "entityTypeRequired": "Le type d'entité est requis"
+      },
+      "empty": "Aucun modèle d'impression",
+      "emptyMessage": "Créez un modèle pour générer des PDF à partir de vos données.",
+      "createSuccess": "Modèle « {name} » créé.",
+      "createError": "Échec de la création du modèle (code déjà utilisé ?).",
+      "cloneSuccess": "Modèle « {name} » créé à partir d'une copie.",
+      "cloneError": "Échec de la duplication du modèle (code déjà utilisé ?).",
+      "saveSuccess": "Modèle enregistré.",
+      "saveError": "Échec de l'enregistrement du modèle.",
+      "loadError": "Modèle introuvable.",
+      "delete": {
+        "confirmTitle": "Supprimer le modèle",
+        "confirmMessage": "Supprimer « {name} » ? Cette action est irréversible.",
+        "success": "Modèle supprimé.",
+        "inUse": "Ce modèle est utilisé et ne peut pas être supprimé."
+      },
+      "entityTypes": {
+        "devis": "Devis",
+        "dossier_etude_bordereau": "BDP chiffré",
+        "dossier_etude_planning": "Planning prévisionnel",
+        "dossier_etude_ressources": "Ressources prévues",
+        "dossier_etude_synthese": "Synthèse d'étude",
+        "facture_client": "Facture client"
+      }
+    },
+    "numberingSequences": {
+      "title": "Séquences de numérotation",
+      "subtitle": "Configurer la numérotation automatique des documents",
+      "loading": "Chargement des séquences...",
+      "empty": "Aucune séquence configurée.",
+      "saving": "Enregistrement...",
+      "preview": "Aperçu",
+      "fields": {
+        "name": "Nom",
+        "code": "Code",
+        "prefix": "Préfixe",
+        "separator": "Séparateur",
+        "yearFormat": "Format d'année",
+        "padLength": "Longueur de remplissage",
+        "incrementBy": "Incrément",
+        "currentNumber": "Numéro actuel",
+        "startingNumber": "Numéro de départ",
+        "resetPolicy": "Politique de réinitialisation"
+      },
+      "reset": {
+        "never": "Jamais",
+        "yearly": "Annuel",
+        "monthly": "Mensuel"
+      },
+      "resetPolicy": {
+        "NEVER": "Jamais",
+        "YEARLY": "Annuel",
+        "MONTHLY": "Mensuel"
+      },
+      "actions": {
+        "create": "Nouvelle séquence",
+        "edit": "Modifier",
+        "delete": "Supprimer"
+      },
+      "dialog": {
+        "createTitle": "Créer une séquence de numérotation",
+        "editTitle": "Modifier la séquence de numérotation"
+      },
+      "columns": {
+        "name": "Nom",
+        "code": "Code",
+        "prefix": "Préfixe",
+        "current": "Actuel",
+        "preview": "Aperçu du modèle",
+        "resetPolicy": "Politique de réinitialisation",
+        "actions": "Actions"
+      }
+    }
+  }
+}

@@ -298,7 +298,7 @@ export const APP_ROUTES = [
       zoneConfig: ACTIVE_APP_ZONE_CONFIG,
       shellOptions: ACTIVE_APP_SHELL_CONFIG.shellOptions,
       userSettingsEnabled: ACTIVE_APP_SHELL_CONFIG.modules.userSettings.enabled,
-      appSettingsEnabled: ACTIVE_APP_SHELL_CONFIG.modules.appSettings.enabled,
+      tenantSettingsEnabled: ACTIVE_APP_SHELL_CONFIG.modules.tenantSettings.enabled,
     },
     children: [
       {
@@ -343,6 +343,26 @@ export const APP_ROUTES = [
           import('@platform/features/user-settings/user-settings.routes').then(
             (m) => m.USER_SETTINGS_ROUTES
           ),
+      },
+      {
+        path: 'organization',
+        canActivate: [authGuard],
+        children: [
+          {
+            path: 'settings',
+            loadChildren: () =>
+              import('@platform/features/app-settings/app-settings.routes').then(
+                (m) => m.APP_SETTINGS_ROUTES
+              ),
+          },
+          {
+            path: 'identity',
+            loadChildren: () =>
+              import('@platform/features/organization-identity/organization-identity.routes').then(
+                (m) => m.ORGANIZATION_IDENTITY_ROUTES
+              ),
+          },
+        ],
       },
       {
         path: 'notifications',

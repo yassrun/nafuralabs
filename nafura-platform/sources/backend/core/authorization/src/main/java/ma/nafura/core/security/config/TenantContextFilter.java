@@ -29,21 +29,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Filter that sets the tenant context for each request.
- * 
+ * Filter that sets the tenant context for each request (multi-tenant mode only).
+ *
+ * <p>Order 2 — after {@link UserContextFilter}. Owns:
+ * <ul>
+ *   <li>resolve tenant id (header / URL / optional default)</li>
+ *   <li>membership check</li>
+ *   <li>tenant-scoped roles and permissions (overlays identity from Order 1)</li>
+ * </ul>
+ *
  * <p>Extracts tenant ID from:
  * <ol>
  *   <li>X-Tenant-Id header (preferred)</li>
  *   <li>URL pattern /api/tenants/{tenantId}/... (fallback)</li>
  *   <li>Optional default tenant fallback (development only, explicitly enabled)</li>
  * </ol>
- * 
- * <p>Validates (configurable):
- * <ul>
- *   <li>Tenant exists</li>
- *   <li>User is member of tenant (unless SUPER_ADMIN)</li>
- * </ul>
- * 
+ *
  * @see SecurityProperties.TenantProperties for configuration options
  */
 @Order(2) // Execute after UserContextFilter
@@ -222,29 +223,26 @@ public class TenantContextFilter extends OncePerRequestFilter {
     }
     
     /**
-     * Load tenant-scoped user role and permissions.
+     * Overlay tenant-scoped role and permissions on the identity set by {@link UserContextFilter}.
      */
     private void loadUserContext(UUID tenantId, boolean superAdmin) {
         try {
             Optional<String> emailOpt = resolveCurrentUserEmail();
 
             if (emailOpt.isEmpty()) {
-                log.debug("No email in JWT, skipping user context loading");
+                log.debug("No email in JWT, skipping tenant RBAC overlay");
                 return;
             }
 
             String email = emailOpt.get();
-            UserContext.setUserEmail(email);
-            
+
             if (superAdmin) {
-                // Super admin has all permissions
                 jwtTokenExtractor.getSubject().ifPresent(this::setUserIdIfUuid);
                 UserContext.setPermissions(Set.of("*"));
                 UserContext.setUserRole("SUPER_ADMIN");
                 return;
             }
 
-            // Load membership first (tenant-scoped role source)
             Optional<TenantMembership> membershipOpt =
                 tenantMembershipRepository.findByTenantIdAndEmailAndStatus(
                         tenantId,
@@ -265,9 +263,9 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     membership.getUserId());
 
             userPermissionContextService.applyRoleCodes(roleCodes, email, true);
-             
+
         } catch (Exception e) {
-            log.error("Error loading user context: {}", e.getMessage(), e);
+            log.error("Error loading tenant user context: {}", e.getMessage(), e);
             UserContext.setUserRole(null);
             UserContext.setPermissions(Set.of());
         }

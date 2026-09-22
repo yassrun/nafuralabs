@@ -14,7 +14,7 @@ import {
 import { ThemeService } from '@core/theme';
 import type { SettingsPageConfig } from '@lib/anatomy/types';
 
-import { APP_SETTINGS_CONFIG } from './app-settings.token';
+import { TENANT_SETTINGS_CONFIG } from './app-settings.token';
 import {
   LOCALE_OPTIONS,
   CURRENCY_OPTIONS,
@@ -99,7 +99,7 @@ export class AppSettingsPage extends ConfigDrivenSettingsPage {
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
-  private readonly moduleConfig = inject(APP_SETTINGS_CONFIG);
+  private readonly moduleConfig = inject(TENANT_SETTINGS_CONFIG);
   private readonly themeService = inject(ThemeService);
 
   readonly localeOptions = [...LOCALE_OPTIONS];
@@ -227,7 +227,7 @@ export class AppSettingsPage extends ConfigDrivenSettingsPage {
     }
 
     return {
-      headerTitleKey: 'core.topbar.appSettings',
+      headerTitleKey: 'core.topbar.orgSettings',
       headerSubtitleKey: 'appSettings.subtitle',
       headerIcon: 'settings',
       tabs,

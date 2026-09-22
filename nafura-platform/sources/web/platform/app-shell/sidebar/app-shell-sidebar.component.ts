@@ -44,13 +44,24 @@ import { AppShellNavigationSection } from '../app-shell.types';
         }
       </nav>
 
-      <footer class="nf-app-shell-sidebar__footer">
+      <footer class="nf-app-shell-sidebar__footer naf-shell__sidebar-footer">
         <ng-content select="[app-shell-sidebar-footer]" />
       </footer>
     </aside>
   `,
   styles: [`
-    :host { display: block; min-height: 0; }
+    :host { display: block; grid-row: 2; min-height: 0; height: 100%; overflow: hidden; }
+    :host(.is-drawer) {
+      position: fixed;
+      z-index: 40;
+      top: var(--nf-app-shell-topbar-height, 56px);
+      bottom: 0;
+      inset-inline-start: var(--nf-app-shell-rail-width, 56px);
+      width: min(var(--nf-app-shell-sidebar-width, 272px), calc(100vw - 56px));
+      height: auto;
+      grid-row: 1;
+      grid-column: 1;
+    }
     .nf-app-shell-sidebar {
       display: flex;
       flex-direction: column;
@@ -123,6 +134,9 @@ import { AppShellNavigationSection } from '../app-shell.types';
       border-top: 1px solid var(--nf-border-default, #e2e8f0);
     }
     @media (max-width: 800px) {
+      :host-context(.nf-app-shell--rail) .nf-app-shell-sidebar {
+        inset-inline-start: var(--nf-app-shell-rail-width, 56px);
+      }
       .nf-app-shell-sidebar {
         position: fixed;
         top: var(--nf-app-shell-topbar-height, 56px);
@@ -145,5 +159,6 @@ export class AppShellSidebarComponent {
   readonly applicationName = input.required<string>();
   readonly navigation = input<readonly AppShellNavigationSection[]>([]);
   readonly mobileOpen = input(false);
+  readonly userMenu = input(false);
   readonly navigationSelected = output<void>();
 }

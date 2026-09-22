@@ -62,4 +62,3 @@ public @interface SecuredResource {
 
     String resource();
 }
-

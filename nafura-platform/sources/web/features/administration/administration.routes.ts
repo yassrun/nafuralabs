@@ -113,9 +113,7 @@ export const ADMINISTRATION_ROUTES: Routes = [
   },
   {
     path: 'settings',
-    loadChildren: () =>
-      import('../app-settings/app-settings.routes').then(
-        (m) => m.APP_SETTINGS_ROUTES
-      ),
+    redirectTo: '/organization/settings',
+    pathMatch: 'full',
   },
 ];

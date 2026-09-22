@@ -51,20 +51,11 @@ import { AuthFacade } from '../../security/services/auth.facade';
 
           @if (userSettingsEnabled()) {
             <a
-              routerLink="/user-settings"
+              [routerLink]="userSettingsRoute()"
               class="naf-shell__user-panel-item"
               (click)="close()">
               <lucide-icon name="settings" [size]="18" class="naf-shell__icon" aria-hidden="true"></lucide-icon>
               {{ 'core.topbar.mySettings' | translate }}
-            </a>
-          }
-          @if (appSettingsEnabled()) {
-            <a
-              routerLink="/administration/settings"
-              class="naf-shell__user-panel-item"
-              (click)="close()">
-              <lucide-icon name="sliders-horizontal" [size]="18" class="naf-shell__icon" aria-hidden="true"></lucide-icon>
-              {{ 'core.topbar.appSettings' | translate }}
             </a>
           }
 
@@ -233,7 +224,7 @@ export class UserMenuWidget {
   private readonly hostRef = inject(ElementRef);
 
   readonly userSettingsEnabled = input<boolean>(false);
-  readonly appSettingsEnabled = input<boolean>(false);
+  readonly userSettingsRoute = input<string>('/user-settings');
   readonly fallbackName = input<string>('');
 
   readonly open = signal(false);

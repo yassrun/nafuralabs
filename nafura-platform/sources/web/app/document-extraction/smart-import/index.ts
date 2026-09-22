@@ -11,4 +11,6 @@ export * from './components/smart-import-doubt-lists.component';
 export * from './components/smart-import-tree-table.component';
 export * from './components/smart-import-record-table.component';
 export * from './utils/root-view.util';
+export * from './schemas/modele-j.schema';
+export * from './handlers/modele-j-import.handler';
 

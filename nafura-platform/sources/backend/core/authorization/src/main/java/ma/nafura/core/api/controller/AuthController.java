@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.nafura.platform.authorization.api.response.auth.CurrentUserResponse;
 import ma.nafura.platform.authorization.api.response.tenant.PermissionGroupResponse;
-import ma.nafura.platform.authorization.service.PermissionMetadataService;
 import ma.nafura.platform.authorization.repository.UserRoleRepository;
+import ma.nafura.platform.authorization.security.jwt.JwtClaimMapper;
+import ma.nafura.platform.authorization.service.PermissionMetadataService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -26,6 +27,7 @@ public class AuthController {
 
     private final UserRoleRepository userRoleRepository;
     private final PermissionMetadataService permissionMetadataService;
+    private final JwtClaimMapper jwtClaimMapper;
 
     /**
      * Get current user info from JWT token.
@@ -41,26 +43,17 @@ public class AuthController {
         
         try {
             String userId = jwt.getSubject();
-            String email = jwt.getClaimAsString("email");
-            String firstName = jwt.getClaimAsString("given_name");
-            String lastName = jwt.getClaimAsString("family_name");
+            String email = jwtClaimMapper.email(jwt);
+            String firstName = jwtClaimMapper.givenName(jwt);
+            String lastName = jwtClaimMapper.familyName(jwt);
             
             log.info("User info from JWT: userId={}, email={}", userId, email);
             
             boolean isSuperAdmin = false;
             try {
-                Boolean claimSuperAdmin = jwt.getClaimAsBoolean("super_admin");
-                if (claimSuperAdmin != null && claimSuperAdmin) {
-                    isSuperAdmin = true;
-                } else {
-                    var realmAccess = jwt.getClaimAsMap("realm_access");
-                    if (realmAccess != null) {
-                        var roles = (List<?>) realmAccess.get("roles");
-                        isSuperAdmin = roles != null && (roles.contains("super_admin") || roles.contains("SUPER_ADMIN"));
-                    }
-                }
+                isSuperAdmin = jwtClaimMapper.isSuperAdmin(jwt);
                 
-                if (!isSuperAdmin) {
+                if (!isSuperAdmin && email != null) {
                     isSuperAdmin = userRoleRepository.existsByEmailIgnoreCaseAndRoleCode(email, "SUPER_ADMIN");
                     if (isSuperAdmin) {
                         log.info("User {} identified as super admin from database role", email);
@@ -70,11 +63,7 @@ public class AuthController {
                 log.warn("Error checking super admin status: {}", e.getMessage());
             }
 
-            String displayName = "";
-            if (firstName != null) displayName = firstName;
-            if (lastName != null) displayName = displayName + " " + lastName;
-            displayName = displayName.trim();
-            if (displayName.isEmpty()) displayName = email;
+            String displayName = jwtClaimMapper.displayName(jwt);
 
             CurrentUserResponse response = new CurrentUserResponse(
                 userId,
@@ -105,6 +94,3 @@ public class AuthController {
         return ResponseEntity.ok(permissionMetadataService.getAllPermissions());
     }
 }
-
-
-

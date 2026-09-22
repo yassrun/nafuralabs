@@ -1,6 +1,7 @@
 package ma.nafura.sandbox.domain;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +15,9 @@ public class SandboxProduct {
     @Id
     @Column(length = 64, nullable = false)
     private String id;
+
+    @Column(name = "tenant_id", nullable = false)
+    private UUID tenantId;
 
     @Column(nullable = false, length = 64)
     private String code;
@@ -56,6 +60,14 @@ public class SandboxProduct {
 
     public String getId() {
         return id;
+    }
+
+    public UUID getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(UUID tenantId) {
+        this.tenantId = tenantId;
     }
 
     public String getCode() {

@@ -48,7 +48,7 @@ import { Router, RouterModule } from '@angular/router';
           <h2>Vous cherchiez peut-être :</h2>
           <ul>
             <li><a routerLink="/">Tableau de bord</a></li>
-            <li><a routerLink="/administration/settings">Paramètres</a></li>
+            <li><a routerLink="/organization/settings">Paramètres de l’organisation</a></li>
             <li><a routerLink="/user-settings">Mes préférences</a></li>
             <li><a routerLink="/notifications">Notifications</a></li>
           </ul>

@@ -1,7 +1,7 @@
 import { Signal } from '@angular/core';
 
 import type { User } from '../../core/security/models/user.models';
-import type { Tenant, TenantContext } from '../../core/security/models/tenant.models';
+import type { Tenant, TenantContext } from '../../core/tenant/tenant.types';
 import type { AuthStatus } from '../../core/security/models/auth.models';
 
 export type PlatformIdentityMode = 'keycloak' | 'sandbox-keycloak-mock';

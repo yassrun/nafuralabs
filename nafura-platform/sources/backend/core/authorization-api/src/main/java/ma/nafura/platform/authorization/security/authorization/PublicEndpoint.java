@@ -41,4 +41,3 @@ public @interface PublicEndpoint {
      */
     String reason() default "";
 }
-

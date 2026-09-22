@@ -18,6 +18,8 @@ spring:
     console:
       enabled: true
       path: /h2-console
+  thymeleaf:
+    check-template-location: false
 
 server:
   port: 8082
@@ -27,3 +29,27 @@ management:
     web:
       exposure:
         include: health,info
+
+nafura:
+  application:
+    id: sandbox
+  security:
+    enabled: true
+    jwt:
+      # Lab HS256 — same secret used by /api/public/sandbox/session issuer
+      hs256-secret: sandbox-local-jwt-secret-key-32-chars!!
+    public-endpoints:
+      - /actuator/**
+      - /api/public/**
+      - /h2-console/**
+    tenant:
+      # single → scope module fills TenantContext (no X-Tenant-Id required)
+      mode: single
+      enabled: true
+      validate-tenant: false
+      validate-membership: false
+      skip-paths:
+        - /api/auth/
+        - /api/public/
+        - /actuator/
+        - /h2-console/

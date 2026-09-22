@@ -63,7 +63,7 @@ interface DashboardSummary {
               </a>
             </li>
             <li>
-              <a routerLink="/administration/settings" class="nf-home-dashboard__empty-link">
+              <a routerLink="/organization/settings" class="nf-home-dashboard__empty-link">
                 {{ 'dashboard.empty.configureSettings' | translate }}
               </a>
             </li>

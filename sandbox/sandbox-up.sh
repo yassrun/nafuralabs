@@ -14,6 +14,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP="$ROOT/sources/backend"
 WEB="$ROOT/sources/web"
+NODE22_HOME="/c/Users/karkafiy/bin/node22/node-v22.17.1-win-x64"
 
 # Use the workspace's documented JDK when the caller has not selected one.
 if [[ -d "/c/Users/karkafiy/Desktop/tools/jdk-25.0.4.1+1" && "${JAVA_HOME:-}" != *jdk-25* ]]; then
@@ -22,6 +23,13 @@ fi
 if [[ -n "${JAVA_HOME:-}" ]]; then
   export PATH="$JAVA_HOME/bin:$PATH"
   hash -r 2>/dev/null || true
+fi
+
+# Agent shells may redirect GRADLE_USER_HOME to a temp cache without proxy props.
+if [[ -d "${USERPROFILE:-$HOME}/.gradle" ]]; then
+  export GRADLE_USER_HOME="${USERPROFILE:-$HOME}/.gradle"
+elif [[ -d "$HOME/.gradle" ]]; then
+  export GRADLE_USER_HOME="$HOME/.gradle"
 fi
 
 BACK_PORT=8082
@@ -173,6 +181,13 @@ start_back() {
 start_front() {
   [[ -d "$WEB" ]] || die "manque $WEB"
   [[ -d "$WEB/node_modules" ]] || die "manque node_modules — cd $WEB && npm install --legacy-peer-deps"
+  if [[ -x "$NODE22_HOME/node.exe" || -x "$NODE22_HOME/node" ]]; then
+    export PATH="$NODE22_HOME:$PATH"
+    hash -r 2>/dev/null || true
+  fi
+  local node_version
+  node_version="$(node --version 2>/dev/null || true)"
+  [[ "$node_version" =~ ^v22\. ]] || die "Node 22 requis pour le frontend Sandbox (Node détecté: ${node_version:-inconnu})"
   command -v npm >/dev/null 2>&1 || die "npm introuvable dans PATH"
   kill_port "$FRONT_PORT"
   echo "→ start front  $FRONT_URL"

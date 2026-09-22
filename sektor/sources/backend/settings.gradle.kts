@@ -25,7 +25,9 @@ includeBuild("../../../nafura-platform/sources/backend") {
             substitute(module("ma.nafuralabs:$module")).using(project(projectPath))
         }
         sub("framework", ":platform:core:framework")
+        sub("authorization-api", ":platform:core:authorization-api")
         sub("authorization", ":platform:core:authorization")
+        sub("multi-tenant", ":platform:core:multi-tenant")
         sub("identity", ":platform:identite:identity")
         sub("scope", ":platform:core:scope")
         sub("tenancy", ":platform:core:tenancy")
@@ -41,6 +43,7 @@ includeBuild("../../../nafura-platform/sources/backend") {
         sub("ai-conversation", ":platform:conversation:ai-conversation")
         sub("llm-provider", ":platform:features:ai:llm-provider")
         sub("app-settings", ":platform:features:app-settings")
+        sub("organization-identity", ":platform:features:organization-identity")
         sub("user-settings", ":platform:features:user-settings")
         sub("audit", ":platform:features:collaboration:audit")
         sub("comment", ":platform:commentaire")

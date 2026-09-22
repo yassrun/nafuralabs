@@ -44,7 +44,7 @@ public class ApiKey {
     @Column(name = "key_prefix", nullable = false, length = 12, unique = true)
     private String keyPrefix;
 
-    @Column(name = "permissions", nullable = false, columnDefinition = "text[]")
+    @Column(name = "permissions", nullable = false)
     private String[] permissions;
 
     @Column(name = "created_by", nullable = false)

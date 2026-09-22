@@ -1,0 +1,24 @@
+{
+  "$comment": "Contrat d'intégration d'un contexte métier. Vit à côté des sources métier du produit. L'activation (enabled) n'est pas ici : c'est un réglage Nafura sur l'app.",
+  "id": "bc.achats",
+  "name": "Achats",
+  "version": "0.1.0",
+  "routesPrefix": "/achats",
+  "permissionsPrefix": "achats.",
+  "web": {
+    "routes": "./sources/web/achats.routes.ts",
+    "navigation": [
+      { "id": "achats-home", "label": "Achats", "route": "/achats", "icon": "shopping-cart" }
+    ]
+  },
+  "backend": {
+    "gradle": ":bc:achats",
+    "packages": ["ma.nafura.bc.achats"]
+  },
+  "platformIntegrations": [
+    "authorization",
+    "tenancy",
+    "organization-identity",
+    "impression"
+  ]
+}

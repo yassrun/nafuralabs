@@ -1,15 +1,7 @@
 /**
- * Configurable Sandbox sidebar.
- * Archetypes (screen exposition) · Components (full nf-* catalog).
+ * Sandbox sidebar — admin / settings lab only.
+ * Archetypes + components catalog temporarily hidden (showroom).
  */
-
-import {
-  CATALOG_ATOMS,
-  CATALOG_MOLECULES,
-  CATALOG_ORGANISMS,
-  catalogRoute,
-  type CatalogEntry,
-} from '../catalog/sandbox-catalog';
 
 export type SandboxNavKind = 'group' | 'link' | 'stub';
 
@@ -18,6 +10,7 @@ export interface SandboxNavItem {
   label: string;
   kind?: SandboxNavKind;
   route?: string;
+  icon?: string;
   children?: SandboxNavItem[];
   status?: 'live' | 'stub' | 'partial';
   description?: string;
@@ -26,115 +19,65 @@ export interface SandboxNavItem {
 export interface SandboxNavSection {
   id: string;
   label: string;
-  menu: 'archetypes' | 'components';
+  menu: 'admin';
   items: SandboxNavItem[];
-}
-
-function fromCatalog(entries: CatalogEntry[]): SandboxNavItem[] {
-  return entries.map((e) => ({
-    id: e.id,
-    label: e.selector,
-    route: catalogRoute(e),
-    status: e.status === 'partial' ? 'partial' : e.status,
-    description: e.note,
-  }));
 }
 
 export const SANDBOX_NAV: SandboxNavSection[] = [
   {
-    id: 'archetypes',
-    label: 'Archetypes',
-    menu: 'archetypes',
+    id: 'admin',
+    label: 'Administration',
+    menu: 'admin',
     items: [
       {
-        id: 'listing-flat',
-        label: 'nf-listing-flat',
-        route: '/archetypes/listing',
+        id: 'user-settings',
+        label: 'Mes paramètres',
+        route: '/user-settings',
+        icon: 'user',
         status: 'live',
-        description: 'Collection à plat · toolbar + pager',
+        description: 'Profil, préférences, sécu, notifs',
       },
       {
-        id: 'listing-tree',
-        label: 'nf-listing-tree',
-        route: '/archetypes/listing-tree',
+        id: 'org-settings',
+        label: 'Paramètres organisation',
+        route: '/organization/settings',
+        icon: 'sliders-horizontal',
         status: 'live',
-        description: 'Hiérarchie · header colonnes',
+        description: 'Général · locale · branding',
       },
       {
-        id: 'file-slots',
-        label: 'nf-file-slots',
-        route: '/archetypes/file-slots',
+        id: 'org-identity',
+        label: 'Identité organisation',
+        route: '/organization/identity',
+        icon: 'building-2',
         status: 'live',
-        description: 'Slots documents typés · grouped · extract IA optionnel',
+        description: 'Légal · ICE · RIB · Import magique',
       },
       {
-        id: 'details',
-        label: 'nf-details',
-        route: '/archetypes/details/prd-01',
+        id: 'nafura-contexts',
+        label: 'Contextes métier',
+        route: '/nafura/business-contexts',
+        icon: 'layout-grid',
         status: 'live',
-        description: 'Form create / edit / view',
+        description: 'Activation Nafura des BC pour cette app',
       },
       {
-        id: 'details-1n',
-        label: 'nf-details-1n',
-        route: '/archetypes/details-1n/ord-1042',
+        id: 'impression',
+        label: 'Impression',
+        route: '/administration/documents/templates',
+        icon: 'file-text',
         status: 'live',
-        description: 'Details + listing embarqué',
+        description: 'Modèles PDF',
       },
       {
-        id: 'master-slave',
-        label: 'nf-master-slave',
-        route: '/archetypes/master-slave',
+        id: 'numbering',
+        label: 'Numérotation',
+        route: '/administration/numbering-sequences',
+        icon: 'hash',
         status: 'live',
-        description: 'Split panes entity-focus',
-      },
-      {
-        id: 'wizard',
-        label: 'nf-wizard',
-        route: '/archetypes/wizard',
-        status: 'stub',
-        description: 'Multi-step create',
-      },
-      {
-        id: 'settings',
-        label: 'nf-settings',
-        route: '/archetypes/settings',
-        status: 'stub',
-        description: 'Config + save explicite',
-      },
-      {
-        id: 'dashboard',
-        label: 'nf-dashboard',
-        route: '/archetypes/dashboard',
-        status: 'stub',
-        description: 'KPI / alertes',
-      },
-      {
-        id: 'document-workspace',
-        label: 'nf-document-workspace',
-        route: '/archetypes/document-workspace',
-        status: 'stub',
-        description: 'Doc + lignes + ribbon',
+        description: 'Séquences documentaires',
       },
     ],
-  },
-  {
-    id: 'components-atoms',
-    label: 'Atoms',
-    menu: 'components',
-    items: fromCatalog(CATALOG_ATOMS),
-  },
-  {
-    id: 'components-molecules',
-    label: 'Molecules',
-    menu: 'components',
-    items: fromCatalog(CATALOG_MOLECULES),
-  },
-  {
-    id: 'components-organisms',
-    label: 'Organisms',
-    menu: 'components',
-    items: fromCatalog(CATALOG_ORGANISMS),
   },
 ];
 

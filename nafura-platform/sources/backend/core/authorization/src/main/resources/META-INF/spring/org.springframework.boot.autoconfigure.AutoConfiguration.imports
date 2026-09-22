@@ -1,3 +1,4 @@
+ma.nafura.platform.authorization.security.config.NafuraJwtDecoderAutoConfiguration
 ma.nafura.platform.authorization.security.config.NafuraSecurityAutoConfiguration
 ma.nafura.platform.authorization.security.config.NafuraTenantSecurityAutoConfiguration
 

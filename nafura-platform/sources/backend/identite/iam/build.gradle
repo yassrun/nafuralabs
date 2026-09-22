@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation project(':platform:core:framework')
     implementation project(':platform:identite:identity')
     implementation project(':platform:core:tenancy')

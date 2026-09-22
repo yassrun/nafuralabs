@@ -26,7 +26,7 @@ public class UserSetting {
     @Column(name = "setting_key", nullable = false, length = 120)
     private String settingKey;
 
-    @Column(name = "value", length = 2000)
+    @Column(name = "setting_value", length = 2000)
     private String value;
 }
 

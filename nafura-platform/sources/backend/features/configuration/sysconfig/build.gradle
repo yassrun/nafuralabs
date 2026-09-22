@@ -12,7 +12,7 @@ sourceSets {
 dependencies {
     // Platform
     implementation project(':platform:core:framework')
-    implementation project(':platform:core:authorization')
+    implementation project(':platform:core:authorization-api')
     
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

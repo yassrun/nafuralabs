@@ -26,7 +26,7 @@ public class TenantSetting {
     @Column(name = "setting_key", nullable = false, length = 120)
     private String settingKey;
 
-    @Column(name = "value", length = 4000)
+    @Column(name = "setting_value", length = 4000)
     private String value;
 }
 

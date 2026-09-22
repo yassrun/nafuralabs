@@ -4,8 +4,10 @@ Produit de démonstration et de validation des composants et archetypes UI Nafur
 
 ## Runtimes
 
-- `sources/backend/`: API Spring Boot locale sur `:8082`.
-- `sources/web/`: application Angular Sandbox sur `:4300`.
+- `sources/backend/`: API Spring Boot locale sur `:8082` — **Layer 0 + Layer 1**
+  (`framework` + `multi-tenant` = tenancy, identity, authorization, scope).
+- `sources/web/`: application Angular Sandbox sur `:4300` — session lab via
+  `POST /api/public/sandbox/session` (JWT HS256).
 
 ## Lancer localement
 

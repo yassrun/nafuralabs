@@ -69,6 +69,11 @@ public class SecurityProperties {
      * User context configuration.
      */
     private UserContextProperties userContext = new UserContextProperties();
+
+    /**
+     * JWT decoder / claim mapping configuration.
+     */
+    private JwtProperties jwt = new JwtProperties();
     
     @Data
     public static class CorsProperties {
@@ -173,6 +178,15 @@ public class SecurityProperties {
          * Should remain enabled in normal operation.
          */
         private boolean enabled = true;
+    }
+
+    @Data
+    public static class JwtProperties {
+        /**
+         * Optional HS256 shared secret for lab / onboarding tokens (min 32 bytes).
+         * When set together with OIDC jwk-set-uri/issuer-uri, decoders are tried HS256 then OIDC.
+         */
+        private String hs256Secret;
     }
 }
 

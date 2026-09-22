@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "tenant", indexes = {
-    @Index(name = "idx_tenant_key", columnList = "key")
+    @Index(name = "idx_tenant_key", columnList = "tenant_key")
 })
 @Data
 @Builder
@@ -27,7 +27,7 @@ public class Tenant {
      * Platform tenant key (e.g., "socimat-sa").
      * Used to match tenants during sync.
      */
-    @Column(name = "key", length = 100, unique = true)
+    @Column(name = "tenant_key", length = 100, unique = true)
     private String key;
 
     @Column(name = "name", nullable = false, length = 200)

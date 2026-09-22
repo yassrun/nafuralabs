@@ -10,7 +10,7 @@ export const APP_SETTINGS_ROUTES: Routes = [
     canActivate: [routePermissionGuard],
     data: {
       permissions: ['administration.settings.manage'],
-      title: 'App Settings',
+      title: 'Organization settings',
     },
   },
 ];

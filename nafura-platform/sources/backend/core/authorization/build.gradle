@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    api project(':platform:core:authorization-api')
     implementation project(':platform:core:framework')
     implementation project(':platform:identite:identity')
     implementation project(':platform:core:tenancy')

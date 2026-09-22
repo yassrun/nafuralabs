@@ -9,6 +9,7 @@ dependencies {
     implementation 'ma.nafuralabs:tenancy:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:iam:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:app-settings:0.1.0-SNAPSHOT'
+    implementation 'ma.nafuralabs:organization-identity:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:sysconfig:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:doc-manager:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:notification:0.1.0-SNAPSHOT'

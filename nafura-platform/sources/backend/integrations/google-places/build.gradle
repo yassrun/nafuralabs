@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
     api project(':platform:core:framework')
     api 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'

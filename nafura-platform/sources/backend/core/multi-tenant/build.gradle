@@ -1,0 +1,15 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    // Layer-1 convenience brick: one dependency for a real multi-tenant app.
+    api project(':platform:core:tenancy')
+    api project(':platform:identite:identity')
+    api project(':platform:core:authorization')
+    api project(':platform:core:scope')
+}
+
+tasks.named('jar') {
+    archiveBaseName = 'multi-tenant'
+}

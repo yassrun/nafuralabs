@@ -77,8 +77,8 @@ const ADMIN_HUB_SECTIONS: readonly {
     descriptionKey: 'administration.hub.descriptions.subscriptions',
   },
   {
-    route: '/administration/settings',
-    labelKey: 'administration.hub.appSettings',
+    route: '/organization/settings',
+    labelKey: 'administration.hub.orgSettings',
     descriptionKey: 'administration.hub.descriptions.settings',
   },
   {

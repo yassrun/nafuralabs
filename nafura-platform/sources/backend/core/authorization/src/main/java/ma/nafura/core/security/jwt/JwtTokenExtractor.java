@@ -1,10 +1,10 @@
 package ma.nafura.platform.authorization.security.jwt;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,8 +16,10 @@ import java.util.Optional;
  * Provides methods to safely extract claims from the current security context.
  */
 @Slf4j
-@Component
+@RequiredArgsConstructor
 public class JwtTokenExtractor {
+
+    private final JwtClaimMapper claimMapper;
     
     /**
      * Get the current JWT from the security context.
@@ -39,7 +41,7 @@ public class JwtTokenExtractor {
      */
     public Optional<String> getEmail() {
         return getCurrentJwt()
-                .map(jwt -> jwt.getClaimAsString("email"));
+                .map(claimMapper::email);
     }
     
     /**
@@ -60,20 +62,8 @@ public class JwtTokenExtractor {
      */
     public Optional<String> getName() {
         return getCurrentJwt()
-                .map(jwt -> {
-                    String name = jwt.getClaimAsString("name");
-                    if (name != null && !name.isBlank()) {
-                        return name;
-                    }
-                    // Fallback to given_name + family_name
-                    String givenName = jwt.getClaimAsString("given_name");
-                    String familyName = jwt.getClaimAsString("family_name");
-                    if (givenName != null || familyName != null) {
-                        return ((givenName != null ? givenName : "") + " " + 
-                                (familyName != null ? familyName : "")).trim();
-                    }
-                    return null;
-                });
+                .map(claimMapper::displayName)
+                .filter(name -> name != null && !name.isBlank());
     }
     
     /**
@@ -151,28 +141,17 @@ public class JwtTokenExtractor {
     }
 
     /**
-     * Extract realm roles from Keycloak claim "realm_access.roles".
+     * Extract roles via {@link JwtClaimMapper} (Keycloak {@code realm_access} by default).
      *
-     * @return List of realm roles, or empty list if not present
+     * @return List of roles, or empty list if not present
      */
-    @SuppressWarnings("unchecked")
     public List<String> getRealmRoles() {
         return getCurrentJwt()
-                .map(jwt -> {
-                    Object realmAccess = jwt.getClaim("realm_access");
-                    if (!(realmAccess instanceof Map<?, ?> map)) {
-                        return Collections.<String>emptyList();
-                    }
-                    Object roles = map.get("roles");
-                    if (!(roles instanceof List<?> roleList)) {
-                        return Collections.<String>emptyList();
-                    }
-                    return roleList.stream()
-                            .filter(String.class::isInstance)
-                            .map(String.class::cast)
-                            .toList();
-                })
+                .map(claimMapper::roles)
                 .orElse(Collections.emptyList());
     }
-}
 
+    public JwtClaimMapper claimMapper() {
+        return claimMapper;
+    }
+}

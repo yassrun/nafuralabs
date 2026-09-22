@@ -1,0 +1,20 @@
+{
+  "id": "organization-identity",
+  "name": "Organization Identity",
+  "description": "Legal company identity per tenant (company.*), consumed by print TenantIdentityProvider",
+  "type": "feature",
+  "layer": "feature",
+  "group": "configuration",
+  "provides": {
+    "backend": {
+      "gradle": ":platform:features:organization-identity",
+      "packages": ["ma.nafura.platform.organizationidentity"]
+    }
+  },
+  "requires": {
+    "core": ["authorization"],
+    "features": ["app-settings"],
+    "modules": ["impression"]
+  },
+  "manifest": { "key": "organization-identity" }
+}

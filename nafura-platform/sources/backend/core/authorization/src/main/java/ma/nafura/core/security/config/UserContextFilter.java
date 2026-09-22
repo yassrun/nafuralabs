@@ -6,14 +6,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ma.nafura.platform.tenancy.repository.TenantMembershipRepository;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
 import ma.nafura.platform.authorization.repository.UserRoleRepository;
 import ma.nafura.platform.authorization.security.jwt.JwtTokenExtractor;
-import ma.nafura.platform.identity.service.AppUserProvisioningService;
+import ma.nafura.platform.authorization.security.properties.SecurityProperties;
 import ma.nafura.platform.authorization.service.UserPermissionContextService;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
+import ma.nafura.platform.identity.service.AppUserProvisioningService;
+import ma.nafura.platform.tenancy.repository.TenantMembershipRepository;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -25,15 +26,21 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Filter that loads user identity context (independent of tenancy).
+ * Order 1 — identity only (before tenant RBAC).
  *
- * <p>This filter is always applicable for authenticated requests and sets:
+ * <p>Owns:
  * <ul>
- *   <li>user email</li>
- *   <li>global role (if any)</li>
+ *   <li>email / userId from JWT</li>
+ *   <li>AppUser provisioning</li>
  *   <li>super-admin flag</li>
- *   <li>global wildcard permission for super-admin</li>
+ *   <li>global platform roles ({@code user_role}) and their permissions</li>
  * </ul>
+ *
+ * <p>Does <strong>not</strong> own tenant-scoped RBAC when
+ * {@code nafura.security.tenant.mode=multi} — that is {@link TenantContextFilter}.
+ *
+ * <p>When mode is {@code single}/{@code none} (no {@link TenantContextFilter}),
+ * falls back to the unique active membership's roles, then JWT realm roles.
  */
 @Slf4j
 @Order(1)
@@ -48,6 +55,7 @@ public class UserContextFilter extends OncePerRequestFilter {
     private final JwtTokenExtractor jwtTokenExtractor;
     private final AppUserProvisioningService appUserProvisioningService;
     private final UserPermissionContextService userPermissionContextService;
+    private final SecurityProperties securityProperties;
 
     @Override
     protected void doFilterInternal(
@@ -71,42 +79,22 @@ public class UserContextFilter extends OncePerRequestFilter {
                     );
                 }
                 jwtTokenExtractor.getSubject().ifPresent(this::setUserIdIfUuid);
+
                 List<String> jwtRoles = jwtTokenExtractor.getRealmRoles().stream()
                     .filter(role -> role != null && !role.isBlank())
                     .map(role -> role.toUpperCase().trim())
                     .collect(Collectors.toList());
 
-                boolean superAdmin = emailOpt.isPresent()
-                    && userRoleRepository.existsByEmailIgnoreCaseAndRoleCode(email, "SUPER_ADMIN")
+                boolean superAdmin = (emailOpt.isPresent()
+                    && userRoleRepository.existsByEmailIgnoreCaseAndRoleCode(email, "SUPER_ADMIN"))
                     || jwtRoles.contains("SUPER_ADMIN");
                 UserContext.setSuperAdmin(superAdmin);
+
                 if (superAdmin) {
                     UserContext.setUserRole("SUPER_ADMIN");
                     UserContext.setPermissions(Set.of("*"));
                 } else {
-                    List<String> roleCodes = emailOpt.isPresent()
-                        ? userRoleRepository.findRoleCodesByEmailIgnoreCase(email)
-                        : List.of();
-
-                    // Safe fallback for single-scope setups:
-                    // use tenant-scoped roles only if exactly one active tenant exists for the user.
-                    if (roleCodes.isEmpty() && emailOpt.isPresent()) {
-                        List<UUID> activeTenantIds = tenantMembershipRepository.findDistinctTenantIdsByEmailAndStatus(
-                                email,
-                                MEMBER_STATUS_ACTIVE);
-                        if (activeTenantIds.size() == 1) {
-                            roleCodes = tenantUserRoleRepository.findRoleCodesByTenantIdAndEmailIgnoreCase(
-                                    activeTenantIds.get(0),
-                                    email);
-                        }
-                    }
-
-                    if (roleCodes.isEmpty() && !jwtRoles.isEmpty()) {
-                        roleCodes = jwtRoles.stream()
-                            .filter(role -> !isTechnicalRealmRole(role))
-                            .collect(Collectors.toList());
-                    }
-                    userPermissionContextService.applyRoleCodes(roleCodes, email, true);
+                    applyNonSuperAdminRoles(emailOpt, email, jwtRoles);
                 }
             }
 
@@ -118,6 +106,37 @@ public class UserContextFilter extends OncePerRequestFilter {
             UserContext.clear();
             TenantContext.clear();
         }
+    }
+
+    private void applyNonSuperAdminRoles(Optional<String> emailOpt, String email, List<String> jwtRoles) {
+        List<String> roleCodes = emailOpt.isPresent()
+            ? userRoleRepository.findRoleCodesByEmailIgnoreCase(email)
+            : List.of();
+
+        // Tenant-scoped roles belong to TenantContextFilter in multi mode.
+        if (!isMultiTenantMode() && roleCodes.isEmpty() && emailOpt.isPresent()) {
+            List<UUID> activeTenantIds = tenantMembershipRepository.findDistinctTenantIdsByEmailAndStatus(
+                    email,
+                    MEMBER_STATUS_ACTIVE);
+            if (activeTenantIds.size() == 1) {
+                roleCodes = tenantUserRoleRepository.findRoleCodesByTenantIdAndEmailIgnoreCase(
+                        activeTenantIds.get(0),
+                        email);
+            }
+        }
+
+        if (roleCodes.isEmpty() && !jwtRoles.isEmpty()) {
+            roleCodes = jwtRoles.stream()
+                .filter(role -> !isTechnicalRealmRole(role))
+                .collect(Collectors.toList());
+        }
+
+        userPermissionContextService.applyRoleCodes(roleCodes, email, true);
+    }
+
+    private boolean isMultiTenantMode() {
+        String mode = securityProperties.getTenant().getMode();
+        return mode != null && mode.equalsIgnoreCase("multi");
     }
 
     private void setUserIdIfUuid(String subject) {
@@ -142,6 +161,3 @@ public class UserContextFilter extends OncePerRequestFilter {
                 || normalized.startsWith("default-roles-");
     }
 }
-
-
-

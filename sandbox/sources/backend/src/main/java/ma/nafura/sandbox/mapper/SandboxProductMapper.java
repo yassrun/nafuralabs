@@ -37,6 +37,7 @@ public class SandboxProductMapper implements EntityMapper<SandboxProduct, Create
 
     @Override
     public void setTenantId(SandboxProduct entity, UUID tenantId) {
+        entity.setTenantId(tenantId);
     }
 
     @Override

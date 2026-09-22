@@ -1,5 +1,11 @@
-/** Minimal FR strings so Import magique + help dialog are readable in the Sandbox. */
+import { TranslateLoader } from '@ngx-translate/core';
+import { Observable, of } from 'rxjs';
+
+import adminFr from './sandbox-admin-fr.json';
+
+/** Minimal FR strings for sandbox admin lab + existing helpers. */
 export const SANDBOX_FR = {
+  ...adminFr,
   Filters: 'Filtres',
   Clear: 'Effacer',
   Apply: 'Appliquer',
@@ -18,47 +24,10 @@ export const SANDBOX_FR = {
       resetTooltip: 'Effacer les filtres actifs',
     },
   },
-  platform: {
-    smartImport: {
-      button: 'Import magique',
-      tooltip: 'Importer des données avec l’IA',
-      phase: {
-        preflight: 'Vérification…',
-        extracting: 'Analyse IA…',
-        reviewing: 'Revue…',
-        importing: 'Import…',
-      },
-      menu: {
-        open: 'Menu Import magique',
-        tooltip: 'Importer avec l’IA — ouvrir le menu',
-        fieldInfo: 'Info des champs',
-        importSingle: 'Importer un élément…',
-        importBulk: 'Importer un tableau…',
-      },
-      help: {
-        close: 'Fermer',
-        formats: 'Formats acceptés',
-        maxSize: 'Taille maximale : {{size}} Mo',
-        hierarchy: 'Structure hiérarchique',
-        hierarchyHint: 'Lots parents puis postes.',
-        expectedFields: 'Champs attendus',
-        expectedFieldsFlat: 'Champs par ligne',
-        extractRequired: 'Obligatoire (fichier)',
-        infer: 'Complétable par l’IA',
-        required: 'Obligatoire',
-        optional: 'Facultatif',
-        behaviour: 'Comportement',
-        partial: 'Les lignes valides peuvent être importées; les autres corrigées ou ignorées.',
-        strict: 'Toutes les lignes doivent être valides avant l’import.',
-        duplicates: 'Les doublons détectés sont ignorés.',
-      },
-      errors: {
-        tenantMissing: 'Tenant manquant (Sandbox).',
-        network: 'API extraction indisponible.',
-        forbidden: 'Accès refusé.',
-        timeout: 'Délai d’extraction dépassé.',
-        unknown: 'Erreur d’import.',
-      },
-    },
-  },
 } as const;
+
+export class SandboxTranslateLoader implements TranslateLoader {
+  getTranslation(_lang: string): Observable<Record<string, unknown>> {
+    return of(SANDBOX_FR as unknown as Record<string, unknown>);
+  }
+}

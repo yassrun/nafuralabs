@@ -95,7 +95,8 @@ export interface UserSettingsSectionConfig {
   notifications?: { enabled: boolean };
 }
 
-export interface AppSettingsSectionConfig {
+/** Tenant / organization preferences (stored as tenant_setting). Not product-wide application flags. */
+export interface TenantSettingsSectionConfig {
   general?: { enabled: boolean };
   localization?: { enabled: boolean };
   branding?: { enabled: boolean };
@@ -115,9 +116,9 @@ export interface UserSettingsModuleConfig {
   sections?: UserSettingsSectionConfig;
 }
 
-export interface AppSettingsModuleConfig {
+export interface TenantSettingsModuleConfig {
   enabled: boolean;
-  sections?: AppSettingsSectionConfig;
+  sections?: TenantSettingsSectionConfig;
 }
 
 // ─── Full app shell config ────────────────────────────────────────────────────
@@ -132,7 +133,7 @@ export interface AppShellConfig {
   modules: {
     administration: AdministrationModuleConfig;
     userSettings: UserSettingsModuleConfig;
-    appSettings: AppSettingsModuleConfig;
+    tenantSettings: TenantSettingsModuleConfig;
   };
 }
 
@@ -180,7 +181,7 @@ export const DEFAULT_APP_SHELL_CONFIG: Omit<AppShellConfig, 'applicationId' | 'a
         notifications: { enabled: true },
       },
     },
-    appSettings: {
+    tenantSettings: {
       enabled: true,
       sections: {
         general: { enabled: true },

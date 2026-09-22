@@ -3,8 +3,9 @@ plugins {
 }
 
 dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation project(':platform:core:framework')
-    implementation project(':platform:core:authorization')
+    implementation project(':platform:core:authorization-api')
     implementation project(':platform:notification')
     implementation project(':platform:approbation')
     implementation 'org.springframework.boot:spring-boot-starter-web'

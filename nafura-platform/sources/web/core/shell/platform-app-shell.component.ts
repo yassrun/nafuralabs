@@ -29,6 +29,7 @@ import { NotificationBellComponent } from '../../app/notification';
 import { AiPanelService } from './ai-panel.service';
 import { AiToggleWidget } from './widgets/ai-toggle.widget';
 import { OrgSwitcherWidget } from './widgets/org-switcher.widget';
+import { TenantMenuWidget } from './widgets/tenant-menu.widget';
 import { UserMenuWidget } from './widgets/user-menu.widget';
 import { ORG_CONTEXT_PORT } from './org-context.port';
 import { ChatPanelComponent } from '../../features/ai-assistant/chat-panel.component';
@@ -97,7 +98,7 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
 @Component({
   selector: 'app-platform-shell',
   standalone: true,
-  imports: [CommonModule, NgComponentOutlet, RouterModule, LucideAngularModule, LanguageSelectorComponent, NotificationBellComponent, AiToggleWidget, UserMenuWidget, OrgSwitcherWidget, CommandPaletteComponent, ChatPanelComponent, ShortcutsHelpComponent, OnboardingTourComponent, TooltipDirective, AssistantBlockRendererComponent],
+  imports: [CommonModule, NgComponentOutlet, RouterModule, LucideAngularModule, LanguageSelectorComponent, NotificationBellComponent, AiToggleWidget, UserMenuWidget, TenantMenuWidget, OrgSwitcherWidget, CommandPaletteComponent, ChatPanelComponent, ShortcutsHelpComponent, OnboardingTourComponent, TooltipDirective, AssistantBlockRendererComponent],
   template: `
     <div
       class="naf-shell"
@@ -147,6 +148,15 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
           }
           @if (showDefaultOrgSwitcher()) {
             <nf-org-switcher />
+          }
+
+          @if (tenantSettingsEnabled()) {
+            <nf-tenant-menu
+              [tenantSettingsEnabled]="true"
+              [tenantSettingsRoute]="'/organization/settings'"
+              [organizationIdentityEnabled]="true"
+              [organizationIdentityRoute]="'/organization/identity'"
+              [fallbackName]="applicationTitle()" />
           }
 
           <app-language-selector *ngIf="resolvedShellOptions().widgets.languageSwitch" />
@@ -311,7 +321,6 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
               } @else {
                 <nf-user-menu
                   [userSettingsEnabled]="userSettingsEnabled()"
-                  [appSettingsEnabled]="appSettingsEnabled()"
                   [fallbackName]="applicationTitle()" />
               }
             </footer>
@@ -1597,7 +1606,7 @@ export class PlatformAppShellComponent implements OnInit {
   readonly zoneConfig = input<ZoneConfig[]>([]);
   readonly shellOptions = input<PlatformAppShellOptions>({});
   readonly userSettingsEnabled = input<boolean>(false);
-  readonly appSettingsEnabled = input<boolean>(false);
+  readonly tenantSettingsEnabled = input<boolean>(false);
 
   // ─── Shell State ─────────────────────────────────────────────────
   readonly sidebarCollapsed = signal<boolean>(

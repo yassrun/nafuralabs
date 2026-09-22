@@ -270,7 +270,7 @@
       "title": "Centre d'administration",
       "subtitle": "Paramètres locataire, IAM, conformité et données de démonstration",
       "intro": "Choisissez une section ci-dessous. Les écrans détaillés restent sous /administration/… (chemins historiques conservés).",
-      "appSettings": "Paramètres application",
+      "orgSettings": "Paramètres de l’organisation",
       "descriptions": {
         "members": "Comptes utilisateurs et invitations",
         "roles": "Rôles et droits d'accès",
@@ -1042,6 +1042,62 @@
       "FAILED": "Échoué"
     }
   },
+  "organizationIdentity": {
+    "title": "Identité organisation",
+    "subtitle": "Identité légale utilisée sur les documents PDF",
+    "loading": "Chargement de l'identité…",
+    "retry": "Réessayer",
+    "loadError": "Impossible de charger l'identité organisation.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saveSuccess": "Identité enregistrée.",
+    "saveError": "Échec de l'enregistrement.",
+    "tabs": {
+      "identite": "Identité",
+      "identifiants": "Identifiants",
+      "banque": "Banque",
+      "documents": "Documents"
+    },
+    "fields": {
+      "raisonSociale": "Raison sociale",
+      "formeJuridique": "Forme juridique",
+      "capital": "Capital social",
+      "adresse": "Adresse du siège",
+      "ville": "Ville",
+      "telephone": "Téléphone",
+      "email": "E-mail",
+      "siteWeb": "Site web",
+      "ice": "ICE",
+      "identifiantFiscal": "Identifiant fiscal (IF)",
+      "rc": "Registre de commerce (RC)",
+      "patente": "Patente",
+      "cnss": "CNSS",
+      "tvaIntra": "N° TVA",
+      "banque": "Banque",
+      "rib": "RIB"
+    },
+    "wizard": {
+      "title": "Configurer l'identité légale",
+      "hint": "Scannez un modèle J / certificat ICE, ou saisissez manuellement.",
+      "scanTitle": "Import magique",
+      "scanHint": "OCR d'un PDF registre de commerce, attestation ICE ou statuts.",
+      "manualTitle": "Saisie manuelle",
+      "manualHint": "Remplir le formulaire puis compléter plus tard.",
+      "manualCta": "Continuer manuellement"
+    },
+    "documents": {
+      "hint": "Le logo chrome et la mise en page PDF se paramètrent ailleurs. Ici : identité légale via Import magique.",
+      "logoLink": "Logo / branding app",
+      "templatesLink": "Modèles d'impression"
+    },
+    "smartImport": {
+      "empty": "Aucune identité extraite.",
+      "applied": "Champs préremplis depuis le document — enregistrez pour persister."
+    },
+    "validation": {
+      "raisonSociale": "La raison sociale est requise."
+    }
+  },
   "appSettings": {
     "subtitle": "Configurer les options de l'application pour le tenant",
     "tabs": {
@@ -1269,8 +1325,10 @@
     "topbar": {
       "notifications": "Notifications",
       "mySettings": "Mes paramètres",
-      "appSettings": "Parametres de l'application",
-      "logout": "Se deconnecter"
+      "orgSettings": "Paramètres de l’organisation",
+      "orgIdentity": "Identité organisation",
+      "tenantMenu": "Organisation",
+      "logout": "Se déconnecter"
     },
     "conversation": {
       "title": "Conversations",

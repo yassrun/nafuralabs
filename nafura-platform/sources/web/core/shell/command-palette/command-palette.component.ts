@@ -42,12 +42,12 @@ const STATIC_PAGES: SearchResult[] = [
     breadcrumb: '',
   },
   {
-    id: 'page:app-settings',
-    label: 'core.topbar.appSettings',
+    id: 'page:org-settings',
+    label: 'core.topbar.orgSettings',
     icon: 'sliders-horizontal',
-    route: '/administration/settings',
+    route: '/organization/settings',
     category: 'pages',
-    breadcrumb: 'Administration',
+    breadcrumb: 'Organization',
   },
   {
     id: 'page:notifications',

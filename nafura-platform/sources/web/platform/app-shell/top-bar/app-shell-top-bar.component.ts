@@ -1,4 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { AiToggleWidget } from '../../../core/shell/widgets/ai-toggle.widget';
+import { TenantMenuWidget } from '../../../core/shell/widgets/tenant-menu.widget';
+import { UserMenuWidget } from '../../../core/shell/widgets/user-menu.widget';
 import { PlatformNotificationBellComponent } from '../../notifications';
 
 import { TopBarApplicationIdentityComponent } from './top-bar-application-identity.component';
@@ -7,7 +10,14 @@ import { TopBarMenuButtonComponent } from './top-bar-menu-button.component';
 @Component({
   selector: 'nf-app-shell-top-bar',
   standalone: true,
-  imports: [PlatformNotificationBellComponent, TopBarApplicationIdentityComponent, TopBarMenuButtonComponent],
+  imports: [
+    PlatformNotificationBellComponent,
+    TopBarApplicationIdentityComponent,
+    TopBarMenuButtonComponent,
+    AiToggleWidget,
+    TenantMenuWidget,
+    UserMenuWidget,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="nf-app-shell-top-bar">
@@ -17,8 +27,25 @@ import { TopBarMenuButtonComponent } from './top-bar-menu-button.component';
       </div>
 
       <div class="nf-app-shell-top-bar__actions">
+        @if (tenantMenu()) {
+          <nf-tenant-menu
+            [tenantSettingsEnabled]="tenantSettings()"
+            [tenantSettingsRoute]="tenantSettingsRoute()"
+            [organizationIdentityEnabled]="organizationIdentity()"
+            [organizationIdentityRoute]="organizationIdentityRoute()"
+            [fallbackName]="tenantFallbackName()"
+            [fallbackKey]="tenantFallbackKey()" />
+        }
         @if (notificationsEnabled()) {
           <nf-platform-notification-bell />
+        }
+        @if (aiEnabled()) {
+          <nf-ai-toggle />
+        }
+        @if (userMenu()) {
+          <nf-user-menu
+            [userSettingsEnabled]="userSettings()"
+            [userSettingsRoute]="userSettingsRoute()" />
         }
         <ng-content select="[app-shell-topbar]" />
       </div>
@@ -54,5 +81,17 @@ import { TopBarMenuButtonComponent } from './top-bar-menu-button.component';
 export class AppShellTopBarComponent {
   readonly applicationName = input.required<string>();
   readonly notificationsEnabled = input(false);
+  /** When true, shows `nf-ai-toggle` between notifications and the user menu. */
+  readonly aiEnabled = input(false);
+  readonly userMenu = input(false);
+  readonly userSettings = input(false);
+  readonly userSettingsRoute = input('/user-settings');
+  readonly tenantMenu = input(false);
+  readonly tenantSettings = input(true);
+  readonly tenantSettingsRoute = input('/organization/settings');
+  readonly organizationIdentity = input(true);
+  readonly organizationIdentityRoute = input('/organization/identity');
+  readonly tenantFallbackName = input('Organisation');
+  readonly tenantFallbackKey = input('');
   readonly navigationToggle = output<void>();
 }

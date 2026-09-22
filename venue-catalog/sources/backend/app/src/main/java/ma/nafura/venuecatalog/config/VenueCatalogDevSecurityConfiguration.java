@@ -1,6 +1,5 @@
 package ma.nafura.venuecatalog.config;
 
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +12,10 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Venue-catalog opts out of NafuraSecurityAutoConfiguration and keeps a local composite decoder.
+ * Prefer {@code nafura.security.jwt.hs256-secret} + platform decoder when this app adopts multi-tenant.
+ */
 @Configuration
 @ConditionalOnProperty(name = "venue-catalog.dev-jwt.enabled", havingValue = "true", matchIfMissing = true)
 public class VenueCatalogDevSecurityConfiguration {

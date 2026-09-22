@@ -270,7 +270,7 @@
       "title": "Administration center",
       "subtitle": "Tenant settings, IAM, compliance, and demo data",
       "intro": "Pick a section below. Detail screens keep their /administration/… URLs (legacy paths preserved).",
-      "appSettings": "Application settings",
+      "orgSettings": "Organization settings",
       "descriptions": {
         "members": "User accounts and invitations",
         "roles": "Roles and access rights",
@@ -1041,6 +1041,62 @@
       "FAILED": "Failed"
     }
   },
+  "organizationIdentity": {
+    "title": "Organization identity",
+    "subtitle": "Legal identity used on PDF documents",
+    "loading": "Loading identity…",
+    "retry": "Retry",
+    "loadError": "Could not load organization identity.",
+    "save": "Save",
+    "saving": "Saving…",
+    "saveSuccess": "Identity saved.",
+    "saveError": "Save failed.",
+    "tabs": {
+      "identite": "Identity",
+      "identifiants": "Identifiers",
+      "banque": "Bank",
+      "documents": "Documents"
+    },
+    "fields": {
+      "raisonSociale": "Legal name",
+      "formeJuridique": "Legal form",
+      "capital": "Share capital",
+      "adresse": "Registered address",
+      "ville": "City",
+      "telephone": "Phone",
+      "email": "Email",
+      "siteWeb": "Website",
+      "ice": "ICE",
+      "identifiantFiscal": "Tax ID (IF)",
+      "rc": "Trade register (RC)",
+      "patente": "Patente",
+      "cnss": "CNSS",
+      "tvaIntra": "VAT number",
+      "banque": "Bank",
+      "rib": "RIB"
+    },
+    "wizard": {
+      "title": "Set up legal identity",
+      "hint": "Scan a modèle J / ICE certificate, or enter details manually.",
+      "scanTitle": "Smart import",
+      "scanHint": "OCR a trade-register PDF, ICE attestation, or articles.",
+      "manualTitle": "Manual entry",
+      "manualHint": "Fill the form and complete later if needed.",
+      "manualCta": "Continue manually"
+    },
+    "documents": {
+      "hint": "App logo and PDF layout are configured elsewhere. Here: legal identity via smart import.",
+      "logoLink": "App logo / branding",
+      "templatesLink": "Print templates"
+    },
+    "smartImport": {
+      "empty": "No identity extracted.",
+      "applied": "Fields prefilled from the document — save to persist."
+    },
+    "validation": {
+      "raisonSociale": "Legal name is required."
+    }
+  },
   "appSettings": {
     "subtitle": "Configure tenant-wide application options",
     "tabs": {
@@ -1268,7 +1324,7 @@
     "topbar": {
       "notifications": "Notifications",
       "mySettings": "My Settings",
-      "appSettings": "Application Settings",
+      "orgSettings": "Organization settings",
       "logout": "Log Out"
     },
     "conversation": {

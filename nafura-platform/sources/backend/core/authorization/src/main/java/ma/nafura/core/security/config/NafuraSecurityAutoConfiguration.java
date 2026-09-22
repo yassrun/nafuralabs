@@ -7,6 +7,8 @@ import ma.nafura.platform.authorization.repository.UserRoleRepository;
 import ma.nafura.platform.tenancy.repository.TenantMembershipRepository;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
 import ma.nafura.platform.authorization.security.authorization.PermissionEnforcementFilter;
+import ma.nafura.platform.authorization.security.jwt.DefaultJwtClaimMapper;
+import ma.nafura.platform.authorization.security.jwt.JwtClaimMapper;
 import ma.nafura.platform.authorization.security.jwt.JwtTokenExtractor;
 import ma.nafura.platform.authorization.security.properties.SecurityProperties;
 import ma.nafura.platform.identity.service.AppUserProvisioningService;
@@ -15,7 +17,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -47,14 +49,20 @@ import java.util.List;
 @EnableConfigurationProperties({SecurityProperties.class, ApiKeyProperties.class})
 @Import(SecurityConfig.class)
 public class NafuraSecurityAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public JwtClaimMapper jwtClaimMapper() {
+        return new DefaultJwtClaimMapper();
+    }
     
     /**
      * JWT token extractor utility bean.
      */
     @Bean
     @ConditionalOnMissingBean
-    public JwtTokenExtractor jwtTokenExtractor() {
-        return new JwtTokenExtractor();
+    public JwtTokenExtractor jwtTokenExtractor(JwtClaimMapper jwtClaimMapper) {
+        return new JwtTokenExtractor(jwtClaimMapper);
     }
 
     @Bean
@@ -77,14 +85,16 @@ public class NafuraSecurityAutoConfiguration {
             TenantUserRoleRepository tenantUserRoleRepository,
             JwtTokenExtractor jwtTokenExtractor,
             AppUserProvisioningService appUserProvisioningService,
-            UserPermissionContextService userPermissionContextService) {
+            UserPermissionContextService userPermissionContextService,
+            SecurityProperties securityProperties) {
         return new UserContextFilter(
                 userRoleRepository,
                 tenantMembershipRepository,
                 tenantUserRoleRepository,
                 jwtTokenExtractor,
                 appUserProvisioningService,
-                userPermissionContextService);
+                userPermissionContextService,
+                securityProperties);
     }
 
     /**

@@ -6,15 +6,12 @@ import {
   type DetachedRouteHandle,
 } from '@angular/router';
 
+import { LabLoginPage, labAuthGuard } from '@platform/platform/lab-auth';
+import { SandboxShellComponent } from './sandbox-shell.component';
 import { HomePage } from './pages/home.page';
-import { StubPage } from './pages/stub.page';
-import { ListingFlatPage } from './archetypes/listing-flat.page';
-import { ProductDetailPage } from './archetypes/product-detail.page';
-import { Details1nPage } from './archetypes/details-1n.page';
-import { MasterSlavePage } from './archetypes/master-slave.page';
-import { ListingTreePage } from './archetypes/listing-tree.page';
-import { FileSlotsPage } from './archetypes/file-slots.page';
-import { ComponentDemoPage } from './components/component-demo.page';
+import { BcSlotPage } from './pages/bc-slot.page';
+import { NafuraContextsPage } from './pages/nafura-contexts.page';
+import { contextSlotGuard } from './shell/context-slot.guard';
 import { PlatformNotificationCenterComponent } from '@platform/platform/notifications';
 
 /** Remount when params/data change so sidebar clicks always refresh the view. */
@@ -41,37 +38,73 @@ export class SandboxNoReuseStrategy implements RouteReuseStrategy {
 }
 
 export const APP_ROUTES: Routes = [
-  { path: '', component: HomePage },
-  { path: 'notifications', component: PlatformNotificationCenterComponent },
-  { path: 'archetypes/listing', component: ListingFlatPage },
-  { path: 'archetypes/listing-tree', component: ListingTreePage },
-  { path: 'archetypes/file-slots', component: FileSlotsPage },
-  { path: 'archetypes/details/:id', component: ProductDetailPage },
-  { path: 'archetypes/details-1n/:id', component: Details1nPage },
-  { path: 'archetypes/master-slave', component: MasterSlavePage },
-  { path: 'archetypes/tree', redirectTo: 'archetypes/listing-tree', pathMatch: 'full' },
+  { path: 'login', component: LabLoginPage },
   {
-    path: 'archetypes/wizard',
-    component: StubPage,
-    data: { title: 'nf-wizard', hint: 'ConfigDrivenWizardPage' },
+    path: '',
+    component: SandboxShellComponent,
+    canActivate: [labAuthGuard],
+    children: [
+      { path: '', component: HomePage },
+      { path: 'nafura/business-contexts', component: NafuraContextsPage },
+      {
+        path: 'achats',
+        component: BcSlotPage,
+        canActivate: [contextSlotGuard],
+        data: { contextSlotId: 'bc.achats', title: 'Achats' },
+      },
+      {
+        path: 'chantiers',
+        component: BcSlotPage,
+        canActivate: [contextSlotGuard],
+        data: { contextSlotId: 'bc.chantiers', title: 'Chantiers' },
+      },
+      { path: 'notifications', component: PlatformNotificationCenterComponent },
+      {
+        path: 'user-settings',
+        loadChildren: () =>
+          import('@platform/features/user-settings/user-settings.routes').then(
+            (m) => m.USER_SETTINGS_ROUTES,
+          ),
+      },
+      {
+        path: 'organization',
+        children: [
+          {
+            path: 'settings',
+            loadChildren: () =>
+              import('@platform/features/app-settings/app-settings.routes').then(
+                (m) => m.APP_SETTINGS_ROUTES,
+              ),
+          },
+          {
+            path: 'identity',
+            loadChildren: () =>
+              import('@platform/features/organization-identity/organization-identity.routes').then(
+                (m) => m.ORGANIZATION_IDENTITY_ROUTES,
+              ),
+          },
+        ],
+      },
+      {
+        path: 'administration/settings',
+        redirectTo: '/organization/settings',
+        pathMatch: 'full',
+      },
+      {
+        path: 'administration/documents/templates',
+        loadChildren: () =>
+          import('@platform/features/administration/templates/templates.routes').then(
+            (m) => m.TEMPLATES_ROUTES,
+          ),
+      },
+      {
+        path: 'administration/numbering-sequences',
+        loadChildren: () =>
+          import(
+            '@platform/features/administration/numbering-sequences/numbering-sequences.routes'
+          ).then((m) => m.NUMBERING_SEQUENCES_ROUTES),
+      },
+      { path: '**', redirectTo: '' },
+    ],
   },
-  {
-    path: 'archetypes/settings',
-    component: StubPage,
-    data: { title: 'nf-settings', hint: 'ConfigDrivenSettingsPage' },
-  },
-  {
-    path: 'archetypes/dashboard',
-    component: StubPage,
-    data: { title: 'nf-dashboard', hint: 'ConfigDrivenDashboardPage' },
-  },
-  {
-    path: 'archetypes/document-workspace',
-    component: StubPage,
-    data: { title: 'nf-document-workspace', hint: 'ConfigDrivenDocumentWorkspacePage' },
-  },
-  { path: 'components/atoms/:name', component: ComponentDemoPage },
-  { path: 'components/molecules/:name', component: ComponentDemoPage },
-  { path: 'components/organisms/:name', component: ComponentDemoPage },
-  { path: '**', redirectTo: '' },
 ];

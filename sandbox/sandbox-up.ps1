@@ -7,8 +7,7 @@
 #   .\sandbox-up.ps1 status    # port health
 #
 # Bash twin: .\sandbox-up.sh (Git Bash / WSL / Linux).
-# On this machine: do NOT use Gradle (plugin proxy 407).
-# Back = offline java (build/offline-classes + offline-classpath.txt).
+# Back = Gradle bootRun with the configured JDK and Gradle proxy.
 
 param(
   [ValidateSet('up', 'start', 'back', 'stop', 'status')]
@@ -19,13 +18,15 @@ $ErrorActionPreference = 'Stop'
 $Root = $PSScriptRoot
 $App = Join-Path $Root 'sources\backend'
 $Web = Join-Path $Root 'sources\web'
+$Jdk25 = 'C:\Users\karkafiy\Desktop\tools\jdk-25.0.4.1+1'
+$Node22 = 'C:\Users\karkafiy\bin\node22\node-v22.17.1-win-x64'
 $BackPort = 8082
 $FrontPort = 4300
 $HealthUrl = "http://127.0.0.1:$BackPort/actuator/health"
 $FrontUrl = "http://127.0.0.1:$FrontPort"
 $PidFile = Join-Path $App 'build\sandbox-backend.pid'
 $LogFile = Join-Path $App 'build\sandbox-backend.log'
-$MainClass = 'ma.nafura.sandbox.bootstrap.SandboxApplication'
+$ErrorLogFile = Join-Path $App 'build\sandbox-backend-error.log'
 
 function Die([string]$Message) {
   Write-Error $Message
@@ -60,41 +61,58 @@ function Test-BackHealth {
 }
 
 function Wait-BackHealth {
-  for ($i = 0; $i -lt 40; $i++) {
+  for ($i = 0; $i -lt 240; $i++) {
     if (Test-BackHealth) {
       Write-Host ("OK back UP  {0}" -f $HealthUrl)
       return
     }
     Start-Sleep -Milliseconds 500
   }
-  Die ("back not UP after ~20s - see {0}" -f $LogFile)
+  Die ("back not UP after ~120s - see {0}" -f $LogFile)
 }
 
-function Require-Offline {
-  $classes = Join-Path $App 'build\offline-classes'
-  $cpFile = Join-Path $App 'build\offline-classpath.txt'
-  if (-not (Test-Path $classes)) { Die ("missing {0} (run offline build once)" -f $classes) }
-  if (-not (Test-Path $cpFile)) { Die ("missing {0}" -f $cpFile) }
+function Resolve-Gradle {
+  if (Test-Path (Join-Path $Jdk25 'bin\java.exe')) {
+    $env:JAVA_HOME = $Jdk25
+    $env:Path = (Join-Path $Jdk25 'bin') + ';' + $env:Path
+  }
   if (-not (Get-Command java -ErrorAction SilentlyContinue)) { Die 'java not found in PATH' }
+
+  # Agent shells may redirect GRADLE_USER_HOME to a temp cache without proxy props.
+  $userGradleHome = Join-Path $env:USERPROFILE '.gradle'
+  if (Test-Path $userGradleHome) {
+    $env:GRADLE_USER_HOME = $userGradleHome
+  }
+
+  $command = Get-Command gradle -ErrorAction SilentlyContinue
+  if ($null -ne $command) { return $command.Source }
+
+  $documentedPath = 'C:\Users\karkafiy\Desktop\tools\gradle-9.7.1\bin\gradle.bat'
+  if (Test-Path $documentedPath) { return $documentedPath }
+
+  Die 'gradle not found in PATH (or at the documented local tools path)'
+}
+
+function Resolve-Node {
+  $nodePath = Join-Path $Node22 'node.exe'
+  if (-not (Test-Path $nodePath)) { Die ("Node 22 not found: {0}" -f $nodePath) }
+  $env:Path = $Node22 + ';' + $env:Path
+
+  $version = (& $nodePath --version).Trim()
+  if ($version -notmatch '^v22\.') { Die ("Node 22 required for the sandbox frontend (detected: {0})" -f $version) }
 }
 
 function Start-Back {
-  Require-Offline
   New-Item -ItemType Directory -Force -Path (Join-Path $App 'build') | Out-Null
   Stop-Port $BackPort
 
-  $classes = Join-Path $App 'build\offline-classes'
-  $cpFile = Join-Path $App 'build\offline-classpath.txt'
-  $cp = (Get-Content $cpFile -Raw).Trim()
-  if ([string]::IsNullOrWhiteSpace($cp)) { Die 'offline-classpath.txt empty' }
-  $cp = "$classes;$cp"
-
-  Write-Host ("-> start back (java offline) cwd={0}" -f $App)
-  # Avoid RedirectStandard* to same file (Windows). Log via cmd redirection.
-  $arg = "/c java -cp `"$cp`" $MainClass > `"$LogFile`" 2>&1"
-  $proc = Start-Process -FilePath 'cmd.exe' `
-    -ArgumentList $arg `
+  $gradle = Resolve-Gradle
+  Write-Host ("-> start back (gradle bootRun) cwd={0}" -f $App)
+  $proc = Start-Process -FilePath $gradle `
+    -ArgumentList '--no-daemon', 'bootRun' `
     -WorkingDirectory $App `
+    -RedirectStandardOutput $LogFile `
+    -RedirectStandardError $ErrorLogFile `
     -WindowStyle Hidden `
     -PassThru
   Set-Content -Path $PidFile -Value $proc.Id -Encoding ascii
@@ -106,13 +124,16 @@ function Start-Front {
   if (-not (Test-Path (Join-Path $Web 'node_modules'))) {
     Die ("missing node_modules - cd {0} ; npm install --legacy-peer-deps" -f $Web)
   }
-  if (-not (Get-Command npm -ErrorAction SilentlyContinue)) { Die 'npm not found in PATH' }
+  Resolve-Node
+  $npm = Join-Path $Node22 'npm.cmd'
+  if (-not (Test-Path $npm)) { Die ("npm not found in Node 22 installation: {0}" -f $npm) }
 
   Stop-Port $FrontPort
   Write-Host ("-> start front  {0}" -f $FrontUrl)
   Write-Host '   Ctrl+C stops the front; back stays up (.\sandbox-up.ps1 stop to kill both)'
   Set-Location $Web
-  npm start
+  $env:NODE_OPTIONS = '--max-old-space-size=4096'
+  & $npm start
 }
 
 function Show-Status {

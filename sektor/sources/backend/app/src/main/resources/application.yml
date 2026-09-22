@@ -93,6 +93,9 @@ nafura:
       - /actuator/**
       - /api/sync/**
       - /api/public/**
+    jwt:
+      # Same secret as onboarding issuer — platform JwtDecoder (HS256 then OIDC).
+      hs256-secret: ${NAFURA_ONBOARDING_DEV_JWT_SECRET:nafura-local-onboarding-jwt-secret-32b-min}
     user-context:
       enabled: true
     tenant:

@@ -107,7 +107,7 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { APP_SHELL_CONFIG } from '@app/socle/config/shell.config';
 import { ADMINISTRATION_CONFIG } from '@platform/features/administration/administration.token';
 import { USER_SETTINGS_CONFIG } from '@platform/features/user-settings/user-settings.token';
-import { APP_SETTINGS_CONFIG } from '@platform/features/app-settings/app-settings.token';
+import { TENANT_SETTINGS_CONFIG } from '@platform/features/app-settings/app-settings.token';
 import { ensurePublicHttpOrigin } from '@platform/core/config/public-web-origin';
 import { ErpNotificationBellAdapter } from '@app/socle/shell/erp-notification-bell.adapter';
 import { ErpNotificationBellListComponent } from '@app/socle/shell/erp-notification-bell-list.component';
@@ -305,8 +305,8 @@ export const appConfig: ApplicationConfig = {
       useValue: APP_SHELL_CONFIG.modules.userSettings,
     },
     {
-      provide: APP_SETTINGS_CONFIG,
-      useValue: APP_SHELL_CONFIG.modules.appSettings,
+      provide: TENANT_SETTINGS_CONFIG,
+      useValue: APP_SHELL_CONFIG.modules.tenantSettings,
     },
 
     {

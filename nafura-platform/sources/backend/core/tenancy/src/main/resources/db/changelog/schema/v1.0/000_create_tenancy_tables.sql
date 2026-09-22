@@ -2,7 +2,7 @@
 
 CREATE TABLE IF NOT EXISTS tenant (
     id UUID PRIMARY KEY,
-    key VARCHAR(100) UNIQUE,
+    tenant_key VARCHAR(100) UNIQUE,
     name VARCHAR(200) NOT NULL,
     type VARCHAR(50),
     owner_email VARCHAR(255),
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS tenant (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_tenant_key ON tenant(key);
+CREATE INDEX IF NOT EXISTS idx_tenant_key ON tenant(tenant_key);
 
 CREATE TABLE IF NOT EXISTS tenant_domain (
     id UUID PRIMARY KEY,

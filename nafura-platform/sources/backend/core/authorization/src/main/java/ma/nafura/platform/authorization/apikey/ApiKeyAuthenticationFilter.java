@@ -10,10 +10,13 @@ import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -47,7 +50,8 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                         UserContext.setUserRole("API_KEY");
                         UserContext.setSuperAdmin(false);
 
-                        AbstractAuthenticationToken authentication = new AbstractAuthenticationToken(null) {
+                        Collection<GrantedAuthority> authorities = Collections.emptyList();
+                        AbstractAuthenticationToken authentication = new AbstractAuthenticationToken(authorities) {
                             @Override
                             public Object getPrincipal() {
                                 return "api-key:" + result.id();

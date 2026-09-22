@@ -59,4 +59,3 @@ public @interface RequirePermission {
      */
     boolean fullPermission() default false;
 }
-

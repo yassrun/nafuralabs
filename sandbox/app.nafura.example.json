@@ -1,0 +1,135 @@
+{
+  "$schema": "./app.nafura.schema.json",
+  "$comment": "EXEMPLE vision — pas encore consommé par un générateur. Aujourd'hui l'équivalent est éclaté en TypeScript (provideAppShell, registerApplicationConfig, shell.config). Ce fichier est le contrat cible : une app = chassis platform + slots BC.",
+
+  "id": "demo-erp",
+  "name": "Demo ERP",
+  "version": "0.1.0",
+  "locale": "fr-MA",
+
+  "product": {
+    "displayName": "Demo ERP",
+    "tagline": "App générée — chassis ~40 %",
+    "logoUrl": "/assets/brand/logo.svg",
+    "defaultRoute": "/home"
+  },
+
+  "runtime": {
+    "requiresTenant": true,
+    "auth": {
+      "mode": "lab-hs256",
+      "sessionUrl": "/api/public/sandbox/session",
+      "usersUrl": "/api/public/sandbox/users"
+    },
+    "apiBaseUrl": "/api"
+  },
+
+  "chassis": {
+    "topBar": {
+      "enabled": true,
+      "sandwich": true,
+      "pageContext": true,
+      "notifications": true,
+      "ai": { "enabled": true, "initiallyOpen": false },
+      "userMenu": {
+        "enabled": true,
+        "userSettings": true,
+        "userSettingsRoute": "/user-settings"
+      },
+      "tenantMenu": {
+        "enabled": true,
+        "tenantSettings": true,
+        "tenantSettingsRoute": "/organization/settings",
+        "organizationIdentity": true,
+        "organizationIdentityRoute": "/organization/identity"
+      }
+    },
+
+    "sidebar": {
+      "enabled": true,
+      "collapsedByDefault": false
+    },
+
+    "contextRail": {
+      "enabled": true,
+      "admin": {
+        "id": "admin",
+        "label": "Admin",
+        "route": "/administration",
+        "icon": "shield"
+      },
+      "slots": [
+        {
+          "id": "bc1",
+          "ref": "bc.achats",
+          "label": "Achats",
+          "icon": "shopping-cart"
+        },
+        {
+          "id": "bc2",
+          "ref": "bc.chantiers",
+          "label": "Chantiers",
+          "icon": "hard-hat"
+        }
+      ]
+    }
+  },
+
+  "platformModules": [
+    { "id": "authorization", "required": true },
+    { "id": "tenancy", "required": true },
+    { "id": "app-settings", "required": true },
+    { "id": "organization-identity", "required": true },
+    { "id": "user-settings", "required": true },
+    { "id": "notification", "required": false },
+    { "id": "impression", "required": false },
+    { "id": "ai-conversation", "required": false }
+  ],
+
+  "businessContexts": [
+    {
+      "id": "bc.achats",
+      "name": "Achats",
+      "package": "@bc/achats",
+      "entry": "./bc.manifest.json",
+      "routesPrefix": "/achats",
+      "navContribution": "sidebar",
+      "permissionsPrefix": "achats."
+    },
+    {
+      "id": "bc.chantiers",
+      "name": "Chantiers",
+      "package": "@bc/chantiers",
+      "entry": "./bc.manifest.json",
+      "routesPrefix": "/chantiers",
+      "navContribution": "sidebar",
+      "permissionsPrefix": "chantiers."
+    }
+  ],
+
+  "nafura": {
+    "$comment": "Réglages opérateur Nafura pour cette app. Le produit ne les possède pas. Seuls les contextes enabled:true sont montés (rail, routes, sidebar).",
+    "businessContexts": {
+      "bc.achats": { "enabled": true },
+      "bc.chantiers": { "enabled": false }
+    }
+  },
+
+  "adminNav": [
+    {
+      "id": "org-identity",
+      "label": "Identité organisation",
+      "route": "/organization/identity"
+    },
+    {
+      "id": "org-settings",
+      "label": "Paramètres organisation",
+      "route": "/organization/settings"
+    },
+    {
+      "id": "templates",
+      "label": "Modèles d'impression",
+      "route": "/administration/documents/templates"
+    }
+  ]
+}

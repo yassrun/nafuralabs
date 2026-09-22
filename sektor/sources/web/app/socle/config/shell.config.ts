@@ -42,9 +42,9 @@ function createShellConfig(applicationId: string, applicationName: string): AppS
         ...DEFAULT_APP_SHELL_CONFIG.modules.userSettings,
         sections: { ...DEFAULT_APP_SHELL_CONFIG.modules.userSettings.sections },
       },
-      appSettings: {
-        ...DEFAULT_APP_SHELL_CONFIG.modules.appSettings,
-        sections: { ...DEFAULT_APP_SHELL_CONFIG.modules.appSettings.sections },
+      tenantSettings: {
+        ...DEFAULT_APP_SHELL_CONFIG.modules.tenantSettings,
+        sections: { ...DEFAULT_APP_SHELL_CONFIG.modules.tenantSettings.sections },
       },
     },
   };
