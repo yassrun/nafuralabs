@@ -10,7 +10,7 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angu
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
-import { ButtonComponent } from '@lib/anatomy';
+import { ButtonComponent } from '@lib/anatomy/components/atoms/button/button.component';
 import {
   reclassifyDoubt,
   summarizeDoubts,

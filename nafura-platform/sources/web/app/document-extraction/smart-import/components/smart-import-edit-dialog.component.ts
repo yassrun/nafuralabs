@@ -4,7 +4,7 @@ import { AbstractControl, FormArray, ReactiveFormsModule } from '@angular/forms'
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { ButtonComponent } from '@lib/anatomy';
+import { ButtonComponent } from '@lib/anatomy/components/atoms/button/button.component';
 import { DynamicArrayTableComponent } from '../../components/dynamic-array-table/dynamic-array-table.component';
 import { DynamicFormRendererComponent } from '../../components/dynamic-form-renderer/dynamic-form-renderer.component';
 import type { JsonSchemaArray, JsonSchemaObject } from '../../models/json-schema.model';

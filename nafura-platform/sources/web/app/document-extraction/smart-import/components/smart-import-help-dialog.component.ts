@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { ButtonComponent } from '@lib/anatomy';
+import { ButtonComponent } from '@lib/anatomy/components/atoms/button/button.component';
 import type { UiHierarchyHint } from '../../models/ui-schema.model';
 import type { JsonSchema } from '../../models/json-schema.model';
 import type { NafuraFieldPresence } from '../../models/json-schema.model';

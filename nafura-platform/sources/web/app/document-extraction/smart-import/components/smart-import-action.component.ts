@@ -13,7 +13,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { TranslateModule } from '@ngx-translate/core';
 import { LucideAngularModule } from 'lucide-angular';
 
-import { ButtonComponent, type ButtonSize } from '@lib/anatomy';
+import { ButtonComponent, type ButtonSize } from '@lib/anatomy/components/atoms/button/button.component';
 import type {
   ExtractionDefinition,
   ReviewedExtraction,

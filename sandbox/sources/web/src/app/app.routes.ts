@@ -91,6 +91,13 @@ export const APP_ROUTES: Routes = [
         pathMatch: 'full',
       },
       {
+        path: 'administration/documents/settings',
+        loadChildren: () =>
+          import('@platform/app/impression/document-settings/document-settings.routes').then(
+            (m) => m.DOCUMENT_SETTINGS_ROUTES,
+          ),
+      },
+      {
         path: 'administration/documents/templates',
         loadChildren: () =>
           import('@platform/features/administration/templates/templates.routes').then(

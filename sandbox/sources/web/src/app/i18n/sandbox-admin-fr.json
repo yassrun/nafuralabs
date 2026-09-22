@@ -208,8 +208,17 @@
   },
   "administration": {
     "navigation": {
+      "hub": "Administration",
+      "documents": "Documents",
+      "identity": "Identité des documents",
+      "models": "Modèles d'impression",
       "templates": "Modèles d'impression",
       "numberingSequences": "Séquences de numérotation"
+    },
+    "documents": {
+      "title": "Documents",
+      "identity": "Identité des documents",
+      "models": "Modèles d'impression"
     },
     "templates": {
       "title": "Modèles d'impression",

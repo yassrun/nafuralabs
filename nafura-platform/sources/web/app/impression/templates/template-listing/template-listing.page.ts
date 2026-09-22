@@ -6,23 +6,26 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
-import {
-  ConfirmDialogService,
-  ConfigDrivenListingPage,
-  ConfigDrivenListingPageImports,
-  ConfigDrivenListingPageStyles,
-} from '@lib/anatomy';
+import { ConfirmDialogService } from '@lib/anatomy/components/services/confirm-dialog.service';
+import { ConfigDrivenListingPage, ConfigDrivenListingPageStyles } from '@lib/anatomy/pages/config-driven-listing-page.class';
+import { EntityListingComponent } from '@lib/anatomy/components/organisms/entity-listing/entity-listing.component';
+import { PageHeaderComponent } from '@lib/anatomy/components/molecules/page-header/page-header.component';
+import { PageShellComponent } from '@lib/anatomy/components/organisms/page-shell/page-shell.component';
 import type { ListingActionEvent } from '@lib/anatomy/types';
 
 import { TEMPLATES_LISTING_CONFIG } from '../config';
 import type { PrintTemplate } from '../models';
 import { TemplatesFacade } from '../services';
-import { CreateTemplateDialogComponent } from '../components/create-template-dialog.component';
 
 @Component({
   selector: 'app-template-listing-page',
   standalone: true,
-  imports: [DocumentNavigationComponent, ...ConfigDrivenListingPageImports],
+  imports: [
+    DocumentNavigationComponent,
+    EntityListingComponent,
+    PageHeaderComponent,
+    PageShellComponent,
+  ],
   template: `
     <nf-page-shell>
       <nf-page-header [config]="headerConfig"></nf-page-header>
@@ -54,7 +57,7 @@ export class TemplateListingPage extends ConfigDrivenListingPage<PrintTemplate> 
     return {
       ...super.headerConfig,
       breadcrumbs: [
-        { label: 'administration.navigation.hub', route: '/admin' },
+        { label: 'administration.navigation.hub', route: '/' },
         { label: 'administration.documents.models' },
       ],
     };
@@ -85,6 +88,7 @@ export class TemplateListingPage extends ConfigDrivenListingPage<PrintTemplate> 
   }
 
   private async openCreateDialog(): Promise<void> {
+    const { CreateTemplateDialogComponent } = await import('../components/create-template-dialog.component');
     const dialogRef = this.dialog.open(CreateTemplateDialogComponent, {
       width: '520px',
       maxWidth: '95vw',
@@ -100,6 +104,7 @@ export class TemplateListingPage extends ConfigDrivenListingPage<PrintTemplate> 
   }
 
   private async openCloneDialog(source: PrintTemplate): Promise<void> {
+    const { CreateTemplateDialogComponent } = await import('../components/create-template-dialog.component');
     const dialogRef = this.dialog.open(CreateTemplateDialogComponent, {
       width: '520px',
       maxWidth: '95vw',

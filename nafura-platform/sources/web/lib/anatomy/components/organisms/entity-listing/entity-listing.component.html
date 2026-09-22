@@ -42,12 +42,7 @@
           [selectionActions]="selectionActions()"
           size="md"
           (actionClick)="onToolbarAction($event)">
-          @if (smartImportVisible()) {
-            <nf-smart-import-action
-              [definition]="$any(config().smartImport!.definition)"
-              [accept]="config().smartImport!.accept ?? '.xlsx,.xls,.csv,.pdf'"
-              (completed)="onSmartImportCompleted($event)" />
-          }
+          <ng-content select="[nf-listing-smart-import]" />
         </nf-listing-actions>
       </div>
 

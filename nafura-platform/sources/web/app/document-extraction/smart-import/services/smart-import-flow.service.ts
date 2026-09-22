@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
-import { ToastService } from '@lib/anatomy';
+import { ToastService } from '@lib/anatomy/components/services/toast.service';
 import type {
   ExtractionDefinition,
   ReviewedExtraction,

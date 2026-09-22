@@ -11,11 +11,8 @@ import {
   signal,
 } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import {
-  TreeTableComponent,
-  type NfTreeNode,
-  type NfTreeTableColumn,
-} from '@lib/anatomy/components';
+import { TreeTableComponent } from '@lib/anatomy/components/organisms/tree-table/tree-table.component';
+import type { NfTreeNode, NfTreeTableColumn } from '@lib/anatomy/components/organisms/tree-table/tree-table.component';
 
 import type { FieldIssue } from '../../models/extraction.model';
 import type { UiArrayColumn, UiTreeConfig } from '../../models/ui-schema.model';

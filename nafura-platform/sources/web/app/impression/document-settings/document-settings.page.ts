@@ -344,7 +344,7 @@ export class DocumentSettingsPage implements OnDestroy, CanComponentDeactivate {
   readonly headerConfig = computed(() => ({
     title: this.i18n.instant('administration.documents.title'),
     breadcrumbs: [
-      { label: 'administration.navigation.hub', route: '/admin' },
+      { label: 'administration.navigation.hub', route: '/' },
       { label: 'administration.documents.identity' },
     ],
   }));

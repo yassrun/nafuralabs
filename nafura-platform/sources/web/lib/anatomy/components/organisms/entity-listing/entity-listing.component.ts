@@ -73,8 +73,6 @@ import type {
   ImportResult,
   EntityActionConfig,
 } from '../../../types';
-import { SmartImportActionComponent } from '@platform/app/document-extraction/smart-import';
-import type { ReviewedExtraction } from '@platform/app/document-extraction/smart-import';
 
 @Component({
   selector: 'nf-entity-listing',
@@ -90,7 +88,6 @@ import type { ReviewedExtraction } from '@platform/app/document-extraction/smart
     CardViewComponent,
     GridViewComponent,
     ListViewComponent,
-    SmartImportActionComponent,
   ],
   templateUrl: './entity-listing.component.html',
   styleUrl: './entity-listing.component.scss',
@@ -146,8 +143,6 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
   /** Emitted right after a successful export (CSV/XLSX). Hook for audit logging. */
   exported = output<{ format: 'csv' | 'xlsx'; filename: string; rowCount: number; selectionOnly: boolean }>();
 
-  /** Emitted when magic import completes on a listing with `config.smartImport`. */
-  smartImportCompleted = output<ReviewedExtraction>();
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Content Children (Custom Templates)
@@ -452,15 +447,6 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
   /** Combined toolbar actions (for backwards compatibility). */
   readonly toolbarButtonActions = computed<ButtonListItem[]>(() => {
     return [...this.selectionActions(), ...this.globalActions()];
-  });
-
-  readonly smartImportVisible = computed(() => {
-    const smartImport = this.config().smartImport;
-    if (!smartImport) return false;
-    if (smartImport.permission && !this.permissionService.hasPermission(smartImport.permission)) {
-      return false;
-    }
-    return true;
   });
 
   /** Selection mode for data table */
@@ -810,10 +796,6 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
       selection: isSelectionAction && selection.length > 0 ? selection : undefined,
       item: selection.length === 1 ? selection[0] : undefined,
     });
-  }
-
-  onSmartImportCompleted(result: ReviewedExtraction): void {
-    this.smartImportCompleted.emit(result);
   }
 
   onEmptyStateAction(): void {

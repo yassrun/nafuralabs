@@ -1,4 +1,4 @@
-import { buildListingConfig } from '@lib/anatomy';
+import { buildListingConfig } from '@lib/anatomy/config';
 import type { ListingPageConfig } from '@lib/anatomy/types';
 
 import type { PrintTemplate } from '../../models';
