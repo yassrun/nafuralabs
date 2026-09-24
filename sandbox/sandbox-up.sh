@@ -17,9 +17,11 @@ WEB="$ROOT/sources/web"
 NODE22_HOME="/c/Users/karkafiy/bin/node22/node-v22.17.1-win-x64"
 
 # Use the workspace's documented JDK when the caller has not selected one.
-JDK25_HOME="/c/Users/karkafiy/Desktop/tools/jdk-25.0.4.1+1"
-if [[ -d "$JDK25_HOME" ]]; then
-  export PATH="$JDK25_HOME/bin:$PATH"
+if [[ -d "/c/Users/karkafiy/Desktop/tools/jdk-25.0.4.1+1" && "${JAVA_HOME:-}" != *jdk-25* ]]; then
+  export JAVA_HOME="/c/Users/karkafiy/Desktop/tools/jdk-25.0.4.1+1"
+fi
+if [[ -n "${JAVA_HOME:-}" ]]; then
+  export PATH="$JAVA_HOME/bin:$PATH"
   hash -r 2>/dev/null || true
 fi
 
@@ -133,8 +135,10 @@ resolve_gradle() {
   else
     die "Gradle introuvable (définir GRADLE_HOME ou ajouter Gradle au PATH)"
   fi
-  local java_bin="$JDK25_HOME/bin/java"
-  if [[ ! -x "$java_bin" ]]; then
+  local java_bin="java"
+  if [[ -n "${JAVA_HOME:-}" && -x "$JAVA_HOME/bin/java" ]]; then
+    java_bin="$JAVA_HOME/bin/java"
+  elif ! command -v java >/dev/null 2>&1; then
     die "java introuvable dans PATH"
   fi
   local java_major
@@ -162,12 +166,12 @@ start_back() {
   echo "→ start back (gradle bootRun) cwd=$APP"
   if command -v powershell.exe >/dev/null 2>&1; then
     powershell.exe -NoProfile -Command \
-      "\$args = @('-Dorg.gradle.java.installations.paths=$JDK25_HOME', '--no-daemon', 'bootRun'); \$p = Start-Process -FilePath '$gradle_bin' -ArgumentList \$args -WorkingDirectory '$app_dir' -RedirectStandardOutput '$log_file' -RedirectStandardError '$error_log_file' -WindowStyle Hidden -PassThru; \$p.Id" \
+      "\$args = @('--no-daemon', 'bootRun'); \$p = Start-Process -FilePath '$gradle_bin' -ArgumentList \$args -WorkingDirectory '$app_dir' -RedirectStandardOutput '$log_file' -RedirectStandardError '$error_log_file' -WindowStyle Hidden -PassThru; \$p.Id" \
       | tr -d '\r' | awk 'NF && $1 ~ /^[0-9]+$/ { print $1; exit }' >"$PID_FILE"
   else
     (
       cd "$APP"
-      nohup "$gradle_bin" "-Dorg.gradle.java.installations.paths=$JDK25_HOME" --no-daemon bootRun >"$LOG_FILE" 2>&1 &
+      nohup "$gradle_bin" --no-daemon bootRun >"$LOG_FILE" 2>&1 &
       echo $! >"$PID_FILE"
     )
   fi

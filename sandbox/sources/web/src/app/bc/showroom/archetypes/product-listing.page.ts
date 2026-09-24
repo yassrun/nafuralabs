@@ -184,10 +184,10 @@ export class ProductListingPage {
   }
 
   onGlobalAction(id: string): void {
-    if (id === 'new') void this.router.navigate(['/archetypes', 'details', 'new']);
+    if (id === 'new') void this.router.navigate(['/showroom', 'archetypes', 'details', 'new']);
   }
 
   open(item: Product): void {
-    void this.router.navigate(['/archetypes', 'details', item.id]);
+    void this.router.navigate(['/showroom', 'archetypes', 'details', item.id]);
   }
 }

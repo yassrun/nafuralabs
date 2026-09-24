@@ -27,8 +27,5 @@ includeBuild("../../../nafura-platform/sources/backend") {
         substitute(module("ma.nafuralabs:organization-identity")).using(project(":platform:features:organization-identity"))
         substitute(module("ma.nafuralabs:sysconfig")).using(project(":platform:features:configuration:sysconfig"))
         substitute(module("ma.nafuralabs:impression")).using(project(":platform:impression"))
-        substitute(module("ma.nafuralabs:notification")).using(project(":platform:notification"))
-        substitute(module("ma.nafuralabs:ai-conversation")).using(project(":platform:conversation:ai-conversation"))
-        substitute(module("ma.nafuralabs:ai-agent-runtime")).using(project(":platform:conversation:ai-agent-runtime"))
     }
 }

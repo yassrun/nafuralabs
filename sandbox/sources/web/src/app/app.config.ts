@@ -63,7 +63,6 @@ export const appConfig: ApplicationConfig = {
       storageKey: 'sandbox.lab.session',
     }),
     provideAppShell({
-      applicationId: 'anatomy-sandbox',
       product: { name: 'Anatomy', tagline: 'Platform lab' },
       topBar: { enabled: true, pageContext: true },
       sidebar: { enabled: true, navigation: buildSandboxNavigation() },

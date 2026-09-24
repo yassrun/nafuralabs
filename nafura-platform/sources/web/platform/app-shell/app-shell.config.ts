@@ -61,7 +61,6 @@ export type {
 } from './app-shell.types';
 
 export interface AppShellFeatureConfig {
-  readonly applicationId?: string;
   readonly product: AppShellProductConfig;
   readonly topBar?: AppShellTopBarConfig;
   readonly sidebar: AppShellSidebarConfig;

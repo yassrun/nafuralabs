@@ -1,6 +1,6 @@
 /**
  * Full Components catalog for the Sandbox.
- * Drives the sidebar + demo routing (`/components/{layer}/{id}`).
+ * Drives the sidebar + demo routing (`/showroom/components/{layer}/{id}`).
  */
 
 export type CatalogLayer = 'atoms' | 'molecules' | 'organisms';
@@ -92,12 +92,14 @@ export const CATALOG_ALL: CatalogEntry[] = [
 
 export function catalogRoute(entry: CatalogEntry): string {
   if (entry.id === 'tree-table' || entry.id === 'tree-editor' || entry.id === 'listing-tree') {
-    return '/archetypes/listing-tree';
+    return '/showroom/archetypes/listing-tree';
   }
   if (entry.id === 'file-slot' || entry.id === 'file-slots') {
-    return '/archetypes/file-slots';
+    return '/showroom/archetypes/file-slots';
   }
-  if (entry.id === 'master-slave-shell') return '/archetypes/master-slave';
-  if (entry.id === 'entity-listing' || entry.id === 'listing-flat') return '/archetypes/listing';
-  return `/components/${entry.layer}/${entry.id}`;
+  if (entry.id === 'master-slave-shell') return '/showroom/archetypes/master-slave';
+  if (entry.id === 'entity-listing' || entry.id === 'listing-flat') {
+    return '/showroom/archetypes/listing';
+  }
+  return `/showroom/components/${entry.layer}/${entry.id}`;
 }

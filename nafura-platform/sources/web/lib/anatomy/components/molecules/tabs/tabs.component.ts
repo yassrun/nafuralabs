@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatIconModule } from '@angular/material/icon';
+import { LucideAngularModule } from 'lucide-angular';
 import { BadgeComponent } from '../../atoms/badge';
 
 /**
@@ -34,7 +34,7 @@ export interface TabItem {
 @Component({
   selector: 'nf-tabs',
   standalone: true,
-  imports: [CommonModule, MatTabsModule, MatIconModule, BadgeComponent],
+  imports: [CommonModule, MatTabsModule, LucideAngularModule, BadgeComponent],
   template: `
     <mat-tab-group
       class="nf-tabs"
@@ -46,7 +46,12 @@ export interface TabItem {
           <ng-template mat-tab-label>
             <div class="nf-tabs__label">
               @if (tab.icon) {
-                <mat-icon class="nf-tabs__icon">{{ tab.icon }}</mat-icon>
+                <lucide-icon
+                  class="nf-tabs__icon"
+                  [name]="tab.icon"
+                  [size]="20"
+                  aria-hidden="true">
+                </lucide-icon>
               }
               <span>{{ tab.label }}</span>
               @if (tab.badge) {

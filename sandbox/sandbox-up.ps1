@@ -73,6 +73,7 @@ function Wait-BackHealth {
 
 function Resolve-Gradle {
   if (Test-Path (Join-Path $Jdk25 'bin\java.exe')) {
+    $env:JAVA_HOME = $Jdk25
     $env:Path = (Join-Path $Jdk25 'bin') + ';' + $env:Path
   }
   if (-not (Get-Command java -ErrorAction SilentlyContinue)) { Die 'java not found in PATH' }
@@ -108,7 +109,7 @@ function Start-Back {
   $gradle = Resolve-Gradle
   Write-Host ("-> start back (gradle bootRun) cwd={0}" -f $App)
   $proc = Start-Process -FilePath $gradle `
-    -ArgumentList "-Dorg.gradle.java.installations.paths=$Jdk25", '--no-daemon', 'bootRun' `
+    -ArgumentList '--no-daemon', 'bootRun' `
     -WorkingDirectory $App `
     -RedirectStandardOutput $LogFile `
     -RedirectStandardError $ErrorLogFile `

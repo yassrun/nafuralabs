@@ -727,10 +727,10 @@ const ICON_COLORS = ['primary', 'success', 'warning', 'danger', 'info'] as const
             </p>
             <p class="muted">
               Prefer an archetype demo when available:
-              <a routerLink="/archetypes/listing">listing</a> ·
-              <a routerLink="/archetypes/details/prd-01">details</a> ·
-              <a routerLink="/archetypes/tree">tree</a> ·
-              <a routerLink="/archetypes/master-slave">master-slave</a>
+              <a routerLink="/showroom/archetypes/listing">listing</a> ·
+              <a routerLink="/showroom/archetypes/details/prd-01">details</a> ·
+              <a routerLink="/showroom/archetypes/tree">tree</a> ·
+              <a routerLink="/showroom/archetypes/master-slave">master-slave</a>
             </p>
           </div>
         }

@@ -1,6 +1,6 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
+import { LucideAngularModule } from 'lucide-angular';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { ButtonComponent } from '../../atoms/button';
@@ -88,7 +88,7 @@ export interface PageHeaderConfig {
 @Component({
   selector: 'nf-page-header',
   standalone: true,
-  imports: [CommonModule, MatIconModule, TranslateModule, ButtonComponent, BreadcrumbComponent],
+  imports: [CommonModule, LucideAngularModule, TranslateModule, ButtonComponent, BreadcrumbComponent],
   template: `
     <div class="nf-page-header">
       <!-- Row 1: one column (breadcrumbs) -->
@@ -105,7 +105,12 @@ export interface PageHeaderConfig {
       <div class="nf-page-header__row nf-page-header__row--two-cols">
         <div class="nf-page-header__content">
           @if (effectiveIcon()) {
-            <mat-icon class="nf-page-header__icon">{{ effectiveIcon() }}</mat-icon>
+            <lucide-icon
+              class="nf-page-header__icon"
+              [name]="effectiveIcon()!"
+              [size]="24"
+              aria-hidden="true">
+            </lucide-icon>
           }
           <div class="nf-page-header__text">
             <h1 class="nf-page-header__title">{{ effectiveTitle() | translate }}</h1>

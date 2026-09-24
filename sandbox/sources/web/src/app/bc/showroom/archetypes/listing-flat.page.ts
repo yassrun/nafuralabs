@@ -455,7 +455,7 @@ export class ListingFlatPage {
 
   onListingAction(id: string): void {
     if (id === 'new') {
-      void this.router.navigate(['/archetypes', 'details', 'new']);
+      void this.router.navigate(['/showroom', 'archetypes', 'details', 'new']);
       return;
     }
     if (id === 'duplicate') {
@@ -494,6 +494,6 @@ export class ListingFlatPage {
   }
 
   open(item: Product): void {
-    void this.router.navigate(['/archetypes', 'details', item.id]);
+    void this.router.navigate(['/showroom', 'archetypes', 'details', item.id]);
   }
 }

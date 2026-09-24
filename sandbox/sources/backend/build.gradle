@@ -35,9 +35,6 @@ dependencies {
     implementation 'ma.nafuralabs:organization-identity:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:sysconfig:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:impression:0.1.0-SNAPSHOT'
-    implementation 'ma.nafuralabs:notification:0.1.0-SNAPSHOT'
-    implementation 'ma.nafuralabs:ai-conversation:0.1.0-SNAPSHOT'
-    implementation 'ma.nafuralabs:ai-agent-runtime:0.1.0-SNAPSHOT'
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jackson'

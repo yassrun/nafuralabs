@@ -275,14 +275,14 @@ export class UserSettingsPage extends ConfigDrivenSettingsPage {
       tabs.push({
         id: 'profile',
         labelKey: 'userSettings.tabs.profile',
-        icon: 'person',
+        icon: 'user',
       });
     }
     if (this.moduleConfig.sections?.preferences?.enabled) {
       tabs.push({
         id: 'preferences',
         labelKey: 'userSettings.tabs.preferences',
-        icon: 'tune',
+        icon: 'sliders-horizontal',
       });
     }
     if (this.moduleConfig.sections?.security?.enabled) {
@@ -296,14 +296,14 @@ export class UserSettingsPage extends ConfigDrivenSettingsPage {
       tabs.push({
         id: 'notifications',
         labelKey: 'userSettings.tabs.notifications',
-        icon: 'notifications',
+        icon: 'bell',
       });
     }
 
     return {
       headerTitleKey: 'core.topbar.mySettings',
       headerSubtitleKey: 'userSettings.subtitle',
-      headerIcon: 'person',
+      headerIcon: 'user',
       tabs,
       defaultTabId: tabs[0]?.id,
     };

@@ -50,7 +50,7 @@ import { ProductMockFacade, type Product } from '../mocks/product-mock.facade';
             <textarea [(ngModel)]="draft.description" name="description" rows="3"></textarea>
           </label>
           <div class="actions">
-            <a routerLink="/archetypes/listing">Cancel</a>
+            <a routerLink="/showroom/archetypes/listing">Cancel</a>
             <nf-button variant="primary" type="submit">Save</nf-button>
           </div>
         </form>
@@ -108,7 +108,7 @@ export class ProductDetailPage {
       subtitle: 'nf-details archetype (sandbox form)',
       breadcrumbs: [
         { label: 'Archetypes', route: '/' },
-        { label: 'Listing', route: '/archetypes/listing' },
+        { label: 'Listing', route: '/showroom/archetypes/listing' },
         { label: this.isNew() ? 'New' : 'Detail' },
       ],
     };
@@ -141,7 +141,7 @@ export class ProductDetailPage {
   async save(): Promise<void> {
     if (this.isNew()) {
       const created = await this.facade.createItem(this.draft);
-      await this.router.navigate(['/archetypes', 'details', created.id]);
+      await this.router.navigate(['/showroom', 'archetypes', 'details', created.id]);
       this.isNew.set(false);
       this.draft = created;
       this.rev.update((n) => n + 1);
