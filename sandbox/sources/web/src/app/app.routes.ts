@@ -47,6 +47,11 @@ export const APP_ROUTES: Routes = [
       { path: '', component: HomePage },
       { path: 'nafura/business-contexts', component: NafuraContextsPage },
       {
+        path: 'showroom',
+        loadChildren: () =>
+          import('./bc/showroom/showroom.routes').then((m) => m.SHOWROOM_ROUTES),
+      },
+      {
         path: 'achats',
         component: BcSlotPage,
         canActivate: [contextSlotGuard],

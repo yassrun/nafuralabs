@@ -14,6 +14,7 @@ export * from './divider';
 export * from './skeleton';
 export * from './input';
 export * from './select';
+export * from './tree-select';
 export * from './textarea';
 export * from './ville-ma-select';
 export * from './hijri-toggle';

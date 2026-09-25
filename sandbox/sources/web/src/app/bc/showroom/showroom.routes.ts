@@ -1,6 +1,7 @@
 import { type Routes } from '@angular/router';
 
 import { Details1nPage } from './archetypes/details-1n.page';
+import { DetailsTabsPage } from './archetypes/details-tabs.page';
 import { FileSlotsPage } from './archetypes/file-slots.page';
 import { ListingFlatPage } from './archetypes/listing-flat.page';
 import { ListingTreePage } from './archetypes/listing-tree.page';
@@ -20,5 +21,6 @@ export const SHOWROOM_ROUTES: Routes = [
   { path: 'archetypes/products', component: ProductListingPage },
   { path: 'archetypes/products/:id', component: ProductDetailPage },
   { path: 'archetypes/details/:id', component: Details1nPage },
+  { path: 'archetypes/details-tabs/:id', component: DetailsTabsPage },
   { path: 'components/:layer/:id', component: ComponentDemoPage },
 ];

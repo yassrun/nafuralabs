@@ -10,7 +10,13 @@ interface RailDomain {
   label: string;
   icon?: string;
   route?: string;
-  children: AppShellNavigationItem[];
+  groups: RailNavigationGroup[];
+}
+
+interface RailNavigationGroup {
+  id: string;
+  label?: string;
+  items: AppShellNavigationItem[];
 }
 
 @Component({
@@ -38,7 +44,7 @@ interface RailDomain {
                 </span>
               }
               <span class="naf-shell__domain-label">{{ domain.label }}</span>
-              @if (domain.children.length) {
+              @if (domain.groups.length) {
                 <lucide-icon
                   name="chevron-right"
                   [size]="18"
@@ -48,16 +54,21 @@ interface RailDomain {
             </button>
             @if (isExpanded(domain.id) && !collapsed()) {
               <div class="naf-shell__domain-body">
-                @for (item of domain.children; track item.id) {
-                  <a
-                    class="naf-shell__link naf-shell__link--direct"
-                    [routerLink]="item.route"
-                    routerLinkActive="is-active">
-                    @if (item.icon) {
-                      <lucide-icon [name]="item.icon" [size]="15" class="naf-shell__icon naf-shell__link-icon" aria-hidden="true"></lucide-icon>
-                    }
-                    <span>{{ item.label }}</span>
-                  </a>
+                @for (group of domain.groups; track group.id) {
+                  @if (group.label) {
+                    <h2 class="naf-shell__group-label">{{ group.label }}</h2>
+                  }
+                  @for (item of group.items; track item.id) {
+                    <a
+                      class="naf-shell__link naf-shell__link--direct"
+                      [routerLink]="item.route"
+                      routerLinkActive="is-active">
+                      @if (item.icon) {
+                        <lucide-icon [name]="item.icon" [size]="15" class="naf-shell__icon naf-shell__link-icon" aria-hidden="true"></lucide-icon>
+                      }
+                      <span>{{ item.label }}</span>
+                    </a>
+                  }
                 }
               </div>
             }
@@ -129,7 +140,16 @@ interface RailDomain {
     .is-collapsed .naf-shell__domain-label,
     .is-collapsed .naf-shell__domain-chevron { display: none; }
     .naf-shell__domain-body { padding-inline-start: 0.5rem; margin-bottom: 0.25rem; }
-    .naf-shell__link {
+    .naf-shell__group-label {
+      margin: 0.75rem 0 0.25rem;
+      padding: 0 0.5rem;
+      color: var(--nf-text-muted, #64748b);
+      font-size: 0.6875rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .naf-shell__link { 
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -170,7 +190,11 @@ export class AppShellContextRailComponent {
       label: slot.label,
       icon: slot.icon,
       route: slot.route,
-      children: (slot.navigation ?? []).flatMap((section) => [...section.items]),
+      groups: (slot.navigation ?? []).map((section) => ({
+        id: section.id,
+        label: section.label,
+        items: [...section.items],
+      })),
     }));
     const admin = this.rail.admin();
     if (!admin) return slots;
@@ -181,7 +205,11 @@ export class AppShellContextRailComponent {
         label: admin.label,
         icon: admin.icon,
         route: admin.route,
-        children: this.adminNavigation().flatMap((section) => [...section.items]),
+        groups: this.adminNavigation().map((section) => ({
+          id: section.id,
+          label: section.label,
+          items: [...section.items],
+        })),
       },
     ];
   });
@@ -196,7 +224,7 @@ export class AppShellContextRailComponent {
       this.expanded.update((set) => new Set(set).add(domain.id));
       return;
     }
-    if (domain.children.length) {
+    if (domain.groups.length) {
       this.expanded.update((set) => {
         const next = new Set(set);
         if (next.has(domain.id)) next.delete(domain.id);

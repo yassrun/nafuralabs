@@ -6,22 +6,21 @@ const ARCHETYPE_ITEMS = [
   { id: 'listing', label: 'Listing', route: '/showroom/archetypes/listing', icon: 'list' },
   {
     id: 'listing-tree',
-    label: 'Listing arborescent',
+    label: 'Arbre / Listing arborescent',
     route: '/showroom/archetypes/listing-tree',
-    icon: 'list-tree',
+    icon: 'list-checks',
   },
-  { id: 'tree', label: 'Tree', route: '/showroom/archetypes/tree', icon: 'git-branch' },
   {
     id: 'file-slots',
     label: 'File slots',
     route: '/showroom/archetypes/file-slots',
-    icon: 'files',
+    icon: 'file',
   },
   {
     id: 'master-slave',
     label: 'Master-detail',
     route: '/showroom/archetypes/master-slave',
-    icon: 'panels-top-left',
+    icon: 'layout-dashboard',
   },
   {
     id: 'products',
@@ -39,7 +38,13 @@ const ARCHETYPE_ITEMS = [
     id: 'details-1n',
     label: 'Detail 1-N',
     route: '/showroom/archetypes/details/prd-01',
-    icon: 'rows-3',
+    icon: 'list-ordered',
+  },
+  {
+    id: 'details-tabs',
+    label: 'Details tabs 1-N',
+    route: '/showroom/archetypes/details-tabs/supplier-01',
+    icon: 'layout-dashboard',
   },
 ] as const;
 
@@ -50,7 +55,7 @@ function componentItems(layer: 'atoms' | 'molecules' | 'organisms') {
       id: `component-${entry.layer}-${entry.id}`,
       label: entry.id,
       route: `/showroom/components/${entry.layer}/${entry.id}`,
-      icon: layer === 'atoms' ? 'circle' : layer === 'molecules' ? 'component' : 'boxes',
+      icon: layer === 'atoms' ? 'circle-plus' : layer === 'molecules' ? 'layers' : 'layout-grid',
     }));
 }
 

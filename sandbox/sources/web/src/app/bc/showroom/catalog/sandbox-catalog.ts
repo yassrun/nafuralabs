@@ -26,6 +26,7 @@ export const CATALOG_ATOMS: CatalogEntry[] = [
   { id: 'skeleton', selector: 'nf-skeleton', layer: 'atoms', status: 'live' },
   { id: 'icon', selector: 'nf-icon', layer: 'atoms', status: 'partial', note: 'sizes + names' },
   { id: 'select', selector: 'nf-select', layer: 'atoms', status: 'live', note: 'native + lookup combo' },
+  { id: 'tree-select', selector: 'nf-tree-select', layer: 'atoms', status: 'live', note: 'recherche + sélection hiérarchique' },
   { id: 'status-badge', selector: 'nf-status-badge', layer: 'atoms', status: 'stub' },
   { id: 'money-input', selector: 'nf-money-input', layer: 'atoms', status: 'stub' },
   { id: 'phone-ma-input', selector: 'nf-phone-ma-input', layer: 'atoms', status: 'stub' },

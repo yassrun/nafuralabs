@@ -10,6 +10,7 @@ import { BadgeComponent } from '@platform/lib/anatomy/components/atoms/badge';
 import { NfInputComponent } from '@platform/lib/anatomy/components/atoms/input';
 import { NfTextareaComponent } from '@platform/lib/anatomy/components/atoms/textarea';
 import { NfSelectComponent, type NfSelectOption } from '@platform/lib/anatomy/components/atoms/select';
+import { TreeSelectComponent, type NfTreeSelectNode } from '@platform/lib/anatomy/components/atoms/tree-select';
 import { SpinnerComponent } from '@platform/lib/anatomy/components/atoms/spinner';
 import type { LookupSearchFn } from '@platform/lib/anatomy/tokens/lookup-searchers.token';
 import { AvatarComponent } from '@platform/lib/anatomy/components/atoms/avatar';
@@ -75,6 +76,7 @@ const ICON_COLORS = ['primary', 'success', 'warning', 'danger', 'info'] as const
     NfInputComponent,
     NfTextareaComponent,
     NfSelectComponent,
+    TreeSelectComponent,
     SpinnerComponent,
     AvatarComponent,
     DividerComponent,
@@ -245,6 +247,19 @@ const ICON_COLORS = ['primary', 'success', 'warning', 'danger', 'info'] as const
               placeholder="Filter cities…"
             />
             <p class="muted">Value: {{ selectCity || '—' }}</p>
+          </section>
+        }
+
+        @case ('tree-select') {
+          <section class="block stack">
+            <h2>Famille produit</h2>
+            <p class="muted">Recherche dans l’arbre, puis sélection d’une famille.</p>
+            <nf-tree-select
+              [nodes]="familyTree"
+              [value]="selectedFamily()"
+              placeholder="Choisir une famille"
+              (valueChange)="selectedFamily.set($event)" />
+            <p class="muted">Valeur : {{ selectedFamily() || '—' }}</p>
           </section>
         }
 
@@ -868,9 +883,9 @@ export class ComponentDemoPage {
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
       startWith(null),
-      map(() => this.route.snapshot.paramMap.get('name') ?? 'button')
+      map(() => this.route.snapshot.paramMap.get('id') ?? 'button')
     ),
-    { initialValue: this.route.snapshot.paramMap.get('name') ?? 'button' }
+    { initialValue: this.route.snapshot.paramMap.get('id') ?? 'button' }
   );
 
   readonly entry = computed((): CatalogEntry | undefined => {
@@ -896,6 +911,23 @@ export class ComponentDemoPage {
   selectStatus = 'Active';
   selectClient = '';
   selectCity = '';
+  readonly selectedFamily = signal<string | null>(null);
+
+  readonly familyTree: NfTreeSelectNode[] = [
+    {
+      key: 'materials',
+      label: 'Matériaux',
+      children: [
+        { key: 'concrete', label: 'Béton', children: [{ key: 'ready-mix', label: 'Béton prêt à l’emploi' }] },
+        { key: 'steel', label: 'Acier' },
+      ],
+    },
+    {
+      key: 'tools',
+      label: 'Outillage',
+      children: [{ key: 'hand-tools', label: 'Outillage à main' }, { key: 'power-tools', label: 'Outillage électroportatif' }],
+    },
+  ];
 
   readonly selectStatusOptions: NfSelectOption[] = [
     { value: 'Active', label: 'Active' },
