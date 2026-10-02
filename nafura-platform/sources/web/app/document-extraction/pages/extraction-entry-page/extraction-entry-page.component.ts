@@ -24,10 +24,11 @@ import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
-import { TenantContextService } from '../../../../../core/tenant/tenant.context';
+import { TenantContextService } from '../../../../core/tenant/tenant.context';
 import { DocTypeService } from '../../services/doc-type.service';
 import { DocTypeListItem, DocTypesByDomain, DomainListItem } from '../../models/doc-type-definition.model';
-import { FlipIconRtlDirective } from '../../../../../lib/anatomy/directives';
+import { FlipIconRtlDirective } from '../../../../lib/anatomy/directives';
+import { formatRelativeTime } from '../../../../lib/anatomy/utils/relative-time';
 
 interface RecentDocType {
   domainKey: string;
@@ -83,43 +84,9 @@ export class ExtractionEntryPage {
   readonly searchResults = signal<DocTypeListItem[]>([]);
   readonly showSearchResults = signal(false);
 
-  // Recent doc types (mocked for now, would come from localStorage/API)
-  readonly recentDocTypes = signal<RecentDocType[]>([
-    {
-      domainKey: 'logistic',
-      docTypeKey: 'BL',
-      name: 'Bon de livraison',
-      icon: 'local_shipping',
-      color: '#3f51b5',
-      lastUsed: new Date(Date.now() - 1000 * 60 * 30), // 30 min ago
-    },
-    {
-      domainKey: 'finance',
-      docTypeKey: 'INVOICE',
-      name: 'Invoice',
-      icon: 'receipt_long',
-      color: '#4caf50',
-      lastUsed: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    },
-    {
-      domainKey: 'logistic',
-      docTypeKey: 'PACKING_LIST',
-      name: 'Packing list',
-      icon: 'inventory_2',
-      color: '#3f51b5',
-      lastUsed: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    },
-  ]);
-
-  // Last workspace (mocked)
-  readonly lastWorkspace = signal<RecentDocType | null>({
-    domainKey: 'logistic',
-    docTypeKey: 'BL',
-    name: 'Bon de livraison',
-    icon: 'local_shipping',
-    color: '#3f51b5',
-    lastUsed: new Date(Date.now() - 1000 * 60 * 30),
-  });
+  // Doc types this user opened in this tenant, most recent first (kept in the browser).
+  readonly recentDocTypes = signal<RecentDocType[]>([]);
+  readonly lastWorkspace = computed<RecentDocType | null>(() => this.recentDocTypes()[0] ?? null);
 
   // Selected domain for templates view
   readonly selectedDomain = signal<string | null>(null);
@@ -179,6 +146,7 @@ export class ExtractionEntryPage {
       const tenantId = this.tenantContext.tenantId();
       if (tenantId) {
         this.loadDocTypes(tenantId);
+        this.recentDocTypes.set(readRecents(tenantId));
       }
     });
 
@@ -270,7 +238,25 @@ export class ExtractionEntryPage {
   }
 
   private navigateToWorkspace(domainKey: string, docTypeKey: string): void {
+    this.rememberRecent(domainKey, docTypeKey);
     this.router.navigate(['/doc-extractor/extraction/workspace', domainKey, docTypeKey]);
+  }
+
+  private rememberRecent(domainKey: string, docTypeKey: string): void {
+    const tenantId = this.tenantContext.tenantId();
+    const docType = this.allDocTypes().find((dt) => dt.docTypeKey === docTypeKey);
+    if (!tenantId || !docType) return;
+    const entry: RecentDocType = {
+      domainKey,
+      docTypeKey,
+      name: docType.name,
+      icon: 'description',
+      color: 'var(--nf-color-primary-600, #2563eb)',
+      lastUsed: new Date(),
+    };
+    const next = [entry, ...this.recentDocTypes().filter((r) => r.docTypeKey !== docTypeKey)].slice(0, 5);
+    this.recentDocTypes.set(next);
+    localStorage.setItem(recentsKey(tenantId), JSON.stringify(next));
   }
 
   private findDomainForDocType(docTypeKey: string): string | null {
@@ -291,31 +277,25 @@ export class ExtractionEntryPage {
 
   private getDomainMetadata(domainKey: string): { description: string; icon: string; color: string } {
     return {
-      description: `Documents related to ${domainKey}.`,
+      description: '',
       icon: 'folder',
       color: '#757575',
     };
   }
 
-  getTemplateMetadata(docType: DocTypeListItem): { fields: number; hasTables: boolean; exportFormats: string[] } {
-    // Mock metadata - in real implementation, this would come from the doc type definition
-    return {
-      fields: 18,
-      hasTables: true,
-      exportFormats: ['Excel', 'JSON'],
-    };
-  }
-
   formatRelativeTime(date: Date): string {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
+    return formatRelativeTime(date);
+  }
+}
 
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    return `${days}d ago`;
+const recentsKey = (tenantId: string) => `nf.doc-extractor.recents.${tenantId}`;
+
+function readRecents(tenantId: string): RecentDocType[] {
+  try {
+    const rows = JSON.parse(localStorage.getItem(recentsKey(tenantId)) ?? '[]') as RecentDocType[];
+    return rows.map((row) => ({ ...row, lastUsed: new Date(row.lastUsed) }));
+  } catch {
+    return [];
   }
 }
 

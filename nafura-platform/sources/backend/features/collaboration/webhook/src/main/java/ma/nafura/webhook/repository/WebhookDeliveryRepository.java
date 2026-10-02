@@ -21,6 +21,8 @@ public interface WebhookDeliveryRepository extends JpaRepository<WebhookDelivery
 
     Optional<WebhookDelivery> findByIdAndWebhookId(UUID id, UUID webhookId);
 
+    void deleteByWebhookId(UUID webhookId);
+
     @Query("""
         select d from WebhookDelivery d
         where d.status = :status

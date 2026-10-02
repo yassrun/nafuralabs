@@ -1,5 +1,6 @@
 import { buildListingConfig } from '@lib/anatomy';
 import type { ListingPageConfig } from '@lib/anatomy/types';
+import { describeCron } from '@lib/anatomy/utils/cron-label';
 import type { ScheduledJobSummary } from './scheduled-jobs.models';
 
 export const SCHEDULED_JOBS_LISTING_CONFIG: ListingPageConfig<ScheduledJobSummary> =
@@ -11,7 +12,9 @@ export const SCHEDULED_JOBS_LISTING_CONFIG: ListingPageConfig<ScheduledJobSummar
         {
           key: 'description',
           label: 'administration.scheduledJobs.columns.name',
-          field: 'description',
+          field: 'key',
+          translate: true,
+          transform: (value: unknown) => `administration.scheduledJobs.jobs.${value}`,
         },
         {
           key: 'key',
@@ -23,6 +26,7 @@ export const SCHEDULED_JOBS_LISTING_CONFIG: ListingPageConfig<ScheduledJobSummar
           key: 'schedule',
           label: 'administration.scheduledJobs.columns.schedule',
           field: 'cron',
+          transform: (value: unknown) => describeCron(value),
         },
         {
           key: 'tenantScoped',
@@ -60,7 +64,7 @@ export const SCHEDULED_JOBS_LISTING_CONFIG: ListingPageConfig<ScheduledJobSummar
       routes: {
         detail: (item) =>
           item ? ['/administration/scheduled-jobs', item.key] : ['/administration/scheduled-jobs'],
-        create: ['/administration/scheduled-jobs'],
+        create: [],
       },
       permissionPrefix: 'administration.scheduled-jobs',
     },

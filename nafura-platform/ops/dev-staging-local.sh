@@ -595,7 +595,7 @@ case "$APP_ID" in
     write_env_file_venue_catalog
     ;;
   *)
-    die "dev-up Mode B not implemented for $APP_ID (supported: sektor-btp, blanner, venue-catalog)"
+    [[ "$SCOPE" == "front" ]] || die "dev-up for a web-only app only supports SCOPE=front (got: $SCOPE)"
     ;;
 esac
 
@@ -631,6 +631,14 @@ case "$APP_ID" in
   sektor-btp|erp) print_recipe_sektor ;;
   blanner) print_recipe_blanner ;;
   venue-catalog) print_recipe_venue_catalog ;;
+  *)
+    cat <<EOF
+Web-only app: local frontend against its configured API base URL.
+
+cd $APP_ID/sources/web
+npm start
+EOF
+    ;;
 esac
 
 echo ""

@@ -1,0 +1,1 @@
+apply from: '../../../../nafura-platform/gradle/nafura-bc.gradle'

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
-import { ContextHeaderComponent } from '../../../../../lib/design-system';
+import { ContextHeaderComponent } from '../../../../lib/design-system';
 
 @Component({
   selector: 'app-extraction-settings-shell-page',

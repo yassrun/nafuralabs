@@ -1,6 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { LucideAngularModule } from 'lucide-angular';
 import { ButtonComponent } from '../../atoms/button';
 
 /**
@@ -20,11 +21,15 @@ import { ButtonComponent } from '../../atoms/button';
 @Component({
   selector: 'nf-empty-state',
   standalone: true,
-  imports: [CommonModule, MatIconModule, ButtonComponent],
+  imports: [CommonModule, MatIconModule, LucideAngularModule, ButtonComponent],
   template: `
     <div class="nf-empty-state">
-      @if (icon()) {
-        <mat-icon class="nf-empty-state__icon">{{ icon() }}</mat-icon>
+      @if (icon(); as name) {
+        @if (name.includes('-')) {
+          <lucide-icon class="nf-empty-state__icon nf-empty-state__icon--lucide" [name]="name" [size]="48" aria-hidden="true"></lucide-icon>
+        } @else {
+          <mat-icon class="nf-empty-state__icon" aria-hidden="true">{{ name }}</mat-icon>
+        }
       }
       <h3 class="nf-empty-state__title">{{ title() }}</h3>
       @if (message()) {

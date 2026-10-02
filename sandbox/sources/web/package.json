@@ -6,10 +6,11 @@
   "scripts": {
     "stack:check": "node ../../../nafura-platform/scripts/sync-stack-versions.mjs --check",
     "stack:sync": "node ../../../nafura-platform/scripts/sync-stack-versions.mjs --write",
+    "architecture:check": "node --experimental-strip-types --test ../../../nafura-platform/sources/web/platform/manifest-validator.test.mjs ../../../nafura-platform/sources/web/platform/manifest-projection.test.mjs ../../../nafura-platform/sources/web/platform/manifest-schema.test.mjs ../../../nafura-platform/sources/web/platform/host/host-plan.test.mjs ../../../nafura-platform/sources/web/platform/host/host-screens.test.mjs ../../../nafura-platform/sources/web/core/icons/app-lucide-icons.test.mjs ../../../nafura-platform/sources/web/platform/host/i18n/platform-i18n.test.mjs ../../../nafura-platform/sources/web/platform/host/product-boundary.test.mjs ../../../nafura-platform/sources/web/platform/app-shell/navigation-access.test.mjs ../../../nafura-platform/sources/web/core/navigation/sidebar-tree.test.mjs ../../../nafura-platform/sources/web/platform/listing/listing-config.test.mjs ../../../nafura-platform/sources/web/lib/anatomy/utils/relative-time.test.mjs ../../../nafura-platform/sources/web/lib/anatomy/utils/cron-label.test.mjs",
     "ng": "ng",
     "start": "ng serve --host 127.0.0.1 --port 4300",
-    "build": "ng build",
-    "build:dev": "ng build --configuration development"
+    "build": "npm run architecture:check && ng build",
+    "build:dev": "npm run architecture:check && ng build --configuration development"
   },
   "dependencies": {
     "@angular/animations": "^22.1.5",

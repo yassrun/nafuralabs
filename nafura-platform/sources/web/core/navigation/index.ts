@@ -7,3 +7,5 @@
 export * from './sidebar.types';
 export * from './sidebar.registry';
 export * from './sidebar.builder';
+export * from './sidebar-tree';
+export { SidebarNavComponent } from './sidebar-nav.component';

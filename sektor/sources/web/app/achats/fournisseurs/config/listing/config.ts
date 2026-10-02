@@ -20,6 +20,13 @@ export function buildFournisseursListingConfig(t: TranslateService) {
     },
     {
       filters: buildFournisseurFilters(t),
+      segments: [
+        { id: 'ALL', label: 'achats.fournisseur.chips.all' },
+        { id: 'ACTIFS', label: 'achats.fournisseur.chips.actifs', filters: { isActive: true } },
+        { id: 'INACTIFS', label: 'achats.fournisseur.chips.inactifs', filters: { isActive: false } },
+        { id: 'TOP_NOTES', label: 'achats.fournisseur.chips.topNotes', filters: { isActive: true } },
+      ],
+      defaultSegment: 'ACTIFS',
       defaultSort: { column: 'raisonSociale', direction: 'asc' },
       features: {
         search: true,

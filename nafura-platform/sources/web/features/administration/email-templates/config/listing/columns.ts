@@ -7,6 +7,12 @@ export const COLUMNS: ColumnConfig[] = [
     key: 'name',
     label: 'administration.emailTemplates.columns.name',
     field: 'name',
+    translate: true,
+    // System templates are seeded in English: show them by code; custom names are user data.
+    transform: (value: unknown, item: unknown) => {
+      const template = item as EmailTemplate;
+      return template.isSystem ? `administration.emailTemplates.systemNames.${template.code}` : String(value ?? '');
+    },
     sortable: true,
   },
   {

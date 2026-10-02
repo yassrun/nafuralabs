@@ -10,8 +10,6 @@ import { LabLoginPage, labAuthGuard } from '@platform/platform/lab-auth';
 import { SandboxShellComponent } from './sandbox-shell.component';
 import { HomePage } from './pages/home.page';
 import { BcSlotPage } from './pages/bc-slot.page';
-import { NafuraContextsPage } from './pages/nafura-contexts.page';
-import { contextSlotGuard } from './shell/context-slot.guard';
 import { PlatformNotificationCenterComponent } from '@platform/platform/notifications';
 
 /** Remount when params/data change so sidebar clicks always refresh the view. */
@@ -45,7 +43,6 @@ export const APP_ROUTES: Routes = [
     canActivate: [labAuthGuard],
     children: [
       { path: '', component: HomePage },
-      { path: 'nafura/business-contexts', component: NafuraContextsPage },
       {
         path: 'showroom',
         loadChildren: () =>
@@ -54,14 +51,12 @@ export const APP_ROUTES: Routes = [
       {
         path: 'achats',
         component: BcSlotPage,
-        canActivate: [contextSlotGuard],
-        data: { contextSlotId: 'bc.achats', title: 'Achats' },
+        data: { title: 'Achats' },
       },
       {
         path: 'chantiers',
         component: BcSlotPage,
-        canActivate: [contextSlotGuard],
-        data: { contextSlotId: 'bc.chantiers', title: 'Chantiers' },
+        data: { title: 'Chantiers' },
       },
       { path: 'notifications', component: PlatformNotificationCenterComponent },
       {

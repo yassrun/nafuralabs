@@ -1,215 +1,80 @@
-import { CommonModule } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { LucideAngularModule, Check, X, ClipboardCheck } from 'lucide-angular';
-import { ToastService } from '@lib/anatomy';
-import { PageShellComponent, PageHeaderComponent } from '@lib/anatomy';
+import { TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
+import {
+  ColumnTemplateDirective,
+  ListingFlatComponent,
+  PageHeaderComponent,
+  PageShellComponent,
+  ToastService,
+  type ListingFlatConfig,
+} from '@lib/anatomy';
+import type { ColumnConfig } from '@lib/anatomy/types';
 import { TabsComponent, TabItem } from '@lib/anatomy/components/molecules/tabs';
 import type { ApprovalRequestDto } from '@platform/app/approbation/services/workflow-api.service';
 import { ApprovalsFacade } from './services/approvals-facade.service';
 import { ApprovalCommentDialogComponent } from './components/approval-comment-dialog.component';
 import { getEntityDetailRoute } from './config/entity-type-routes.config';
 
+type Tab = 'pending' | 'history';
+
+const TITLE: ColumnConfig = { key: 'title', field: 'title', label: 'approvals.columns.title', sortable: true };
+const REQUESTED_BY: ColumnConfig = { key: 'requestedBy', field: 'requestedBy', label: 'approvals.columns.requestedBy', sortable: true };
+
 @Component({
   selector: 'app-approvals-page',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatTabsModule,
-    MatProgressSpinnerModule,
-    TranslateModule,
-    LucideAngularModule,
-    PageShellComponent,
-    PageHeaderComponent,
-    TabsComponent,
-  ],
+  imports: [NgTemplateOutlet, RouterLink, PageShellComponent, PageHeaderComponent, TabsComponent, ListingFlatComponent, ColumnTemplateDirective],
   template: `
     <nf-page-shell>
       <nf-page-header [config]="headerConfig"></nf-page-header>
-
-      <nf-tabs
-        [tabs]="tabs()"
-        [activeTab]="activeTab()"
-        (tabChange)="onTabChange($event)">
-      </nf-tabs>
+      <nf-tabs [tabs]="tabs()" [activeTab]="activeTab()" (tabChange)="onTabChange($event)"></nf-tabs>
 
       <div class="nf-approvals-content">
         @if (activeTab() === 'pending') {
-          @if (facade.loadingPending()) {
-            <div class="nf-approvals-loading">
-              <mat-spinner diameter="32"></mat-spinner>
-              <span>{{ 'approvals.loading' | translate }}</span>
-            </div>
-          } @else if (facade.pending().length === 0) {
-            <div class="nf-approvals-empty">
-              <lucide-icon name="clipboard-check" [size]="48" class="nf-approvals-empty__icon"></lucide-icon>
-              <p class="nf-approvals-empty__title">{{ 'approvals.emptyTitle' | translate }}</p>
-              <p class="nf-approvals-empty__message">{{ 'approvals.emptyMessage' | translate }}</p>
-            </div>
-          } @else {
-            <div class="nf-approvals-table-wrap">
-              <table class="nf-approvals-table">
-                <thead>
-                  <tr>
-                    <th>{{ 'approvals.columns.entity' | translate }}</th>
-                    <th>{{ 'approvals.columns.title' | translate }}</th>
-                    <th>{{ 'approvals.columns.requestedBy' | translate }}</th>
-                    <th>{{ 'approvals.columns.requestedAt' | translate }}</th>
-                    <th>{{ 'approvals.columns.step' | translate }}</th>
-                    <th class="nf-approvals-table__actions">{{ 'approvals.columns.actions' | translate }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (row of facade.pending(); track row.id) {
-                    <tr>
-                      <td>
-                        @if (entityLink(row).length) {
-                          <a [routerLink]="entityLink(row)" class="nf-approvals-link">{{ entityLabel(row) }}</a>
-                        } @else {
-                          <span>{{ entityLabel(row) }}</span>
-                        }
-                      </td>
-                      <td>{{ row.title }}</td>
-                      <td>{{ row.requestedBy }}</td>
-                      <td>{{ relativeTime(row.requestedAt) }}</td>
-                      <td>{{ row.currentStep || '—' }}</td>
-                      <td class="nf-approvals-table__actions">
-                        <div class="nf-approvals-actions">
-                          <button
-                            type="button"
-                            class="nf-approvals-btn nf-approvals-btn--approve"
-                            [disabled]="facade.actionBusyId() === row.id"
-                            (click)="onApprove(row)">
-                            <lucide-icon name="check" [size]="16"></lucide-icon>
-                            {{ 'approvals.approve' | translate }}
-                          </button>
-                          <button
-                            type="button"
-                            class="nf-approvals-btn nf-approvals-btn--reject"
-                            [disabled]="facade.actionBusyId() === row.id"
-                            (click)="onReject(row)">
-                            <lucide-icon name="x" [size]="16"></lucide-icon>
-                            {{ 'approvals.reject' | translate }}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          }
-        }
-
-        @if (activeTab() === 'history') {
-          @if (facade.loadingHistory()) {
-            <div class="nf-approvals-loading">
-              <mat-spinner diameter="32"></mat-spinner>
-              <span>{{ 'approvals.loading' | translate }}</span>
-            </div>
-          } @else if (facade.history().length === 0) {
-            <div class="nf-approvals-empty">
-              <p class="nf-approvals-empty__message">{{ 'approvals.historyEmpty' | translate }}</p>
-            </div>
-          } @else {
-            <div class="nf-approvals-table-wrap">
-              <table class="nf-approvals-table">
-                <thead>
-                  <tr>
-                    <th>{{ 'approvals.columns.entity' | translate }}</th>
-                    <th>{{ 'approvals.columns.title' | translate }}</th>
-                    <th>{{ 'approvals.columns.requestedBy' | translate }}</th>
-                    <th>{{ 'approvals.columns.decision' | translate }}</th>
-                    <th>{{ 'approvals.columns.decisionAt' | translate }}</th>
-                    <th>{{ 'approvals.columns.comment' | translate }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (row of facade.history(); track row.id) {
-                    <tr>
-                      <td>
-                        @if (entityLink(row).length) {
-                          <a [routerLink]="entityLink(row)" class="nf-approvals-link">{{ entityLabel(row) }}</a>
-                        } @else {
-                          <span>{{ entityLabel(row) }}</span>
-                        }
-                      </td>
-                      <td>{{ row.title }}</td>
-                      <td>{{ row.requestedBy }}</td>
-                      <td>
-                        <span class="nf-approvals-badge" [class.nf-approvals-badge--approved]="row.status === 'APPROVED'" [class.nf-approvals-badge--rejected]="row.status === 'REJECTED'">
-                          {{ row.status }}
-                        </span>
-                      </td>
-                      <td>{{ row.approvedAt ? relativeTime(row.approvedAt) : '—' }}</td>
-                      <td>{{ row.decisionComment || '—' }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          }
+          <nf-listing-flat
+            [config]="pendingListing"
+            [items]="facade.pending()"
+            [loading]="facade.loadingPending()"
+            [error]="failed() ? 'Unable to load data' : null"
+            (retry)="load('pending')"
+            (selectionChange)="selection.set($event)"
+            (actionClick)="onAction($event)">
+            <ng-template nfColumn="title" let-item="item">
+              <ng-container [ngTemplateOutlet]="entityCell" [ngTemplateOutletContext]="{ $implicit: item }" />
+            </ng-template>
+          </nf-listing-flat>
+        } @else {
+          <nf-listing-flat
+            [config]="historyListing"
+            [items]="facade.history()"
+            [loading]="facade.loadingHistory()"
+            [error]="failed() ? 'Unable to load data' : null"
+            (retry)="load('history')">
+            <ng-template nfColumn="title" let-item="item">
+              <ng-container [ngTemplateOutlet]="entityCell" [ngTemplateOutletContext]="{ $implicit: item }" />
+            </ng-template>
+          </nf-listing-flat>
         }
       </div>
     </nf-page-shell>
+
+    <ng-template #entityCell let-row>
+      @if (entityLink(row).length) {
+        <a [routerLink]="entityLink(row)" class="nf-approvals-link" data-no-click="true">{{ entityLabel(row) }}</a>
+      } @else {
+        {{ entityLabel(row) }}
+      }
+    </ng-template>
   `,
   styles: [`
-    .nf-approvals-content { padding: 1rem 0; }
-    .nf-approvals-loading {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 2rem;
-      color: var(--nf-text-muted, #6b7280);
-    }
-    .nf-approvals-empty {
-      text-align: center;
-      padding: 3rem 2rem;
-      color: var(--nf-text-muted, #6b7280);
-    }
-    .nf-approvals-empty__icon { margin-bottom: 12px; opacity: 0.6; }
-    .nf-approvals-empty__title { font-weight: 600; font-size: 1.125rem; margin: 0 0 8px; color: var(--nf-text-primary, #111827); }
-    .nf-approvals-empty__message { margin: 0; font-size: 0.875rem; }
-    .nf-approvals-table-wrap { overflow-x: auto; border: 1px solid var(--nf-border-default, #e5e7eb); border-radius: 8px; }
-    .nf-approvals-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.875rem;
-    }
-    .nf-approvals-table th,
-    .nf-approvals-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--nf-border-default, #e5e7eb); }
-    .nf-approvals-table th { font-weight: 600; background: var(--nf-color-bg-subtle, #f9fafb); }
-    .nf-approvals-table__actions { white-space: nowrap; }
+    :host { display: block; height: 100%; }
+    .nf-approvals-content { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; padding-top: 1rem; }
     .nf-approvals-link { color: var(--nf-color-primary, #2563eb); text-decoration: none; }
     .nf-approvals-link:hover { text-decoration: underline; }
-    .nf-approvals-actions { display: flex; gap: 8px; }
-    .nf-approvals-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 6px;
-      border: 1px solid transparent;
-      font-size: 0.8125rem;
-      cursor: pointer;
-    }
-    .nf-approvals-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .nf-approvals-btn--approve { background: #059669; color: #fff; }
-    .nf-approvals-btn--reject { background: #dc2626; color: #fff; }
-    .nf-approvals-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-    .nf-approvals-badge--approved { background: #d1fae5; color: #065f46; }
-    .nf-approvals-badge--rejected { background: #fee2e2; color: #991b1b; }
   `],
 })
 export class ApprovalsPage implements OnInit {
@@ -217,9 +82,10 @@ export class ApprovalsPage implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
-  private readonly router = inject(Router);
 
-  readonly activeTab = signal<'pending' | 'history'>('pending');
+  readonly activeTab = signal<Tab>('pending');
+  readonly selection = signal<ApprovalRequestDto[]>([]);
+  readonly failed = signal(false);
 
   readonly headerConfig = {
     title: 'approvals.title',
@@ -236,64 +102,90 @@ export class ApprovalsPage implements OnInit {
     ];
   });
 
+  readonly pendingListing: ListingFlatConfig = {
+    columns: [
+      TITLE,
+      REQUESTED_BY,
+      { key: 'requestedAt', field: 'requestedAt', label: 'approvals.columns.requestedAt', type: 'relative', sortable: true },
+      { key: 'step', field: 'currentStep', label: 'approvals.columns.step', transform: (step) => String(step || '—') },
+    ],
+    searchFields: ['title', 'requestedBy', 'entityType', 'entityId'],
+    features: { filters: false, columnToggle: false },
+    emptyState: { icon: 'clipboard-check', title: 'approvals.emptyTitle', message: 'approvals.emptyMessage' },
+    selectionActions: [
+      { id: 'approve', label: 'approvals.approve', icon: 'check', variant: 'primary', scope: 'single', disabledFor: (rows) => this.busy(rows) },
+      { id: 'reject', label: 'approvals.reject', icon: 'x', variant: 'danger', scope: 'single', disabledFor: (rows) => this.busy(rows) },
+    ],
+  };
+
+  readonly historyListing: ListingFlatConfig = {
+    columns: [
+      TITLE,
+      REQUESTED_BY,
+      {
+        key: 'decision',
+        field: 'status',
+        label: 'approvals.columns.decision',
+        type: 'badge',
+        transform: (status) => `approvals.status.${status}`,
+        badgeVariant: (status) => (status === 'APPROVED' ? 'success' : status === 'REJECTED' ? 'danger' : 'default'),
+      },
+      { key: 'decisionAt', field: 'approvedAt', label: 'approvals.columns.decisionAt', type: 'relative', sortable: true },
+      { key: 'comment', field: 'decisionComment', label: 'approvals.columns.comment', transform: (comment) => String(comment || '—') },
+    ],
+    searchFields: ['title', 'requestedBy', 'entityType', 'entityId', 'decisionComment'],
+    features: { filters: false, columnToggle: false, selection: 'none' },
+    emptyState: { icon: 'history', title: 'approvals.historyEmpty' },
+  };
+
   ngOnInit(): void {
-    void this.facade.loadPending();
+    void this.load('pending');
   }
 
   onTabChange(tabId: string): void {
-    this.activeTab.set(tabId as 'pending' | 'history');
-    if (tabId === 'history') {
-      void this.facade.loadHistory();
+    this.activeTab.set(tabId as Tab);
+    this.selection.set([]);
+    void this.load(tabId as Tab);
+  }
+
+  async load(tab: Tab): Promise<void> {
+    this.failed.set(false);
+    try {
+      await (tab === 'pending' ? this.facade.loadPending() : this.facade.loadHistory());
+    } catch {
+      this.failed.set(true);
     }
   }
 
   entityLabel(row: ApprovalRequestDto): string {
-    return `${row.entityType} / ${row.entityId}`;
+    return row.title || `${row.entityType} / ${row.entityId}`;
   }
 
   entityLink(row: ApprovalRequestDto): string[] {
     return getEntityDetailRoute(row.entityType, row.entityId);
   }
 
-  relativeTime(iso: string): string {
-    if (!iso) return '—';
-    const date = new Date(iso);
-    const now = new Date();
-    const sec = Math.floor((now.getTime() - date.getTime()) / 1000);
-    if (sec < 60) return this.translate.instant('approvals.time.agoSeconds', { count: sec });
-    if (sec < 3600) return this.translate.instant('approvals.time.agoMinutes', { count: Math.floor(sec / 60) });
-    if (sec < 86400) return this.translate.instant('approvals.time.agoHours', { count: Math.floor(sec / 3600) });
-    if (sec < 2592000) return this.translate.instant('approvals.time.agoDays', { count: Math.floor(sec / 86400) });
-    return date.toLocaleDateString();
-  }
-
-  async onApprove(row: ApprovalRequestDto): Promise<void> {
-    const ref = this.dialog.open(ApprovalCommentDialogComponent, {
-      width: '400px',
-      data: { action: 'approve' as const },
-    });
-    const comment = await ref.afterClosed().toPromise();
-    if (comment === undefined) return; // cancelled
+  async onAction(id: string): Promise<void> {
+    const row = this.selection()[0];
+    if (!row || (id !== 'approve' && id !== 'reject')) return;
+    const ref = this.dialog.open(ApprovalCommentDialogComponent, { width: '400px', data: { action: id } });
+    const decision = (await firstValueFrom(ref.afterClosed())) as { comment?: string } | undefined | '';
+    if (!decision) return;
+    const comment = decision.comment;
     try {
-      await this.facade.approve(row.id, comment);
-      this.toast.success(this.translate.instant('approvals.approved'));
-    } catch (e) {
+      if (id === 'approve') {
+        await this.facade.approve(row.id, comment);
+        this.toast.success(this.translate.instant('approvals.approved'));
+      } else {
+        await this.facade.reject(row.id, comment ?? '');
+        this.toast.success(this.translate.instant('approvals.rejected'));
+      }
+    } catch {
       this.toast.error(this.translate.instant('approvals.actionFailed'));
     }
   }
 
-  async onReject(row: ApprovalRequestDto): Promise<void> {
-    const ref = this.dialog.open(ApprovalCommentDialogComponent, {
-      width: '400px',
-      data: { action: 'reject' as const },
-    });
-    const comment = await ref.afterClosed().toPromise();
-    if (comment === undefined) return;
-    try {
-      await this.facade.reject(row.id, comment);
-      this.toast.success(this.translate.instant('approvals.rejected'));
-    } catch (e) {
-      this.toast.error(this.translate.instant('approvals.actionFailed'));
-    }
+  private busy(rows: ApprovalRequestDto[]): boolean {
+    return rows.some((row) => row.id === this.facade.actionBusyId());
   }
 }

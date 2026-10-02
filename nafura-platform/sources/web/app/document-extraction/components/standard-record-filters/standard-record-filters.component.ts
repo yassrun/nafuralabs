@@ -12,6 +12,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatBadgeModule } from '@angular/material/badge';
 import { TranslateModule } from '@ngx-translate/core';
 import { ExtractionStatus, StandardRecordFilters, DateFieldType } from '../../models/extraction.model';
+import { EXTRACTION_STATUS_OPTIONS, NO_DATE_FILTER } from '../../models/extraction-status';
 
 @Component({
   selector: 'app-standard-record-filters',
@@ -55,19 +56,11 @@ export class StandardRecordFiltersComponent implements OnDestroy {
     return !!(dateFieldValue && typeof dateFieldValue === 'string' && dateFieldValue.length > 0);
   }
 
-  readonly statusOptions: Array<{ value: ExtractionStatus | ''; label: string }> = [
-    { value: '', label: 'All Statuses' },
-    { value: 'draft', label: 'Draft' },
-    { value: 'validated', label: 'Valid' },
-    { value: 'invalid', label: 'Invalid' },
-    { value: 'corrected', label: 'Corrected' },
-    { value: 'exported', label: 'Exported' },
-    { value: 'error', label: 'Failed' },
-  ];
+  readonly statusOptions = EXTRACTION_STATUS_OPTIONS;
 
   readonly dateFieldOptions: Array<{ value: DateFieldType | ''; label: string }> = [
-    { value: '', label: 'No date filter' },
-    { value: 'CREATED_AT', label: 'Created At' },
+    { value: '', label: NO_DATE_FILTER },
+    { value: 'CREATED_AT', label: 'Date de création' },
   ];
 
   readonly filterForm = new FormGroup({

@@ -3,6 +3,7 @@ package ma.nafura.platform.administration.iam.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.nafura.platform.administration.iam.api.request.tenant.BulkMemberRoleRequest;
+import ma.nafura.platform.administration.iam.roles.DeclaredRolesSeeder;
 import ma.nafura.platform.administration.iam.api.request.tenant.CreateRoleRequest;
 import ma.nafura.platform.administration.iam.api.request.tenant.InviteMemberRequest;
 import ma.nafura.platform.administration.iam.api.request.tenant.UpdateRoleRequest;
@@ -30,6 +31,7 @@ import ma.nafura.platform.tenancy.repository.TenantRepository;
 import ma.nafura.platform.administration.iam.domain.model.TenantInvitation;
 import ma.nafura.platform.administration.iam.repository.TenantInvitationRepository;
 import ma.nafura.platform.administration.iam.service.TenantInvitationDeliveryService;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -70,6 +72,7 @@ public class IamService {
     private final PermissionService permissionService;
     private final TenantInvitationRepository tenantInvitationRepository;
     private final TenantInvitationDeliveryService tenantInvitationDeliveryService;
+    private final ObjectProvider<DeclaredRolesSeeder> declaredRoles;
 
     @Value("${nafura.application.id:app}")
     private String defaultApplicationId;
@@ -345,7 +348,7 @@ public class IamService {
             .map(role -> {
                 List<String> permissions = permissionService.getPermissionsForRole(role);
                 long count = memberCounts.getOrDefault(role.toUpperCase(Locale.ROOT), 0L);
-                return RoleResponse.fromRole(role, permissions, count);
+                return systemRole(role, permissions, count);
             })
             .collect(Collectors.toList());
         List<RoleResponse> customRoles = tenantCustomRoleRepository.findByTenantIdOrderByRoleCode(tenantId).stream()
@@ -393,7 +396,23 @@ public class IamService {
                 RoleResponse.resolveScopeType(normalizedRoleCode)
             );
         }
-        return RoleResponse.fromRole(normalizedRoleCode, permissions, memberCount);
+        return systemRole(normalizedRoleCode, permissions, memberCount);
+    }
+
+    /** Declared roles (business contexts, application) are configuration: read-only, labelled by their manifest. */
+    private RoleResponse systemRole(String code, List<String> permissions, long memberCount) {
+        DeclaredRolesSeeder seeder = declaredRoles.getIfAvailable();
+        return Optional.ofNullable(seeder).flatMap(s -> s.declaredRole(code))
+            .map(role -> new RoleResponse(
+                role.code(),
+                role.label(),
+                role.owner().startsWith("bc.") ? "Rôle du module " + role.owner() : "Rôle de l’application",
+                permissions,
+                true,
+                30,
+                memberCount,
+                RoleResponse.resolveScopeType(role.code())))
+            .orElseGet(() -> RoleResponse.fromRole(code, permissions, memberCount));
     }
 
     /**
@@ -616,38 +635,44 @@ public class IamService {
     // ─────────────────────────────────────────────────────────────────────────────
 
     /**
-     * Get all domains available to the tenant with their current enablement status.
-     *
-     * Domains available = domains present in tenant_domain table.
-     * Domain enabled/disabled = per-tenant setting (from tenant_domain table).
+     * Domains of the tenant: the business contexts the application declares (active unless the tenant
+     * disabled them) plus any other tenant_domain row (products seeding their own domains).
      */
     public List<DomainToggleResponse> getDomains(UUID tenantId) {
         requireTenant(tenantId);
-        return tenantDomainRepository.findByTenantId(tenantId).stream()
-            .map(this::toDomainResponse)
-            .toList();
+        Map<String, TenantDomain> rows = tenantDomainRepository.findByTenantId(tenantId).stream()
+            .collect(Collectors.toMap(TenantDomain::getDomainCode, row -> row, (a, b) -> a, LinkedHashMap::new));
+        List<DomainToggleResponse> result = new ArrayList<>();
+        for (DeclaredRolesSeeder.BusinessContext context : declaredBusinessContexts()) {
+            TenantDomain row = rows.remove(context.domainCode());
+            boolean enabled = row == null || DOMAIN_STATUS_ACTIVE.equalsIgnoreCase(row.getStatus());
+            result.add(new DomainToggleResponse(context.domainCode(), context.label(), "", enabled, false, context.icon(), List.of()));
+        }
+        rows.values().forEach(row -> result.add(toDomainResponse(row)));
+        return result;
     }
-    
+
     /**
-     * Get enabled domain IDs for a tenant.
-     * Reads from tenant_domain table.
+     * Get enabled domain IDs for a tenant: declared business contexts not disabled, plus active rows.
      */
     public List<String> getEnabledDomainIds(UUID tenantId) {
         requireTenant(tenantId);
-        return tenantDomainRepository.findByTenantId(tenantId).stream()
-            .filter(tm -> DOMAIN_STATUS_ACTIVE.equalsIgnoreCase(tm.getStatus()))
-            .map(TenantDomain::getDomainCode)
+        return getDomains(tenantId).stream()
+            .filter(DomainToggleResponse::enabled)
+            .map(DomainToggleResponse::code)
             .collect(Collectors.toList());
     }
-    
+
     /**
      * Check if a domain is enabled for a tenant.
      */
     public boolean isDomainEnabled(UUID tenantId, String domainId) {
-        requireTenant(tenantId);
-        return tenantDomainRepository.findByTenantIdAndDomainCode(tenantId, domainId)
-            .map(tm -> DOMAIN_STATUS_ACTIVE.equalsIgnoreCase(tm.getStatus()))
-            .orElse(false);
+        return getEnabledDomainIds(tenantId).contains(domainId);
+    }
+
+    private List<DeclaredRolesSeeder.BusinessContext> declaredBusinessContexts() {
+        DeclaredRolesSeeder seeder = declaredRoles.getIfAvailable();
+        return seeder == null ? List.of() : seeder.businessContexts();
     }
 
     /**
@@ -662,6 +687,10 @@ public class IamService {
     @Transactional
     public DomainToggleResponse updateDomain(UUID tenantId, String domainCode, boolean enabled) {
         requireTenant(tenantId);
+        boolean declared = declaredBusinessContexts().stream().anyMatch(c -> c.domainCode().equals(domainCode));
+        if (!declared && tenantDomainRepository.findByTenantIdAndDomainCode(tenantId, domainCode).isEmpty()) {
+            throw new IllegalArgumentException("Unknown domain: " + domainCode);
+        }
 
         // Update or create tenant-domain status record (tenant_domain table).
         TenantDomain tenantDomain = tenantDomainRepository.findByTenantIdAndDomainCode(tenantId, domainCode)
@@ -673,12 +702,13 @@ public class IamService {
             });
         
         tenantDomain.setStatus(enabled ? DOMAIN_STATUS_ACTIVE : DOMAIN_STATUS_INACTIVE);
-        tenantDomain = tenantDomainRepository.save(tenantDomain);
+        TenantDomain saved = tenantDomainRepository.save(tenantDomain);
 
         log.info("Domain '{}' {} for tenant {}",
             domainCode, enabled ? "enabled" : "disabled", tenantId);
 
-        return toDomainResponse(tenantDomain);
+        return getDomains(tenantId).stream().filter(d -> d.code().equals(domainCode)).findFirst()
+            .orElseGet(() -> toDomainResponse(saved));
     }
 
     /**

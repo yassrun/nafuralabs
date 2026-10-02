@@ -15,6 +15,9 @@ public interface ApprovalStepRepository extends TenantScopedRepository<ApprovalS
     /** Pending steps where current user's role can approve (for "my pending" dashboard). */
     List<ApprovalStep> findByTenantIdAndStatusAndApproverRole(
             UUID tenantId, String status, String approverRole);
+
+    List<ApprovalStep> findByTenantIdAndStatusAndApproverRoleIn(
+            UUID tenantId, String status, java.util.Collection<String> approverRoles);
 }
 
 

@@ -7,7 +7,7 @@ import { MatRippleModule } from '@angular/material/core';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { DocTypeListItem, DocTypesByDomain, DomainListItem } from '../../models/doc-type-definition.model';
-import { FlipIconRtlDirective } from '../../../../../lib/anatomy/directives';
+import { FlipIconRtlDirective } from '../../../../lib/anatomy/directives';
 
 export interface DiscoveryDomainCard {
   id: string;

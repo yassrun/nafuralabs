@@ -7,10 +7,14 @@ export interface LabAuthConfig {
   readonly usersUrl: string;
   readonly sessionUrl: string;
   readonly productName: string;
+  /** Product square icon; without it the initial of `productName`. */
+  readonly productMark?: string;
   readonly subtitle?: string;
   readonly storageKey?: string;
   readonly loginPath?: string;
   readonly homePath?: string;
+  /** Effective permissions of the session (default `/api/v1/me/permissions`). */
+  readonly permissionsUrl?: string;
 }
 
 export const LAB_AUTH_CONFIG = new InjectionToken<LabAuthConfig>('LAB_AUTH_CONFIG');

@@ -668,6 +668,19 @@ build_vitrine_images() {
   }
 }
 
+build_web_only_images() {
+  local app_id="$1"
+  local tag web_img app_root
+  tag="$(image_tag_for_env)"
+  web_img="$(image_ref "${app_id}-web" "$tag")"
+  app_root="$ROOT/$app_id"
+  echo "Building ${app_id}-web -> $web_img"
+  docker build -t "$web_img" -f "$app_root/sources/web/Dockerfile" "$app_root/sources/web" 2>/dev/null || {
+    echo "ERROR: $app_id Dockerfile not found in $app_root/sources/web" >&2
+    exit 1
+  }
+}
+
 build_images() {
   local app_id="${1:-sektor-btp}"
   local scope="${2:-$IMAGE_SCOPE}"
@@ -691,8 +704,11 @@ build_images() {
       ;;
     mbs-studio|corporate) build_vitrine_images "$app_id" ;;
     *)
-      echo "ERROR: build-images not implemented for $app_id" >&2
-      exit 1
+      case "$scope" in
+        front|full) build_web_only_images "$app_id" ;;
+        back) echo "ERROR: $app_id has no backend image" >&2; exit 1 ;;
+        *) echo "ERROR: IMAGE_SCOPE must be front|back|full (got: $scope)" >&2; exit 1 ;;
+      esac
       ;;
   esac
 }
@@ -743,8 +759,11 @@ push_images() {
       docker push "$(image_ref "${app_id}-web" "$tag")"
       ;;
     *)
-      echo "ERROR: push-images not implemented for $app_id" >&2
-      exit 1
+      case "$scope" in
+        front|full) docker push "$(image_ref "${app_id}-web" "$tag")" ;;
+        back) echo "ERROR: $app_id has no backend image" >&2; exit 1 ;;
+        *) echo "ERROR: IMAGE_SCOPE must be front|back|full (got: $scope)" >&2; exit 1 ;;
+      esac
       ;;
   esac
   echo "Push complete."

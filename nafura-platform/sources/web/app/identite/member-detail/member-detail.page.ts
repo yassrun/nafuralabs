@@ -411,7 +411,7 @@ export class MemberDetailPage extends ConfigDrivenDetailPage<Member> {
       breadcrumbs: this.mode() === 'create'
         ? undefined
         : [
-            { label: 'administration.navigation.title', route: '/admin' },
+            { label: 'administration.navigation.title', route: '/administration' },
             {
               label: 'administration.navigation.members',
               route: '/administration/members',
@@ -476,14 +476,14 @@ export class MemberDetailPage extends ConfigDrivenDetailPage<Member> {
         roleIds: (savedItem.roles ?? []).map((role) => role.id),
       };
       this.showSuccess(
-        this.i18n.instant('administration.members.invite.success', {
+        this.i18n.instant('administration.members.feedback.inviteSuccess', {
           email: normalized.email,
         })
       );
       this.detailComponent?.markAsPristine();
       this.afterSave(normalized);
     } catch (error) {
-      this.showError(this.i18n.instant('administration.members.invite.error'));
+      this.showError(this.i18n.instant('administration.members.feedback.inviteError'));
     } finally {
       this.isSaving.set(false);
     }
@@ -647,8 +647,8 @@ export class MemberDetailPage extends ConfigDrivenDetailPage<Member> {
     ) {
       return true;
     }
-    const role = this.item()?.roles?.find((entry) => entry.id === roleId);
-    return Boolean(role?.isSystem);
+    // A system role's definition is read-only; assigning it to a member is a normal admin action.
+    return false;
   }
 
   onRoleToggle(roleId: string, checked: boolean): void {
@@ -671,9 +671,11 @@ export class MemberDetailPage extends ConfigDrivenDetailPage<Member> {
       return;
     }
 
+    // Only roles the editor offers: a code the tenant does not define (e.g. a stale one) is dropped, not resent.
+    const offered = new Set(this.availableRoleOptions().map((option) => option.key.toUpperCase()));
     const roles = this.draftRoleIds()
       .map((roleId) => String(roleId ?? '').trim().toUpperCase())
-      .filter((roleId) => roleId.length > 0);
+      .filter((roleId) => roleId.length > 0 && offered.has(roleId));
 
     if (roles.length === 0) {
       this.showError(this.i18n.instant('administration.members.detail.roles.saveError'));
@@ -719,7 +721,7 @@ export class MemberDetailPage extends ConfigDrivenDetailPage<Member> {
     try {
       await this.crud.deactivateMember(member.id);
       await this.loadItem(member.id);
-      this.showSuccess(this.i18n.instant('administration.members.actions.deactivate.success'));
+      this.showSuccess(this.i18n.instant('administration.members.feedback.deactivateSuccess'));
     } catch (error) {
       this.showError(this.i18n.instant('administration.members.detail.actions.updateError'));
     } finally {
@@ -737,7 +739,7 @@ export class MemberDetailPage extends ConfigDrivenDetailPage<Member> {
     try {
       await this.crud.reactivateMember(member.id);
       await this.loadItem(member.id);
-      this.showSuccess(this.i18n.instant('administration.members.actions.reactivate.success'));
+      this.showSuccess(this.i18n.instant('administration.members.feedback.reactivateSuccess'));
     } catch (error) {
       this.showError(this.i18n.instant('administration.members.detail.actions.updateError'));
     } finally {
@@ -755,7 +757,7 @@ export class MemberDetailPage extends ConfigDrivenDetailPage<Member> {
     try {
       await this.crud.resendInvitation(member.id);
       await this.loadItem(member.id);
-      this.showSuccess(this.i18n.instant('administration.members.actions.resendInvitation.success'));
+      this.showSuccess(this.i18n.instant('administration.members.feedback.resendInvitationSuccess'));
     } catch (error) {
       this.showError(this.i18n.instant('administration.members.detail.actions.updateError'));
     } finally {
@@ -785,7 +787,7 @@ export class MemberDetailPage extends ConfigDrivenDetailPage<Member> {
     this.isSaving.set(true);
     try {
       await this.crud.removeMember(member.id);
-      this.showSuccess(this.i18n.instant('administration.members.actions.remove.success'));
+      this.showSuccess(this.i18n.instant('administration.members.feedback.removeSuccess'));
       this.navigateToList();
     } catch (error) {
       this.showError(this.i18n.instant('administration.members.detail.actions.updateError'));

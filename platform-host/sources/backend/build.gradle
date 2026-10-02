@@ -1,0 +1,32 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+
+def stackVersions = new Properties()
+file('../../../nafura-platform/stack.versions.properties').withInputStream { stackVersions.load(it) }
+
+repositories {
+    mavenCentral()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${stackVersions.getProperty('spring-boot.version')}"
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(stackVersions.getProperty('java.version').toInteger())
+    }
+}
+
+apply from: '../../../nafura-platform/gradle/nafura-host.gradle'
+
+tasks.named('bootJar') {
+    archiveBaseName = 'platform-host-backend'
+}

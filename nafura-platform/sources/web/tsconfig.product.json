@@ -1,0 +1,56 @@
+{
+  // Base for a product web app. Extend it and set "baseUrl": "." in the product.
+  // Platform sources import npm packages; these paths make them resolve in the product's node_modules
+  // (a second @angular in the bundle fails with NG0203). Subpaths are export maps, not directories.
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "declaration": false,
+    "experimentalDecorators": true,
+    "moduleResolution": "bundler",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@platform/*": ["../../../nafura-platform/sources/web/*"],
+      "@core/*": ["../../../nafura-platform/sources/web/core/*"],
+      "@lib/*": ["../../../nafura-platform/sources/web/lib/*"],
+      "@env": ["./src/environments/environment"],
+
+      "@angular/*": ["./node_modules/@angular/*"],
+      "@angular/core/*": ["./node_modules/@angular/core/types/*.d.ts", "./node_modules/@angular/core/fesm2022/*.mjs"],
+      "@angular/core/primitives/*": ["./node_modules/@angular/core/types/primitives-*.d.ts", "./node_modules/@angular/core/fesm2022/primitives-*.mjs"],
+      "@angular/common/*": ["./node_modules/@angular/common/types/*.d.ts", "./node_modules/@angular/common/fesm2022/*.mjs", "./node_modules/@angular/common/*"],
+      "@angular/material/*": ["./node_modules/@angular/material/types/*.d.ts", "./node_modules/@angular/material/fesm2022/*.mjs"],
+      "@angular/cdk/*": ["./node_modules/@angular/cdk/types/*.d.ts", "./node_modules/@angular/cdk/fesm2022/*.mjs"],
+      "@angular/platform-browser/animations": ["./node_modules/@angular/platform-browser/types/animations.d.ts", "./node_modules/@angular/platform-browser/fesm2022/animations.mjs"],
+      "@angular/platform-browser/animations/async": ["./node_modules/@angular/platform-browser/types/animations-async.d.ts", "./node_modules/@angular/platform-browser/fesm2022/animations-async.mjs"],
+      "@ngx-translate/*": ["./node_modules/@ngx-translate/*"],
+      "ngx-translate-messageformat-compiler": ["./node_modules/ngx-translate-messageformat-compiler"],
+      "lucide-angular": ["./node_modules/lucide-angular"],
+      "ng2-charts": ["./node_modules/ng2-charts"],
+      "chart.js": ["./node_modules/chart.js"],
+      "chart.js/*": ["./node_modules/chart.js/*"],
+      "rxjs": ["./node_modules/rxjs"],
+      "rxjs/*": ["./node_modules/rxjs/dist/types/*/index.d.ts", "./node_modules/rxjs/dist/esm/*/index.js"],
+      "tslib": ["./node_modules/tslib"]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true,
+    "strictAttributeTypes": false,
+    "strictDomEventTypes": false
+  }
+}

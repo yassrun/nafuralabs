@@ -10,7 +10,7 @@
  * - Settings: Workspace/tenant settings
  */
 
-import { ModuleSidebarDeclaration, SidebarNode } from '../../../../core/navigation/sidebar.types';
+import { ModuleSidebarDeclaration, SidebarNode } from '../../../core/navigation/sidebar.types';
 import { DOC_EXTRACTOR_MODULE_ID, DocExtractorPermissions } from '../permissions/doc-extractor.permissions';
 
 /**

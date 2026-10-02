@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { PageHeaderComponent, PageShellComponent, ToastService } from '@lib/anatomy';
+import {
+  ButtonComponent,
+  NfSelectComponent,
+  PageHeaderComponent,
+  PageShellComponent,
+  ToastService,
+} from '@lib/anatomy';
 
 import {
   AiProvidersApiService,
@@ -22,10 +24,8 @@ import {
     CommonModule,
     FormsModule,
     TranslateModule,
-    MatButtonModule,
-    MatRadioModule,
-    MatSelectModule,
-    MatFormFieldModule,
+    ButtonComponent,
+    NfSelectComponent,
     PageShellComponent,
     PageHeaderComponent,
   ],
@@ -85,33 +85,27 @@ import {
               </header>
 
               @if (draftProvider() === p.id && p.keyConfigured) {
-                <mat-form-field appearance="outline" class="ai-prov__model">
-                  <mat-label>{{ 'administration.aiProviders.model' | translate }}</mat-label>
-                  <mat-select
+                <nf-select
+                  class="ai-prov__model"
+                  [label]="'administration.aiProviders.model' | translate"
+                  [options]="p.models.map(modelOption)"
                     [ngModel]="draftModel()"
                     (ngModelChange)="draftModel.set($event)"
                     [disabled]="saving()"
-                  >
-                    @for (m of p.models; track m) {
-                      <mat-option [value]="m">{{ m }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
+                />
               }
             </article>
           }
         </div>
 
         <div class="ai-prov__actions">
-          <button
-            mat-flat-button
-            color="primary"
-            type="button"
+          <nf-button
+            variant="primary"
             [disabled]="!canSave() || saving()"
             (click)="save()"
           >
             {{ 'administration.aiProviders.save' | translate }}
-          </button>
+          </nf-button>
         </div>
       }
     </nf-page-shell>
@@ -205,6 +199,8 @@ export class AiProvidersPage implements OnInit {
   readonly state = signal<AiProvidersState | null>(null);
   readonly draftProvider = signal('gemini');
   readonly draftModel = signal('gemini-2.5-flash');
+
+  readonly modelOption = (model: string) => ({ value: model, label: model });
 
   readonly headerConfig = computed(() => ({
     title: this.i18n.instant('administration.aiProviders.title'),

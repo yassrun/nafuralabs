@@ -13,7 +13,7 @@ import type { WidgetConfig, ActivityWidgetConfig as ActivityConfig, ActivityWidg
         [entries]="entries()"
         [title]="config().title"
         [searchEnabled]="false"
-        [emptyLabel]="'No recent activity'"
+        [emptyLabel]="'Aucune activité récente'"
       />
     </div>
   `,

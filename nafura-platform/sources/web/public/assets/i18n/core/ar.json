@@ -1,0 +1,37 @@
+{
+  "administration": {
+    "documents": {
+      "title": "المستندات والطباعة",
+      "identity": "الهوية وتنسيق الصفحة",
+      "models": "القوالب",
+      "description": "الهوية البصرية وتنسيق الصفحات وقوالب المستندات"
+    },
+    "navigation": {
+      "title": "الإدارة",
+      "members": "الأعضاء",
+      "roles": "الأدوار",
+      "domainActivation": "تفعيل المجالات",
+      "audit": "سجل التدقيق",
+      "templates": "نماذج الطباعة",
+      "emailTemplates": "نماذج البريد الإلكتروني",
+      "workflows": "سير العمل",
+      "subscriptions": "الاشتراكات",
+      "scheduledJobs": "المهام المجدولة",
+      "webhooks": "Webhooks",
+      "apiKeys": "مفاتيح API",
+      "aiProviders": "موفرو الذكاء الاصطناعي",
+      "numberingSequences": "تسلسلات الترقيم",
+      "hub": "الصفحة الرئيسية للإدارة"
+    },
+    "hub": {
+      "title": "مركز الإدارة",
+      "subtitle": "إعدادات المستأجر والهوية وقدرات المنصة",
+      "intro": "اختر قسماً إدارياً."
+    }
+  },
+  "approvals": { "title": "الموافقات" },
+  "userSettings": { "title": "إعداداتي" },
+  "appSettings": { "title": "إعدادات المؤسسة" },
+  "organizationIdentity": { "title": "هوية المؤسسة" },
+  "notifications": { "title": "الإشعارات" }
+}

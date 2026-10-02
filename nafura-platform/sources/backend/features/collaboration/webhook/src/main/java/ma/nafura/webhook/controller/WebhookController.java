@@ -154,7 +154,7 @@ public class WebhookController {
     public record UpdateWebhookRequest(
             @NotBlank @Size(max = 100) String name,
             @NotBlank @Size(max = 500) String url,
-            @NotBlank @Size(max = 200) String secret,
+            @Size(max = 200) String secret,
             @NotEmpty List<WebhookEvent> events,
             Boolean active
     ) {}

@@ -4,6 +4,7 @@ import ma.nafura.platform.authorization.domain.model.TenantUserRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -28,7 +29,10 @@ public interface TenantUserRoleRepository extends JpaRepository<TenantUserRole, 
     @Query("SELECT tur.roleCode, COUNT(tur) FROM TenantUserRole tur WHERE tur.tenantId = :tenantId GROUP BY tur.roleCode")
     List<Object[]> countMembersByRoleCode(@Param("tenantId") UUID tenantId);
 
-    void deleteByTenantIdAndUserId(UUID tenantId, UUID userId);
+    // Bulk delete executed now: a derived delete runs at flush, after the re-inserted rows of a role replacement.
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("DELETE FROM TenantUserRole tur WHERE tur.tenantId = :tenantId AND tur.userId = :userId")
+    void deleteByTenantIdAndUserId(@Param("tenantId") UUID tenantId, @Param("userId") UUID userId);
 
     void deleteByTenantIdAndRoleCodeAndUserIdIn(UUID tenantId, String roleCode, Collection<UUID> userIds);
 

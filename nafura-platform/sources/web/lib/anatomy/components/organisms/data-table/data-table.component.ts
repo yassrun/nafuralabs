@@ -18,6 +18,7 @@ import { SpinnerComponent } from '../../atoms/spinner';
 import { BadgeComponent } from '../../atoms/badge';
 import { EmptyStateComponent } from '../../molecules/empty-state';
 import { MadCurrencyPipe } from '../../../pipes/mad-currency.pipe';
+import { formatRelativeTime } from '../../../utils/relative-time';
 import { PaginationComponent, type PageChangeEvent } from '../../molecules/pagination/pagination.component';
 
 /**
@@ -141,7 +142,11 @@ export interface RowActionEvent<T> {
                 [style.width]="col.width"
                 [ngClass]="col.cssClass"
               >
-                @if (col.cellAction) {
+                @if (cellTemplates()[col.key]; as cellTpl) {
+                  <ng-container
+                    *ngTemplateOutlet="cellTpl; context: { $implicit: getFieldValue(row, col.field), item: row }"
+                  ></ng-container>
+                } @else if (col.cellAction) {
                   <button
                     type="button"
                     class="nf-data-table__cell-action"
@@ -150,7 +155,7 @@ export interface RowActionEvent<T> {
                     @switch (col.type) {
                       @case ('badge') {
                         <nf-badge [variant]="getBadgeVariant(row, col)">
-                          {{ getCellValue(row, col) }}
+                          {{ getCellValue(row, col) | translate }}
                         </nf-badge>
                       }
                     @case ('boolean') {
@@ -159,10 +164,13 @@ export interface RowActionEvent<T> {
                       </nf-badge>
                     }
                       @case ('date') {
-                        {{ $any(getFieldValue(row, col.field)) | date:'mediumDate' }}
+                        {{ ($any(getFieldValue(row, col.field)) | date:'mediumDate') ?? '—' }}
                       }
                       @case ('datetime') {
-                        {{ $any(getFieldValue(row, col.field)) | date:'medium' }}
+                        {{ ($any(getFieldValue(row, col.field)) | date:'medium') ?? '—' }}
+                      }
+                      @case ('relative') {
+                        {{ relativeValue(row, col) }}
                       }
                       @case ('currency') {
                         {{ $any(getFieldValue(row, col.field)) | mad }}
@@ -171,7 +179,7 @@ export interface RowActionEvent<T> {
                         {{ $any(getFieldValue(row, col.field)) | number }}
                       }
                       @default {
-                        {{ getCellValue(row, col) }}
+                        {{ col.translate ? (getCellValue(row, col) | translate) : getCellValue(row, col) }}
                       }
                     }
                   </button>
@@ -179,7 +187,7 @@ export interface RowActionEvent<T> {
                   @switch (col.type) {
                     @case ('badge') {
                       <nf-badge [variant]="getBadgeVariant(row, col)">
-                        {{ getCellValue(row, col) }}
+                        {{ getCellValue(row, col) | translate }}
                       </nf-badge>
                     }
                     @case ('boolean') {
@@ -188,10 +196,13 @@ export interface RowActionEvent<T> {
                       </nf-badge>
                     }
                     @case ('date') {
-                      {{ $any(getFieldValue(row, col.field)) | date:'mediumDate' }}
+                      {{ ($any(getFieldValue(row, col.field)) | date:'mediumDate') ?? '—' }}
                     }
                     @case ('datetime') {
-                      {{ $any(getFieldValue(row, col.field)) | date:'medium' }}
+                      {{ ($any(getFieldValue(row, col.field)) | date:'medium') ?? '—' }}
+                    }
+                    @case ('relative') {
+                      <span [attr.title]="$any(getFieldValue(row, col.field)) | date:'medium'">{{ relativeValue(row, col) }}</span>
                     }
                     @case ('currency') {
                       {{ $any(getFieldValue(row, col.field)) | mad }}
@@ -200,7 +211,7 @@ export interface RowActionEvent<T> {
                       {{ $any(getFieldValue(row, col.field)) | number }}
                     }
                     @default {
-                      {{ getCellValue(row, col) }}
+                      {{ col.translate ? (getCellValue(row, col) | translate) : getCellValue(row, col) }}
                     }
                   }
                 }
@@ -458,6 +469,11 @@ export interface RowActionEvent<T> {
       content-visibility: auto;
       contain-intrinsic-size: 48px 1px;
     }
+
+    .nf-cell--mono {
+      font-family: var(--nf-font-family-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+      font-size: 0.8125rem;
+    }
   `],
 })
 export class DataTableComponent<T = unknown> {
@@ -485,6 +501,8 @@ export class DataTableComponent<T = unknown> {
    * is visible even when selection array uses different references.
    */
   activeRowId = input<string | null>(null);
+  /** Custom cell per column key; context: `$implicit` = value, `item` = row. */
+  cellTemplates = input<Record<string, TemplateRef<unknown>>>({});
 
   // Outputs
   selectionChange = output<T[]>();
@@ -628,6 +646,11 @@ export class DataTableComponent<T = unknown> {
     }
 
     return 'default';
+  }
+
+  /** « il y a 3 h »; — when empty. */
+  relativeValue(row: T, col: ColumnConfig): string {
+    return formatRelativeTime(this.getFieldValue(row, col.field)) || '—';
   }
 
   getBooleanLabel(row: T, col: ColumnConfig): string {

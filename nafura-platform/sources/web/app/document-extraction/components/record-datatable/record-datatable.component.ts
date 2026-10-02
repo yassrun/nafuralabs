@@ -23,11 +23,13 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SelectionModel } from '@angular/cdk/collections';
 
-import { StatusChipComponent } from '../../../../../lib/design-system';
+import { StatusChipComponent } from '../../../../lib/design-system';
 import { ExtractedRecord, ExtractionStatus, WorkflowStatus, StandardRecordFilters } from '../../models/extraction.model';
 import { ResolvedColumn } from '../../utils/column-resolver';
 import { ColumnResolver } from '../../utils/column-resolver';
 import { StandardRecordFiltersComponent } from '../standard-record-filters/standard-record-filters.component';
+import { formatRelativeTime } from '../../../../lib/anatomy/utils/relative-time';
+import { EXTRACTION_FAILED, extractionStatusInfo } from '../../models/extraction-status';
 
 export interface RecordTableAction {
   icon: string;
@@ -205,18 +207,9 @@ export class RecordDatatableComponent {
   getStatusInfo(record: ExtractedRecord): { label: string; variant: string } {
     // If workflowStatus is REJECTED or FAILED, show that first
     if (record.workflowStatus === 'REJECTED' || record.workflowStatus === 'FAILED') {
-      return { label: 'Extraction Failed', variant: 'error' };
+      return EXTRACTION_FAILED;
     }
-    
-    const statusMap: Record<ExtractionStatus, { label: string; variant: string }> = {
-      'draft': { label: 'Draft', variant: 'warning' },
-      'validated': { label: 'Validated', variant: 'success' },
-      'invalid': { label: 'Invalid', variant: 'error' },
-      'corrected': { label: 'Corrected', variant: 'info' },
-      'exported': { label: 'Exported', variant: 'success' },
-      'error': { label: 'Error', variant: 'error' },
-    };
-    return statusMap[record.status] || { label: record.status, variant: 'default' };
+    return extractionStatusInfo(record.status);
   }
 
   /**
@@ -237,17 +230,7 @@ export class RecordDatatableComponent {
    * Format relative time for display
    */
   formatRelativeTime(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString();
+    return formatRelativeTime(dateString);
   }
 
   /**

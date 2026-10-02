@@ -17,9 +17,9 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatTableModule } from '@angular/material/table';
 import { TranslateModule } from '@ngx-translate/core';
 
+import { ColumnTemplateDirective, ListingFlatComponent, type ListingFlatConfig } from '@lib/anatomy';
 import type { ActiveSession } from '../../models';
 import { PASSWORD_MIN_LENGTH } from './security.config';
 
@@ -41,7 +41,8 @@ const SECURITY_PHASE_1 = true;
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatTableModule,
+    ListingFlatComponent,
+    ColumnTemplateDirective,
   ],
   template: `
     <section class="settings-section">
@@ -109,43 +110,19 @@ const SECURITY_PHASE_1 = true;
         } @else if (sessions.length === 0) {
           <p class="muted">{{ 'userSettings.security.sessions.comingSoon' | translate }}</p>
         } @else {
-          <table mat-table [dataSource]="sessions" class="sessions-table">
-            <ng-container matColumnDef="device">
-              <th mat-header-cell *matHeaderCellDef>Device</th>
-              <td mat-cell *matCellDef="let session">
-                {{ session.deviceName || 'Unknown device' }}
-                @if (session.isCurrent) {
-                  <span class="pill">{{ 'userSettings.security.sessions.current' | translate }}</span>
-                }
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="ip">
-              <th mat-header-cell *matHeaderCellDef>IP</th>
-              <td mat-cell *matCellDef="let session">{{ session.ipAddress }}</td>
-            </ng-container>
-            <ng-container matColumnDef="lastActiveAt">
-              <th mat-header-cell *matHeaderCellDef>Last active</th>
-              <td mat-cell *matCellDef="let session">
-                {{ session.lastActiveAt | date : 'medium' }}
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let session" class="actions-cell">
-                @if (!session.isCurrent) {
-                  <button
-                    mat-stroked-button
-                    type="button"
-                    [disabled]="loading || revokingSessionId === session.id"
-                    (click)="revoke.emit(session.id)">
-                    {{ 'userSettings.security.sessions.revoke' | translate }}
-                  </button>
-                }
-              </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="columns"></tr>
-            <tr mat-row *matRowDef="let row; columns: columns"></tr>
-          </table>
+          <nf-listing-flat
+            [config]="sessionsListing"
+            [items]="sessions"
+            [loading]="loading"
+            (selectionChange)="selectedSession = $event[0] ?? null"
+            (actionClick)="selectedSession && revoke.emit(selectedSession.id)">
+            <ng-template nfColumn="device" let-item="item">
+              {{ item.deviceName || ('userSettings.security.sessions.unknownDevice' | translate) }}
+              @if (item.isCurrent) {
+                <span class="pill">{{ 'userSettings.security.sessions.current' | translate }}</span>
+              }
+            </ng-template>
+          </nf-listing-flat>
         }
       </div>
 
@@ -203,14 +180,6 @@ const SECURITY_PHASE_1 = true;
         justify-content: flex-end;
       }
 
-      .sessions-table {
-        width: 100%;
-      }
-
-      .actions-cell {
-        text-align: right;
-      }
-
       .pill {
         display: inline-block;
         margin-left: 0.4rem;
@@ -236,7 +205,26 @@ export class SecuritySectionComponent implements OnChanges {
   @Output() changePassword = new EventEmitter<ChangePasswordPayload>();
   @Output() revoke = new EventEmitter<string>();
 
-  readonly columns = ['device', 'ip', 'lastActiveAt', 'actions'];
+  readonly sessionsListing: ListingFlatConfig = {
+    columns: [
+      { key: 'device', field: 'deviceName', label: 'userSettings.security.sessions.columns.device' },
+      { key: 'ip', field: 'ipAddress', label: 'userSettings.security.sessions.columns.ip', cssClass: 'nf-cell--mono' },
+      { key: 'lastActiveAt', field: 'lastActiveAt', label: 'userSettings.security.sessions.columns.lastActive', type: 'relative' },
+    ],
+    features: { search: false, filters: false, columnToggle: false, pagination: false },
+    selectionActions: [
+      {
+        id: 'revoke',
+        label: 'userSettings.security.sessions.revoke',
+        icon: 'log-out',
+        variant: 'danger',
+        scope: 'single',
+        when: (session: ActiveSession) => !session.isCurrent,
+        disabledFor: (selection: ActiveSession[]) => this.loading || selection.some((s) => s.id === this.revokingSessionId),
+      },
+    ],
+  };
+  selectedSession: ActiveSession | null = null;
 
   readonly passwordForm = this.fb.group(
     {

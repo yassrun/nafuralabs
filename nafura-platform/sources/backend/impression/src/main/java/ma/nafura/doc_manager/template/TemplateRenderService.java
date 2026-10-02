@@ -137,7 +137,7 @@ public class TemplateRenderService {
     private DocumentTemplate getTemplateForTenant(UUID templateId) {
         UUID tenantId = TenantContext.getTenantId();
         return templateRepository.findByIdAndTenantId(templateId, tenantId)
-                .orElseThrow(() -> new TemplateRenderException("Template not found: " + templateId));
+                .orElseThrow(() -> new TemplateNotFoundException("Template not found: " + templateId));
     }
 
     /**

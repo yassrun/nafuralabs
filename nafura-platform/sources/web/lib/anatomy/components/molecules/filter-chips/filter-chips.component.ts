@@ -140,6 +140,10 @@ export class FilterChipsComponent {
       return opLabel;
     }
     const valueLabel = this.displayValue(clause.field, clause.value);
+    // « Rôle : Éditeur » reads better than « Rôle : is Éditeur ».
+    if (clause.op === 'eq' || clause.op === 'in') {
+      return valueLabel;
+    }
     return `${opLabel} ${valueLabel}`.trim();
   }
 

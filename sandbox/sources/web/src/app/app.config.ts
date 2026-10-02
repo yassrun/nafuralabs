@@ -25,12 +25,15 @@ import { APP_ROUTES, SandboxNoReuseStrategy } from './app.routes';
 import { SandboxTranslateLoader } from './i18n/sandbox-fr';
 import { buildSandboxNavigation } from './sandbox-shell.component';
 import { provideAppShell } from '@platform/platform/app-shell';
-import { SANDBOX_CONTEXT_SLOTS } from './shell/sandbox-context-slots';
+import { SANDBOX_MANIFEST } from './sandbox.manifest';
+import { assertNafuraManifestsValid } from '@platform/platform/manifest-validator';
 import { providePlatformIdentity } from '@platform/platform/identity';
 import { labAuthInterceptor, provideLabAuth } from '@platform/platform/lab-auth';
 import { USER_SETTINGS_CONFIG } from '@platform/features/user-settings/user-settings.token';
 import { TENANT_SETTINGS_CONFIG } from '@platform/features/app-settings/app-settings.token';
 import { DEFAULT_APP_SHELL_CONFIG } from '@platform/core/shell/platform-app-shell.types';
+
+assertNafuraManifestsValid([SANDBOX_MANIFEST]);
 
 registerApplicationConfig({
   applicationId: 'anatomy-sandbox',
@@ -81,12 +84,6 @@ export const appConfig: ApplicationConfig = {
       },
       notifications: { enabled: true },
       ai: { enabled: true },
-      contextRail: {
-        enabled: true,
-        storageKey: 'sandbox.nafura.business-contexts',
-        admin: { label: 'Admin', route: '/', icon: 'shield' },
-        slots: SANDBOX_CONTEXT_SLOTS,
-      },
     }),
     {
       provide: USER_SETTINGS_CONFIG,

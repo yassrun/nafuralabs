@@ -15,7 +15,18 @@ export const ENTITY_TYPE_ROUTE_PREFIX: Record<string, string> = {
   'payment-term': '/finance/configuration/payment-terms',
 };
 
+/** Record routes declared by business contexts: entity type → `/route/{id}`. */
+const DECLARED_ROUTES = new Map<string, string>();
+
+export function registerEntityRoutes(routes: Readonly<Record<string, string>>): void {
+  for (const [entityType, route] of Object.entries(routes)) DECLARED_ROUTES.set(entityType, route);
+}
+
 export function getEntityDetailRoute(entityType: string, entityId: string): string[] {
+  const declared = DECLARED_ROUTES.get(entityType);
+  if (declared) {
+    return [declared.replace('{id}', entityId)];
+  }
   const prefix = ENTITY_TYPE_ROUTE_PREFIX[entityType];
   if (prefix) {
     return [prefix, entityId];

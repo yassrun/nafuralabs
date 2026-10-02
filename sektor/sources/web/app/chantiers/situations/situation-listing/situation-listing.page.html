@@ -11,17 +11,6 @@
     </nf-select>
   </div>
 
-  <div class="situations-chips">
-    @for (chip of chips; track chip.id) {
-      <nf-button
-        class="situations-chips__btn"
-        [variant]="currentChip() === chip.id ? 'primary' : 'secondary'"
-        (clicked)="selectChip(chip.id)">
-        {{ chip.label }}
-      </nf-button>
-    }
-  </div>
-
   <nf-entity-listing
     #listing
     [config]="config"

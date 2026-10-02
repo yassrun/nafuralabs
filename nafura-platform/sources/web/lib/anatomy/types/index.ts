@@ -204,6 +204,19 @@ export interface ListingQueryState {
   pageSize: number;
   scope?: ListingScope;
   columns?: ListingColumnState[];
+  /** Active quick view (`ListingSegment.id`). */
+  segment?: string;
+}
+
+/**
+ * Quick view of a list (« À valider », « En retard »…): tabs above the table, each one
+ * a fixed set of `field = value` filters combined with the user's own filters.
+ */
+export interface ListingSegment {
+  id: string;
+  label: string;
+  /** Omitted: every row. */
+  filters?: Record<string, unknown>;
 }
 
 /** Paginated listing result (local or remote). */
@@ -428,7 +441,7 @@ export interface WizardStepDefinition {
 /**
  * Column type for data tables.
  */
-export type ColumnType = 'text' | 'number' | 'date' | 'datetime' | 'boolean' | 'currency' | 'badge' | 'custom';
+export type ColumnType = 'text' | 'number' | 'date' | 'datetime' | 'relative' | 'boolean' | 'currency' | 'badge' | 'custom';
 
 /**
  * Badge variants for table status chips.
@@ -465,6 +478,9 @@ export interface ColumnConfig {
 
   /** Value transform function */
   transform?: (value: unknown, item: unknown) => string;
+
+  /** The (transformed) value is an i18n key: render its translation. Off by default so user data is never translated. */
+  translate?: boolean;
 
   /** Emit rowAction when the cell is clicked (uses this as action id). */
   cellAction?: string;
@@ -2150,6 +2166,12 @@ export interface ListingPageConfig<TItem = unknown> {
   // === Filters ===
   /** Filter field configurations */
   filters: FilterFieldConfig[];
+
+  /** Quick views shown as tabs above the table; the first one is active by default. */
+  segments?: ListingSegment[];
+
+  /** Segment active on arrival (defaults to the first). */
+  defaultSegment?: string;
 
   // === Pagination ===
   /** Pagination settings */

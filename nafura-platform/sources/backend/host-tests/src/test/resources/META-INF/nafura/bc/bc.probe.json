@@ -1,0 +1,15 @@
+{
+  "apiVersion": "nafura.io/v1",
+  "kind": "business-context",
+  "metadata": { "id": "bc.probe", "version": "0.1.0", "owner": "nafuralabs", "lifecycle": "experimental" },
+  "spec": {
+    "label": "Sonde",
+    "icon": "radar",
+    "routesPrefix": "/probe",
+    "permissions": [{ "id": "probe.items.item.read" }, { "id": "probe.items.item.create" }],
+    "defaultRoles": [
+      { "code": "PROBE_VIEWER", "label": "Probe viewer", "permissions": ["probe.items.item.read"] },
+      { "code": "PROBE_WRITER", "label": "Probe writer", "permissions": ["probe.items.item.create"] }
+    ]
+  }
+}

@@ -3,6 +3,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../organisms/confirm-dialog';
 import { PromptDialogComponent, PromptDialogData, PromptField } from '../organisms/prompt-dialog';
+import { FormDialogComponent, type FormDialogData, SecretDialogComponent, type SecretDialogData } from '../organisms/form-dialog';
 
 /**
  * Prompt options (design-system replacement for native window.prompt).
@@ -102,6 +103,29 @@ export class ConfirmDialogService {
     const result = await firstValueFrom(dialogRef.afterClosed());
 
     return result && typeof result === 'object' ? (result as Record<string, string>) : null;
+  }
+
+  /** A configured form (nf-form) in a dialog: the values on save, null on cancel. */
+  async form(data: FormDialogData): Promise<Record<string, unknown> | null> {
+    const dialogRef = this.dialog.open(FormDialogComponent, {
+      data,
+      autoFocus: 'first-tabbable',
+      maxWidth: 'calc(100vw - 2rem)',
+      panelClass: 'nf-confirm-dialog-panel',
+    });
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    return result && typeof result === 'object' ? (result as Record<string, unknown>) : null;
+  }
+
+  /** Shows a secret once (it cannot be read again) with a copy button. */
+  async reveal(data: SecretDialogData): Promise<void> {
+    const dialogRef = this.dialog.open(SecretDialogComponent, {
+      data,
+      disableClose: true,
+      maxWidth: 'calc(100vw - 2rem)',
+      panelClass: 'nf-confirm-dialog-panel',
+    });
+    await firstValueFrom(dialogRef.afterClosed());
   }
 
   /**

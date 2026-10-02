@@ -26,19 +26,21 @@ import { AuthFacade } from '../../security/services/auth.facade';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterModule, LucideAngularModule, TranslateModule, AvatarComponent],
   template: `
-    <div class="naf-shell__user-menu">
+    <div class="naf-shell__user-menu" [class.naf-shell__user-menu--compact]="compact()">
       <button
         type="button"
         class="naf-shell__user-trigger"
         (click)="toggle($event)"
-        [attr.aria-expanded]="open()">
+        [attr.aria-expanded]="open()"
+        [attr.aria-label]="displayName()"
+        [attr.title]="compact() ? displayName() : null">
         <nf-avatar [name]="displayName()" size="xs" />
         <span class="naf-shell__user-name">{{ displayName() }}</span>
         <lucide-icon name="chevron-down" [size]="18" class="naf-shell__icon naf-shell__user-chevron" aria-hidden="true"></lucide-icon>
       </button>
 
       @if (open()) {
-        <div class="naf-shell__user-panel">
+        <div class="naf-shell__user-panel" [style]="panelPosition()">
           <div class="naf-shell__user-panel-header">
             <nf-avatar [name]="displayName()" size="sm" />
             <div class="naf-shell__user-panel-info">
@@ -140,6 +142,27 @@ import { AuthFacade } from '../../security/services/auth.facade';
       inset-inline-end: auto;
     }
 
+    :host-context(.naf-shell__sidebar-footer) .naf-shell__user-menu {
+      width: 100%;
+    }
+
+    :host-context(.naf-shell__sidebar-footer) .naf-shell__user-name {
+      flex: 1;
+      max-width: none;
+      text-align: start;
+    }
+
+    .naf-shell__user-menu--compact .naf-shell__user-trigger {
+      justify-content: center;
+      border-color: transparent;
+      padding: var(--nf-space-1, 0.25rem);
+    }
+
+    .naf-shell__user-menu--compact .naf-shell__user-name,
+    .naf-shell__user-menu--compact .naf-shell__user-chevron {
+      display: none;
+    }
+
     .naf-shell__user-panel-header {
       display: flex;
       align-items: center;
@@ -226,8 +249,11 @@ export class UserMenuWidget {
   readonly userSettingsEnabled = input<boolean>(false);
   readonly userSettingsRoute = input<string>('/user-settings');
   readonly fallbackName = input<string>('');
+  /** Avatar only (collapsed sidebar); the panel opens beside it, outside the narrow column. */
+  readonly compact = input<boolean>(false);
 
   readonly open = signal(false);
+  readonly panelPosition = signal<Record<string, string> | null>(null);
 
   readonly displayName = computed(
     () => this.auth.displayName() || this.fallbackName(),
@@ -236,6 +262,18 @@ export class UserMenuWidget {
 
   toggle(event: MouseEvent): void {
     event.stopPropagation();
+    if (this.compact() && !this.open()) {
+      const trigger = (event.currentTarget as HTMLElement).getBoundingClientRect();
+      this.panelPosition.set({
+        position: 'fixed',
+        top: 'auto',
+        bottom: `${window.innerHeight - trigger.bottom}px`,
+        'inset-inline-start': `${trigger.right + 8}px`,
+        'inset-inline-end': 'auto',
+      });
+    } else if (!this.compact()) {
+      this.panelPosition.set(null);
+    }
     this.open.update((v) => !v);
   }
 

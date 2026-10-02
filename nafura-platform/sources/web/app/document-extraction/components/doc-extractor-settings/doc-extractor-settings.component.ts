@@ -6,10 +6,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 
-import { BasePageClass } from '../../../../../core/pages/base-page.class';
-import { BreadcrumbComponent } from '../../../../../core/components/breadcrumb/breadcrumb.component';
+import { BasePageClass } from '../../../../core/pages/base-page.class';
+import { BreadcrumbComponent } from '../../../../core/components/breadcrumb/breadcrumb.component';
 import { DocTypeService } from '../../services/doc-type.service';
-import { TenantContextService } from '../../../../../core/tenant/tenant.context';
+import { TenantContextService } from '../../../../core/tenant/tenant.context';
 import { DocTypeListItem, DocTypesByDomain } from '../../models/doc-type-definition.model';
 import { HttpErrorResponse } from '@angular/common/http';
 

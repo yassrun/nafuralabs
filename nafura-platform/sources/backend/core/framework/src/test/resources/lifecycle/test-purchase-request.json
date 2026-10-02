@@ -1,0 +1,22 @@
+{
+  "entity": "test.purchase-request",
+  "initial": "DRAFT",
+  "editable": ["DRAFT", "REJECTED"],
+  "states": [
+    { "id": "DRAFT", "label": "Draft" },
+    { "id": "SUBMITTED", "label": "Submitted", "tone": "warning" },
+    { "id": "APPROVED", "label": "Approved", "tone": "success" },
+    { "id": "REJECTED", "label": "Rejected", "tone": "danger" },
+    { "id": "ORDERED", "label": "Ordered", "tone": "info" }
+  ],
+  "transitions": [
+    {
+      "id": "submit", "label": "Submit", "from": ["DRAFT", "REJECTED"], "to": "SUBMITTED",
+      "permission": "test.purchase.request.submit", "requires": ["subject", "amount"],
+      "approval": { "role": "LEAD", "when": "amount > 10000", "title": "Request {subject}", "approved": "approve", "rejected": "reject" }
+    },
+    { "id": "approve", "label": "Approve", "from": ["SUBMITTED"], "to": "APPROVED", "system": true },
+    { "id": "reject", "label": "Reject", "from": ["SUBMITTED"], "to": "REJECTED", "system": true },
+    { "id": "order", "label": "Order", "from": ["APPROVED"], "to": "ORDERED", "permission": "test.purchase.request.order" }
+  ]
+}

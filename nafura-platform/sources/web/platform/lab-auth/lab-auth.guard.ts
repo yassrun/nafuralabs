@@ -3,10 +3,12 @@ import { CanActivateFn, Router } from '@angular/router';
 
 import { LabAuthService } from './lab-auth.service';
 
-export const labAuthGuard: CanActivateFn = () => {
+export const labAuthGuard: CanActivateFn = async () => {
   const auth = inject(LabAuthService);
+  const router = inject(Router);
+  await auth.ensureSession();
   if (auth.accessToken()) {
     return true;
   }
-  return inject(Router).createUrlTree([auth.loginPath()]);
+  return router.createUrlTree([auth.loginPath()]);
 };

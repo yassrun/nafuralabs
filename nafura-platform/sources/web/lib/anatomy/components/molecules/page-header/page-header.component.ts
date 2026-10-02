@@ -190,6 +190,7 @@ export interface PageHeaderConfig {
       font-size: var(--nf-page-header-icon-size, 28px);
       width: var(--nf-page-header-icon-size, 28px);
       height: var(--nf-page-header-icon-size, 28px);
+      flex-shrink: 0;
       color: var(--nf-page-header-icon-color, var(--nf-color-text, #111827));
       // Align with title baseline
       margin-top: var(--nf-page-header-icon-offset, 2px);

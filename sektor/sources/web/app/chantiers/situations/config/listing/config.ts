@@ -18,6 +18,14 @@ export function buildSituationsListingConfig(t: TranslateService) {
     },
     {
       filters: FILTERS,
+      segments: [
+        { id: 'ALL', label: 'Toutes' },
+        { id: 'BROUILLON', label: 'Brouillons', filters: { quick: 'BROUILLON' } },
+        { id: 'A_VALIDER', label: 'À valider', filters: { quick: 'A_VALIDER' } },
+        { id: 'A_FACTURER', label: 'À facturer', filters: { quick: 'A_FACTURER' } },
+        { id: 'EN_RETARD_PAIEMENT', label: 'En retard paiement', filters: { quick: 'EN_RETARD_PAIEMENT' } },
+        { id: 'MES_SITUATIONS', label: 'Mes situations', filters: { quick: 'MES_SITUATIONS' } },
+      ],
       defaultSort: { column: 'dateEmission', direction: 'desc' },
       features: {
         search: true,

@@ -1,16 +1,17 @@
-import { InjectionToken, Provider } from '@angular/core';
+import { InjectionToken, Provider, type Signal } from '@angular/core';
 
-import {
-  AppShellContextRailConfig,
-  AppShellNavigationSection,
-} from './app-shell.types';
-import { AppShellContextRailService } from './context-rail.service';
+import { AppShellNavigationSection } from './app-shell.types';
+import type { NavigationAccess } from './navigation-access';
 import { PlatformNotificationsService } from '../notifications';
 
+/** Product identity, owned by the product (`app.nafura.json` spec.product, files in its web `public/`). */
 export interface AppShellProductConfig {
   readonly name: string;
-  readonly logoUrl?: string;
   readonly tagline?: string;
+  /** Square icon (sidebar, login, favicon), e.g. `/brand/mark.svg`; without it the initial of `name`. */
+  readonly mark?: string;
+  /** Wide logo replacing mark + name in the expanded sidebar. */
+  readonly logo?: string;
 }
 
 export interface AppShellTopBarConfig {
@@ -54,12 +55,6 @@ export interface AppShellAiConfig {
   readonly initiallyOpen?: boolean;
 }
 
-export type {
-  AppShellContextAdmin,
-  AppShellContextRailConfig,
-  AppShellContextSlot,
-} from './app-shell.types';
-
 export interface AppShellFeatureConfig {
   readonly product: AppShellProductConfig;
   readonly topBar?: AppShellTopBarConfig;
@@ -68,7 +63,6 @@ export interface AppShellFeatureConfig {
   readonly tenantMenu?: AppShellTenantMenuConfig;
   readonly notifications?: AppShellNotificationsConfig;
   readonly ai?: AppShellAiConfig;
-  readonly contextRail?: AppShellContextRailConfig;
 }
 
 export const DEFAULT_APP_SHELL_FEATURE_CONFIG: AppShellFeatureConfig = {
@@ -79,7 +73,6 @@ export const DEFAULT_APP_SHELL_FEATURE_CONFIG: AppShellFeatureConfig = {
   tenantMenu: { enabled: false },
   notifications: { enabled: false },
   ai: { enabled: false },
-  contextRail: { enabled: false, slots: [] },
 };
 
 export const APP_SHELL_CONFIG = new InjectionToken<AppShellFeatureConfig>(
@@ -87,17 +80,16 @@ export const APP_SHELL_CONFIG = new InjectionToken<AppShellFeatureConfig>(
   { factory: () => DEFAULT_APP_SHELL_FEATURE_CONFIG },
 );
 
+/**
+ * What the signed-in user may open: effective permissions (`null` while loading) and the domains the
+ * organization disabled. When provided, guarded navigation entries are hidden unless granted; without
+ * it nothing is filtered (the backend enforces).
+ */
+export const APP_SHELL_ACCESS = new InjectionToken<Signal<NavigationAccess>>('APP_SHELL_ACCESS');
+
 export function provideAppShell(config: AppShellFeatureConfig): Provider[] {
   return [
     { provide: APP_SHELL_CONFIG, useValue: config },
-    {
-      provide: AppShellContextRailService,
-      useFactory: () => {
-        const service = new AppShellContextRailService();
-        service.load(config.contextRail);
-        return service;
-      },
-    },
     PlatformNotificationsService,
   ];
 }

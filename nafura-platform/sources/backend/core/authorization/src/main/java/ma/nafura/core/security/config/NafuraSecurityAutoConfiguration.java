@@ -5,6 +5,8 @@ import ma.nafura.platform.authorization.apikey.ApiKeyProperties;
 import ma.nafura.platform.authorization.apikey.ApiKeyService;
 import ma.nafura.platform.authorization.repository.UserRoleRepository;
 import ma.nafura.platform.tenancy.repository.TenantMembershipRepository;
+import ma.nafura.platform.tenancy.repository.TenantDomainRepository;
+import org.springframework.beans.factory.ObjectProvider;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
 import ma.nafura.platform.authorization.security.authorization.PermissionEnforcementFilter;
 import ma.nafura.platform.authorization.security.jwt.DefaultJwtClaimMapper;
@@ -105,8 +107,8 @@ public class NafuraSecurityAutoConfiguration {
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "nafura.security.permission-enforcement.enabled", havingValue = "true", matchIfMissing = true)
     public PermissionEnforcementFilter permissionEnforcementFilter(
-            List<HandlerMapping> handlerMappings) {
-        return new PermissionEnforcementFilter(handlerMappings);
+            List<HandlerMapping> handlerMappings, ObjectProvider<TenantDomainRepository> tenantDomains) {
+        return new PermissionEnforcementFilter(handlerMappings, tenantDomains);
     }
 }
 

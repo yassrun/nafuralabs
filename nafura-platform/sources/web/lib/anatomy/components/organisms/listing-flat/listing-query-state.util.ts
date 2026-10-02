@@ -301,13 +301,16 @@ export function sortItemsLocally<T>(
 
 export function controlColumnsFromQuery(
   columns: ColumnConfig[],
-  columnState?: ListingQueryState['columns']
+  columnState?: ListingQueryState['columns'],
+  defaultVisible?: string[]
 ): { key: string; label: string; visible: boolean }[] {
   const visibility = new Map(columnState?.map((c) => [c.key, c.visible]));
   return columns.map((c) => ({
     key: c.key,
     label: c.label,
-    visible: visibility.has(c.key) ? visibility.get(c.key)! : true,
+    visible: visibility.has(c.key)
+      ? visibility.get(c.key)!
+      : !defaultVisible || defaultVisible.includes(c.key),
   }));
 }
 

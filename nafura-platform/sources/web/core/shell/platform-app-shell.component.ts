@@ -21,7 +21,9 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { filter, map, startWith } from 'rxjs';
 
-import { SidebarIcon, SidebarNode, SidebarZoneGroup, ZoneConfig } from '../navigation/sidebar.types';
+import { SidebarBadgeProvider, SidebarNode, ZoneConfig } from '../navigation/sidebar.types';
+import { SidebarNavComponent } from '../navigation/sidebar-nav.component';
+import { displayLabel, filterVisibleNodes, findActiveLabel } from '../navigation/sidebar-tree';
 import { I18nService } from '../i18n';
 import { AuthFacade } from '../security/services/auth.facade';
 import { LanguageSelectorComponent } from '../components/language-selector/language-selector.component';
@@ -73,32 +75,10 @@ interface UiConversationMessage {
   summary?: string | null;
 }
 
-const LUCIDE_ICON_ALIASES: Record<string, string> = {
-  'alert-triangle':  'triangle-alert',
-  'bar-chart':       'chart-bar',
-  'bar-chart-2':     'chart-bar',
-  'bar-chart-3':     'chart-column',
-  'check-circle':    'circle-check',
-  'check-circle-2':  'circle-check',
-  'check-square':    'circle-check',
-  'x-circle':        'circle-x',
-  'layout-dashboard':'layout-dashboard',
-  // `file-signature` does not exist in lucide-angular@0.563; fall back to file-pen.
-  'file-signature':  'file-pen',
-  // Material-style nav ids from erp-sidebar.config (materiel section)
-  'calendar-range':  'calendar-clock',
-  'schedule':        'clock',
-  'verified-user':   'shield-check',
-  'scale-balanced':  'scale',
-  'sliders':         'sliders-horizontal',
-  'today':           'calendar',
-  'table':           'table-2',
-};
-
 @Component({
   selector: 'app-platform-shell',
   standalone: true,
-  imports: [CommonModule, NgComponentOutlet, RouterModule, LucideAngularModule, LanguageSelectorComponent, NotificationBellComponent, AiToggleWidget, UserMenuWidget, TenantMenuWidget, OrgSwitcherWidget, CommandPaletteComponent, ChatPanelComponent, ShortcutsHelpComponent, OnboardingTourComponent, TooltipDirective, AssistantBlockRendererComponent],
+  imports: [CommonModule, NgComponentOutlet, RouterModule, LucideAngularModule, SidebarNavComponent, LanguageSelectorComponent, NotificationBellComponent, AiToggleWidget, UserMenuWidget, TenantMenuWidget, OrgSwitcherWidget, CommandPaletteComponent, ChatPanelComponent, ShortcutsHelpComponent, OnboardingTourComponent, TooltipDirective, AssistantBlockRendererComponent],
   template: `
     <div
       class="naf-shell"
@@ -220,99 +200,12 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
               *ngIf="(!themeService.branding()?.logoUrl || sidebarCollapsed()) && !themeService.branding()?.tenantDisplayName && applicationId() !== 'erp'"
               class="naf-shell__sidebar-name">{{ applicationTitle() }}</span>
           </div>
-          <nav class="naf-shell__nav" aria-label="Application navigation">
-            <ng-container *ngIf="zoneGroups().length > 0; else emptyNav">
-              <ng-container *ngFor="let group of zoneGroups(); let groupIdx = index; trackBy: trackByZone">
-                <div *ngIf="group.label" class="naf-shell__zone-header">
-                  <span class="naf-shell__zone-label">{{ translateLabel(group.label) }}</span>
-                </div>
-                <div *ngIf="!group.label && groupIdx > 0" class="naf-shell__zone-divider"></div>
-
-                <!-- Domain nodes in this zone -->
-                <div
-                  class="naf-shell__domain"
-                  *ngFor="let domain of group.nodes; trackBy: trackByNodeId">
-
-                  <!-- Divider before (if node requests it) -->
-                  <div *ngIf="domain.dividerBefore" class="naf-shell__zone-divider"></div>
-
-                  <!-- Domain header (collapsible) -->
-                  <button
-                    type="button"
-                    class="naf-shell__domain-header"
-                    [class.is-expanded]="expandedDomains().has(domain.id)"
-                    [title]="sidebarCollapsed() ? translateLabel(domain.label) : ''"
-                    (click)="onDomainClick(domain)">
-                    <span
-                      *ngIf="resolveNavIcon(domain.icon) as domainIcon"
-                      class="naf-shell__domain-icon">
-                      <lucide-icon [name]="domainIcon" [size]="20" class="naf-shell__icon" aria-hidden="true"></lucide-icon>
-                    </span>
-                    <span class="naf-shell__domain-label">{{ translateLabel(domain.label) }}</span>
-                    <lucide-icon
-                      *ngIf="nodeChildren(domain).length > 0"
-                      name="chevron-right"
-                      [size]="18"
-                      class="naf-shell__icon naf-shell__domain-chevron"
-                      aria-hidden="true"></lucide-icon>
-                  </button>
-
-                  <!-- Domain children (sections + entities) -->
-                  <div
-                    class="naf-shell__domain-body"
-                    *ngIf="expandedDomains().has(domain.id) && !sidebarCollapsed()">
-
-                    <ng-container *ngFor="let child of nodeChildren(domain); trackBy: trackByNodeId">
-                      <!-- If child has children → it's a section/subsection -->
-                      <ng-container *ngIf="nodeChildren(child).length > 0; else leafLink">
-                        <div class="naf-shell__section">
-                          <div class="naf-shell__section-label">{{ translateLabel(child.label) }}</div>
-                          <a
-                            class="naf-shell__link"
-                            *ngFor="let item of nodeChildren(child); trackBy: trackByNodeId"
-                            [routerLink]="resolveRoute(item.route)"
-                            routerLinkActive="is-active"
-                            [routerLinkActiveOptions]="{ exact: item.exactMatch ?? false }">
-                            <span
-                              *ngIf="resolveNavIcon(item.icon) as itemIcon"
-                              class="naf-shell__link-icon">
-                              <lucide-icon [name]="itemIcon" [size]="15" class="naf-shell__icon" aria-hidden="true"></lucide-icon>
-                            </span>
-                            {{ translateLabel(item.label) }}
-                          </a>
-                        </div>
-                      </ng-container>
-
-                      <!-- If child is a leaf → direct link (e.g., admin items) -->
-                      <ng-template #leafLink>
-                        <a
-                          class="naf-shell__link naf-shell__link--direct"
-                          *ngIf="child.route"
-                          [routerLink]="resolveRoute(child.route)"
-                          routerLinkActive="is-active"
-                          [routerLinkActiveOptions]="{ exact: child.exactMatch ?? false }">
-                          <span
-                            *ngIf="resolveNavIcon(child.icon) as childIcon"
-                            class="naf-shell__link-icon">
-                            <lucide-icon [name]="childIcon" [size]="15" class="naf-shell__icon" aria-hidden="true"></lucide-icon>
-                          </span>
-                          {{ translateLabel(child.label) }}
-                          <span
-                            *ngIf="child.id === 'approvals' && approvalsFacade.pendingCount() > 0"
-                            class="naf-shell__link-badge">
-                            {{ approvalsFacade.pendingCount() }}
-                          </span>
-                        </a>
-                      </ng-template>
-                    </ng-container>
-                  </div>
-
-                  <!-- Divider after (if node requests it) -->
-                  <div *ngIf="domain.dividerAfter" class="naf-shell__zone-divider"></div>
-                </div>
-              </ng-container>
-            </ng-container>
-          </nav>
+          <nf-sidebar-nav
+            [nodes]="navigationWithBadges()"
+            [zones]="zoneConfig()"
+            [collapsed]="sidebarCollapsed()"
+            (expandRequest)="sidebarCollapsed.set(false)"
+            (navigated)="closeMobileNav()" />
 
           @if (resolvedShellOptions().widgets.userMenu) {
             <footer class="naf-shell__sidebar-footer">
@@ -505,10 +398,6 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
         </aside>
       </div>
     </div>
-
-    <ng-template #emptyNav>
-      <div class="naf-shell__empty">{{ translateLabel('core.navigation.empty') }}</div>
-    </ng-template>
 
     @if (commandPalette.open()) {
       <nf-command-palette />
@@ -906,15 +795,6 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
       background-attachment: local, local, scroll, scroll;
     }
 
-    .naf-shell__nav {
-      display: flex;
-      flex-direction: column;
-      gap: var(--nf-space-1, 0.25rem);
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow-y: auto;
-    }
-
     .naf-shell__sidebar-footer {
       flex: 0 0 auto;
       margin-top: var(--nf-space-3, 0.75rem);
@@ -922,209 +802,7 @@ const LUCIDE_ICON_ALIASES: Record<string, string> = {
       border-top: 1px solid var(--nf-border-default, #e5e7eb);
     }
 
-    /* ─── Zone Divider ─── */
-    .naf-shell__zone-divider {
-      height: 1px;
-      background: var(--nf-border-default, #e5e7eb);
-      margin: var(--nf-space-2, 0.5rem) var(--nf-space-2, 0.5rem);
-    }
-
-    .naf-shell__zone-header {
-      padding: 0 var(--nf-space-2, 0.5rem) var(--nf-space-1, 0.25rem);
-      margin-top: var(--nf-space-5, 1.25rem);
-    }
-
-    .naf-shell__zone-header:first-child {
-      margin-top: var(--nf-space-1, 0.25rem);
-    }
-
-    .naf-shell__zone-label {
-      font-size: 0.6875rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--nf-text-muted, #6b7280);
-      display: block;
-      padding-bottom: var(--nf-space-1, 0.25rem);
-      border-bottom: 1px solid var(--nf-border-subtle, #f3f4f6);
-    }
-
-    /* ─── Domain Header ─── */
-    .naf-shell__domain-header {
-      display: flex;
-      align-items: center;
-      gap: var(--nf-space-2, 0.5rem);
-      width: 100%;
-      padding: var(--nf-space-2, 0.5rem);
-      border: none;
-      border-radius: var(--nf-radius-lg, 0.5rem);
-      background: transparent;
-      color: var(--nf-text-primary, #111827);
-      font-size: var(--nf-font-size-sm, 0.875rem);
-      font-weight: var(--nf-font-weight-semibold, 600);
-      cursor: pointer;
-      transition: background var(--nf-transition-fast, 100ms ease),
-                  color var(--nf-transition-fast, 100ms ease);
-      text-align: start;
-    }
-
-    .naf-shell__domain-header:hover {
-      background: var(--nf-surface-hover, #f9fafb);
-      color: var(--nf-text-primary, #111827);
-    }
-
-    .naf-shell__domain-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      flex-shrink: 0;
-      color: var(--nf-color-primary, #3b82f6);
-    }
-
-    .naf-shell__domain-header:hover .naf-shell__domain-icon,
-    .naf-shell__domain-header.is-expanded .naf-shell__domain-icon {
-      color: var(--nf-color-primary-700, #1d4ed8);
-    }
-
-    .naf-shell__domain-label {
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .naf-shell__domain-chevron {
-      font-size: 18px !important;
-      width: 18px !important;
-      height: 18px !important;
-      color: var(--nf-text-muted, #6b7280);
-      transition: transform var(--nf-transition-normal, 150ms ease);
-      flex-shrink: 0;
-    }
-
-    .naf-shell__domain-header.is-expanded .naf-shell__domain-chevron {
-      transform: rotate(90deg);
-    }
-
-    /* RTL : mirror chevron-right so it visually points toward the inline-end
-       side regardless of writing direction; keep the existing 90° rotation
-       on the expanded state. */
-    :host-context([dir="rtl"]) .naf-shell__domain-chevron {
-      transform: scaleX(-1);
-    }
-
-    :host-context([dir="rtl"]) .naf-shell__domain-header.is-expanded .naf-shell__domain-chevron {
-      transform: scaleX(-1) rotate(90deg);
-    }
-
-    /* Collapsed sidebar: hide labels, center icon */
-    .naf-shell--sidebar-collapsed .naf-shell__domain-header {
-      justify-content: center;
-      padding: var(--nf-space-2, 0.5rem);
-    }
-
-    .naf-shell--sidebar-collapsed .naf-shell__domain-label,
-    .naf-shell--sidebar-collapsed .naf-shell__domain-chevron {
-      display: none;
-    }
-
-    .naf-shell--sidebar-collapsed .naf-shell__zone-header,
-    .naf-shell--sidebar-collapsed .naf-shell__zone-divider {
-      display: none;
-    }
-
-    /* ─── Domain Body (children) ─── */
-    .naf-shell__domain-body {
-      padding-inline-start: var(--nf-space-2, 0.5rem);
-      margin-bottom: var(--nf-space-1, 0.25rem);
-    }
-
-    /* ─── Section (subsection) ─── */
-    .naf-shell__section {
-      margin-top: var(--nf-space-1, 0.25rem);
-    }
-
-    .naf-shell__section-label {
-      padding: var(--nf-space-1, 0.25rem) var(--nf-space-2, 0.5rem);
-      font-size: var(--nf-font-size-xs, 0.75rem);
-      font-weight: var(--nf-font-weight-medium, 500);
-      text-transform: uppercase;
-      letter-spacing: var(--nf-letter-spacing-wide, 0.025em);
-      color: var(--nf-text-muted, #6b7280);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* ─── Nav Links ─── */
-    .naf-shell__link {
-      display: flex;
-      align-items: center;
-      gap: var(--nf-space-2, 0.5rem);
-      padding-block: var(--nf-space-1-5, 0.375rem);
-      padding-inline-start: var(--nf-space-4, 1rem);
-      padding-inline-end: var(--nf-space-2, 0.5rem);
-      border-radius: var(--nf-radius-md, 0.375rem);
-      color: var(--nf-text-muted, #6b7280);
-      text-decoration: none;
-      font-size: 0.8125rem;
-      font-weight: var(--nf-font-weight-normal, 400);
-      transition: background var(--nf-transition-fast, 100ms ease),
-                  color var(--nf-transition-fast, 100ms ease);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      border-inline-start: 2px solid transparent;
-    }
-
-    .naf-shell__link:hover {
-      background: var(--nf-surface-hover, #f9fafb);
-      color: var(--nf-text-primary, #111827);
-    }
-
-    .naf-shell__link.is-active {
-      background: var(--nf-primary-subtle, #eff6ff);
-      color: var(--nf-color-primary-700, #1d4ed8);
-      font-weight: var(--nf-font-weight-medium, 500);
-      border-inline-start-color: var(--nf-color-primary, #3b82f6);
-    }
-
-    .naf-shell__link--direct {
-      padding-inline-start: var(--nf-space-2, 0.5rem);
-    }
-
-    .naf-shell__link-icon {
-      font-size: 15px !important;
-      width: 15px !important;
-      height: 15px !important;
-      color: var(--nf-text-muted, #9ca3af);
-      flex-shrink: 0;
-    }
-
-    .naf-shell__link--direct.is-active .naf-shell__link-icon {
-      color: var(--nf-color-primary-700, #1d4ed8);
-    }
-
-    .naf-shell__link-badge {
-      margin-inline-start: auto;
-      min-width: 1.25rem;
-      padding: 0 6px;
-      font-size: 0.6875rem;
-      font-weight: 600;
-      line-height: 1.25rem;
-      text-align: center;
-      border-radius: 9999px;
-      background: var(--nf-color-primary, #3b82f6);
-      color: #fff;
-    }
-
-    /* ─── Empty State ─── */
-    .naf-shell__empty {
-      font-size: var(--nf-font-size-sm, 0.875rem);
-      color: var(--nf-text-muted, #6b7280);
-      padding: var(--nf-space-4, 1rem) var(--nf-space-2, 0.5rem);
-      text-align: center;
-    }
+    /* Navigation (zones, domains, links): nf-sidebar-nav, core/navigation. */
 
     /* ═══════════════════════════════════════════════════════════════════════
        MAIN CONTENT
@@ -1613,9 +1291,6 @@ export class PlatformAppShellComponent implements OnInit {
     Boolean(DEFAULT_PLATFORM_APP_SHELL_OPTIONS.sidebar.initiallyCollapsed)
   );
   readonly mobileNavOpen = signal<boolean>(false);
-  readonly expandedDomains = signal<Set<string>>(new Set());
-  /** Domains the user explicitly collapsed — auto-expand won't override these */
-  private readonly manuallyCollapsed = new Set<string>();
 
   // ─── Conversation State ──────────────────────────────────────────
   readonly conversationOpen = this.aiPanel.open;
@@ -1660,43 +1335,24 @@ export class PlatformAppShellComponent implements OnInit {
     return url.includes('/finance/journaux') || url.includes('/finance/ecritures');
   });
 
-  readonly visibleNavigation = computed(() => this.filterVisibleNodes(this.navigation()));
+  readonly visibleNavigation = computed(() => filterVisibleNodes(this.navigation()));
 
-  readonly zoneGroups = computed((): SidebarZoneGroup[] => {
-    const nodes = this.visibleNavigation();
-    const zones = this.zoneConfig();
-    const zoneOrderMap = new Map<string, { label: string; order: number }>();
-    for (const zone of zones) {
-      zoneOrderMap.set(zone.id, { label: zone.label, order: zone.order });
-    }
-
-    const groups = new Map<string, SidebarNode[]>();
-
-    for (const node of nodes) {
-      const zone = node.zone || 'default';
-      if (!groups.has(zone)) {
-        groups.set(zone, []);
-      }
-      groups.get(zone)!.push(node);
-    }
-
-    // Sort within each zone by order
-    for (const list of groups.values()) {
-      list.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    }
-
-    return Array.from(groups.entries())
-      .map(([zone, zoneNodes]) => ({
-        zone,
-        label: zoneOrderMap.get(zone)?.label || '',
-        order: zoneOrderMap.get(zone)?.order ?? 9999,
-        nodes: zoneNodes,
-      }))
-      .sort((a, b) => a.order - b.order);
+  /** Pending approvals counted on the approvals entry, wherever the product placed it. */
+  readonly navigationWithBadges = computed(() => {
+    const pending: SidebarBadgeProvider = () => {
+      const count = this.approvalsFacade.pendingCount();
+      return count > 0 ? { value: count, variant: 'info' } : null;
+    };
+    const withBadge = (node: SidebarNode): SidebarNode => ({
+      ...node,
+      badge: node.id === 'approvals' && !node.children?.length ? pending : node.badge,
+      children: node.children?.map(withBadge),
+    });
+    return this.navigation().map(withBadge);
   });
 
   readonly currentPageLabel = computed(() => {
-    const activeLabel = this.findActiveLabel(this.visibleNavigation(), this.currentUrl());
+    const activeLabel = findActiveLabel(this.visibleNavigation(), this.currentUrl());
     return activeLabel || this.applicationTitle();
   });
 
@@ -1735,64 +1391,6 @@ export class PlatformAppShellComponent implements OnInit {
         this.cdr.markForCheck();
       });
     }
-
-    // Auto-expand domains that contain the active route (unless user manually collapsed)
-    // Also enforces single-expanded-per-zone rule
-    effect(() => {
-      const url = this.currentUrl();
-      const nodes = this.visibleNavigation();
-      const activeDomainId = this.findActiveDomainId(nodes, url);
-      if (activeDomainId && !this.expandedDomains().has(activeDomainId) && !this.manuallyCollapsed.has(activeDomainId)) {
-        this.expandedDomains.update((set) => {
-          const next = new Set(set);
-          // Collapse siblings in the same zone
-          const targetZone = this.findNodeZone(activeDomainId);
-          if (targetZone) {
-            for (const group of this.zoneGroups()) {
-              if (group.zone === targetZone) {
-                for (const node of group.nodes) {
-                  if (node.id !== activeDomainId) {
-                    next.delete(node.id);
-                  }
-                }
-              }
-            }
-          }
-          next.add(activeDomainId);
-          return next;
-        });
-      }
-    });
-
-    // Auto-expand: (1) domains with meta.expanded: true, (2) single top-level group with children (e.g. Administration-only apps)
-    effect(() => {
-      const nodes = this.visibleNavigation();
-      const expandedByZone = new Map<string, string>(); // zone → first domainId
-      for (const node of nodes) {
-        if (node.meta?.['expanded'] === true) {
-          const zone = node.zone || 'default';
-          if (!expandedByZone.has(zone)) {
-            expandedByZone.set(zone, node.id);
-          }
-        }
-      }
-      // When there is only one top-level group and it has children, expand it so all items (e.g. Domain Activation, Subscriptions) are visible without clicking
-      if (nodes.length === 1 && nodes[0].children?.length) {
-        const zone = nodes[0].zone || 'default';
-        if (!expandedByZone.has(zone)) {
-          expandedByZone.set(zone, nodes[0].id);
-        }
-      }
-      if (expandedByZone.size > 0) {
-        this.expandedDomains.update((set) => {
-          const next = new Set(set);
-          for (const id of expandedByZone.values()) {
-            next.add(id);
-          }
-          return next;
-        });
-      }
-    }, { allowSignalWrites: true });
 
     effect(() => {
       this.aiPanel.syncFromOptions(this.resolvedShellOptions().conversation);
@@ -1855,68 +1453,6 @@ export class PlatformAppShellComponent implements OnInit {
 
   private isMobileViewport(): boolean {
     return typeof window !== 'undefined' && window.matchMedia('(max-width: 980px)').matches;
-  }
-
-  toggleDomain(domainId: string): void {
-    this.expandedDomains.update((set) => {
-      const next = new Set(set);
-      if (next.has(domainId)) {
-        next.delete(domainId);
-        this.manuallyCollapsed.add(domainId);
-      } else {
-        // Single-expanded-per-zone: collapse other domains in the same zone
-        const targetZone = this.findNodeZone(domainId);
-        if (targetZone) {
-          for (const group of this.zoneGroups()) {
-            if (group.zone === targetZone) {
-              for (const node of group.nodes) {
-                if (node.id !== domainId && next.has(node.id)) {
-                  next.delete(node.id);
-                  this.manuallyCollapsed.add(node.id);
-                }
-              }
-            }
-          }
-        }
-        next.add(domainId);
-        this.manuallyCollapsed.delete(domainId);
-      }
-      return next;
-    });
-    this.cdr.markForCheck();
-  }
-
-  /** Find the zone a domain node belongs to */
-  private findNodeZone(domainId: string): string | null {
-    for (const group of this.zoneGroups()) {
-      if (group.nodes.some(n => n.id === domainId)) {
-        return group.zone;
-      }
-    }
-    return null;
-  }
-
-  onDomainClick(domain: SidebarNode): void {
-    if (this.sidebarCollapsed()) {
-      // Expand sidebar and expand this domain
-      this.sidebarCollapsed.set(false);
-      this.manuallyCollapsed.delete(domain.id);
-      this.expandedDomains.update((set) => {
-        const next = new Set(set);
-        next.add(domain.id);
-        return next;
-      });
-      this.cdr.markForCheck();
-    } else if (this.nodeChildren(domain).length > 0) {
-      this.toggleDomain(domain.id);
-    } else if (domain.route) {
-      void this.router.navigateByUrl(this.resolveRoute(domain.route));
-      this.closeMobileNav();
-    }
-  }
-
-  isDomainExpanded(domainId: string): boolean {
-    return this.expandedDomains().has(domainId);
   }
 
   toggleConversation(): void {
@@ -2144,10 +1680,8 @@ export class PlatformAppShellComponent implements OnInit {
   }
 
   // ─── Track-by Functions ──────────────────────────────────────────
-  trackByNodeId = (_index: number, node: SidebarNode): string => node.id;
   trackByMessage = (_index: number, message: { id: string }): string => message.id;
   trackByAgentAction = (_index: number, action: AgentActionResponse): string => action.id;
-  trackByZone = (index: number, group: SidebarZoneGroup): string => group.zone;
 
   messageHasVisibleBody(message: UiConversationMessage): boolean {
     if (message.role === 'user') {
@@ -2265,15 +1799,6 @@ export class PlatformAppShellComponent implements OnInit {
   }
 
   // ─── Helpers ─────────────────────────────────────────────────────
-  nodeChildren(node: SidebarNode): SidebarNode[] {
-    return Array.isArray(node.children) ? node.children : [];
-  }
-
-  /** Count how many section-level children (children that themselves have children) a domain has */
-  sectionCount(domain: SidebarNode): number {
-    return this.nodeChildren(domain).filter(c => this.nodeChildren(c).length > 0).length;
-  }
-
   resolveRoute(route: string | undefined): string {
     if (!route || !route.trim()) {
       return '/feature-unavailable/unknown';
@@ -2288,17 +1813,7 @@ export class PlatformAppShellComponent implements OnInit {
   }
 
   translateLabel(label: string | undefined): string {
-    if (!label) return '';
-    const translated = this.i18n.instant(label);
-    if (translated && translated !== label) return translated;
-    return this.humanize(label);
-  }
-
-  resolveNavIcon(icon: SidebarIcon | undefined): string {
-    if (typeof icon !== 'string') return '';
-    const normalized = icon.trim().toLowerCase().replace(/_/g, '-');
-    if (!normalized) return '';
-    return LUCIDE_ICON_ALIASES[normalized] || normalized;
+    return displayLabel(label, (key) => this.i18n.instant(key));
   }
 
   // ─── Private: Conversation ───────────────────────────────────────
@@ -2499,81 +2014,6 @@ export class PlatformAppShellComponent implements OnInit {
       if (typeof error.message === 'string' && error.message.trim()) return error.message;
     }
     return this.translateLabel('core.conversation.errorGeneric');
-  }
-
-  // ─── Private: Navigation ─────────────────────────────────────────
-  private filterVisibleNodes(nodes: SidebarNode[]): SidebarNode[] {
-    const result: SidebarNode[] = [];
-    for (const node of nodes || []) {
-      if (node.visible === false) continue;
-      const children = this.filterVisibleNodes(node.children || []);
-      if (children.length === 0 && !node.route) continue;
-      result.push(children.length > 0 ? { ...node, children } : { ...node, children: undefined });
-    }
-    return result;
-  }
-
-  private findActiveLabel(nodes: SidebarNode[], url: string): string | null {
-    const normalizedUrl = this.normalizeUrl(url);
-    let winnerLabel: string | null = null;
-    let winnerScore = -1;
-
-    const visit = (node: SidebarNode): void => {
-      if (node.route) {
-        const route = this.normalizeUrl(node.route);
-        if (route && normalizedUrl.startsWith(route)) {
-          const score = route.length;
-          if (score > winnerScore) {
-            winnerScore = score;
-            winnerLabel = node.label;
-          }
-        }
-      }
-      for (const child of node.children || []) {
-        visit(child);
-      }
-    };
-
-    for (const node of nodes) visit(node);
-    return winnerLabel;
-  }
-
-  private findActiveDomainId(nodes: SidebarNode[], url: string): string | null {
-    const normalizedUrl = this.normalizeUrl(url);
-    for (const domain of nodes) {
-      const visit = (node: SidebarNode): boolean => {
-        if (node.route) {
-          const route = this.normalizeUrl(node.route);
-          if (route && normalizedUrl.startsWith(route)) return true;
-        }
-        for (const child of node.children || []) {
-          if (visit(child)) return true;
-        }
-        return false;
-      };
-      if (visit(domain)) return domain.id;
-    }
-    return null;
-  }
-
-  private normalizeUrl(value: string): string {
-    if (!value) return '';
-    let normalized = value.trim();
-    if (!normalized.startsWith('/')) normalized = `/${normalized}`;
-    return normalized.replace(/\/+$/, '');
-  }
-
-  private humanize(value: string): string {
-    const parts = value.includes('.') ? value.split('.') : [value];
-    let key = parts[parts.length - 1] || value;
-    if (parts.length >= 2 && key.toLowerCase() === 'title') {
-      key = parts[0] || key;
-    }
-    const spaced = key
-      .replace(/[-_]/g, ' ')
-      .replace(/([a-z])([A-Z])/g, '$1 $2')
-      .trim();
-    return spaced.replace(/\b\w/g, (char) => char.toUpperCase());
   }
 }
 

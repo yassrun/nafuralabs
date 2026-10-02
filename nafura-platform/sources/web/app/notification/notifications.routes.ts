@@ -1,15 +1,12 @@
 import { Routes } from '@angular/router';
 
-import { routePermissionGuard } from '@core/security/guards/permission.guard';
-
+/** The signed-in user's own inbox: no permission (the API is scoped to the recipient). */
 export const NOTIFICATIONS_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () =>
       import('./notification-center.page').then((m) => m.NotificationCenterPage),
-    canActivate: [routePermissionGuard],
     data: {
-      permissions: ['collaboration.notification.read'],
       title: 'notifications.center.title',
     },
   },

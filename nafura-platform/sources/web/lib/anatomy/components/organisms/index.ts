@@ -11,6 +11,7 @@ export * from './form';
 export * from './modal';
 export * from './confirm-dialog';
 export * from './prompt-dialog';
+export * from './form-dialog';
 export * from './import-export-modal';
 export * from './toast';
 export * from './drawer';

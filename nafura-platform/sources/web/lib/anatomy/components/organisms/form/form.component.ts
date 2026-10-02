@@ -197,22 +197,39 @@ export type FormLayout = 'vertical' | 'horizontal' | 'grid';
         }
       </div>
 
-      <nf-action-bar align="right" class="nf-form__actions">
-        <nf-button
-          variant="secondary"
-          [disabled]="loading()"
-          (clicked)="onCancel()"
-        >{{ 'Cancel' | translate }}</nf-button>
-        <nf-button
-          variant="primary"
-          [loading]="loading()"
-          [disabled]="!formGroup.valid || loading()"
-          (clicked)="onSubmit()"
-        >{{ 'Save' | translate }}</nf-button>
-      </nf-action-bar>
+      @if (actions()) {
+        <nf-action-bar align="right" class="nf-form__actions">
+          <nf-button
+            variant="secondary"
+            [disabled]="loading()"
+            (clicked)="onCancel()"
+          >{{ 'Cancel' | translate }}</nf-button>
+          <nf-button
+            variant="primary"
+            [loading]="loading()"
+            [disabled]="!formGroup.valid || loading()"
+            (clicked)="onSubmit()"
+          >{{ 'Save' | translate }}</nf-button>
+        </nf-action-bar>
+      }
     </form>
   `,
   styles: [`
+    :host {
+      display: block;
+      container-type: inline-size;
+    }
+
+    /* Narrow container: one column, every field full width. */
+    @container (max-width: 640px) {
+      .nf-form__fields {
+        grid-template-columns: 1fr !important;
+      }
+      .nf-form__field {
+        grid-column: auto !important;
+      }
+    }
+
     .nf-form {
       display: flex;
       flex-direction: column;
@@ -280,6 +297,8 @@ export class FormComponent implements OnInit, OnChanges {
   loading = input<boolean>(false);
   disabled = input<boolean>(false);
   lookups = input<LookupContext>({});
+  /** False when the host owns saving (e.g. a record page save bar). */
+  actions = input(true);
 
   // Outputs
   valueChange = output<Record<string, unknown>>();
@@ -304,8 +323,30 @@ export class FormComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['fields'] || changes['values']) {
+    if (changes['fields'] || !this.hasControls()) {
       this.buildForm();
+    } else if (changes['values'] || changes['disabled']) {
+      this.resetForm();
+    }
+  }
+
+  private hasControls(): boolean {
+    const fields = this.fields();
+    return fields.length === Object.keys(this.formGroup.controls).length && fields.every((field) => this.formGroup.contains(field.key));
+  }
+
+  private initialValue(field: FormFieldConfig): unknown {
+    // A checkbox has two states: unchecked is false, never null.
+    return this.values()[field.key] ?? field.defaultValue ?? (field.type === 'checkbox' ? false : null);
+  }
+
+  /** New values or state on the same fields: update the controls in place (keeps focus and bindings). */
+  private resetForm(): void {
+    for (const field of this.fields()) {
+      const control = this.formGroup.get(field.key)!;
+      control.reset(this.initialValue(field), { emitEvent: false });
+      if (field.disabled || this.disabled()) control.disable({ emitEvent: false });
+      else control.enable({ emitEvent: false });
     }
   }
 
@@ -343,9 +384,8 @@ export class FormComponent implements OnInit, OnChanges {
         validators.push(Validators.email);
       }
 
-      const value = this.values()[field.key] ?? field.defaultValue ?? null;
       group[field.key] = new FormControl(
-        { value, disabled: field.disabled || this.disabled() },
+        { value: this.initialValue(field), disabled: field.disabled || this.disabled() },
         validators
       );
     }
@@ -384,56 +424,40 @@ export class FormComponent implements OnInit, OnChanges {
     const label = this.translateLabel(field.label);
 
     if (control.errors['required']) {
-      return this.t(
-        '{{label}} is required',
-        `${label} is required`,
-        { label }
-      );
+      return this.t('form.errors.required', `${label} is required`, { label });
     }
     if (control.errors['minlength']) {
-      return this.t(
-        '{{label}} must be at least {{count}} characters',
-        `${label} must be at least ${control.errors['minlength'].requiredLength} characters`,
-        { label, count: control.errors['minlength'].requiredLength }
-      );
+      return this.t('form.errors.minLength', `${label} must be at least ${control.errors['minlength'].requiredLength} characters`, {
+        label,
+        count: control.errors['minlength'].requiredLength,
+      });
     }
     if (control.errors['maxlength']) {
-      return this.t(
-        '{{label}} must be at most {{count}} characters',
-        `${label} must be at most ${control.errors['maxlength'].requiredLength} characters`,
-        { label, count: control.errors['maxlength'].requiredLength }
-      );
+      return this.t('form.errors.maxLength', `${label} must be at most ${control.errors['maxlength'].requiredLength} characters`, {
+        label,
+        count: control.errors['maxlength'].requiredLength,
+      });
     }
     if (control.errors['min']) {
-      return this.t(
-        '{{label}} must be at least {{value}}',
-        `${label} must be at least ${control.errors['min'].min}`,
-        { label, value: control.errors['min'].min }
-      );
+      return this.t('form.errors.min', `${label} must be at least ${control.errors['min'].min}`, {
+        label,
+        value: control.errors['min'].min,
+      });
     }
     if (control.errors['max']) {
-      return this.t(
-        '{{label}} must be at most {{value}}',
-        `${label} must be at most ${control.errors['max'].max}`,
-        { label, value: control.errors['max'].max }
-      );
+      return this.t('form.errors.max', `${label} must be at most ${control.errors['max'].max}`, {
+        label,
+        value: control.errors['max'].max,
+      });
     }
     if (control.errors['email']) {
-      return this.t(
-        '{{label}} must be a valid email',
-        `${label} must be a valid email`,
-        { label }
-      );
+      return this.t('form.errors.email', `${label} must be a valid email`, { label });
     }
     if (control.errors['pattern']) {
-      return this.t(
-        '{{label}} has an invalid format',
-        `${label} has an invalid format`,
-        { label }
-      );
+      return this.t('form.errors.pattern', `${label} has an invalid format`, { label });
     }
 
-    return this.t('Invalid value', 'Invalid value');
+    return this.t('form.errors.invalid', 'Invalid value');
   }
 
   onSubmit(): void {

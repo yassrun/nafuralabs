@@ -54,6 +54,8 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
+import ma.nafura.platform.administration.iam.roles.DeclaredRolesSeeder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -117,7 +119,8 @@ class IdentiteBaselineTest {
                 new AppUserProvisioningService(appUserRepository),
                 permissionService,
                 tenantInvitationRepository,
-                tenantInvitationDeliveryService);
+                tenantInvitationDeliveryService,
+                new StaticListableBeanFactory().getBeanProvider(DeclaredRolesSeeder.class));
         accept = new InvitationAcceptService(
                 tokens,
                 tenantInvitationRepository,

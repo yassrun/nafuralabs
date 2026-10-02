@@ -19,6 +19,12 @@ export function buildCongesListingConfig(t: TranslateService) {
     },
     {
       filters: buildCongeFilters(t),
+      segments: [
+        { id: 'ALL', label: 'rh.conge.listing.chips.all' },
+        { id: 'DEMANDE', label: 'rh.conge.listing.chips.demande', filters: { status: 'DEMANDE' } },
+        { id: 'APPROUVE', label: 'rh.conge.listing.chips.approuve', filters: { status: 'APPROUVE' } },
+        { id: 'EN_COURS', label: 'rh.conge.listing.chips.enCours', filters: { status: 'EN_COURS' } },
+      ],
       defaultSort: { column: 'dateDebut', direction: 'desc' },
       features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {

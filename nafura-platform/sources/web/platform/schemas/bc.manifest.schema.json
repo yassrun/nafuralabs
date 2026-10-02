@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nafura.io/schemas/v1/bc.manifest.schema.json",
+  "title": "Nafura business context manifest",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "const": "nafura.io/v1" },
+    "kind": { "const": "business-context" },
+    "metadata": {
+      "type": "object",
+      "required": ["id", "version", "owner", "lifecycle"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^bc\\.[a-z][a-z0-9-]*$" },
+        "version": { "$ref": "#/$defs/version" },
+        "owner": { "type": "string" },
+        "lifecycle": { "enum": ["experimental", "production", "deprecated"] },
+        "labels": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "required": ["label", "routesPrefix", "permissions"],
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string" },
+        "icon": { "type": "string" },
+        "routesPrefix": { "type": "string", "pattern": "^/[a-z0-9-]+(/[a-z0-9-]+)*$" },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": { "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$" } }
+          }
+        },
+        "defaultRoles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["code", "permissions"],
+            "additionalProperties": false,
+            "properties": {
+              "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+              "label": { "type": "string" },
+              "permissions": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "navigation": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/navigationItem" }
+        },
+        "provides": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "version"],
+            "additionalProperties": false,
+            "properties": { "id": { "type": "string" }, "version": { "$ref": "#/$defs/version" } }
+          }
+        },
+        "requires": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "version"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "version": { "type": "string", "pattern": "^\\^\\d+\\.\\d+\\.\\d+$" },
+              "optional": { "type": "boolean" }
+            }
+          }
+        },
+        "i18n": {
+          "type": "object",
+          "required": ["namespace", "locales"],
+          "additionalProperties": false,
+          "properties": {
+            "namespace": { "type": "string" },
+            "locales": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "navigationItem": {
+      "type": "object",
+      "required": ["id", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "route": { "type": "string", "pattern": "^/" },
+        "icon": { "type": "string" },
+        "permission": { "type": "string" },
+        "exactMatch": { "type": "boolean" },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/navigationItem" } }
+      }
+    }
+  }
+}

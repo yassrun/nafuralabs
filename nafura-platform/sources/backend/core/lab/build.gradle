@@ -1,0 +1,24 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation project(':platform:core:framework')
+    implementation project(':platform:core:multi-tenant')
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // Lab runs without Docker or installs: embedded PostgreSQL (binaries from Maven Central).
+    api 'io.zonky.test:embedded-postgres:2.2.2'
+    api 'org.postgresql:postgresql'
+    api 'org.springframework.boot:spring-boot-starter-actuator'
+    // Lab applies the generated changelog at startup (staging/prod: the lifecycle job).
+    api 'org.springframework.boot:spring-boot-starter-liquibase'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('jar') {
+    archiveBaseName = 'lab'
+}

@@ -51,6 +51,7 @@ import type {
   ListingPageConfig,
   ColumnConfig,
   FilterFieldConfig,
+  ListingSegment,
   ListingRouteConfig,
   DeleteConfig,
   ImportExportConfig,
@@ -459,6 +460,12 @@ export interface ListingConfigOverrides<TItem> {
    */
   filters?: FilterFieldConfig[];
 
+  /** Quick views as tabs above the table, e.g. `{ id: 'A_VALIDER', label: '…', filters: { status: 'A_VALIDER' } }`. */
+  segments?: ListingSegment[];
+
+  /** Segment active on arrival (defaults to the first). */
+  defaultSegment?: string;
+
   /**
    * Pagination settings.
    *
@@ -593,28 +600,29 @@ export function buildListingConfig<TItem>(
   };
 
   // ─── Build Empty State ───────────────────────────────────────────────────
+  // Defaults never interpolate entityName: it is an English code name, not a label.
+  const canCreate = Array.isArray(routes.create) ? routes.create.length > 0 : Boolean(routes.create);
   const emptyState: EmptyStateConfig = {
     icon: overrides.emptyState?.icon ?? 'inbox',
-    title:
-      overrides.emptyState?.title ?? `No ${entityNamePlural.toLowerCase()} found`,
-    message:
-      overrides.emptyState?.message ??
-      `Create your first ${entityName.toLowerCase()} to get started`,
-    actionLabel: overrides.emptyState?.actionLabel ?? `Add ${entityName}`,
+    title: overrides.emptyState?.title ?? 'Aucun élément',
+    message: overrides.emptyState?.message ?? (canCreate ? 'Créez le premier pour commencer.' : ''),
+    actionLabel: overrides.emptyState?.actionLabel ?? (canCreate ? 'Créer' : ''),
     actionId: overrides.emptyState?.actionId ?? 'create',
   };
 
   // ─── Build Delete Config ─────────────────────────────────────────────────
   const deleteConfig: DeleteConfig<TItem> | undefined = overrides.delete ?? {
-    title: `Delete ${entityName}`,
+    title: 'Supprimer',
     getMessage: (item: TItem) => {
-      const name = (item as Record<string, unknown>)['name'] ?? entityName;
-      return `Are you sure you want to delete "${name}"? This action cannot be undone.`;
+      const name = (item as Record<string, unknown>)['name'];
+      return name
+        ? `Supprimer « ${name} » ? Cette action est définitive.`
+        : 'Supprimer cet élément ? Cette action est définitive.';
     },
-    confirmLabel: 'Delete',
+    confirmLabel: 'Supprimer',
     icon: 'delete',
-    successMessage: `${entityName} deleted successfully`,
-    errorMessage: `Failed to delete ${entityName.toLowerCase()}`,
+    successMessage: 'Élément supprimé',
+    errorMessage: 'La suppression a échoué',
   };
 
   // ─── Build Default Visible Columns ───────────────────────────────────────
@@ -626,8 +634,8 @@ export function buildListingConfig<TItem>(
     ? {
         enableImportExport: true,
         entityName: entityNamePlural,
-        importExplanation: `Import ${entityNamePlural.toLowerCase()} from a CSV file using the provided template.`,
-        exportExplanation: `Export ${entityNamePlural.toLowerCase()} as a CSV file.`,
+        importExplanation: 'Importez des lignes depuis un fichier CSV à partir du modèle fourni.',
+        exportExplanation: 'Exportez les lignes au format CSV.',
         templateColumns: columns.map((c) => ({ key: c.key })),
         allowedImportFormats: ['csv'],
         enableExport: true,
@@ -649,6 +657,8 @@ export function buildListingConfig<TItem>(
     features,
     actions,
     filters: overrides.filters ?? [],
+    segments: overrides.segments,
+    defaultSegment: overrides.defaultSegment,
     pagination,
     delete: deleteConfig,
     emptyState,

@@ -32,8 +32,8 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { catchError, of } from 'rxjs';
 
-import { TenantContextService } from '../../../../../core/tenant/tenant.context';
-import { StatusChipComponent } from '../../../../../lib/design-system';
+import { TenantContextService } from '../../../../core/tenant/tenant.context';
+import { StatusChipComponent } from '../../../../lib/design-system';
 import { DocTypeService } from '../../services/doc-type.service';
 import { ExtractionService } from '../../services/extraction.service';
 import { DocTypeDefinition, DocTypeListItem, DocTypesByDomain } from '../../models/doc-type-definition.model';
@@ -42,8 +42,9 @@ import { ColumnResolver, ResolvedColumn } from '../../utils/column-resolver';
 import { DynamicRecordDialogComponent, DynamicRecordDialogResult } from '../../components/dynamic-record-dialog/dynamic-record-dialog.component';
 import { ExportResultDialogComponent, ExportResultData } from '../../components/export-result-dialog/export-result-dialog.component';
 import { RecordDatatableComponent, RecordTableAction } from '../../components/record-datatable/record-datatable.component';
-import { ConfirmDialogComponent } from '../../../../../core/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent } from '../../../../core/components/confirm-dialog/confirm-dialog.component';
 import { ExtractionResponse } from '../../models/extraction.model';
+import { EXTRACTION_STATUS_OPTIONS, NO_DATE_FILTER, extractionStatusInfo } from '../../models/extraction-status';
 
 @Component({
   selector: 'app-extraction-workspace-page',
@@ -174,21 +175,14 @@ export class ExtractionWorkspacePage implements OnInit {
   });
 
   // Status options
-  readonly statusOptions: Array<{ value: ExtractionStatus | ''; label: string }> = [
-    { value: '', label: 'All Statuses' },
-    { value: 'draft', label: 'Draft' },
-    { value: 'validated', label: 'Validated' },
-    { value: 'invalid', label: 'Invalid' },
-    { value: 'corrected', label: 'Corrected' },
-    { value: 'exported', label: 'Exported' },
-  ];
+  readonly statusOptions = EXTRACTION_STATUS_OPTIONS;
 
   // Date field options
   readonly dateFieldOptions = [
-    { value: '', label: 'No date filter' },
-    { value: 'CREATED_AT', label: 'Created Date' },
-    { value: 'UPDATED_AT', label: 'Updated Date' },
-    { value: 'DOCUMENT_DATE', label: 'Document Date' },
+    { value: '', label: NO_DATE_FILTER },
+    { value: 'CREATED_AT', label: 'Date de création' },
+    { value: 'UPDATED_AT', label: 'Date de modification' },
+    { value: 'DOCUMENT_DATE', label: 'Date du document' },
   ];
 
   constructor() {
@@ -598,15 +592,7 @@ export class ExtractionWorkspacePage implements OnInit {
 
   // Helpers
   getStatusInfo(status: ExtractionStatus): { label: string; variant: string } {
-    const statusMap: Record<ExtractionStatus, { label: string; variant: string }> = {
-      'draft': { label: 'Draft', variant: 'warning' },
-      'validated': { label: 'Validated', variant: 'success' },
-      'invalid': { label: 'Invalid', variant: 'error' },
-      'corrected': { label: 'Corrected', variant: 'info' },
-      'exported': { label: 'Exported', variant: 'success' },
-      'error': { label: 'Error', variant: 'error' },
-    };
-    return statusMap[status] || { label: status, variant: 'default' };
+    return extractionStatusInfo(status);
   }
 
 

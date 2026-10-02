@@ -1,12 +1,9 @@
 package ma.nafura.platform.administration.iam.service.port;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
 
+/** Fallback registered by {@code NafuraIamAutoConfiguration} when no product or platform adapter exists. */
 @Slf4j
-@Component
-@ConditionalOnMissingBean(InvitationEmailPort.class)
 public class NoOpInvitationEmailPort implements InvitationEmailPort {
 
     @Override

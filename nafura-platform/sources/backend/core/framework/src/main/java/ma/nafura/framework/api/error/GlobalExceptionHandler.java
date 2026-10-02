@@ -5,11 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import ma.nafura.platform.framework.service.crud.CrudNotFoundException;
 import ma.nafura.platform.framework.service.crud.CrudOperationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -82,6 +86,18 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 correlationId(request));
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<ApiError> handleUnreadableRequest(
+            Exception ex,
+            HttpServletRequest request) {
+        ApiError error = ApiError.simple(
+                "BAD_REQUEST",
+                "error.badRequest",
+                "Malformed request",
+                correlationId(request));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -185,6 +201,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleUnhandled(
             Exception ex,
             HttpServletRequest request) {
+        // Spring MVC request errors (missing parameter, type mismatch, unsupported method...) carry a 4xx status.
+        if (ex instanceof ErrorResponse errorResponse && errorResponse.getStatusCode().is4xxClientError()) {
+            return clientError(errorResponse.getStatusCode(), ex, request);
+        }
         log.error("Unhandled error: {}", ex.getMessage(), ex);
         ApiError error = ApiError.simple(
                 "INTERNAL_ERROR",
@@ -192,6 +212,21 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred",
                 correlationId(request));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    private ResponseEntity<ApiError> clientError(HttpStatusCode status, Exception ex, HttpServletRequest request) {
+        log.debug("Client request error {}: {}", status.value(), ex.getMessage());
+        HttpStatus resolved = HttpStatus.resolve(status.value());
+        String message = resolved != null ? resolved.getReasonPhrase() : "Bad request";
+        if (ex instanceof ErrorResponse errorResponse && errorResponse.getBody().getDetail() != null) {
+            message = errorResponse.getBody().getDetail();
+        }
+        ApiError error = ApiError.simple(
+                status.value() == 400 ? "BAD_REQUEST" : "HTTP_" + status.value(),
+                "error." + status.value(),
+                message,
+                correlationId(request));
+        return ResponseEntity.status(status).body(error);
     }
 
     private ApiFieldError toFieldError(FieldError fieldError) {

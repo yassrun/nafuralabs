@@ -105,7 +105,8 @@ export class PermissionService {
   hasPermission(permission: Permission): boolean {
     // Non-tenant application mode: no tenant-context RBAC resolution.
     // Keep UI actions available; backend remains source of enforcement.
-    if (!applicationRequiresTenant() && this.state.isAuthenticated()) {
+    // Non-tenant application without a loaded context: no RBAC data on the client, the backend enforces.
+    if (!applicationRequiresTenant() && this.state.isAuthenticated() && !this.tenantContextService.context()) {
       return true;
     }
 

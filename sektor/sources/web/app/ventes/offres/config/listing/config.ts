@@ -19,6 +19,14 @@ export function buildOffreListingConfig(t: TranslateService) {
     },
     {
       filters: buildOffreFilters(t),
+      segments: [
+        { id: 'ALL', label: 'Toutes' },
+        { id: 'BROUILLON', label: 'Brouillon', filters: { status: 'BROUILLON' } },
+        { id: 'ENVOYEE', label: 'Envoyées', filters: { status: 'ENVOYEE' } },
+        { id: 'ACCEPTEE', label: 'Acceptées', filters: { status: 'ACCEPTEE' } },
+        { id: 'REFUSEE', label: 'Refusées', filters: { status: 'REFUSEE' } },
+        { id: 'EXPIREE', label: 'Expirées', filters: { status: 'EXPIREE' } },
+      ],
       defaultSort: { column: 'dateEmission', direction: 'desc' },
       features: {
         search: true,

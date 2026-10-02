@@ -11,6 +11,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChildren,
   DestroyRef,
   effect,
   ElementRef,
@@ -19,6 +20,8 @@ import {
   NgZone,
   output,
   signal,
+  TemplateRef,
+  untracked,
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -28,6 +31,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { DataTableComponent } from '../data-table';
+import { ColumnTemplateDirective } from '../entity-listing/column-template.directive';
 import { PaginationComponent } from '../pagination';
 import { ButtonComponent } from '../../atoms/button';
 import {
@@ -41,10 +45,19 @@ import {
   type ListingActionItem,
 } from '../../molecules/listing-actions';
 import type { ListingControlsColumn } from '../../molecules/listing-controls';
-import type { ColumnConfig, FilterGroup, ListingQueryState } from '../../../types';
+import { DataStateComponent } from '../../molecules/data-state';
+import { EmptyStateComponent } from '../../molecules/empty-state';
+import type {
+  ColumnConfig,
+  FilterFieldConfig,
+  FilterGroup,
+  ListingQueryState,
+  LookupContext,
+} from '../../../types';
 import {
   matchesFilterGroup,
   matchesSearch,
+  matchesSegment,
 } from './listing-query.util';
 import {
   clausesToGroup,
@@ -90,11 +103,29 @@ import {
     FilterChipsComponent,
     ListingActionsComponent,
     DataTableComponent,
+    DataStateComponent,
+    EmptyStateComponent,
     PaginationComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="nf-listing-flat" [class.nf-listing-flat--split]="layout() === 'split'">
+      @if (config().segments?.length) {
+        <div class="nf-listing-flat__segments" role="tablist">
+          @for (segment of config().segments; track segment.id) {
+            <button
+              type="button"
+              role="tab"
+              class="nf-listing-flat__segment"
+              [class.nf-listing-flat__segment--active]="activeSegment()?.id === segment.id"
+              [attr.aria-selected]="activeSegment()?.id === segment.id"
+              (click)="selectSegment(segment.id)"
+            >
+              {{ segment.label | translate }}
+            </button>
+          }
+        </div>
+      }
       <!-- Row 1: Search + Filter Add + Filter Chips (starts left, flows right) -->
       @if (features().search || features().filters) {
         <div class="nf-listing-flat__filters">
@@ -242,7 +273,8 @@ import {
                 >
                   <div (click)="$event.stopPropagation()">
                     <nf-filter-builder
-                      [filters]="config().filters ?? []"
+                      [filters]="resolvedFilters()"
+                      [advanced]="config().filterMode !== 'simple'"
                       [group]="activeFilterGroup()"
                       [openCount]="filterMenuOpenCount()"
                       (apply)="onFilterApply($event)"
@@ -252,7 +284,7 @@ import {
                 </mat-menu>
               }
               <nf-filter-chips
-                [fields]="config().filters ?? []"
+                [fields]="resolvedFilters()"
                 [group]="activeFilterGroup()"
                 (removeLeaf)="onRemoveFilterLeaf($event)"
               />
@@ -351,22 +383,36 @@ import {
       </div>
 
       <div class="nf-listing-flat__view">
-        <nf-data-table
-          [items]="pageItems()"
-          [columns]="visibleColumns()"
-          [paginateAfter]="0"
-          [rowClickable]="true"
-          [selectable]="tableSelectable()"
-          [selection]="selection()"
-          [sortColumn]="sortColumn()"
-          [sortDirection]="sortDirection()"
-          [emptyMessage]="config().emptyMessage ?? 'No items'"
-          [loading]="loading()"
-          (selectionChange)="onTableSelectionChange($event)"
-          (sortChange)="onSortChange($event)"
-          (rowClick)="onRowClick($event)"
-          (rowDblClick)="rowDblClick.emit($event)"
-        />
+        @if (error(); as message) {
+          <nf-data-state state="error" [errorMessage]="message | translate" (retry)="retry.emit()" />
+        } @else if (emptyState(); as empty) {
+          <nf-empty-state
+            [icon]="empty.icon ?? 'inbox'"
+            [title]="empty.title | translate"
+            [message]="empty.message ? (empty.message | translate) : undefined"
+            [actionLabel]="empty.actionLabel ? (empty.actionLabel | translate) : undefined"
+            (action)="actionClick.emit(empty.actionId ?? 'create')"
+          />
+        } @else {
+          <nf-data-table
+            [items]="pageItems()"
+            [columns]="visibleColumns()"
+            [cellTemplates]="resolvedCellTemplates()"
+            [activeRowId]="activeRowId()"
+            [paginateAfter]="0"
+            [rowClickable]="true"
+            [selectable]="tableSelectable()"
+            [selection]="selection()"
+            [sortColumn]="sortColumn()"
+            [sortDirection]="sortDirection()"
+            [emptyMessage]="narrowed() ? 'No results' : (config().emptyMessage ?? 'No items')"
+            [loading]="loading()"
+            (selectionChange)="onTableSelectionChange($event)"
+            (sortChange)="onSortChange($event)"
+            (rowClick)="onRowClick($event)"
+            (rowDblClick)="rowDblClick.emit($event)"
+          />
+        }
       </div>
 
       <!-- Export Configuration Dialog (Anatomy Modal) -->
@@ -661,6 +707,43 @@ import {
         min-height: 0;
         height: 100%;
         gap: 8px;
+      }
+
+      /* ── Quick views (segments) ───────────────────────────────────────────── */
+      .nf-listing-flat__segments {
+        display: flex;
+        gap: 2px;
+        flex: 0 0 auto;
+        overflow-x: auto;
+        scrollbar-width: none;
+        border-bottom: 1px solid var(--nf-border-default, #e5e7eb);
+      }
+      .nf-listing-flat__segment {
+        flex: 0 0 auto;
+        margin-bottom: -1px;
+        padding: 6px 10px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: none;
+        font: inherit;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        white-space: nowrap;
+        color: var(--nf-text-secondary, #4b5563);
+        cursor: pointer;
+      }
+      .nf-listing-flat__segment:hover {
+        color: var(--nf-text-primary, #111827);
+      }
+      .nf-listing-flat__segment:focus-visible {
+        outline: 2px solid var(--nf-primary, #2563eb);
+        outline-offset: -2px;
+        border-radius: 4px;
+      }
+      .nf-listing-flat__segment--active {
+        font-weight: 600;
+        color: var(--nf-primary, #2563eb);
+        border-bottom-color: var(--nf-primary, #2563eb);
       }
 
       /* ── Row 1: Search + Filter Chips ───────────────────────────────── */
@@ -1519,9 +1602,23 @@ export class ListingFlatComponent<T = unknown> {
   readonly remote = input<boolean>(false);
   readonly remoteTotal = input<number | undefined>(undefined);
   readonly resourceKey = input<string | undefined>();
+  /** Options of filters declared with `lookupKey`. */
+  readonly lookups = input<LookupContext>({});
+  /** Custom cells by column key (`<ng-template nfColumn="key" let-value let-item="item">`). */
+  readonly cellTemplates = input<Record<string, TemplateRef<unknown>>>({});
+  private readonly projectedCells = contentChildren(ColumnTemplateDirective);
+  readonly resolvedCellTemplates = computed(() => ({
+    ...Object.fromEntries(this.projectedCells().map((cell) => [cell.nfColumn, cell.templateRef])),
+    ...this.cellTemplates(),
+  }));
+  /** Row highlighted as open (master–detail). */
+  readonly activeRowId = input<string | null>(null);
+  /** Load failure: replaces the table with a retry state. */
+  readonly error = input<string | null>(null);
 
   readonly queryChange = output<ListingQueryState>();
   readonly load = output<ListingQueryState>();
+  readonly retry = output<void>();
 
   readonly rowClick = output<T>();
   readonly rowDblClick = output<T>();
@@ -1562,8 +1659,32 @@ export class ListingFlatComponent<T = unknown> {
 
   readonly selectionKind = computed(() => this.features().selection);
 
-  readonly pinnedFilters = computed(() => (this.config().filters ?? []).filter((f) => f.pinned === true));
-  readonly popupFilters = computed(() => (this.config().filters ?? []).filter((f) => !f.pinned));
+  /** Lookup options resolved; « All » placeholders dropped (the listing offers its own). */
+  readonly resolvedFilters = computed((): FilterFieldConfig[] => {
+    const lookups = this.lookups();
+    return (this.config().filters ?? []).map((f) => {
+      const options =
+        f.options ??
+        (f.lookupKey ? (lookups[f.lookupKey] ?? []).map((l) => ({ value: l.key, label: l.value })) : undefined);
+      return options ? { ...f, options: options.filter((o) => o.value !== '' && o.value != null) } : f;
+    });
+  });
+  readonly pinnedFilters = computed(() => this.resolvedFilters().filter((f) => f.pinned === true));
+  readonly popupFilters = computed(() => this.resolvedFilters().filter((f) => !f.pinned));
+
+  readonly emptyState = computed(() => {
+    const empty = this.config().emptyState;
+    if (!empty || this.loading() || this.items().length > 0) return null;
+    return this.narrowed() ? null : empty;
+  });
+
+  /** Search, filters or a filtering segment hide part of the rows. */
+  readonly narrowed = computed(
+    () =>
+      !!this.search() ||
+      this.filterActive() ||
+      Object.keys(this.activeSegment()?.filters ?? {}).length > 0
+  );
 
   readonly tableSelectable = computed((): false | 'single' | 'multiple' => {
     const sel = this.selectionKind();
@@ -1601,7 +1722,11 @@ export class ListingFlatComponent<T = unknown> {
 
     effect(() => {
       const cols = this.config().columns;
-      const fromQuery = controlColumnsFromQuery(cols, this.listingQuery().columns);
+      const fromQuery = controlColumnsFromQuery(
+        cols,
+        this.listingQuery().columns,
+        this.config().defaultVisibleColumns
+      );
       this.controlColumns.set(fromQuery);
     });
 
@@ -1611,7 +1736,11 @@ export class ListingFlatComponent<T = unknown> {
         this.suppressQueryEmit.set(true);
         this.listingQuery.set(external);
         this.controlColumns.set(
-          controlColumnsFromQuery(this.config().columns, external.columns)
+          controlColumnsFromQuery(
+            this.config().columns,
+            external.columns,
+            this.config().defaultVisibleColumns
+          )
         );
         this.suppressQueryEmit.set(false);
       }
@@ -1636,11 +1765,14 @@ export class ListingFlatComponent<T = unknown> {
       );
     });
 
+    // Only a config change resets the page size; the user's pick stays.
     effect(() => {
       const size = this.config().pageSize ?? 20;
-      if (this.listingQuery().pageSize !== size) {
-        this.patchQuery({ pageSize: size, page: 1 });
-      }
+      untracked(() => {
+        if (this.listingQuery().pageSize !== size) {
+          this.patchQuery({ pageSize: size, page: 1 });
+        }
+      });
     });
 
     effect(() => {
@@ -1648,6 +1780,15 @@ export class ListingFlatComponent<T = unknown> {
       const selectionToggleDefaultActive = this.features().selectionToggleDefaultActive ?? false;
       this.toggleSelectionOn.set(selection !== 'none' && selectionToggleDefaultActive);
       this.setSelection([]);
+    });
+
+    // New data (reload, delete): the selection keeps only rows still listed.
+    effect(() => {
+      const items = this.items();
+      const selected = untracked(this.selection);
+      if (selected.length && selected.some((item) => !items.includes(item))) {
+        untracked(() => this.setSelection(selected.filter((item) => items.includes(item))));
+      }
     });
 
     effect(() => {
@@ -1704,6 +1845,16 @@ export class ListingFlatComponent<T = unknown> {
   );
 
   readonly filterActive = computed(() => collectLeaves(this.activeFilterGroup()).length > 0);
+
+  readonly activeSegment = computed(() => {
+    const segments = this.config().segments ?? [];
+    const id = this.listingQuery().segment ?? this.config().defaultSegment;
+    return segments.find((s) => s.id === id) ?? segments[0];
+  });
+
+  selectSegment(id: string): void {
+    this.patchQuery({ segment: id }, true);
+  }
   readonly hiddenCount = computed(
     () => this.controlColumns().filter((c) => !c.visible).length
   );
@@ -1748,8 +1899,11 @@ export class ListingFlatComponent<T = unknown> {
   readonly visibleSelectionActions = computed(() => {
     const count = this.selection().length;
     if (count === 0) return [];
+    const selection = this.selection();
     return (this.config().selectionActions ?? []).filter((a) => {
       if (a.visible === false) return false;
+      if (a.when && !selection.every((item) => a.when!(item))) return false;
+      if (a.visibleFor && !a.visibleFor(selection)) return false;
       const scope = a.scope ?? 'single+bulk';
       const min =
         scope === 'single' ? 1 : scope === 'bulk' ? (a.minSelection ?? 2) : (a.minSelection ?? 1);
@@ -1757,7 +1911,7 @@ export class ListingFlatComponent<T = unknown> {
       if (count < min) return false;
       if (max != null && count > max) return false;
       return true;
-    });
+    }).map((a) => (a.disabledFor?.(selection) ? { ...a, disabled: true } : a));
   });
 
   /** True when the host container is below 600px — toolbar condenses to primary action + ⋯ overflow. */
@@ -1818,7 +1972,8 @@ export class ListingFlatComponent<T = unknown> {
     let rows = this.items().filter(
       (item) =>
         matchesSearch(item, q.search ?? '', searchFields) &&
-        matchesFilterGroup(item, resolveFilterGroup(q))
+        matchesFilterGroup(item, resolveFilterGroup(q)) &&
+        matchesSegment(item, this.activeSegment()?.filters)
     );
     rows = sortItemsLocally(rows, q.sort, this.config().columns);
     return rows;
@@ -1846,7 +2001,9 @@ export class ListingFlatComponent<T = unknown> {
   }
 
   resetDefaultColumns(): void {
-    this.controlColumns.update((cols) => cols.map((c) => ({ ...c, visible: true })));
+    this.controlColumns.set(
+      controlColumnsFromQuery(this.config().columns, undefined, this.config().defaultVisibleColumns)
+    );
     this.patchQuery({ columns: columnStateFromControls(this.controlColumns()) }, false);
   }
 
@@ -1875,7 +2032,7 @@ export class ListingFlatComponent<T = unknown> {
 
   setFilterValue(key: string, value: unknown): void {
     const field = this.pinnedFilters().find((f) => f.key === key)
-      ?? (this.config().filters ?? []).find((f) => f.key === key);
+      ?? this.resolvedFilters().find((f) => f.key === key);
     if (!field) return;
     const next = upsertPinnedClause(this.activeFilterGroup(), field, value);
     this.replaceFilterGroup(next);
@@ -1901,8 +2058,17 @@ export class ListingFlatComponent<T = unknown> {
     this.setFilterValue(key, next);
   }
 
+  private searchTimer?: ReturnType<typeof setTimeout>;
+
+  /** Remote lists reload once typing pauses (300 ms), not on every key. */
   onSearchChange(value: string): void {
-    this.patchQuery({ search: value }, true);
+    if (!this.remote()) {
+      this.patchQuery({ search: value }, true);
+      return;
+    }
+    this.listingQuery.update((current) => ({ ...mergeListingQuery(current, { search: value }), page: 1 }));
+    clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.emitQueryChange(), 300);
   }
 
   onPageChange(ev: { page: number; pageSize: number }): void {
@@ -1922,7 +2088,11 @@ export class ListingFlatComponent<T = unknown> {
     this.suppressQueryEmit.set(true);
     this.listingQuery.set({ ...view.query, page: view.query.page ?? 1 });
     this.controlColumns.set(
-      controlColumnsFromQuery(this.config().columns, view.query.columns)
+      controlColumnsFromQuery(
+        this.config().columns,
+        view.query.columns,
+        this.config().defaultVisibleColumns
+      )
     );
     this.suppressQueryEmit.set(false);
     if (markActive) {
@@ -1975,7 +2145,7 @@ export class ListingFlatComponent<T = unknown> {
   }
 
   handleActionClick(id: string): void {
-    if (id === 'export') {
+    if (id === 'export' && this.features().export) {
       this.openExportDialog();
       return;
     }
@@ -2077,7 +2247,7 @@ export class ListingFlatComponent<T = unknown> {
 
   /** Single mode: row click toggles the selected row (highlight, no checkboxes). */
   onRowClick(item: T): void {
-    if (this.tableSelectable() === 'single') {
+    if (this.features().rowClick !== 'open' && this.tableSelectable() === 'single') {
       const next = this.selection().includes(item) ? [] : [item];
       this.setSelection(next);
     }
@@ -2106,7 +2276,6 @@ export class ListingFlatComponent<T = unknown> {
       danger: a.variant === 'danger',
       disabled: a.disabled,
       tooltip: a.tooltip,
-      confirm: a.id === 'delete' || a.id === 'delete-bulk' || a.variant === 'danger',
     };
   }
 }

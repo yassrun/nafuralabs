@@ -72,6 +72,7 @@ export class ApprovalCommentDialogComponent {
       return;
     }
     this.showError = false;
-    this.dialogRef.close(this.comment.trim() || undefined);
+    // An object, so an approval without comment is not mistaken for « Cancel ».
+    this.dialogRef.close({ comment: this.comment.trim() || undefined });
   }
 }

@@ -1,4 +1,4 @@
-import type { ColumnConfig, FilterFieldConfig } from '../../../types';
+import type { ColumnConfig, FilterFieldConfig, ListingSegment } from '../../../types';
 import type { ListingActionItem } from '../../molecules/listing-actions';
 
 /** Row selection on the table. */
@@ -19,6 +19,12 @@ export interface ListingSelectionAction extends ListingActionItem {
   minSelection?: number;
   /** Max rows allowed. single: forced 1. */
   maxSelection?: number;
+  /** Offered only when true for every selected row (e.g. Revoke only on active keys). */
+  when?: (item: any) => boolean;
+  /** Offered only when true for the whole selection. */
+  visibleFor?: (selection: any[]) => boolean;
+  /** Shown but disabled when true for the whole selection. */
+  disabledFor?: (selection: any[]) => boolean;
 }
 
 export interface ListingFlatFeatures {
@@ -32,10 +38,24 @@ export interface ListingFlatFeatures {
   /** When the selection toggle is shown, whether it starts in multi-select mode. */
   selectionToggleDefaultActive?: boolean;
   pagination: boolean;
+  /** Row click: `select` toggles the row (default), `open` only emits `rowClick` (master–detail). */
+  rowClick?: 'select' | 'open';
+}
+
+/** Shown instead of the table when the list has no row at all (no search, no filter). */
+export interface ListingEmptyState {
+  icon?: string;
+  title: string;
+  message?: string;
+  /** Button label; the button emits `actionClick(actionId)`. */
+  actionLabel?: string;
+  actionId?: string;
 }
 
 export interface ListingFlatConfig {
   columns: ColumnConfig[];
+  /** Column keys visible by default (all when omitted); the others stay in the columns menu. */
+  defaultVisibleColumns?: string[];
   /**
    * Toolbar layout.
    * - `chips` (default, proposal A): row 1 = filter chips + « + Filtre » + search,
@@ -47,6 +67,14 @@ export interface ListingFlatConfig {
   toolbarLayout?: 'chips' | 'split';
   filters?: FilterFieldConfig[];
   /**
+   * `advanced` (default): Notion builder with operators and AND/OR groups.
+   * `simple`: one value per field — for backends that only take `field=value`.
+   */
+  filterMode?: 'advanced' | 'simple';
+  /** Quick views as tabs above the table (first one active unless `defaultSegment`). */
+  segments?: ListingSegment[];
+  defaultSegment?: string;
+  /**
    * Filters applied at init (demo / saved view).
    * @deprecated Prefer `query.filters` on the listing query input.
    */
@@ -57,6 +85,7 @@ export interface ListingFlatConfig {
   pageSize?: number;
   pageSizeOptions?: number[];
   emptyMessage?: string;
+  emptyState?: ListingEmptyState;
   /** Fields used by the search box. Defaults to all column fields. */
   searchFields?: string[];
   /** Export filename (without .csv). Defaults to 'export'. */

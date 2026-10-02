@@ -9,12 +9,9 @@ import {
   inject,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslateModule } from '@ngx-translate/core';
 
+import { ButtonComponent, NfInputComponent, SpinnerComponent } from '@lib/anatomy';
 import { AvatarComponent } from '@platform/lib/anatomy/components/atoms/avatar/avatar.component';
 import type { UserProfileSettings, UserProfileUpdatePayload } from '../../models';
 
@@ -30,10 +27,9 @@ const MAX_PHONE_LENGTH = 20;
     CommonModule,
     ReactiveFormsModule,
     TranslateModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
+    ButtonComponent,
+    NfInputComponent,
+    SpinnerComponent,
     AvatarComponent,
   ],
   template: `
@@ -41,7 +37,7 @@ const MAX_PHONE_LENGTH = 20;
       <h3>{{ 'userSettings.profile.title' | translate }}</h3>
       @if (loading) {
         <div class="loading">
-          <mat-spinner diameter="32"></mat-spinner>
+          <nf-spinner size="md"></nf-spinner>
         </div>
       } @else {
         <form [formGroup]="form" (ngSubmit)="submit()">
@@ -58,49 +54,36 @@ const MAX_PHONE_LENGTH = 20;
           </div>
 
           <div class="grid">
-            <mat-form-field appearance="outline">
-              <mat-label>{{ 'userSettings.profile.firstName' | translate }}</mat-label>
-              <input
-                matInput
-                formControlName="firstName"
-                [maxlength]="maxFirstNameLength" />
-            </mat-form-field>
+            <nf-input
+              [label]="'userSettings.profile.firstName' | translate"
+              formControlName="firstName"
+              [maxlength]="maxFirstNameLength" />
 
-            <mat-form-field appearance="outline">
-              <mat-label>{{ 'userSettings.profile.lastName' | translate }}</mat-label>
-              <input
-                matInput
-                formControlName="lastName"
-                [maxlength]="maxLastNameLength" />
-            </mat-form-field>
+            <nf-input
+              [label]="'userSettings.profile.lastName' | translate"
+              formControlName="lastName"
+              [maxlength]="maxLastNameLength" />
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>{{ 'userSettings.profile.displayName' | translate }}</mat-label>
-              <input
-                matInput
-                formControlName="displayName"
-                [maxlength]="maxDisplayNameLength" />
-              <mat-hint align="start">{{ 'userSettings.profile.displayName.hint' | translate }}</mat-hint>
-            </mat-form-field>
+            <nf-input
+              class="full-width"
+              [label]="'userSettings.profile.displayName' | translate"
+              formControlName="displayName"
+              [maxlength]="maxDisplayNameLength" />
 
-            <mat-form-field appearance="outline">
-              <mat-label>{{ 'userSettings.profile.phone' | translate }}</mat-label>
-              <input
-                matInput
-                formControlName="phone"
-                type="tel"
-                [maxlength]="maxPhoneLength" />
-            </mat-form-field>
+            <nf-input
+              [label]="'userSettings.profile.phone' | translate"
+              type="tel"
+              formControlName="phone"
+              [maxlength]="maxPhoneLength" />
           </div>
 
           <div class="actions">
-            <button
-              mat-flat-button
-              color="primary"
+            <nf-button
               type="submit"
+              variant="primary"
               [disabled]="loading || saving || form.invalid || !form.dirty">
               {{ 'userSettings.profile.save' | translate }}
-            </button>
+            </nf-button>
           </div>
         </form>
       }

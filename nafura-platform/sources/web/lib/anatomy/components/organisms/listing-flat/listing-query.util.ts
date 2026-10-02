@@ -176,6 +176,15 @@ export function matchesFilters(item: unknown, filters: Record<string, unknown>):
   return matchesFilterClauses(item, recordFiltersToClauses(filters));
 }
 
+/** Segment filters: each field equals the value (or one of the values of an array). */
+export function matchesSegment(item: unknown, filters: Record<string, unknown> | undefined): boolean {
+  if (!filters) return true;
+  return Object.entries(filters).every(([field, expected]) => {
+    const actual = fieldValue(item, field);
+    return Array.isArray(expected) ? expected.includes(actual) : actual === expected;
+  });
+}
+
 /** Keep matching nodes and ancestors. A match keeps the whole subtree. */
 export function filterTreeNodes<T>(
   nodes: NfTreeNode<T>[],

@@ -1,0 +1,171 @@
+import groovy.json.JsonSlurper
+import org.gradle.api.artifacts.ProjectDependency
+
+plugins {
+    id 'java'
+}
+
+apply from: '../../../gradle/nafura-migrations.gradle'
+
+def catalog = new JsonSlurper().parse(file('../../../capabilities.json')).capabilities
+def moduleNames = catalog.collectMany { it.modules }.unique()
+
+def platformProject = { String name ->
+    def found = rootProject.allprojects.find { it.name == name }
+    if (found == null) {
+        throw new GradleException("capabilities.json references unknown module '${name}'.")
+    }
+    found
+}
+
+dependencies {
+    moduleNames.each { testImplementation project(platformProject(it).path) }
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// A disabled capability must not come back through a Gradle dependency of an enabled one.
+def verifyCapabilityCatalog = tasks.register('verifyCapabilityCatalog') {
+    group = 'verification'
+    description = 'Checks capabilities.json against the real Gradle module graph.'
+    doLast {
+        def directDeps = { String name ->
+            def p = platformProject(name)
+            ['api', 'implementation'].collectMany { conf ->
+                p.configurations.findByName(conf)?.dependencies?.withType(ProjectDependency)?.collect { dep ->
+                    dep.path.tokenize(':').last()
+                } ?: []
+            }.unique()
+        }
+        def closure = { Collection<String> roots ->
+            def seen = new LinkedHashSet<String>()
+            def stack = new ArrayDeque<String>(roots)
+            while (!stack.isEmpty()) {
+                def name = stack.pop()
+                if (seen.add(name)) stack.addAll(directDeps(name))
+            }
+            seen
+        }
+        def byId = catalog.collectEntries { [(it.id): it] }
+        def owner = [:]
+        catalog.each { cap -> cap.modules.each { owner[it] = cap.id } }
+        def coreClosure = closure(catalog.findAll { it.core }.collectMany { it.modules })
+        def requiresClosure = { String id ->
+            def seen = new LinkedHashSet<String>()
+            def stack = new ArrayDeque<String>([id])
+            while (!stack.isEmpty()) {
+                def current = stack.pop()
+                if (!byId.containsKey(current)) throw new GradleException("Unknown capability '${current}' in requires.")
+                if (seen.add(current)) stack.addAll(byId[current].requires ?: [])
+            }
+            seen
+        }
+
+        def problems = []
+        catalog.findAll { !it.core }.each { cap ->
+            def allowed = requiresClosure(cap.id)
+            closure(cap.modules).each { module ->
+                def moduleOwner = owner[module]
+                if (moduleOwner == null) {
+                    if (!coreClosure.contains(module)) problems << "${cap.id}: module '${module}' belongs to no capability"
+                } else if (!allowed.contains(moduleOwner) && !byId[moduleOwner].core) {
+                    problems << "${cap.id}: pulls '${module}' of ${moduleOwner}, missing from its requires"
+                }
+            }
+        }
+        rootProject.allprojects.findAll { it.file('src/main/java').isDirectory() }.each { p ->
+            if (!owner.containsKey(p.name) && !coreClosure.contains(p.name)) {
+                problems << "module '${p.name}' is in no capability"
+            }
+        }
+        if (problems) throw new GradleException("Capability catalog out of sync:\n - " + problems.join('\n - '))
+        logger.lifecycle("Capability catalog OK: ${catalog.size()} capabilities, ${owner.size()} modules.")
+    }
+}
+
+def allMigrations = nafuraMigrationsFor(configurations.testRuntimeClasspath, 'migrations-all')
+
+tasks.named('test') {
+    dependsOn verifyCapabilityCatalog
+    useJUnitPlatform()
+    classpath += allMigrations
+    def dataDir = layout.buildDirectory.dir('lab-postgres/all')
+    doFirst { delete dataDir }
+    systemProperty 'nafura.lab.data-dir', dataDir.get().asFile.absolutePath
+    systemProperty 'nafura.test.catalog', file('../../../capabilities.json').absolutePath
+    systemProperty 'nafura.test.disabled-capabilities', ''
+}
+
+// One boot per capability: the capability and every capability requiring it are removed from the classpath.
+def byId = catalog.collectEntries { [(it.id): it] }
+def dependents = { String id ->
+    def removed = new LinkedHashSet<String>([id])
+    boolean grew = true
+    while (grew) {
+        grew = false
+        catalog.each { cap ->
+            if (!removed.contains(cap.id) && (cap.requires ?: []).any { removed.contains(it) }) {
+                removed << cap.id
+                grew = true
+            }
+        }
+    }
+    removed
+}
+def testLibraries = [
+    'org.springframework.boot:spring-boot-starter-test',
+    'org.springframework.boot:spring-boot-starter-thymeleaf',
+]
+
+def withoutTasks = catalog.findAll { !it.core }.collect { cap ->
+    def removed = dependents(cap.id)
+    def removedModules = catalog.findAll { removed.contains(it.id) }.collectMany { it.modules } as Set
+    def keptModules = moduleNames.findAll { !removedModules.contains(it) }
+    def suffix = cap.id.replace('cap.', '')
+
+    def runtime = configurations.create("capabilityRuntime_${suffix.replace('-', '_')}") {
+        canBeConsumed = false
+        canBeResolved = true
+        extendsFrom configurations.testRuntimeOnly
+    }
+    dependencies {
+        keptModules.each { add(runtime.name, project(platformProject(it).path)) }
+        testLibraries.each { add(runtime.name, it) }
+        add(runtime.name, 'org.junit.platform:junit-platform-launcher')
+    }
+
+    def migrations = nafuraMigrationsFor(runtime, "migrations-without-${suffix}")
+
+    tasks.register("testWithout-${suffix}", Test) {
+        group = 'verification'
+        description = "Boots the platform without ${removed.join(', ')}."
+        dependsOn verifyCapabilityCatalog
+        useJUnitPlatform()
+        testClassesDirs = sourceSets.test.output.classesDirs
+        classpath = sourceSets.test.output + runtime + migrations
+        def dataDir = layout.buildDirectory.dir("lab-postgres/without-${suffix}")
+        systemProperty 'nafura.lab.data-dir', dataDir.get().asFile.absolutePath
+        systemProperty 'nafura.test.catalog', file('../../../capabilities.json').absolutePath
+        systemProperty 'nafura.test.disabled-capabilities', removed.join(',')
+        reports.html.outputLocation = layout.buildDirectory.dir("reports/tests/without-${suffix}")
+        reports.junitXml.outputLocation = layout.buildDirectory.dir("test-results/without-${suffix}")
+        doFirst {
+            delete dataDir
+            def leaked = runtime.incoming.resolutionResult.allComponents
+                .collect { it.id }
+                .findAll { it instanceof org.gradle.api.artifacts.component.ProjectComponentIdentifier }
+                .collect { it.projectName }
+                .findAll { removedModules.contains(it) }
+            if (leaked) {
+                throw new GradleException("Disabling ${cap.id} still puts ${leaked} on the classpath.")
+            }
+        }
+    }
+}
+
+tasks.register('testCapabilitiesOnOff') {
+    group = 'verification'
+    description = 'Boots the platform once with everything, then once per removable capability.'
+    dependsOn tasks.named('test'), withoutTasks
+}

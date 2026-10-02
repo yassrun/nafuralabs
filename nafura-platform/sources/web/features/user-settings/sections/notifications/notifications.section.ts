@@ -8,13 +8,9 @@ import {
   inject,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
-import { AlertComponent } from '@lib/anatomy';
+import { AlertComponent, ButtonComponent, NfSelectComponent, NfSwitchComponent } from '@lib/anatomy';
 import type { UserNotificationSettings } from '../../models';
 import { DIGEST_FREQUENCY_OPTIONS } from './notifications.config';
 
@@ -25,11 +21,10 @@ import { DIGEST_FREQUENCY_OPTIONS } from './notifications.config';
     CommonModule,
     ReactiveFormsModule,
     TranslateModule,
-    MatSlideToggleModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatButtonModule,
     AlertComponent,
+    ButtonComponent,
+    NfSelectComponent,
+    NfSwitchComponent,
   ],
   template: `
     <section class="settings-section">
@@ -41,41 +36,38 @@ import { DIGEST_FREQUENCY_OPTIONS } from './notifications.config';
 
       <form [formGroup]="form" (ngSubmit)="submit()">
         <div class="toggles">
-          <mat-slide-toggle formControlName="emailNotifications">
-            {{ 'userSettings.notifications.email' | translate }}
-          </mat-slide-toggle>
+          <nf-switch
+            [checked]="form.controls.emailNotifications.value"
+            [label]="'userSettings.notifications.email' | translate"
+            (changed)="setNotificationControl('emailNotifications', $event)" />
           <p class="field-hint">{{ 'userSettings.notifications.email.hint' | translate }}</p>
 
-          <mat-slide-toggle formControlName="inAppNotifications">
-            {{ 'userSettings.notifications.inApp' | translate }}
-          </mat-slide-toggle>
+          <nf-switch
+            [checked]="form.controls.inAppNotifications.value"
+            [label]="'userSettings.notifications.inApp' | translate"
+            (changed)="setNotificationControl('inAppNotifications', $event)" />
           <p class="field-hint">{{ 'userSettings.notifications.inApp.hint' | translate }}</p>
         </div>
 
-        <mat-form-field appearance="outline" class="digest-field">
-          <mat-label>{{ 'userSettings.notifications.digest' | translate }}</mat-label>
-          <mat-select
+        <nf-select
+          class="digest-field"
+          [label]="'userSettings.notifications.digest' | translate"
+          [options]="digestSelectOptions"
             formControlName="digestFrequency"
-            [disabled]="!form.get('emailNotifications')?.value">
-            @for (option of digestOptions; track option.value) {
-              <mat-option [value]="option.value">{{ option.labelKey | translate }}</mat-option>
-            }
-          </mat-select>
-          @if (form.get('emailNotifications')?.value) {
-            <mat-hint>{{ 'userSettings.notifications.digest.hint' | translate }}</mat-hint>
-          } @else {
-            <mat-hint>{{ 'userSettings.notifications.digest.disabled' | translate }}</mat-hint>
-          }
-        </mat-form-field>
+          [disabled]="!form.controls.emailNotifications.value" />
+        @if (form.controls.emailNotifications.value) {
+          <p class="field-hint">{{ 'userSettings.notifications.digest.hint' | translate }}</p>
+        } @else {
+          <p class="field-hint">{{ 'userSettings.notifications.digest.disabled' | translate }}</p>
+        }
 
         <div class="actions">
-          <button
-            mat-flat-button
-            color="primary"
+          <nf-button
             type="submit"
+            variant="primary"
             [disabled]="loading || saving || form.invalid">
             {{ 'userSettings.notifications.save' | translate }}
-          </button>
+          </nf-button>
         </div>
       </form>
     </section>
@@ -103,7 +95,7 @@ import { DIGEST_FREQUENCY_OPTIONS } from './notifications.config';
         margin-bottom: 0.75rem;
       }
 
-      .toggles mat-slide-toggle {
+      .toggles nf-switch {
         display: block;
       }
 
@@ -127,6 +119,7 @@ import { DIGEST_FREQUENCY_OPTIONS } from './notifications.config';
 })
 export class NotificationsSectionComponent implements OnChanges {
   private readonly fb = inject(FormBuilder);
+  private readonly i18n = inject(TranslateService);
 
   @Input() data: UserNotificationSettings | null = null;
   @Input() loading = false;
@@ -135,6 +128,10 @@ export class NotificationsSectionComponent implements OnChanges {
   @Output() save = new EventEmitter<UserNotificationSettings>();
 
   readonly digestOptions = [...DIGEST_FREQUENCY_OPTIONS];
+  readonly digestSelectOptions = this.digestOptions.map((option) => ({
+    value: option.value,
+    label: this.i18n.instant(option.labelKey),
+  }));
 
   readonly form = this.fb.nonNullable.group({
     emailNotifications: true,
@@ -163,5 +160,9 @@ export class NotificationsSectionComponent implements OnChanges {
       return;
     }
     this.save.emit(this.form.getRawValue());
+  }
+
+  setNotificationControl(control: 'emailNotifications' | 'inAppNotifications', value: boolean): void {
+    this.form.controls[control].setValue(value);
   }
 }

@@ -1,24 +1,26 @@
 {
-  "$comment": "Contrat d'intégration d'un contexte métier. Vit à côté des sources métier du produit. L'activation (enabled) n'est pas ici : c'est un réglage Nafura sur l'app.",
-  "id": "bc.achats",
-  "name": "Achats",
-  "version": "0.1.0",
-  "routesPrefix": "/achats",
-  "permissionsPrefix": "achats.",
-  "web": {
-    "routes": "./sources/web/achats.routes.ts",
+  "$schema": "../nafura-platform/sources/web/platform/schemas/bc.manifest.schema.json",
+  "apiVersion": "nafura.io/v1",
+  "kind": "business-context",
+  "metadata": { "id": "bc.achats", "version": "0.1.0", "owner": "sandbox", "lifecycle": "experimental" },
+  "spec": {
+    "label": "Achats",
+    "icon": "shopping-cart",
+    "routesPrefix": "/achats",
+    "permissions": [
+      { "id": "achats.commande.read" },
+      { "id": "achats.commande.write" }
+    ],
+    "defaultRoles": [
+      { "code": "ACHETEUR", "permissions": ["achats.commande.read", "achats.commande.write"] },
+      { "code": "ACHATS_LECTEUR", "permissions": ["achats.commande.read"] }
+    ],
     "navigation": [
-      { "id": "achats-home", "label": "Achats", "route": "/achats", "icon": "shopping-cart" }
-    ]
-  },
-  "backend": {
-    "gradle": ":bc:achats",
-    "packages": ["ma.nafura.bc.achats"]
-  },
-  "platformIntegrations": [
-    "authorization",
-    "tenancy",
-    "organization-identity",
-    "impression"
-  ]
+      { "id": "achats-home", "label": "Accueil", "route": "/achats", "icon": "shopping-cart", "permission": "achats.commande.read" }
+    ],
+    "requires": [
+      { "id": "cap.approvals", "version": "^0.1.0", "optional": true }
+    ],
+    "i18n": { "namespace": "bc.achats", "locales": ["fr"] }
+  }
 }

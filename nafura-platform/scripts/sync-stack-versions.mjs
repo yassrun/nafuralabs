@@ -6,12 +6,19 @@ import { resolve } from 'node:path';
 const write = process.argv.includes('--write');
 const repositoryRoot = resolve(import.meta.dirname, '..', '..');
 const catalogPath = resolve(repositoryRoot, 'nafura-platform', 'stack.versions.properties');
-const products = [
-  'nafura-platform/sources/web',
-  'sektor/sources/web',
-  'venue-catalog/sources/web',
-  'sandbox/sources/web',
-];
+const packageArgumentIndex = process.argv.indexOf('--package');
+const packageArgument = packageArgumentIndex >= 0 ? process.argv[packageArgumentIndex + 1] : null;
+if (packageArgumentIndex >= 0 && (!packageArgument || packageArgument.startsWith('--'))) {
+  throw new Error('--package requires a path to package.json');
+}
+const products = packageArgument
+  ? [{ name: packageArgument, packagePath: resolve(process.cwd(), packageArgument) }]
+  : [
+      'nafura-platform/sources/web',
+      'sektor/sources/web',
+      'venue-catalog/sources/web',
+      'sandbox/sources/web',
+    ].map((name) => ({ name, packagePath: resolve(repositoryRoot, name, 'package.json') }));
 const versionKeys = {
   '@angular/animations': 'angular-animations.version',
   '@angular/cdk': 'angular-cdk.version',
@@ -28,6 +35,13 @@ const versionKeys = {
   '@angular-devkit/build-angular': 'angular-devkit.version',
   typescript: 'typescript.version',
   rxjs: 'rxjs.version',
+  tslib: 'tslib.version',
+  'zone.js': 'zonejs.version',
+  '@ngx-translate/core': 'ngx-translate-core.version',
+  'ngx-translate-messageformat-compiler': 'ngx-translate-messageformat-compiler.version',
+  'chart.js': 'chartjs.version',
+  'lucide-angular': 'lucide-angular.version',
+  'ng2-charts': 'ng2-charts.version',
 };
 
 function parseProperties(source) {
@@ -52,8 +66,8 @@ const catalog = parseProperties(await readFile(catalogPath, 'utf8'));
 let drift = false;
 
 for (const product of products) {
-  const productPath = resolve(repositoryRoot, product);
-  const packagePath = resolve(productPath, 'package.json');
+  const productPath = resolve(product.packagePath, '..');
+  const packagePath = product.packagePath;
   const overridesPath = resolve(productPath, 'stack.versions.override.properties');
   const manifest = JSON.parse(await readFile(packagePath, 'utf8'));
   let overrides = {};
@@ -75,7 +89,7 @@ for (const product of products) {
       if (dependencies[dependency] === expected) continue;
       drift = true;
       changed = true;
-      console.log(`${product}: ${dependency} ${dependencies[dependency]} -> ${expected}`);
+      console.log(`${product.name}: ${dependency} ${dependencies[dependency]} -> ${expected}`);
       dependencies[dependency] = expected;
     }
   }

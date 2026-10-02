@@ -1,19 +1,22 @@
-import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { CommonModule, formatDate } from '@angular/common';
+import { Component, LOCALE_ID, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {
+  ConfirmDialogService,
+  ListingFlatComponent,
   PageHeaderComponent,
   PageShellComponent,
   ToastService,
+  type ListingFlatConfig,
 } from '@lib/anatomy';
+import type { ListingQueryState } from '@lib/anatomy/types';
 import type { JobExecution, ScheduledJobSummary } from './scheduled-jobs.models';
 import { ScheduledJobsFacade } from './scheduled-jobs.facade';
 import { CronDescriptionPipe } from '@lib/anatomy/pipes/cron-description.pipe';
+
+const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-scheduled-job-detail-page',
@@ -23,9 +26,7 @@ import { CronDescriptionPipe } from '@lib/anatomy/pipes/cron-description.pipe';
     PageShellComponent,
     PageHeaderComponent,
     TranslateModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
+    ListingFlatComponent,
     CronDescriptionPipe,
   ],
   template: `
@@ -53,105 +54,23 @@ import { CronDescriptionPipe } from '@lib/anatomy/pipes/cron-description.pipe';
         </section>
 
         <section class="toolbar">
-          <div class="left">
-            <h2>
-              {{ 'administration.scheduledJobs.detail.executions' | translate }}
-            </h2>
-            <p class="subtitle">
-              {{ job()?.cron | cronDescription }}
-            </p>
-          </div>
-          <div class="right">
-            <mat-form-field appearance="outline">
-              <mat-select
-                [value]="statusFilter()"
-                (valueChange)="onStatusFilterChange($event)"
-                [placeholder]="'common.filters.status' | translate">
-                <mat-option value="all">
-                  {{ 'common.filters.all' | translate }}
-                </mat-option>
-                <mat-option value="SUCCESS">
-                  {{ 'common.status.success' | translate }}
-                </mat-option>
-                <mat-option value="FAILED">
-                  {{ 'common.status.failed' | translate }}
-                </mat-option>
-                <mat-option value="RUNNING">
-                  {{ 'common.status.running' | translate }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <button
-              mat-raised-button
-              color="primary"
-              type="button"
-              (click)="onRunNow()">
-              <mat-icon>play_arrow</mat-icon>
-              {{ 'administration.scheduledJobs.actions.runNow' | translate }}
-            </button>
-          </div>
+          <h2>
+            {{ 'administration.scheduledJobs.detail.executions' | translate }}
+          </h2>
+          <p class="subtitle">
+            {{ job()?.cron | cronDescription }}
+          </p>
         </section>
 
-        <section class="table">
-          <table>
-            <thead>
-              <tr>
-                <th>
-                  {{ 'administration.scheduledJobs.detail.columns.started' | translate }}
-                </th>
-                <th>
-                  {{ 'administration.scheduledJobs.detail.columns.ended' | translate }}
-                </th>
-                <th>
-                  {{ 'administration.scheduledJobs.detail.columns.duration' | translate }}
-                </th>
-                <th>
-                  {{ 'administration.scheduledJobs.detail.columns.status' | translate }}
-                </th>
-                <th>
-                  {{ 'administration.scheduledJobs.detail.columns.tenant' | translate }}
-                </th>
-                <th>
-                  {{ 'administration.scheduledJobs.detail.columns.error' | translate }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (executions().length === 0) {
-                <tr>
-                  <td colspan="6" class="empty">
-                    {{ 'common.empty.noResults' | translate }}
-                  </td>
-                </tr>
-              } @else {
-                @for (exec of executions(); track exec.id) {
-                  <tr>
-                    <td>{{ exec.startedAt | date: 'short' }}</td>
-                    <td>{{ exec.endedAt ? (exec.endedAt | date: 'short') : '—' }}</td>
-                    <td>{{ formatDuration(exec.durationMs) }}</td>
-                    <td>
-                      <span class="badge" [ngClass]="statusClass(exec.status)">
-                        {{ exec.status }}
-                      </span>
-                    </td>
-                    <td>{{ exec.tenantId || 'System' }}</td>
-                    <td>
-                      @if (exec.errorMessage) {
-                        <details>
-                          <summary>{{ exec.errorMessage | slice: 0:80 }}</summary>
-                          <pre>{{ exec.errorMessage }}</pre>
-                        </details>
-                      } @else {
-                        —
-                      }
-                    </td>
-                  </tr>
-                }
-              }
-            </tbody>
-          </table>
-        </section>
+        <nf-listing-flat
+          class="executions"
+          [config]="listing"
+          [items]="executions()"
+          [remote]="true"
+          [remoteTotal]="totalRuns()"
+          (load)="onLoad($event)"
+          (actionClick)="onRunNow()"
+          (rowDblClick)="showError($event)" />
       } @else {
         <p class="empty">
           {{ 'common.empty.loading' | translate }}
@@ -193,12 +112,11 @@ import { CronDescriptionPipe } from '@lib/anatomy/pipes/cron-description.pipe';
       }
 
       .toolbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .toolbar h2 {
+        margin: 0;
       }
 
       .toolbar .subtitle {
@@ -207,93 +125,15 @@ import { CronDescriptionPipe } from '@lib/anatomy/pipes/cron-description.pipe';
         color: #64748b;
       }
 
-      .toolbar .right {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
-
-      .table {
-        border-radius: 0.75rem;
-        border: 1px solid #e2e8f0;
-        overflow: auto;
-        background: #ffffff;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-
-      thead {
-        background: #f8fafc;
-      }
-
-      th,
-      td {
-        padding: 0.75rem 0.875rem;
-        text-align: left;
-        font-size: 0.875rem;
-        border-bottom: 1px solid #e2e8f0;
-      }
-
-      th {
-        font-weight: 600;
-        color: #64748b;
-        white-space: nowrap;
-      }
-
-      tbody tr:last-child td {
-        border-bottom: none;
+      .executions {
+        display: block;
+        min-height: 320px;
       }
 
       .empty {
         text-align: center;
         padding: 1.5rem;
         color: #64748b;
-      }
-
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.15rem 0.5rem;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-      }
-
-      .badge--success {
-        background: #dcfce7;
-        color: #15803d;
-      }
-
-      .badge--failed {
-        background: #fee2e2;
-        color: #b91c1c;
-      }
-
-      .badge--running {
-        background: #dbeafe;
-        color: #1d4ed8;
-      }
-
-      details summary {
-        cursor: pointer;
-        list-style: none;
-        outline: none;
-      }
-
-      details summary::-webkit-details-marker {
-        display: none;
-      }
-
-      details pre {
-        margin-top: 0.5rem;
-        white-space: pre-wrap;
-        font-size: 0.78rem;
-        background: #f8fafc;
-        padding: 0.5rem;
-        border-radius: 0.5rem;
       }
     `,
   ],
@@ -302,13 +142,43 @@ export class ScheduledJobDetailPage {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(ScheduledJobsFacade);
   private readonly toast = inject(ToastService);
+  private readonly dialogs = inject(ConfirmDialogService);
+  private readonly locale = inject(LOCALE_ID);
   private readonly i18n = inject(TranslateService);
+
+  readonly listing: ListingFlatConfig = {
+    columns: [
+      { key: 'started', field: 'startedAt', label: 'administration.scheduledJobs.detail.columns.started', type: 'datetime' },
+      { key: 'ended', field: 'endedAt', label: 'administration.scheduledJobs.detail.columns.ended', type: 'datetime' },
+      { key: 'duration', field: 'durationMs', label: 'administration.scheduledJobs.detail.columns.duration', transform: (ms) => this.formatDuration(ms as number | null) },
+      {
+        key: 'status',
+        field: 'status',
+        label: 'administration.scheduledJobs.detail.columns.status',
+        type: 'badge',
+        transform: (status) => `common.status.${String(status).toLowerCase()}`,
+        badgeVariant: (status) => ({ SUCCESS: 'success', FAILED: 'danger', RUNNING: 'info' } as const)[status as JobExecution['status']] ?? 'default',
+      },
+      { key: 'tenant', field: 'tenantId', label: 'administration.scheduledJobs.detail.columns.tenant', transform: (id) => (id ? String(id) : this.i18n.instant('administration.scheduledJobs.detail.systemTenant')) },
+      { key: 'error', field: 'errorMessage', label: 'administration.scheduledJobs.detail.columns.error', transform: (error) => (error ? String(error).slice(0, 80) : '—') },
+    ],
+    pageSize: PAGE_SIZE,
+    pageSizeOptions: [PAGE_SIZE],
+    emptyMessage: 'common.empty.noResults',
+    features: { search: false, filters: false, columnToggle: false, selection: 'none' },
+    segments: [
+      { id: 'all', label: 'common.filters.all' },
+      { id: 'SUCCESS', label: 'common.status.success', filters: { status: 'SUCCESS' } },
+      { id: 'FAILED', label: 'common.status.failed', filters: { status: 'FAILED' } },
+      { id: 'RUNNING', label: 'common.status.running', filters: { status: 'RUNNING' } },
+    ],
+    actions: [{ id: 'run', label: 'administration.scheduledJobs.actions.runNow', icon: 'play', variant: 'primary' }],
+  };
 
   readonly key = signal<string | null>(null);
   readonly job = signal<ScheduledJobSummary | null>(null);
   readonly executions = this.facade.executions;
-
-  readonly statusFilter = signal<string>('all');
+  private readonly query = signal<{ page: number; status?: string }>({ page: 0 });
 
   readonly headerTitle = computed(() => {
     const j = this.job();
@@ -361,7 +231,7 @@ export class ScheduledJobDetailPage {
       }
       const job = this.facade.jobs().find((j) => j.key === key) ?? null;
       this.job.set(job);
-      await this.facade.loadExecutions(key, { page: 0, size: 20 });
+      await this.reload();
     } catch {
       this.toast.error(
         this.i18n.instant('common.errors.operationFailed') ||
@@ -370,15 +240,24 @@ export class ScheduledJobDetailPage {
     }
   }
 
-  onStatusFilterChange(value: string): void {
-    this.statusFilter.set(value || 'all');
+  onLoad(query: ListingQueryState): void {
+    const status = query.segment && query.segment !== 'all' ? query.segment : undefined;
+    this.query.set({ page: query.page - 1, status });
+    void this.reload();
+  }
+
+  private async reload(): Promise<void> {
     const key = this.key();
     if (!key) return;
-    const status = value === 'all' ? undefined : value;
-    void this.facade.loadExecutions(key, {
-      page: 0,
-      size: 20,
-      status,
+    await this.facade.loadExecutions(key, { size: PAGE_SIZE, ...this.query() });
+  }
+
+  async showError(execution: JobExecution): Promise<void> {
+    if (!execution.errorMessage) return;
+    await this.dialogs.reveal({
+      title: this.i18n.instant('administration.scheduledJobs.detail.columns.error'),
+      message: formatDate(execution.startedAt, 'medium', this.locale),
+      value: execution.errorMessage,
     });
   }
 
@@ -390,7 +269,7 @@ export class ScheduledJobDetailPage {
       this.toast.success(
         this.i18n.instant('administration.scheduledJobs.actions.runNowSuccess')
       );
-      await this.facade.loadExecutions(key, { page: 0, size: 20 });
+      await this.reload();
     } catch {
       this.toast.error(
         this.i18n.instant('common.errors.operationFailed') ||
@@ -411,19 +290,6 @@ export class ScheduledJobDetailPage {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     return `${hours}h ${remainingMinutes}m`;
-  }
-
-  statusClass(status: JobExecution['status']): string {
-    switch (status) {
-      case 'SUCCESS':
-        return 'badge--success';
-      case 'FAILED':
-        return 'badge--failed';
-      case 'RUNNING':
-        return 'badge--running';
-      default:
-        return '';
-    }
   }
 }
 

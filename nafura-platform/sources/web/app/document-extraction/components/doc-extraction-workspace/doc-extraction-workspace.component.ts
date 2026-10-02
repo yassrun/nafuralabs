@@ -35,14 +35,14 @@ import { ExtractionService } from '../../services/extraction.service';
 import { ColumnResolver, ResolvedColumn } from '../../utils/column-resolver';
 import { DynamicRecordDialogComponent, DynamicRecordDialogResult } from '../dynamic-record-dialog/dynamic-record-dialog.component';
 import { ExportResultDialogComponent, ExportResultData } from '../export-result-dialog/export-result-dialog.component';
-import { TenantContextService } from '../../../../../core/tenant/tenant.context';
+import { TenantContextService } from '../../../../core/tenant/tenant.context';
 import { StandardRecordFiltersComponent } from '../standard-record-filters/standard-record-filters.component';
-import { ContextHeaderComponent, StatusChipComponent } from '../../../../../lib/design-system';
+import { ContextHeaderComponent, StatusChipComponent } from '../../../../lib/design-system';
 
 import { ExtractionDiscoveryComponent } from '../extraction-discovery/extraction-discovery.component';
-import { ConfirmDialogComponent } from '../../../../../core/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent } from '../../../../core/components/confirm-dialog/confirm-dialog.component';
 import { ExtractionResponse } from '../../models/extraction.model';
-import { FlipIconRtlDirective } from '../../../../../lib/anatomy/directives';
+import { FlipIconRtlDirective } from '../../../../lib/anatomy/directives';
 
 @Component({
   selector: 'app-doc-extraction-workspace',

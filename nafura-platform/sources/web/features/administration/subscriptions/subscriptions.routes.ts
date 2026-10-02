@@ -9,7 +9,7 @@ export const SUBSCRIPTIONS_ROUTES: Routes = [
       import('./subscriptions.page').then((m) => m.SubscriptionsPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.subscriptions.read'],
+      permissions: ['tenant.subscriptions.read'],
       title: 'Subscriptions',
     },
   },

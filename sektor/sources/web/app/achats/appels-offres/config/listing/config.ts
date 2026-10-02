@@ -19,6 +19,12 @@ export function buildAoListingConfig(t: TranslateService) {
     },
     {
       filters: buildAoFilters(t),
+      segments: [
+        { id: 'ALL', label: 'achats.appelOffre.chips.all' },
+        { id: 'EN_COURS', label: 'achats.appelOffre.chips.enCours', filters: { quick: 'EN_COURS' } },
+        { id: 'A_CLOTURER', label: 'achats.appelOffre.chips.aCloturer', filters: { quick: 'A_CLOTURER' } },
+        { id: 'ATTRIBUES', label: 'achats.appelOffre.chips.attribues', filters: { quick: 'ATTRIBUES' } },
+      ],
       defaultSort: { column: 'createdAt', direction: 'desc' },
       features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {

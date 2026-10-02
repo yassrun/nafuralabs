@@ -9,8 +9,8 @@ export const APP_SETTINGS_ROUTES: Routes = [
       import('./app-settings.page').then((m) => m.AppSettingsPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.settings.manage'],
-      title: 'Organization settings',
+      permissions: ['tenant.settings.write'],
+      title: 'Paramètres de l’organisation',
     },
   },
 ];

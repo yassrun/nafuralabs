@@ -1,0 +1,25 @@
+{
+  "$comment": "Single source for platform capabilities: web host, Gradle host build and tests read it. `modules` are Gradle project names (ma.nafuralabs:<name>). `core` capabilities cannot be disabled. `probe` proves the capability is on (not 404 / class present) or off (404 / class absent).",
+  "capabilities": [
+    { "id": "cap.foundation", "core": true, "modules": ["framework", "multi-tenant", "observability", "settings"], "probe": { "get": "/api/v1/listing-views" } },
+    { "id": "cap.lab", "core": true, "modules": ["lab"], "probe": { "get": "/api/public/lab/users" } },
+    { "id": "cap.user-settings", "modules": ["user-settings"], "requires": [], "probe": { "get": "/api/v1/user-settings/profile" } },
+    { "id": "cap.app-settings", "modules": ["app-settings"], "requires": [], "probe": { "get": "/api/v1/app-settings/general" } },
+    { "id": "cap.organization-identity", "modules": ["organization-identity"], "requires": ["cap.app-settings", "cap.documents"], "probe": { "get": "/api/v1/organization/identity" } },
+    { "id": "cap.iam", "modules": ["iam"], "requires": [], "probe": { "get": "/api/public/invitations/preview" } },
+    { "id": "cap.subscriptions", "modules": ["subscription"], "requires": [], "probe": { "get": "/api/v1/administration/subscriptions" } },
+    { "id": "cap.usage", "modules": ["usage"], "requires": ["cap.documents", "cap.ai"], "probe": { "get": "/api/v1/platform/usage/tenants" } },
+    { "id": "cap.sysconfig", "modules": ["sysconfig"], "requires": [], "probe": { "get": "/api/v1/numbering-sequences" } },
+    { "id": "cap.audit", "modules": ["audit"], "requires": [], "probe": { "get": "/api/v1/platform/collaboration/audit/log" } },
+    { "id": "cap.tagging", "modules": ["tagging"], "requires": [], "probe": { "get": "/api/v1/platform/collaboration/tags" } },
+    { "id": "cap.comments", "modules": ["commentaire"], "requires": [], "probe": { "get": "/api/v1/platform/collaboration/comments" } },
+    { "id": "cap.approvals", "modules": ["approbation"], "requires": [], "probe": { "get": "/api/v1/platform/collaboration/approvals/pending" } },
+    { "id": "cap.documents", "modules": ["documents", "impression"], "requires": ["cap.app-settings"], "probe": { "get": "/api/v1/platform/templates" } },
+    { "id": "cap.notifications", "modules": ["notification"], "requires": ["cap.documents", "cap.audit", "cap.comments", "cap.approvals"], "probe": { "get": "/api/v1/platform/collaboration/notifications/unread-count" } },
+    { "id": "cap.webhooks", "modules": ["webhook"], "requires": ["cap.notifications", "cap.approvals"], "probe": { "get": "/api/v1/platform/admin/webhooks" } },
+    { "id": "cap.jobs", "modules": ["job-runner"], "requires": [], "probe": { "class": "ma.nafura.platform.jobrunner.JobRunnerAutoConfiguration" } },
+    { "id": "cap.geo", "modules": ["geo", "google-places"], "requires": [], "probe": { "class": "ma.nafura.platform.geo.GeoPlatformAutoConfiguration" } },
+    { "id": "cap.ai", "modules": ["llm-provider", "ai-agent-api", "ai-conversation", "ai-agent-runtime"], "requires": ["cap.approvals", "cap.subscriptions", "cap.app-settings"], "probe": { "get": "/api/v1/platform/admin/ai-providers" } },
+    { "id": "cap.document-extraction", "modules": ["document-extraction"], "requires": ["cap.ai", "cap.documents"], "probe": { "get": "/api/doc-types/domains" } }
+  ]
+}

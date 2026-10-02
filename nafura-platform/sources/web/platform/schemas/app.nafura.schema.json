@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nafura.io/schemas/v1/app.nafura.schema.json",
+  "title": "Nafura application manifest",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "const": "nafura.io/v1" },
+    "kind": { "const": "application" },
+    "metadata": { "$ref": "#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["product", "runtime", "businessContexts"],
+      "additionalProperties": false,
+      "properties": {
+        "product": {
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "tagline": { "type": "string" },
+            "mark": { "type": "string", "pattern": "^/[a-zA-Z0-9/_.-]+\\.(svg|png|webp)$" },
+            "logo": { "type": "string", "pattern": "^/[a-zA-Z0-9/_.-]+\\.(svg|png|webp)$" }
+          }
+        },
+        "runtime": {
+          "type": "object",
+          "required": ["requiresTenant", "defaultRoute"],
+          "additionalProperties": false,
+          "properties": {
+            "requiresTenant": { "type": "boolean" },
+            "defaultRoute": { "type": "string", "pattern": "^/" },
+            "auth": {
+              "type": "object",
+              "required": ["mode"],
+              "additionalProperties": false,
+              "properties": {
+                "mode": { "enum": ["keycloak", "lab"] },
+                "sessionUrl": { "type": "string" },
+                "usersUrl": { "type": "string" }
+              }
+            }
+          }
+        },
+        "shell": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "topBar": { "type": "object", "additionalProperties": false, "properties": { "enabled": { "type": "boolean" }, "pageContext": { "type": "boolean" } } },
+            "sidebar": { "type": "object", "additionalProperties": false, "properties": { "enabled": { "type": "boolean" } } },
+            "userMenu": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "userSettings": { "type": "boolean" },
+                "userSettingsRoute": { "type": "string" }
+              }
+            },
+            "tenantMenu": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "tenantSettings": { "type": "boolean" },
+                "tenantSettingsRoute": { "type": "string" },
+                "organizationIdentity": { "type": "boolean" },
+                "organizationIdentityRoute": { "type": "string" },
+                "fallbackName": { "type": "string" },
+                "fallbackKey": { "type": "string" }
+              }
+            },
+            "notifications": { "type": "object", "additionalProperties": false, "properties": { "enabled": { "type": "boolean" } } },
+            "ai": { "type": "object", "additionalProperties": false, "properties": { "enabled": { "type": "boolean" }, "initiallyOpen": { "type": "boolean" } } }
+          }
+        },
+        "businessContexts": { "type": "array", "items": { "type": "string", "pattern": "^bc\\.[a-z][a-z0-9-]*$" } },
+        "capabilities": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "disabled": { "type": "array", "items": { "type": "string", "pattern": "^cap\\.[a-z][a-z0-9-]*$" } }
+          }
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["code", "label"],
+            "additionalProperties": false,
+            "properties": {
+              "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+              "label": { "type": "string" },
+              "includes": { "type": "array", "items": { "type": "string", "pattern": "^bc\\.[a-z][a-z0-9-]*:[A-Z][A-Z0-9_]*$" } },
+              "permissions": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "provides": { "type": "array", "items": { "$ref": "#/$defs/capability" } },
+        "requires": { "type": "array", "items": { "$ref": "#/$defs/requirement" } },
+        "i18n": { "$ref": "#/$defs/i18n" }
+      }
+    }
+  },
+  "$defs": {
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "metadata": {
+      "type": "object",
+      "required": ["id", "version", "owner", "lifecycle"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^app\\.[a-z][a-z0-9-]*$" },
+        "version": { "$ref": "#/$defs/version" },
+        "owner": { "type": "string" },
+        "lifecycle": { "enum": ["experimental", "production", "deprecated"] },
+        "labels": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "required": ["id", "version"],
+      "additionalProperties": false,
+      "properties": { "id": { "type": "string" }, "version": { "$ref": "#/$defs/version" } }
+    },
+    "requirement": {
+      "type": "object",
+      "required": ["id", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "string", "pattern": "^\\^\\d+\\.\\d+\\.\\d+$" },
+        "optional": { "type": "boolean" }
+      }
+    },
+    "i18n": {
+      "type": "object",
+      "required": ["namespace", "locales"],
+      "additionalProperties": false,
+      "properties": {
+        "namespace": { "type": "string" },
+        "locales": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

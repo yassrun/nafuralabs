@@ -1,0 +1,11 @@
+{
+  "apiVersion": "nafura.io/v1",
+  "kind": "application",
+  "metadata": { "id": "app.host-tests", "version": "0.1.0", "owner": "nafuralabs", "lifecycle": "experimental" },
+  "spec": {
+    "businessContexts": ["bc.probe"],
+    "roles": [
+      { "code": "PROBE_LEAD", "label": "Probe lead", "includes": ["bc.probe:PROBE_VIEWER", "bc.probe:PROBE_WRITER"] }
+    ]
+  }
+}

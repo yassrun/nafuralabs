@@ -99,6 +99,30 @@
         "showInDetail": true, "detailSection": "general", "detailOrder": 6,
         "component": "nf-number-input"
       }
+    },
+    {
+      "name": "separator",
+      "type": "string",
+      "column": "separator",
+      "validation": { "maxLength": 5 },
+      "db": { "nullable": true, "length": 5 },
+      "ui": { "label": "sysconfig.fields.separator", "showInListing": false, "showInDetail": true, "detailSection": "general", "detailOrder": 7, "component": "nf-input" }
+    },
+    {
+      "name": "yearFormat",
+      "type": "string",
+      "column": "year_format",
+      "validation": { "maxLength": 10 },
+      "db": { "nullable": true, "length": 10 },
+      "ui": { "label": "sysconfig.fields.yearFormat", "showInListing": false, "showInDetail": true, "detailSection": "general", "detailOrder": 8, "component": "nf-input" }
+    },
+    {
+      "name": "resetPolicy",
+      "type": "string",
+      "column": "reset_policy",
+      "validation": { "maxLength": 20 },
+      "db": { "nullable": true, "length": 20 },
+      "ui": { "label": "sysconfig.fields.resetPolicy", "showInListing": false, "showInDetail": true, "detailSection": "general", "detailOrder": 9, "component": "nf-input" }
     }
   ],
 

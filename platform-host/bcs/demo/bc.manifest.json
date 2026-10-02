@@ -1,0 +1,102 @@
+{
+  "$schema": "../../../nafura-platform/sources/web/platform/schemas/bc.manifest.schema.json",
+  "apiVersion": "nafura.io/v1",
+  "kind": "business-context",
+  "metadata": { "id": "bc.demo", "version": "0.2.0", "owner": "nafuralabs", "lifecycle": "experimental" },
+  "spec": {
+    "label": "Démo",
+    "icon": "flask-conical",
+    "routesPrefix": "/demo",
+    "permissions": [
+      { "id": "demo.notes.note.read" },
+      { "id": "demo.notes.note.create" },
+      { "id": "demo.notes.note.delete" },
+      { "id": "demo.purchasing.category.read" },
+      { "id": "demo.purchasing.category.create" },
+      { "id": "demo.purchasing.category.update" },
+      { "id": "demo.purchasing.category.delete" },
+      { "id": "demo.purchasing.supplier.read" },
+      { "id": "demo.purchasing.supplier.create" },
+      { "id": "demo.purchasing.supplier.update" },
+      { "id": "demo.purchasing.supplier.delete" },
+      { "id": "demo.purchasing.contact.read" },
+      { "id": "demo.purchasing.contact.create" },
+      { "id": "demo.purchasing.contact.update" },
+      { "id": "demo.purchasing.contact.delete" },
+      { "id": "demo.purchasing.item.read" },
+      { "id": "demo.purchasing.item.create" },
+      { "id": "demo.purchasing.item.update" },
+      { "id": "demo.purchasing.item.delete" },
+      { "id": "demo.purchasing.request.read" },
+      { "id": "demo.purchasing.request.create" },
+      { "id": "demo.purchasing.request.update" },
+      { "id": "demo.purchasing.request.delete" },
+      { "id": "demo.purchasing.request.submit" },
+      { "id": "demo.purchasing.request.order" },
+      { "id": "demo.projects.project.read" },
+      { "id": "demo.projects.project.create" },
+      { "id": "demo.projects.project.update" },
+      { "id": "demo.projects.project.delete" },
+      { "id": "demo.projects.project.advance" }
+    ],
+    "defaultRoles": [
+      {
+        "code": "DEMO_VIEWER",
+        "label": "Lecteur démo",
+        "permissions": [
+          "demo.notes.note.read",
+          "demo.purchasing.category.read",
+          "demo.purchasing.supplier.read",
+          "demo.purchasing.contact.read",
+          "demo.purchasing.item.read",
+          "demo.purchasing.request.read",
+          "demo.projects.project.read"
+        ]
+      },
+      {
+        "code": "DEMO_EDITOR",
+        "label": "Éditeur démo",
+        "permissions": [
+          "demo.notes.note.read",
+          "demo.notes.note.create",
+          "demo.notes.note.delete",
+          "demo.purchasing.category.read",
+          "demo.purchasing.category.create",
+          "demo.purchasing.category.update",
+          "demo.purchasing.category.delete",
+          "demo.purchasing.supplier.read",
+          "demo.purchasing.supplier.create",
+          "demo.purchasing.supplier.update",
+          "demo.purchasing.supplier.delete",
+          "demo.purchasing.contact.read",
+          "demo.purchasing.contact.create",
+          "demo.purchasing.contact.update",
+          "demo.purchasing.contact.delete",
+          "demo.purchasing.item.read",
+          "demo.purchasing.item.create",
+          "demo.purchasing.item.update",
+          "demo.purchasing.item.delete",
+          "demo.purchasing.request.read",
+          "demo.purchasing.request.create",
+          "demo.purchasing.request.update",
+          "demo.purchasing.request.delete",
+          "demo.purchasing.request.submit",
+          "demo.purchasing.request.order",
+          "demo.projects.project.read",
+          "demo.projects.project.create",
+          "demo.projects.project.update",
+          "demo.projects.project.delete",
+          "demo.projects.project.advance"
+        ]
+      }
+    ],
+    "navigation": [
+      { "id": "demo.suppliers", "label": "Fournisseurs", "route": "/demo/suppliers", "icon": "building-2", "permission": "demo.purchasing.supplier.read" },
+      { "id": "demo.items", "label": "Articles", "route": "/demo/items", "icon": "package", "permission": "demo.purchasing.item.read" },
+      { "id": "demo.categories", "label": "Catégories", "route": "/demo/categories", "icon": "folder-tree", "permission": "demo.purchasing.category.read" },
+      { "id": "demo.requests", "label": "Demandes d’achat", "route": "/demo/purchase-requests", "icon": "shopping-cart", "permission": "demo.purchasing.request.read" },
+      { "id": "demo.projects", "label": "Projets", "route": "/demo/projects", "icon": "hard-hat", "permission": "demo.projects.project.read" },
+      { "id": "demo.notes", "label": "Notes", "route": "/demo/notes", "icon": "file-text", "permission": "demo.notes.note.read" }
+    ]
+  }
+}

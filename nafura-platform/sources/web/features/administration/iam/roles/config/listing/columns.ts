@@ -1,5 +1,4 @@
 import type { ColumnConfig } from '@lib/anatomy/types';
-import type { RoleListItem } from '../../models';
 
 export const COLUMNS: ColumnConfig[] = [
   {
@@ -7,11 +6,6 @@ export const COLUMNS: ColumnConfig[] = [
     label: 'administration.roles.columns.name',
     field: 'name',
     sortable: true,
-    transform: (value: unknown, item: unknown) => {
-      const role = item as RoleListItem | undefined;
-      const str = String(value ?? '');
-      return role?.isSystem ? `**${str}**` : str;
-    },
   },
   {
     key: 'description',

@@ -54,14 +54,6 @@ export const SANDBOX_NAV: SandboxNavSection[] = [
         description: 'Légal · ICE · RIB · Import magique',
       },
       {
-        id: 'nafura-contexts',
-        label: 'Contextes métier',
-        route: '/nafura/business-contexts',
-        icon: 'layout-grid',
-        status: 'live',
-        description: 'Activation Nafura des BC pour cette app',
-      },
-      {
         id: 'impression',
         label: 'Impression',
         route: '/administration/documents/templates',

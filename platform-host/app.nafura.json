@@ -1,0 +1,36 @@
+{
+  "$schema": "../nafura-platform/sources/web/platform/schemas/app.nafura.schema.json",
+  "apiVersion": "nafura.io/v1",
+  "kind": "application",
+  "metadata": { "id": "app.platform-host", "version": "0.1.0", "owner": "nafuralabs", "lifecycle": "experimental" },
+  "spec": {
+    "product": { "name": "Platform Host", "tagline": "Config + BCs", "mark": "/brand/mark.svg" },
+    "runtime": {
+      "requiresTenant": false,
+      "defaultRoute": "/",
+      "auth": { "mode": "lab", "sessionUrl": "/api/public/lab/session", "usersUrl": "/api/public/lab/users" }
+    },
+    "shell": {
+      "topBar": { "enabled": true, "pageContext": true },
+      "sidebar": { "enabled": true },
+      "userMenu": { "enabled": true, "userSettings": true },
+      "tenantMenu": {
+        "enabled": true,
+        "tenantSettings": true,
+        "tenantSettingsRoute": "/organization/settings",
+        "organizationIdentity": true,
+        "organizationIdentityRoute": "/organization/identity",
+        "fallbackName": "Platform Host",
+        "fallbackKey": "platform-host"
+      },
+      "notifications": { "enabled": true },
+      "ai": { "enabled": true }
+    },
+    "businessContexts": ["bc.demo"],
+    "capabilities": { "disabled": [] },
+    "roles": [
+      { "code": "DEMO_LEAD", "label": "Responsable démo", "includes": ["bc.demo:DEMO_EDITOR"] }
+    ],
+    "i18n": { "namespace": "app.platform-host", "locales": ["fr"] }
+  }
+}

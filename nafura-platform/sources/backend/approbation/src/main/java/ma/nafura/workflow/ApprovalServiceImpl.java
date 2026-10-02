@@ -108,6 +108,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         }
         List<ApprovalStep> steps = stepRepository.findByApprovalRequestIdOrderByStepNumberAsc(approvalRequestId);
         ApprovalStep current = steps.stream().filter(s -> STATUS_PENDING.equals(s.getStatus())).findFirst().orElse(null);
+        requireApprover(current);
         if (current != null) {
             current.setStatus(STATUS_APPROVED);
             current.setDecidedAt(OffsetDateTime.now());
@@ -145,6 +146,15 @@ public class ApprovalServiceImpl implements ApprovalService {
         if (!STATUS_PENDING.equals(request.getStatus())) {
             throw new IllegalStateException("Approval request is not pending");
         }
+        ApprovalStep current = stepRepository.findByApprovalRequestIdOrderByStepNumberAsc(approvalRequestId).stream()
+                .filter(s -> STATUS_PENDING.equals(s.getStatus())).findFirst().orElse(null);
+        requireApprover(current);
+        if (current != null) {
+            current.setStatus(STATUS_REJECTED);
+            current.setDecidedAt(OffsetDateTime.now());
+            current.setComment(comment);
+            stepRepository.save(current);
+        }
         request.setStatus(STATUS_REJECTED);
         request.setApprovedBy(UserContext.getUserEmail());
         request.setApprovedAt(OffsetDateTime.now());
@@ -168,12 +178,7 @@ public class ApprovalServiceImpl implements ApprovalService {
     @Transactional(readOnly = true)
     public List<ApprovalDashboardItem> getPendingForCurrentUser() {
         UUID tenantId = TenantContext.getTenantId();
-        String userRole = UserContext.getUserRole();
-        if (userRole == null || userRole.isBlank()) {
-            return List.of();
-        }
-        List<ApprovalStep> steps = stepRepository.findByTenantIdAndStatusAndApproverRole(
-                tenantId, STATUS_PENDING, userRole);
+        List<ApprovalStep> steps = pendingStepsForCurrentUser(tenantId);
         List<UUID> requestIds = steps.stream()
                 .map(ApprovalStep::getApprovalRequestId)
                 .distinct()
@@ -185,6 +190,7 @@ public class ApprovalServiceImpl implements ApprovalService {
                 .collect(Collectors.toMap(ApprovalStep::getApprovalRequestId, ApprovalStep::getApproverRole, (a, b) -> a));
         List<ApprovalRequest> requests = requestRepository.findByTenantIdAndIdInOrderByRequestedAtAsc(tenantId, requestIds);
         return requests.stream()
+                .filter(r -> STATUS_PENDING.equals(r.getStatus()))
                 .map(r -> toDashboardItem(r, requestIdToStepName.get(r.getId())))
                 .toList();
     }
@@ -193,13 +199,37 @@ public class ApprovalServiceImpl implements ApprovalService {
     @Transactional(readOnly = true)
     public long getPendingCountForCurrentUser() {
         UUID tenantId = TenantContext.getTenantId();
-        String userRole = UserContext.getUserRole();
-        if (userRole == null || userRole.isBlank()) {
-            return 0L;
+        List<UUID> requestIds = pendingStepsForCurrentUser(tenantId).stream()
+                .map(ApprovalStep::getApprovalRequestId)
+                .distinct()
+                .toList();
+        if (requestIds.isEmpty()) {
+            return 0;
         }
-        List<ApprovalStep> steps = stepRepository.findByTenantIdAndStatusAndApproverRole(
-                tenantId, STATUS_PENDING, userRole);
-        return steps.stream().map(ApprovalStep::getApprovalRequestId).distinct().count();
+        return requestRepository.findByTenantIdAndIdInOrderByRequestedAtAsc(tenantId, requestIds).stream()
+                .filter(r -> STATUS_PENDING.equals(r.getStatus()))
+                .count();
+    }
+
+    /** Steps waiting on any role the user holds. */
+    private List<ApprovalStep> pendingStepsForCurrentUser(UUID tenantId) {
+        java.util.Set<String> roles = new java.util.HashSet<>(UserContext.getUserRoles());
+        String primary = UserContext.getUserRole();
+        if (primary != null && !primary.isBlank()) {
+            roles.add(primary.trim().toUpperCase());
+        }
+        if (roles.isEmpty()) {
+            return List.of();
+        }
+        return stepRepository.findByTenantIdAndStatusAndApproverRoleIn(tenantId, STATUS_PENDING, roles);
+    }
+
+    /** Only a holder of the step's role decides it. */
+    private static void requireApprover(ApprovalStep step) {
+        if (step != null && !UserContext.hasRole(step.getApproverRole()) && !UserContext.isSuperAdmin()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN, "Not an approver of this step");
+        }
     }
 
     @Override

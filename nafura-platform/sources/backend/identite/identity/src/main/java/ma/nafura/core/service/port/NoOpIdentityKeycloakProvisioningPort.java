@@ -1,10 +1,6 @@
 package ma.nafura.platform.identity.service.port;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
-
-@Component
-@ConditionalOnMissingBean(IdentityKeycloakProvisioningPort.class)
+/** Fallback registered by {@code NafuraIdentityAutoConfiguration} when no Keycloak adapter exists. */
 public class NoOpIdentityKeycloakProvisioningPort implements IdentityKeycloakProvisioningPort {
 
     @Override

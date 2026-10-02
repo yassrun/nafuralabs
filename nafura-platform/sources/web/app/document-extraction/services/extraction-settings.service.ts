@@ -1,7 +1,7 @@
 import { inject, Injectable, effect } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 
-import { TenantContextService } from '../../../../core/tenant/tenant.context';
+import { TenantContextService } from '../../../core/tenant/tenant.context';
 
 export type AutoValidationPolicy = 'MANUAL' | 'CONFIDENCE' | 'ALWAYS';
 

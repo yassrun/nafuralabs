@@ -20,7 +20,7 @@ const SAMPLE_PREVIEW_VARS: Record<string, unknown> = {
   inviter: { name: 'Marie Dupont' },
   inviteLink: 'https://app.example.com/invite/accept?token=xxx',
   invitee: { email: 'invitee@example.com' },
-  message: 'Welcome to the team!',
+  message: 'Bienvenue dans l’équipe !',
 };
 
 @Component({

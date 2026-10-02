@@ -1,0 +1,39 @@
+// Applied by a business context backend: platform APIs it may use, its manifest on the classpath.
+import groovy.json.JsonSlurper
+
+apply plugin: 'java-library'
+apply plugin: 'io.spring.dependency-management'
+
+def platformRoot = file("${buildscript.sourceFile.parentFile}/..")
+def stackVersions = new Properties()
+new File(platformRoot, 'stack.versions.properties').withInputStream { stackVersions.load(it) }
+
+repositories { mavenCentral() }
+dependencyManagement {
+    imports { mavenBom "org.springframework.boot:spring-boot-dependencies:${stackVersions.getProperty('spring-boot.version')}" }
+}
+java { toolchain { languageVersion = JavaLanguageVersion.of(stackVersions.getProperty('java.version').toInteger()) } }
+// Spring binds @PathVariable/@RequestParam by parameter name (the Boot plugin sets this for applications).
+tasks.withType(JavaCompile).configureEach { options.compilerArgs << '-parameters' }
+
+def manifestFile = file('../bc.manifest.json')
+def manifest = new JsonSlurper().parse(manifestFile)
+
+dependencies {
+    implementation 'ma.nafuralabs:framework:0.1.0-SNAPSHOT'
+    implementation 'ma.nafuralabs:authorization-api:0.1.0-SNAPSHOT'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// The platform seeds the business context's roles from this manifest (DeclaredRolesSeeder).
+tasks.named('processResources') {
+    from(manifestFile) { into 'META-INF/nafura/bc'; rename { "${manifest.metadata.id}.json" } }
+}
+
+tasks.withType(Test).configureEach { useJUnitPlatform() }

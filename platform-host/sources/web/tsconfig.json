@@ -1,0 +1,7 @@
+{
+  "extends": "../../../nafura-platform/sources/web/tsconfig.product.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./dist/out-tsc"
+  }
+}

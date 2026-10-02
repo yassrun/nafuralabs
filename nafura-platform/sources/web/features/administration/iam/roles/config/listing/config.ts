@@ -19,6 +19,7 @@ export function createRolesListingConfig(
     },
     {
       filters: FILTERS,
+      defaultVisibleColumns: ['name', 'description', 'isSystem', 'memberCount'],
       defaultSort: {
         column: 'priority',
         direction: 'asc',
@@ -38,7 +39,7 @@ export function createRolesListingConfig(
                   icon: 'shield-plus',
                   scope: 'global' as const,
                   variant: 'primary' as const,
-                  permission: 'administration.roles.write',
+                  permission: 'tenant.roles.write',
                 },
               ]
             : []),
@@ -48,7 +49,7 @@ export function createRolesListingConfig(
             icon: 'trash-2',
             scope: 'single' as const,
             variant: 'danger' as const,
-            permission: 'administration.roles.write',
+            permission: 'tenant.roles.write',
             visible: (selection) =>
               !(selection[0] as RoleListItem | undefined)?.isSystem,
           },
@@ -56,8 +57,8 @@ export function createRolesListingConfig(
       },
       emptyState: {
         icon: 'shield-check',
-        title: 'No roles found',
-        message: 'Create your first custom role to configure permissions.',
+        title: 'Aucun rôle',
+        message: 'Les rôles viennent des modules de l’application ; vous pouvez aussi créer des rôles personnalisés.',
       },
     }
   );

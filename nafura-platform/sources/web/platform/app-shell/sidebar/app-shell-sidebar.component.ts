@@ -1,56 +1,61 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
+import { SidebarNavComponent } from '../../../core/navigation/sidebar-nav.component';
+import { UserMenuWidget } from '../../../core/shell/widgets/user-menu.widget';
+import type { AppShellProductConfig } from '../app-shell.config';
 import { AppShellNavigationSection } from '../app-shell.types';
+import { toSidebar } from '../navigation-access';
 
 @Component({
   selector: 'nf-app-shell-sidebar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, LucideAngularModule],
+  imports: [RouterLink, SidebarNavComponent, UserMenuWidget],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <aside
       class="nf-app-shell-sidebar"
       [class.nf-app-shell-sidebar--mobile-open]="mobileOpen()"
+      [class.nf-app-shell-sidebar--collapsed]="collapsed()"
       aria-label="Navigation">
       <div class="nf-app-shell-sidebar__brand">
-        <span class="nf-app-shell-sidebar__application-name">{{ applicationName() }}</span>
+        <a class="nf-app-shell-sidebar__home" [routerLink]="homeRoute()" [attr.aria-label]="product().name" [attr.title]="collapsed() ? product().name : null">
+          @if (product().logo && !collapsed()) {
+            <img class="nf-app-shell-sidebar__logo" [src]="product().logo" alt="" />
+          } @else {
+            @if (product().mark) {
+              <img class="nf-app-shell-sidebar__mark" [src]="product().mark" alt="" />
+            } @else {
+              <span class="nf-app-shell-sidebar__mark nf-app-shell-sidebar__mark--initial" aria-hidden="true">{{ initial() }}</span>
+            }
+            <span class="nf-app-shell-sidebar__application-name">{{ product().name }}</span>
+          }
+        </a>
         <ng-content select="[app-shell-organization]" />
       </div>
 
-      <nav class="nf-app-shell-sidebar__navigation">
-        @for (section of navigation(); track section.id) {
-          <section class="nf-app-shell-sidebar__navigation-section">
-            @if (section.label) {
-              <h2 class="nf-app-shell-sidebar__navigation-label">{{ section.label }}</h2>
-            }
-            @for (item of section.items; track item.id) {
-              <a
-                class="nf-app-shell-sidebar__navigation-link"
-                [routerLink]="item.route"
-                routerLinkActive="is-active"
-                (click)="navigationSelected.emit()">
-                @if (item.icon) {
-                  <lucide-icon [name]="item.icon" [size]="18" aria-hidden="true"></lucide-icon>
-                }
-                <span>{{ item.label }}</span>
-                @if (item.badge) {
-                  <span class="nf-app-shell-sidebar__navigation-badge">{{ item.badge }}</span>
-                }
-              </a>
-            }
-          </section>
-        }
-      </nav>
+      <nf-sidebar-nav
+        class="nf-app-shell-sidebar__navigation"
+        [nodes]="sidebar().nodes"
+        [zones]="sidebar().zones"
+        [collapsed]="collapsed()"
+        emptyLabel="Aucun écran disponible"
+        (expandRequest)="expandRequest.emit()"
+        (navigated)="navigationSelected.emit()" />
 
       <footer class="nf-app-shell-sidebar__footer naf-shell__sidebar-footer">
+        @if (userMenu()) {
+          <nf-user-menu
+            [compact]="collapsed()"
+            [userSettingsEnabled]="userSettings()"
+            [userSettingsRoute]="userSettingsRoute()" />
+        }
         <ng-content select="[app-shell-sidebar-footer]" />
       </footer>
     </aside>
   `,
   styles: [`
-    :host { display: block; grid-row: 2; min-height: 0; height: 100%; overflow: hidden; }
+    :host { display: block; grid-row: 1 / span 2; grid-column: 1; min-height: 0; height: 100%; overflow: hidden; }
     :host(.is-drawer) {
       position: fixed;
       z-index: 40;
@@ -74,10 +79,46 @@ import { AppShellNavigationSection } from '../app-shell.types';
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex: 0 0 auto;
       gap: 8px;
-      min-height: 56px;
+      height: var(--nf-app-shell-topbar-height, 56px);
       padding: 0 16px;
       border-bottom: 1px solid var(--nf-border-default, #e2e8f0);
+      box-sizing: border-box;
+    }
+    .nf-app-shell-sidebar__home {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      color: inherit;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+    .nf-app-shell-sidebar__home:focus-visible {
+      outline: 2px solid var(--nf-color-primary, #3b82f6);
+      outline-offset: 2px;
+    }
+    .nf-app-shell-sidebar__mark {
+      flex: 0 0 auto;
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      object-fit: contain;
+    }
+    .nf-app-shell-sidebar__mark--initial {
+      display: grid;
+      place-items: center;
+      background: var(--nf-color-primary, #0d9488);
+      color: #fff;
+      font-size: 0.875rem;
+      font-weight: 800;
+    }
+    .nf-app-shell-sidebar__logo {
+      display: block;
+      max-width: 100%;
+      max-height: 32px;
+      object-fit: contain;
     }
     .nf-app-shell-sidebar__application-name {
       font-size: 0.9375rem;
@@ -87,51 +128,30 @@ import { AppShellNavigationSection } from '../app-shell.types';
       text-overflow: ellipsis;
     }
     .nf-app-shell-sidebar__navigation {
-      flex: 1;
-      min-height: 0;
-      overflow: auto;
       padding: 12px 8px;
     }
-    .nf-app-shell-sidebar__navigation-section + .nf-app-shell-sidebar__navigation-section {
-      margin-top: 20px;
+    .nf-app-shell-sidebar--collapsed .nf-app-shell-sidebar__brand {
+      justify-content: center;
+      padding: 0;
     }
-    .nf-app-shell-sidebar__navigation-label {
-      margin: 0;
-      padding: 0 8px 6px;
-      color: var(--nf-text-muted, #64748b);
-      font-size: 0.6875rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+    .nf-app-shell-sidebar--collapsed .nf-app-shell-sidebar__application-name {
+      display: none;
     }
-    .nf-app-shell-sidebar__navigation-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-height: 40px;
-      padding: 0 8px;
-      border-radius: 6px;
-      color: inherit;
-      font-size: 0.875rem;
-      text-decoration: none;
-    }
-    .nf-app-shell-sidebar__navigation-link:hover {
-      background: var(--nf-surface-hover, #f1f5f9);
-    }
-    .nf-app-shell-sidebar__navigation-link.is-active {
-      background: var(--nf-color-primary-50, #eff6ff);
-      color: var(--nf-color-primary-700, #1d4ed8);
-      font-weight: 600;
-    }
-    .nf-app-shell-sidebar__navigation-badge {
-      margin-inline-start: auto;
-      color: var(--nf-text-muted, #64748b);
-      font-size: 0.75rem;
+    .nf-app-shell-sidebar--collapsed .nf-app-shell-sidebar__navigation {
+      padding: 12px 6px;
     }
     .nf-app-shell-sidebar__footer {
       flex: 0 0 auto;
-      padding: 12px 8px;
+      padding: 8px;
       border-top: 1px solid var(--nf-border-default, #e2e8f0);
+    }
+    .nf-app-shell-sidebar__footer:empty {
+      display: none;
+    }
+    .nf-app-shell-sidebar--collapsed .nf-app-shell-sidebar__footer {
+      display: flex;
+      justify-content: center;
+      padding: 8px 0;
     }
     @media (max-width: 800px) {
       :host-context(.nf-app-shell--rail) .nf-app-shell-sidebar {
@@ -156,9 +176,18 @@ import { AppShellNavigationSection } from '../app-shell.types';
   `],
 })
 export class AppShellSidebarComponent {
-  readonly applicationName = input.required<string>();
+  readonly product = input.required<AppShellProductConfig>();
+  readonly homeRoute = input('/');
   readonly navigation = input<readonly AppShellNavigationSection[]>([]);
   readonly mobileOpen = input(false);
+  /** Icons only (desktop); a click on a domain asks to expand. */
+  readonly collapsed = input(false);
   readonly userMenu = input(false);
+  readonly userSettings = input(false);
+  readonly userSettingsRoute = input('/user-settings');
   readonly navigationSelected = output<void>();
+  readonly expandRequest = output<void>();
+
+  readonly sidebar = computed(() => toSidebar(this.navigation()));
+  readonly initial = computed(() => this.product().name.trim().charAt(0).toUpperCase());
 }

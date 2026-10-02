@@ -9,7 +9,7 @@ export const DOMAIN_ACTIVATION_ROUTES: Routes = [
       import('./domain-activation.page').then((m) => m.DomainActivationPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.domains.read'],
+      permissions: ['tenant.settings.read'],
       title: 'Domain Activation',
     },
   },

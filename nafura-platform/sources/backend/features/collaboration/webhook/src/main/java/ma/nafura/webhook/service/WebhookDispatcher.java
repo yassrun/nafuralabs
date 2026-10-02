@@ -189,6 +189,8 @@ public class WebhookDispatcher {
         delivery.setStatus(WebhookDelivery.Status.PENDING);
         delivery.setAttempts(0);
         delivery.setCreatedAt(OffsetDateTime.now());
+        // The payload embeds the delivery id: saved once with an empty object to get it.
+        delivery.setPayload("{}");
         delivery = webhookDeliveryRepository.save(delivery);
 
         try {

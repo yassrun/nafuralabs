@@ -50,7 +50,7 @@ export interface InviteMemberDialogResult {
             {{ 'administration.members.validation.emailInvalid' | translate }}
           </mat-error>
           <mat-error *ngIf="data.duplicateError">
-            {{ 'administration.members.invite.duplicate' | translate }}
+            {{ 'administration.members.feedback.inviteDuplicate' | translate }}
           </mat-error>
         </mat-form-field>
 

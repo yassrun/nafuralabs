@@ -25,6 +25,9 @@ dependencies {
     
     // Validation
     api 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Jackson 2 ObjectMapper still injected by platform services (Boot 4 defaults to Jackson 3)
+    api 'com.fasterxml.jackson.core:jackson-databind'
     
     // CSV parsing for import/export
     api 'org.apache.commons:commons-csv:1.11.0'
@@ -36,6 +39,9 @@ dependencies {
     // Lombok for reducing boilerplate
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // Permission annotations (no runtime): admin controllers declare what they require
+    implementation project(':platform:core:authorization-api')
     
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

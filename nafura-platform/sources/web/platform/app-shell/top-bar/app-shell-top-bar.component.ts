@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { AiToggleWidget } from '../../../core/shell/widgets/ai-toggle.widget';
 import { TenantMenuWidget } from '../../../core/shell/widgets/tenant-menu.widget';
-import { UserMenuWidget } from '../../../core/shell/widgets/user-menu.widget';
 import { PlatformNotificationBellComponent } from '../../notifications';
 
 import { TopBarApplicationIdentityComponent } from './top-bar-application-identity.component';
 import { TopBarMenuButtonComponent } from './top-bar-menu-button.component';
 
+/** Context of the screen: where you are (title), the organization, notifications, assistant. The person lives in the sidebar. */
 @Component({
   selector: 'nf-app-shell-top-bar',
   standalone: true,
@@ -16,14 +16,13 @@ import { TopBarMenuButtonComponent } from './top-bar-menu-button.component';
     TopBarMenuButtonComponent,
     AiToggleWidget,
     TenantMenuWidget,
-    UserMenuWidget,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="nf-app-shell-top-bar">
       <div class="nf-app-shell-top-bar__start">
         <nf-app-shell-top-bar-menu-button (pressed)="navigationToggle.emit()" />
-        <nf-app-shell-top-bar-application-identity [applicationName]="applicationName()" />
+        <nf-app-shell-top-bar-application-identity [applicationName]="title()" />
       </div>
 
       <div class="nf-app-shell-top-bar__actions">
@@ -42,11 +41,6 @@ import { TopBarMenuButtonComponent } from './top-bar-menu-button.component';
         @if (aiEnabled()) {
           <nf-ai-toggle />
         }
-        @if (userMenu()) {
-          <nf-user-menu
-            [userSettingsEnabled]="userSettings()"
-            [userSettingsRoute]="userSettingsRoute()" />
-        }
         <ng-content select="[app-shell-topbar]" />
       </div>
     </header>
@@ -54,7 +48,8 @@ import { TopBarMenuButtonComponent } from './top-bar-menu-button.component';
   styles: [`
     :host { display: contents; }
     .nf-app-shell-top-bar {
-      grid-column: 1 / -1;
+      grid-row: 1;
+      grid-column: 2 / -1;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -76,16 +71,17 @@ import { TopBarMenuButtonComponent } from './top-bar-menu-button.component';
       min-width: 0;
       gap: 8px;
     }
+    @media (max-width: 800px) {
+      .nf-app-shell-top-bar { grid-column: 1 / -1; }
+    }
   `],
 })
 export class AppShellTopBarComponent {
-  readonly applicationName = input.required<string>();
+  /** The current screen (or the product when none matches). */
+  readonly title = input.required<string>();
   readonly notificationsEnabled = input(false);
-  /** When true, shows `nf-ai-toggle` between notifications and the user menu. */
+  /** When true, shows `nf-ai-toggle` after notifications. */
   readonly aiEnabled = input(false);
-  readonly userMenu = input(false);
-  readonly userSettings = input(false);
-  readonly userSettingsRoute = input('/user-settings');
   readonly tenantMenu = input(false);
   readonly tenantSettings = input(true);
   readonly tenantSettingsRoute = input('/organization/settings');

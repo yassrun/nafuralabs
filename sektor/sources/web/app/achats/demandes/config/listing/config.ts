@@ -19,6 +19,13 @@ export function buildDemandesListingConfig(t: TranslateService) {
     },
     {
       filters: buildDemandeFilters(t),
+      segments: [
+        { id: 'ALL', label: 'achats.demande.chips.all' },
+        { id: 'A_APPROUVER', label: 'achats.demande.chips.aApprouver', filters: { quick: 'A_APPROUVER' } },
+        { id: 'NON_CONVERTIES', label: 'achats.demande.chips.nonConverties', filters: { quick: 'NON_CONVERTIES' } },
+        { id: 'URGENT', label: 'achats.demande.chips.urgent', filters: { quick: 'URGENT' } },
+        { id: 'MES_DEMANDES', label: 'achats.demande.chips.mesDemandes', filters: { quick: 'MES_DEMANDES' } },
+      ],
       defaultSort: { column: 'createdAt', direction: 'desc' },
       features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {

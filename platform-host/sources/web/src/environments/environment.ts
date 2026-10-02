@@ -1,0 +1,22 @@
+export const environment = {
+  production: false,
+  appName: 'Platform Host',
+  apiBaseUrl: '/api',
+  keycloakUrl: '',
+  keycloakRealm: '',
+  keycloakClientId: '',
+  devAuthBypass: true,
+  devAuthEagerBootstrap: false,
+  onboardingV2Enabled: false,
+  directKeycloakLogin: false,
+  cursorAuthAutoLogin: false,
+  devAuthUser: {
+    id: 'platform-host',
+    email: 'admin@host.local',
+    firstName: 'Host',
+    lastName: 'Admin',
+    tenantId: 'platform-host',
+    tenantName: 'Platform Host',
+    tenantSlug: 'platform-host',
+  },
+};

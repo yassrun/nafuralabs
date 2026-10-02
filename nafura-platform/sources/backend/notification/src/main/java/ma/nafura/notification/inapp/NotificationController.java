@@ -1,8 +1,6 @@
 package ma.nafura.platform.collaboration.notification.inapp;
 
 import ma.nafura.platform.collaboration.notification.domain.model.Notification;
-import ma.nafura.platform.authorization.security.authorization.RequirePermission;
-import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/** The caller's own inbox: every operation is scoped to the current tenant and recipient by the service. */
 @RestController
 @RequestMapping("/api/v1/platform/collaboration/notifications")
-@SecuredResource(domain = "collaboration", feature = "collaboration", resource = "notification")
 @RequiredArgsConstructor
 public class NotificationController {
 
@@ -56,21 +54,18 @@ public class NotificationController {
     }
 
     @PostMapping("/{id}/read")
-    @RequirePermission("read")
     public ResponseEntity<Void> markRead(@PathVariable UUID id) {
         notificationService.markRead(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/read-all")
-    @RequirePermission("read")
     public ResponseEntity<Void> markAllRead() {
         notificationService.markAllRead();
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/bulk-read")
-    @RequirePermission("read")
     public ResponseEntity<Void> markBulkRead(@RequestBody BulkReadRequest request) {
         notificationService.markReadBulk(request.ids());
         return ResponseEntity.noContent().build();

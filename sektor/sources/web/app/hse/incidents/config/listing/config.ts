@@ -19,6 +19,11 @@ export function buildIncidentsListingConfig(t: TranslateService) {
     },
     {
       filters: buildIncidentFilters(t),
+      segments: [
+        { id: 'ALL', label: 'hse.incident.chips.all' },
+        { id: 'DECLARE', label: 'hse.incident.chips.ouverts', filters: { status: 'DECLARE' } },
+        { id: 'EN_INVESTIGATION', label: 'hse.incident.chips.investigation', filters: { status: 'EN_INVESTIGATION' } },
+      ],
       defaultSort: { column: 'date', direction: 'desc' },
       features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {

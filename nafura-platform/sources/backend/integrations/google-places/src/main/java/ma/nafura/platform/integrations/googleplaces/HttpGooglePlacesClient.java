@@ -99,11 +99,11 @@ public class HttpGooglePlacesClient implements GooglePlacesClient {
                                 + "/" + resource
                                 + "/media?maxWidthPx=" + maxWidthPx
                                 + "&skipHttpRedirect=true");
-                JsonNode response = restClient.get()
+                JsonNode response = readJson(restClient.get()
                         .uri(mediaUri)
                         .header("X-Goog-Api-Key", properties.getApiKey())
                         .retrieve()
-                        .body(JsonNode.class);
+                        .body(String.class));
                 String photoUri = response != null ? response.path("photoUri").asText(null) : null;
                 if (photoUri == null || photoUri.isBlank()) {
                     throw new GooglePlacesException("Place photo URI missing from Google response", 502, true);
@@ -144,12 +144,12 @@ public class HttpGooglePlacesClient implements GooglePlacesClient {
         while (true) {
             attempts++;
             try {
-                return restClient.post()
+                return readJson(restClient.post()
                         .uri(path)
                         .header("X-Goog-FieldMask", fieldMask)
-                        .body(body)
+                        .body(body.toString())
                         .retrieve()
-                        .body(JsonNode.class);
+                        .body(String.class));
             } catch (RestClientResponseException ex) {
                 if (attempts >= properties.getMaxRetries() || !isRetryable(ex.getStatusCode().value())) {
                     throw toException(ex);
@@ -167,11 +167,11 @@ public class HttpGooglePlacesClient implements GooglePlacesClient {
         while (true) {
             attempts++;
             try {
-                return restClient.get()
+                return readJson(restClient.get()
                         .uri(path)
                         .header("X-Goog-FieldMask", fieldMask)
                         .retrieve()
-                        .body(JsonNode.class);
+                        .body(String.class));
             } catch (RestClientResponseException ex) {
                 if (attempts >= properties.getMaxRetries() || !isRetryable(ex.getStatusCode().value())) {
                     throw toException(ex);
@@ -199,6 +199,17 @@ public class HttpGooglePlacesClient implements GooglePlacesClient {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new GooglePlacesException("Interrupted during Google Places backoff", e);
+        }
+    }
+
+    private JsonNode readJson(String body) {
+        if (body == null || body.isBlank()) {
+            return objectMapper.createObjectNode();
+        }
+        try {
+            return objectMapper.readTree(body);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException ex) {
+            throw new GooglePlacesException("Unreadable Google Places response", 502, true);
         }
     }
 

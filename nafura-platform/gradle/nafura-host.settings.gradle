@@ -1,0 +1,12 @@
+// Applied by a product's settings: every bcs/<name>/backend becomes project ':bc-<name>'.
+def productRoot = new File(settingsDir, '../..').canonicalFile
+def bcs = new File(productRoot, 'bcs')
+if (bcs.isDirectory()) {
+    bcs.eachDir { bc ->
+        def backend = new File(bc, 'backend')
+        if (new File(backend, 'build.gradle').isFile()) {
+            include(":bc-${bc.name}")
+            project(":bc-${bc.name}").projectDir = backend
+        }
+    }
+}

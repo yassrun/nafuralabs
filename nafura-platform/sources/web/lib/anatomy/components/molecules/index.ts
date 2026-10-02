@@ -33,3 +33,4 @@ export * from './status-machine';
 export * from './status-action-bar';
 export * from './form-error-summary';
 export * from './file-slot';
+export * from './save-bar';

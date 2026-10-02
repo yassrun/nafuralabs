@@ -11,6 +11,8 @@ dependencies {
     implementation project(':platform:features:collaboration:audit')
     implementation project(':platform:commentaire')
     implementation project(':platform:approbation')
+    // Optional bridge: invitation mails when IAM is embedded (see NotificationInvitationEmailAutoConfiguration).
+    compileOnly project(':platform:identite:iam')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

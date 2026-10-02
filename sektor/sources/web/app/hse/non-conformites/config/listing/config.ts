@@ -19,6 +19,12 @@ export function buildNcListingConfig(t: TranslateService) {
     },
     {
       filters: buildNcFilters(t),
+      segments: [
+        { id: 'ALL', label: 'hse.nonConformite.chips.all' },
+        { id: 'OUVERTE', label: 'hse.nonConformite.chips.ouvertes', filters: { status: 'OUVERTE' } },
+        { id: 'EN_COURS', label: 'hse.nonConformite.chips.enCours', filters: { status: 'EN_COURS' } },
+        { id: 'VERIFIEE', label: 'hse.nonConformite.chips.verifiees', filters: { status: 'VERIFIEE' } },
+      ],
       defaultSort: { column: 'date', direction: 'desc' },
       features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {

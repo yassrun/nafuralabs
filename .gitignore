@@ -5,6 +5,13 @@ out/
 bin/
 *.class
 
+# Local toolchains
+deps/jdk*/
+deps/node-*/
+
+# Local H2 databases
+platform-host/sources/backend/data/
+
 # IDE
 .idea/
 *.iml

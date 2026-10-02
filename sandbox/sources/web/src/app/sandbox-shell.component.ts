@@ -6,6 +6,7 @@ import {
   type AppShellNavigationSection,
 } from '@platform/platform/app-shell';
 
+import { SHOWROOM_NAVIGATION } from './bc/showroom/showroom-navigation';
 import { SANDBOX_NAV, type SandboxNavItem } from './nav/sandbox-nav.config';
 
 @Component({
@@ -26,14 +27,37 @@ import { SANDBOX_NAV, type SandboxNavItem } from './nav/sandbox-nav.config';
 })
 export class SandboxShellComponent {}
 
+/** Showroom and the lab business contexts as sidebar groups, then the platform screens. */
 export function buildSandboxNavigation(): readonly AppShellNavigationSection[] {
-  return SANDBOX_NAV.map((section): AppShellNavigationSection => ({
+  const showroom: AppShellNavigationItem = {
+    id: 'nf.showroom',
+    label: 'Showroom NF',
+    icon: 'flask-conical',
+    children: SHOWROOM_NAVIGATION.map((section) => ({ id: section.id, label: section.label ?? section.id, children: section.items })),
+  };
+  const businessContext = (id: string, label: string, route: string, icon: string): AppShellNavigationItem => ({
+    id,
+    label,
+    icon,
+    children: [{ id: `${id}.home`, label: 'Accueil', route, icon }],
+  });
+  return [
+    { id: 'showroom', items: [showroom] },
+    {
+      id: 'business-contexts',
+      items: [
+        businessContext('bc.achats', 'Achats', '/achats', 'shopping-cart'),
+        businessContext('bc.chantiers', 'Chantiers', '/chantiers', 'hard-hat'),
+      ],
+    },
+    ...SANDBOX_NAV.map((section): AppShellNavigationSection => ({
       id: section.id,
       label: section.label,
       items: section.items
         .map(toAppShellNavigationItem)
         .filter((item): item is AppShellNavigationItem => item !== null),
-    }));
+    })),
+  ];
 }
 
 function toAppShellNavigationItem(item: SandboxNavItem): AppShellNavigationItem | null {

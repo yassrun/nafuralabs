@@ -1,16 +1,6 @@
 <nf-screen [header]="headerConfig">
 
   <div class="chips-row">
-    @for (chip of chips; track chip.id) {
-      <nf-button
-        type="button"
-        class="chip-btn"
-        size="sm"
-        [variant]="currentChip() === chip.id ? 'primary' : 'secondary'"
-        (clicked)="selectChip(chip.id)">
-        {{ chip.labelKey | translate }}
-      </nf-button>
-    }
     <nf-button type="button" class="chip-btn" size="sm" variant="secondary" routerLink="comparateur">
       Comparateur
     </nf-button>

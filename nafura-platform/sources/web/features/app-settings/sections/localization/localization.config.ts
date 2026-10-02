@@ -9,7 +9,7 @@ export const NUMBER_FORMAT_OPTIONS = ['#,##0.00', '#.##0,00'] as const;
 /** Locale value and display label (from I18N_CONFIG available locales) */
 export const LOCALE_OPTIONS: { value: string; label: string }[] = [
   { value: 'en', label: 'English' },
-  { value: 'fr', label: 'French' },
+  { value: 'fr', label: 'Français' },
 ];
 
 /** Currency code and display label with symbol */

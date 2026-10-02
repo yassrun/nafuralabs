@@ -7,16 +7,18 @@ import { TenantContextService } from '@core/tenant/tenant.context';
 
 import type { DomainActivationStatus } from '../models/domain-activation.model';
 
-/** Backend response shape per spec GET /api/tenants/{tenantId}/domains */
+/** Backend response shape: GET /api/tenants/{tenantId}/domains (IamController, DomainToggleResponse). */
 interface TenantDomainApiResponse {
   domainId?: string;
   code?: string;
   name: string;
   description: string | null;
   icon: string | null;
-  isActive: boolean;
-  isLocked: boolean;
-  activatedAt: string | null;
+  enabled?: boolean;
+  locked?: boolean;
+  isActive?: boolean;
+  isLocked?: boolean;
+  activatedAt?: string | null;
   entityCount?: number;
   entities?: string[];
 }
@@ -67,8 +69,8 @@ export class DomainActivationApiService {
       name: item.name,
       description: item.description ?? null,
       icon: item.icon ?? null,
-      isActive: item.isActive === true,
-      isLocked: item.isLocked === true,
+      isActive: (item.enabled ?? item.isActive) === true,
+      isLocked: (item.locked ?? item.isLocked) === true,
       activatedAt: item.activatedAt ?? null,
       entityCount: item.entityCount ?? (item.entities?.length ?? 0),
       entities: item.entities ?? [],

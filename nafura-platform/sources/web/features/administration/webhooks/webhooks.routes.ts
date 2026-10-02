@@ -1,16 +1,18 @@
 import { Routes } from '@angular/router';
 
 import { routePermissionGuard } from '@core/security/guards/permission.guard';
+import { ListingPageComponent } from '../../../platform/listing';
+import { WEBHOOKS_LISTING } from './webhooks.listing';
 
 export const WEBHOOKS_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./webhooks-listing.page').then((m) => m.WebhooksListingPage),
+    component: ListingPageComponent,
     canActivate: [routePermissionGuard],
     data: {
       permissions: ['administration.webhooks.read'],
       title: 'administration.webhooks.title',
+      listing: WEBHOOKS_LISTING,
     },
   },
   {

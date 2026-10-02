@@ -83,7 +83,7 @@ export class RoleListingPage extends ConfigDrivenListingPage<RoleListItem> {
     const result = await firstValueFrom(dialogRef.afterClosed()) as Role | undefined;
     if (result) {
       this.showSuccess(
-        this.i18n.instant('administration.roles.create.success', { name: result.name })
+        this.i18n.instant('administration.roles.feedback.createSuccess', { name: result.name })
       );
       await this.refresh();
       await this.router.navigate(['/administration/roles', result.roleCode]);

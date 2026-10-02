@@ -10,6 +10,7 @@ import java.util.UUID;
 import ma.nafura.platform.collaboration.webhook.domain.model.WebhookConfig;
 import ma.nafura.platform.collaboration.webhook.domain.model.WebhookEvent;
 import ma.nafura.platform.collaboration.webhook.repository.WebhookConfigRepository;
+import ma.nafura.platform.collaboration.webhook.repository.WebhookDeliveryRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,9 +25,11 @@ public class WebhookService {
     private static final int MAX_WEBHOOKS_PER_TENANT = 10;
 
     private final WebhookConfigRepository webhookConfigRepository;
+    private final WebhookDeliveryRepository webhookDeliveryRepository;
 
-    public WebhookService(WebhookConfigRepository webhookConfigRepository) {
+    public WebhookService(WebhookConfigRepository webhookConfigRepository, WebhookDeliveryRepository webhookDeliveryRepository) {
         this.webhookConfigRepository = webhookConfigRepository;
+        this.webhookDeliveryRepository = webhookDeliveryRepository;
     }
 
     @Transactional(readOnly = true)
@@ -67,13 +70,17 @@ public class WebhookService {
     @Transactional
     public void delete(UUID id) {
         WebhookConfig existing = getById(id);
+        webhookDeliveryRepository.deleteByWebhookId(existing.getId());
         webhookConfigRepository.delete(existing);
     }
 
     private void applyRequest(WebhookConfig target, WebhookUpsertRequest request) {
         target.setName(request.name().trim());
         target.setUrl(request.url().trim());
-        target.setSecret(request.secret().trim());
+        // A blank secret on update keeps the current one (it is never sent back to the browser).
+        if (request.secret() != null && !request.secret().isBlank()) {
+            target.setSecret(request.secret().trim());
+        }
         target.setEvents(request.events());
         target.setActive(Boolean.TRUE.equals(request.active()));
     }
@@ -81,7 +88,7 @@ public class WebhookService {
     public record WebhookUpsertRequest(
             @NotBlank @Size(max = 100) String name,
             @NotBlank @Size(max = 500) String url,
-            @NotBlank @Size(max = 200) String secret,
+            @Size(max = 200) String secret,
             @NotEmpty List<WebhookEvent> events,
             Boolean active
     ) {}

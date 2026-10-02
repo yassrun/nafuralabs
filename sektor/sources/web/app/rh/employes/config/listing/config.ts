@@ -20,6 +20,11 @@ export function buildEmployesListingConfig(t: TranslateService) {
     },
     {
       filters: buildEmployeFilters(t),
+      segments: [
+        { id: 'ALL', label: 'rh.employe.listing.chips.all' },
+        { id: 'ACTIF', label: 'rh.employe.listing.chips.actifs', filters: { statut: 'ACTIF' } },
+        { id: 'SUSPENDU', label: 'rh.employe.listing.chips.suspendus', filters: { statut: 'SUSPENDU' } },
+      ],
       defaultSort: { column: 'nom', direction: 'asc' },
       features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {

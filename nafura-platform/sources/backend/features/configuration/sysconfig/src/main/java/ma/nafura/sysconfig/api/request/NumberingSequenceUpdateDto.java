@@ -28,5 +28,14 @@ public class NumberingSequenceUpdateDto {
 
     @Min(0)
     private Integer padLength;
+
+    @Size(max = 5)
+    private String separator;
+
+    @Size(max = 10)
+    private String yearFormat;
+
+    @Size(max = 20)
+    private String resetPolicy;
 }
 

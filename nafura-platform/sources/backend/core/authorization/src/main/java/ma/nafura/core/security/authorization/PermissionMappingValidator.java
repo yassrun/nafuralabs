@@ -47,6 +47,16 @@ public class PermissionMappingValidator implements ApplicationRunner {
             // Check for @SecuredResource
             SecuredResource securedResource = controllerClass.getAnnotation(SecuredResource.class);
             if (securedResource == null) {
+                // No scope to prefix: PermissionEnforcementFilter enforces the value as a full permission.
+                for (Method method : controllerClass.getDeclaredMethods()) {
+                    RequirePermission requirePermission = method.getAnnotation(RequirePermission.class);
+                    if (requirePermission != null && !requirePermission.value().contains(".")) {
+                        throw new IllegalStateException(
+                                "Invalid @RequirePermission(\"" + requirePermission.value() + "\") on "
+                                + controllerClass.getSimpleName() + "::" + method.getName()
+                                + ": without @SecuredResource it must name a full permission (domain.resource.action)");
+                    }
+                }
                 continue;
             }
             

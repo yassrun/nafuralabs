@@ -1,7 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   LucideAngularModule,
 } from 'lucide-angular';
@@ -14,35 +12,22 @@ import {
   PageShellComponent,
   ToastService,
   ConfirmDialogService,
+  NfSwitchComponent,
 } from '@lib/anatomy';
 import { PermissionService } from '@core/security/services/permission.service';
 
 import type { DomainActivationStatus } from './models/domain-activation.model';
 import { DomainActivationApiService } from './services/domain-activation-api.service';
-
-/** Lucide icon names we support for domain cards; fallback is layout-grid */
-const DOMAIN_ICON_NAMES = new Set([
-  'layout-grid',
-  'lock',
-  'banknote',
-  'package',
-  'users',
-  'file-text',
-  'calculator',
-  'truck',
-  'building',
-  'layers',
-]);
+import { ACCESS_REFRESH } from '@core/security/access-refresh.token';
 
 @Component({
   selector: 'app-domain-activation-page',
   standalone: true,
   imports: [
     CommonModule,
-    MatSlideToggleModule,
-    MatTooltipModule,
     TranslateModule,
     LucideAngularModule,
+    NfSwitchComponent,
     PageShellComponent,
     PageHeaderComponent,
   ],
@@ -82,15 +67,16 @@ const DOMAIN_ICON_NAMES = new Set([
                     name="lock"
                     [size]="18"
                     class="domain-card__lock"
-                    [matTooltip]="'administration.domains.locked' | translate"
-                    matTooltipPosition="above">
+                    [attr.title]="'administration.domains.locked' | translate">
                   </lucide-icon>
                 }
               </div>
 
-              <p class="domain-card__meta">
-                {{ 'administration.domains.entities' | translate: { count: domain.entityCount } }}
-              </p>
+              @if (domain.entityCount > 0) {
+                <p class="domain-card__meta">
+                  {{ 'administration.domains.entities' | translate: { count: domain.entityCount } }}
+                </p>
+              }
               @if (domain.entities.length) {
                 <p class="domain-card__preview">
                   {{ entityPreview(domain) }}
@@ -117,17 +103,16 @@ const DOMAIN_ICON_NAMES = new Set([
                   @if (savingId() === domain.domainId) {
                     <span class="domain-card__spinner" aria-hidden="true"></span>
                   } @else {
-                    <mat-slide-toggle
+                    <nf-switch
                       [checked]="domain.isActive"
                       [disabled]="domain.isLocked || !canWrite()"
-                      [matTooltip]="
+                      [attr.title]="
                         domain.isLocked
                           ? ('administration.domains.locked' | translate)
-                          : (!canWrite() ? ('administration.domains.readOnlyTooltip' | translate) : '')
+                          : (!canWrite() ? ('administration.domains.readOnlyTooltip' | translate) : null)
                       "
-                      matTooltipPosition="above"
-                      (change)="onToggle($event.checked, domain)">
-                    </mat-slide-toggle>
+                      (changed)="onToggle($event, domain)">
+                    </nf-switch>
                   }
                 </span>
               </div>
@@ -302,6 +287,7 @@ export class DomainActivationPage {
   private readonly toast = inject(ToastService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly translate = inject(TranslateService);
+  private readonly refreshAccess = inject(ACCESS_REFRESH, { optional: true });
 
   readonly domains = signal<DomainActivationStatus[]>([]);
   readonly loading = signal(true);
@@ -309,7 +295,7 @@ export class DomainActivationPage {
   readonly savingId = signal<string | null>(null);
 
   readonly canWrite = computed(() =>
-    this.permissionService.hasPermission('administration.domains.write')
+    this.permissionService.hasPermission('tenant.settings.write')
   );
 
   readonly headerConfig = computed(() => ({
@@ -323,8 +309,7 @@ export class DomainActivationPage {
   }
 
   domainIconName(domain: DomainActivationStatus): string {
-    const name = (domain.icon ?? 'layout-grid').toLowerCase().replace(/_/g, '-');
-    return DOMAIN_ICON_NAMES.has(name) ? name : 'layout-grid';
+    return (domain.icon || 'layout-grid').toLowerCase().replace(/_/g, '-');
   }
 
   entityPreview(domain: DomainActivationStatus): string {
@@ -362,6 +347,7 @@ export class DomainActivationPage {
       this.domains.update((items) =>
         items.map((item) => (item.domainId === updated.domainId ? updated : item))
       );
+      await this.refreshAccess?.();
       this.toast.success(
         this.translate.instant('administration.domains.activate.success', { name: updated.name })
       );
@@ -398,6 +384,7 @@ export class DomainActivationPage {
       this.domains.update((items) =>
         items.map((item) => (item.domainId === updated.domainId ? updated : item))
       );
+      await this.refreshAccess?.();
       this.toast.success(
         this.translate.instant('administration.domains.deactivate.success', { name: updated.name })
       );

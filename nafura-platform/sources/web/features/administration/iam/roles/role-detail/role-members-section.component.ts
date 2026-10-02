@@ -11,8 +11,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RolesApiService } from '../services/roles-api.service';
 import { MembersApiService } from '../../../../../app/identite/services/members-api.service';
-import { ConfirmDialogService } from '@lib/anatomy/components';
+import { ConfirmDialogService, ListingFlatComponent, type ListingFlatConfig } from '@lib/anatomy/components';
 import { ToastService } from '@lib/anatomy/components';
+import type { ListingQueryState } from '@lib/anatomy/types';
 import { AddMembersDialogComponent } from '../components/add-members-dialog.component';
 import type { Member } from '../../../../../app/identite/models';
 
@@ -24,98 +25,31 @@ export interface RoleMemberRow {
   joinedAt: string | null;
 }
 
+const PAGE_SIZE = 20;
+
 @Component({
   selector: 'app-role-members-section',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, ListingFlatComponent],
   template: `
     <section class="nf-role-members">
-      <div class="nf-role-members__header">
-        <h3 class="nf-role-members__title">
-          {{ 'administration.roles.detail.members.title' | translate }}
-        </h3>
-        <button
-          type="button"
-          class="nf-role-members__add"
-          (click)="openAddModal()">
-          {{ 'administration.roles.detail.members.add' | translate }}
-        </button>
-      </div>
-      @if (loading()) {
-        <p class="nf-role-members__loading">
-          {{ 'administration.roles.detail.members.loading' | translate }}
-        </p>
-      } @else if (members().length === 0) {
-        <p class="nf-role-members__empty">
-          {{ 'administration.roles.detail.members.empty' | translate }}
-        </p>
-      } @else {
-        <table class="nf-role-members__table">
-          <thead>
-            <tr>
-              <th>{{ 'administration.roles.detail.members.columns.email' | translate }}</th>
-              <th>{{ 'administration.roles.detail.members.columns.displayName' | translate }}</th>
-              <th>{{ 'administration.roles.detail.members.columns.status' | translate }}</th>
-              <th>{{ 'administration.roles.detail.members.columns.joined' | translate }}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of members(); track row.userId) {
-              <tr>
-                <td>{{ row.email }}</td>
-                <td>{{ row.displayName ?? '—' }}</td>
-                <td>{{ row.status }}</td>
-                <td>{{ row.joinedAt ?? '—' }}</td>
-                <td>
-                  <button
-                    type="button"
-                    class="nf-role-members__remove"
-                    (click)="removeMember(row.userId)">
-                    {{ 'administration.roles.detail.members.remove' | translate }}
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-        @if (total() > members().length) {
-          <div class="nf-role-members__pagination">
-            <button
-              type="button"
-              [disabled]="page() === 0"
-              (click)="setPage(page() - 1)">
-              {{ 'administration.roles.detail.members.pagination.previous' | translate }}
-            </button>
-            <span>{{
-              'administration.roles.detail.members.pagination.page'
-                | translate : { current: page() + 1, total: totalPages() }
-            }}</span>
-            <button
-              type="button"
-              [disabled]="page() >= totalPages() - 1"
-              (click)="setPage(page() + 1)">
-              {{ 'administration.roles.detail.members.pagination.next' | translate }}
-            </button>
-          </div>
-        }
-      }
+      <h3 class="nf-role-members__title">
+        {{ 'administration.roles.detail.members.title' | translate }}
+      </h3>
+      <nf-listing-flat
+        [config]="listing"
+        [items]="members()"
+        [loading]="loading()"
+        [remote]="true"
+        [remoteTotal]="total()"
+        (load)="onLoad($event)"
+        (selectionChange)="selection.set($event)"
+        (actionClick)="onAction($event)" />
     </section>
   `,
   styles: [`
     .nf-role-members { margin-top: 1.5rem; }
-    .nf-role-members__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
-    .nf-role-members__title { font-size: 1rem; font-weight: 600; margin: 0; }
-    .nf-role-members__add { padding: 0.375rem 0.75rem; border-radius: 0.375rem; border: 1px solid var(--nf-border-default, #e5e7eb); background: var(--nf-color-surface, #fff); cursor: pointer; font-size: 0.875rem; }
-    .nf-role-members__loading, .nf-role-members__empty { color: var(--nf-text-muted, #6b7280); font-size: 0.875rem; margin: 0.5rem 0; }
-    .nf-role-members__table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-    .nf-role-members__table th, .nf-role-members__table td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid var(--nf-border-subtle, #f3f4f6); }
-    .nf-role-members__table th { font-weight: 600; color: var(--nf-text-muted, #6b7280); }
-    .nf-role-members__remove { padding: 0.25rem 0.5rem; font-size: 0.8125rem; border: none; background: transparent; color: var(--nf-danger, #ef4444); cursor: pointer; }
-    .nf-role-members__remove:hover { text-decoration: underline; }
-    .nf-role-members__pagination { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.75rem; font-size: 0.875rem; }
-    .nf-role-members__pagination button { padding: 0.25rem 0.5rem; cursor: pointer; }
-    .nf-role-members__pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .nf-role-members__title { font-size: 1rem; font-weight: 600; margin: 0 0 0.75rem; }
   `],
 })
 export class RoleMembersSectionComponent {
@@ -130,11 +64,32 @@ export class RoleMembersSectionComponent {
   private readonly i18n = inject(TranslateService);
 
   readonly page = signal(0);
-  readonly pageSize = 20;
   readonly members = signal<RoleMemberRow[]>([]);
   readonly total = signal(0);
-  readonly totalPages = signal(0);
   readonly loading = signal(false);
+  readonly selection = signal<RoleMemberRow[]>([]);
+
+  readonly listing: ListingFlatConfig = {
+    columns: [
+      { key: 'email', field: 'email', label: 'administration.roles.detail.members.columns.email' },
+      { key: 'displayName', field: 'displayName', label: 'administration.roles.detail.members.columns.displayName', transform: (name) => String(name ?? '—') },
+      {
+        key: 'status',
+        field: 'status',
+        label: 'administration.roles.detail.members.columns.status',
+        type: 'badge',
+        transform: (status) => `administration.members.status.${String(status).toLowerCase()}`,
+        badgeVariant: (status) => (String(status).toLowerCase() === 'active' ? 'success' : 'default'),
+      },
+      { key: 'joined', field: 'joinedAt', label: 'administration.roles.detail.members.columns.joined', type: 'date' },
+    ],
+    pageSize: PAGE_SIZE,
+    pageSizeOptions: [PAGE_SIZE],
+    emptyMessage: 'administration.roles.detail.members.empty',
+    features: { search: false, filters: false, columnToggle: false, selection: 'multiple' },
+    actions: [{ id: 'add', label: 'administration.roles.detail.members.add', icon: 'user-plus', variant: 'secondary' }],
+    selectionActions: [{ id: 'remove', label: 'administration.roles.detail.members.remove', icon: 'user-minus', variant: 'danger' }],
+  };
 
   private readonly roleCodeEffect = effect(() => {
     const code = this.roleCode();
@@ -144,9 +99,14 @@ export class RoleMembersSectionComponent {
     }
   });
 
-  setPage(p: number): void {
-    this.page.set(p);
-    this.loadMembers();
+  onLoad(query: ListingQueryState): void {
+    this.page.set(query.page - 1);
+    void this.loadMembers();
+  }
+
+  onAction(id: string): void {
+    if (id === 'add') void this.openAddModal();
+    if (id === 'remove') void this.removeMembers(this.selection().map((row) => row.userId));
   }
 
   async loadMembers(): Promise<void> {
@@ -154,7 +114,7 @@ export class RoleMembersSectionComponent {
     if (!code) return;
     this.loading.set(true);
     try {
-      const res = await this.rolesApi.getRoleMembers(code, this.page(), this.pageSize);
+      const res = await this.rolesApi.getRoleMembers(code, this.page(), PAGE_SIZE);
       this.members.set(
         res.items.map((m) => ({
           userId: m.userId,
@@ -165,24 +125,23 @@ export class RoleMembersSectionComponent {
         }))
       );
       this.total.set(res.total);
-      this.totalPages.set(Math.max(1, res.totalPages));
     } finally {
       this.loading.set(false);
     }
   }
 
-  async removeMember(userId: string): Promise<void> {
+  async removeMembers(userIds: string[]): Promise<void> {
     const code = this.roleCode();
-    if (!code) return;
+    if (!code || userIds.length === 0) return;
     const confirmed = await this.confirmDialog.confirm({
       title: this.i18n.instant('administration.roles.detail.members.removeConfirm.title'),
-      message: this.i18n.instant('administration.roles.detail.members.removeConfirm.message'),
+      message: this.i18n.instant('administration.roles.detail.members.removeConfirm.message', { count: userIds.length }),
       confirmLabel: this.i18n.instant('administration.roles.detail.members.remove'),
       variant: 'danger',
     });
     if (!confirmed) return;
     try {
-      await this.rolesApi.removeMembersFromRole(code, [userId]);
+      await this.rolesApi.removeMembersFromRole(code, userIds);
       this.membersRefreshed.emit();
       await this.loadMembers();
     } catch {

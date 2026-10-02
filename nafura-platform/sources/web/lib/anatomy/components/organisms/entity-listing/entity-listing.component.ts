@@ -1,158 +1,128 @@
 /**
- * Entity Listing Component
+ * Entity Listing Component — a facade-backed list rendered by `nf-listing-flat`.
  *
- * A config-driven, fully standardized listing component for entities.
- * Handles all listing concerns: data loading, pagination, sorting, selection,
- * filtering, view modes, and actions.
- *
- * Features:
- * - Multiple view modes: table, cards, grid, list
- * - Config-driven columns, filters, actions
- * - Built-in selection (single, multiple, toggleable)
- * - Import/export support
- * - Custom cell templates via content projection
+ * Keeps the `ListingPageConfig` + `PartialCrudFacade` contract of config-driven
+ * pages; the look and the toolbar are the ones of the listing artifact.
  *
  * @example
  * ```html
- * <nf-entity-listing
- *   [config]="config"
- *   [facade]="facade"
- *   (action)="onAction($event)">
- *
- *   <!-- Custom status cell template -->
+ * <nf-entity-listing [config]="config" [facade]="facade" (action)="onAction($event)">
  *   <ng-template nfColumn="status" let-value let-item="item">
  *     <nf-badge [variant]="getStatusVariant(value)">{{ value }}</nf-badge>
  *   </ng-template>
- *
  * </nf-entity-listing>
  * ```
  */
 
 import {
   Component,
-  ContentChildren,
-  OnDestroy,
-  QueryList,
   TemplateRef,
   computed,
+  contentChildren,
   effect,
   inject,
   input,
   output,
   signal,
+  untracked,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
 
-import { DataTableComponent } from '../data-table';
-import { PaginationComponent } from '../pagination';
-import { ListingControlsComponent, ListingControlsColumn } from '../../molecules/listing-controls';
-import { ButtonListItem } from '../../molecules/button-list';
-import { ListingActionsComponent } from '../../molecules/listing-actions';
-import { DataStateComponent, type DataStateValue } from '../../molecules/data-state';
+import { ListingFlatComponent } from '../listing-flat/listing-flat.component';
+import type {
+  ListingFlatConfig,
+  ListingSelectionAction,
+  ListingSelectionScope,
+} from '../listing-flat/listing-flat.types';
+import {
+  clausesToGroup,
+  createDefaultListingQuery,
+  filterGroupToPinnedValues,
+  filterValuesToClauses,
+  listingQuerySnapshotEqual,
+  resolveFilterGroup,
+} from '../listing-flat/listing-query-state.util';
+import type { ListingActionItem } from '../../molecules/listing-actions';
 import { ToastService, ConfirmDialogService, CsvService, ImportExportDialogService } from '../../services';
 import { PermissionService } from '../../../../../core/security/services/permission.service';
 import { ColumnTemplateDirective } from './column-template.directive';
 import { LISTING_EXPORT_AUDIT, type ListingExportAuditPayload } from '../../../tokens/listing-export-audit.token';
-import { CardViewComponent } from './card-view.component';
-import { GridViewComponent } from './grid-view.component';
-import { ListViewComponent } from './list-view.component';
 
 import type {
-  ListingPageConfig,
-  ListingActionEvent,
+  ActionConfig,
   ColumnConfig,
-  LookupContext,
-  ViewMode,
-  SelectionMode,
-  SortState,
-  PartialCrudFacade,
-  ImportResult,
   EntityActionConfig,
+  ImportResult,
+  ListingActionEvent,
+  ListingPageConfig,
+  ListingQueryState,
+  LookupContext,
+  PartialCrudFacade,
+  ViewMode,
 } from '../../../types';
 
 @Component({
   selector: 'nf-entity-listing',
   standalone: true,
-  imports: [
-    CommonModule,
-    TranslateModule,
-    DataTableComponent,
-    PaginationComponent,
-    ListingControlsComponent,
-    ListingActionsComponent,
-    DataStateComponent,
-    CardViewComponent,
-    GridViewComponent,
-    ListViewComponent,
-  ],
-  templateUrl: './entity-listing.component.html',
-  styleUrl: './entity-listing.component.scss',
+  imports: [ListingFlatComponent],
+  template: `
+    <nf-listing-flat
+      [config]="flatConfig()"
+      [items]="items()"
+      [loading]="isLoading() || isRefreshing()"
+      [remote]="true"
+      [remoteTotal]="totalItems()"
+      [query]="query()"
+      [lookups]="listingLookups()"
+      [cellTemplates]="cellTemplates()"
+      [activeRowId]="openOnRowClick() ? activeItemId() : null"
+      [error]="hasError() ? listingErrorMessage() : null"
+      (load)="onQueryLoad($event)"
+      (retry)="loadData()"
+      (rowClick)="onRowClick($event)"
+      (rowDblClick)="onRowDblClick($event)"
+      (actionClick)="onToolbarAction($event)"
+      (selectionChange)="onSelectionChange($event)"
+    >
+      <ng-content select="[nf-listing-smart-import]" />
+    </nf-listing-flat>
+  `,
+  styles: `
+    :host {
+      display: block;
+      height: 100%;
+      min-height: 0;
+    }
+  `,
 })
-export class EntityListingComponent<TItem = unknown> implements OnDestroy {
+export class EntityListingComponent<TItem = unknown> {
   // ═══════════════════════════════════════════════════════════════════════════
-  // Inputs
+  // Inputs / Outputs
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /** Listing configuration */
   config = input.required<ListingPageConfig<TItem>>();
-
-  /** CRUD facade for data operations */
   facade = input.required<PartialCrudFacade<unknown, TItem>>();
-
-  /** Whether to auto-load data on init */
   autoLoad = input<boolean>(true);
-
   /** Prefill filters (ex. query params depuis un dashboard). */
   initialFilters = input<Record<string, unknown>>({});
-
-  /**
-   * Master–Slave mode: single click opens item (emits rowOpen) instead of toggling selection.
-   * When true, selection mode is effectively ignored for row click; use (rowOpen) to sync URL/detail.
-   */
+  /** Master–detail: a click opens the row (`rowOpen`) instead of selecting it. */
   openOnRowClick = input<boolean>(false);
-
-  /**
-   * Master–Slave: id of the row that is "open" (drives detail pane). When set with openOnRowClick,
-   * that row is highlighted (single-selection effect) without using checkbox selection.
-   */
+  /** Master–detail: id of the open row, highlighted. */
   activeItemId = input<string | null>(null);
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // Outputs
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /** Emitted when an action is triggered */
   action = output<ListingActionEvent<TItem>>();
-
-  /** Emitted when selection changes */
   selectionChange = output<TItem[]>();
-
-  /** Emitted when view mode changes */
+  /** @deprecated The listing has a single (table) view. */
   viewModeChange = output<ViewMode>();
-
-  /** Emitted when user single-clicks a row and openOnRowClick is true (Master–Slave pattern). */
   rowOpen = output<TItem>();
-
-  /** Emitted when a load completes successfully with the current items (e.g. for master–slave to auto-select first). */
   itemsLoaded = output<TItem[]>();
-
-  /** Emitted right after a successful export (CSV/XLSX). Hook for audit logging. */
   exported = output<{ format: 'csv' | 'xlsx'; filename: string; rowCount: number; selectionOnly: boolean }>();
 
+  private readonly columnTemplates = contentChildren(ColumnTemplateDirective);
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Content Children (Custom Templates)
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  @ContentChildren(ColumnTemplateDirective)
-  columnTemplates!: QueryList<ColumnTemplateDirective>;
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // Injected Services
+  // Services
   // ═══════════════════════════════════════════════════════════════════════════
 
   private readonly router = inject(Router);
@@ -165,44 +135,19 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
   private readonly listingExportAudit = inject(LISTING_EXPORT_AUDIT, { optional: true });
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Internal State
+  // State
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // Lifecycle
-  private readonly destroy$ = new Subject<void>();
-  private readonly search$ = new Subject<string>();
-
-  // Data
   protected readonly _items = signal<TItem[]>([]);
   protected readonly _totalItems = signal<number>(0);
   protected readonly _loadingState = signal<'idle' | 'loading' | 'success' | 'error'>('idle');
   protected readonly _error = signal<string | null>(null);
   protected readonly _isRefreshing = signal<boolean>(false);
-
-  // Pagination
-  protected readonly _currentPage = signal<number>(1);
-  protected readonly _pageSize = signal<number>(20);
-
-  // Sorting
-  protected readonly _sort = signal<SortState | null>(null);
-
-  // Selection
-  protected readonly _selectionMode = signal<SelectionMode>('none');
   protected readonly _selection = signal<TItem[]>([]);
-
-  // View
-  protected readonly _viewMode = signal<ViewMode>('table');
-
-  // Filters & Search
-  protected readonly _filterValues = signal<Record<string, unknown>>({});
-  protected readonly _searchTerm = signal<string>('');
-
-  // Column visibility
-  protected readonly _visibleColumnKeys = signal<Set<string>>(new Set());
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // Computed State
-  // ═══════════════════════════════════════════════════════════════════════════
+  /** Search, filters, sort, page and columns — shared with the listing. */
+  protected readonly query = signal<ListingQueryState>(createDefaultListingQuery());
+  /** Filters set by the page (quick chips) on fields the filter menu does not offer. */
+  private readonly pageFilters = signal<Record<string, unknown>>({});
 
   readonly items = this._items.asReadonly();
   readonly totalItems = this._totalItems.asReadonly();
@@ -212,334 +157,147 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
   readonly error = this._error.asReadonly();
   readonly isRefreshing = this._isRefreshing.asReadonly();
   readonly isEmpty = computed(() => this.isLoaded() && this._items().length === 0);
-
-  /** Unified state for `<nf-data-state>` (all config-driven listings). */
-  readonly listingDataState = computed<DataStateValue>(() => {
-    const ls = this._loadingState();
-    if (ls === 'idle') {
-      return this.autoLoad() ? 'loading' : 'loaded';
-    }
-    if (this.isLoading() && !this.isRefreshing()) {
-      return 'loading';
-    }
-    if (this.hasError()) {
-      return 'error';
-    }
-    if (this.isEmpty()) {
-      return 'empty';
-    }
-    return 'loaded';
-  });
-
-  readonly listingLoadingMessage = computed(() => {
-    const head = this.translate.instant('Loading');
-    const plural = this.translateLabel(this.config().entityNamePlural);
-    return `${head} ${plural}...`;
-  });
-
-  readonly listingErrorMessage = computed(() =>
-    this.error() ?? this.t('Failed to load data', 'Failed to load data'),
-  );
-
-  readonly listingEmptyTitle = computed(() => this.translateLabel(this.config().emptyState.title));
-
-  readonly listingEmptyMessage = computed(() => this.translateLabel(this.config().emptyState.message));
-
-  readonly listingEmptyActionLabel = computed(() => {
-    const label = this.config().emptyState.actionLabel;
-    return label ? this.translateLabel(label) : '';
-  });
-
-  readonly currentPage = this._currentPage.asReadonly();
-  readonly pageSize = this._pageSize.asReadonly();
-  readonly totalPages = computed(() =>
-    Math.ceil(this._totalItems() / this._pageSize()) || 1
-  );
-
-  readonly sort = this._sort.asReadonly();
-  readonly selectionMode = this._selectionMode.asReadonly();
   readonly selectedItems = this._selection.asReadonly();
   readonly hasSelection = computed(() => this._selection().length > 0);
   readonly selectionCount = computed(() => this._selection().length);
 
-  /**
-   * Selection passed to table/card/grid/list for display (row highlight).
-   * When openOnRowClick + activeItemId, highlights the row with that id; otherwise uses _selection.
-   */
-  readonly effectiveTableSelection = computed<TItem[]>(() => {
-    if (this.openOnRowClick() && this.activeItemId()) {
-      const id = this.activeItemId()!;
-      const found = this._items().find((i) => (i as { id?: string }).id === id);
-      return found ? [found] : [];
-    }
-    return this._selection();
+  readonly searchTerm = computed(() => this.query().search ?? '');
+  readonly filterValues = computed<Record<string, unknown>>(() => ({
+    ...this.pageFilters(),
+    ...filterGroupToPinnedValues(resolveFilterGroup(this.query())),
+  }));
+  /** Active quick view (first segment unless chosen). */
+  readonly activeSegment = computed(() => {
+    const segments = this.config().segments ?? [];
+    const id = this.query().segment ?? this.config().defaultSegment;
+    return segments.find((s) => s.id === id) ?? segments[0];
   });
+  readonly currentPage = computed(() => this.query().page);
+  readonly pageSize = computed(() => this.query().pageSize);
 
-  readonly viewMode = this._viewMode.asReadonly();
-  readonly filterValues = this._filterValues.asReadonly();
-  readonly searchTerm = this._searchTerm.asReadonly();
-  readonly hasActiveFilters = computed(() =>
-    Object.keys(this._filterValues()).length > 0 || this._searchTerm().length > 0
+  readonly listingErrorMessage = computed(
+    () => this.error() ?? this.t('Failed to load data', 'Failed to load data'),
   );
 
-  /**
-   * Active structured filters as removable chips (shown below toolbar on narrow viewports; Task 4.5).
-   */
-  readonly mobileActiveFilterChips = computed(() => {
-    const cfg = this.config();
-    const values = this._filterValues();
-    const filters = cfg.filters ?? [];
-    const chips: { key: string; label: string; value: string }[] = [];
-    for (const f of filters) {
-      const v = values[f.key];
-      if (v === undefined || v === null || v === '') continue;
-      if (Array.isArray(v) && v.length === 0) continue;
-      const display = Array.isArray(v) ? v.map(String).join(', ') : String(v);
-      chips.push({ key: f.key, label: f.label, value: display });
-    }
-    return chips;
-  });
-
-  /** Columns with visibility toggle support */
-  readonly listingColumns = computed<ListingControlsColumn[]>(() => {
-    const visibleKeys = this._visibleColumnKeys();
-    return this.config().columns.map((c) => ({
-      key: c.key,
-      label: c.label,
-      visible: visibleKeys.has(c.key),
-    }));
-  });
-
-  readonly hiddenColumnsCount = computed(() =>
-    this.listingColumns().filter((c) => !c.visible).length
-  );
-
-  /** Lookups for filter options (from facade if available). */
   readonly listingLookups = computed<LookupContext>(() => {
-    const f = this.facade() as (PartialCrudFacade<unknown, TItem> & { lookups?: () => LookupContext }) | undefined;
-    if (!f) return {};
-    return f.lookups?.() ?? {};
+    const f = this.facade() as PartialCrudFacade<unknown, TItem> & { lookups?: () => LookupContext };
+    return f?.lookups?.() ?? {};
   });
 
-  /** Visible columns for table view */
+  readonly cellTemplates = computed<Record<string, TemplateRef<unknown>>>(() =>
+    Object.fromEntries(this.columnTemplates().map((t) => [t.nfColumn, t.templateRef])),
+  );
+
+  /** Visible columns (used by exports). */
   readonly visibleColumns = computed<ColumnConfig[]>(() => {
-    const visibleKeys = this._visibleColumnKeys();
-    return this.config().columns.filter((col) => visibleKeys.has(col.key));
+    const state = new Map((this.query().columns ?? []).map((c) => [c.key, c.visible]));
+    const defaults = this.config().defaultVisibleColumns;
+    return this.config().columns.filter((c) =>
+      state.has(c.key) ? state.get(c.key) : !defaults || defaults.includes(c.key),
+    );
   });
 
-  /**
-   * Check if user has permission for an action.
-   * If no permission is specified, action is allowed.
-   */
-  private hasActionPermission(action: EntityActionConfig<TItem>): boolean {
-    if (!action.permission) return true;
-    return this.permissionService.hasPermission(action.permission);
-  }
-
-  /**
-   * Selection-based actions (single, bulk, single+bulk scopes).
-   * Only visible when items are selected and user has permission.
-   */
-  readonly selectionActions = computed<ButtonListItem[]>(() => {
+  /** Listing artifact config — depends on the page config and permissions only. */
+  readonly flatConfig = computed<ListingFlatConfig>(() => {
     const cfg = this.config();
-    const unifiedActions = cfg.actions ?? [];
-    const selection = this._selection();
-    const selectionCount = selection.length;
-    const result: ButtonListItem[] = [];
+    const allowed = (cfg.actions ?? []).filter((a) => this.hasActionPermission(a));
+    const global = allowed.filter((a) => a.scope === 'global');
+    const scoped = allowed.filter((a) => a.scope !== 'global');
+    const mode = cfg.features.selectionMode;
 
-    if (selectionCount === 0) return result;
+    const actions: ListingActionItem[] = global.length
+      ? global.map((a) => this.toActionItem(a))
+      : (cfg.toolbarActions ?? []).map((a) => this.toActionItem(a));
+    const selectionActions: ListingSelectionAction[] = scoped.length
+      ? scoped.map((a) => ({
+          ...this.toActionItem(a),
+          scope: a.scope as ListingSelectionScope,
+          minSelection: a.minSelection,
+          maxSelection: a.maxSelection,
+          visibleFor: a.visible as ((selection: unknown[]) => boolean) | undefined,
+          disabledFor: a.disabled as ((selection: unknown[]) => boolean) | undefined,
+        }))
+      : (cfg.bulkActions ?? []).map((a) => ({ ...this.toActionItem(a), scope: 'single+bulk' as const }));
 
-    // Process selection-based actions
-    unifiedActions
-      .filter((a) => a.scope !== 'global')
-      .filter((a) => this.hasActionPermission(a)) // Permission check
-      .forEach((a) => {
-        let isVisible = false;
+    const empty = cfg.emptyState;
+    const emptyActionId = empty.actionId ?? 'create';
+    const emptyActionOffered =
+      !!empty.actionLabel &&
+      (global.some((a) => a.id === emptyActionId || (emptyActionId === 'create' && a.id === 'new')) ||
+        (!!cfg.routes?.create && !(cfg.actions ?? []).some((a) => a.id === emptyActionId)));
 
-        switch (a.scope) {
-          case 'single':
-            isVisible = selectionCount === 1;
-            break;
-          case 'bulk':
-            isVisible = selectionCount >= (a.minSelection ?? 2);
-            break;
-          case 'single+bulk':
-            isVisible = selectionCount >= (a.minSelection ?? 1);
-            break;
-        }
-
-        if (!isVisible) return;
-        if (a.maxSelection && selectionCount > a.maxSelection) return;
-        if (a.visible && !a.visible(selection)) return;
-
-        const isDisabled = a.disabled ? a.disabled(selection) : false;
-
-        result.push({
-          id: a.id,
-          label: a.label ?? '',
-          icon: a.icon,
-          variant: (a.variant as ButtonListItem['variant']) ?? 'secondary',
-          ariaLabel: a.ariaLabel ?? a.label,
-          tooltip: a.tooltip ?? a.ariaLabel ?? a.label ?? '',
-          disabled: isDisabled,
-        });
-      });
-
-    // Fallback to legacy bulkActions
-    if (result.length === 0 && cfg.bulkActions) {
-      cfg.bulkActions.forEach((a) => {
-        result.push({
-          id: a.id,
-          label: a.label ?? '',
-          icon: a.icon,
-          variant: (a.variant as ButtonListItem['variant']) ?? 'secondary',
-          ariaLabel: a.ariaLabel ?? a.label,
-          disabled: a.disabled,
-        });
-      });
-    }
-
-    return result;
+    return {
+      columns: cfg.columns,
+      defaultVisibleColumns: cfg.defaultVisibleColumns,
+      filters: cfg.filters,
+      filterMode: 'simple',
+      segments: cfg.segments,
+      defaultSegment: cfg.defaultSegment,
+      pageSize: cfg.pagination.defaultPageSize,
+      pageSizeOptions: cfg.pagination.pageSizeOptions,
+      emptyState: {
+        icon: empty.icon,
+        title: empty.title,
+        message: empty.message,
+        actionLabel: emptyActionOffered ? empty.actionLabel : undefined,
+        actionId: emptyActionId,
+      },
+      projectedActions: true,
+      actions,
+      selectionActions,
+      features: {
+        search: cfg.features.search,
+        filters: cfg.features.filters,
+        columnToggle: cfg.features.columnToggle,
+        export: false,
+        selection: mode === 'toggleable' ? 'multiple' : mode,
+        selectionToggle: mode === 'toggleable',
+        selectionToggleDefaultActive: false,
+        pagination: true,
+        rowClick: this.openOnRowClick() ? 'open' : 'select',
+      },
+    };
   });
-
-  /**
-   * Global actions (always visible if user has permission).
-   */
-  readonly globalActions = computed<ButtonListItem[]>(() => {
-    const cfg = this.config();
-    const unifiedActions = cfg.actions ?? [];
-    const result: ButtonListItem[] = [];
-
-    // Process global actions
-    unifiedActions
-      .filter((a) => a.scope === 'global')
-      .filter((a) => this.hasActionPermission(a)) // Permission check
-      .forEach((a) => {
-        result.push({
-          id: a.id,
-          label: a.label ?? '',
-          icon: a.icon,
-          variant: (a.variant as ButtonListItem['variant']) ?? 'secondary',
-          ariaLabel: a.ariaLabel ?? a.label,
-          tooltip: a.tooltip ?? a.ariaLabel ?? a.label ?? '',
-          disabled: false,
-        });
-      });
-
-    // Fallback to legacy toolbarActions
-    if (result.length === 0 && cfg.toolbarActions) {
-      cfg.toolbarActions.forEach((a) => {
-        result.push({
-          id: a.id,
-          label: a.label ?? '',
-          icon: a.icon,
-          variant: (a.variant as ButtonListItem['variant']) ?? 'secondary',
-          ariaLabel: a.ariaLabel ?? a.label,
-          tooltip: a.tooltip ?? a.ariaLabel ?? a.label ?? '',
-          disabled: a.disabled,
-        });
-      });
-    }
-
-    return result;
-  });
-
-  /** Combined toolbar actions (for backwards compatibility). */
-  readonly toolbarButtonActions = computed<ButtonListItem[]>(() => {
-    return [...this.selectionActions(), ...this.globalActions()];
-  });
-
-  /** Selection mode for data table */
-  readonly selectableMode = computed<boolean | 'single' | 'multiple'>(() => {
-    const mode = this._selectionMode();
-    return mode === 'none' ? false : mode;
-  });
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // Lifecycle
-  // ═══════════════════════════════════════════════════════════════════════════
 
   constructor() {
-    // Initialize state from config when config changes
     effect(() => {
       const cfg = this.config();
-
-      // Set default page size
-      this._pageSize.set(cfg.pagination.defaultPageSize);
-
-      // Set default sort
-      if (cfg.defaultSort) {
-        this._sort.set(cfg.defaultSort);
-      }
-
-      // Set default selection mode
-      const selMode = cfg.features.selectionMode;
-      if (selMode === 'single' || selMode === 'multiple') {
-        this._selectionMode.set(selMode);
-      } else if (selMode === 'toggleable') {
-        this._selectionMode.set('single'); // Default to single, can toggle to multiple
-      } else {
-        this._selectionMode.set('none');
-      }
-
-      // Set default view mode
-      this._viewMode.set(cfg.viewModes.default);
-
-      // Initialize visible columns
-      const defaultVisible = cfg.defaultVisibleColumns ?? cfg.columns.map((c) => c.key);
-      this._visibleColumnKeys.set(new Set(defaultVisible));
-    }, { allowSignalWrites: true });
-
-    // Auto-load data (applique initialFilters avant le premier fetch)
-    effect(() => {
       const init = this.initialFilters();
-      this._filterValues.set({ ...(init ?? {}) });
-      if (this.autoLoad()) {
-        this.loadData();
-      }
-    }, { allowSignalWrites: true });
-
-    // Debounced search (300ms)
-    this.search$
-      .pipe(
-        debounceTime(300),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((value) => {
-        this._searchTerm.set(value);
-        this._currentPage.set(1);
-        this.loadData();
+      untracked(() => {
+        this.query.set({
+          ...createDefaultListingQuery(cfg.pagination.defaultPageSize),
+          sort: cfg.defaultSort
+            ? { field: cfg.defaultSort.column, direction: cfg.defaultSort.direction ?? 'asc' }
+            : null,
+        });
+        this.applyFilterValues(init ?? {});
+        if (this.autoLoad()) {
+          void this.loadData();
+        }
       });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    });
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Data Operations
+  // Data
   // ═══════════════════════════════════════════════════════════════════════════
 
   async loadData(): Promise<void> {
     const facadeInstance = this.facade();
     if (!facadeInstance?.loadItems) {
-      if (!facadeInstance) return;
-      console.warn('Facade does not implement loadItems()');
+      if (facadeInstance) console.warn('Facade does not implement loadItems()');
       return;
     }
 
     this._loadingState.set('loading');
     this._error.set(null);
-    this.clearSelection();
 
     try {
       const ensureLookups = (facadeInstance as { ensureLookups?: () => Promise<void> }).ensureLookups;
       if (ensureLookups) {
         await ensureLookups.call(facadeInstance);
       }
-      const query = this.buildQuery();
-      const result = await facadeInstance.loadItems(query);
+      const result = await facadeInstance.loadItems(this.buildQuery());
       this._items.set(result.items);
       this._totalItems.set(result.total);
       this._loadingState.set('success');
@@ -558,8 +316,7 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
     this._error.set(null);
 
     try {
-      const query = this.buildQuery();
-      const result = await facadeInstance.loadItems(query);
+      const result = await facadeInstance.loadItems(this.buildQuery());
       this._items.set(result.items);
       this._totalItems.set(result.total);
       this.itemsLoaded.emit(result.items);
@@ -571,43 +328,71 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
   }
 
   protected buildQuery(): Record<string, unknown> {
-    const sort = this._sort();
+    const q = this.query();
+    const sorted = q.sort ? this.config().columns.find((c) => c.key === q.sort!.field) : undefined;
     return {
-      page: this._currentPage(),
-      pageSize: this._pageSize(),
-      sortBy: sort?.column,
-      sortDirection: sort?.direction,
-      search: this._searchTerm() || undefined,
-      ...this._filterValues(),
+      page: q.page,
+      pageSize: q.pageSize,
+      sortBy: q.sort ? (sorted?.field ?? q.sort.field) : undefined,
+      sortDirection: q.sort?.direction,
+      search: q.search || undefined,
+      ...this.activeSegment()?.filters,
+      ...this.filterValues(),
     };
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // Pagination
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  onPageChange(event: { page: number; pageSize: number }): void {
-    if (event.pageSize !== this._pageSize()) {
-      this._pageSize.set(event.pageSize);
-      this._currentPage.set(1);
-    } else {
-      this._currentPage.set(event.page);
+  /** The listing changed search, filters, sort, page or columns. */
+  onQueryLoad(next: ListingQueryState): void {
+    const withoutColumns = (q: ListingQueryState) => ({ ...q, columns: undefined });
+    const reload = !listingQuerySnapshotEqual(withoutColumns(next), withoutColumns(this.query()));
+    this.query.set(next);
+    if (reload) {
+      void this.loadData();
     }
-    this.loadData();
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Sorting
+  // Filters & search (also driven by pages: quick chips, dashboards)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  onSortChange(event: { column: string; direction: 'asc' | 'desc' | null }): void {
-    this._sort.set(event.direction ? { column: event.column, direction: event.direction } : null);
-    this._currentPage.set(1);
-    this.loadData();
+  onFilterChange(filters: Record<string, unknown>): void {
+    this.applyFilterValues(filters);
+    void this.loadData();
+  }
+
+  onSearchChange(value: string): void {
+    this.query.update((q) => ({ ...q, search: value, page: 1 }));
+    void this.loadData();
+  }
+
+  onResetFilters(): void {
+    this.pageFilters.set({});
+    this.query.update((q) => ({ ...q, search: '', filters: [], filterGroup: clausesToGroup([]), page: 1 }));
+    void this.loadData();
+  }
+
+  clearFilterChip(key: string): void {
+    const next = { ...this.filterValues() };
+    delete next[key];
+    this.onFilterChange(next);
+  }
+
+  private applyFilterValues(values: Record<string, unknown>): void {
+    const fields = this.config().filters ?? [];
+    const offered = new Set(fields.map((f) => f.key));
+    const inMenu: Record<string, unknown> = {};
+    const fromPage: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(values)) {
+      if (value === undefined) continue;
+      (offered.has(key) ? inMenu : fromPage)[key] = value;
+    }
+    const clauses = filterValuesToClauses(inMenu, fields);
+    this.pageFilters.set(fromPage);
+    this.query.update((q) => ({ ...q, filters: clauses, filterGroup: clausesToGroup(clauses), page: 1 }));
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Selection
+  // Selection & rows
   // ═══════════════════════════════════════════════════════════════════════════
 
   onSelectionChange(items: TItem[]): void {
@@ -620,175 +405,50 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
     this.selectionChange.emit([]);
   }
 
-  onToggleSelectionMode(): void {
-    const currentMode = this._selectionMode();
-    if (currentMode === 'multiple') {
-      this._selectionMode.set('single');
-      this.clearSelection();
-    } else {
-      this._selectionMode.set('multiple');
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // Filters & Search
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  onSearchChange(value: string): void {
-    // Use debounced search to avoid excessive API calls
-    this.search$.next(value);
-  }
-
-  onFilterChange(filters: Record<string, unknown>): void {
-    this._filterValues.set(filters);
-    this._currentPage.set(1);
-    this.loadData();
-  }
-
-  onResetFilters(): void {
-    this._filterValues.set({});
-    this._searchTerm.set('');
-    this.search$.next('');
-    this._currentPage.set(1);
-    this.loadData();
-  }
-
-  clearFilterChip(key: string): void {
-    const next = { ...this._filterValues() };
-    delete next[key];
-    this.onFilterChange(next);
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // Column Visibility
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  onColumnsChange(columns: ListingControlsColumn[]): void {
-    const visibleKeys = new Set(columns.filter((c) => c.visible).map((c) => c.key));
-    this._visibleColumnKeys.set(visibleKeys);
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // View Mode
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  onViewModeChange(mode: ViewMode): void {
-    this._viewMode.set(mode);
-    this.viewModeChange.emit(mode);
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // Row Events
-  // ═══════════════════════════════════════════════════════════════════════════
-
   onRowClick(item: TItem): void {
     if (this.openOnRowClick()) {
       this.rowOpen.emit(item);
-      return;
     }
-    const mode = this._selectionMode();
-    if (mode === 'none') {
-      return;
-    }
-    const current = this._selection();
-    const index = current.indexOf(item);
-    if (mode === 'single') {
-      this._selection.set(index >= 0 ? [] : [item]);
-    } else {
-      if (index >= 0) {
-        this._selection.set(current.filter((i) => i !== item));
-      } else {
-        this._selection.set([...current, item]);
-      }
-    }
-    this.selectionChange.emit(this._selection());
   }
 
   onRowDblClick(item: TItem): void {
-    const routes = this.config().routes;
-    if (routes?.detail) {
-      this.router.navigate(routes.detail(item));
-    }
-  }
-
-  onRowAction(event: { action: string; item: TItem }): void {
-    // Row actions are deprecated - emit for custom handling
-    this.action.emit({
-      actionId: event.action,
-      source: 'row',
-      item: event.item,
-    });
-  }
-
-  /**
-   * Handle builtin action for the current selection.
-   */
-  protected handleBuiltinAction(action: 'edit' | 'view' | 'delete' | 'duplicate'): void {
-    const selection = this._selection();
-
-    switch (action) {
-      case 'edit':
-      case 'view':
-        // Edit/view navigates to detail page (only for single selection)
-        if (selection.length === 1) {
-          const routes = this.config().routes;
-          if (routes?.detail) {
-            this.router.navigate(routes.detail(selection[0]));
-          }
-        }
-        break;
-      case 'delete':
-        // Delete works for single or multiple items
-        if (selection.length === 1) {
-          this.deleteItem(selection[0]);
-        } else if (selection.length > 1) {
-          this.handleBulkDelete();
-        }
-        break;
-      case 'duplicate':
-        // Duplicate single item
-        if (selection.length === 1) {
-          this.action.emit({ actionId: 'duplicate', source: 'bulk', item: selection[0], selection });
-        }
-        break;
-    }
+    this.navigateToDetail(item);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Action Handlers
+  // Actions
   // ═══════════════════════════════════════════════════════════════════════════
 
   onToolbarAction(actionId: string): void {
-    // Handle built-in toolbar actions (always visible)
     switch (actionId) {
       case 'new':
       case 'create':
-        this.navigateToCreate();
-        return;
+        if (this.config().routes?.create) {
+          this.navigateToCreate();
+          return;
+        }
+        break;
       case 'refresh':
-        this.refresh();
+        void this.refresh();
         return;
       case 'import-export':
-        this.openImportExportModal();
+        void this.openImportExportModal();
         return;
       case 'bulk-delete':
-        this.handleBulkDelete();
+        void this.handleBulkDelete();
         return;
     }
 
-    // Check if it's a unified action with builtin handler
     const unifiedAction = (this.config().actions ?? []).find((a) => a.id === actionId);
     if (unifiedAction?.builtin) {
       this.handleBuiltinAction(unifiedAction.builtin);
       return;
     }
 
-    // Check if it's a selection-based action
     const selection = this._selection();
     const isSelectionAction =
-      unifiedAction !== undefined ||
-      this.config().bulkActions?.some((a) => a.id === actionId) ||
-      false;
+      (unifiedAction !== undefined && unifiedAction.scope !== 'global') ||
+      (this.config().bulkActions?.some((a) => a.id === actionId) ?? false);
 
     this.action.emit({
       actionId,
@@ -798,32 +458,39 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
     });
   }
 
-  onEmptyStateAction(): void {
-    const cfg = this.config().emptyState;
-    const actionId = cfg.actionId ?? 'create';
-
-    if (actionId === 'create') {
-      this.navigateToCreate();
-    } else {
-      this.action.emit({ actionId, source: 'toolbar' });
+  protected handleBuiltinAction(action: 'edit' | 'view' | 'delete' | 'duplicate'): void {
+    const selection = this._selection();
+    switch (action) {
+      case 'edit':
+      case 'view':
+        if (selection.length === 1) this.navigateToDetail(selection[0]);
+        break;
+      case 'delete':
+        if (selection.length === 1) {
+          void this.deleteItem(selection[0]);
+        } else if (selection.length > 1) {
+          void this.handleBulkDelete();
+        }
+        break;
+      case 'duplicate':
+        if (selection.length === 1) {
+          this.action.emit({ actionId: 'duplicate', source: 'bulk', item: selection[0], selection });
+        }
+        break;
     }
   }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // Navigation
-  // ═══════════════════════════════════════════════════════════════════════════
 
   navigateToCreate(): void {
     const routes = this.config().routes;
     if (routes?.create) {
-      this.router.navigate(routes.create);
+      void this.router.navigate(routes.create);
     }
   }
 
   navigateToDetail(item: TItem): void {
     const routes = this.config().routes;
     if (routes?.detail) {
-      this.router.navigate(routes.detail(item));
+      void this.router.navigate(routes.detail(item));
     }
   }
 
@@ -845,28 +512,24 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
       variant: 'danger',
       icon: deleteConfig.icon ?? 'delete',
     });
+    if (!confirmed) return;
 
-    if (confirmed) {
-      try {
-        const facadeInstance = this.facade();
-        if (facadeInstance.deleteItem) {
-          const id = this.getItemId(item);
-          await facadeInstance.deleteItem(id);
-          this.toast.success(deleteConfig.successMessage);
-          await this.refresh();
-        }
-      } catch (error) {
-        this.toast.error(deleteConfig.errorMessage);
+    try {
+      const facadeInstance = this.facade();
+      if (facadeInstance.deleteItem) {
+        await facadeInstance.deleteItem(this.getItemId(item));
+        this.toast.success(deleteConfig.successMessage);
+        await this.refresh();
       }
+    } catch {
+      this.toast.error(deleteConfig.errorMessage);
     }
   }
 
   protected async handleBulkDelete(): Promise<void> {
     const selected = this._selection();
     if (selected.length === 0) return;
-
-    const deleteConfig = this.config().delete;
-    if (!deleteConfig) return;
+    if (!this.config().delete) return;
 
     const confirmed = await this.confirmDialog.confirm({
       title: this.translate.instant('shared.entityListing.bulkDelete.title', {
@@ -876,32 +539,25 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
             ? this.translateLabel(this.config().entityName)
             : this.translateLabel(this.config().entityNamePlural),
       }),
-      message: this.translate.instant('shared.entityListing.bulkDelete.message', {
-        count: selected.length,
-      }),
+      message: this.translate.instant('shared.entityListing.bulkDelete.message', { count: selected.length }),
       confirmLabel: this.translate.instant('shared.entityListing.bulkDelete.confirmLabel'),
       variant: 'danger',
       icon: 'delete',
     });
+    if (!confirmed) return;
 
-    if (confirmed) {
-      try {
-        const facadeInstance = this.facade();
-        if (facadeInstance.deleteItem) {
-          for (const item of selected) {
-            await facadeInstance.deleteItem(this.getItemId(item));
-          }
-          this.toast.success(
-            this.translate.instant('shared.entityListing.toast.deleted', {
-              count: selected.length,
-            })
-          );
-          this.clearSelection();
-          await this.refresh();
+    try {
+      const facadeInstance = this.facade();
+      if (facadeInstance.deleteItem) {
+        for (const item of selected) {
+          await facadeInstance.deleteItem(this.getItemId(item));
         }
-      } catch (error) {
-        this.toast.error(this.t('Failed to delete some items', 'Failed to delete some items'));
+        this.toast.success(this.translate.instant('shared.entityListing.toast.deleted', { count: selected.length }));
+        this.clearSelection();
+        await this.refresh();
       }
+    } catch {
+      this.toast.error(this.t('Failed to delete some items', 'Failed to delete some items'));
     }
   }
 
@@ -910,7 +566,7 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Import/Export
+  // Import / Export
   // ═══════════════════════════════════════════════════════════════════════════
 
   async openImportExportModal(): Promise<void> {
@@ -926,7 +582,7 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
       downloadTemplate: () => {
         this.csvService.generateTemplateCsv(
           importExportConfig.templateColumns.map((c) => ({ key: c.key, label: c.label ?? c.key })),
-          `${this.config().entityName.toLowerCase()}-template-${new Date().toISOString().slice(0, 10)}.csv`
+          `${this.config().entityName.toLowerCase()}-template-${new Date().toISOString().slice(0, 10)}.csv`,
         );
         this.toast.success(this.t('Template downloaded', 'Template downloaded'));
       },
@@ -942,9 +598,6 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
     }
   }
 
-  /**
-   * Import by sending the raw CSV file to the backend.
-   */
   protected async runImportFile(file: File): Promise<ImportResult> {
     const facadeInstance = this.facade() as { importCsv?: (f: File) => Promise<ImportResult> };
     if (facadeInstance.importCsv) {
@@ -958,21 +611,17 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
     return { created: 0, updated: 0, skipped: 0, failed: rows.length, errors: [] };
   }
 
-  /**
-   * Export current view. When useBackendExport is true, calls backend export endpoint (filtered, up to 10k rows).
-   * Otherwise uses client-side CSV from loaded data (same filters/sort).
-   */
+  /** Backend export when the facade has one (filtered, up to 10k rows); otherwise CSV of the filtered rows. */
   protected async exportView(useBackendExport?: boolean): Promise<void> {
     const facadeInstance = this.facade() as {
       loadItems?: (q: Record<string, unknown>) => Promise<{ items: unknown[]; total: number }>;
       exportCsv?: (q?: Record<string, unknown>) => Promise<Blob>;
     };
+    const filename = `${this.config().entityName.toLowerCase()}-export-${new Date().toISOString().slice(0, 10)}.csv`;
 
     if (useBackendExport && facadeInstance.exportCsv) {
       try {
-        const query = this.buildQuery();
-        const blob = await facadeInstance.exportCsv(query);
-        const filename = `${this.config().entityName.toLowerCase()}-export-${new Date().toISOString().slice(0, 10)}.csv`;
+        const blob = await facadeInstance.exportCsv(this.buildQuery());
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -980,15 +629,7 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
         a.click();
         URL.revokeObjectURL(url);
         this.toast.success(this.t('Export complete', 'Export complete'));
-        this.exported.emit({ format: 'csv', filename, rowCount: -1, selectionOnly: false });
-        this.emitListingExportAudit({
-          entityName: this.config().entityName,
-          entityNamePlural: this.config().entityNamePlural,
-          format: 'csv',
-          filename,
-          rowCount: -1,
-          selectionOnly: false,
-        });
+        this.notifyExported({ format: 'csv', filename, rowCount: -1, selectionOnly: false });
       } catch (e) {
         this.toast.error(e instanceof Error ? e.message : this.t('Export failed', 'Export failed'));
       }
@@ -1000,36 +641,16 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
       this.toast.warning(this.t('No columns to export', 'No columns to export'));
       return;
     }
-
     if (!facadeInstance.loadItems) return;
 
-    const query = {
+    const result = await facadeInstance.loadItems({
       ...this.buildQuery(),
       page: 1,
       pageSize: CsvService.DEFAULT_EXPORT_PAGE_SIZE,
-    };
-
-    const result = await facadeInstance.loadItems(query);
-    const filename = `${this.config().entityName.toLowerCase()}-export-${new Date().toISOString().slice(0, 10)}.csv`;
-    this.csvService.exportToCsv(
-      result.items as Record<string, unknown>[],
-      columns,
-      filename,
-    );
-    this.toast.success(
-      this.translate.instant('shared.entityListing.toast.exported', {
-        count: result.items.length,
-      })
-    );
-    this.exported.emit({ format: 'csv', filename, rowCount: result.items.length, selectionOnly: false });
-    this.emitListingExportAudit({
-      entityName: this.config().entityName,
-      entityNamePlural: this.config().entityNamePlural,
-      format: 'csv',
-      filename,
-      rowCount: result.items.length,
-      selectionOnly: false,
     });
+    this.csvService.exportToCsv(result.items as Record<string, unknown>[], columns, filename);
+    this.toast.success(this.translate.instant('shared.entityListing.toast.exported', { count: result.items.length }));
+    this.notifyExported({ format: 'csv', filename, rowCount: result.items.length, selectionOnly: false });
   }
 
   protected async exportSelection(): Promise<void> {
@@ -1038,7 +659,6 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
       this.toast.warning(this.t('Select items to export', 'Select items to export'));
       return;
     }
-
     const columns = this.visibleColumns().map((c) => ({ field: c.field, label: c.label }));
     if (columns.length === 0) {
       this.toast.warning(this.t('No columns to export', 'No columns to export'));
@@ -1046,44 +666,43 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
     }
 
     const filename = `${this.config().entityName.toLowerCase()}-selected-${new Date().toISOString().slice(0, 10)}.csv`;
-    this.csvService.exportToCsv(
-      selected as Record<string, unknown>[],
-      columns,
-      filename,
-    );
-    this.toast.success(
-      this.translate.instant('shared.entityListing.toast.exported', {
-        count: selected.length,
-      })
-    );
-    this.exported.emit({ format: 'csv', filename, rowCount: selected.length, selectionOnly: true });
-    this.emitListingExportAudit({
-      entityName: this.config().entityName,
-      entityNamePlural: this.config().entityNamePlural,
-      format: 'csv',
-      filename,
-      rowCount: selected.length,
-      selectionOnly: true,
-    });
+    this.csvService.exportToCsv(selected as Record<string, unknown>[], columns, filename);
+    this.toast.success(this.translate.instant('shared.entityListing.toast.exported', { count: selected.length }));
+    this.notifyExported({ format: 'csv', filename, rowCount: selected.length, selectionOnly: true });
   }
 
-  private emitListingExportAudit(payload: ListingExportAuditPayload): void {
+  private notifyExported(event: { format: 'csv'; filename: string; rowCount: number; selectionOnly: boolean }): void {
+    this.exported.emit(event);
+    const payload: ListingExportAuditPayload = {
+      entityName: this.config().entityName,
+      entityNamePlural: this.config().entityNamePlural,
+      ...event,
+    };
     this.listingExportAudit?.(payload);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Template Helpers
+  // Helpers
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /** Get custom template for a column, if defined */
+  /** Custom template for a column, if defined. */
   getColumnTemplate(columnKey: string): TemplateRef<unknown> | null {
-    const directive = this.columnTemplates?.find((t) => t.nfColumn === columnKey);
-    return directive?.templateRef ?? null;
+    return this.cellTemplates()[columnKey] ?? null;
   }
 
-  /** Check if view mode is available */
-  isViewModeAvailable(mode: ViewMode): boolean {
-    return this.config().viewModes.available.includes(mode);
+  private hasActionPermission(action: EntityActionConfig<TItem>): boolean {
+    return !action.permission || this.permissionService.hasPermission(action.permission);
+  }
+
+  private toActionItem(a: EntityActionConfig<TItem> | ActionConfig): ListingActionItem {
+    return {
+      id: a.id,
+      label: a.label ?? '',
+      icon: a.icon,
+      variant: a.variant as ListingActionItem['variant'],
+      tooltip: a.tooltip ?? a.ariaLabel ?? a.label,
+      disabled: typeof a.disabled === 'boolean' ? a.disabled : undefined,
+    };
   }
 
   private translateLabel(value: string): string {
@@ -1096,4 +715,3 @@ export class EntityListingComponent<TItem = unknown> implements OnDestroy {
     return translated === key ? fallback : translated;
   }
 }
-

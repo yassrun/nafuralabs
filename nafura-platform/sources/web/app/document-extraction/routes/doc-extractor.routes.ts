@@ -11,8 +11,8 @@
  */
 
 import { Routes } from '@angular/router';
-import { permissionGuard } from '../../../../core/security/guards/permission.guard';
-import { featureEnabledGuard } from '../../../../core/tenant/tenant.guard';
+import { permissionGuard } from '../../../core/security/guards/permission.guard';
+import { featureEnabledGuard } from '../../../core/tenant/tenant.guard';
 import { DOC_EXTRACTOR_MODULE_ID, DocExtractorPermissions } from '../permissions/doc-extractor.permissions';
 
 /**

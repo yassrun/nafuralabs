@@ -141,16 +141,16 @@ export class MembersApiService extends FeatureApiService<
     if (!query) return params;
 
     if (query.page !== undefined) {
-      params = params.set('page', String(Math.max(Number(query.page) - 1, 0)));
+      params = params.set('page', String(Math.max(Number(query.page), 1)));
     }
     if (query.pageSize !== undefined) {
       params = params.set('pageSize', String(query.pageSize));
     }
     if (query.sortBy) {
-      params = params.set('sort', query.sortBy);
+      params = params.set('sortBy', query.sortBy);
     }
     if (query.sortDirection) {
-      params = params.set('direction', query.sortDirection);
+      params = params.set('sortDirection', query.sortDirection);
     }
 
     for (const [key, rawValue] of Object.entries(query)) {
@@ -167,6 +167,8 @@ export class MembersApiService extends FeatureApiService<
       }
       if (key === 'status') {
         params = params.set('status', this.toApiStatus(String(rawValue)) ?? String(rawValue));
+      } else if (key === 'roleId') {
+        params = params.set('role', String(rawValue));
       } else {
         params = params.set(key, String(rawValue));
       }

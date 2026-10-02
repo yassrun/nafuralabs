@@ -19,6 +19,13 @@ export function buildBcListingConfig(t: TranslateService) {
     },
     {
       filters: buildBcFilters(t),
+      segments: [
+        { id: 'ALL', label: 'achats.commande.chips.all' },
+        { id: 'A_VALIDER', label: 'achats.commande.chips.aValider', filters: { quick: 'A_VALIDER' } },
+        { id: 'EN_COURS_LIVRAISON', label: 'achats.commande.chips.enCoursLivraison', filters: { quick: 'EN_COURS_LIVRAISON' } },
+        { id: 'EN_RETARD', label: 'achats.commande.chips.enRetard', filters: { quick: 'EN_RETARD' } },
+        { id: 'A_FACTURER', label: 'achats.commande.chips.aFacturer', filters: { quick: 'A_FACTURER' } },
+      ],
       defaultSort: { column: 'dateCreation', direction: 'desc' },
       features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {

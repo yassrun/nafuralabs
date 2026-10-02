@@ -1,0 +1,155 @@
+// Liquibase changelog of a runnable project, generated from the SQL of the modules on its runtime classpath.
+// Same order and changeset ids as ops/lifecycle, so a capability off at build time has no tables and a BC
+// brings its own. Applied by a host/test project: `nafuraMigrations(configurations.runtimeClasspath)`.
+import java.security.MessageDigest
+import java.util.Locale
+
+def repoRoot = file("${buildscript.sourceFile.parentFile}/../..").canonicalFile
+
+// Topological order of Sektor product modules (see ops/lifecycle); unlisted modules keep 500.
+def productModuleRank = [
+        currency: 10, finance: 10, hse: 10, marches: 10, partner: 10, rh: 10,
+        item: 20, etudes: 30, stock: 30, achats: 40, chantiers: 50, approbations: 60, ventes: 60,
+]
+
+ext.nafuraMigrationSortKey = { String relativePath ->
+    def lower = relativePath.replace('\\', '/').toLowerCase(Locale.ROOT)
+    def filename = relativePath.tokenize('/').last()
+
+    int layerRank = 50
+    int moduleRank = 500
+    if (lower.startsWith('nafura-platform/sources/backend/core/') ||
+            lower.startsWith('nafura-platform/sources/backend/identite/identity/')) {
+        layerRank = 10
+    } else if (lower.startsWith('nafura-platform/sources/backend/features/configuration/')) {
+        layerRank = 25
+    } else if (lower.startsWith('nafura-platform/sources/backend/features/business/')) {
+        layerRank = 30
+    } else if (lower.startsWith('nafura-platform/sources/backend/features/administration/') ||
+            lower.startsWith('nafura-platform/sources/backend/identite/iam/')) {
+        layerRank = 35
+    } else if (lower.startsWith('nafura-platform/sources/backend/conversation/ai-conversation/')) {
+        // AI migrations stay appended; conversation schema precedes agent runtime schema.
+        layerRank = 95
+        moduleRank = 10
+    } else if (lower.startsWith('nafura-platform/sources/backend/conversation/ai-agent-runtime/')) {
+        layerRank = 95
+        moduleRank = 20
+    } else if (lower.startsWith('nafura-platform/sources/backend/features/')) {
+        layerRank = 35
+    } else if (lower.startsWith('nafura-platform/')) {
+        layerRank = 45
+    } else if (lower ==~ ~'^[^/]+/sources/backend/(?:modules/)?[^/]+/.*') {
+        def moduleMatch = (lower =~ ~'^[^/]+/sources/backend/(?:modules/)?([^/]+)/')
+        if (moduleMatch.find()) {
+            moduleRank = productModuleRank.getOrDefault(moduleMatch.group(1), 500) as int
+        }
+    } else if (lower.startsWith('nafura-platform/ops/lifecycle/')) {
+        layerRank = 90
+    }
+
+    int kindRank = 3
+    if (lower.contains('/db/changelog/schema/') || lower.contains('/db/migration/schema/')) {
+        kindRank = 1
+    } else if (lower.contains('/db/changelog/data/') || lower.contains('/db/migration/data/')) {
+        kindRank = 2
+    }
+
+    def versionedFilename = (filename =~ /^V(\d+)_(\d+)_(\d+)__.*\.sql$/)
+    if (versionedFilename.matches()) {
+        return String.format('%02d-%03d-%02d-%06d-%06d-%06d-%s', layerRank, moduleRank, kindRank,
+                versionedFilename[0][1] as int, versionedFilename[0][2] as int, versionedFilename[0][3] as int, relativePath)
+    }
+    def semanticVersion = (lower =~ /\/v(\d+)\.(\d+)\//)
+    if (semanticVersion.find()) {
+        return String.format('%02d-%03d-%02d-%06d-%06d-%s', layerRank, moduleRank, kindRank,
+                semanticVersion.group(1) as int, semanticVersion.group(2) as int, relativePath)
+    }
+    if (filename.startsWith('R__')) {
+        return String.format('%02d-%03d-%02d-999999-999999-%s', layerRank, moduleRank, kindRank, relativePath)
+    }
+    return String.format('%02d-%03d-%02d-500000-500000-%s', layerRank, moduleRank, kindRank, relativePath)
+}
+
+/** Stable id from the repo-relative path only: reordering other migrations never retargets it. */
+ext.nafuraChangeSetId = { String relativePath ->
+    def digest = MessageDigest.getInstance('SHA-256')
+    digest.update(relativePath.replace('\\', '/').getBytes('UTF-8'))
+    return "m-${digest.digest().encodeHex().toString().substring(0, 24)}"
+}
+
+/** Module dirs (src/main/resources/db) → ordered SQL entries, as ops/lifecycle selects them. */
+ext.nafuraMigrationEntries = { Collection<File> moduleDirs ->
+    def entries = []
+    moduleDirs.each { File moduleDir ->
+        def dbRoot = new File(moduleDir, 'src/main/resources/db')
+        def changelog = new File(dbRoot, 'changelog')
+        def migration = new File(dbRoot, 'migration')
+        def pick = { File root -> root.isDirectory() ? fileTree(root) { include '**/*.sql' }.files.toList() : [] }
+        def selected = pick(changelog) ?: pick(migration)
+        selected.each { File sql ->
+            def relativePath = repoRoot.toPath().relativize(sql.canonicalFile.toPath()).toString().replace('\\', '/')
+            if (relativePath.contains('cursor_qa')) return
+            def content = sql.getText('UTF-8')
+            entries << [source: sql, relativePath: relativePath, disableSplitStatements: content.contains('$$')]
+        }
+    }
+    return entries.sort { left, right -> nafuraMigrationSortKey(left.relativePath) <=> nafuraMigrationSortKey(right.relativePath) }
+}
+
+ext.nafuraChangelogYaml = { List entries, Closure<String> sqlPathOf ->
+    def yaml = ['databaseChangeLog:', '']
+    entries.each { entry ->
+        def filename = entry.relativePath.tokenize('/').last()
+        def iamBootstrap = entry.relativePath.contains('/db/changelog/data/') && filename.contains('iam_bootstrap')
+        yaml << '  - changeSet:'
+        yaml << "      id: ${nafuraChangeSetId(entry.relativePath)}"
+        yaml << '      author: lifecycle'
+        if (filename.startsWith('R__') || iamBootstrap) yaml << '      runOnChange: true'
+        yaml << '      changes:'
+        yaml << '        - sqlFile:'
+        yaml << "            path: ${sqlPathOf(entry)}"
+        yaml << '            relativeToChangelogFile: true'
+        if (entry.disableSplitStatements) yaml << '            splitStatements: false'
+        yaml << ''
+    }
+    return yaml.join('\n') + '\n'
+}
+
+/**
+ * Registers `<taskName>` generating nafura/db/ (changelog-master.yaml + SQL) from the project
+ * modules of `classpath` (platform modules and product BCs). Returns the output as a FileCollection
+ * built by the task, to add to a source set or a Test classpath.
+ */
+ext.nafuraMigrationsFor = { Configuration classpath, String taskName ->
+    def outputDir = layout.buildDirectory.dir("generated/${taskName}")
+    def task = tasks.register(taskName) {
+        description = 'Generates the Liquibase changelog of the modules on the runtime classpath (lab mode).'
+        inputs.files(classpath)
+        outputs.dir(outputDir)
+        doLast {
+            def root = outputDir.get().asFile
+            project.delete(root)
+            def db = new File(root, 'nafura/db')
+            // A project artifact is <projectDir>/build/libs/<name>.jar.
+            def moduleDirs = classpath.incoming.artifacts.artifacts
+                    .findAll { it.id.componentIdentifier instanceof ProjectComponentIdentifier }
+                    .collect { it.file.parentFile.parentFile.parentFile }
+                    .unique()
+            def entries = nafuraMigrationEntries(moduleDirs)
+            entries.each { entry ->
+                def target = new File(db, "migrations/${entry.relativePath}")
+                target.parentFile.mkdirs()
+                target.bytes = entry.source.bytes
+            }
+            new File(db, 'changelog-master.yaml').text = nafuraChangelogYaml(entries) { "migrations/${it.relativePath}" }
+            logger.lifecycle("${taskName}: ${entries.size()} SQL migrations from ${moduleDirs.size()} modules")
+        }
+    }
+    return files(outputDir).builtBy(task)
+}
+
+/** Product host: the changelog of its runtime classpath, packaged in its resources. */
+ext.nafuraMigrations = { Configuration classpath ->
+    sourceSets.named('main') { resources.srcDir(nafuraMigrationsFor(classpath, 'nafuraMigrations')) }
+}

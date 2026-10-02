@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: platform-host-backend
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  thymeleaf:
+    check-template-location: false
+
+server:
+  port: 8090
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+nafura:
+  application:
+    id: platform-host
+  lab:
+    enabled: true
+    embedded-postgres: true
+    data-dir: ./data/postgres
+    issuer: platform-host-lab
+    tenant:
+      key: platform-host
+      name: Platform Host
+    users:
+      - { email: admin@host.local, given-name: Host, family-name: Admin, role: SUPER_ADMIN }
+      - { email: reader@host.local, given-name: Host, family-name: Reader, role: READER }
+      - { email: lead@host.local, given-name: Demo, family-name: Lead, role: DEMO_LEAD }
+      - { email: viewer@host.local, given-name: Demo, family-name: Viewer, role: DEMO_VIEWER }
+  security:
+    enabled: true
+    jwt:
+      # Lab-only secret: signs the tokens minted by /api/public/lab/session.
+      hs256-secret: platform-host-local-jwt-secret-32-chars!
+    public-endpoints:
+      - /actuator/**
+      - /api/public/**
+    tenant:
+      mode: single
+      enabled: true
+      validate-tenant: false
+      validate-membership: false
+      skip-paths:
+        - /api/auth/
+        - /api/public/
+        - /actuator/

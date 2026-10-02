@@ -1,0 +1,37 @@
+{
+  "administration": {
+    "documents": {
+      "title": "Documents and printing",
+      "identity": "Identity and layout",
+      "models": "Templates",
+      "description": "Visual identity, layout and document templates"
+    },
+    "navigation": {
+      "title": "Administration",
+      "members": "Members",
+      "roles": "Roles",
+      "domainActivation": "Domain activation",
+      "audit": "Audit log",
+      "templates": "Print templates",
+      "emailTemplates": "Email templates",
+      "workflows": "Workflows",
+      "subscriptions": "Subscriptions",
+      "scheduledJobs": "Scheduled jobs",
+      "webhooks": "Webhooks",
+      "apiKeys": "API keys",
+      "aiProviders": "AI providers",
+      "numberingSequences": "Numbering sequences",
+      "hub": "Administration home"
+    },
+    "hub": {
+      "title": "Administration center",
+      "subtitle": "Tenant settings, identity and platform capabilities",
+      "intro": "Choose an administration section."
+    }
+  },
+  "approvals": { "title": "Approvals" },
+  "userSettings": { "title": "My settings" },
+  "appSettings": { "title": "Organization settings" },
+  "organizationIdentity": { "title": "Organization identity" },
+  "notifications": { "title": "Notifications" }
+}

@@ -7,6 +7,7 @@
 
 1. **anatomy-showroom** — mini-app sandbox + canon archétypes écrans (listing, details, details-1N, tree) · [`raster-src/lots/anatomy-showroom/LOT.md`](raster-src/lots/anatomy-showroom/LOT.md) · sous-lot [`sandbox-v1`](raster-src/lots/anatomy-showroom/sandbox-v1/00-PLAN.md)
 1. **nf-screen** — cadre d’écran anatomy (header + breadcrumbs + body) · sous-lot `cadre-v1` · catalogue / études / achats / ventes / chantiers · [`raster-src/lots/nf-screen/LOT.md`](raster-src/lots/nf-screen/LOT.md)
+1. **platform-host** — un produit = `app.nafura.json` + BCs ; cible : Sektor reconstruit sur le host · sous-lot [`contrat-v1`](raster-src/lots/platform-host/contrat-v1/00-PLAN.md) · [`raster-src/lots/platform-host/LOT.md`](raster-src/lots/platform-host/LOT.md)
 
 <!-- borne -->
 

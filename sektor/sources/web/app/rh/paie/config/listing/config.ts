@@ -19,6 +19,12 @@ export function buildPaieListingConfig(t: TranslateService) {
     },
     {
       filters: buildPaieFilters(t),
+      segments: [
+        { id: 'ALL', label: 'rh.paie.listing.chips.all' },
+        { id: 'BROUILLON', label: 'rh.paie.listing.chips.brouillon', filters: { status: 'BROUILLON' } },
+        { id: 'VALIDEE', label: 'rh.paie.listing.chips.validee', filters: { status: 'VALIDEE' } },
+        { id: 'PAYEE', label: 'rh.paie.listing.chips.payee', filters: { status: 'PAYEE' } },
+      ],
       defaultSort: { column: 'mois', direction: 'desc' },
       features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {

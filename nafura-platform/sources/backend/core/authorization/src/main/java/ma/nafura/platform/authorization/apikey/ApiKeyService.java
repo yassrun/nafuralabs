@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -37,11 +36,11 @@ public class ApiKeyService {
         String plainKey = apiKeyGenerator.generatePlainKey(apiKeyProperties.getRandomLength());
         String keyPrefix = apiKeyGenerator.extractPrefix(plainKey);
 
-        Set<String> userPermissions = UserContext.getPermissions();
+        // A key never exceeds its creator: same rule as the filter (exact, `*`, `prefix.*`).
         String[] effectivePermissions = requestedPermissions == null
                 ? new String[0]
                 : requestedPermissions.stream()
-                    .filter(userPermissions::contains)
+                    .filter(UserContext::hasPermission)
                     .distinct()
                     .toArray(String[]::new);
 

@@ -7,7 +7,7 @@
  * Naming convention: module.feature.action
  */
 
-import { buildPermission, PermissionActions } from '../../../../core/security/models/user.models';
+import { buildPermission, PermissionActions } from '../../../core/security/models/user.models';
 
 /**
  * Doc Extractor module identifier.

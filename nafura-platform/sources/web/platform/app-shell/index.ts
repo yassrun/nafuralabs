@@ -2,6 +2,7 @@
 export { AppShellComponent } from './app-shell.component';
 export {
   APP_SHELL_CONFIG,
+  APP_SHELL_ACCESS,
   DEFAULT_APP_SHELL_FEATURE_CONFIG,
   provideAppShell,
   type AppShellFeatureConfig,
@@ -12,12 +13,7 @@ export {
   type AppShellUserMenuConfig,
   type AppShellTenantMenuConfig,
   type AppShellAiConfig,
-  type AppShellContextAdmin,
-  type AppShellContextRailConfig,
-  type AppShellContextSlot,
 } from './app-shell.config';
-export { AppShellContextRailService } from './context-rail.service';
-export { AppShellContextRailComponent } from './context-rail.component';
 export * from '../notifications';
 export * from '../identity';
 export { AppShellTopBarComponent } from './top-bar/app-shell-top-bar.component';
@@ -25,6 +21,7 @@ export { TopBarApplicationIdentityComponent } from './top-bar/top-bar-applicatio
 export { TopBarMenuButtonComponent } from './top-bar/top-bar-menu-button.component';
 export { AppShellSidebarComponent } from './sidebar/app-shell-sidebar.component';
 export { AppShellAiPanelComponent } from './ai/app-shell-ai-panel.component';
+export { domainOf, grants, toSidebar, visibleNavigation, type NavigationAccess } from './navigation-access';
 export {
   type AppShellNavigationItem,
   type AppShellNavigationSection,

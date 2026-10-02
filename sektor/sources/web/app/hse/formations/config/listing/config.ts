@@ -19,6 +19,12 @@ export function buildFormationsListingConfig(t: TranslateService) {
     },
     {
       filters: buildFormationFilters(t),
+      segments: [
+        { id: 'ALL', label: 'hse.formation.chips.all' },
+        { id: 'PLANIFIEE', label: 'hse.formation.chips.planifiees', filters: { status: 'PLANIFIEE' } },
+        { id: 'EN_COURS', label: 'hse.formation.chips.enCours', filters: { status: 'EN_COURS' } },
+        { id: 'TERMINEE', label: 'hse.formation.chips.terminees', filters: { status: 'TERMINEE' } },
+      ],
       defaultSort: { column: 'dateDebut', direction: 'desc' },
       features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {

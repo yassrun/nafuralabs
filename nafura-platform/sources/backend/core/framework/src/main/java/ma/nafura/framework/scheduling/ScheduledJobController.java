@@ -3,6 +3,7 @@ package ma.nafura.platform.framework.scheduling;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ public class ScheduledJobController {
     private final ScheduledJobExecutor executor;
 
     @GetMapping
+    @RequirePermission(value = "administration.scheduled-jobs.read", fullPermission = true)
     public List<ScheduledJobSummaryDto> listJobs() {
         return registry.getAll().stream()
                 .map(job -> {
@@ -45,6 +47,7 @@ public class ScheduledJobController {
     }
 
     @GetMapping("/{key}/executions")
+    @RequirePermission(value = "administration.scheduled-jobs.read", fullPermission = true)
     public Page<ScheduledJobExecution> getExecutions(
             @PathVariable String key,
             @RequestParam(defaultValue = "0") int page,
@@ -54,6 +57,7 @@ public class ScheduledJobController {
     }
 
     @PostMapping("/{key}/trigger")
+    @RequirePermission(value = "administration.scheduled-jobs.write", fullPermission = true)
     public TriggerResponse triggerJob(@PathVariable String key) {
         UUID executionId = executor.triggerNow(key);
         return new TriggerResponse(executionId);

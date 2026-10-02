@@ -13,7 +13,7 @@ export const DATE_FORMAT_OPTIONS = [
 /** Locale value and display label (aligned with I18N_CONFIG). */
 export const PREFERENCES_LOCALE_OPTIONS: { value: string; label: string }[] = [
   { value: 'en', label: 'English' },
-  { value: 'fr', label: 'French' },
+  { value: 'fr', label: 'Français' },
 ];
 
 /**

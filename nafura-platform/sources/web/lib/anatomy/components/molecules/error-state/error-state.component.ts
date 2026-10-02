@@ -1,6 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { LucideAngularModule } from 'lucide-angular';
 import { ButtonComponent } from '../../atoms/button';
 
 /**
@@ -17,10 +18,14 @@ import { ButtonComponent } from '../../atoms/button';
 @Component({
   selector: 'nf-error-state',
   standalone: true,
-  imports: [CommonModule, MatIconModule, ButtonComponent],
+  imports: [CommonModule, MatIconModule, LucideAngularModule, ButtonComponent],
   template: `
-    <div class="nf-error-state">
-      <mat-icon class="nf-error-state__icon">{{ icon() }}</mat-icon>
+    <div class="nf-error-state" role="alert">
+      @if (icon().includes('-')) {
+        <lucide-icon class="nf-error-state__icon" [name]="icon()" [size]="48" aria-hidden="true"></lucide-icon>
+      } @else {
+        <mat-icon class="nf-error-state__icon" aria-hidden="true">{{ icon() }}</mat-icon>
+      }
       <h3 class="nf-error-state__title">{{ title() }}</h3>
       @if (message()) {
         <p class="nf-error-state__message">{{ message() }}</p>
@@ -70,10 +75,10 @@ import { ButtonComponent } from '../../atoms/button';
 })
 export class ErrorStateComponent {
   // Inputs
-  icon = input<string>('error_outline');
-  title = input<string>('Something went wrong');
+  icon = input<string>('alert-circle');
+  title = input<string>('Une erreur est survenue');
   message = input<string | undefined>(undefined);
-  retryLabel = input<string>('Try again');
+  retryLabel = input<string>('Réessayer');
   showRetry = input<boolean>(true);
 
   // Outputs

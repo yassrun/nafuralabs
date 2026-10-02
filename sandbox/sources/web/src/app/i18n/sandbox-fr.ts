@@ -1,7 +1,7 @@
 import { TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
-import adminFr from './sandbox-admin-fr.json';
+import adminFr from '@platform/platform/host/i18n/fr.json';
 
 /** Minimal FR strings for sandbox admin lab + existing helpers. */
 export const SANDBOX_FR = {

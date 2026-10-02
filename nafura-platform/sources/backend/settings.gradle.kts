@@ -34,6 +34,7 @@ includePlatform(":platform:identite:identity")
 includePlatform(":platform:core:scope")
 includePlatform(":platform:core:tenancy")
 includePlatform(":platform:core:multi-tenant")
+includePlatform(":platform:core:lab")
 includePlatform(":platform:core:observability")
 
 
@@ -80,3 +81,5 @@ includePlatform(":platform:features:foundation:geo")
 includePlatform(":platform:features:foundation")
 includePlatform(":platform:integrations:google-places")
 includePlatform(":platform:core:job-runner")
+include(":platform:host-tests")
+project(":platform:host-tests").projectDir = file("host-tests")

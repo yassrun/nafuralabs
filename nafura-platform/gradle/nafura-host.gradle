@@ -1,0 +1,45 @@
+// Applied by a product backend: derives platform modules from app.nafura.json (spec.capabilities.disabled).
+import groovy.json.JsonSlurper
+
+def platformRoot = file("${buildscript.sourceFile.parentFile}/..")
+def catalog = new JsonSlurper().parse(new File(platformRoot, 'capabilities.json')).capabilities
+def appFile = project.findProperty('nafura.app') ?: '../../app.nafura.json'
+def app = new JsonSlurper().parse(file(appFile))
+def disabled = (app.spec?.capabilities?.disabled ?: []) as Set
+
+def byId = catalog.collectEntries { [(it.id): it] }
+disabled.each { id ->
+    if (!byId.containsKey(id)) throw new GradleException("app.nafura.json disables unknown capability '${id}'.")
+    if (byId[id].core) throw new GradleException("Capability '${id}' is core and cannot be disabled.")
+}
+catalog.findAll { !disabled.contains(it.id) }.each { cap ->
+    (cap.requires ?: []).findAll { disabled.contains(it) }.each { missing ->
+        throw new GradleException("Capability '${cap.id}' requires '${missing}', which app.nafura.json disables.")
+    }
+}
+
+def enabledModules = catalog.findAll { !disabled.contains(it.id) }.collectMany { it.modules }.unique()
+ext.nafuraEnabledCapabilities = catalog.findAll { !disabled.contains(it.id) }.collect { it.id }
+
+dependencies {
+    enabledModules.each { implementation "ma.nafuralabs:${it}:0.1.0-SNAPSHOT" }
+}
+
+// Business contexts listed by the application are composed at build time (D-2): bc.x -> project ':bc-x'.
+(app.spec?.businessContexts ?: []).each { id ->
+    def path = ":bc-${id - 'bc.'}"
+    if (findProject(path) == null) {
+        throw new GradleException("app.nafura.json lists '${id}' but bcs/${id - 'bc.'}/backend/build.gradle does not exist.")
+    }
+    dependencies { implementation project(path) }
+}
+
+// The platform reads the product configuration at runtime (declared roles) from the classpath.
+// Not under META-INF: bootJar moves the application's META-INF out of BOOT-INF/classes.
+tasks.named('processResources') {
+    from(file(appFile)) { into 'nafura'; rename { 'app.nafura.json' } }
+}
+
+// Lab mode applies the SQL of exactly the modules composed above (nafura-migrations.gradle).
+apply from: new File(platformRoot, 'gradle/nafura-migrations.gradle')
+nafuraMigrations(configurations.runtimeClasspath)

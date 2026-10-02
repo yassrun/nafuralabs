@@ -11,7 +11,11 @@ import { LabAuthService } from './lab-auth.service';
   template: `
     <div class="login">
       <div class="card">
-        <div class="logo">N</div>
+        @if (productMark) {
+          <img class="logo logo--image" [src]="productMark" alt="" />
+        } @else {
+          <div class="logo" aria-hidden="true">{{ productInitial }}</div>
+        }
         <h1>{{ productName }}</h1>
         <p>{{ subtitle }}</p>
 
@@ -63,6 +67,7 @@ import { LabAuthService } from './lab-auth.service';
       font-size: 26px;
       font-weight: 800;
     }
+    .logo--image { display: block; background: none; object-fit: contain; }
     h1 { margin: 0 0 8px; font-size: 1.35rem; }
     p { margin: 0 0 1.25rem; color: #64748b; font-size: 0.875rem; line-height: 1.45; }
     label { display: block; margin-bottom: 6px; font-size: 0.75rem; font-weight: 600; color: #334155; }
@@ -93,6 +98,8 @@ export class LabLoginPage implements OnInit {
   private readonly config = inject(LAB_AUTH_CONFIG);
 
   readonly productName = this.config.productName;
+  readonly productMark = this.config.productMark;
+  readonly productInitial = this.config.productName.trim().charAt(0).toUpperCase();
   readonly subtitle = this.config.subtitle
     ?? 'Choisir un utilisateur lab. Session locale, sans Keycloak.';
   readonly users = this.auth.users;

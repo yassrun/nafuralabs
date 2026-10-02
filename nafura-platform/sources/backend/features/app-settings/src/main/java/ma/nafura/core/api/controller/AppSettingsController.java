@@ -17,6 +17,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
+/**
+ * Reads serve every member (the shell renders branding, user settings read general/localization);
+ * writes need tenant.settings.write.
+ */
 @RestController
 @RequestMapping("/api/v1/app-settings")
 @RequiredArgsConstructor
@@ -25,7 +29,6 @@ public class AppSettingsController {
     private final AppSettingsService appSettingsService;
 
     @GetMapping("/general")
-    @RequirePermission(value = "tenant.settings.read", fullPermission = true)
     public ResponseEntity<AppGeneralSettingsResponse> getGeneral() {
         return ResponseEntity.ok(appSettingsService.getGeneral());
     }
@@ -38,7 +41,6 @@ public class AppSettingsController {
     }
 
     @GetMapping("/localization")
-    @RequirePermission(value = "tenant.settings.read", fullPermission = true)
     public ResponseEntity<AppLocalizationSettingsResponse> getLocalization() {
         return ResponseEntity.ok(appSettingsService.getLocalization());
     }
@@ -51,7 +53,6 @@ public class AppSettingsController {
     }
 
     @GetMapping("/branding")
-    @RequirePermission(value = "tenant.settings.read", fullPermission = true)
     public ResponseEntity<AppBrandingSettingsResponse> getBranding() {
         return ResponseEntity.ok(appSettingsService.getBranding());
     }
@@ -76,7 +77,6 @@ public class AppSettingsController {
     }
 
     @GetMapping(value = "/branding/assets/{assetType}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    @RequirePermission(value = "tenant.settings.read", fullPermission = true)
     public ResponseEntity<byte[]> getBrandingAsset(@PathVariable String assetType) {
         return appSettingsService.getBrandingAsset(assetType)
                 .map(body -> ResponseEntity.ok()

@@ -11,7 +11,7 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 import localeFr from '@angular/common/locales/fr';
 import localeFrMA from '@angular/common/locales/fr-MA';
 
-import { FrMatPaginatorIntl } from '@app/socle/shared/i18n/fr-mat-paginator-intl';
+import { FrMatPaginatorIntl } from '@platform/core/i18n/fr-mat-paginator-intl';
 
 registerLocaleData(localeFr);
 registerLocaleData(localeFrMA, 'fr-MA');

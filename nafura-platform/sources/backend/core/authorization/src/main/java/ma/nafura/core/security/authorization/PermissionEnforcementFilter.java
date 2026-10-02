@@ -6,7 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
+import ma.nafura.platform.tenancy.repository.TenantDomainRepository;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.method.HandlerMethod;
@@ -16,6 +19,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Filter that enforces permission checks based on @SecuredResource annotations.
@@ -44,6 +48,7 @@ import java.util.List;
 public class PermissionEnforcementFilter extends OncePerRequestFilter {
     
     private final List<HandlerMapping> handlerMappings;
+    private final ObjectProvider<TenantDomainRepository> tenantDomains;
     
     @Override
     protected void doFilterInternal(
@@ -64,16 +69,16 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
             
             // Check if controller has @SecuredResource
             SecuredResource securedResource = handlerMethod.getBeanType().getAnnotation(SecuredResource.class);
-            
-            if (securedResource == null) {
+            Method method = handlerMethod.getMethod();
+            RequirePermission methodPermission = method.getAnnotation(RequirePermission.class);
+
+            if (securedResource == null && methodPermission == null) {
                 // Controller not secured - allow through
                 log.debug("Controller {} has no @SecuredResource annotation, skipping permission check",
                         handlerMethod.getBeanType().getSimpleName());
                 filterChain.doFilter(request, response);
                 return;
             }
-            
-            Method method = handlerMethod.getMethod();
             
             // Check for @PublicEndpoint
             if (method.isAnnotationPresent(PublicEndpoint.class)) {
@@ -84,8 +89,10 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
                 return;
             }
             
-            // Build the required permission
-            String requiredPermission = buildPermission(securedResource, method, request.getMethod());
+            // Without @SecuredResource there is no scope: @RequirePermission names the whole permission.
+            String requiredPermission = securedResource == null
+                    ? methodPermission.value()
+                    : buildPermission(securedResource, method, request.getMethod());
             
             log.debug("Checking permission: {} for {}:{}", 
                     requiredPermission, 
@@ -93,6 +100,16 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
                     method.getName());
             
             // Check if user has the permission
+            if (isDomainDisabled(requiredPermission)) {
+                log.warn("Domain disabled for tenant: {} for user {}", requiredPermission, UserContext.getUserEmail());
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json");
+                response.getWriter().write(String.format(
+                        "{\"error\":\"Forbidden\",\"message\":\"Domain disabled: %s\",\"status\":403}",
+                        domainOf(requiredPermission)
+                ));
+                return;
+            }
             if (!UserContext.hasPermission(requiredPermission)) {
                 log.warn("Permission denied: {} for user {} (role: {})", 
                         requiredPermission,
@@ -126,6 +143,26 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
     
+    /**
+     * A domain the tenant switched off refuses its API to everyone: the first segment of a permission
+     * is the domain code (bc.demo → demo.notes.note.read).
+     */
+    private boolean isDomainDisabled(String permission) {
+        UUID tenantId = TenantContext.getTenantIdOrNull();
+        TenantDomainRepository domains = tenantDomains.getIfAvailable();
+        if (tenantId == null || domains == null) {
+            return false;
+        }
+        return domains.findByTenantIdAndDomainCode(tenantId, domainOf(permission))
+                .map(row -> !"ACTIVE".equalsIgnoreCase(row.getStatus()))
+                .orElse(false);
+    }
+
+    private static String domainOf(String permission) {
+        int dot = permission.indexOf('.');
+        return dot < 0 ? permission : permission.substring(0, dot);
+    }
+
     /**
      * Find the handler method for the current request.
      */

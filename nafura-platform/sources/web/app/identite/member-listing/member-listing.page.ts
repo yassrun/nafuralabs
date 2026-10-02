@@ -90,7 +90,7 @@ export class MemberListingPage extends ConfigDrivenListingPage<MemberListItem> {
             return;
           }
           await this.facade.deactivateMember(target.id);
-          this.showSuccess(this.i18n.instant('administration.members.actions.deactivate.success'));
+          this.showSuccess(this.i18n.instant('administration.members.feedback.deactivateSuccess'));
           await this.refresh();
         }
         break;
@@ -118,7 +118,7 @@ export class MemberListingPage extends ConfigDrivenListingPage<MemberListItem> {
 
         await this.facade.deactivateMembers(activeMembers.map((member) => member.id));
         this.showSuccess(
-          this.i18n.instant('administration.members.actions.deactivateSelected.success', {
+          this.i18n.instant('administration.members.feedback.deactivateSelectedSuccess', {
             count: activeMembers.length,
           })
         );
@@ -128,14 +128,14 @@ export class MemberListingPage extends ConfigDrivenListingPage<MemberListItem> {
       case 'reactivate':
         if (target) {
           await this.facade.reactivateMember(target.id);
-          this.showSuccess(this.i18n.instant('administration.members.actions.reactivate.success'));
+          this.showSuccess(this.i18n.instant('administration.members.feedback.reactivateSuccess'));
           await this.refresh();
         }
         break;
       case 'resend-invitation':
         if (target) {
           await this.facade.resendInvitation(target.id);
-          this.showSuccess(this.i18n.instant('administration.members.actions.resendInvitation.success'));
+          this.showSuccess(this.i18n.instant('administration.members.feedback.resendInvitationSuccess'));
         }
         break;
       case 'remove':
@@ -153,7 +153,7 @@ export class MemberListingPage extends ConfigDrivenListingPage<MemberListItem> {
             return;
           }
           await this.facade.removeMember(target.id);
-          this.showSuccess(this.i18n.instant('administration.members.actions.remove.success'));
+          this.showSuccess(this.i18n.instant('administration.members.feedback.removeSuccess'));
           await this.refresh();
         }
         break;
@@ -199,11 +199,11 @@ export class MemberListingPage extends ConfigDrivenListingPage<MemberListItem> {
         });
         if (invited.invitationEmailStatus === 'failed') {
           this.showError(
-            this.i18n.instant('administration.members.invite.emailFailed', { email: invited.email })
+            this.i18n.instant('administration.members.feedback.inviteEmailFailed', { email: invited.email })
           );
         } else {
           this.showSuccess(
-            this.i18n.instant('administration.members.invite.success', { email: invited.email })
+            this.i18n.instant('administration.members.feedback.inviteSuccess', { email: invited.email })
           );
         }
         await this.refresh();
@@ -215,7 +215,7 @@ export class MemberListingPage extends ConfigDrivenListingPage<MemberListItem> {
           continue;
         }
 
-        this.showError(this.i18n.instant('administration.members.invite.error'));
+        this.showError(this.i18n.instant('administration.members.feedback.inviteError'));
         return;
       }
     }

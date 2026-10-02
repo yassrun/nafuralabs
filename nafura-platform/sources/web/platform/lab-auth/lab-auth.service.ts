@@ -1,9 +1,11 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthStateStore } from '../../core/security/state/auth.state';
 import type { User } from '../../core/security/models/user.models';
+import type { TenantMembership } from '../../core/security/models/tenant.models';
+import { TenantContextService } from '../../core/tenant/tenant.context';
 
 import { LAB_AUTH_CONFIG } from './lab-auth.config';
 
@@ -13,9 +15,16 @@ export interface LabUserOption {
   role: string;
 }
 
+export interface LabTenant {
+  id: string;
+  key: string;
+  name: string;
+}
+
 export interface LabSessionResponse extends LabUserOption {
   accessToken: string;
   tokenType: string;
+  tenant?: LabTenant;
 }
 
 const DEFAULT_STORAGE_KEY = 'nf.lab.session';
@@ -28,11 +37,18 @@ const DEFAULT_STORAGE_KEY = 'nf.lab.session';
 export class LabAuthService {
   private readonly http = inject(HttpClient);
   private readonly authState = inject(AuthStateStore);
+  private readonly tenantContext = inject(TenantContextService);
   private readonly config = inject(LAB_AUTH_CONFIG);
   private token: string | null = null;
+  private restoring: Promise<void> | null = null;
 
   readonly users = signal<LabUserOption[]>([]);
   readonly current = signal<LabUserOption | null>(null);
+  /** Effective permissions enforced by the backend for this session; `null` until loaded. */
+  readonly permissions = signal<ReadonlySet<string> | null>(null);
+  /** Domains the organization switched off: the backend refuses them whatever the role. */
+  readonly disabledDomains = signal<ReadonlySet<string>>(new Set());
+  readonly access = computed(() => ({ permissions: this.permissions(), disabledDomains: this.disabledDomains() }));
 
   accessToken(): string | null {
     return this.token ?? readStored(this.storageKey())?.accessToken ?? null;
@@ -46,13 +62,19 @@ export class LabAuthService {
     return this.config.homePath ?? '/';
   }
 
-  /** Restore a stored lab session. A missing session stays on the login page. */
+  /** Restore a stored lab session. A missing or pre-tenant session stays on the login page. */
   async ensureSession(): Promise<void> {
+    this.restoring ??= this.restore();
+    await this.restoring;
+  }
+
+  private async restore(): Promise<void> {
     const stored = readStored(this.storageKey());
-    if (!stored) {
+    if (!stored?.tenant) {
+      sessionStorage.removeItem(this.storageKey());
       return;
     }
-    this.apply(stored);
+    await this.apply(stored);
   }
 
   async refreshUsers(): Promise<void> {
@@ -64,21 +86,26 @@ export class LabAuthService {
     const session = await firstValueFrom(
       this.http.post<LabSessionResponse>(this.config.sessionUrl, { email }),
     );
-    this.apply(session);
+    this.restoring = this.apply(session);
+    await this.restoring;
   }
 
   clear(): void {
     this.token = null;
     this.current.set(null);
+    this.permissions.set(null);
+    this.disabledDomains.set(new Set());
+    this.restoring = null;
     sessionStorage.removeItem(this.storageKey());
     this.authState.clear();
+    this.tenantContext.clear();
   }
 
   private storageKey(): string {
     return this.config.storageKey ?? DEFAULT_STORAGE_KEY;
   }
 
-  private apply(session: LabSessionResponse): void {
+  private async apply(session: LabSessionResponse): Promise<void> {
     this.token = session.accessToken;
     this.current.set({ email: session.email, name: session.name, role: session.role });
     sessionStorage.setItem(this.storageKey(), JSON.stringify(session));
@@ -92,6 +119,59 @@ export class LabAuthService {
       },
       toAuthUser(session),
     );
+    await this.loadPermissions(session);
+  }
+
+  private async loadPermissions(session: LabSessionResponse): Promise<void> {
+    this.permissions.set(null);
+    try {
+      const permissions = await this.fetchAccess();
+      await this.enterTenant(session, permissions);
+    } catch {
+      // Unknown permissions: guarded navigation stays hidden, the backend still decides.
+      this.permissions.set(new Set());
+    }
+  }
+
+  /** Reload what the session may do, e.g. after an administrator switched a domain on or off. */
+  async refreshAccess(): Promise<void> {
+    if (this.current()) await this.fetchAccess();
+  }
+
+  private async fetchAccess(): Promise<string[]> {
+    const url = this.config.permissionsUrl ?? '/api/v1/me/permissions';
+    const response = await firstValueFrom(
+      this.http.get<{ permissions: string[]; disabledDomains?: string[] }>(url),
+    );
+    this.permissions.set(new Set(response.permissions));
+    this.disabledDomains.set(new Set(response.disabledDomains ?? []));
+    return response.permissions;
+  }
+
+  /** Tenant-scoped screens (members, roles, domains) need the lab tenant as current context. */
+  private async enterTenant(session: LabSessionResponse, permissions: string[]): Promise<void> {
+    if (!session.tenant) return;
+    const now = new Date().toISOString();
+    const membership: TenantMembership = {
+      tenant: {
+        id: session.tenant.id,
+        name: session.tenant.name,
+        slug: session.tenant.key,
+        status: 'active',
+        enabledFeatures: [],
+        enabledModules: [],
+        features: {},
+        createdAt: now,
+        updatedAt: now,
+      },
+      roles: [{ id: session.role, name: session.role, description: '', permissions, isSystem: true, priority: 0 }],
+      permissions,
+      isDefault: true,
+      status: 'active',
+      joinedAt: now,
+    };
+    this.authState.setTenants([membership]);
+    await this.tenantContext.initialize(session.tenant.id);
   }
 }
 

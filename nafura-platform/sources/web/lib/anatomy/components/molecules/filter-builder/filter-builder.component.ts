@@ -41,14 +41,18 @@ import {
           @for (child of draft().children; track $index; let i = $index) {
             @if (i > 0) {
               <div class="nf-filter-builder__combinator">
-                <select
-                  class="nf-filter-builder__combinator-select"
-                  [ngModel]="draft().combinator"
-                  (ngModelChange)="setRootCombinator($event)"
-                >
-                  <option value="and">AND</option>
-                  <option value="or">OR</option>
-                </select>
+                @if (advanced()) {
+                  <select
+                    class="nf-filter-builder__combinator-select"
+                    [ngModel]="draft().combinator"
+                    (ngModelChange)="setRootCombinator($event)"
+                  >
+                    <option value="and">AND</option>
+                    <option value="or">OR</option>
+                  </select>
+                } @else {
+                  <span class="nf-filter-builder__combinator--nested">{{ 'and' | translate }}</span>
+                }
               </div>
             }
 
@@ -97,9 +101,11 @@ import {
         <button type="button" class="nf-filter-builder__link" (click)="addRootClause()">
           + {{ 'Add filter' | translate }}
         </button>
-        <button type="button" class="nf-filter-builder__link" (click)="addRootGroup()">
-          + {{ 'Add filter group' | translate }}
-        </button>
+        @if (advanced()) {
+          <button type="button" class="nf-filter-builder__link" (click)="addRootGroup()">
+            + {{ 'Add filter group' | translate }}
+          </button>
+        }
       </div>
 
       <div class="nf-filter-builder__actions">
@@ -119,15 +125,17 @@ import {
             <option [ngValue]="f.key">{{ f.label | translate }}</option>
           }
         </select>
-        <select
-          class="nf-filter-field__control nf-filter-field__control--select nf-filter-builder__op"
-          [ngModel]="clause.op"
-          (ngModelChange)="setClauseOp(rootIndex, nestedIndex, $event)"
-        >
-          @for (op of opsForField(clause.field); track op) {
-            <option [ngValue]="op">{{ opLabel(op) }}</option>
-          }
-        </select>
+        @if (advanced()) {
+          <select
+            class="nf-filter-field__control nf-filter-field__control--select nf-filter-builder__op"
+            [ngModel]="clause.op"
+            (ngModelChange)="setClauseOp(rootIndex, nestedIndex, $event)"
+          >
+            @for (op of opsForField(clause.field); track op) {
+              <option [ngValue]="op">{{ opLabel(op) }}</option>
+            }
+          </select>
+        }
         @if (!isUnary(clause.op)) {
           @if (clause.op === 'between') {
             <div class="nf-filter-builder__between">
@@ -369,6 +377,8 @@ export class FilterBuilderComponent {
   group = input<FilterGroup | null>(null);
   /** Bump when menu opens to resync draft. */
   openCount = input(0);
+  /** False: no operator choice, no OR / groups — each row is `field = value`. */
+  advanced = input(true);
 
   /** Emits FilterGroup on Apply. */
   apply = output<FilterGroup>();

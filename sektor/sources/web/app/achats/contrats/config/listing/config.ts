@@ -19,6 +19,13 @@ export function buildContratsListingConfig(t: TranslateService) {
     },
     {
       filters: buildContratFilters(t),
+      segments: [
+        { id: 'ALL', label: 'achats.contrat.chips.all' },
+        { id: 'ACTIFS', label: 'achats.contrat.chips.actifs', filters: { quick: 'ACTIFS' } },
+        { id: 'EXPIRATION_PROCHE', label: 'achats.contrat.chips.expirationProche', filters: { quick: 'EXPIRATION_PROCHE' } },
+        { id: 'ECHUS', label: 'achats.contrat.chips.echus', filters: { quick: 'ECHUS' } },
+      ],
+      defaultSegment: 'ACTIFS',
       defaultSort: { column: 'dateDebut', direction: 'desc' },
       features: { search: true, filters: true, columnToggle: true, refresh: true },
       emptyState: {
