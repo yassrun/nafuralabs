@@ -1,14 +1,14 @@
 {
-  "name": "@nafura/platform-host",
+  "name": "@nafura/product-web",
   "version": "0.1.0",
   "private": true,
-  "description": "Platform host — app.nafura.json + BCs, everything else from nafura-platform",
+  "description": "Product web entry: app.nafura.json + BCs, everything else from nafura-platform",
   "scripts": {
     "stack:check": "node ../../../nafura-platform/scripts/sync-stack-versions.mjs --check",
     "ng": "ng",
-    "start": "ng serve --host 127.0.0.1 --port 4400",
-    "build": "ng build",
-    "build:dev": "ng build --configuration development"
+    "start": "node ../../../nafura-platform/scripts/product-web.mjs serve",
+    "build": "node ../../../nafura-platform/scripts/product-web.mjs build",
+    "build:dev": "node ../../../nafura-platform/scripts/product-web.mjs build --configuration development"
   },
   "dependencies": {
     "@angular/animations": "^22.1.5",

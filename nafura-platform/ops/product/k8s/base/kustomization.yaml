@@ -1,0 +1,9 @@
+# Every product's workloads. Names are generic: the namespace (<app>-<env>) isolates products.
+# run.mjs sets the namespace, images, host and labels from app.nafura.json.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - backend.yaml
+  - web.yaml
+  - ingress.yaml

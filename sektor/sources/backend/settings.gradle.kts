@@ -35,6 +35,7 @@ includeBuild("../../../nafura-platform/sources/backend") {
         sub("job-runner", ":platform:core:job-runner")
         sub("settings", ":platform:features:configuration:settings")
         sub("sysconfig", ":platform:features:configuration:sysconfig")
+        sub("access", ":platform:identite:access")
         sub("iam", ":platform:identite:iam")
         sub("subscription", ":platform:features:administration:subscription")
         sub("usage", ":platform:features:administration:usage")

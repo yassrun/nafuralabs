@@ -80,6 +80,9 @@ subprojects {
         }
     }
 
+    // Mockito as a Java agent: on recent JDKs its self-attach is refused, and every @Mock fails to initialize.
+    val mockitoAgent = configurations.create("mockitoAgent")
+
     dependencies {
         "compileOnly"("org.projectlombok:lombok")
         "annotationProcessor"("org.projectlombok:lombok")
@@ -88,10 +91,12 @@ subprojects {
         "annotationProcessor"("org.mapstruct:mapstruct-processor:1.5.5.Final")
         // Gradle 9 no longer ships a JUnit Platform launcher: without it, module tests do not run at all.
         "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
+        "mockitoAgent"("org.mockito:mockito-core") { isTransitive = false }
     }
 
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
+        jvmArgumentProviders.add(CommandLineArgumentProvider { listOf("-javaagent:${mockitoAgent.singleFile}") })
     }
 
     tasks.named("check") {

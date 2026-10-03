@@ -1,2 +1,3 @@
+ma.nafura.host.NafuraHostAutoConfiguration
 ma.nafura.lab.NafuraLabAutoConfiguration
 ma.nafura.lab.NafuraLabEmbeddedPostgresAutoConfiguration

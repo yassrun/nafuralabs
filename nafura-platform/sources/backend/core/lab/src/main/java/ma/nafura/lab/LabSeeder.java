@@ -7,38 +7,31 @@ import ma.nafura.platform.authorization.repository.UserRoleRepository;
 import ma.nafura.platform.identity.domain.model.AppUser;
 import ma.nafura.platform.identity.service.AppUserProvisioningService;
 import ma.nafura.platform.scope.security.scope.DefaultScopeService;
-import ma.nafura.platform.tenancy.repository.TenantRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Seeds the single-scope tenant row, then the roster. Idempotent. */
+/** Seeds the lab roster into the organization created by SingleScopeBootstrap. Idempotent. */
 @Order(40)
 public class LabSeeder implements ApplicationRunner {
 
     private final LabProperties properties;
-    private final String applicationId;
     private final DefaultScopeService defaultScopeService;
-    private final TenantRepository tenantRepository;
     private final JdbcTemplate jdbcTemplate;
     private final AppUserProvisioningService appUserProvisioningService;
     private final UserRoleRepository userRoleRepository;
 
     public LabSeeder(
             LabProperties properties,
-            String applicationId,
             DefaultScopeService defaultScopeService,
-            TenantRepository tenantRepository,
             JdbcTemplate jdbcTemplate,
             AppUserProvisioningService appUserProvisioningService,
             UserRoleRepository userRoleRepository
     ) {
         this.properties = properties;
-        this.applicationId = applicationId;
         this.defaultScopeService = defaultScopeService;
-        this.tenantRepository = tenantRepository;
         this.jdbcTemplate = jdbcTemplate;
         this.appUserProvisioningService = appUserProvisioningService;
         this.userRoleRepository = userRoleRepository;
@@ -47,27 +40,7 @@ public class LabSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        seedTenant();
         seedUsers();
-    }
-
-    private void seedTenant() {
-        UUID scopeId = defaultScopeService.resolveDefaultScopeId();
-        if (tenantRepository.findById(scopeId).isPresent()) {
-            return;
-        }
-        jdbcTemplate.update(
-                """
-                INSERT INTO tenant (id, tenant_key, name, type, owner_email, application_id, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-                """,
-                scopeId,
-                properties.tenant().key(),
-                properties.tenant().name(),
-                "LAB",
-                properties.users().get(0).email(),
-                applicationId
-        );
     }
 
     private void seedUsers() {

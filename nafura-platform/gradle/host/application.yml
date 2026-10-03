@@ -1,0 +1,39 @@
+# Configuration of every product backend, copied into its resources by nafura-host.gradle.
+# Names, lab tenant/users and local port come from app.nafura.json (ApplicationManifestEnvironment).
+spring:
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  thymeleaf:
+    check-template-location: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+nafura:
+  lab:
+    enabled: true
+    embedded-postgres: true
+    data-dir: ./data/postgres
+  security:
+    enabled: true
+    jwt:
+      # Lab-only secret: signs the tokens minted by /api/public/lab/session.
+      hs256-secret: nafura-lab-local-jwt-secret-32-chars!
+    public-endpoints:
+      - /actuator/**
+      - /api/public/**
+    tenant:
+      enabled: true
+      validate-tenant: false
+      validate-membership: false
+      skip-paths:
+        - /api/auth/
+        - /api/public/
+        - /actuator/

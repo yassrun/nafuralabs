@@ -40,19 +40,15 @@ export interface NafuraCommonSpec {
   requires?: CapabilityRequirement[];
   permissions?: PermissionDeclaration[];
   i18n?: {
-    namespace: string;
+    namespace?: string;
     locales: string[];
   };
 }
 
 export interface ApplicationRuntimeSpec {
-  requiresTenant: boolean;
+  /** `single` (default): one organization per deployment; `multi`: users switch between organizations. */
+  tenancy?: 'single' | 'multi';
   defaultRoute: string;
-  auth?: {
-    mode: 'keycloak' | 'lab';
-    sessionUrl?: string;
-    usersUrl?: string;
-  };
 }
 
 /** Mirrors `AppShellFeatureConfig` minus what the platform derives from business contexts. */
@@ -74,6 +70,21 @@ export interface ApplicationSpec extends NafuraCommonSpec {
   capabilities?: { disabled?: string[] };
   /** Cross-BC roles: composed from business-context roles (`bc.x:ROLE`) and declared permissions only. */
   roles?: ApplicationRoleDeclaration[];
+  /** false: organizations keep to the declared roles (platform, business contexts, application). Default true. */
+  customRoles?: boolean;
+  /** Local run (lab and local-staging): ports, and the lab users offered at login. */
+  local?: {
+    ports?: { api: number; web: number };
+    users?: { email: string; givenName: string; familyName: string; role: string }[];
+  };
+  /** Cluster hosts; default `<id>.nafuralabs.staging` and `<id>.nafuralabs.com` (ops/product/run.mjs). */
+  deploy?: { staging?: ApplicationDeployment; prod?: ApplicationDeployment };
+}
+
+export interface ApplicationDeployment {
+  host?: string;
+  /** Emails holding OWNER in the organization; they invite and assign everyone else in the app. */
+  owners?: string[];
 }
 
 export interface ApplicationRoleDeclaration {

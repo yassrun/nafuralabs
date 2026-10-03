@@ -25,24 +25,21 @@ import ma.nafura.platform.administration.iam.api.response.publicapi.InvitationAc
 import ma.nafura.platform.administration.iam.api.response.tenant.MemberListResponse;
 import ma.nafura.platform.administration.iam.api.response.tenant.TenantMemberResponse;
 import ma.nafura.platform.administration.iam.domain.model.TenantInvitation;
-import ma.nafura.platform.administration.iam.repository.TenantCustomRolePermissionRepository;
-import ma.nafura.platform.administration.iam.repository.TenantCustomRoleRepository;
 import ma.nafura.platform.administration.iam.repository.TenantInvitationRepository;
 import ma.nafura.platform.administration.iam.service.IamService;
 import ma.nafura.platform.administration.iam.service.InvitationAcceptService;
 import ma.nafura.platform.administration.iam.service.InvitationTokenService;
 import ma.nafura.platform.administration.iam.service.TenantInvitationDeliveryService;
 import ma.nafura.platform.administration.iam.service.port.InvitationEmailPort;
+import ma.nafura.platform.administration.access.service.AccessService;
 import ma.nafura.platform.authorization.domain.model.TenantUserRole;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
-import ma.nafura.platform.authorization.service.PermissionService;
 import ma.nafura.platform.identity.domain.model.AppUser;
 import ma.nafura.platform.identity.repository.AppUserRepository;
 import ma.nafura.platform.identity.service.AppUserProvisioningService;
 import ma.nafura.platform.identity.service.port.IdentityKeycloakProvisioningPort;
 import ma.nafura.platform.tenancy.domain.model.Tenant;
 import ma.nafura.platform.tenancy.domain.model.TenantMembership;
-import ma.nafura.platform.tenancy.repository.TenantDomainRepository;
 import ma.nafura.platform.tenancy.repository.TenantMembershipRepository;
 import ma.nafura.platform.tenancy.repository.TenantRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,8 +51,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.beans.factory.support.StaticListableBeanFactory;
-import ma.nafura.platform.administration.iam.roles.DeclaredRolesSeeder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -75,11 +70,8 @@ class IdentiteBaselineTest {
     @Mock private TenantRepository tenantRepository;
     @Mock private AppUserRepository appUserRepository;
     @Mock private TenantMembershipRepository tenantMembershipRepository;
-    @Mock private TenantDomainRepository tenantDomainRepository;
     @Mock private TenantUserRoleRepository tenantUserRoleRepository;
-    @Mock private TenantCustomRoleRepository tenantCustomRoleRepository;
-    @Mock private TenantCustomRolePermissionRepository tenantCustomRolePermissionRepository;
-    @Mock private PermissionService permissionService;
+    @Mock private AccessService accessService;
     @Mock private TenantInvitationRepository tenantInvitationRepository;
     @Mock private TenantInvitationDeliveryService tenantInvitationDeliveryService;
     @Mock private IdentityKeycloakProvisioningPort keycloakProvisioningPort;
@@ -98,8 +90,7 @@ class IdentiteBaselineTest {
     @BeforeEach
     void setUp() {
         stubRepos();
-        when(permissionService.getAllRoleCodes()).thenReturn(List.of(ROLE_A));
-        when(tenantCustomRoleRepository.findByTenantIdOrderByRoleCode(any())).thenReturn(List.of());
+        when(accessService.roleExists(any(), anyString())).thenAnswer(inv -> ROLE_A.equals(inv.getArgument(1)));
         when(tenantInvitationDeliveryService.createAndSendInvitation(any(), any(), any(), any(), any()))
                 .thenReturn("FAILED");
         when(keycloakProvisioningPort.isEnabled()).thenReturn(false);
@@ -112,15 +103,11 @@ class IdentiteBaselineTest {
                 tenantRepository,
                 appUserRepository,
                 tenantMembershipRepository,
-                tenantDomainRepository,
                 tenantUserRoleRepository,
-                tenantCustomRoleRepository,
-                tenantCustomRolePermissionRepository,
                 new AppUserProvisioningService(appUserRepository),
-                permissionService,
                 tenantInvitationRepository,
                 tenantInvitationDeliveryService,
-                new StaticListableBeanFactory().getBeanProvider(DeclaredRolesSeeder.class));
+                accessService);
         accept = new InvitationAcceptService(
                 tokens,
                 tenantInvitationRepository,

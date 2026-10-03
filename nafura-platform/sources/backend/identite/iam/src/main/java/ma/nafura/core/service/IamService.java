@@ -2,37 +2,21 @@ package ma.nafura.platform.administration.iam.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ma.nafura.platform.administration.access.service.AccessService;
 import ma.nafura.platform.administration.iam.api.request.tenant.BulkMemberRoleRequest;
-import ma.nafura.platform.administration.iam.roles.DeclaredRolesSeeder;
-import ma.nafura.platform.administration.iam.api.request.tenant.CreateRoleRequest;
 import ma.nafura.platform.administration.iam.api.request.tenant.InviteMemberRequest;
-import ma.nafura.platform.administration.iam.api.request.tenant.UpdateRoleRequest;
-import ma.nafura.platform.administration.iam.api.request.tenant.UpdateDomainRequest;
-import ma.nafura.platform.administration.iam.api.request.tenant.UpdateFeaturesRequest;
-import ma.nafura.platform.administration.iam.api.request.tenant.UpdateMemberRolesRequest;
-import ma.nafura.platform.administration.iam.api.request.tenant.UpdateMemberStatusRequest;
 import ma.nafura.platform.administration.iam.api.response.tenant.*;
-import ma.nafura.platform.administration.iam.domain.model.TenantCustomRole;
-import ma.nafura.platform.administration.iam.domain.model.TenantCustomRolePermission;
-import ma.nafura.platform.administration.iam.repository.TenantCustomRolePermissionRepository;
-import ma.nafura.platform.administration.iam.repository.TenantCustomRoleRepository;
 import ma.nafura.platform.authorization.domain.model.TenantUserRole;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
-import ma.nafura.platform.authorization.service.PermissionService;
 import ma.nafura.platform.identity.domain.model.AppUser;
 import ma.nafura.platform.identity.repository.AppUserRepository;
 import ma.nafura.platform.identity.service.AppUserProvisioningService;
 import ma.nafura.platform.tenancy.domain.model.Tenant;
-import ma.nafura.platform.tenancy.domain.model.TenantDomain;
 import ma.nafura.platform.tenancy.domain.model.TenantMembership;
 import ma.nafura.platform.tenancy.repository.TenantMembershipRepository;
-import ma.nafura.platform.tenancy.repository.TenantDomainRepository;
 import ma.nafura.platform.tenancy.repository.TenantRepository;
 import ma.nafura.platform.administration.iam.domain.model.TenantInvitation;
 import ma.nafura.platform.administration.iam.repository.TenantInvitationRepository;
-import ma.nafura.platform.administration.iam.service.TenantInvitationDeliveryService;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -46,36 +30,25 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Service for Tenant Administration operations.
- * 
- * Supports per-tenant domain toggling within the application's available domains.
- * Each tenant can enable/disable domains that are part of their application bundle.
+ * Members of an organization: who they are, their invitations and the roles they hold.
+ * The roles themselves and the business contexts switched on are {@link AccessService} (core).
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class IamService {
 
-    private static final String DOMAIN_STATUS_ACTIVE = "ACTIVE";
-    private static final String DOMAIN_STATUS_INACTIVE = "INACTIVE";
     private static final String MEMBER_STATUS_ACTIVE = "ACTIVE";
     private static final String MEMBER_STATUS_INVITED = "INVITED";
 
     private final TenantRepository tenantRepository;
     private final AppUserRepository appUserRepository;
     private final TenantMembershipRepository tenantMembershipRepository;
-    private final TenantDomainRepository tenantDomainRepository;
     private final TenantUserRoleRepository tenantUserRoleRepository;
-    private final TenantCustomRoleRepository tenantCustomRoleRepository;
-    private final TenantCustomRolePermissionRepository tenantCustomRolePermissionRepository;
     private final AppUserProvisioningService appUserProvisioningService;
-    private final PermissionService permissionService;
     private final TenantInvitationRepository tenantInvitationRepository;
     private final TenantInvitationDeliveryService tenantInvitationDeliveryService;
-    private final ObjectProvider<DeclaredRolesSeeder> declaredRoles;
-
-    @Value("${nafura.application.id:app}")
-    private String defaultApplicationId;
+    private final AccessService accessService;
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Tenant Info
@@ -88,8 +61,7 @@ public class IamService {
         Tenant tenant = tenantRepository.findById(tenantId)
             .orElseThrow(() -> new IllegalArgumentException("Tenant not found: " + tenantId));
 
-        // Get enabled domains from tenant_domain table.
-        List<String> enabledDomains = getEnabledDomainIds(tenantId);
+        List<String> enabledDomains = accessService.getEnabledDomainIds(tenantId);
 
         return new TenantInfoResponse(
             tenant.getId().toString(),
@@ -335,85 +307,8 @@ public class IamService {
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Roles & Permissions
+    // Members of a role
     // ─────────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Get all roles for a tenant with member counts (system + custom roles).
-     */
-    public List<RoleResponse> getRoles(UUID tenantId) {
-        requireTenant(tenantId);
-        Map<String, Long> memberCounts = getRoleMemberCounts(tenantId);
-        List<RoleResponse> systemRoles = permissionService.getAllRoleCodes().stream()
-            .map(role -> {
-                List<String> permissions = permissionService.getPermissionsForRole(role);
-                long count = memberCounts.getOrDefault(role.toUpperCase(Locale.ROOT), 0L);
-                return systemRole(role, permissions, count);
-            })
-            .collect(Collectors.toList());
-        List<RoleResponse> customRoles = tenantCustomRoleRepository.findByTenantIdOrderByRoleCode(tenantId).stream()
-            .map(custom -> {
-                List<String> permissions = getPermissionsForTenantRole(tenantId, custom.getRoleCode());
-                long count = memberCounts.getOrDefault(custom.getRoleCode().toUpperCase(Locale.ROOT), 0L);
-                return new RoleResponse(
-                    custom.getRoleCode(),
-                    custom.getName(),
-                    custom.getDescription() != null ? custom.getDescription() : "Custom role",
-                    permissions,
-                    false,
-                    10,
-                    count,
-                    RoleResponse.resolveScopeType(custom.getRoleCode())
-                );
-            })
-            .collect(Collectors.toList());
-        List<RoleResponse> result = new ArrayList<>(systemRoles);
-        result.addAll(customRoles);
-        return result;
-    }
-
-    /**
-     * Get a single role (system or custom).
-     */
-    public RoleResponse getRole(UUID tenantId, String roleCode) {
-        requireTenant(tenantId);
-        String normalizedRoleCode = roleCode == null ? null : roleCode.trim().toUpperCase(Locale.ROOT);
-        if (!roleExistsForTenant(tenantId, normalizedRoleCode)) {
-            throw new IllegalArgumentException("Role not found: " + roleCode);
-        }
-        List<String> permissions = getPermissionsForTenantRole(tenantId, normalizedRoleCode);
-        long memberCount = tenantUserRoleRepository.countByTenantIdAndRoleCode(tenantId, normalizedRoleCode);
-        Optional<TenantCustomRole> custom = tenantCustomRoleRepository.findByTenantIdAndRoleCode(tenantId, normalizedRoleCode);
-        if (custom.isPresent()) {
-            return new RoleResponse(
-                normalizedRoleCode,
-                custom.get().getName(),
-                custom.get().getDescription() != null ? custom.get().getDescription() : "Custom role",
-                permissions,
-                false,
-                10,
-                memberCount,
-                RoleResponse.resolveScopeType(normalizedRoleCode)
-            );
-        }
-        return systemRole(normalizedRoleCode, permissions, memberCount);
-    }
-
-    /** Declared roles (business contexts, application) are configuration: read-only, labelled by their manifest. */
-    private RoleResponse systemRole(String code, List<String> permissions, long memberCount) {
-        DeclaredRolesSeeder seeder = declaredRoles.getIfAvailable();
-        return Optional.ofNullable(seeder).flatMap(s -> s.declaredRole(code))
-            .map(role -> new RoleResponse(
-                role.code(),
-                role.label(),
-                role.owner().startsWith("bc.") ? "Rôle du module " + role.owner() : "Rôle de l’application",
-                permissions,
-                true,
-                30,
-                memberCount,
-                RoleResponse.resolveScopeType(role.code())))
-            .orElseGet(() -> RoleResponse.fromRole(code, permissions, memberCount));
-    }
 
     /**
      * Get paginated members assigned to a specific role.
@@ -497,234 +392,13 @@ public class IamService {
         log.info("Removed role {} from {} member(s) in tenant {}", normalizedRoleCode, memberIds.size(), tenantId);
     }
 
-    /**
-     * Get member counts per role for a tenant.
-     */
-    public Map<String, Long> getRoleMemberCounts(UUID tenantId) {
-        requireTenant(tenantId);
-        List<Object[]> rows = tenantUserRoleRepository.countMembersByRoleCode(tenantId);
-        Map<String, Long> result = new HashMap<>();
-        for (Object[] row : rows) {
-            if (row.length >= 2 && row[0] != null && row[1] != null) {
-                result.put(String.valueOf(row[0]).toUpperCase(Locale.ROOT), ((Number) row[1]).longValue());
-            }
-        }
-        return result;
-    }
-
-    /** Whether the role exists for this tenant (system or custom). */
-    private boolean roleExistsForTenant(UUID tenantId, String roleCode) {
-        if (roleCode == null || roleCode.isBlank()) return false;
-        return permissionService.roleExists(roleCode)
-            || tenantCustomRoleRepository.existsByTenantIdAndRoleCode(tenantId, roleCode);
-    }
-
-    /** Permissions for a role in this tenant (from system role_permission or custom tenant_custom_role_permission). */
-    private List<String> getPermissionsForTenantRole(UUID tenantId, String roleCode) {
-        if (roleCode == null || roleCode.isBlank()) return List.of();
-        List<TenantCustomRolePermission> custom = tenantCustomRolePermissionRepository.findByTenantIdAndRoleCode(tenantId, roleCode);
-        if (!custom.isEmpty()) {
-            return custom.stream().map(TenantCustomRolePermission::getPermission).toList();
-        }
-        return permissionService.getPermissionsForRole(roleCode);
-    }
-
-    /**
-     * Create a custom role for the tenant. Fails if role code is already used (system or custom).
-     */
-    @Transactional
-    public RoleResponse createRole(UUID tenantId, CreateRoleRequest request) {
-        requireTenant(tenantId);
-        String normalizedCode = request.roleCode().trim().toUpperCase(Locale.ROOT);
-        if (permissionService.roleExists(normalizedCode)) {
-            throw new IllegalArgumentException("Cannot create custom role with system role code: " + normalizedCode);
-        }
-        if (tenantCustomRoleRepository.existsByTenantIdAndRoleCode(tenantId, normalizedCode)) {
-            throw new IllegalArgumentException("Role already exists: " + normalizedCode);
-        }
-        TenantCustomRole role = TenantCustomRole.builder()
-            .tenantId(tenantId)
-            .roleCode(normalizedCode)
-            .name(request.name() != null ? request.name().trim() : normalizedCode)
-            .description(request.description() != null ? request.description().trim() : null)
-            .build();
-        role = tenantCustomRoleRepository.save(role);
-        List<String> perms = request.permissions() != null ? request.permissions().stream()
-            .filter(p -> p != null && !p.isBlank())
-            .map(String::trim)
-            .distinct()
-            .toList() : List.of();
-        for (String perm : perms) {
-            tenantCustomRolePermissionRepository.save(TenantCustomRolePermission.builder()
-                .tenantId(tenantId)
-                .roleCode(normalizedCode)
-                .permission(perm)
-                .build());
-        }
-        permissionService.invalidateRoleCache(normalizedCode);
-        List<String> permissions = getPermissionsForTenantRole(tenantId, normalizedCode);
-        return new RoleResponse(normalizedCode, role.getName(), role.getDescription() != null ? role.getDescription() : "Custom role",
-            permissions, false, 10, 0L, RoleResponse.resolveScopeType(normalizedCode));
-    }
-
-    /**
-     * Update a custom role. Only custom roles can be updated.
-     */
-    @Transactional
-    public RoleResponse updateRole(UUID tenantId, String roleCode, UpdateRoleRequest request) {
-        requireTenant(tenantId);
-        String normalizedCode = roleCode == null ? null : roleCode.trim().toUpperCase(Locale.ROOT);
-        TenantCustomRole role = tenantCustomRoleRepository.findByTenantIdAndRoleCode(tenantId, normalizedCode)
-            .orElseThrow(() -> new IllegalArgumentException("Custom role not found: " + roleCode));
-        if (request.name() != null && !request.name().isBlank()) {
-            role.setName(request.name().trim());
-        }
-        if (request.description() != null) {
-            role.setDescription(request.description().trim().isBlank() ? null : request.description().trim());
-        }
-        if (request.permissions() != null) {
-            tenantCustomRolePermissionRepository.deleteByTenantIdAndRoleCode(tenantId, normalizedCode);
-            List<String> perms = request.permissions().stream()
-                .filter(p -> p != null && !p.isBlank())
-                .map(String::trim)
-                .distinct()
-                .toList();
-            for (String perm : perms) {
-                tenantCustomRolePermissionRepository.save(TenantCustomRolePermission.builder()
-                    .tenantId(tenantId)
-                    .roleCode(normalizedCode)
-                    .permission(perm)
-                    .build());
-            }
-        }
-        tenantCustomRoleRepository.save(role);
-        permissionService.invalidateRoleCache(normalizedCode);
-        long memberCount = tenantUserRoleRepository.countByTenantIdAndRoleCode(tenantId, normalizedCode);
-        List<String> permissions = getPermissionsForTenantRole(tenantId, normalizedCode);
-        return new RoleResponse(normalizedCode, role.getName(), role.getDescription() != null ? role.getDescription() : "Custom role",
-            permissions, false, 10, memberCount, RoleResponse.resolveScopeType(normalizedCode));
-    }
-
-    /**
-     * Delete a custom role. Only custom roles can be deleted. Removes the role from all members first.
-     */
-    @Transactional
-    public void deleteRole(UUID tenantId, String roleCode) {
-        requireTenant(tenantId);
-        String normalizedCode = roleCode == null ? null : roleCode.trim().toUpperCase(Locale.ROOT);
-        if (permissionService.roleExists(normalizedCode)) {
-            throw new IllegalArgumentException("Cannot delete system role: " + roleCode);
-        }
-        if (!tenantCustomRoleRepository.existsByTenantIdAndRoleCode(tenantId, normalizedCode)) {
-            throw new IllegalArgumentException("Custom role not found: " + roleCode);
-        }
-        List<UUID> userIds = tenantUserRoleRepository.findByTenantIdAndRoleCode(tenantId, normalizedCode).stream()
-            .map(TenantUserRole::getUserId)
-            .toList();
-        if (!userIds.isEmpty()) {
-            tenantUserRoleRepository.deleteByTenantIdAndRoleCodeAndUserIdIn(tenantId, normalizedCode, userIds);
-        }
-        tenantCustomRolePermissionRepository.deleteByTenantIdAndRoleCode(tenantId, normalizedCode);
-        tenantCustomRoleRepository.deleteByTenantIdAndRoleCode(tenantId, normalizedCode);
-        permissionService.invalidateRoleCache(normalizedCode);
-        log.info("Deleted custom role {} in tenant {}", normalizedCode, tenantId);
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────────
-    // Domains & Features
-    // ─────────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Domains of the tenant: the business contexts the application declares (active unless the tenant
-     * disabled them) plus any other tenant_domain row (products seeding their own domains).
-     */
-    public List<DomainToggleResponse> getDomains(UUID tenantId) {
-        requireTenant(tenantId);
-        Map<String, TenantDomain> rows = tenantDomainRepository.findByTenantId(tenantId).stream()
-            .collect(Collectors.toMap(TenantDomain::getDomainCode, row -> row, (a, b) -> a, LinkedHashMap::new));
-        List<DomainToggleResponse> result = new ArrayList<>();
-        for (DeclaredRolesSeeder.BusinessContext context : declaredBusinessContexts()) {
-            TenantDomain row = rows.remove(context.domainCode());
-            boolean enabled = row == null || DOMAIN_STATUS_ACTIVE.equalsIgnoreCase(row.getStatus());
-            result.add(new DomainToggleResponse(context.domainCode(), context.label(), "", enabled, false, context.icon(), List.of()));
-        }
-        rows.values().forEach(row -> result.add(toDomainResponse(row)));
-        return result;
-    }
-
-    /**
-     * Get enabled domain IDs for a tenant: declared business contexts not disabled, plus active rows.
-     */
-    public List<String> getEnabledDomainIds(UUID tenantId) {
-        requireTenant(tenantId);
-        return getDomains(tenantId).stream()
-            .filter(DomainToggleResponse::enabled)
-            .map(DomainToggleResponse::code)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Check if a domain is enabled for a tenant.
-     */
-    public boolean isDomainEnabled(UUID tenantId, String domainId) {
-        return getEnabledDomainIds(tenantId).contains(domainId);
-    }
-
-    private List<DeclaredRolesSeeder.BusinessContext> declaredBusinessContexts() {
-        DeclaredRolesSeeder seeder = declaredRoles.getIfAvailable();
-        return seeder == null ? List.of() : seeder.businessContexts();
-    }
-
-    /**
-     * Enable or disable a domain for a tenant.
-     *
-     * @param tenantId The tenant ID
-     * @param domainCode The domain code to toggle
-     * @param enabled Whether to enable or disable the domain
-     * @return The updated domain status
-     * @throws IllegalArgumentException if domain is not in the application or is a core domain
-     */
-    @Transactional
-    public DomainToggleResponse updateDomain(UUID tenantId, String domainCode, boolean enabled) {
-        requireTenant(tenantId);
-        boolean declared = declaredBusinessContexts().stream().anyMatch(c -> c.domainCode().equals(domainCode));
-        if (!declared && tenantDomainRepository.findByTenantIdAndDomainCode(tenantId, domainCode).isEmpty()) {
-            throw new IllegalArgumentException("Unknown domain: " + domainCode);
-        }
-
-        // Update or create tenant-domain status record (tenant_domain table).
-        TenantDomain tenantDomain = tenantDomainRepository.findByTenantIdAndDomainCode(tenantId, domainCode)
-            .orElseGet(() -> {
-                TenantDomain tm = new TenantDomain();
-                tm.setTenantId(tenantId);
-                tm.setDomainCode(domainCode);
-                return tm;
-            });
-        
-        tenantDomain.setStatus(enabled ? DOMAIN_STATUS_ACTIVE : DOMAIN_STATUS_INACTIVE);
-        TenantDomain saved = tenantDomainRepository.save(tenantDomain);
-
-        log.info("Domain '{}' {} for tenant {}",
-            domainCode, enabled ? "enabled" : "disabled", tenantId);
-
-        return getDomains(tenantId).stream().filter(d -> d.code().equals(domainCode)).findFirst()
-            .orElseGet(() -> toDomainResponse(saved));
-    }
-
-    /**
-     * Update feature flags.
-     */
-    @Transactional
-    public void updateFeatures(UUID tenantId, Map<String, Object> features) {
-        requireTenant(tenantId);
-        log.info("Received feature update for tenant {}: {}", tenantId, features);
-        // Feature flag persistence is intentionally deferred until a dedicated
-        // feature-config storage model is introduced.
-    }
-
     // ─────────────────────────────────────────────────────────────────────────────
     // Helper Methods
     // ─────────────────────────────────────────────────────────────────────────────
+
+    private boolean roleExistsForTenant(UUID tenantId, String roleCode) {
+        return accessService.roleExists(tenantId, roleCode);
+    }
 
     private TenantMemberResponse toMemberResponse(
             AppUser user,
@@ -782,14 +456,8 @@ public class IamService {
             throw new IllegalArgumentException("At least one role is required");
         }
 
-        Set<String> validRoleCodes = new HashSet<>(permissionService.getAllRoleCodes().stream()
-            .map(String::toUpperCase)
-            .toList());
-        tenantCustomRoleRepository.findByTenantIdOrderByRoleCode(tenantId).stream()
-            .map(r -> r.getRoleCode().toUpperCase(Locale.ROOT))
-            .forEach(validRoleCodes::add);
         List<String> unknownRoles = normalizedRoles.stream()
-            .filter(role -> !validRoleCodes.contains(role))
+            .filter(role -> !accessService.roleExists(tenantId, role))
             .toList();
         if (!unknownRoles.isEmpty()) {
             throw new IllegalArgumentException("Unknown role code(s): " + String.join(", ", unknownRoles));
@@ -804,31 +472,6 @@ public class IamService {
                 .build())
             .toList();
         tenantUserRoleRepository.saveAll(tenantRoles);
-    }
-
-    private DomainToggleResponse toDomainResponse(TenantDomain tenantDomain) {
-        String status = tenantDomain.getStatus() != null
-            ? tenantDomain.getStatus().toUpperCase(Locale.ROOT)
-            : DOMAIN_STATUS_INACTIVE;
-        boolean enabled = DOMAIN_STATUS_ACTIVE.equalsIgnoreCase(status);
-
-        String code = tenantDomain.getDomainCode();
-        return new DomainToggleResponse(
-            code,
-            code,
-            "",
-            enabled,
-            false,
-            "folder",
-            List.of()
-        );
-    }
-
-    private String resolveApplicationId(Tenant tenant) {
-        if (tenant.getApplicationId() != null && !tenant.getApplicationId().isBlank()) {
-            return tenant.getApplicationId();
-        }
-        return defaultApplicationId;
     }
 
     private String mapSortField(String field) {

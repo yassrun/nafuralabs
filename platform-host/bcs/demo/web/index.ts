@@ -34,3 +34,5 @@ export const demoBusinessContext: HostBusinessContext = {
     'demo.project': '/demo/projects/{id}',
   },
 };
+
+export default demoBusinessContext;

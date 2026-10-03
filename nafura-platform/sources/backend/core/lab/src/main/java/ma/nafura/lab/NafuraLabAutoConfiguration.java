@@ -4,7 +4,6 @@ import ma.nafura.platform.authorization.repository.UserRoleRepository;
 import ma.nafura.platform.identity.repository.AppUserRepository;
 import ma.nafura.platform.identity.service.AppUserProvisioningService;
 import ma.nafura.platform.scope.security.scope.DefaultScopeService;
-import ma.nafura.platform.tenancy.repository.TenantRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -14,8 +13,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/** Mock login + seeded tenant/users for local products. Mints tokens without a password: never in prod. */
-@AutoConfiguration
+/** Mock login + seeded users for local products. Mints tokens without a password: never in prod. */
+@AutoConfiguration(after = ma.nafura.host.NafuraHostAutoConfiguration.class)
 @ConditionalOnProperty(name = "nafura.lab.enabled", havingValue = "true")
 @EnableConfigurationProperties(LabProperties.class)
 public class NafuraLabAutoConfiguration {
@@ -30,23 +29,19 @@ public class NafuraLabAutoConfiguration {
     LabSessionController labSessionController(
             LabProperties properties,
             @Value("${nafura.security.jwt.hs256-secret}") String hs256Secret,
-            AppUserRepository appUserRepository,
-            DefaultScopeService defaultScopeService
+            AppUserRepository appUserRepository
     ) {
-        return new LabSessionController(properties, hs256Secret, appUserRepository, defaultScopeService);
+        return new LabSessionController(properties, hs256Secret, appUserRepository);
     }
 
     @Bean
     LabSeeder labSeeder(
             LabProperties properties,
-            @Value("${nafura.application.id:lab}") String applicationId,
             DefaultScopeService defaultScopeService,
-            TenantRepository tenantRepository,
             JdbcTemplate jdbcTemplate,
             AppUserProvisioningService appUserProvisioningService,
             UserRoleRepository userRoleRepository
     ) {
-        return new LabSeeder(properties, applicationId, defaultScopeService, tenantRepository, jdbcTemplate,
-                appUserProvisioningService, userRoleRepository);
+        return new LabSeeder(properties, defaultScopeService, jdbcTemplate, appUserProvisioningService, userRoleRepository);
     }
 }

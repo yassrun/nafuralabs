@@ -1,5 +1,8 @@
-// Applied by a product's settings: every bcs/<name>/backend becomes project ':bc-<name>'.
+// Applied by a product's settings: the project is named after app.nafura.json, every bcs/<name>/backend becomes ':bc-<name>'.
 def productRoot = new File(settingsDir, '../..').canonicalFile
+def app = new groovy.json.JsonSlurper().parse(new File(productRoot, 'app.nafura.json'))
+rootProject.name = "${app.metadata.id - 'app.'}-backend"
+
 def bcs = new File(productRoot, 'bcs')
 if (bcs.isDirectory()) {
     bcs.eachDir { bc ->

@@ -31,7 +31,7 @@ import { USER_SETTINGS_CONFIG } from '../../features/user-settings/user-settings
 import { APP_SHELL_ACCESS, provideAppShell } from '../app-shell/app-shell.config';
 import { PLATFORM_CAPABILITY_MANIFESTS } from '../capability-catalog';
 import { providePlatformIdentity } from '../identity';
-import { LabAuthService, LabLoginPage, labAuthGuard, labAuthInterceptor, provideLabAuth } from '../lab-auth';
+import { HostAuthCallbackPage, HostAuthService, HostLoginPage, hostAuthGuard, hostAuthInterceptor, provideHostAuth } from '../host-auth';
 import type { ApplicationManifest, BusinessContextManifest, NafuraManifest } from '../manifest';
 import { assertNafuraManifestsValid } from '../manifest-validator';
 import { businessContextDomain, projectApplicationConfig, projectAppShellConfig } from '../manifest-projection';
@@ -53,19 +53,14 @@ function planFrom(app: unknown, businessContexts: readonly BusinessContextManife
   return planHost(application, businessContexts, capabilityCatalog as CapabilityCatalog);
 }
 
+/** How users sign in is the environment's business (lab picker or OIDC), fetched from the backend at startup. */
 function authProviders(application: ApplicationManifest) {
-  const auth = application.spec.runtime?.auth;
-  if (auth?.mode !== 'lab' || !auth.sessionUrl || !auth.usersUrl) {
-    throw new Error(`Application "${application.metadata.id}": host v1 mounts only runtime.auth.mode "lab" with sessionUrl and usersUrl.`);
-  }
   return [
     providePlatformIdentity({ mode: 'sandbox-keycloak-mock' }),
-    ...provideLabAuth({
-      usersUrl: auth.usersUrl,
-      sessionUrl: auth.sessionUrl,
+    ...provideHostAuth({
       productName: application.spec.product?.name ?? application.metadata.id,
       productMark: application.spec.product?.mark,
-      storageKey: `${application.metadata.id}.lab.session`,
+      storageKey: application.metadata.id,
       homePath: application.spec.runtime?.defaultRoute,
     }),
   ];
@@ -95,7 +90,7 @@ function businessContextEnabled(manifest: BusinessContextManifest): CanActivateF
   const label = manifest.spec.label ?? manifest.metadata.id;
   return async () => {
     // inject() only works before the first await.
-    const auth = inject(LabAuthService);
+    const auth = inject(HostAuthService);
     const toast = inject(ToastService);
     const router = inject(Router);
     await auth.ensureSession();
@@ -105,17 +100,23 @@ function businessContextEnabled(manifest: BusinessContextManifest): CanActivateF
   };
 }
 
-/** Routes of a host app: lab login, then the platform shell with every enabled capability and business context. */
+/** Screens of the plan: enabled capabilities, and whether organizations may create their own roles. */
+function screensOf(plan: HostPlan) {
+  return hostScreens(plan.capabilities, { customRoles: plan.application.spec.customRoles !== false });
+}
+
+/** Routes of a host app: sign-in, then the platform shell with every enabled capability and business context. */
 export function nafuraHostRoutes(app: unknown, businessContexts: readonly HostBusinessContext[] = []): Routes {
-  const screens = hostScreens(planFrom(app, businessContexts.map((context) => context.manifest)).capabilities);
+  const screens = screensOf(planFrom(app, businessContexts.map((context) => context.manifest)));
   const home = screens.homePath;
 
   return [
-    { path: 'login', component: LabLoginPage },
+    { path: 'login', component: HostLoginPage },
+    { path: 'auth/callback', component: HostAuthCallbackPage },
     {
       path: '',
       component: NafuraHostShellComponent,
-      canActivate: [labAuthGuard],
+      canActivate: [hostAuthGuard],
       children: [
         ...screens.routes,
         ...businessContextRoutes(businessContexts),
@@ -132,7 +133,7 @@ export function provideNafuraHost(
   businessContexts: readonly HostBusinessContext[] = [],
 ): EnvironmentProviders {
   const plan = planFrom(app, businessContexts.map((context) => context.manifest));
-  const screens = hostScreens(plan.capabilities);
+  const screens = screensOf(plan);
   registerApplicationConfig(projectApplicationConfig(plan.application));
   businessContexts.forEach((context) => registerEntityRoutes(context.records ?? {}));
   const locale = plan.application.spec.i18n?.locales[0] ?? 'fr';
@@ -140,18 +141,18 @@ export function provideNafuraHost(
   return makeEnvironmentProviders([
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),
-    provideHttpClient(withInterceptors([labAuthInterceptor])),
+    provideHttpClient(withInterceptors([hostAuthInterceptor])),
     provideRouter(nafuraHostRoutes(app, businessContexts), withComponentInputBinding()),
     provideAppLucideIcons(),
     ...provideDynamicLocaleId(),
     { provide: MatPaginatorIntl, useClass: FrMatPaginatorIntl },
     ...authProviders(plan.application),
     provideAppShell(projectAppShellConfig(plan.application, plan.businessContexts, screens.platform, screens.workspace)),
-    { provide: APP_SHELL_ACCESS, useFactory: () => inject(LabAuthService).access },
+    { provide: APP_SHELL_ACCESS, useFactory: () => inject(HostAuthService).access },
     {
       provide: ACCESS_REFRESH,
       useFactory: () => {
-        const auth = inject(LabAuthService);
+        const auth = inject(HostAuthService);
         return () => auth.refreshAccess();
       },
     },

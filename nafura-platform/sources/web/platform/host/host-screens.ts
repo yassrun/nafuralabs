@@ -92,8 +92,8 @@ const TOP_LEVEL_SCREENS: readonly TopLevelScreen[] = [
 /** Sections of ADMINISTRATION_ROUTES, the capability that owns each, and the permission its API reads with. */
 const ADMINISTRATION_SCREENS: readonly AdministrationScreen[] = [
   { section: 'members', path: 'members', capability: 'cap.iam', nav: { id: 'admin-members', label: 'Membres', icon: 'users', permission: 'tenant.members.read' } },
-  { section: 'roles', path: 'roles', capability: 'cap.iam', nav: { id: 'admin-roles', label: 'Rôles', icon: 'shield-check', permission: 'tenant.roles.read' } },
-  { section: 'domainActivation', path: 'domain-activation', capability: 'cap.iam', nav: { id: 'admin-domains', label: 'Modules', icon: 'puzzle', permission: 'tenant.settings.read' } },
+  { section: 'roles', path: 'roles', capability: 'cap.access', nav: { id: 'admin-roles', label: 'Rôles', icon: 'shield-check', permission: 'tenant.roles.read' } },
+  { section: 'domainActivation', path: 'domain-activation', capability: 'cap.access', nav: { id: 'admin-domains', label: 'Modules', icon: 'puzzle', permission: 'tenant.settings.read' } },
   { section: 'audit', path: 'audit', capability: 'cap.audit', nav: { id: 'admin-audit', label: 'Journal d’audit', icon: 'scroll-text', permission: 'administration.audit.read' } },
   { section: 'templates', path: 'documents', capability: 'cap.documents', nav: { id: 'admin-documents', label: 'Documents', icon: 'file-text', permission: 'administration.templates.read' } },
   { section: 'emailTemplates', path: 'email-templates', capability: 'cap.notifications', nav: { id: 'admin-email-templates', label: 'Modèles d’e-mail', icon: 'send', permission: 'administration.email.read' } },
@@ -117,8 +117,8 @@ export interface HostScreens {
   readonly homePath: string | undefined;
 }
 
-/** Routes, navigation and administration sections of the enabled capabilities. */
-export function hostScreens(enabledCapabilities: readonly string[]): HostScreens {
+/** Routes, navigation and administration sections of the enabled capabilities; `customRoles` is app.nafura.json spec.customRoles. */
+export function hostScreens(enabledCapabilities: readonly string[], { customRoles = true } = {}): HostScreens {
   const enabled = new Set(enabledCapabilities);
   const topLevel = TOP_LEVEL_SCREENS.filter((screen) => enabled.has(screen.capability));
   const administration = ADMINISTRATION_SCREENS.filter((screen) => enabled.has(screen.capability));
@@ -151,7 +151,7 @@ export function hostScreens(enabledCapabilities: readonly string[]): HostScreens
     ADMINISTRATION_SCREENS.map((screen) => [screen.section, { enabled: enabled.has(screen.capability) }]),
   ) as AdministrationSectionConfig;
   if (administrationSections.roles) {
-    administrationSections.roles = { ...administrationSections.roles, customRoles: true };
+    administrationSections.roles = { ...administrationSections.roles, customRoles };
   }
 
   const workspace = topNav('workspace');

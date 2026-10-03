@@ -11,7 +11,6 @@ public record LabProperties(
         @DefaultValue("false") boolean enabled,
         @DefaultValue("nafura-lab") String issuer,
         @DefaultValue("12h") Duration sessionTtl,
-        @DefaultValue Tenant tenant,
         List<User> users
 ) {
 
@@ -19,9 +18,6 @@ public record LabProperties(
         users = users == null || users.isEmpty()
                 ? List.of(new User("admin@lab.local", "Lab", "Admin", "SUPER_ADMIN"))
                 : List.copyOf(users);
-    }
-
-    public record Tenant(@DefaultValue("lab") String key, @DefaultValue("Lab") String name) {
     }
 
     public record User(String email, String givenName, String familyName, String role) {

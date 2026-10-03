@@ -24,7 +24,7 @@
       "@platform/*": ["../../../nafura-platform/sources/web/*"],
       "@core/*": ["../../../nafura-platform/sources/web/core/*"],
       "@lib/*": ["../../../nafura-platform/sources/web/lib/*"],
-      "@env": ["./src/environments/environment"],
+      "@env": ["../../../nafura-platform/sources/web/platform/host/environment"],
 
       "@angular/*": ["./node_modules/@angular/*"],
       "@angular/core/*": ["./node_modules/@angular/core/types/*.d.ts", "./node_modules/@angular/core/fesm2022/*.mjs"],

@@ -1,0 +1,35 @@
+# Staging (Docker Desktop k8s): local images, shared infra in nafura-infra-staging, plain HTTP.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../base
+
+patches:
+  - target: { kind: Deployment, name: backend }
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: cluster,staging
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: postgres.nafura-infra-staging.svc
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: { name: NAFURA_GOTENBERG_URL, value: "http://gotenberg.nafura-infra-staging.svc:3000" }
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: { name: NAFURA_SEED_DEMO, value: "true" }
+  - target: { kind: Deployment, name: web }
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - target: { kind: Ingress, name: app }
+    patch: |-
+      - op: add
+        path: /metadata/annotations/nginx.ingress.kubernetes.io~1ssl-redirect
+        value: "false"

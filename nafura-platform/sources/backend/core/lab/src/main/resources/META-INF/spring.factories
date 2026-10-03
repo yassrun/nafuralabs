@@ -1,2 +1,3 @@
 org.springframework.boot.EnvironmentPostProcessor=\
+ma.nafura.lab.ApplicationManifestEnvironment,\
 ma.nafura.lab.LabEnvironmentDefaults

@@ -45,7 +45,7 @@ class LifecycleEngineTest {
         StaticListableBeanFactory beans = new StaticListableBeanFactory();
         beans.addBean("gateway", (ApprovalGateway) (type, entityId, title, role) -> opened.add(type + "|" + title + "|" + role));
         engine = new LifecycleEngine(beans.getBeanProvider(ApprovalGateway.class), events::add);
-        engine.register(lifecycle, entityId -> Optional.of(request), r -> { });
+        engine.register(Object.class, lifecycle, entityId -> Optional.of(request), r -> { });
         UserContext.setPermissions(Set.of("test.purchase.request.submit", "test.purchase.request.order"));
     }
 

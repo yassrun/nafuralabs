@@ -3,6 +3,7 @@
   "capabilities": [
     { "id": "cap.foundation", "core": true, "modules": ["framework", "multi-tenant", "observability", "settings"], "probe": { "get": "/api/v1/listing-views" } },
     { "id": "cap.lab", "core": true, "modules": ["lab"], "probe": { "get": "/api/public/lab/users" } },
+    { "id": "cap.access", "core": true, "modules": ["access"], "probe": { "class": "ma.nafura.platform.administration.access.NafuraAccessAutoConfiguration" } },
     { "id": "cap.user-settings", "modules": ["user-settings"], "requires": [], "probe": { "get": "/api/v1/user-settings/profile" } },
     { "id": "cap.app-settings", "modules": ["app-settings"], "requires": [], "probe": { "get": "/api/v1/app-settings/general" } },
     { "id": "cap.organization-identity", "modules": ["organization-identity"], "requires": ["cap.app-settings", "cap.documents"], "probe": { "get": "/api/v1/organization/identity" } },

@@ -33,17 +33,10 @@ public class PermissionService {
         }
         
         log.debug("Fetching permissions for role: {}", roleCode);
-        List<String> permissions = rolePermissionRepository.findByRoleCode(roleCode.toUpperCase())
+        return rolePermissionRepository.findByRoleCode(roleCode.toUpperCase())
             .stream()
             .map(RolePermission::getPermission)
             .collect(Collectors.toList());
-
-        // System OWNER is full-access by contract; tolerate missing IAM bootstrap seed.
-        if (permissions.isEmpty() && "OWNER".equals(roleCode.toUpperCase())) {
-            return List.of("*");
-        }
-
-        return permissions;
     }
     
     /**

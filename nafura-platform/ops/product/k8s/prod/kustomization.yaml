@@ -1,0 +1,41 @@
+# Prod (OVH VPS k3s): registry images, shared infra in nafura-infra-prod, TLS by cert-manager.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../base
+
+patches:
+  - target: { kind: Deployment, name: backend }
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: cluster,prod
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: postgres.nafura-infra-prod.svc
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: { name: NAFURA_GOTENBERG_URL, value: "http://gotenberg.nafura-infra-prod.svc:3000" }
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value: [{ name: nafura-registry }]
+  - target: { kind: Deployment, name: web }
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value: [{ name: nafura-registry }]
+  - target: { kind: Ingress, name: app }
+    patch: |-
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod
+      - op: add
+        path: /metadata/annotations/nginx.ingress.kubernetes.io~1ssl-redirect
+        value: "true"

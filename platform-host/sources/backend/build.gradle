@@ -26,7 +26,3 @@ java {
 }
 
 apply from: '../../../nafura-platform/gradle/nafura-host.gradle'
-
-tasks.named('bootJar') {
-    archiveBaseName = 'platform-host-backend'
-}

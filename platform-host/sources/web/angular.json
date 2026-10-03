@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "platform-host": {
+    "app": {
       "projectType": "application",
       "root": "",
       "sourceRoot": "src",
@@ -12,7 +12,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/platform-host",
+            "outputPath": "dist/app",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -39,11 +39,11 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "prebundle": false,
-            "proxyConfig": "proxy.conf.json"
+            "proxyConfig": "../../../nafura-platform/sources/web/platform/host/dev-proxy.mjs"
           },
           "configurations": {
-            "production": { "buildTarget": "platform-host:build:production" },
-            "development": { "buildTarget": "platform-host:build:development" }
+            "production": { "buildTarget": "app:build:production" },
+            "development": { "buildTarget": "app:build:development" }
           },
           "defaultConfiguration": "development"
         }

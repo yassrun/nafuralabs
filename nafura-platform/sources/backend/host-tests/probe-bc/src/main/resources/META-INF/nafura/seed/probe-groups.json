@@ -1,0 +1,14 @@
+{
+  "id": "probe.groups",
+  "kind": "reference",
+  "entities": [
+    {
+      "entity": "ProbeGroup",
+      "key": ["code"],
+      "records": [
+        { "code": "G1", "name": "Group one" },
+        { "code": "G2", "name": "Group two" }
+      ]
+    }
+  ]
+}

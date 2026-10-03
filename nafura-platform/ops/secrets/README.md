@@ -10,9 +10,9 @@ Fichiers gitignored, jamais commités, restent sur la machine :
 Seule exception suivie : **ce README** (la forme, jamais les valeurs).
 
 ```bash
-ENV=staging bash toolchain/ops/nlops.sh bootstrap-env
-ENV=staging bash toolchain/ops/nlops.sh vault-seed
-SECRETS_FILE=/path/to/file bash toolchain/ops/nlops.sh vault-seed
+ENV=staging bash nafura-platform/ops/nlops.sh bootstrap-env
+ENV=staging bash nafura-platform/ops/nlops.sh vault-seed
+SECRETS_FILE=/path/to/file bash nafura-platform/ops/nlops.sh vault-seed
 ```
 
 ---
@@ -153,7 +153,7 @@ Après création de la clé staging dans [Brevo](https://app.brevo.com) → **Se
 
 - Créer une clé nommée `staging` → la valeur commence par `xkeysib-…`
 - Coller dans `[staging/platform/integrations/email/brevo]` → `api_key=…`
-- `KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh vault-seed`
+- `KUBE_CONTEXT=docker-desktop ENV=staging bash nafura-platform/ops/nlops.sh vault-seed`
 - `kubectl -n sektor-staging rollout restart deploy/sektor-btp-backend`
 
 ---

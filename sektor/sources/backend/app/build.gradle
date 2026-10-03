@@ -16,6 +16,7 @@ dependencies {
     implementation 'ma.nafuralabs:tenancy:0.1.0-SNAPSHOT'
 
     // Layer 2 (enabled features)
+    implementation 'ma.nafuralabs:access:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:iam:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:subscription:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:usage:0.1.0-SNAPSHOT'

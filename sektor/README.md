@@ -1,7 +1,7 @@
 # Sektor BTP (ERP)
 
-ERP BTP. Porte : [NAFURALABS.md](../NAFURALABS.md).  
-Deploy : [nafura-platform/ops/AGENTS.md](../nafura-platform/ops/AGENTS.md).
+ERP BTP. Porte : [AGENTS.md](../AGENTS.md).  
+Deploy : [nafura-platform/ops/README.md](../nafura-platform/ops/README.md).
 
 ## Structure
 

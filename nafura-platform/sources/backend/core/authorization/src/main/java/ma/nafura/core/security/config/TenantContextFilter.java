@@ -262,7 +262,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     tenantId,
                     membership.getUserId());
 
-            userPermissionContextService.applyRoleCodes(roleCodes, email, true);
+            userPermissionContextService.applyRoleCodes(roleCodes, email);
 
         } catch (Exception e) {
             log.error("Error loading tenant user context: {}", e.getMessage(), e);

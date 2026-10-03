@@ -38,7 +38,13 @@ dependencies {
 // Not under META-INF: bootJar moves the application's META-INF out of BOOT-INF/classes.
 tasks.named('processResources') {
     from(file(appFile)) { into 'nafura'; rename { 'app.nafura.json' } }
+    from(new File(platformRoot, 'gradle/host')) { include 'application*.yml' }
 }
+
+// Products ship no Java outside their BCs: the main class and the jar name come from the platform and the manifest.
+def applicationId = app.metadata.id - 'app.'
+springBoot { mainClass = 'ma.nafura.host.NafuraHostApplication' }
+tasks.named('bootJar') { archiveFileName = "${applicationId}-backend.jar" }
 
 // Lab mode applies the SQL of exactly the modules composed above (nafura-migrations.gradle).
 apply from: new File(platformRoot, 'gradle/nafura-migrations.gradle')

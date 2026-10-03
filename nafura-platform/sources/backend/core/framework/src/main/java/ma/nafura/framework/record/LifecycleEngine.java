@@ -37,6 +37,7 @@ public class LifecycleEngine {
     private final ObjectProvider<ApprovalGateway> approvals;
     private final ApplicationEventPublisher events;
     private final Map<String, Binding<?>> bindings = new ConcurrentHashMap<>();
+    private final Map<Class<?>, Lifecycle> byRecordType = new ConcurrentHashMap<>();
 
     public LifecycleEngine(ObjectProvider<ApprovalGateway> approvals, ApplicationEventPublisher events) {
         this.approvals = approvals;
@@ -44,8 +45,14 @@ public class LifecycleEngine {
     }
 
     /** Called by each {@link RecordController} with a lifecycle, so approval outcomes find their record. */
-    public <E extends HasStatus> void register(Lifecycle lifecycle, Function<UUID, Optional<E>> loader, Consumer<E> saver) {
+    public <E extends HasStatus> void register(Class<?> recordType, Lifecycle lifecycle, Function<UUID, Optional<E>> loader, Consumer<E> saver) {
         bindings.put(lifecycle.entity(), new Binding<>(lifecycle, loader, saver));
+        byRecordType.put(recordType, lifecycle);
+    }
+
+    /** The lifecycle declared for records of this entity class, if any. */
+    public Optional<Lifecycle> lifecycleOf(Class<?> recordType) {
+        return Optional.ofNullable(byRecordType.get(recordType));
     }
 
     /** Transitions the current user may fire now. */

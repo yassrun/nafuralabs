@@ -1,0 +1,35 @@
+{
+  "$comment": "Generic roles every application gets (DeclaredRolesSeeder). Wildcards cover whole platform namespaces; business contexts bring their own roles.",
+  "roles": [
+    {
+      "code": "OWNER",
+      "label": "Propriétaire de l’organisation",
+      "permissions": ["*"]
+    },
+    {
+      "code": "ORG_ADMIN",
+      "label": "Administrateur de l’organisation",
+      "permissions": ["tenant.*", "administration.*", "collaboration.*", "settings.*", "platform.*"]
+    },
+    {
+      "code": "ORG_MEMBER",
+      "label": "Membre",
+      "permissions": [
+        "tenant.read",
+        "collaboration.collaboration.comment.read",
+        "collaboration.collaboration.comment.create",
+        "collaboration.collaboration.attachment.read",
+        "collaboration.collaboration.attachment.create",
+        "collaboration.collaboration.notification.read",
+        "collaboration.collaboration.notification.update",
+        "collaboration.collaboration.tag.read",
+        "collaboration.collaboration.approval.read",
+        "collaboration.collaboration.workflow.read",
+        "settings.sysconfig.code-list.read",
+        "settings.sysconfig.reference-value.read",
+        "settings.sysconfig.calendar.read",
+        "settings.sysconfig.tag.read"
+      ]
+    }
+  ]
+}

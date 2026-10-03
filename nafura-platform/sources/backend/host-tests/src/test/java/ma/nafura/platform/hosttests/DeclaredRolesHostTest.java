@@ -47,11 +47,6 @@ class DeclaredRolesHostTest {
     @Autowired
     private ObjectProvider<ApplicationRunner> runners;
 
-    @BeforeEach
-    void requiresIam() {
-        assumeThat(disabledCapabilities()).as("roles are seeded by cap.iam").doesNotContain("cap.iam");
-    }
-
     @Test
     void businessContextAndApplicationRolesAreSeeded() {
         RolePermissionRepository repository = rolePermissions.getObject();
@@ -87,7 +82,7 @@ class DeclaredRolesHostTest {
         assertThat(send(token("viewer@host.local"), "POST")).isEqualTo(403);
     }
 
-    /** By name: the seeder class is absent from the variants without cap.iam. */
+    /** By name: the test does not depend on the access module's packages. */
     private void seedDeclaredRoles() throws Exception {
         runners.orderedStream().filter(runner -> runner.getClass().getSimpleName().equals("DeclaredRolesSeeder"))
                 .findFirst().orElseThrow().run(new DefaultApplicationArguments());
@@ -95,6 +90,7 @@ class DeclaredRolesHostTest {
 
     @Test
     void assigningDeclaredRolesToAMemberChangesWhatTheMemberCanDo() throws Exception {
+        assumeThat(disabledCapabilities()).as("members are managed by cap.iam").doesNotContain("cap.iam");
         String admin = token("admin@host.local");
         String tenant = tenantId("admin@host.local");
         String member = memberId(admin, tenant, "assignee@host.local");
@@ -166,9 +162,8 @@ class DeclaredRolesHostTest {
     }
 
     private String tenantId(String email) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(uri("/api/public/lab/session"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString("{\"email\":\"" + email + "\"}"))
+        HttpRequest request = HttpRequest.newBuilder(uri("/api/v1/me/session"))
+                .header("Authorization", "Bearer " + token(email))
                 .build();
         return json.readTree(http.send(request, HttpResponse.BodyHandlers.ofString()).body()).path("tenant").path("id").asText();
     }

@@ -2,7 +2,7 @@
  * Nafura Platform - Generic Page Layout
  *
  * Use on any page type (listing, detail, form, settings).
- * See DESIGN-SYSTEM.md for padding and max-width; listing pages may use full width by overriding max-width.
+ * Listing pages may use full width by overriding max-width.
  *
  * - .nf-page         → page container: padding = space between parent and content
  * - .nf-page__section → section: inner padding (same for every section on any page)

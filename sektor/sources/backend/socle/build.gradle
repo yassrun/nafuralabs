@@ -7,6 +7,7 @@ dependencies {
     implementation 'ma.nafuralabs:authorization:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:identity:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:tenancy:0.1.0-SNAPSHOT'
+    implementation 'ma.nafuralabs:access:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:iam:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:app-settings:0.1.0-SNAPSHOT'
     implementation 'ma.nafuralabs:organization-identity:0.1.0-SNAPSHOT'

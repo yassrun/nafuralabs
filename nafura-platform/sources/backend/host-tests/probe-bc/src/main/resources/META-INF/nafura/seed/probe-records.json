@@ -1,0 +1,15 @@
+{
+  "id": "probe.records",
+  "kind": "demo",
+  "after": ["probe.groups"],
+  "entities": [
+    {
+      "entity": "ProbeRecord",
+      "key": ["code"],
+      "records": [
+        { "code": "R-1", "amount": 50, "groupId": { "$ref": "ProbeGroup", "code": "G1" } },
+        { "code": "R-2", "amount": 80, "groupId": { "$ref": "ProbeGroup", "code": "G2" }, "$transitions": ["submit"] }
+      ]
+    }
+  ]
+}

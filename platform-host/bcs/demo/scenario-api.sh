@@ -3,7 +3,7 @@
 set -euo pipefail
 BASE=${BASE:-http://localhost:8090}
 token() { curl -s -X POST -H 'Content-Type: application/json' -d "{\"email\":\"$1\"}" "$BASE/api/public/lab/session" | sed -E 's/.*"accessToken":"([^"]+)".*/\1/'; }
-TENANT=$(curl -s -X POST -H 'Content-Type: application/json' -d '{"email":"lead@host.local"}' "$BASE/api/public/lab/session" | sed -E 's/.*"id":"([^"]+)".*/\1/')
+TENANT=$(curl -s -H "Authorization: Bearer $(token lead@host.local)" "$BASE/api/v1/me/session" | sed -E 's/.*"tenant":\{"id":"([^"]+)".*/\1/')
 call() { # user method path [json] -> prints "status body"
   local t; t=$(token "$1")
   curl -s -o /tmp/demo-body -w '%{http_code}' -X "$2" -H "Authorization: Bearer $t" -H "X-Tenant-ID: $TENANT" -H 'Content-Type: application/json' ${4:+-d "$4"} "$BASE$3"
@@ -14,10 +14,10 @@ expect() { [[ "$1" == $2* ]] && echo "ok   $3" || { echo "FAIL $3 -> $1"; FAILED
 FAILED=0
 LEAD=lead@host.local; VIEWER=viewer@host.local
 
-r=$(call $LEAD POST /api/v1/demo/categories '{"code":"IT","name":"Informatique"}'); expect "$r" 201 "create category"; CAT=$(echo "$r" | field id)
-r=$(call $LEAD POST /api/v1/demo/suppliers "{\"code\":\"F-001\",\"name\":\"Atlas Bureautique\",\"categoryId\":\"$CAT\",\"city\":\"Casablanca\"}"); expect "$r" 201 "create supplier"; SUP=$(echo "$r" | field id)
+r=$(call $LEAD POST /api/v1/demo/categories '{"code":"SCN-CAT","name":"Categorie scenario"}'); expect "$r" 201 "create category"; CAT=$(echo "$r" | field id)
+r=$(call $LEAD POST /api/v1/demo/suppliers "{\"code\":\"SCN-001\",\"name\":\"Atlas Scenario\",\"categoryId\":\"$CAT\",\"city\":\"Casablanca\"}"); expect "$r" 201 "create supplier"; SUP=$(echo "$r" | field id)
 r=$(call $LEAD GET "/api/v1/demo/suppliers?q=atlas"); expect "$r" "200 {\"content\":[{" "search supplier"
-[[ "$r" == *'"categoryName":"Informatique"'* ]] && echo "ok   derived categoryName" || { echo "FAIL derived categoryName"; FAILED=1; }
+[[ "$r" == *'"categoryName":"Categorie scenario"'* ]] && echo "ok   derived categoryName" || { echo "FAIL derived categoryName"; FAILED=1; }
 r=$(call $LEAD POST /api/v1/demo/supplier-contacts "{\"supplierId\":\"$SUP\",\"name\":\"Salma B.\",\"email\":\"salma@atlas.ma\"}"); expect "$r" 201 "create contact"
 r=$(call $LEAD GET "/api/v1/demo/supplier-contacts?supplierId=$SUP"); expect "$r" "200 {\"content\":[{" "contacts of supplier"
 r=$(call $VIEWER POST /api/v1/demo/suppliers '{"code":"X","name":"X"}'); expect "$r" 403 "viewer cannot create"

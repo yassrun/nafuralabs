@@ -1,0 +1,42 @@
+# Profile `cluster` (local-staging, staging, prod): the shared infra's PostgreSQL and Keycloak (realm iam-portal,
+# one client per product) instead of the embedded database and the lab login.
+# The lifecycle job migrates (same generated changelog as the lab); the app only validates.
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT:5432}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  liquibase:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # In-cluster keys; tokens still carry the public issuer, checked below.
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+nafura:
+  lab:
+    enabled: false
+    embedded-postgres: false
+  access:
+    # Comma-separated emails holding OWNER in the organization (SingleScopeBootstrap).
+    owners: ${NAFURA_OWNERS:}
+  seed:
+    # Demo data sets (META-INF/nafura/seed, kind demo): on in staging, refused with the prod profile.
+    demo: ${NAFURA_SEED_DEMO:false}
+  documents:
+    gotenberg:
+      url: ${NAFURA_GOTENBERG_URL:http://gotenberg:3000}
+  security:
+    oidc:
+      issuer: ${KEYCLOAK_ISSUER_URI}
+    jwt:
+      # The lab secret is public: no HS256 token is accepted on a cluster.
+      hs256-secret: ""

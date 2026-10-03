@@ -31,8 +31,7 @@ class NafuraLabAutoConfigurationTest {
 
     @Test
     void defaultsToASingleSuperAdmin() {
-        LabProperties properties = new LabProperties(false, "nafura-lab", java.time.Duration.ofHours(12),
-                new LabProperties.Tenant("lab", "Lab"), null);
+        LabProperties properties = new LabProperties(false, "nafura-lab", java.time.Duration.ofHours(12), null);
 
         assertThat(properties.users()).singleElement()
                 .satisfies(user -> assertThat(user.superAdmin()).isTrue());

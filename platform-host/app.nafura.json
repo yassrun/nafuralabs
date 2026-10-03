@@ -5,11 +5,7 @@
   "metadata": { "id": "app.platform-host", "version": "0.1.0", "owner": "nafuralabs", "lifecycle": "experimental" },
   "spec": {
     "product": { "name": "Platform Host", "tagline": "Config + BCs", "mark": "/brand/mark.svg" },
-    "runtime": {
-      "requiresTenant": false,
-      "defaultRoute": "/",
-      "auth": { "mode": "lab", "sessionUrl": "/api/public/lab/session", "usersUrl": "/api/public/lab/users" }
-    },
+    "runtime": { "tenancy": "single", "defaultRoute": "/" },
     "shell": {
       "topBar": { "enabled": true, "pageContext": true },
       "sidebar": { "enabled": true },
@@ -19,9 +15,7 @@
         "tenantSettings": true,
         "tenantSettingsRoute": "/organization/settings",
         "organizationIdentity": true,
-        "organizationIdentityRoute": "/organization/identity",
-        "fallbackName": "Platform Host",
-        "fallbackKey": "platform-host"
+        "organizationIdentityRoute": "/organization/identity"
       },
       "notifications": { "enabled": true },
       "ai": { "enabled": true }
@@ -31,6 +25,15 @@
     "roles": [
       { "code": "DEMO_LEAD", "label": "Responsable démo", "includes": ["bc.demo:DEMO_EDITOR"] }
     ],
-    "i18n": { "namespace": "app.platform-host", "locales": ["fr"] }
+    "i18n": { "locales": ["fr"] },
+    "local": {
+      "ports": { "api": 8090, "web": 4400 },
+      "users": [
+        { "email": "admin@host.local", "givenName": "Host", "familyName": "Admin", "role": "SUPER_ADMIN" },
+        { "email": "reader@host.local", "givenName": "Host", "familyName": "Reader", "role": "READER" },
+        { "email": "lead@host.local", "givenName": "Demo", "familyName": "Lead", "role": "DEMO_LEAD" },
+        { "email": "viewer@host.local", "givenName": "Demo", "familyName": "Viewer", "role": "DEMO_VIEWER" }
+      ]
+    }
   }
 }

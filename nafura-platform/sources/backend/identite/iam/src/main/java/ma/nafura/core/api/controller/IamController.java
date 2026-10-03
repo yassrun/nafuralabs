@@ -6,10 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import ma.nafura.platform.administration.iam.api.request.tenant.*;
 import ma.nafura.platform.administration.iam.api.response.publicapi.ResendInvitationResponse;
 import ma.nafura.platform.administration.iam.api.response.tenant.*;
-import ma.nafura.platform.authorization.api.response.tenant.PermissionGroupResponse;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
-import ma.nafura.platform.authorization.service.PermissionMetadataService;
 import ma.nafura.platform.administration.iam.service.IamService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Shared REST Controller for Tenant Administration.
+ * Members of an organization: info, members, invitations, members of a role.
  */
 @Slf4j
 @RestController
@@ -35,7 +33,6 @@ import org.springframework.data.domain.Pageable;
 public class IamController {
 
     private final IamService iamService;
-    private final PermissionMetadataService permissionMetadataService;
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Tenant Info
@@ -229,41 +226,8 @@ public class IamController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    // Roles & Permissions
+    // Members of a role (roles themselves: AccessController)
     // ─────────────────────────────────────────────────────────────────────────────
-
-    /**
-     * GET /api/tenants/{tenantId}/roles
-     * Get all roles for the tenant.
-     */
-    @GetMapping("/{tenantId}/roles")
-    @RequirePermission(value = "tenant.roles.read", fullPermission = true)
-    public ResponseEntity<List<RoleResponse>> getRoles(
-            @PathVariable UUID tenantId,
-            @AuthenticationPrincipal Jwt jwt) {
-        
-        log.debug("GET /api/tenants/{}/roles", tenantId);
-        
-        List<RoleResponse> response = iamService.getRoles(tenantId);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * GET /api/tenants/{tenantId}/roles/{roleCode}
-     * Get a single role.
-     */
-    @GetMapping("/{tenantId}/roles/{roleCode}")
-    @RequirePermission(value = "tenant.roles.read", fullPermission = true)
-    public ResponseEntity<RoleResponse> getRole(
-            @PathVariable UUID tenantId,
-            @PathVariable String roleCode,
-            @AuthenticationPrincipal Jwt jwt) {
-        
-        log.debug("GET /api/tenants/{}/roles/{}", tenantId, roleCode);
-        
-        RoleResponse response = iamService.getRole(tenantId, roleCode);
-        return ResponseEntity.ok(response);
-    }
 
     /**
      * GET /api/tenants/{tenantId}/roles/{roleCode}/members
@@ -317,123 +281,6 @@ public class IamController {
         
         iamService.removeRoleFromMembers(tenantId, roleCode, request);
         return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * POST /api/tenants/{tenantId}/roles
-     * Create a custom role.
-     */
-    @PostMapping("/{tenantId}/roles")
-    @RequirePermission(value = "tenant.roles.write", fullPermission = true)
-    public ResponseEntity<RoleResponse> createRole(
-            @PathVariable UUID tenantId,
-            @Valid @RequestBody CreateRoleRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
-        
-        log.info("POST /api/tenants/{}/roles", tenantId);
-        RoleResponse created = iamService.createRole(tenantId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
-    }
-
-    /**
-     * PATCH /api/tenants/{tenantId}/roles/{roleCode}
-     * Update a custom role.
-     */
-    @PatchMapping("/{tenantId}/roles/{roleCode}")
-    @RequirePermission(value = "tenant.roles.write", fullPermission = true)
-    public ResponseEntity<RoleResponse> updateRole(
-            @PathVariable UUID tenantId,
-            @PathVariable String roleCode,
-            @Valid @RequestBody UpdateRoleRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
-        
-        log.info("PATCH /api/tenants/{}/roles/{}", tenantId, roleCode);
-        return ResponseEntity.ok(iamService.updateRole(tenantId, roleCode, request));
-    }
-
-    /**
-     * DELETE /api/tenants/{tenantId}/roles/{roleCode}
-     * Delete a custom role (custom roles only).
-     */
-    @DeleteMapping("/{tenantId}/roles/{roleCode}")
-    @RequirePermission(value = "tenant.roles.write", fullPermission = true)
-    public ResponseEntity<Void> deleteRole(
-            @PathVariable UUID tenantId,
-            @PathVariable String roleCode,
-            @AuthenticationPrincipal Jwt jwt) {
-        
-        log.info("DELETE /api/tenants/{}/roles/{}", tenantId, roleCode);
-        iamService.deleteRole(tenantId, roleCode);
-        return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * GET /api/tenants/{tenantId}/permissions/catalog
-     * Get permissions catalog for role editing (grouped by module).
-     */
-    @GetMapping("/{tenantId}/permissions/catalog")
-    @RequirePermission(value = "tenant.roles.read", fullPermission = true)
-    public ResponseEntity<List<PermissionGroupResponse>> getPermissionsCatalog(
-            @PathVariable UUID tenantId,
-            @AuthenticationPrincipal Jwt jwt) {
-        
-        log.debug("GET /api/tenants/{}/permissions/catalog", tenantId);
-        return ResponseEntity.ok(permissionMetadataService.getAllPermissions());
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────────
-    // Domains & Features
-    // ─────────────────────────────────────────────────────────────────────────────
-
-    /**
-     * GET /api/tenants/{tenantId}/domains
-     * Get all domains with their enablement status.
-     */
-    @GetMapping("/{tenantId}/domains")
-    @RequirePermission(value = "tenant.settings.read", fullPermission = true)
-    public ResponseEntity<List<DomainToggleResponse>> getDomains(
-            @PathVariable UUID tenantId,
-            @AuthenticationPrincipal Jwt jwt) {
-        
-        log.debug("GET /api/tenants/{}/domains", tenantId);
-        
-        List<DomainToggleResponse> response = iamService.getDomains(tenantId);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * PATCH /api/tenants/{tenantId}/domains/{domainCode}
-     * Enable or disable a domain.
-     */
-    @PatchMapping("/{tenantId}/domains/{domainCode}")
-    @RequirePermission(value = "tenant.settings.write", fullPermission = true)
-    public ResponseEntity<DomainToggleResponse> updateDomain(
-            @PathVariable UUID tenantId,
-            @PathVariable String domainCode,
-            @Valid @RequestBody UpdateDomainRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
-        
-        log.info("PATCH /api/tenants/{}/domains/{} enabled={}", tenantId, domainCode, request.enabled());
-        
-        DomainToggleResponse response = iamService.updateDomain(tenantId, domainCode, request.enabled());
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * PATCH /api/tenants/{tenantId}/features
-     * Update feature flags.
-     */
-    @PatchMapping("/{tenantId}/features")
-    @RequirePermission(value = "tenant.settings.write", fullPermission = true)
-    public ResponseEntity<Void> updateFeatures(
-            @PathVariable UUID tenantId,
-            @Valid @RequestBody UpdateFeaturesRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
-        
-        log.info("PATCH /api/tenants/{}/features", tenantId);
-        
-        iamService.updateFeatures(tenantId, request.features());
-        return ResponseEntity.ok().build();
     }
 }
 

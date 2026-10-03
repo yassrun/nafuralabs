@@ -28,21 +28,11 @@
         },
         "runtime": {
           "type": "object",
-          "required": ["requiresTenant", "defaultRoute"],
+          "required": ["defaultRoute"],
           "additionalProperties": false,
           "properties": {
-            "requiresTenant": { "type": "boolean" },
-            "defaultRoute": { "type": "string", "pattern": "^/" },
-            "auth": {
-              "type": "object",
-              "required": ["mode"],
-              "additionalProperties": false,
-              "properties": {
-                "mode": { "enum": ["keycloak", "lab"] },
-                "sessionUrl": { "type": "string" },
-                "usersUrl": { "type": "string" }
-              }
-            }
+            "tenancy": { "enum": ["single", "multi"] },
+            "defaultRoute": { "type": "string", "pattern": "^/" }
           }
         },
         "shell": {
@@ -100,12 +90,59 @@
           }
         },
         "provides": { "type": "array", "items": { "$ref": "#/$defs/capability" } },
+        "customRoles": { "type": "boolean" },
         "requires": { "type": "array", "items": { "$ref": "#/$defs/requirement" } },
-        "i18n": { "$ref": "#/$defs/i18n" }
+        "i18n": { "$ref": "#/$defs/i18n" },
+        "local": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ports": {
+              "type": "object",
+              "required": ["api", "web"],
+              "additionalProperties": false,
+              "properties": { "api": { "type": "number" }, "web": { "type": "number" } }
+            },
+            "users": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["email", "givenName", "familyName", "role"],
+                "additionalProperties": false,
+                "properties": {
+                  "email": { "type": "string" },
+                  "givenName": { "type": "string" },
+                  "familyName": { "type": "string" },
+                  "role": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" }
+                }
+              }
+            }
+          }
+        },
+        "deploy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "staging": { "$ref": "#/$defs/deployment" },
+            "prod": { "$ref": "#/$defs/deployment" }
+          }
+        }
       }
     }
   },
   "$defs": {
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "host": { "type": "string", "pattern": "^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$" },
+        "owners": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[^@\\s,'\"`$\\\\]+@[^@\\s,'\"`$\\\\]+$" },
+          "uniqueItems": true
+        }
+      }
+    },
     "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
     "metadata": {
       "type": "object",
@@ -137,7 +174,7 @@
     },
     "i18n": {
       "type": "object",
-      "required": ["namespace", "locales"],
+      "required": ["locales"],
       "additionalProperties": false,
       "properties": {
         "namespace": { "type": "string" },

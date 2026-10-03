@@ -88,6 +88,14 @@ test('with everything enabled, every screen is mounted', () => {
   assert.ok(routes.has('administration'));
 });
 
+test('roles stay without cap.iam (core), and spec.customRoles: false keeps organizations to the declared roles', () => {
+  const withoutMembers = hostScreens(all.filter((id) => id !== 'cap.iam'));
+  assert.equal(withoutMembers.administrationSections.roles.enabled, true);
+  assert.equal(withoutMembers.administrationSections.members.enabled, false);
+  assert.equal(everything.administrationSections.roles.customRoles, true);
+  assert.equal(hostScreens(all, { customRoles: false }).administrationSections.roles.customRoles, false);
+});
+
 // Permissions the backend enforces (shared with the listing guard).
 import { backendPermissions } from './backend-permissions.mjs';
 

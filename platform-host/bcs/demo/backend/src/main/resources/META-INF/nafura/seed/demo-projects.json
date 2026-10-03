@@ -1,0 +1,37 @@
+{
+  "id": "demo.projects",
+  "kind": "demo",
+  "entities": [
+    {
+      "entity": "DemoProject",
+      "key": ["name"],
+      "records": [
+        { "name": "Résidence Les Orangers", "client": "Groupe Anfa Immobilier", "city": "Casablanca" },
+        {
+          "name": "Aménagement agence Agdal", "client": "Banque du Littoral", "city": "Rabat",
+          "budget": 420000.00, "studyNotes": "Relevés faits, plans validés par le client.",
+          "$transitions": ["quote"]
+        },
+        {
+          "name": "Rénovation école Al Amal", "client": "Commune de Salé", "city": "Salé",
+          "budget": 85000.00, "studyNotes": "Toiture et menuiseries.",
+          "quoteAmount": 79000.00, "quoteDate": "2026-08-20", "startDate": "2026-09-15", "progress": 35,
+          "$transitions": ["quote", "start"]
+        },
+        {
+          "name": "Entrepôt logistique Tanger Med", "client": "TMS Logistique", "city": "Tanger",
+          "budget": 2400000.00, "studyNotes": "Étude de sol favorable, charpente métallique.",
+          "quoteAmount": 2280000.00, "quoteDate": "2026-09-25", "startDate": "2026-11-02",
+          "$transitions": ["quote", "start"]
+        },
+        {
+          "name": "Clôture parc Ménara", "client": "Ville de Marrakech", "city": "Marrakech",
+          "budget": 60000.00, "studyNotes": "Clôture grillagée 600 m.",
+          "quoteAmount": 57500.00, "quoteDate": "2026-03-02", "startDate": "2026-04-01", "progress": 100,
+          "closingNotes": "Réception sans réserve le 28/06/2026.",
+          "$transitions": ["quote", "start", "close"]
+        }
+      ]
+    }
+  ]
+}

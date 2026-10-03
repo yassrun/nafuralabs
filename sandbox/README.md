@@ -37,7 +37,7 @@ Pour vérifier leur état :
 Lancement manuel, dans deux terminaux :
 
 ```powershell
-$env:JAVA_HOME = 'C:\Users\karkafiy\Desktop\tools\jdk-25.0.4.1+1'
+$env:JAVA_HOME = 'C:\nf\nafuralabs\deps\jdk-25.0.4.1+1'
 $env:Path = 'C:\Users\karkafiy\Desktop\tools\gradle-9.7.1\bin;' + $env:Path
 cd sandbox\sources\backend
 gradle bootRun

@@ -16,7 +16,7 @@ export function projectApplicationConfig(manifest: ApplicationManifest): Applica
   return {
     applicationId: applicationIdOf(manifest),
     defaultRoute: runtime.defaultRoute,
-    requiresTenant: runtime.requiresTenant,
+    requiresTenant: runtime.tenancy === 'multi',
   };
 }
 
@@ -80,16 +80,17 @@ export function projectAppShellConfig(
 ): AppShellFeatureConfig {
   const shell = manifest.spec.shell ?? {};
   const ordered = orderedContexts(manifest, contexts);
+  const product = manifest.spec.product ?? { name: manifest.metadata.id };
 
   return {
-    product: manifest.spec.product ?? { name: manifest.metadata.id },
+    product,
     topBar: shell.topBar,
     sidebar: {
       enabled: shell.sidebar?.enabled,
       navigation: [...workspaceNavigation, ...ordered.map(contextNavigation), ...platformNavigation],
     },
     userMenu: shell.userMenu,
-    tenantMenu: shell.tenantMenu,
+    tenantMenu: shell.tenantMenu && { fallbackName: product.name, fallbackKey: applicationIdOf(manifest), ...shell.tenantMenu },
     notifications: shell.notifications,
     ai: shell.ai,
   };

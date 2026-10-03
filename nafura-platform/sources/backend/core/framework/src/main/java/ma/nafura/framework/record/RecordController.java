@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.domain.Page;
@@ -84,7 +85,8 @@ public abstract class RecordController<E extends TenantEntity> {
         String resource = lifecycleResource();
         if (resource != null) {
             lifecycle = Lifecycle.load(resource);
-            lifecycles.<HasStatus>register(lifecycle, id -> find(id).map(HasStatus.class::cast), r -> repository().save(cast(r)));
+            Class<?> recordType = GenericTypeResolver.resolveTypeArgument(getClass(), RecordController.class);
+            lifecycles.<HasStatus>register(recordType, lifecycle, id -> find(id).map(HasStatus.class::cast), r -> repository().save(cast(r)));
         }
     }
 

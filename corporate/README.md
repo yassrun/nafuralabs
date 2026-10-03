@@ -45,4 +45,4 @@ KUBE_CONTEXT=nafura-vps-prod ENV=prod bash nafura-platform/ops/nlops.sh deploy c
 
 Registry: `54.36.183.106:30500/nafura/corporate-web:prod`
 
-Porte : [NAFURALABS.md](../NAFURALABS.md). Deploy : [nafura-platform/ops/AGENTS.md](../nafura-platform/ops/AGENTS.md).
+Porte : [AGENTS.md](../AGENTS.md). Deploy : [nafura-platform/ops/README.md](../nafura-platform/ops/README.md).

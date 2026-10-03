@@ -16,10 +16,6 @@ pluginManagement {
     }
 }
 
-rootProject.name = "platform-host-backend"
-
-// Gradle substitutes ma.nafuralabs:<project-name> with the platform project of that name.
+// Name and business contexts come from app.nafura.json.
 includeBuild("../../../nafura-platform/sources/backend")
-
-// Business contexts of this product: bcs/<name>/backend.
 apply(from = "../../../nafura-platform/gradle/nafura-host.settings.gradle")

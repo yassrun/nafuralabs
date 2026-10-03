@@ -14,7 +14,7 @@ function application(disabled) {
     metadata: { id: 'app.host', version: '0.1.0', owner: 'test', lifecycle: 'experimental' },
     spec: {
       product: { name: 'Host' },
-      runtime: { requiresTenant: false, defaultRoute: '/', auth: { mode: 'lab', sessionUrl: '/s', usersUrl: '/u' } },
+      runtime: { defaultRoute: '/' },
       businessContexts: [],
       ...(disabled ? { capabilities: { disabled } } : {}),
     },
@@ -36,6 +36,10 @@ test('reads an application manifest and rejects anything else', () => {
   assert.throws(() => readApplicationManifest({ ...app, kind: 'capability' }), /kind "application"/);
   assert.throws(() => readApplicationManifest(null), /kind "application"/);
   assert.throws(() => readApplicationManifest({ ...app, spec: {} }), /no spec\.runtime/);
+  assert.throws(
+    () => readApplicationManifest({ ...app, spec: { ...app.spec, runtime: { tenancy: 'multi', defaultRoute: '/' } } }),
+    /one organization per deployment/,
+  );
 });
 
 test('embeds every catalog capability by default', () => {

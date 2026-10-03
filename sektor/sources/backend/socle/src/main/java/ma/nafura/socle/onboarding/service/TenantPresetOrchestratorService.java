@@ -16,7 +16,7 @@ import ma.nafura.socle.onboarding.api.dto.OnboardingDtos.ApplyPresetRequest;
 import ma.nafura.socle.onboarding.api.dto.OnboardingDtos.ApplyPresetResponse;
 import ma.nafura.socle.onboarding.domain.TenantOnboardingMeta;
 import ma.nafura.socle.onboarding.repository.TenantOnboardingMetaRepository;
-import ma.nafura.platform.administration.iam.service.IamService;
+import ma.nafura.platform.administration.access.service.AccessService;
 import ma.nafura.platform.appsettings.domain.model.TenantSetting;
 import ma.nafura.platform.appsettings.repository.TenantSettingRepository;
 import ma.nafura.platform.configuration.sysconfig.domain.model.NumberingSequence;
@@ -42,7 +42,7 @@ public class TenantPresetOrchestratorService {
     private final TenantOnboardingMetaRepository metaRepository;
     private final TenantSettingRepository tenantSettingRepository;
     private final NumberingSequenceRepository numberingSequenceRepository;
-    private final IamService iamService;
+    private final AccessService accessService;
     private final CatalogueOnboardingPort catalogueOnboardingPort;
     private final FinanceOnboardingPort financeOnboardingPort;
     private final OnboardingAgentParserService agentParserService;
@@ -149,10 +149,10 @@ public class TenantPresetOrchestratorService {
             if ("marches".equals(code) && "PRIVE".equalsIgnoreCase(request.marches())) {
                 enabled = false;
             }
-            iamService.updateDomain(tenantId, code, enabled);
+            accessService.updateDomain(tenantId, code, enabled);
         }
         if ("PUBLIC".equalsIgnoreCase(request.marches()) || "MIXTE".equalsIgnoreCase(request.marches())) {
-            iamService.updateDomain(tenantId, "marches", true);
+            accessService.updateDomain(tenantId, "marches", true);
         }
     }
 

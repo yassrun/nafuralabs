@@ -514,11 +514,11 @@ export class ButtonComponent implements AfterViewInit {
     if (!hasIcon || !contentEmpty) return;
     if (v === 'danger') {
       console.warn(
-        '[nf-button] UX: Danger buttons must not be icon-only. Add a visible label (e.g. "Delete"). See BUTTONS-UX-SEMANTICS.md.'
+        '[nf-button] UX: Danger buttons must not be icon-only. Add a visible label (e.g. "Delete").'
       );
     } else if (v === 'primary') {
       console.warn(
-        '[nf-button] UX: Primary page actions should not be icon-only. Add a visible label. See BUTTONS-UX-SEMANTICS.md.'
+        '[nf-button] UX: Primary page actions should not be icon-only. Add a visible label.'
       );
     }
   }

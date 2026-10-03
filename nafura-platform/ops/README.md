@@ -1,106 +1,70 @@
-# Nafura ops (`nlops.sh`)
+# Ops Nafura — lancer et déployer
 
-CLI deploy : infra partagée (1× par cluster) + produits (indépendants).
+> Pour les agents comme pour les humains. Un seul lanceur par produit du host ; `nlops.sh` reste pour l’infra partagée et les produits hors host (Sektor, vitrines, venue-catalog).
 
-| Audience | Document |
-|----------|----------|
-| **Agents IA (ops)** | **[AGENTS.md](AGENTS.md)** — cycle de vie, recettes, troubleshooting |
-| Monorepo / git / envs | [NAFURALABS.md](../../NAFURALABS.md) |
+## Prérequis (Windows, Git Bash)
 
-## Cycle de vie (vocabulaire canonique)
+- JDK et Node du projet : `deps/jdk-25*`, `deps/node-v22*` (versions : `nafura-platform/stack.versions.properties`). `run.mjs` trouve le JDK tout seul.
+- `export PATH=/c/nf/nafuralabs/deps/node-v22.22.3-win-x64:$PATH` puis `node.exe` (avec `node`, Git Bash répond « stdout is not a tty » dans un pipe).
+- Staging : Docker Desktop avec Kubernetes ; fichier hosts : `<id>.nafuralabs.staging` et `iam.nafuralabs.staging` → `127.0.0.1` (`powershell -File nafura-platform/ops/add-staging-hosts.ps1`, admin).
 
-| Commande | Effet |
-|----------|-------|
-| **`make -C nafura-platform/ops mode-b`** | One-shot Sektor Mode B : env + PF + bootRun + `start:erp:cursor` |
-| **`make -C nafura-platform/ops mode-b-stop`** | Arrête 8082 / 4200 + port-forwards |
-| **`make -C nafura-platform/ops dev-up SCOPE=front\|back\|full`** | Prep Mode B seulement (recette, ne lance pas) |
-| **`make -C nafura-platform/ops stg-up SCOPE=front\|back\|full`** | Build images + **deploy pods** staging |
-| **`make -C nafura-platform/ops prod-up SCOPE=front\|back\|full`** | Build + push + **deploy pods** prod (`REGISTRY_PASS` requis) |
+## Produits du host : quatre modes, une commande
 
 ```bash
-make -C nafura-platform/ops mode-b
-make -C nafura-platform/ops stg-up  SCOPE=full APP=sektor-btp          # valider staging
-REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=front APP=sektor-btp  # prod, image web only
+node <produit>/ops/run.mjs lab                      # back + front locaux, PostgreSQL embarqué, utilisateurs lab : aucune infra
+node <produit>/ops/run.mjs local-staging            # back + front locaux sur la base et le Keycloak du staging
+node <produit>/ops/run.mjs staging [--scope=back|front] [--dry-run]
+node <produit>/ops/run.mjs prod    [--scope=back|front] [--dry-run] [--yes]
+node nafura-platform/scripts/nafura.mjs new <id> --name "<Nom>"     # nouveau produit
 ```
 
-Windows : `powershell -File nafura-platform/ops/prod-up.ps1 -Scope front` (Git bash + kubectl Windows ; `REGISTRY_PASS` lu dans le cluster si vide).
+| Mode | Ce qui tourne | Connexion | Prêt quand |
+|---|---|---|---|
+| `lab` | API `spec.local.ports.api`, web `spec.local.ports.web` | sélecteur d’utilisateurs lab (`spec.local.users`) | le journal affiche `<Nom> is up:` |
+| `local-staging` | idem, base du staging en port-forward | Keycloak staging | idem ; `staging` lancé au moins une fois |
+| `staging` | pods dans `<id>-staging` (Docker Desktop) | Keycloak staging | `rollout status` OK puis réponse HTTP |
+| `prod` | pods dans `<id>-prod` (VPS OVH, images poussées au registry) | Keycloak prod | idem ; confirmation demandée |
 
-Itérer → `mode-b` · Valider → `stg-up` · Promouvoir → `prod-up`.
+`staging` et `prod` enchaînent : contrôles (Docker, contexte kubectl, infra prête) → images backend, migrations, web → premier passage : namespace, base et rôle PostgreSQL dédiés, client Keycloak du produit, comptes des propriétaires (`spec.deploy.<env>.owners`, mot de passe temporaire affiché une fois) → Job de migrations → déploiement → rollouts → vérification HTTP.
 
-## Environnements
+### Règles pour les agents
 
-| `ENV` | Cluster | Contexte | Infra NS | Images |
-|-------|---------|----------|----------|--------|
-| `staging` | Docker Desktop K8s | `docker-desktop` | `nafura-infra-staging` | locales `:staging` |
-| `prod` | OVH VPS k3s | `nafura-vps-prod` | `nafura-infra-prod` | registry VPS `:prod` |
+1. Lancer `lab` en arrière-plan avec sortie dans un fichier (`node.exe ops/run.mjs lab > /tmp/lab.log 2>&1`) et attendre `is up:` ; une seule instance à la fois (ports du manifeste). Arrêt : tuer le terminal, puis `taskkill //F //IM java.exe` et `postgres.exe` si besoin.
+2. Session lab pour tester l’API : `POST /api/public/lab/session {"email":"…"}` → `accessToken` ; organisation et rôles : `GET /api/v1/me/session`.
+3. `prod` : toujours `--dry-run` d’abord ; jamais `--yes` sans demande explicite. Ne jamais écrire un mot de passe temporaire dans un fichier.
+4. Un changement de déploiement commun va dans `nafura-platform/ops/product/` (k8s base + surcharges staging/prod, Dockerfiles, `run.mjs` + `run.test.mjs`). `<produit>/ops/k8s/<env>/` ne porte que des patches propres au produit. Jamais de script ops dans un produit.
+5. Contexte kubectl : `docker-desktop` (staging) et `nafura-vps-prod` (prod) par défaut, `KUBE_CONTEXT` sinon ; un contexte prod est refusé pour staging et inversement.
+6. Lab mode : pas de données métier en prod (hors vitrines) ; on peut réinitialiser une base lab (`<produit>/sources/backend/data/postgres`, supprimer avec `cmd //c "rmdir /s /q …"`).
 
-`demo` (GKE) : **deprecated** — ne plus utiliser.
+### Configuration par environnement
 
-## Commandes bas niveau (résumé)
+| Clé | lab | cluster (`local-staging`, `staging`, `prod`) |
+|---|---|---|
+| Base | embarquée, migrée au démarrage | infra, migrée par le Job, validée au démarrage |
+| Connexion | `nafura.lab.*` | `KEYCLOAK_ISSUER_URI`, `KEYCLOAK_JWK_SET_URI` (rendus par `run.mjs`) |
+| Propriétaires | — | `NAFURA_OWNERS` ← `spec.deploy.<env>.owners` |
+| Données de démo des BCs | oui | `NAFURA_SEED_DEMO` : `true` en staging, refusé en prod |
 
-| Commande | Effet |
-|----------|-------|
-| `bootstrap-env` | Infra + vault-init + **vault-seed** + wait services |
-| `vault-seed` | Applique `secrets/nafura.secrets` → Vault pour `ENV` |
-| `onboard-app <app>` | provision-db → migrate → deploy |
-| `release-app <app>` | migrate → deploy-backend → deploy-frontend (= `stg-up`/`prod-up` `SCOPE=full`) |
-| `release-backend <app>` | migrate → deploy-backend (= `SCOPE=back`) |
-| `release-frontend <app>` | deploy-frontend (= `SCOPE=front`) |
-| `infra-up` | Apply overlay infra |
-| `preflight` | Diagnostic cluster / images |
+Configuration commune : `nafura-platform/gradle/host/application.yml` et `application-cluster.yml`.
 
-`BUILD_IMAGES=true` pour rebuild Docker. Prod : ajouter `PUSH_IMAGES=true REGISTRY_PASS=…`.
-
-## Scénarios
-
-### Staging — nouveau cluster
+## Vérifications avant de rendre la main
 
 ```bash
-# secrets/nafura.secrets doit exister (voir secrets/README.md)
-
-KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh bootstrap-env
-BUILD_IMAGES=true KUBE_CONTEXT=docker-desktop ENV=staging bash toolchain/ops/nlops.sh onboard-app sektor-btp
+cd nafura-platform/sources/web && npm run -s architecture:check
+cd nafura-platform/sources/backend && JAVA_HOME=/c/nf/nafuralabs/deps/jdk-25.0.4.1+1 ./gradlew :platform:host-tests:test --no-daemon --max-workers=1
+node <produit>/ops/run.mjs staging --dry-run          # si l’ops a changé
 ```
 
-### Staging — validation pods
+## Infra partagée et produits hors host — `nlops.sh`
 
-```bash
-make -C nafura-platform/ops stg-up SCOPE=full APP=sektor-btp
-```
+Jusqu’à `sektor-sur-host`, Sektor, venue-catalog et les vitrines (MBS, corporate) se déploient par `nafura-platform/ops/nlops.sh` (et `make -C nafura-platform/ops help`).
 
-### Staging — itération locale (sans image)
+| Besoin | Commande |
+|---|---|
+| Nouveau cluster : infra (PostgreSQL, Keycloak, MinIO, Vault, Gotenberg) + secrets | `KUBE_CONTEXT=docker-desktop ENV=staging bash nafura-platform/ops/nlops.sh bootstrap-env` (fichier `ops/secrets/nafura.secrets`, voir [secrets/README.md](secrets/README.md)) |
+| Recharger les secrets Vault | `ENV=staging bash nafura-platform/ops/nlops.sh vault-seed` |
+| Sektor staging | `make -C nafura-platform/ops stg-up SCOPE=full\|back\|front APP=sektor-btp` |
+| Sektor prod | `REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=… APP=sektor-btp` |
+| Diagnostic | `bash nafura-platform/ops/nlops.sh preflight` |
 
-```bash
-make -C nafura-platform/ops dev-up SCOPE=full APP=sektor-btp
-```
-
-### Prod — Sektor
-
-```bash
-REGISTRY_PASS=*** make -C nafura-platform/ops prod-up SCOPE=full APP=sektor-btp
-```
-
-URLs prod : `sektor.nafuralabs.com`, `api.sektor.nafuralabs.com`, `iam.nafuralabs.com`
-
-## Hostnames staging
-
-Tous en `*.nafuralabs.staging` → `127.0.0.1` dans le fichier hosts :
-
-```
-127.0.0.1 sektor.nafuralabs.staging api.sektor.nafuralabs.staging mbs.nafuralabs.staging iam.nafuralabs.staging minio.nafuralabs.staging s3.nafuralabs.staging vault.nafuralabs.staging
-```
-
-Windows (admin) : `powershell -ExecutionPolicy Bypass -File toolchain/ops/add-staging-hosts.ps1`
-
-## Makefile
-
-Cibles dans ce dossier. Depuis la racine du repo :
-
-```bash
-make -C nafura-platform/ops help
-make -C nafura-platform/ops stg-up SCOPE=full APP=sektor-btp
-make -C nafura-platform/ops prod-up SCOPE=full APP=sektor-btp REGISTRY_PASS=***
-make -C nafura-platform/ops dev-up SCOPE=front APP=sektor-btp
-```
-
-Détail complet : [AGENTS.md](AGENTS.md).
+Environnements : `staging` = Docker Desktop (`nafura-infra-staging`), `prod` = VPS OVH k3s (`nafura-infra-prod`, registry `54.36.183.106:30500/nafura`). `demo` (GKE) n’existe plus.

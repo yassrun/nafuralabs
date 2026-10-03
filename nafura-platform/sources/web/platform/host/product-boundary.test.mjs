@@ -4,19 +4,24 @@ import { join, relative, sep } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
+import { drift, products } from '../../../../scripts/nafura.mjs';
+
 // D-6: a product on the host only configures the platform and codes its business contexts.
 const repo = fileURLToPath(new URL('../../../../../', import.meta.url));
-const HOST_PRODUCTS = ['platform-host'];
+const HOST_PRODUCTS = products().map((product) => product.dir);
 
-const ENTRY_POINTS = new Set([
-  'sources/web/src/main.ts',
-  'sources/web/src/environments/environment.ts',
-  'sources/backend/src/main/java/ma/nafura/host/PlatformHostApplication.java',
-]);
-const SKIPPED_DIRS = new Set(['node_modules', 'dist', 'build', '.gradle', '.angular', 'data', 'gradle']);
+test('the reference product is found', () => assert.ok(HOST_PRODUCTS.includes('platform-host')));
+
+// D-16: entry points are the reference product's, byte for byte: a copy runs with no renaming.
+for (const product of HOST_PRODUCTS) {
+  test(`${product} entry points are the reference ones`, () => assert.deepEqual(drift(product), []));
+}
+
+const ENTRY_POINTS = new Set(['sources/web/src/main.ts', 'sources/web/src/index.html', 'sources/web/src/styles.scss', 'ops/run.mjs']);
+const SKIPPED_DIRS = new Set(['node_modules', 'dist', 'build', '.gradle', '.angular', 'data', 'gradle', '.render']);
 const CODE = /\.(ts|js|mjs|java|kt|scss|css|html)$/;
 
-function productCode(product) {
+function productFiles(product, pattern) {
   const root = join(repo, product);
   const files = [];
   const walk = (dir) => {
@@ -24,18 +29,16 @@ function productCode(product) {
       if (SKIPPED_DIRS.has(entry.name)) continue;
       const full = join(dir, entry.name);
       if (entry.isDirectory()) walk(full);
-      else if (CODE.test(entry.name)) files.push(relative(root, full).split(sep).join('/'));
+      else if (pattern.test(entry.name) && !entry.name.endsWith('.generated.ts')) files.push(relative(root, full).split(sep).join('/'));
     }
   };
   walk(root);
   return files;
 }
 
-const allowed = (file) =>
-  ENTRY_POINTS.has(file) ||
-  file === 'sources/web/src/styles.scss' ||
-  file === 'sources/web/src/index.html' ||
-  file.startsWith('bcs/');
+const productCode = (product) => productFiles(product, CODE);
+
+const allowed = (file) => ENTRY_POINTS.has(file) || file.startsWith('bcs/');
 
 for (const product of HOST_PRODUCTS) {
   test(`${product} contains only configuration, entry points and business contexts`, () => {
@@ -43,6 +46,23 @@ for (const product of HOST_PRODUCTS) {
     const files = productCode(product);
     assert.ok(files.length > 0, 'product files scanned');
     assert.deepEqual(files.filter((file) => !allowed(file)), [], 'generic code belongs to nafura-platform');
+  });
+}
+
+// One source for the product's identity: entry points and ops read app.nafura.json, so a copy needs no renaming.
+const TEXT = /\.(ts|js|mjs|java|kt|scss|css|html|json|gradle|kts|properties|ya?ml|sh|ps1|conf|Dockerfile)$|^Dockerfile/;
+
+for (const product of HOST_PRODUCTS) {
+  test(`${product} names itself only in app.nafura.json`, () => {
+    const app = JSON.parse(readFileSync(join(repo, product, 'app.nafura.json'), 'utf8'));
+    const names = [app.metadata.id.replace(/^app\./, ''), app.spec.product.name];
+    const offenders = productFiles(product, TEXT)
+      .filter((file) => file !== 'app.nafura.json' && !file.startsWith('bcs/') && !file.endsWith('package-lock.json'))
+      .flatMap((file) => {
+        const source = readFileSync(join(repo, product, file), 'utf8');
+        return names.filter((name) => source.includes(name)).map((name) => `${file}: ${name}`);
+      });
+    assert.deepEqual(offenders, []);
   });
 }
 
@@ -80,7 +100,7 @@ test('roleChecks detects role APIs and declared role codes in code', () => {
 for (const product of HOST_PRODUCTS) {
   test(`${product} business contexts check permissions, never roles`, () => {
     const codes = declaredRoleCodes(product);
-    assert.ok(codes.length > 0, 'declared roles found');
+    if (product === 'platform-host') assert.ok(codes.length > 0, 'declared roles found');
     const offenders = productCode(product)
       .filter((file) => file.startsWith('bcs/'))
       .flatMap((file) => roleChecks(readFileSync(join(repo, product, file), 'utf8'), codes).map((hit) => `${file}: ${hit}`));

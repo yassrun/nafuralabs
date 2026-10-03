@@ -1,0 +1,28 @@
+# Rendered by nafura-platform/ops/product/run.mjs from app.nafura.json. Do not edit.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: platform-host-staging
+resources:
+  - ../../k8s/staging
+labels:
+  - pairs: { app.kubernetes.io/part-of: platform-host, nafura.io/env: staging }
+images:
+  - { name: backend, newName: platform-host-backend, newTag: staging }
+  - { name: web, newName: platform-host-web, newTag: staging }
+patches:
+  - target: { kind: Ingress, name: app }
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: platform-host.nafuralabs.staging
+  - target: { kind: Deployment, name: backend }
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: { name: KEYCLOAK_ISSUER_URI, value: "http://iam.nafuralabs.staging/realms/iam-portal" }
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: { name: KEYCLOAK_JWK_SET_URI, value: "http://keycloak.nafura-infra-staging.svc:8080/realms/iam-portal/protocol/openid-connect/certs" }
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: { name: NAFURA_OWNERS, value: "" }

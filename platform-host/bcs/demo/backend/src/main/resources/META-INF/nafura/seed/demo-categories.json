@@ -1,0 +1,20 @@
+{
+  "id": "demo.categories",
+  "kind": "reference",
+  "entities": [
+    {
+      "entity": "DemoCategory",
+      "key": ["code"],
+      "records": [
+        { "code": "IT", "name": "Informatique", "description": "Matériel, logiciels et services informatiques" },
+        { "code": "IT-HW", "name": "Matériel informatique", "parentId": { "$ref": "DemoCategory", "code": "IT" } },
+        { "code": "IT-SW", "name": "Logiciels et licences", "parentId": { "$ref": "DemoCategory", "code": "IT" } },
+        { "code": "BUR", "name": "Bureautique", "description": "Fournitures et mobilier de bureau" },
+        { "code": "BUR-FOU", "name": "Fournitures", "parentId": { "$ref": "DemoCategory", "code": "BUR" } },
+        { "code": "BUR-MOB", "name": "Mobilier", "parentId": { "$ref": "DemoCategory", "code": "BUR" } },
+        { "code": "BTP", "name": "Matériaux de construction" },
+        { "code": "SRV", "name": "Prestations de services" }
+      ]
+    }
+  ]
+}

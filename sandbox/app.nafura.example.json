@@ -5,15 +5,7 @@
   "metadata": { "id": "app.anatomy-sandbox", "version": "0.1.0", "owner": "nafuralabs", "lifecycle": "experimental" },
   "spec": {
     "product": { "name": "Anatomy", "tagline": "Platform lab" },
-    "runtime": {
-      "requiresTenant": false,
-      "defaultRoute": "/",
-      "auth": {
-        "mode": "lab",
-        "sessionUrl": "/api/public/sandbox/session",
-        "usersUrl": "/api/public/sandbox/users"
-      }
-    },
+    "runtime": { "tenancy": "single", "defaultRoute": "/" },
     "shell": {
       "topBar": { "enabled": true, "pageContext": true },
       "sidebar": { "enabled": true },

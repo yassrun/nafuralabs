@@ -25,38 +25,21 @@ public class UserPermissionContextService {
 
     /**
      * Resolve and apply primary role + permission set on the current request context.
+     * Permissions come only from role definitions: no role, or a role without permissions, grants nothing.
      */
-    public void applyRoleCodes(List<String> roleCodes, String principal, boolean allowBootstrapFallback) {
+    public void applyRoleCodes(List<String> roleCodes, String principal) {
         List<String> normalized = normalize(roleCodes);
         if (normalized.isEmpty()) {
-            applyEmptyRoleContext(principal, allowBootstrapFallback);
+            UserContext.setUserRole(null);
+            UserContext.setPermissions(Set.of());
             return;
         }
-
         UserContext.setUserRoles(normalized);
         Set<String> permissions = resolvePermissionsForRoles(normalized);
-        if (permissions.isEmpty() && normalized.contains("OWNER")) {
-            log.warn("OWNER role resolved to no permissions for {}; applying wildcard", principal);
-            permissions = Set.of("*");
-        } else if (permissions.isEmpty() && allowBootstrapFallback && permissionService.getAllRoleCodes().isEmpty()) {
-            log.warn("No role-permission mappings found; enabling bootstrap wildcard permissions for {}", principal);
-            if (UserContext.getUserRole() == null || UserContext.getUserRole().isBlank()) {
-                UserContext.setUserRole("BOOTSTRAP_AUTHENTICATED");
-            }
-            permissions = Set.of("*");
+        if (permissions.isEmpty()) {
+            log.debug("Roles {} of {} grant no permission", normalized, principal);
         }
         UserContext.setPermissions(permissions);
-    }
-
-    private void applyEmptyRoleContext(String principal, boolean allowBootstrapFallback) {
-        UserContext.setUserRole(null);
-        if (allowBootstrapFallback && permissionService.getAllRoleCodes().isEmpty()) {
-            log.warn("No role-permission mappings found; enabling bootstrap wildcard permissions for {}", principal);
-            UserContext.setUserRole("BOOTSTRAP_AUTHENTICATED");
-            UserContext.setPermissions(Set.of("*"));
-            return;
-        }
-        UserContext.setPermissions(Set.of());
     }
 
     /**

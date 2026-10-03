@@ -6,7 +6,7 @@
   "scripts": {
     "stack:check": "node ../../scripts/sync-stack-versions.mjs --check",
     "stack:sync": "node ../../scripts/sync-stack-versions.mjs --write",
-    "architecture:check": "node --experimental-strip-types --test platform/manifest-validator.test.mjs platform/manifest-projection.test.mjs platform/manifest-schema.test.mjs platform/host/host-plan.test.mjs platform/host/host-screens.test.mjs core/icons/app-lucide-icons.test.mjs platform/host/i18n/platform-i18n.test.mjs platform/host/product-boundary.test.mjs platform/app-shell/navigation-access.test.mjs core/navigation/sidebar-tree.test.mjs platform/listing/listing-config.test.mjs lib/anatomy/utils/relative-time.test.mjs lib/anatomy/utils/cron-label.test.mjs"
+    "architecture:check": "node --experimental-strip-types --test platform/host-auth/oidc.test.mjs platform/manifest-validator.test.mjs platform/manifest-projection.test.mjs platform/manifest-schema.test.mjs platform/host/host-plan.test.mjs platform/host/host-screens.test.mjs core/icons/app-lucide-icons.test.mjs platform/host/i18n/platform-i18n.test.mjs platform/host/product-boundary.test.mjs ../../ops/product/run.test.mjs platform/app-shell/navigation-access.test.mjs core/navigation/sidebar-tree.test.mjs platform/listing/listing-config.test.mjs lib/anatomy/utils/relative-time.test.mjs lib/anatomy/utils/cron-label.test.mjs"
   },
   "peerDependencies": {
     "@angular/animations": "^22.1.5",

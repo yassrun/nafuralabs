@@ -20,6 +20,7 @@ def platformProject = { String name ->
 
 dependencies {
     moduleNames.each { testImplementation project(platformProject(it).path) }
+    testImplementation project(':platform:host-tests:probe-bc')
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -74,7 +75,8 @@ def verifyCapabilityCatalog = tasks.register('verifyCapabilityCatalog') {
                 }
             }
         }
-        rootProject.allprojects.findAll { it.file('src/main/java').isDirectory() }.each { p ->
+        // Platform modules only: probe-bc is a business context fixture, composed like a product's BC.
+        rootProject.allprojects.findAll { it.file('src/main/java').isDirectory() && it.path != ':platform:host-tests:probe-bc' }.each { p ->
             if (!owner.containsKey(p.name) && !coreClosure.contains(p.name)) {
                 problems << "module '${p.name}' is in no capability"
             }
@@ -131,6 +133,7 @@ def withoutTasks = catalog.findAll { !it.core }.collect { cap ->
     }
     dependencies {
         keptModules.each { add(runtime.name, project(platformProject(it).path)) }
+        add(runtime.name, project(':platform:host-tests:probe-bc'))
         testLibraries.each { add(runtime.name, it) }
         add(runtime.name, 'org.junit.platform:junit-platform-launcher')
     }

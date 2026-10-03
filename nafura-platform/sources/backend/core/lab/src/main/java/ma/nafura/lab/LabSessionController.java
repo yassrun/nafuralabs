@@ -7,7 +7,6 @@ import ma.nafura.platform.authorization.security.authorization.PublicEndpoint;
 import ma.nafura.platform.authorization.security.jwt.LabSessionTokenIssuer;
 import ma.nafura.platform.identity.domain.model.AppUser;
 import ma.nafura.platform.identity.repository.AppUserRepository;
-import ma.nafura.platform.scope.security.scope.DefaultScopeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,14 +22,11 @@ public class LabSessionController {
     private final LabProperties properties;
     private final String hs256Secret;
     private final AppUserRepository appUserRepository;
-    private final DefaultScopeService defaultScopeService;
 
-    public LabSessionController(LabProperties properties, String hs256Secret, AppUserRepository appUserRepository,
-                                DefaultScopeService defaultScopeService) {
+    public LabSessionController(LabProperties properties, String hs256Secret, AppUserRepository appUserRepository) {
         this.properties = properties;
         this.hs256Secret = hs256Secret;
         this.appUserRepository = appUserRepository;
-        this.defaultScopeService = defaultScopeService;
     }
 
     public record SessionRequest(String email) {
@@ -68,16 +64,7 @@ public class LabSessionController {
                 labUser.superAdmin(),
                 properties.sessionTtl().toSeconds()
         ));
-        return Map.of(
-                "accessToken", token,
-                "tokenType", "Bearer",
-                "email", labUser.email(),
-                "name", labUser.displayName(),
-                "role", labUser.role(),
-                "tenant", Map.of(
-                        "id", defaultScopeService.resolveDefaultScopeId().toString(),
-                        "key", properties.tenant().key(),
-                        "name", properties.tenant().name())
-        );
+        // Who and where: GET /api/v1/me/session, as with any identity provider.
+        return Map.of("accessToken", token, "tokenType", "Bearer");
     }
 }

@@ -127,6 +127,7 @@ def mavenArtifactToPlatformProject = [
         'job-runner'         : 'platform:core:job-runner',
         'settings'           : 'platform:features:configuration:settings',
         'sysconfig'          : 'platform:features:configuration:sysconfig',
+        'access'             : 'platform:identite:access',
         'iam'                : 'platform:identite:iam',
         'subscription'       : 'platform:features:administration:subscription',
         'usage'              : 'platform:features:administration:usage',

@@ -1,0 +1,9 @@
+# Staging of this product: the platform's staging deployment, plus this product's own adjustments (patches below).
+# Namespace, images and host come from app.nafura.json (ops/run.mjs).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../../nafura-platform/ops/product/k8s/staging
+
+patches: []

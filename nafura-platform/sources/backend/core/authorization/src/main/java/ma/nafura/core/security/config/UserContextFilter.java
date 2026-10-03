@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  * {@code nafura.security.tenant.mode=multi} — that is {@link TenantContextFilter}.
  *
  * <p>When mode is {@code single}/{@code none} (no {@link TenantContextFilter}),
- * falls back to the unique active membership's roles, then JWT realm roles.
+ * falls back to the unique active membership's roles.
  */
 @Slf4j
 @Order(1)
@@ -80,21 +80,17 @@ public class UserContextFilter extends OncePerRequestFilter {
                 }
                 jwtTokenExtractor.getSubject().ifPresent(this::setUserIdIfUuid);
 
-                List<String> jwtRoles = jwtTokenExtractor.getRealmRoles().stream()
-                    .filter(role -> role != null && !role.isBlank())
-                    .map(role -> role.toUpperCase().trim())
-                    .collect(Collectors.toList());
-
-                boolean superAdmin = (emailOpt.isPresent()
-                    && userRoleRepository.existsByEmailIgnoreCaseAndRoleCode(email, "SUPER_ADMIN"))
-                    || jwtRoles.contains("SUPER_ADMIN");
+                // Roles are the product's (user_role, tenant_user_role), never the shared realm's: a realm role
+                // would grant the same code in every product of the realm.
+                boolean superAdmin = emailOpt.isPresent()
+                    && userRoleRepository.existsByEmailIgnoreCaseAndRoleCode(email, "SUPER_ADMIN");
                 UserContext.setSuperAdmin(superAdmin);
 
                 if (superAdmin) {
                     UserContext.setUserRole("SUPER_ADMIN");
                     UserContext.setPermissions(Set.of("*"));
                 } else {
-                    applyNonSuperAdminRoles(emailOpt, email, jwtRoles);
+                    applyNonSuperAdminRoles(emailOpt, email);
                 }
             }
 
@@ -108,7 +104,7 @@ public class UserContextFilter extends OncePerRequestFilter {
         }
     }
 
-    private void applyNonSuperAdminRoles(Optional<String> emailOpt, String email, List<String> jwtRoles) {
+    private void applyNonSuperAdminRoles(Optional<String> emailOpt, String email) {
         List<String> roleCodes = emailOpt.isPresent()
             ? userRoleRepository.findRoleCodesByEmailIgnoreCase(email)
             : List.of();
@@ -125,13 +121,7 @@ public class UserContextFilter extends OncePerRequestFilter {
             }
         }
 
-        if (roleCodes.isEmpty() && !jwtRoles.isEmpty()) {
-            roleCodes = jwtRoles.stream()
-                .filter(role -> !isTechnicalRealmRole(role))
-                .collect(Collectors.toList());
-        }
-
-        userPermissionContextService.applyRoleCodes(roleCodes, email, true);
+        userPermissionContextService.applyRoleCodes(roleCodes, email);
     }
 
     private boolean isMultiTenantMode() {
@@ -148,16 +138,5 @@ public class UserContextFilter extends OncePerRequestFilter {
         } catch (IllegalArgumentException ex) {
             log.debug("JWT subject is not a UUID, userId context not set: {}", subject);
         }
-    }
-
-    private boolean isTechnicalRealmRole(String role) {
-        if (role == null) {
-            return true;
-        }
-        String normalized = role.trim().toLowerCase();
-        return normalized.isBlank()
-                || normalized.equals("offline_access")
-                || normalized.equals("uma_authorization")
-                || normalized.startsWith("default-roles-");
     }
 }
