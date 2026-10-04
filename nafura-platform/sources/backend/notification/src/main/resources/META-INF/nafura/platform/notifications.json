@@ -1,0 +1,36 @@
+{
+  "$comment": "Notification events of the platform itself (DeclaredNotifications). Business contexts declare theirs in bc.manifest.json → spec.notifications.",
+  "notifications": [
+    {
+      "id": "platform.approval.requested",
+      "label": "Approbation à donner",
+      "title": "À approuver : {title}",
+      "channels": ["in_app", "email"],
+      "mandatory": true
+    },
+    {
+      "id": "platform.approval.decided",
+      "label": "Décision d’approbation",
+      "title": "{title} : {outcome}",
+      "channels": ["in_app"]
+    },
+    {
+      "id": "platform.mention",
+      "label": "Mention dans un commentaire",
+      "title": "Vous avez été mentionné : {entity}",
+      "channels": ["in_app", "email"]
+    },
+    {
+      "id": "platform.assignment",
+      "label": "Affectation",
+      "title": "{title}",
+      "channels": ["in_app", "email"]
+    },
+    {
+      "id": "platform.legacy.transition",
+      "label": "Changement de statut (Sektor)",
+      "title": "{title}",
+      "channels": ["in_app", "email"]
+    }
+  ]
+}

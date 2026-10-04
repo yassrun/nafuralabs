@@ -5,6 +5,7 @@ import test from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { backendPermissions } from '../host/backend-permissions.mjs';
+import { effectivePaging } from '../page-action.ts';
 
 // Every listing screen is a `*.listing.ts` config rendered by nf-listing-page.
 const web = fileURLToPath(new URL('../../', import.meta.url));
@@ -89,4 +90,10 @@ test('the listing artifact speaks French', () => {
   }
   const missing = [...phrases].filter((phrase) => typeof fr[phrase] !== 'string');
   assert.deepEqual(missing, []);
+});
+
+test('a tree is paged in the browser and a board is not a tree', () => {
+  assert.equal(effectivePaging({ tree: { parentField: 'parentId' }, paging: 'server' }), 'client');
+  assert.equal(effectivePaging({}), 'server');
+  assert.equal(effectivePaging({ paging: 'client' }), 'client');
 });

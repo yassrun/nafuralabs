@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -109,6 +110,12 @@ public class AttachmentServiceImpl implements AttachmentService {
         UUID tenantId = TenantContext.getTenantId();
         return attachmentRepository.findByTenantIdAndEntityTypeAndEntityIdOrderByCreatedAtDesc(
                 tenantId, entityType, entityId, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<RecordAttachment> find(UUID attachmentId) {
+        return attachmentRepository.findByIdAndTenantId(attachmentId, TenantContext.getTenantId());
     }
 
     @Override

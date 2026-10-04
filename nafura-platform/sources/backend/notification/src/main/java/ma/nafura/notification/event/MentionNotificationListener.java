@@ -7,7 +7,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import ma.nafura.platform.collaboration.comment.event.CommentCreatedEvent;
-import ma.nafura.platform.collaboration.notification.service.NotificationCreationService;
+import ma.nafura.platform.collaboration.notification.service.NotificationRouter;
+import ma.nafura.platform.collaboration.notification.service.NotificationRouter.Message;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.identity.domain.model.AppUser;
 import ma.nafura.platform.identity.repository.AppUserRepository;
@@ -20,7 +21,7 @@ public class MentionNotificationListener {
 
     private static final Pattern MENTION_PATTERN = Pattern.compile("@\\{([^}]+)}");
 
-    private final NotificationCreationService notificationCreationService;
+    private final NotificationRouter router;
     private final AppUserRepository appUserRepository;
 
     @EventListener
@@ -56,22 +57,15 @@ public class MentionNotificationListener {
                 continue;
             }
             AppUser target = appUserRepository.findById(targetUserId).orElse(null);
-            if (target == null || target.getEmail() == null || target.getEmail().isBlank()) {
+            if (target == null) {
                 continue;
             }
 
             withTenant(event.getTenantId(), () -> {
-                NotificationEvent notificationEvent = NotificationEvent.builder()
-                        .sourceObject(this)
-                        .recipientId(targetUserId)
-                        .title("You were mentioned")
+                router.send(Message.of("platform.mention", targetUserId, java.util.Map.of("entity", readableEntity(event.getEntityType())))
                         .body(buildMessageBody(event.getEntityType()))
-                        .entityType(event.getEntityType())
-                        .entityId(event.getEntityId())
-                        .source("mention")
-                        .actionUrl(buildActionUrl(event.getEntityType(), event.getEntityId()))
-                        .build();
-                notificationCreationService.createAndDeliver(notificationEvent, target.getEmail());
+                        .about(event.getEntityType(), event.getEntityId())
+                        .link(buildActionUrl(event.getEntityType(), event.getEntityId())));
             });
         }
     }
@@ -94,6 +88,9 @@ public class MentionNotificationListener {
     }
 
     private String readableEntity(String entityType) {
+        if (entityType == null) {
+            return "commentaire";
+        }
         String value = entityType.replace('-', ' ').replace('_', ' ').trim();
         if (value.isEmpty()) {
             return "record";

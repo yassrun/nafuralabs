@@ -12,7 +12,7 @@
 
 ```bash
 node <produit>/ops/run.mjs lab                      # back + front locaux, PostgreSQL embarqué, utilisateurs lab : aucune infra
-node <produit>/ops/run.mjs local-staging            # back + front locaux sur la base et le Keycloak du staging
+node <produit>/ops/run.mjs local-staging            # back + front locaux sur la base du staging, sélecteur d’utilisateurs lab
 node <produit>/ops/run.mjs staging [--scope=back|front] [--dry-run]
 node <produit>/ops/run.mjs prod    [--scope=back|front] [--dry-run] [--yes]
 node nafura-platform/scripts/nafura.mjs new <id> --name "<Nom>"     # nouveau produit
@@ -21,7 +21,7 @@ node nafura-platform/scripts/nafura.mjs new <id> --name "<Nom>"     # nouveau pr
 | Mode | Ce qui tourne | Connexion | Prêt quand |
 |---|---|---|---|
 | `lab` | API `spec.local.ports.api`, web `spec.local.ports.web` | sélecteur d’utilisateurs lab (`spec.local.users`) | le journal affiche `<Nom> is up:` |
-| `local-staging` | idem, base du staging en port-forward | Keycloak staging | idem ; `staging` lancé au moins une fois |
+| `local-staging` | idem, base du staging en port-forward | sélecteur d’utilisateurs lab (`spec.local.users`) | idem ; `staging` lancé au moins une fois |
 | `staging` | pods dans `<id>-staging` (Docker Desktop) | Keycloak staging | `rollout status` OK puis réponse HTTP |
 | `prod` | pods dans `<id>-prod` (VPS OVH, images poussées au registry) | Keycloak prod | idem ; confirmation demandée |
 
@@ -41,7 +41,7 @@ node nafura-platform/scripts/nafura.mjs new <id> --name "<Nom>"     # nouveau pr
 | Clé | lab | cluster (`local-staging`, `staging`, `prod`) |
 |---|---|---|
 | Base | embarquée, migrée au démarrage | infra, migrée par le Job, validée au démarrage |
-| Connexion | `nafura.lab.*` | `KEYCLOAK_ISSUER_URI`, `KEYCLOAK_JWK_SET_URI` (rendus par `run.mjs`) |
+| Connexion | `nafura.lab.*` | Keycloak sur les pods ; `local-staging` réactive `nafura.lab.*` (même liste) |
 | Propriétaires | — | `NAFURA_OWNERS` ← `spec.deploy.<env>.owners` |
 | Données de démo des BCs | oui | `NAFURA_SEED_DEMO` : `true` en staging, refusé en prod |
 

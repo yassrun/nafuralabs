@@ -1,6 +1,9 @@
 package ma.nafura.platform.collaboration.notification.config;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import ma.nafura.platform.collaboration.notification.service.EmailService;
 import ma.nafura.platform.collaboration.notification.service.EmailTemplateService;
@@ -9,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 
 /**
  * Email provider configuration (Brevo by default).
@@ -24,7 +29,8 @@ public class EmailConfig {
     @Value("${app.email.from-address:noreply@seyrura.com}")
     private String fromAddress;
 
-    @Value("${app.email.from-name:Seyrura}")
+    /** Empty: the product's name ({@code spec.product.name} of {@code app.nafura.json}). */
+    @Value("${app.email.from-name:}")
     private String fromName;
 
     @Bean
@@ -42,11 +48,22 @@ public class EmailConfig {
                     return noOpEmailService();
                 }
                 log.info("Creating Brevo email client");
-                return new BrevoEmailService(brevoApiKey.trim(), fromAddress, fromName, templateService);
+                return new BrevoEmailService(brevoApiKey.trim(), fromAddress, senderName(), templateService);
             default:
                 throw new IllegalStateException(
                     String.format("Unsupported email provider: %s. Supported: brevo", emailProvider)
                 );
+        }
+    }
+
+    private String senderName() {
+        if (fromName != null && !fromName.isBlank()) return fromName;
+        Resource manifest = new DefaultResourceLoader().getResource("classpath:nafura/app.nafura.json");
+        if (!manifest.exists()) return "Nafura";
+        try (InputStream in = manifest.getInputStream()) {
+            return new ObjectMapper().readTree(in).path("spec").path("product").path("name").asText("Nafura");
+        } catch (IOException e) {
+            return "Nafura";
         }
     }
 

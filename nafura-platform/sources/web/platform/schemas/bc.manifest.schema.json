@@ -51,6 +51,21 @@
             }
           }
         },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label", "title", "channels"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$" },
+              "label": { "type": "string" },
+              "title": { "type": "string" },
+              "channels": { "type": "array", "items": { "enum": ["in_app", "email", "sms"] } },
+              "mandatory": { "type": "boolean" }
+            }
+          }
+        },
         "navigation": {
           "type": "array",
           "items": { "$ref": "#/$defs/navigationItem" }
@@ -74,6 +89,19 @@
               "id": { "type": "string" },
               "version": { "type": "string", "pattern": "^\\^\\d+\\.\\d+\\.\\d+$" },
               "optional": { "type": "boolean" }
+            }
+          }
+        },
+        "screens": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+              "label": { "type": "string" },
+              "reason": { "type": "string" }
             }
           }
         },

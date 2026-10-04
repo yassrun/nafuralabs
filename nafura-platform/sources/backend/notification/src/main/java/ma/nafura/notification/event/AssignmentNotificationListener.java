@@ -2,7 +2,8 @@ package ma.nafura.platform.collaboration.notification.event;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import ma.nafura.platform.collaboration.notification.service.NotificationCreationService;
+import ma.nafura.platform.collaboration.notification.service.NotificationRouter;
+import ma.nafura.platform.collaboration.notification.service.NotificationRouter.Message;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.event.EntityAssignedEvent;
 import ma.nafura.platform.identity.domain.model.AppUser;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AssignmentNotificationListener {
 
-    private final NotificationCreationService notificationCreationService;
+    private final NotificationRouter router;
     private final AppUserRepository appUserRepository;
 
     @EventListener
@@ -32,22 +33,16 @@ public class AssignmentNotificationListener {
         }
 
         AppUser assignee = resolveAssignee(event);
-        if (assignee == null || assignee.getEmail() == null || assignee.getEmail().isBlank()) {
+        if (assignee == null) {
             return;
         }
 
         withTenant(event.getTenantId(), () -> {
-            NotificationEvent notificationEvent = NotificationEvent.builder()
-                    .sourceObject(this)
-                    .recipientId(assignee.getId())
-                    .title(hasText(event.getTitle()) ? event.getTitle() : "Affectation")
+            router.send(Message.of("platform.assignment", assignee.getId(),
+                            java.util.Map.of("title", hasText(event.getTitle()) ? event.getTitle() : "Affectation"))
                     .body(hasText(event.getBody()) ? event.getBody() : defaultBody(event.getEntityType()))
-                    .entityType(event.getEntityType())
-                    .entityId(event.getEntityId())
-                    .source("assignment")
-                    .actionUrl(event.getActionUrl() != null ? event.getActionUrl() : "/")
-                    .build();
-            notificationCreationService.createAndDeliver(notificationEvent, assignee.getEmail());
+                    .about(event.getEntityType(), event.getEntityId())
+                    .link(event.getActionUrl() != null ? event.getActionUrl() : "/"));
         });
     }
 

@@ -18,6 +18,8 @@ public interface TenantUserRoleRepository extends JpaRepository<TenantUserRole, 
 
     List<TenantUserRole> findByTenantIdAndUserId(UUID tenantId, UUID userId);
 
+    List<TenantUserRole> findByTenantId(UUID tenantId);
+
     List<TenantUserRole> findByTenantIdAndUserIdIn(UUID tenantId, Collection<UUID> userIds);
 
     List<TenantUserRole> findByTenantIdAndRoleCode(UUID tenantId, String roleCode);

@@ -87,6 +87,7 @@ export function listingQueryToParams(query: ListingQueryState): Record<string, s
   if (synced.scope && synced.scope !== 'all') {
     params['scope'] = synced.scope;
   }
+  if (synced.segment) params['segment'] = synced.segment;
 
   const group = synced.filterGroup;
   if (group && group.children.length > 0) {
@@ -145,6 +146,9 @@ export function paramsToListingQuery(
       q.sort = { field, direction };
     }
   }
+
+  const segment = paramString(params['segment']);
+  if (segment) q.segment = segment;
 
   const scope = paramString(params['scope']) as ListingScope | undefined;
   if (scope === 'mine' || scope === 'archived' || scope === 'all') {

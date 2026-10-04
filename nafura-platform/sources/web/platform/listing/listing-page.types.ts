@@ -1,7 +1,9 @@
 import type { ListingEmptyState, ListingFlatFeatures } from '../../lib/anatomy/components/organisms/listing-flat';
 import type { ListingTreeActionLabels } from '../../lib/anatomy/components/organisms/listing-tree';
-import type { ColumnConfig, FilterFieldConfig, FormFieldConfig, ListingSegment } from '../../lib/anatomy/types';
-import type { ButtonVariant } from '../../lib/anatomy/components/atoms/button';
+import type { ColumnConfig, FilterFieldConfig, ListingSegment } from '../../lib/anatomy/types';
+import type { PageAction, PageForm, PageRequest, Row } from '../page-action';
+
+export type { PageAction, PageForm, PageRequest, Row };
 
 /**
  * A listing screen as configuration: where the rows come from, how they show, what one can do.
@@ -25,6 +27,24 @@ export interface ListingPageConfig<T = Row> {
   /** Shown instead of the table while the list has no row at all. */
   emptyState?: ListingEmptyState;
   pageSize?: number;
+  /**
+   * `server` (default) asks the API for the current page, sort, search and equality filters.
+   * `client` keeps every loaded row in the browser (small lists). A `tree` is always `client`.
+   */
+  paging?: 'server' | 'client';
+  /**
+   * Columns, one per lifecycle state. Exclusive with `tree`.
+   * Cards move by firing the transition that reaches the target column.
+   */
+  board?: {
+    /** Only source of columns in v1: the states of `GET {endpoint}/lifecycle`. */
+    columns: 'lifecycle';
+    /** States without a column (rarely consulted terminals). */
+    hide?: string[];
+    card: { title: string; subtitle?: string; badge?: string; meta?: string };
+    /** Shown first when the list also has a table. Default `board`. */
+    defaultView?: 'board' | 'table';
+  };
   features?: Partial<ListingFlatFeatures>;
   /** Toolbar actions, and row actions (`row: true`) offered on the selected row. */
   actions?: ListingAction<T>[];
@@ -44,44 +64,13 @@ export interface ListingPageConfig<T = Row> {
   };
 }
 
-export type Row = Record<string, unknown>;
-
-export interface ListingAction<T = Row> {
-  id: string;
-  label: string;
-  icon?: string;
-  variant?: ButtonVariant;
-  /** Hidden unless the user holds it. */
-  permission?: string;
+/** A list action is a {@link PageAction} that may target the selected row. */
+export interface ListingAction<T = Row> extends PageAction<T> {
   /** Acts on the selected row instead of the whole list. */
   row?: boolean;
-  /** Row actions: offered only when true for the selected row. */
-  when?: (item: T) => boolean;
-  /** Navigate (no request). */
-  route?: string | ((item: T) => string);
-  confirm?: { title: string; message: string; confirmLabel?: string; danger?: boolean };
-  form?: ListingForm<T>;
-  request?: ListingRequest;
-  /** After the request: a secret of the response shown once (API key, signing secret). */
-  reveal?: { field: string; title: string; message: string };
-  /** Toast after success. */
-  success?: string;
-  /** The request answered but reports a failure (e.g. a webhook test): toast `failure` instead. */
-  failed?: (response: Row) => boolean;
-  failure?: string;
 }
 
-export interface ListingForm<T = Row> {
-  title: string;
-  fields: FormFieldConfig[];
-  /** Initial values: from the selected row (edit), or defaults when creating (`item` undefined). */
-  values?: (item?: T) => Record<string, unknown>;
-  /** Form values → request body (default: the values). */
-  body?: (values: Record<string, unknown>, item?: T) => unknown;
-}
-
-export interface ListingRequest {
-  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  /** Default: the listing endpoint, plus `/{id}` for row actions. `{id}` is the selected row id. */
-  url?: string;
-}
+/** @deprecated Use {@link PageForm}. Kept so existing imports stay valid. */
+export type ListingForm<T = Row> = PageForm<T>;
+/** @deprecated Use {@link PageRequest}. */
+export type ListingRequest = PageRequest;

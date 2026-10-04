@@ -8,6 +8,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Whether a declared notification {@code event} goes through {@code channel}. {@code userId} null: the organisation's
+ * choice, which may switch a default channel off or add one; otherwise a user's choice, which may only switch off.
+ */
 @Entity
 @Table(name = "notification_preferences")
 @Data
@@ -23,20 +27,17 @@ public class NotificationPreference {
     @Column(name = "tenant_id", nullable = false)
     private UUID tenantId;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private UUID userId;
 
-    @Column(name = "event_type", nullable = false, length = 80)
-    private String eventType;
+    @Column(name = "event", nullable = false, length = 120)
+    private String event;
 
-    @Column(name = "email_enabled")
-    private Boolean emailEnabled;
+    @Column(name = "channel", nullable = false, length = 20)
+    private String channel;
 
-    @Column(name = "in_app_enabled")
-    private Boolean inAppEnabled;
-
-    @Column(name = "push_enabled")
-    private Boolean pushEnabled;
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
@@ -55,4 +56,3 @@ public class NotificationPreference {
         this.updatedAt = OffsetDateTime.now();
     }
 }
-

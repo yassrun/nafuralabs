@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
+import ma.nafura.platform.framework.record.RecordAccess;
 import ma.nafura.platform.tenancy.repository.TenantDomainRepository;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.annotation.Order;
@@ -49,6 +50,7 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
     
     private final List<HandlerMapping> handlerMappings;
     private final ObjectProvider<TenantDomainRepository> tenantDomains;
+    private final ObjectProvider<RecordAccess> recordAccess;
     
     @Override
     protected void doFilterInternal(
@@ -87,6 +89,15 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
                         method.getName(), publicEndpoint.reason());
                 filterChain.doFilter(request, response);
                 return;
+            }
+
+            if (method.isAnnotationPresent(HostRecordGate.class)) {
+                String entity = entityType(request);
+                RecordAccess access = recordAccess.getIfAvailable();
+                if (access != null && access.known(entity)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
             }
             
             // Without @SecuredResource there is no scope: @RequirePermission names the whole permission.
@@ -161,6 +172,11 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
     private static String domainOf(String permission) {
         int dot = permission.indexOf('.');
         return dot < 0 ? permission : permission.substring(0, dot);
+    }
+
+    private String entityType(HttpServletRequest request) {
+        String param = request.getParameter("entityType");
+        return param == null || param.isBlank() ? null : param;
     }
 
     /**

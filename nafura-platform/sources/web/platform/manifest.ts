@@ -113,12 +113,26 @@ export interface DefaultRoleDeclaration {
   permissions: string[];
 }
 
+/** A notification event the BC emits; `notify` rules of its lifecycles reference it by `id`. */
+export interface NotificationDeclaration {
+  /** Under the BC's prefix, like a permission. */
+  id: string;
+  label: string;
+  /** May reference record fields: `"Demande approuvée : {subject}"`. */
+  title: string;
+  /** Defaults, before the organisation and the user. */
+  channels: Array<'in_app' | 'email' | 'sms'>;
+  /** The user cannot opt out. */
+  mandatory?: boolean;
+}
+
 export interface BusinessContextSpec extends NafuraCommonSpec {
   /** Name shown to users: sidebar group, Modules screen. */
   label: string;
   icon?: string;
   routesPrefix?: string;
   defaultRoles?: DefaultRoleDeclaration[];
+  notifications?: NotificationDeclaration[];
   navigation?: BusinessContextNavigationItem[];
 }
 

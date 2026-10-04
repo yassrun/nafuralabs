@@ -6,7 +6,10 @@
       "entity": "DemoProject",
       "key": ["name"],
       "records": [
-        { "name": "Résidence Les Orangers", "client": "Groupe Anfa Immobilier", "city": "Casablanca" },
+        {
+          "name": "Résidence Les Orangers", "client": "Groupe Anfa Immobilier", "city": "Casablanca",
+          "description": "# Résidence Les Orangers\n\n- 48 logements\n- Livraison prévue en 2027\n- [Plans](https://example.com/plans)"
+        },
         {
           "name": "Aménagement agence Agdal", "client": "Banque du Littoral", "city": "Rabat",
           "budget": 420000.00, "studyNotes": "Relevés faits, plans validés par le client.",

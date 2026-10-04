@@ -34,6 +34,10 @@ public class Project extends TenantEntity implements HasStatus {
     @Size(max = 80)
     private String city;
 
+    /** Markdown. Column is TEXT in the v1.0 schema. */
+    @Column(columnDefinition = "text")
+    private String description;
+
     @DecimalMin("0")
     private BigDecimal budget;
 

@@ -20,6 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -103,6 +104,12 @@ public class CommentServiceImpl implements CommentService {
         RecordComment comment = requireComment(commentId);
         assertAuthor(comment);
         commentRepository.delete(comment);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<RecordComment> find(UUID commentId) {
+        return commentRepository.findByIdAndTenantId(commentId, TenantContext.getTenantId());
     }
 
     private RecordComment requireComment(UUID commentId) {

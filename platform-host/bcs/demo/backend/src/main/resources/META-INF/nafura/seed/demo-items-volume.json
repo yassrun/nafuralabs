@@ -1,0 +1,817 @@
+{
+  "id": "demo.items-volume",
+  "kind": "demo",
+  "after": [
+    "demo.purchasing"
+  ],
+  "entities": [
+    {
+      "entity": "DemoItem",
+      "key": [
+        "code"
+      ],
+      "records": [
+        {
+          "code": "V-001",
+          "name": "Article volume 001",
+          "unit": "U",
+          "unitPrice": 11,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-002",
+          "name": "Article volume 002",
+          "unit": "U",
+          "unitPrice": 12,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-003",
+          "name": "Article volume 003",
+          "unit": "U",
+          "unitPrice": 13,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-004",
+          "name": "Article volume 004",
+          "unit": "U",
+          "unitPrice": 14,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-005",
+          "name": "Article volume 005",
+          "unit": "U",
+          "unitPrice": 15,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-006",
+          "name": "Article volume 006",
+          "unit": "U",
+          "unitPrice": 16,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-007",
+          "name": "Article volume 007",
+          "unit": "U",
+          "unitPrice": 17,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-008",
+          "name": "Article volume 008",
+          "unit": "U",
+          "unitPrice": 18,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-009",
+          "name": "Article volume 009",
+          "unit": "U",
+          "unitPrice": 19,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-010",
+          "name": "Article volume 010",
+          "unit": "U",
+          "unitPrice": 20,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-011",
+          "name": "Article volume 011",
+          "unit": "U",
+          "unitPrice": 21,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-012",
+          "name": "Article volume 012",
+          "unit": "U",
+          "unitPrice": 22,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-013",
+          "name": "Article volume 013",
+          "unit": "U",
+          "unitPrice": 23,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-014",
+          "name": "Article volume 014",
+          "unit": "U",
+          "unitPrice": 24,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-015",
+          "name": "Article volume 015",
+          "unit": "U",
+          "unitPrice": 25,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-016",
+          "name": "Article volume 016",
+          "unit": "U",
+          "unitPrice": 26,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-017",
+          "name": "Article volume 017",
+          "unit": "U",
+          "unitPrice": 27,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-018",
+          "name": "Article volume 018",
+          "unit": "U",
+          "unitPrice": 28,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-019",
+          "name": "Article volume 019",
+          "unit": "U",
+          "unitPrice": 29,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-020",
+          "name": "Article volume 020",
+          "unit": "U",
+          "unitPrice": 30,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-021",
+          "name": "Article volume 021",
+          "unit": "U",
+          "unitPrice": 31,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-022",
+          "name": "Article volume 022",
+          "unit": "U",
+          "unitPrice": 32,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-023",
+          "name": "Article volume 023",
+          "unit": "U",
+          "unitPrice": 33,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-024",
+          "name": "Article volume 024",
+          "unit": "U",
+          "unitPrice": 34,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-025",
+          "name": "Article volume 025",
+          "unit": "U",
+          "unitPrice": 35,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-026",
+          "name": "Article volume 026",
+          "unit": "U",
+          "unitPrice": 36,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-027",
+          "name": "Article volume 027",
+          "unit": "U",
+          "unitPrice": 37,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-028",
+          "name": "Article volume 028",
+          "unit": "U",
+          "unitPrice": 38,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-029",
+          "name": "Article volume 029",
+          "unit": "U",
+          "unitPrice": 39,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-030",
+          "name": "Article volume 030",
+          "unit": "U",
+          "unitPrice": 40,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-031",
+          "name": "Article volume 031",
+          "unit": "U",
+          "unitPrice": 41,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-032",
+          "name": "Article volume 032",
+          "unit": "U",
+          "unitPrice": 42,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-033",
+          "name": "Article volume 033",
+          "unit": "U",
+          "unitPrice": 43,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-034",
+          "name": "Article volume 034",
+          "unit": "U",
+          "unitPrice": 44,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-035",
+          "name": "Article volume 035",
+          "unit": "U",
+          "unitPrice": 45,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-036",
+          "name": "Article volume 036",
+          "unit": "U",
+          "unitPrice": 46,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-037",
+          "name": "Article volume 037",
+          "unit": "U",
+          "unitPrice": 47,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-038",
+          "name": "Article volume 038",
+          "unit": "U",
+          "unitPrice": 48,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-039",
+          "name": "Article volume 039",
+          "unit": "U",
+          "unitPrice": 49,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-040",
+          "name": "Article volume 040",
+          "unit": "U",
+          "unitPrice": 50,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-041",
+          "name": "Article volume 041",
+          "unit": "U",
+          "unitPrice": 51,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-042",
+          "name": "Article volume 042",
+          "unit": "U",
+          "unitPrice": 52,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-043",
+          "name": "Article volume 043",
+          "unit": "U",
+          "unitPrice": 53,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-044",
+          "name": "Article volume 044",
+          "unit": "U",
+          "unitPrice": 54,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-045",
+          "name": "Article volume 045",
+          "unit": "U",
+          "unitPrice": 55,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-046",
+          "name": "Article volume 046",
+          "unit": "U",
+          "unitPrice": 56,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-047",
+          "name": "Article volume 047",
+          "unit": "U",
+          "unitPrice": 57,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-048",
+          "name": "Article volume 048",
+          "unit": "U",
+          "unitPrice": 58,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-049",
+          "name": "Article volume 049",
+          "unit": "U",
+          "unitPrice": 59,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-050",
+          "name": "Article volume 050",
+          "unit": "U",
+          "unitPrice": 60,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-051",
+          "name": "Article volume 051",
+          "unit": "U",
+          "unitPrice": 61,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-052",
+          "name": "Article volume 052",
+          "unit": "U",
+          "unitPrice": 62,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-053",
+          "name": "Article volume 053",
+          "unit": "U",
+          "unitPrice": 63,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-054",
+          "name": "Article volume 054",
+          "unit": "U",
+          "unitPrice": 64,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-055",
+          "name": "Article volume 055",
+          "unit": "U",
+          "unitPrice": 65,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-056",
+          "name": "Article volume 056",
+          "unit": "U",
+          "unitPrice": 66,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-057",
+          "name": "Article volume 057",
+          "unit": "U",
+          "unitPrice": 67,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-058",
+          "name": "Article volume 058",
+          "unit": "U",
+          "unitPrice": 68,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-059",
+          "name": "Article volume 059",
+          "unit": "U",
+          "unitPrice": 69,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-060",
+          "name": "Article volume 060",
+          "unit": "U",
+          "unitPrice": 70,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-061",
+          "name": "Article volume 061",
+          "unit": "U",
+          "unitPrice": 71,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-062",
+          "name": "Article volume 062",
+          "unit": "U",
+          "unitPrice": 72,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-063",
+          "name": "Article volume 063",
+          "unit": "U",
+          "unitPrice": 73,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-064",
+          "name": "Article volume 064",
+          "unit": "U",
+          "unitPrice": 74,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-065",
+          "name": "Article volume 065",
+          "unit": "U",
+          "unitPrice": 75,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-066",
+          "name": "Article volume 066",
+          "unit": "U",
+          "unitPrice": 76,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-067",
+          "name": "Article volume 067",
+          "unit": "U",
+          "unitPrice": 77,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-068",
+          "name": "Article volume 068",
+          "unit": "U",
+          "unitPrice": 78,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-069",
+          "name": "Article volume 069",
+          "unit": "U",
+          "unitPrice": 79,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-070",
+          "name": "Article volume 070",
+          "unit": "U",
+          "unitPrice": 80,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-071",
+          "name": "Article volume 071",
+          "unit": "U",
+          "unitPrice": 81,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-072",
+          "name": "Article volume 072",
+          "unit": "U",
+          "unitPrice": 82,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-073",
+          "name": "Article volume 073",
+          "unit": "U",
+          "unitPrice": 83,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-074",
+          "name": "Article volume 074",
+          "unit": "U",
+          "unitPrice": 84,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-075",
+          "name": "Article volume 075",
+          "unit": "U",
+          "unitPrice": 85,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-076",
+          "name": "Article volume 076",
+          "unit": "U",
+          "unitPrice": 86,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-077",
+          "name": "Article volume 077",
+          "unit": "U",
+          "unitPrice": 87,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-078",
+          "name": "Article volume 078",
+          "unit": "U",
+          "unitPrice": 88,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-079",
+          "name": "Article volume 079",
+          "unit": "U",
+          "unitPrice": 89,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        },
+        {
+          "code": "V-080",
+          "name": "Article volume 080",
+          "unit": "U",
+          "unitPrice": 90,
+          "categoryId": {
+            "$ref": "DemoCategory",
+            "code": "BUR-FOU"
+          }
+        }
+      ]
+    }
+  ]
+}

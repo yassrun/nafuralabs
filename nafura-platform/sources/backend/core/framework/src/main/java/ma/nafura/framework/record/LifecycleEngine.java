@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
 import ma.nafura.platform.framework.record.Lifecycle.Transition;
 
@@ -25,8 +26,16 @@ import ma.nafura.platform.framework.record.Lifecycle.Transition;
 @Service
 public class LifecycleEngine {
 
-    /** Published after every transition (audit, webhooks, notifications can listen). */
-    public record Transitioned(String entityType, UUID entityId, String transition, String from, String to) {
+    /** Published after every successful transition. {@code system} is a platform outcome (approval). */
+    public record Transitioned(
+            String entityType,
+            UUID entityId,
+            String transition,
+            String from,
+            String to,
+            UUID actorId,
+            UUID tenantId,
+            boolean system) {
     }
 
     private record Binding<E extends HasStatus>(Lifecycle lifecycle, Function<UUID, Optional<E>> loader, Consumer<E> saver) {
@@ -50,6 +59,18 @@ public class LifecycleEngine {
         byRecordType.put(recordType, lifecycle);
     }
 
+    public Optional<Lifecycle> lifecycleOf(String entityType) {
+        Binding<?> binding = bindings.get(entityType);
+        return binding == null ? Optional.empty() : Optional.of(binding.lifecycle());
+    }
+
+    /** The record a transition notified about, still in its organization. */
+    public Optional<HasStatus> load(String entityType, UUID id) {
+        Binding<?> binding = bindings.get(entityType);
+        if (binding == null) return Optional.empty();
+        return binding.loader().apply(id).map(HasStatus.class::cast);
+    }
+
     /** The lifecycle declared for records of this entity class, if any. */
     public Optional<Lifecycle> lifecycleOf(Class<?> recordType) {
         return Optional.ofNullable(byRecordType.get(recordType));
@@ -63,9 +84,22 @@ public class LifecycleEngine {
     }
 
     public <E extends HasStatus> void fire(Lifecycle lifecycle, E record, UUID id, String transitionId, Consumer<E> saver) {
+        fire(lifecycle, record, id, transitionId, saver, false);
+    }
+
+    /** A seed or another trusted caller fires a {@code system} transition. A user click cannot. */
+    public <E extends HasStatus> void fireSystem(Lifecycle lifecycle, E record, UUID id, String transitionId, Consumer<E> saver) {
+        fire(lifecycle, record, id, transitionId, saver, true);
+    }
+
+    private <E extends HasStatus> void fire(Lifecycle lifecycle, E record, UUID id, String transitionId, Consumer<E> saver, boolean systemAllowed) {
         Transition transition = lifecycle.transition(transitionId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown transition: " + transitionId));
-        if (transition.system() || !UserContext.hasPermission(transition.permission())) {
+        if (transition.system()) {
+            if (!systemAllowed) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Transition not permitted: " + transitionId);
+            }
+        } else if (!UserContext.hasPermission(transition.permission())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Transition not permitted: " + transitionId);
         }
         if (!transition.allowedFrom(record.getStatus())) {
@@ -117,7 +151,9 @@ public class LifecycleEngine {
     private void apply(Lifecycle lifecycle, HasStatus record, UUID id, Transition transition) {
         String from = record.getStatus();
         record.setStatus(transition.to());
-        events.publishEvent(new Transitioned(lifecycle.entity(), id, transition.id(), from, transition.to()));
+        events.publishEvent(new Transitioned(
+                lifecycle.entity(), id, transition.id(), from, transition.to(),
+                UserContext.getUserIdOrNull(), TenantContext.getTenantIdOrNull(), transition.system()));
     }
 
     static List<String> missingFields(Object record, List<String> required) {
@@ -135,18 +171,20 @@ public class LifecycleEngine {
         return missing;
     }
 
-    private static String title(String template, Object record, Transition transition) {
-        if (template == null || template.isBlank()) {
-            return transition.label();
-        }
+    public static String fill(String template, Object record, String fallback) {
+        if (template == null || template.isBlank()) return fallback == null ? "" : fallback;
         BeanWrapperImpl wrapper = new BeanWrapperImpl(record);
         Matcher m = PLACEHOLDER.matcher(template);
         StringBuilder out = new StringBuilder();
         while (m.find()) {
-            Object value = wrapper.getPropertyValue(m.group(1));
+            Object value = wrapper.isReadableProperty(m.group(1)) ? wrapper.getPropertyValue(m.group(1)) : "";
             m.appendReplacement(out, Matcher.quoteReplacement(value == null ? "" : value.toString()));
         }
         m.appendTail(out);
         return out.toString();
+    }
+
+    private static String title(String template, Object record, Transition transition) {
+        return fill(template, record, transition.label());
     }
 }

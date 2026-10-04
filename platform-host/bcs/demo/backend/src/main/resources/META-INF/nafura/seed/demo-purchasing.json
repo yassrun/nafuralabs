@@ -76,6 +76,11 @@
         {
           "subject": "Ciment pour l’extension du dépôt", "supplierId": { "$ref": "DemoSupplier", "code": "F-003" },
           "amount": 15600.00, "$transitions": ["submit"]
+        },
+        {
+          "subject": "Gravier refusé", "supplierId": { "$ref": "DemoSupplier", "code": "F-003" },
+          "amount": 12000.00, "justification": "Qualité insuffisante.",
+          "$transitions": ["submit", "reject"]
         }
       ]
     }

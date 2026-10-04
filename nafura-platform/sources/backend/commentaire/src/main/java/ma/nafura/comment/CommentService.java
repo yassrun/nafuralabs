@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface CommentService {
@@ -16,6 +17,8 @@ public interface CommentService {
     Page<RecordComment> listByEntity(String entityType, UUID entityId, Pageable pageable);
 
     List<RecordComment> listReplies(UUID parentCommentId);
+
+    Optional<RecordComment> find(UUID commentId);
 
     /** Met à jour le corps — auteur uniquement. */
     RecordComment update(UUID commentId, String text);

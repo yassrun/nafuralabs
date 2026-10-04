@@ -1,6 +1,8 @@
 import { Component, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+import { formatRelativeTime } from '../../../utils/relative-time';
+
 export interface CommentEntry {
   id: string;
   author: string;
@@ -43,7 +45,7 @@ export interface CommentEntry {
             <li class="nf-comment-thread__item">
               <div class="nf-comment-thread__meta">
                 <strong>{{ comment.author }}</strong>
-                <time>{{ comment.createdAt | date:'short' }}</time>
+                <time>{{ relative(comment.createdAt) }}</time>
                 @if (comment.editedAt) {
                   <span class="nf-comment-thread__edited">({{ editedLabel() }})</span>
                 }
@@ -74,6 +76,11 @@ export interface CommentEntry {
                   @if (!readonly() && comment.canDelete) {
                     <button type="button" class="nf-comment-thread__btn nf-comment-thread__btn--danger" (click)="onDelete(comment.id)">
                       {{ deleteLabel() }}
+                    </button>
+                  }
+                  @if (!readonly()) {
+                    <button type="button" class="nf-comment-thread__btn" (click)="onReply(comment.id)">
+                      {{ replyLabel() }}
                     </button>
                   }
                 </div>
@@ -134,6 +141,7 @@ export class CommentThreadComponent {
   addLabel = input<string>('Add comment');
   editLabel = input<string>('Edit');
   deleteLabel = input<string>('Delete');
+  replyLabel = input<string>('Reply');
   saveLabel = input<string>('Save');
   cancelLabel = input<string>('Cancel');
   editedLabel = input<string>('edited');
@@ -141,6 +149,7 @@ export class CommentThreadComponent {
   addComment = output<string>();
   editComment = output<{ id: string; body: string }>();
   deleteComment = output<string>();
+  replyComment = output<{ parentId: string; body: string }>();
 
   readonly draft = signal('');
   readonly editingId = signal<string | null>(null);
@@ -187,6 +196,16 @@ export class CommentThreadComponent {
 
   onDelete(commentId: string): void {
     this.deleteComment.emit(commentId);
+  }
+
+  relative(value: string): string {
+    return formatRelativeTime(value);
+  }
+
+  onReply(parentId: string): void {
+    const body = window.prompt(this.replyLabel());
+    if (!body?.trim()) return;
+    this.replyComment.emit({ parentId, body: body.trim() });
   }
 }
 

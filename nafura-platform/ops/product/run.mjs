@@ -1,6 +1,6 @@
 // Runs a product in one of four modes; a product's ops/run.mjs only calls run(). Products script nothing (D-16).
 //   lab            backend + web locally, embedded PostgreSQL, lab login: no infra at all
-//   local-staging  backend + web locally against the staging infra (port-forwarded PostgreSQL, staging Keycloak)
+//   local-staging  backend + web locally against the staging infra (port-forwarded PostgreSQL), lab user list
 //   staging        build images, migrate, deploy on the staging cluster (Docker Desktop)
 //   prod           build and push images, migrate, deploy on the prod cluster (asks for confirmation)
 import { spawn, spawnSync } from 'node:child_process';
@@ -30,7 +30,7 @@ const USAGE = `usage: node ops/run.mjs <mode> [options]
 
 modes
   lab              backend + web locally, embedded PostgreSQL, lab users (no infra)
-  local-staging    backend + web locally on the staging infra and Keycloak (run "staging" once first)
+  local-staging    backend + web locally on the staging infra, lab user list (run "staging" once first)
   staging          build, migrate and deploy on the staging cluster
   prod             build, push, migrate and deploy on the prod cluster
 
@@ -322,6 +322,8 @@ async function localStaging(product) {
   start('pg', 'kubectl', ['--context', process.env.KUBE_CONTEXT ?? ENVIRONMENTS.staging.context, 'port-forward', '-n', ENVIRONMENTS.staging.infra, 'svc/postgres', `${LOCAL_STAGING_POSTGRES_PORT}:5432`]);
   await waitTcp(LOCAL_STAGING_POSTGRES_PORT, 30);
   // Outside the cluster: keys through the public Keycloak URL (hosts entry iam.nafuralabs.staging).
+  // The cluster profile blanks the lab secret and hides the user list. A local run keeps that list;
+  // staging and prod pods do not (they stay on Keycloak).
   const oidc = oidcOf('staging', { inCluster: false });
   await local(product, {
     SPRING_PROFILES_ACTIVE: 'cluster',
@@ -335,6 +337,10 @@ async function localStaging(product) {
     KEYCLOAK_JWK_SET_URI: oidc.jwkSetUri,
     NAFURA_OWNERS: ownersOf(product, 'staging').join(','),
     NAFURA_SEED_DEMO: 'true',
+    NAFURA_LAB_ENABLED: 'true',
+    NAFURA_LAB_EMBEDDED_POSTGRES: 'false',
+    NAFURA_SECURITY_JWT_HS256_SECRET: 'nafura-lab-local-jwt-secret-32-chars!',
+    SPRING_LIQUIBASE_ENABLED: 'true',
   });
 }
 

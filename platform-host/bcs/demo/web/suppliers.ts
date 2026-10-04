@@ -163,6 +163,22 @@ export const SUPPLIER_RECORD: RecordPageConfig = {
     delete: 'demo.purchasing.supplier.delete',
   },
   defaults: { active: true, paymentTerms: '30 jours' },
+  actions: [
+    {
+      id: 'overview',
+      label: 'Synthèse',
+      icon: 'chart-column',
+      permission: 'demo.purchasing.supplier.read',
+      requiresSaved: false,
+      route: (supplier) => `/demo/suppliers/${supplier['id']}/overview`,
+    },
+  ],
+  import: {
+    label: 'Depuis une carte',
+    accept: ['application/pdf', '.txt'],
+    docType: { endpoint: '/api/v1/demo/suppliers/extract' },
+    map: { name: 'name', city: 'city', email: 'email' },
+  },
   layout: {
     kind: 'tabs',
     tabs: [

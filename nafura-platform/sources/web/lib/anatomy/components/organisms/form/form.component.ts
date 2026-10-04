@@ -13,6 +13,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormFieldConfig, LookupContext } from '../../../types';
 import { ButtonComponent } from '../../atoms/button';
 import { ActionBarComponent } from '../../molecules/action-bar';
+import { RichtextComponent } from './richtext.component';
 
 /**
  * Form layout types.
@@ -54,6 +55,7 @@ export type FormLayout = 'vertical' | 'horizontal' | 'grid';
     TranslateModule,
     ButtonComponent,
     ActionBarComponent,
+    RichtextComponent,
   ],
   template: `
     <form
@@ -175,6 +177,14 @@ export type FormLayout = 'vertical' | 'horizontal' | 'grid';
                   }
                   <mat-error>{{ getErrorMessage(field) }}</mat-error>
                 </mat-form-field>
+              }
+              @case ('richtext') {
+                <nf-richtext
+                  [label]="field.label"
+                  [toolbar]="field.toolbar ?? 'basic'"
+                  [readonly]="field.readonly ?? false"
+                  [maxLength]="field.validation?.maxLength"
+                  [formControlName]="field.key" />
               }
               @default {
                 <mat-form-field appearance="outline" class="nf-form__mat-field">

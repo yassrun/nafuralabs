@@ -73,6 +73,7 @@ export const PROJECT_RECORD: RecordPageConfig = {
               { key: 'client', field: 'client', label: 'Client', type: 'text', required: true },
               { key: 'city', field: 'city', label: 'Ville', type: 'text' },
               { key: 'budget', field: 'budget', label: 'Budget estimé (MAD)', type: 'number', validation: { min: 0 } },
+              { key: 'description', field: 'description', label: 'Description', type: 'richtext', toolbar: 'full', wide: true },
             ],
           },
           {

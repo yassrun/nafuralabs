@@ -38,6 +38,7 @@ import { businessContextDomain, projectApplicationConfig, projectAppShellConfig 
 import capabilityCatalog from '../../../../capabilities.json';
 import { type CapabilityCatalog, type HostPlan, planHost, readApplicationManifest } from './host-plan';
 import { hostScreens } from './host-screens';
+import { HOST_CAPABILITIES } from './host-capabilities';
 import { NafuraHostShellComponent } from './nafura-host-shell.component';
 import platformFr from './i18n/fr.json';
 
@@ -156,6 +157,7 @@ export function provideNafuraHost(
         return () => auth.refreshAccess();
       },
     },
+    { provide: HOST_CAPABILITIES, useValue: plan.capabilities },
     { provide: USER_SETTINGS_CONFIG, useValue: DEFAULT_APP_SHELL_CONFIG.modules.userSettings },
     { provide: TENANT_SETTINGS_CONFIG, useValue: DEFAULT_APP_SHELL_CONFIG.modules.tenantSettings },
     {

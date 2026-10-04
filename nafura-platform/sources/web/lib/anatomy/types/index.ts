@@ -484,6 +484,12 @@ export interface ColumnConfig {
 
   /** Emit rowAction when the cell is clicked (uses this as action id). */
   cellAction?: string;
+
+  /**
+   * Badge of a status field: label and tone come from `GET {endpoint}/lifecycle`
+   * instead of a hard-coded `transform`.
+   */
+  lifecycle?: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -507,6 +513,7 @@ export type FormFieldType =
   | 'radio'
   | 'file'
   | 'autocomplete'
+  | 'richtext'
   | 'custom';
 
 /**
@@ -560,6 +567,9 @@ export interface FormFieldConfig {
 
   /** Column span in grid layout */
   colSpan?: number;
+
+  /** `richtext` toolbar. `basic` (default): bold, italic, lists, link. `full` adds headings and quote. */
+  toolbar?: 'basic' | 'full';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

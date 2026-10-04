@@ -5,15 +5,6 @@ const REQUESTS = '/api/v1/demo/purchase-requests';
 const route = (id: string) => `/demo/purchase-requests/${id}`;
 const money = (value: unknown) => (value == null ? '—' : `${Number(value).toLocaleString('fr-MA', { minimumFractionDigits: 2 })} MAD`);
 
-/** Labels and tones of lifecycle/purchase-request.json, for the list. */
-const STATUS: Record<string, { label: string; tone: 'default' | 'warning' | 'success' | 'danger' | 'info' }> = {
-  DRAFT: { label: 'Brouillon', tone: 'default' },
-  SUBMITTED: { label: 'En approbation', tone: 'warning' },
-  APPROVED: { label: 'Approuvée', tone: 'success' },
-  REJECTED: { label: 'Rejetée', tone: 'danger' },
-  ORDERED: { label: 'Commandée', tone: 'info' },
-};
-
 export const PURCHASE_REQUESTS_LISTING: ListingPageConfig = {
   title: 'Demandes d’achat',
   subtitle: 'Approuvées par un responsable au-delà de 10 000 MAD',
@@ -27,20 +18,18 @@ export const PURCHASE_REQUESTS_LISTING: ListingPageConfig = {
     { id: 'approved', label: 'À commander', filters: { status: 'APPROVED' } },
     { id: 'ordered', label: 'Commandées', filters: { status: 'ORDERED' } },
   ],
+  paging: 'server',
+  board: {
+    columns: 'lifecycle',
+    defaultView: 'table',
+    card: { title: 'subject', subtitle: 'supplierName', badge: 'amount' },
+  },
   columns: [
     { key: 'subject', field: 'subject', label: 'Objet', sortable: true },
     { key: 'supplier', field: 'supplierName', label: 'Fournisseur', sortable: true },
     { key: 'amount', field: 'amount', label: 'Montant', transform: money, sortable: true, width: '160px' },
     { key: 'neededBy', field: 'neededBy', label: 'Pour le', type: 'date', sortable: true, width: '130px' },
-    {
-      key: 'status',
-      field: 'status',
-      label: 'Statut',
-      type: 'badge',
-      transform: (status) => STATUS[String(status)]?.label ?? String(status),
-      badgeVariant: (status) => STATUS[String(status)]?.tone ?? 'default',
-      width: '150px',
-    },
+    { key: 'status', field: 'status', label: 'Statut', type: 'badge', lifecycle: true, width: '150px' },
   ],
   emptyState: { icon: 'shopping-cart', title: 'Aucune demande d’achat', message: 'Créez une demande, soumettez-la : elle suit son circuit d’approbation.' },
   open: (request) => route(String(request['id'])),
@@ -60,6 +49,26 @@ export const PURCHASE_REQUEST_RECORD: RecordPageConfig = {
   route,
   lifecycle: true,
   lookups: { suppliers: '/api/v1/demo/suppliers/options' },
+  actions: [
+    {
+      id: 'duplicate',
+      label: 'Dupliquer',
+      icon: 'copy',
+      permission: 'demo.purchasing.request.duplicate',
+      request: { method: 'POST', url: `${REQUESTS}/{id}/duplicate` },
+      result: 'record',
+      success: 'Demande dupliquée.',
+    },
+    {
+      id: 'pdf',
+      label: 'Bon de commande (PDF)',
+      icon: 'file-down',
+      permission: 'demo.purchasing.request.print',
+      when: (request) => request['status'] === 'ORDERED',
+      request: { method: 'POST', url: `${REQUESTS}/{id}/pdf` },
+      result: 'download',
+    },
+  ],
   permissions: {
     create: 'demo.purchasing.request.create',
     update: 'demo.purchasing.request.update',
@@ -79,6 +88,8 @@ export const PURCHASE_REQUEST_RECORD: RecordPageConfig = {
           { key: 'justification', field: 'justification', label: 'Justification', type: 'textarea' },
         ],
       },
+      { title: 'Pièces jointes', kind: 'attachments', accept: ['application/pdf', 'image/png', 'image/jpeg'], maxSizeMb: 10 },
+      { title: 'Notes', kind: 'comments' },
     ],
   },
   messages: { created: 'Demande créée.', saved: 'Demande enregistrée.', deleted: 'Demande supprimée.' },

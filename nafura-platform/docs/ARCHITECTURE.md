@@ -68,14 +68,16 @@ Le nom du produit n’existe que dans `app.nafura.json`. Le backend le lit au d�
 6. **Organisation** : `spec.runtime.tenancy: single` (une organisation par déploiement, créée par la plateforme, propriétaires déclarés par environnement). `multi` est la cible suivante.
 7. **Données initiales = fichiers du BC**, appliqués à chaque organisation à travers les règles des records (validation, cycle de vie), idempotents.
 8. **Un écran = un archétype configuré** (liste, fiche, arbre, assistant, étapes). Voir [UI.md](UI.md).
-9. **Lab mode** : aucun produit n’a encore de données métier en prod (sauf vitrines MBS et corporate). Schéma cible net, pas de migrations défensives.
+9. **Le BC démo exerce toute la plateforme.** Chaque concept et artefact (archétypes et leurs variantes, cycle de vie, approbation, seeding, permissions, capabilities) y a un cas d’usage : c’est sa vitrine et son banc de test. Un concept absent de la démo n’est ni montré ni testé.
+10. **Statut et étapes, au choix du BC** : un parcours en étapes peut être une vue du cycle de vie (étapes = groupes d’états) ou un avancement déduit des données, indépendant du statut ; dans les deux cas, un seul statut stocké par record, et la complétude des étapes peut conditionner une transition.
+11. **Lab mode** : aucun produit n’a encore de données métier en prod (sauf vitrines MBS et corporate). Schéma cible net, pas de migrations défensives.
 
 ## Environnements
 
 | Mode | Où | Base | Connexion | Données de démo |
 |---|---|---|---|---|
 | `lab` | poste | PostgreSQL embarqué | utilisateurs lab | oui |
-| `local-staging` | poste | PostgreSQL du staging | Keycloak staging | oui |
+| `local-staging` | poste | PostgreSQL du staging | sélecteur d’utilisateurs lab | oui |
 | `staging` | Docker Desktop k8s | infra `nafura-infra-staging` | Keycloak staging | oui |
 | `prod` | VPS OVH k3s | infra `nafura-infra-prod` | Keycloak prod | jamais |
 
@@ -86,10 +88,14 @@ Lancement : [ops/README.md](../ops/README.md).
 | Sujet | État |
 |---|---|
 | Host, manifestes, capabilities, BC démo, rôles, connexion, seeding | livrés (`platform-host`) |
+| Notifications : événements déclarés (BC et plateforme), routeur unique, préférences organisation / utilisateur (API), canaux in-app et e-mail | livré (backend) |
+| Notifications : écrans de préférences, canal SMS, modèles de message par canal | à faire |
 | `tenancy: multi` dans le web du host | à faire |
 | Approbation par permission (au lieu d’un rôle), multi-étapes, historique | à faire |
 | Réglages déclarés par BC, documents (impression, marque, import), conversation IA, tableau de bord | à faire |
 | i18n par BC (libellés du BC démo en dur) | à faire |
+| BC démo couvrant chaque concept et artefact (règle 9) ; étapes déduites des données et conditions de transition calculées (règle 10) | à faire |
+| Écrans spécifiques d’un BC ([UI.md](UI.md)) : `spec.screens`, `ScreenPageComponent`, façade `screen-kit`, garde-fou | livré (démo : synthèse fournisseur) |
 | Sektor sur le host (supprimer `socle`, vérifications de rôles `OWNER`) | à faire |
 | Publication (BOM Maven, paquets npm) à la place de `includeBuild` et des alias source | après Sektor |
 | `platform/lab-auth` : seulement pour `sandbox` | à migrer |

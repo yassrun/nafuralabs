@@ -164,7 +164,12 @@ public class TenantSeeder {
                 new IllegalStateException("Seed " + where + ": " + type.getName() + " has no lifecycle for $transitions"));
         for (String transition : transitions) {
             try {
-                lifecycles.fire(declared, (HasStatus) record, record.getId(), transition, entityManager::merge);
+                Lifecycle.Transition declaredTransition = declared.transition(transition).orElse(null);
+                if (declaredTransition != null && declaredTransition.system()) {
+                    lifecycles.fireSystem(declared, (HasStatus) record, record.getId(), transition, entityManager::merge);
+                } else {
+                    lifecycles.fire(declared, (HasStatus) record, record.getId(), transition, entityManager::merge);
+                }
             } catch (RuntimeException e) {
                 throw new IllegalStateException("Seed " + where + ": transition " + transition + " failed: " + e.getMessage(), e);
             }

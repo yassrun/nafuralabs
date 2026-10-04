@@ -20,6 +20,7 @@ import ma.nafura.platform.collaboration.docmanager.domain.model.RecordAttachment
 import ma.nafura.platform.collaboration.docmanager.repository.RecordAttachmentRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
+import ma.nafura.platform.framework.record.RecordAccess;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,9 @@ class DocumentsDownloadTenantTest {
     @Mock
     private RecordAttachmentRepository attachmentRepository;
 
+    @Mock
+    private RecordAccess recordAccess;
+
     private final Map<UUID, RecordAttachment> store = new LinkedHashMap<>();
     private AttachmentController controller;
 
@@ -59,7 +63,7 @@ class DocumentsDownloadTenantTest {
         LocalFileStorageService fileStorage = new LocalFileStorageService(tmp.toString());
         AttachmentServiceImpl attachments = new AttachmentServiceImpl(attachmentRepository, fileStorage);
         stubAttachmentRepo();
-        controller = new AttachmentController(attachments, fileStorage);
+        controller = new AttachmentController(attachments, fileStorage, recordAccess);
     }
 
     @AfterEach
@@ -73,7 +77,7 @@ class DocumentsDownloadTenantTest {
     void downloadProprietaire() throws Exception {
         RecordAttachment saved = attachAsA();
 
-        ResponseEntity<?> response = controller.download(saved.getFileUrl());
+        ResponseEntity<?> response = controller.download(saved.getFileUrl(), null, null);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(((Resource) response.getBody()).getContentAsByteArray()).isEqualTo(BYTES);
@@ -84,8 +88,8 @@ class DocumentsDownloadTenantTest {
         RecordAttachment ofA = attachAsA();
 
         TenantContext.setTenantId(TENANT_B);
-        ResponseEntity<?> other = controller.download(ofA.getFileUrl());
-        ResponseEntity<?> unknown = controller.download("local:" + TENANT_B + "/record/rec-1/missing.txt");
+        ResponseEntity<?> other = controller.download(ofA.getFileUrl(), null, null);
+        ResponseEntity<?> unknown = controller.download("local:" + TENANT_B + "/record/rec-1/missing.txt", null, null);
 
         assertThat(other.getStatusCode()).isEqualTo(unknown.getStatusCode());
         assertThat(other.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

@@ -11,14 +11,12 @@ import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import lombok.extern.slf4j.Slf4j;
-import ma.nafura.platform.collaboration.notification.event.NotificationEvent;
 import ma.nafura.platform.collaboration.webhook.domain.model.WebhookConfig;
 import ma.nafura.platform.collaboration.webhook.domain.model.WebhookDelivery;
 import ma.nafura.platform.collaboration.webhook.domain.model.WebhookEvent;
 import ma.nafura.platform.collaboration.webhook.repository.WebhookConfigRepository;
 import ma.nafura.platform.collaboration.webhook.repository.WebhookDeliveryRepository;
 import ma.nafura.platform.collaboration.workflow.event.ApprovalStateChangedEvent;
-import ma.nafura.platform.framework.context.TenantContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -72,34 +70,6 @@ public class WebhookDispatcher {
                         "entityId", event.getEntityId(),
                         "status", event.getNewStatus(),
                         "decidedBy", event.getDecidedBy()
-                )
-        );
-    }
-
-    @EventListener
-    public void onNotificationEvent(NotificationEvent event) {
-        String source = event.getSource() != null ? event.getSource().toLowerCase() : "";
-        WebhookEvent mapped = switch (source) {
-            case "member_invited" -> WebhookEvent.MEMBER_INVITED;
-            case "member_activated" -> WebhookEvent.MEMBER_ACTIVATED;
-            case "domain_activated" -> WebhookEvent.DOMAIN_ACTIVATED;
-            default -> null;
-        };
-        if (mapped == null) {
-            return;
-        }
-        UUID tenantId = TenantContext.getTenantIdOrNull();
-        if (tenantId == null) {
-            return;
-        }
-        dispatch(
-                tenantId,
-                mapped,
-                Map.of(
-                        "recipientId", event.getRecipientId(),
-                        "entityType", event.getEntityType(),
-                        "entityId", event.getEntityId(),
-                        "source", event.getSource()
                 )
         );
     }

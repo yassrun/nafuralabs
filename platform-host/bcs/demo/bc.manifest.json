@@ -33,6 +33,8 @@
       { "id": "demo.purchasing.request.delete" },
       { "id": "demo.purchasing.request.submit" },
       { "id": "demo.purchasing.request.order" },
+      { "id": "demo.purchasing.request.duplicate" },
+      { "id": "demo.purchasing.request.print" },
       { "id": "demo.projects.project.read" },
       { "id": "demo.projects.project.create" },
       { "id": "demo.projects.project.update" },
@@ -82,6 +84,8 @@
           "demo.purchasing.request.delete",
           "demo.purchasing.request.submit",
           "demo.purchasing.request.order",
+          "demo.purchasing.request.duplicate",
+          "demo.purchasing.request.print",
           "demo.projects.project.read",
           "demo.projects.project.create",
           "demo.projects.project.update",
@@ -90,6 +94,11 @@
         ]
       }
     ],
+    "notifications": [
+      { "id": "demo.purchasing.request.approved", "label": "Demande d’achat approuvée", "title": "Demande approuvée : {subject}", "channels": ["in_app", "email"] },
+      { "id": "demo.purchasing.request.rejected", "label": "Demande d’achat rejetée", "title": "Demande rejetée : {subject}", "channels": ["in_app"] },
+      { "id": "demo.purchasing.request.ordered", "label": "Demande d’achat commandée", "title": "Demande commandée : {subject}", "channels": ["in_app"] }
+    ],
     "navigation": [
       { "id": "demo.suppliers", "label": "Fournisseurs", "route": "/demo/suppliers", "icon": "building-2", "permission": "demo.purchasing.supplier.read" },
       { "id": "demo.items", "label": "Articles", "route": "/demo/items", "icon": "package", "permission": "demo.purchasing.item.read" },
@@ -97,6 +106,13 @@
       { "id": "demo.requests", "label": "Demandes d’achat", "route": "/demo/purchase-requests", "icon": "shopping-cart", "permission": "demo.purchasing.request.read" },
       { "id": "demo.projects", "label": "Projets", "route": "/demo/projects", "icon": "hard-hat", "permission": "demo.projects.project.read" },
       { "id": "demo.notes", "label": "Notes", "route": "/demo/notes", "icon": "file-text", "permission": "demo.notes.note.read" }
+    ],
+    "screens": [
+      {
+        "id": "supplier-overview",
+        "label": "Synthèse fournisseur",
+        "reason": "Tableau de synthèse calculé (demandes par état, montant cumulé, graphique), sans formulaire."
+      }
     ]
   }
 }

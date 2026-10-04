@@ -151,6 +151,16 @@ test('rejects a permission outside the business context namespace', () => {
   assert.deepEqual(codes([bc]), ['permission-outside-namespace']);
 });
 
+test('rejects a notification outside the namespace, declared twice or without a channel', () => {
+  const event = (id) => ({ id, label: 'X', title: 'X', channels: ['in_app'] });
+  const outside = achats({ notifications: [event('ventes.devis.sent')] });
+  const twice = achats({ notifications: [event('achats.commande.sent'), event('achats.commande.sent')] });
+
+  assert.deepEqual(codes([outside]), ['notification-outside-namespace']);
+  assert.deepEqual(codes([twice]), ['notification-duplicate']);
+  assert.deepEqual(codes([achats({ notifications: [{ ...event('achats.commande.sent'), channels: [] }] })]), ['notification-without-channel']);
+});
+
 test('rejects a default role granting an undeclared permission', () => {
   const bc = achats({
     defaultRoles: [{ code: 'ACHETEUR', permissions: ['achats.commande.read', 'achats.commande.write'] }],

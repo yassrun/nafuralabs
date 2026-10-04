@@ -9,6 +9,9 @@ export type ManifestValidationIssueCode =
   | 'unknown-business-context'
   | 'route-prefix-collision'
   | 'permission-outside-namespace'
+  | 'notification-outside-namespace'
+  | 'notification-without-channel'
+  | 'notification-duplicate'
   | 'role-unknown-permission'
   | 'navigation-outside-prefix'
   | 'navigation-unknown-permission'
@@ -108,6 +111,29 @@ function validateBusinessContexts(
           message: `Business context "${id}" declares "${permission}" outside "${namespace}".`,
         });
       }
+    }
+
+    const events = new Set<string>();
+    for (const notification of context.spec.notifications ?? []) {
+      if (!notification.id.startsWith(namespace)) {
+        issues.push({
+          code: 'notification-outside-namespace',
+          message: `Business context "${id}" declares notification "${notification.id}" outside "${namespace}".`,
+        });
+      }
+      if (notification.channels.length === 0) {
+        issues.push({
+          code: 'notification-without-channel',
+          message: `Notification "${notification.id}" of "${id}" has no channel.`,
+        });
+      }
+      if (events.has(notification.id)) {
+        issues.push({
+          code: 'notification-duplicate',
+          message: `Business context "${id}" declares notification "${notification.id}" twice.`,
+        });
+      }
+      events.add(notification.id);
     }
 
     for (const role of context.spec.defaultRoles ?? []) {

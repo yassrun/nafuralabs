@@ -4,7 +4,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import ma.nafura.platform.collaboration.notification.service.NotificationCreationService;
+import ma.nafura.platform.collaboration.notification.service.NotificationRouter;
+import ma.nafura.platform.collaboration.notification.service.NotificationRouter.Message;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.event.ErpEntityTransitionEvent;
 import ma.nafura.platform.identity.domain.model.AppUser;
@@ -20,7 +21,7 @@ public class ErpDomainNotificationListener {
 
     private static final int MAX_RECIPIENTS = 50;
 
-    private final NotificationCreationService notificationCreationService;
+    private final NotificationRouter router;
     private final AppUserRepository appUserRepository;
 
     @EventListener
@@ -50,21 +51,15 @@ public class ErpDomainNotificationListener {
 
         for (UUID recipientId : recipientIds) {
             AppUser user = appUserRepository.findById(recipientId).orElse(null);
-            if (user == null || user.getEmail() == null || user.getEmail().isBlank()) {
+            if (user == null) {
                 continue;
             }
             withTenant(event.getTenantId(), () -> {
-                NotificationEvent notificationEvent = NotificationEvent.builder()
-                        .sourceObject(this)
-                        .recipientId(recipientId)
-                        .title(event.getTitle())
+                router.send(Message.of("platform.legacy.transition", recipientId,
+                                java.util.Map.of("title", event.getTitle() == null ? "" : event.getTitle()))
                         .body(event.getBody())
-                        .entityType(event.getEntityType())
-                        .entityId(entityUuid)
-                        .source("erp_" + event.getEntityType().toLowerCase())
-                        .actionUrl(event.getActionUrl())
-                        .build();
-                notificationCreationService.createAndDeliver(notificationEvent, user.getEmail());
+                        .about(event.getEntityType(), entityUuid)
+                        .link(event.getActionUrl()));
             });
         }
     }

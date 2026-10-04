@@ -14,6 +14,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionException;
@@ -31,10 +32,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
+import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.domain.TenantEntity;
 
@@ -46,11 +52,18 @@ import ma.nafura.platform.framework.domain.TenantEntity;
  */
 public abstract class RecordController<E extends TenantEntity> {
 
+    private static final Logger log = LoggerFactory.getLogger(RecordController.class);
     private static final Set<String> MANAGED = Set.of("id", "tenantId", "createdAt", "updatedAt", "createdBy", "updatedBy", "status");
     private static final int MAX_PAGE = 500;
 
     @Autowired
     private LifecycleEngine lifecycles;
+
+    @Autowired
+    private RecordAccess recordAccess;
+
+    @Autowired
+    private ObjectProvider<LifecycleNotifications> notifications;
 
     private Lifecycle lifecycle;
 
@@ -83,10 +96,60 @@ public abstract class RecordController<E extends TenantEntity> {
     @PostConstruct
     void registerLifecycle() {
         String resource = lifecycleResource();
+        Class<?> recordType = GenericTypeResolver.resolveTypeArgument(getClass(), RecordController.class);
         if (resource != null) {
             lifecycle = Lifecycle.load(resource);
-            Class<?> recordType = GenericTypeResolver.resolveTypeArgument(getClass(), RecordController.class);
+            checkNotify(lifecycle, recordType, resource);
             lifecycles.<HasStatus>register(recordType, lifecycle, id -> find(id).map(HasStatus.class::cast), r -> repository().save(cast(r)));
+        }
+        registerAccess();
+    }
+
+    /** Entity key of attachments and notes: the lifecycle entity, otherwise the last segment of the mapping. */
+    private void registerAccess() {
+        SecuredResource secured = getClass().getAnnotation(SecuredResource.class);
+        if (secured == null || recordAccess == null) return;
+        String scope = secured.domain() + "." + secured.feature() + "." + secured.resource();
+        recordAccess.register(recordKey(), scope + ".read", scope + ".update", id -> find(id).isPresent());
+    }
+
+    private String recordKey() {
+        if (lifecycle != null && lifecycle.entity() != null && !lifecycle.entity().isBlank()) return lifecycle.entity();
+        RequestMapping mapping = getClass().getAnnotation(RequestMapping.class);
+        String path = mapping != null && mapping.value().length > 0 ? mapping.value()[0] : "";
+        int slash = path.lastIndexOf('/');
+        return slash >= 0 ? path.substring(slash + 1) : path;
+    }
+
+    private void checkNotify(Lifecycle declared, Class<?> recordType, String source) {
+        boolean any = declared.transitions().stream().anyMatch(t -> t.notifications() != null && !t.notifications().isEmpty());
+        if (!any) return;
+        if (notifications == null || notifications.getIfAvailable() == null) {
+            log.warn("Lifecycle {} declares notify but notifications are disabled; they will be ignored ({})", declared.entity(), source);
+        }
+        Set<String> permissions = DeclaredPermissions.load();
+        Set<String> events = DeclaredNotifications.load().keySet();
+        Set<String> properties = recordType == null ? Set.of() : Stream.of(org.springframework.beans.BeanUtils.getPropertyDescriptors(recordType)).map(d -> d.getName()).collect(java.util.stream.Collectors.toSet());
+        for (Lifecycle.Transition transition : declared.transitions()) {
+            if (transition.notifications() == null) continue;
+            for (Lifecycle.Notify notify : transition.notifications()) {
+                if (!events.contains(notify.event())) {
+                    throw new IllegalStateException("Invalid lifecycle " + source + ": " + transition.id() + " notifies undeclared event " + notify.event());
+                }
+                String to = notify.to();
+                if (to.startsWith("field:")) {
+                    String field = to.substring("field:".length());
+                    if (!properties.contains(field)) {
+                        throw new IllegalStateException("Invalid lifecycle " + source + ": " + transition.id() + " notifies unknown field " + field);
+                    }
+                }
+                if (to.startsWith("permission:")) {
+                    String permission = to.substring("permission:".length());
+                    if (!permissions.isEmpty() && !permissions.contains(permission)) {
+                        throw new IllegalStateException("Invalid lifecycle " + source + ": " + transition.id() + " notifies undeclared permission " + permission);
+                    }
+                }
+            }
         }
     }
 
@@ -98,6 +161,7 @@ public abstract class RecordController<E extends TenantEntity> {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("content", result.getContent());
         body.put("totalElements", result.getTotalElements());
+        body.put("size", size);
         return body;
     }
 

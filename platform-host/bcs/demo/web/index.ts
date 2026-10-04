@@ -2,8 +2,11 @@ import type { BusinessContextManifest } from '@platform/platform/manifest';
 import type { HostBusinessContext } from '@platform/platform/host';
 import { ListingPageComponent } from '@platform/platform/listing';
 import { recordRoute } from '@platform/platform/record';
+import { ScreenPageComponent } from '@platform/platform/screen/screen-page.component';
+import { routePermissionGuard } from '@platform/core/security/guards/permission.guard';
 
 import manifest from '../bc.manifest.json';
+import { SupplierOverviewComponent } from './screens/supplier-overview/supplier-overview.component';
 import { CATEGORIES_LISTING } from './categories';
 import { ITEMS_LISTING, ITEM_RECORD } from './items';
 import { NOTES_LISTING } from './notes.listing';
@@ -20,6 +23,21 @@ export const demoBusinessContext: HostBusinessContext = {
     { path: '', pathMatch: 'full', redirectTo: 'suppliers' },
     listing('suppliers', SUPPLIERS_LISTING),
     recordRoute('suppliers/:id', SUPPLIER_RECORD),
+    {
+      path: 'suppliers/:id/overview',
+      component: ScreenPageComponent,
+      canActivate: [routePermissionGuard],
+      data: {
+        permissions: ['demo.purchasing.supplier.read'],
+        screen: {
+          id: 'supplier-overview',
+          title: 'Synthèse fournisseur',
+          icon: 'chart-column',
+          back: { label: 'Fournisseur', route: '/demo/suppliers/{id}' },
+          component: SupplierOverviewComponent,
+        },
+      },
+    },
     listing('items', ITEMS_LISTING),
     recordRoute('items/:id', ITEM_RECORD),
     listing('categories', CATEGORIES_LISTING),

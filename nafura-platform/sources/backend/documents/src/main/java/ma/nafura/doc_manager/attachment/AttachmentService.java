@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface AttachmentService {
@@ -12,6 +13,8 @@ public interface AttachmentService {
     RecordAttachment attach(String entityType, String entityId, MultipartFile file);
 
     Page<RecordAttachment> listByEntity(String entityType, String entityId, Pageable pageable);
+
+    Optional<RecordAttachment> find(UUID attachmentId);
 
     void delete(UUID attachmentId);
 

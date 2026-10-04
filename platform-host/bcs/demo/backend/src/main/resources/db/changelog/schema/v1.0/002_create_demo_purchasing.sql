@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS demo_project (
     name            VARCHAR(160) NOT NULL,
     client          VARCHAR(160) NOT NULL,
     city            VARCHAR(80),
+    description     TEXT,
     budget          NUMERIC(14, 2),
     study_notes     VARCHAR(4000),
     quote_amount    NUMERIC(14, 2),

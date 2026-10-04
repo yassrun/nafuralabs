@@ -17,7 +17,7 @@ Rien d’autre dans le produit : les garde-fous (`npm run architecture:check`) r
 | Fichier | Contient | Schéma |
 |---|---|---|
 | `app.nafura.json` | `metadata.id`, `spec.product` (`name`, `mark`, `logo`), `spec.runtime` (`tenancy`, `defaultRoute`), `spec.shell`, `spec.businessContexts`, `spec.capabilities.disabled`, `spec.roles`, `spec.customRoles`, `spec.i18n`, `spec.local` (ports, utilisateurs lab), `spec.deploy.<env>` (`host`, `owners`) | `sources/web/platform/schemas/app.nafura.schema.json` |
-| `bc.manifest.json` | `label`, `icon`, `routesPrefix`, `permissions`, `defaultRoles`, `navigation`, `requires` | `sources/web/platform/schemas/bc.manifest.schema.json` |
+| `bc.manifest.json` | `label`, `icon`, `routesPrefix`, `permissions`, `defaultRoles`, `notifications`, `navigation`, `requires`, `screens` (écrans spécifiques : `id`, `label`, `reason`) | `sources/web/platform/schemas/bc.manifest.schema.json` |
 
 Les deux sont validés au build (web) et lus au démarrage (backend). Pas de second format.
 
@@ -32,13 +32,25 @@ Une entité métier = `extends TenantEntity` (id, organisation, audit) + Bean Va
 class SupplierController extends RecordController<Supplier> { … }
 ```
 
-`RecordController` donne : liste paginée, triée, recherchée (`q`) et filtrée (`?champ=valeur`), `/options` pour les listes de choix, lecture, création, modification, suppression. Permissions : `<domain>.<feature>.<resource>.{read,create,update,delete}` selon la méthode HTTP. Champs dérivés en lecture : `@Formula`.
+`RecordController` donne : liste paginée (`page` à partir de 0, `size` plafonné à 500 et renvoyé tel qu’appliqué), triée, recherchée (`q`) et filtrée (`?champ=valeur`, égalité), `/options` pour les listes de choix, lecture, création, modification, suppression. Permissions : `<domain>.<feature>.<resource>.{read,create,update,delete}` selon la méthode HTTP. Champs dérivés en lecture : `@Formula`.
+
+Une action de fiche qui n’est pas une transition est un endpoint du même contrôleur (`POST /{id}/<action>`, `@RequirePermission`). La fiche déclare `result: 'record'` quand la réponse est la fiche à ouvrir (une copie, par exemple) : l’écran navigue vers son id.
+
+Les pièces jointes et les notes d’un record enregistré par un `RecordController` utilisent la permission de ce record (lecture pour voir, mise à jour pour ajouter ou supprimer), pas `collaboration.*.*`. La clé d’entité envoyée est `lifecycle.entity`, sinon le dernier segment du mapping. Un type d’entité inconnu du registre garde la permission du contrôleur collaboration.
 
 Ne pas écrire de service CRUD, de DTO de liste ou de pagination à la main.
 
 ## Cycle de vie et approbations
 
-`lifecycleResource()` → `resources/lifecycle/<record>.json` : états (libellé, ton), `initial`, `editable`, transitions (`from`, `to`, `permission`, `requires`, `approval { role, when, title, approved, rejected }`, `system`). La plateforme expose `/lifecycle`, `/{id}/transitions`, `POST /{id}/transitions/{id}` et refuse ce que le JSON interdit (403, 409, 422 avec les champs manquants). Une approbation passe par la boîte unique `/approvals` ; sa décision tire la transition de sortie. Le web dessine le statut et les actions depuis ce JSON.
+`lifecycleResource()` → `resources/lifecycle/<record>.json` : états (libellé, ton), `initial`, `editable`, transitions (`from`, `to`, `permission`, `requires`, `approval { role, when, title, approved, rejected }`, `system`, `notify`). La plateforme expose `/lifecycle`, `/{id}/transitions`, `POST /{id}/transitions/{id}` et refuse ce que le JSON interdit (403, 409, 422 avec les champs manquants). Une approbation passe par la boîte unique `/approvals` ; sa décision tire la transition de sortie. Le web dessine le statut et les actions depuis ce JSON.
+
+`notify` sur une transition : `{ "event": "<id déclaré>", "to": … }`. `to` vaut `createdBy`, `field:<champ>` (UUID d’utilisateur) ou `permission:<id>` (les membres qui ont cette permission — jamais un rôle). L’acteur d’une transition utilisateur n’est pas prévenu ; une issue `system` (approuver, rejeter) prévient quand même `createdBy`. La capability `notifications` coupée : les règles sont ignorées, un avertissement est écrit au démarrage. Un événement non déclaré, un champ inconnu ou une permission non déclarée empêche le démarrage. Le lien est `entityType` + `entityId` ; le web le résout avec `HostBusinessContext.records`.
+
+## Notifications
+
+Le BC déclare ses événements dans `bc.manifest.json` → `notifications` : `id` (sous son préfixe, comme une permission), `label` (écran de préférences), `title` (`{champ}` du record), `channels` (défaut, parmi `in_app`, `email`, `sms`), `mandatory` (l’utilisateur ne peut pas couper). Les événements de la plateforme (approbation, mention, affectation) sont dans `META-INF/nafura/platform/notifications.json` du module `notification`.
+
+Un seul chemin : règle (`notify`, mention, affectation…) → `NotificationRouter` → canaux retenus → `NotificationChannel` (`in_app`, `email` ; un canal déclaré sans implémentation est ignoré, avertissement au démarrage). Canaux retenus : défaut du manifeste → organisation (coupe ou ajoute) → utilisateur (coupe, sauf `mandatory` ; n’ajoute jamais). API : `GET|PUT /api/v1/platform/collaboration/notification-preferences` (utilisateur courant), `…/organisation` (permission `administration.notifications.configure`).
 
 ## Permissions et rôles
 

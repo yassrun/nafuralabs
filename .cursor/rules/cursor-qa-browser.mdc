@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Cursor QA / Browser (Mode B)
 
-SSOT pour **tous** les agents (Spec, Code, QA, Orch, ce chat) dès qu’on touche l’UI ou l’API **Sektor locale**.
+**Sektor seulement** (ancienne architecture, jusqu’à `sektor-sur-host`). Pour les produits du host (`platform-host` et ses copies) : `node <produit>/ops/run.mjs lab` et les utilisateurs lab — voir `nafura-platform/ops/README.md`.
 
 Pas Keycloak. Auto-login **conservé** sur l’owner.
 

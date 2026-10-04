@@ -44,7 +44,7 @@ public class Notification {
     @Column(name = "entity_id")
     private UUID entityId;
 
-    @Column(name = "source", length = 30)
+    @Column(name = "source", length = 120)
     private String source;
 
     @Column(name = "action_url", length = 300)

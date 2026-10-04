@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,7 +38,8 @@ public record Lifecycle(
             String permission,
             boolean system,
             List<String> requires,
-            Approval approval) {
+            Approval approval,
+            @JsonProperty("notify") List<Notify> notifications) {
 
         public boolean allowedFrom(String status) {
             return from != null && from.contains(status);
@@ -49,6 +51,14 @@ public record Lifecycle(
      * otherwise {@code approved} is fired at once. {@code title} may reference fields: {@code "Request {subject}"}.
      */
     public record Approval(String role, String when, String title, String approved, String rejected) {
+    }
+
+    /**
+     * Who to tell after the transition. {@code event} is a notification declared by a business context manifest
+     * (its title and default channels live there). {@code to} is {@code createdBy}, {@code field:<uuid field>}
+     * or {@code permission:<id>} — never a role.
+     */
+    public record Notify(String event, String to) {
     }
 
     private static final ObjectMapper JSON = new ObjectMapper()
@@ -91,6 +101,22 @@ public record Lifecycle(
                 check(t.approval().role() != null, source, t.id() + ": the approval needs a role");
                 for (String outcome : new String[] {t.approval().approved(), t.approval().rejected()}) {
                     check(transition(outcome).isPresent(), source, t.id() + ": unknown approval outcome " + outcome);
+                }
+            }
+            if (t.notifications() != null) {
+                for (Notify notify : t.notifications()) {
+                    check(notify.to() != null && !notify.to().isBlank(), source, t.id() + ": notify needs a recipient");
+                    check(notify.event() != null && !notify.event().isBlank(), source, t.id() + ": notify needs an event");
+                    String to = notify.to();
+                    boolean ok = to.equals("createdBy") || to.startsWith("field:") || to.startsWith("permission:");
+                    check(ok, source, t.id() + ": notify recipient must be createdBy, field:<name> or permission:<id>");
+                    if (to.startsWith("field:")) {
+                        check(to.length() > "field:".length(), source, t.id() + ": notify field is empty");
+                    }
+                    if (to.startsWith("permission:")) {
+                        String permission = to.substring("permission:".length());
+                        check(permission.chars().filter(ch -> ch == '.').count() >= 2, source, t.id() + ": notify permission is not an id");
+                    }
                 }
             }
         }

@@ -25,8 +25,17 @@
         "rejected": "reject"
       }
     },
-    { "id": "approve", "label": "Approuver", "from": ["SUBMITTED"], "to": "APPROVED", "system": true },
-    { "id": "reject", "label": "Rejeter", "from": ["SUBMITTED"], "to": "REJECTED", "system": true },
-    { "id": "order", "label": "Commander", "from": ["APPROVED"], "to": "ORDERED", "permission": "demo.purchasing.request.order" }
+    {
+      "id": "approve", "label": "Approuver", "from": ["SUBMITTED"], "to": "APPROVED", "system": true,
+      "notify": [{ "event": "demo.purchasing.request.approved", "to": "createdBy" }]
+    },
+    {
+      "id": "reject", "label": "Rejeter", "from": ["SUBMITTED"], "to": "REJECTED", "system": true,
+      "notify": [{ "event": "demo.purchasing.request.rejected", "to": "createdBy" }]
+    },
+    {
+      "id": "order", "label": "Commander", "from": ["APPROVED"], "to": "ORDERED", "permission": "demo.purchasing.request.order",
+      "notify": [{ "event": "demo.purchasing.request.ordered", "to": "createdBy" }]
+    }
   ]
 }

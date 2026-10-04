@@ -30,8 +30,10 @@ import { ConfirmDialogService } from '../../lib/anatomy/components/services/conf
 import { ToastService } from '../../lib/anatomy/components/services/toast.service';
 import type { BadgeVariant, FormFieldConfig, LookupContext } from '../../lib/anatomy/types';
 import { ListingPageComponent } from '../listing/listing-page.component';
+import { HOST_CAPABILITIES } from '../host/host-capabilities';
+import { RecordCollaborationComponent } from './record-collaboration.component';
 import type { ListingPageConfig, Row } from '../listing/listing-page.types';
-import type { RecordField, RecordPageConfig, RecordSection } from './record-page.types';
+import type { RecordAction, RecordField, RecordPageConfig, RecordSection } from './record-page.types';
 
 interface LifecycleState {
   id: string;
@@ -39,6 +41,7 @@ interface LifecycleState {
   tone?: BadgeVariant;
 }
 interface LifecycleDeclaration {
+  entity?: string;
   initial: string;
   editable?: string[];
   states: LifecycleState[];
@@ -57,6 +60,9 @@ interface SectionView {
   fields: FormFieldConfig[];
   columns: number;
   listing: ListingPageConfig | null;
+  collaboration: 'attachments' | 'comments' | null;
+  accept: string[];
+  maxSizeMb?: number;
 }
 interface PanelView {
   id: string;
@@ -85,6 +91,7 @@ interface PanelView {
     LoadingStateComponent,
     ErrorStateComponent,
     ListingPageComponent,
+    RecordCollaborationComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -105,6 +112,10 @@ interface PanelView {
               }
             </div>
             <div class="nf-record__actions">
+              @if (showImport()) {
+                <nf-button variant="secondary" size="sm" icon="file-up" (clicked)="pickImport()">{{ config().import!.label | translate }}</nf-button>
+                <input #importFile type="file" hidden [attr.accept]="importAccept()" (change)="onImport($event)" />
+              }
               @for (transition of transitions(); track transition.id; let first = $first) {
                 <nf-button
                   [variant]="first ? 'primary' : 'secondary'"
@@ -113,6 +124,18 @@ interface PanelView {
                   [tooltip]="dirty() ? ('record.saveFirst' | translate) : ''"
                   (clicked)="fire(transition)">
                   {{ transition.label | translate }}
+                </nf-button>
+              }
+              @for (action of toolbarActions(); track action.id) {
+                <nf-button
+                  [variant]="action.variant ?? 'secondary'"
+                  size="sm"
+                  [icon]="action.icon"
+                  [loading]="busyId() === action.id"
+                  [disabled]="actionBlocked(action)"
+                  [tooltip]="actionBlocked(action) ? ('record.saveFirst' | translate) : ''"
+                  (clicked)="runAction(action)">
+                  {{ action.label | translate }}
                 </nf-button>
               }
               @if (menu().length) {
@@ -152,10 +175,23 @@ interface PanelView {
                       [disabled]="!editable()"
                       [actions]="false"
                       (valueChange)="patch($event)" />
+                    @for (hint of hintsOf(section); track hint.field) {
+                      <p class="nf-record__hint">{{ hint.label | translate }}</p>
+                    }
+                  }
+                  @if (section.collaboration && recordId(); as saved) {
+                    <nf-record-collaboration
+                      [kind]="section.collaboration"
+                      [entityType]="entityType()"
+                      [entityId]="saved"
+                      [canUpdate]="canUpdate()"
+                      [title]="section.title ?? ''"
+                      [accept]="section.accept"
+                      [maxSizeMb]="section.maxSizeMb" />
                   }
                   @if (section.listing; as listing) {
                     <nf-listing-page class="nf-record__listing" [listing]="listing" [embedded]="true" />
-                  } @else if (!section.fields.length) {
+                  } @else if (!section.fields.length && !(section.collaboration && recordId())) {
                     <p class="nf-record__after-save">{{ 'record.availableAfterSave' | translate }}</p>
                   }
                 </section>
@@ -211,6 +247,7 @@ interface PanelView {
     .nf-record__section-header p { margin: 4px 0 0; font-size: 0.8125rem; color: var(--nf-text-muted, #6b7280); }
     .nf-record__listing { display: block; min-height: 220px; }
     .nf-record__after-save { margin: 0; font-size: 0.875rem; color: var(--nf-text-muted, #6b7280); }
+    .nf-record__hint { margin: 6px 0 0; font-size: 0.75rem; color: var(--nf-color-warning-700, #b45309); }
     .nf-record__wizard { display: flex; justify-content: space-between; gap: 8px; padding-top: 4px; }
     .nf-record__wizard-steps { display: flex; gap: 8px; }
   `,
@@ -246,7 +283,12 @@ export class RecordPageComponent {
   readonly loading = signal(true);
   readonly failed = signal(false);
   readonly busy = signal(false);
+  readonly busyId = signal<string | null>(null);
   readonly activePanel = signal('');
+  /** Field key → marker after an extraction (`extracted` or `check`). */
+  readonly extracted = signal<Record<string, 'extracted' | 'check'>>({});
+  private pendingFile: File | null = null;
+  private readonly capabilities = inject(HOST_CAPABILITIES, { optional: true });
 
   readonly creating = computed(() => this.id() === null);
   readonly canUpdate = computed(() => this.allowed(this.config().permissions.update));
@@ -326,8 +368,27 @@ export class RecordPageComponent {
 
   readonly menu = computed(() => {
     const config = this.config();
+    const record = this.record();
+    const nodes = this.visibleActions()
+      .filter((action) => action.placement === 'menu')
+      .map((action) => ({ id: `action:${action.id}`, label: this.translate.instant(action.label), icon: action.icon, danger: false, disabled: this.actionBlocked(action) }));
     const canDelete = !this.creating() && this.allowed(config.permissions.delete) && this.editableState();
-    return canDelete ? [{ id: 'delete', label: this.translate.instant('Delete'), icon: 'trash-2', danger: true }] : [];
+    if (canDelete) nodes.push({ id: 'delete', label: this.translate.instant('Delete'), icon: 'trash-2', danger: true, disabled: false });
+    return record || canDelete ? nodes : nodes;
+  });
+
+  readonly toolbarActions = computed(() => this.visibleActions().filter((action) => action.placement !== 'menu'));
+
+  readonly entityType = computed(() => this.lifecycle()?.entity ?? this.config().endpoint.split('/').filter(Boolean).pop() ?? 'record');
+
+  readonly showImport = computed(() => {
+    const imported = this.config().import;
+    if (!imported || !this.creating() || !this.allowed(this.config().permissions.create)) return false;
+    const caps = this.capabilities;
+    if (!caps) return true;
+    const endpoint = 'endpoint' in imported.docType;
+    if (endpoint) return true;
+    return caps.includes('cap.document-extraction') && caps.includes('cap.ai');
   });
 
   constructor() {
@@ -399,6 +460,8 @@ export class RecordPageComponent {
     try {
       if (this.creating()) {
         const created = await firstValueFrom(this.http.post<Row>(this.url(config.endpoint), body));
+        if (this.pendingFile) await this.attachImported(String(created['id']), this.pendingFile);
+        this.pendingFile = null;
         this.draft.set({});
         this.toast.success(this.translate.instant(config.messages?.created ?? 'record.created'));
         void this.router.navigateByUrl(config.route(String(created['id'])), { replaceUrl: true });
@@ -449,6 +512,11 @@ export class RecordPageComponent {
   }
 
   async onMenu(id: string): Promise<void> {
+    if (id.startsWith('action:')) {
+      const action = this.visibleActions().find((candidate) => candidate.id === id.slice('action:'.length));
+      if (action) await this.runAction(action);
+      return;
+    }
     if (id !== 'delete') return;
     const config = this.config();
     const confirmed = await this.dialogs.confirm({
@@ -509,6 +577,18 @@ export class RecordPageComponent {
     this.formValues.set({ ...(this.config().defaults ?? {}), ...(record ?? {}) });
   }
 
+  private async attachImported(id: string, file: File): Promise<void> {
+    const body = new FormData();
+    body.append('file', file);
+    body.append('entityType', this.entityType());
+    body.append('entityId', id);
+    try {
+      await firstValueFrom(this.http.post(this.url('/api/v1/platform/collaboration/attachments/upload'), body));
+    } catch {
+      this.toast.warning(this.translate.instant('record.attachFailed'));
+    }
+  }
+
   private async loadTransitions(): Promise<void> {
     if (!this.config().lifecycle || !this.id()) {
       this.transitions.set([]);
@@ -532,15 +612,143 @@ export class RecordPageComponent {
     const columns = section.columns ?? 2;
     const fields = (section.fields ?? []).map((field: RecordField) => ({
       ...field,
-      colSpan: field.wide || field.type === 'textarea' ? columns : field.colSpan,
+      colSpan: field.wide || field.type === 'textarea' || field.type === 'richtext' ? columns : field.colSpan,
     }));
+    const kind = section.kind ?? (section.listing ? undefined : 'fields');
+    const collaboration = kind === 'attachments' || kind === 'comments' ? kind : null;
     return {
       title: section.title,
       description: section.description,
-      fields,
+      fields: collaboration ? [] : fields,
       columns,
-      listing: section.listing && record ? section.listing(record) : null,
+      listing: !collaboration && section.listing && record ? section.listing(record) : null,
+      collaboration: collaboration && this.capabilityOn(collaboration) ? collaboration : null,
+      accept: section.accept ?? ['*'],
+      maxSizeMb: section.maxSizeMb,
     };
+  }
+
+  private capabilityOn(kind: 'attachments' | 'comments'): boolean {
+    const caps = this.capabilities;
+    if (!caps) return true;
+    return caps.includes(kind === 'attachments' ? 'cap.documents' : 'cap.comments');
+  }
+
+  private visibleActions(): RecordAction[] {
+    const record = (this.record() ?? {}) as never;
+    return (this.config().actions ?? []).filter((action) => {
+      if (action.permission && !this.permissions.hasPermission(action.permission)) return false;
+      if (action.when && !action.when(record)) return false;
+      if (this.creating() && action.request) return false;
+      return true;
+    });
+  }
+
+  actionBlocked(action: RecordAction): boolean {
+    return (action.requiresSaved ?? true) && this.dirty();
+  }
+
+  importAccept(): string {
+    return (this.config().import?.accept ?? []).join(',');
+  }
+
+  hintsOf(section: SectionView): { field: string; label: string }[] {
+    const marks = this.extracted();
+    return section.fields
+      .filter((field) => marks[field.key])
+      .map((field) => ({ field: field.key, label: marks[field.key] === 'check' ? 'record.checkExtracted' : 'record.extracted' }));
+  }
+
+  pickImport(): void {
+    const input = document.querySelector<HTMLInputElement>('nf-record-page input[type=file]');
+    input?.click();
+  }
+
+  async onImport(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    const imported = this.config().import;
+    if (!file || !imported) return;
+    const endpoint = 'endpoint' in imported.docType ? imported.docType.endpoint : '/api/stateless-extractions';
+    const body = new FormData();
+    body.append('file', file);
+    this.busy.set(true);
+    try {
+      const response = await firstValueFrom(this.http.post<{ fields?: Record<string, { value?: unknown; confidence?: number }> }>(this.url(endpoint), body));
+      const values: Row = { ...(this.config().defaults ?? {}) };
+      const marks: Record<string, 'extracted' | 'check'> = {};
+      for (const [source, target] of Object.entries(imported.map)) {
+        const field = response.fields?.[source];
+        if (!field || field.value == null || field.value === '') continue;
+        values[target] = field.value;
+        marks[target] = field.confidence != null && field.confidence < 0.6 ? 'check' : 'extracted';
+      }
+      this.extracted.set(marks);
+      this.formValues.set(values);
+      this.draft.set(values);
+      this.pendingFile = imported.attach === false ? null : file;
+      this.toast.success(this.translate.instant('record.extractedDone'));
+    } catch (error) {
+      this.toast.error(this.errorMessage(error));
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  async runAction(action: RecordAction): Promise<void> {
+    if (this.actionBlocked(action) || this.busy()) return;
+    const record = this.record();
+    if (action.route && !action.request) {
+      const target = typeof action.route === 'string' ? action.route : action.route((record ?? {}) as never);
+      void this.router.navigateByUrl(target);
+      return;
+    }
+    if (action.confirm) {
+      const confirmed = await this.dialogs.confirm({
+        title: this.translate.instant(action.confirm.title),
+        message: this.translate.instant(action.confirm.message),
+        confirmLabel: action.confirm.confirmLabel ? this.translate.instant(action.confirm.confirmLabel) : undefined,
+        variant: action.confirm.danger ? 'danger' : 'default',
+      });
+      if (!confirmed) return;
+    }
+    let body: unknown = {};
+    if (action.form) {
+      const values = await this.dialogs.form({ title: action.form.title, fields: action.form.fields, values: action.form.values?.(record as never) });
+      if (!values) return;
+      body = action.form.body ? action.form.body(values, record as never) : values;
+    }
+    if (!action.request) return;
+    const url = (action.request.url ?? `${this.config().endpoint}/{id}`).replace('{id}', encodeURIComponent(String(record?.['id'] ?? '')));
+    this.busyId.set(action.id);
+    this.busy.set(true);
+    try {
+      if ((action.result ?? 'record') === 'download') {
+        const response = await firstValueFrom(this.http.request('POST', this.url(url), { body, responseType: 'blob', observe: 'response' }));
+        const named = /filename="?([^";]+)"?/i.exec(response.headers.get('Content-Disposition') ?? '');
+        saveBlob(response.body ?? new Blob(), named?.[1] ?? 'document');
+      } else {
+        const response = await firstValueFrom(this.http.request<Row>(action.request.method, this.url(url), { body }));
+        if (action.reveal) await this.dialogs.reveal({ title: action.reveal.title, message: action.reveal.message, value: String(response?.[action.reveal.field] ?? '') });
+        if (response && action.failed?.(response)) this.toast.error(this.translate.instant(action.failure ?? 'Action failed'));
+        else if (action.success) this.toast.success(this.translate.instant(action.success));
+        if ((action.result ?? 'record') === 'record' && response?.['id']) {
+          const next = String(response['id']);
+          if (next !== this.id()) void this.router.navigateByUrl(this.config().route(next));
+          else this.show(response);
+        }
+      }
+      if (action.route && action.result === 'none') {
+        const target = typeof action.route === 'string' ? action.route : action.route((record ?? {}) as never);
+        void this.router.navigateByUrl(target);
+      }
+    } catch (error) {
+      this.toast.error(this.errorMessage(error));
+    } finally {
+      this.busy.set(false);
+      this.busyId.set(null);
+    }
   }
 
   /** Index of the panel holding a form (forms render in panel order). */
@@ -624,4 +832,13 @@ function same(a: unknown, b: unknown): boolean {
 function isoDate(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function saveBlob(blob: Blob, name: string): void {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  link.click();
+  URL.revokeObjectURL(url);
 }

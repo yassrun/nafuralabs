@@ -26,6 +26,7 @@
     "@ngx-translate/core": "^15.0.0",
     "chart.js": "^4.5.1",
     "lucide-angular": "^0.563.0",
+    "marked": "15.0.12",
     "material-icons": "1.13.14",
     "ng2-charts": "^10.0.0",
     "ngx-translate-messageformat-compiler": "^7.2.0",
