@@ -37,6 +37,11 @@ public class TenantMembership {
     @Builder.Default
     private String status = "ACTIVE";
 
+    /** {@code members} (default) or an audience declared by the product. One account, the audience is on the membership. */
+    @Column(name = "audience", nullable = false, length = 40)
+    @Builder.Default
+    private String audience = "members";
+
     @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt;
 

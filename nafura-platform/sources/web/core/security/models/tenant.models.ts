@@ -85,6 +85,9 @@ export interface TenantMembership {
 
   /** Join date */
   joinedAt: string;
+
+  /** Audience of this membership (`members` or an external audience). One selector, no second account. */
+  audience?: string;
 }
 
 /**

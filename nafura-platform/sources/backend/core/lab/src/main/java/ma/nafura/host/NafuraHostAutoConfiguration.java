@@ -7,13 +7,17 @@ import jakarta.validation.Validator;
 import ma.nafura.host.seed.SeedCatalog;
 import ma.nafura.host.seed.SeedRunner;
 import ma.nafura.host.seed.TenantSeeder;
+import ma.nafura.lab.LabProperties;
+import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
 import ma.nafura.platform.framework.record.LifecycleEngine;
 import ma.nafura.platform.identity.repository.AppUserRepository;
 import ma.nafura.platform.identity.service.AppUserProvisioningService;
 import ma.nafura.platform.scope.security.scope.DefaultScopeService;
+import ma.nafura.platform.tenancy.repository.TenantMembershipRepository;
 import ma.nafura.platform.tenancy.repository.TenantRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
@@ -49,6 +53,11 @@ public class NafuraHostAutoConfiguration {
     }
 
     @Bean
+    EntityScopeGuard entityScopeGuard(EntityManager entityManager) {
+        return new EntityScopeGuard(entityManager);
+    }
+
+    @Bean
     SeedRunner seedRunner(TenantSeeder tenantSeeder, TenantRepository tenantRepository) {
         return new SeedRunner(tenantSeeder, tenantRepository);
     }
@@ -67,5 +76,42 @@ public class NafuraHostAutoConfiguration {
     ) {
         return new SingleScopeBootstrap(applicationId, applicationName, owners, defaultScopeService, tenantRepository,
                 appUserRepository, appUserProvisioningService, jdbcTemplate);
+    }
+
+    @Bean
+    @ConditionalOnExpression(
+            "'${nafura.security.tenant.mode:single}'.equalsIgnoreCase('multi') && '${nafura.lab.enabled:false}'.equalsIgnoreCase('true')")
+    MultiScopeBootstrap multiScopeBootstrap(
+            @Value("${nafura.application.id:app}") String applicationId,
+            LabProperties labProperties,
+            TenantRepository tenantRepository,
+            JdbcTemplate jdbcTemplate
+    ) {
+        return new MultiScopeBootstrap(applicationId, labProperties, tenantRepository, jdbcTemplate);
+    }
+
+    @Bean
+    OrganizationProvisioning organizationProvisioning(
+            @Value("${nafura.application.id:app}") String applicationId,
+            @Value("${nafura.runtime.signup:operator}") String signup,
+            TenantRepository tenantRepository,
+            TenantSeeder tenantSeeder,
+            AppUserProvisioningService appUserProvisioningService,
+            JdbcTemplate jdbcTemplate
+    ) {
+        return new OrganizationProvisioning(applicationId, signup, tenantRepository, tenantSeeder,
+                appUserProvisioningService, jdbcTemplate);
+    }
+
+    @Bean
+    OrganizationController organizationController(
+            OrganizationProvisioning organizationProvisioning,
+            AppUserRepository appUserRepository,
+            TenantMembershipRepository tenantMembershipRepository,
+            TenantRepository tenantRepository,
+            TenantUserRoleRepository tenantUserRoleRepository
+    ) {
+        return new OrganizationController(organizationProvisioning, appUserRepository, tenantMembershipRepository,
+                tenantRepository, tenantUserRoleRepository);
     }
 }

@@ -36,9 +36,9 @@ test('reads an application manifest and rejects anything else', () => {
   assert.throws(() => readApplicationManifest({ ...app, kind: 'capability' }), /kind "application"/);
   assert.throws(() => readApplicationManifest(null), /kind "application"/);
   assert.throws(() => readApplicationManifest({ ...app, spec: {} }), /no spec\.runtime/);
-  assert.throws(
-    () => readApplicationManifest({ ...app, spec: { ...app.spec, runtime: { tenancy: 'multi', defaultRoute: '/' } } }),
-    /one organization per deployment/,
+  assert.equal(
+    readApplicationManifest({ ...app, spec: { ...app.spec, runtime: { tenancy: 'multi', signup: 'operator', defaultRoute: '/' } } }).spec.runtime.tenancy,
+    'multi',
   );
 });
 

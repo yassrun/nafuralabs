@@ -1,5 +1,5 @@
 import type { FormFieldConfig } from '../../../lib/anatomy/types';
-import type { ListingPageConfig } from '../../../platform/listing';
+import type { LegacyListingPageConfig } from '../../../platform/listing/legacy';
 
 interface Webhook extends Record<string, unknown> {
   id: string;
@@ -48,7 +48,7 @@ const fields = (secretRequired: boolean): FormFieldConfig[] => [
 const randomSecret = (): string =>
   Array.from(crypto.getRandomValues(new Uint8Array(24)), (byte) => byte.toString(16).padStart(2, '0')).join('');
 
-export const WEBHOOKS_LISTING: ListingPageConfig<Webhook> = {
+export const WEBHOOKS_LISTING: LegacyListingPageConfig<Webhook> = {
   title: 'administration.webhooks.title',
   subtitle: 'administration.webhooks.subtitle',
   icon: 'webhook',

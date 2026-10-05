@@ -1,4 +1,4 @@
-import type { ListingPageConfig } from '../../../platform/listing';
+import type { LegacyListingPageConfig } from '../../../platform/listing/legacy';
 
 interface ApiKey extends Record<string, unknown> {
   name: string;
@@ -13,7 +13,7 @@ const status = (key: ApiKey): 'active' | 'revoked' | 'expired' =>
 
 const EXPIRY_DAYS: Record<string, number | null> = { never: null, '30d': 30, '90d': 90, '1y': 365 };
 
-export const API_KEYS_LISTING: ListingPageConfig<ApiKey> = {
+export const API_KEYS_LISTING: LegacyListingPageConfig<ApiKey> = {
   title: 'administration.apiKeys.title',
   subtitle: 'administration.apiKeys.subtitle',
   icon: 'key-round',

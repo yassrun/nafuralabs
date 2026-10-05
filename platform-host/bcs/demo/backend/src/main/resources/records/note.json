@@ -1,0 +1,5 @@
+{
+  "entity": "demo.note",
+  "search": ["title"],
+  "properties": { "title": {"label": "Titre", "filterable": true, "sortable": true} }
+}

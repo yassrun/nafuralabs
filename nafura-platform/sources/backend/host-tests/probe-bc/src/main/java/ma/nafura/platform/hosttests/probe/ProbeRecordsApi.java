@@ -23,6 +23,7 @@ class ProbeGroupController extends RecordController<ProbeGroup> {
     }
 
     @Override protected RecordRepository<ProbeGroup> repository() { return repository; }
+    @Override protected String recordResource() { return "records/probe-group.json"; }
 }
 
 @RestController
@@ -36,5 +37,5 @@ class ProbeRecordController extends RecordController<ProbeRecord> {
     }
 
     @Override protected RecordRepository<ProbeRecord> repository() { return repository; }
-    @Override protected String lifecycleResource() { return "probe/record-lifecycle.json"; }
+    @Override protected String recordResource() { return "records/probe-record.json"; }
 }

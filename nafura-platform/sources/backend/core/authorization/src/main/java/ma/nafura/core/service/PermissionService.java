@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.nafura.platform.authorization.domain.model.RolePermission;
 import ma.nafura.platform.authorization.repository.RolePermissionRepository;
+import ma.nafura.platform.authorization.security.authorization.OperatorPermissions;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -65,22 +66,17 @@ public class PermissionService {
         }
         
         List<String> permissions = getPermissionsForRole(roleCode);
-        
+
+        // A role never grants an operator permission, whatever it lists: only the deployment's operators do.
+        if (OperatorPermissions.isOperatorPermission(permission)) {
+            return false;
+        }
+
         if (permissions.contains(permission)) {
             return true;
         }
-        
-        return permissions.stream()
-            .anyMatch(perm -> {
-                if (perm.equals("*")) {
-                    return true;
-                }
-                if (perm.endsWith(".*")) {
-                    String prefix = perm.substring(0, perm.length() - 2);
-                    return permission.startsWith(prefix + ".");
-                }
-                return false;
-            });
+
+        return permissions.stream().anyMatch(perm -> OperatorPermissions.coveredByWildcard(permission, perm));
     }
 
     /**

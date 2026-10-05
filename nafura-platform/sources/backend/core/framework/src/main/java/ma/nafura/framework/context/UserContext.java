@@ -6,6 +6,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import ma.nafura.platform.authorization.security.authorization.OperatorPermissions;
+
 /**
  * Thread-local context holder for user-level security information.
  */
@@ -17,6 +19,7 @@ public class UserContext {
     private static final ThreadLocal<String> USER_ROLE = new ThreadLocal<>();
     private static final ThreadLocal<Set<String>> USER_ROLES = new ThreadLocal<>();
     private static final ThreadLocal<UUID> USER_ID = new ThreadLocal<>();
+    private static final ThreadLocal<String> AUDIENCE = new ThreadLocal<>();
 
     private UserContext() {
         // Utility class
@@ -32,6 +35,9 @@ public class UserContext {
     }
 
     public static boolean hasPermission(String permission) {
+        if (OperatorPermissions.isOperatorPermission(permission)) {
+            return OperatorPermissions.granted(getPermissions(), permission);
+        }
         if (isSuperAdmin()) {
             return true;
         }
@@ -42,22 +48,9 @@ public class UserContext {
         }
 
         for (String userPerm : userPermissions) {
-            if (matchesWildcard(permission, userPerm)) {
+            if (OperatorPermissions.coveredByWildcard(permission, userPerm)) {
                 return true;
             }
-        }
-
-        return false;
-    }
-
-    private static boolean matchesWildcard(String permission, String pattern) {
-        if ("*".equals(pattern)) {
-            return true;
-        }
-
-        if (pattern.endsWith(".*")) {
-            String prefix = pattern.substring(0, pattern.length() - 2);
-            return permission.startsWith(prefix + ".");
         }
 
         return false;
@@ -143,6 +136,16 @@ public class UserContext {
         return isSuperAdmin() || isTenantOwner();
     }
 
+    /** Audience of the active membership. {@code members} when none was chosen. */
+    public static void setAudience(String audience) {
+        AUDIENCE.set(audience == null || audience.isBlank() ? "members" : audience);
+    }
+
+    public static String getAudience() {
+        String audience = AUDIENCE.get();
+        return audience == null || audience.isBlank() ? "members" : audience;
+    }
+
     public static void setUserId(UUID userId) {
         USER_ID.set(userId);
     }
@@ -166,6 +169,7 @@ public class UserContext {
         USER_ROLE.remove();
         USER_ROLES.remove();
         USER_ID.remove();
+        AUDIENCE.remove();
     }
 }
 

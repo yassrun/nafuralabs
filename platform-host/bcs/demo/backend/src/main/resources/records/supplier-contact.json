@@ -1,0 +1,12 @@
+{
+  "entity": "demo.supplier-contact",
+  "search": ["name", "email", "jobTitle"],
+  "properties": {
+    "supplierId": { "label": "Fournisseur", "type": "relation", "target": "demo.supplier", "filterable": true },
+    "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "jobTitle": { "label": "Fonction", "filterable": true },
+    "email": { "label": "E-mail", "filterable": true },
+    "phone": { "label": "Téléphone" },
+    "mainContact": { "label": "Principal", "filterable": true }
+  }
+}

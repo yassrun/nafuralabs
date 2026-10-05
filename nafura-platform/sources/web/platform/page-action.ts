@@ -45,8 +45,8 @@ export interface PageRequest {
   url?: string;
 }
 
-/** A list with a hierarchy loads every row (`tree`). Otherwise the server pages, unless `paging: 'client'`. */
-export function effectivePaging(config: { paging?: 'server' | 'client'; tree?: unknown }): 'server' | 'client' {
-  if (config.tree) return 'client';
+/** A tree view loads every row. Otherwise the server pages, unless `paging: 'client'`. */
+export function effectivePaging(config: { paging?: 'server' | 'client' }, view?: { layout?: string }): 'server' | 'client' {
+  if (view?.layout === 'tree') return 'client';
   return config.paging ?? 'server';
 }

@@ -1,0 +1,40 @@
+{
+  "id": "demo.public-items",
+  "kind": "demo",
+  "after": ["demo.categories"],
+  "entities": [
+    {
+      "entity": "DemoItem",
+      "key": ["code"],
+      "records": [
+        {
+          "code": "PUB-001",
+          "name": "Écran publié",
+          "unit": "U",
+          "unitPrice": 1200,
+          "published": true,
+          "supplierName": "Atlas Écrans",
+          "categoryId": { "$ref": "DemoCategory", "code": "IT-HW" }
+        },
+        {
+          "code": "PUB-SECRET",
+          "name": "Offre confidentielle",
+          "unit": "U",
+          "unitPrice": 50,
+          "published": true,
+          "confidential": true,
+          "supplierName": "Fournisseur discret",
+          "categoryId": { "$ref": "DemoCategory", "code": "SRV" }
+        },
+        {
+          "code": "PUB-HIDDEN",
+          "name": "Article non publié",
+          "unit": "U",
+          "unitPrice": 10,
+          "published": false,
+          "categoryId": { "$ref": "DemoCategory", "code": "BUR" }
+        }
+      ]
+    }
+  ]
+}

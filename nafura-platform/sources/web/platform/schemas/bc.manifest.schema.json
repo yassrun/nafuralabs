@@ -92,6 +92,15 @@
             }
           }
         },
+        "public": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "routes": { "type": "array", "items": { "type": "string", "pattern": "^/" } },
+            "endpoints": { "type": "array", "items": { "type": "string", "pattern": "^GET /api/public/[a-z0-9-]+/" } },
+            "submissions": { "type": "array", "items": { "type": "string", "pattern": "^POST /api/public/[a-z0-9-]+/" } }
+          }
+        },
         "screens": {
           "type": "array",
           "items": {

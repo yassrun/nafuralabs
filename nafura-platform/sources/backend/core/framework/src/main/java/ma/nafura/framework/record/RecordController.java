@@ -1,6 +1,11 @@
 package ma.nafura.platform.framework.record;
 
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,15 +15,17 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.convert.ConversionException;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -42,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.framework.context.TenantContext;
+import ma.nafura.platform.framework.context.UserContext;
 import ma.nafura.platform.framework.domain.TenantEntity;
 
 /**
@@ -65,19 +73,19 @@ public abstract class RecordController<E extends TenantEntity> {
     @Autowired
     private ObjectProvider<LifecycleNotifications> notifications;
 
+    @Autowired
+    private RecordCatalog records;
+
+    @Autowired
+    private EntityManager entities;
+
+    @Autowired
+    private ObjectProvider<OrganizationZone> zones;
+
     private Lifecycle lifecycle;
+    private RecordDescriptor descriptor;
 
     protected abstract RecordRepository<E> repository();
-
-    /** Fields searched by {@code q} (contains, case-insensitive). */
-    protected List<String> searchFields() {
-        return List.of();
-    }
-
-    /** Fields filterable by equality, as query parameters ({@code ?supplierId=...}). */
-    protected Set<String> filterFields() {
-        return Set.of();
-    }
 
     /** Field shown by {@code /options}. */
     protected String labelField() {
@@ -88,19 +96,23 @@ public abstract class RecordController<E extends TenantEntity> {
         return Sort.by(Sort.Direction.DESC, "createdAt");
     }
 
-    /** Classpath JSON of the record lifecycle, e.g. {@code "lifecycle/purchase-request.json"}; none by default. */
-    protected String lifecycleResource() {
+    /** Classpath JSON of the record, e.g. {@code "records/purchase-request.json"}; none by default. */
+    protected String recordResource() {
         return null;
     }
 
     @PostConstruct
-    void registerLifecycle() {
-        String resource = lifecycleResource();
+    void registerRecord() {
+        String resource = recordResource();
         Class<?> recordType = GenericTypeResolver.resolveTypeArgument(getClass(), RecordController.class);
         if (resource != null) {
-            lifecycle = Lifecycle.load(resource);
-            checkNotify(lifecycle, recordType, resource);
-            lifecycles.<HasStatus>register(recordType, lifecycle, id -> find(id).map(HasStatus.class::cast), r -> repository().save(cast(r)));
+            descriptor = RecordDescriptor.load(resource, recordType);
+            lifecycle = descriptor.lifecycle();
+            if (lifecycle != null) {
+                checkNotify(lifecycle, recordType, resource);
+                lifecycles.<HasStatus>register(recordType, lifecycle, id -> find(id).map(HasStatus.class::cast), r -> repository().save(cast(r)));
+            }
+            records.register(descriptor, mappingPath(), readPermission());
         }
         registerAccess();
     }
@@ -113,10 +125,19 @@ public abstract class RecordController<E extends TenantEntity> {
         recordAccess.register(recordKey(), scope + ".read", scope + ".update", id -> find(id).isPresent());
     }
 
+    private String readPermission() {
+        SecuredResource secured = getClass().getAnnotation(SecuredResource.class);
+        return secured == null ? null : secured.domain() + "." + secured.feature() + "." + secured.resource() + ".read";
+    }
+
+    private String mappingPath() {
+        RequestMapping mapping = getClass().getAnnotation(RequestMapping.class);
+        return mapping != null && mapping.value().length > 0 ? mapping.value()[0] : "";
+    }
+
     private String recordKey() {
         if (lifecycle != null && lifecycle.entity() != null && !lifecycle.entity().isBlank()) return lifecycle.entity();
-        RequestMapping mapping = getClass().getAnnotation(RequestMapping.class);
-        String path = mapping != null && mapping.value().length > 0 ? mapping.value()[0] : "";
+        String path = mappingPath();
         int slash = path.lastIndexOf('/');
         return slash >= 0 ? path.substring(slash + 1) : path;
     }
@@ -217,6 +238,47 @@ public abstract class RecordController<E extends TenantEntity> {
         return ResponseEntity.noContent().build();
     }
 
+    /** Declared properties: type, label, whether they can be filtered or sorted, and the values of a status or a select. */
+    @GetMapping("/properties")
+    public Map<String, Object> properties() {
+        if (descriptor == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This record has no properties");
+        }
+        Map<String, Object> body = new LinkedHashMap<>();
+        descriptor.properties().forEach((key, property) -> body.put(key, propertyView(property)));
+        return body;
+    }
+
+    /** Sum, average and count of the whole filtered result, not of the current page. */
+    @GetMapping("/aggregate")
+    public Map<String, Object> aggregate(
+            @RequestParam Map<String, String> params,
+            @RequestParam(value = "sum", required = false) List<String> sums,
+            @RequestParam(value = "avg", required = false) List<String> avgs,
+            @RequestParam(value = "count", required = false) List<String> counts) {
+        Specification<E> spec = specification(params);
+        Map<String, Object> sum = new LinkedHashMap<>();
+        Map<String, Object> avg = new LinkedHashMap<>();
+        Map<String, Object> count = new LinkedHashMap<>();
+        for (String field : sums == null ? List.<String>of() : sums) {
+            requireNumeric(field, "sum");
+            sum.put(field, aggregate(spec, "sum", field));
+        }
+        for (String field : avgs == null ? List.<String>of() : avgs) {
+            requireNumeric(field, "avg");
+            avg.put(field, aggregate(spec, "avg", field));
+        }
+        for (String field : counts == null ? List.<String>of() : counts) {
+            requireProperty(field);
+            count.put(field, aggregate(spec, "count", field));
+        }
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("sum", sum);
+        body.put("avg", avg);
+        body.put("count", count);
+        return body;
+    }
+
     /** Declared states and transitions (labels, tones) — the UI draws the status from it. */
     @GetMapping("/lifecycle")
     public Lifecycle lifecycle() {
@@ -253,7 +315,30 @@ public abstract class RecordController<E extends TenantEntity> {
 
     protected Optional<E> find(UUID id) {
         UUID tenantId = TenantContext.getTenantId();
-        return repository().findById(id).filter(record -> tenantId.equals(record.getTenantId()));
+        return repository().findById(id).filter(record -> tenantId.equals(record.getTenantId()) && visibleToCaller(record));
+    }
+
+    /** External audiences only see records they own. No {@link OwnedBy} means no external owner, so nothing. */
+    private boolean visibleToCaller(E record) {
+        if (!externalAudience()) return true;
+        String field = ownerField();
+        if (field == null) return false;
+        Object owner = new BeanWrapperImpl(record).getPropertyValue(field);
+        UUID userId = UserContext.getUserIdOrNull();
+        return userId != null && userId.equals(owner);
+    }
+
+    private boolean externalAudience() {
+        return !"members".equals(UserContext.getAudience());
+    }
+
+    private String ownerField() {
+        Class<?> type = GenericTypeResolver.resolveTypeArgument(getClass(), RecordController.class);
+        if (type == null) return null;
+        for (Field field : type.getDeclaredFields()) {
+            if (field.getAnnotation(OwnedBy.class) != null) return field.getName();
+        }
+        return null;
     }
 
     private E require(UUID id) {
@@ -275,27 +360,38 @@ public abstract class RecordController<E extends TenantEntity> {
 
     private Specification<E> specification(Map<String, String> params) {
         UUID tenantId = TenantContext.getTenantId();
-        Set<String> filters = filterFields();
-        String q = params.get("q");
+        RecordFilter.Context context = filterContext(tenantId);
+        Specification<E> search = RecordFilter.search(params.get("q"), descriptor, context);
+        Specification<E> filter = descriptor == null ? null : RecordFilter.compile(params.get("filter"), descriptor.properties(), context);
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.get("tenantId"), tenantId));
-            if (q != null && !q.isBlank() && !searchFields().isEmpty()) {
-                String like = "%" + q.trim().toLowerCase() + "%";
-                predicates.add(cb.or(searchFields().stream()
-                        .map(f -> cb.like(cb.lower(root.get(f).as(String.class)), like))
-                        .toArray(Predicate[]::new)));
-            }
-            params.forEach((field, value) -> {
-                if (filters.contains(field) && value != null && !value.isBlank()) {
-                    var path = root.get(field);
-                    predicates.add(value.equals("null")
-                            ? cb.isNull(path)
-                            : cb.equal(path, typed(value, path.getJavaType())));
+            if (externalAudience()) {
+                String field = ownerField();
+                UUID userId = UserContext.getUserIdOrNull();
+                if (field == null || userId == null) {
+                    predicates.add(cb.disjunction());
+                } else {
+                    predicates.add(cb.equal(root.get(field), userId));
                 }
-            });
+            }
+            for (Specification<E> extra : Arrays.asList(search, filter)) {
+                if (extra == null) continue;
+                Predicate predicate = extra.toPredicate(root, query, cb);
+                if (predicate != null) predicates.add(predicate);
+            }
             return cb.and(predicates.toArray(Predicate[]::new));
         };
+    }
+
+    private RecordFilter.Context filterContext(UUID tenantId) {
+        ZoneId zone = zone();
+        return new RecordFilter.Context(tenantId, UserContext.getUserIdOrNull(), LocalDate.now(zone), zone, externalAudience(),
+                records::target,
+                entity -> {
+                    RecordCatalog.Target target = records.target(entity);
+                    return target != null && (target.readPermission() == null || UserContext.hasPermission(target.readPermission()));
+                });
     }
 
     private Sort sort(String sort) {
@@ -304,15 +400,108 @@ public abstract class RecordController<E extends TenantEntity> {
         }
         String[] parts = sort.split(",");
         Sort.Direction direction = parts.length > 1 && parts[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-        return Stream.of(parts[0]).filter(f -> !f.isBlank()).findFirst().map(f -> Sort.by(direction, f)).orElse(defaultSort());
+        String field = parts[0];
+        if (field.isBlank()) {
+            return defaultSort();
+        }
+        if (descriptor != null) {
+            RecordProperty property = descriptor.property(field);
+            if (property == null || !property.sortable()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Property " + field + " is not sortable");
+            }
+        }
+        return Sort.by(direction, field);
     }
 
-    private static Object typed(String value, Class<?> type) {
-        try {
-            return DefaultConversionService.getSharedInstance().convert(value, type);
-        } catch (ConversionException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filter value: " + value);
+    private Map<String, Object> propertyView(RecordProperty property) {
+        Map<String, Object> view = new LinkedHashMap<>();
+        view.put("label", property.label());
+        view.put("type", property.type());
+        view.put("filterable", property.filterable());
+        view.put("sortable", property.sortable());
+        if (property.target() != null) {
+            view.put("target", property.target());
+            String endpoint = records.endpoint(property.target());
+            if (endpoint != null) {
+                view.put("endpoint", endpoint);
+                view.put("options", endpoint + "/options");
+            }
         }
+        if (property.via() != null) {
+            view.put("via", property.via());
+        }
+        if (property.currency() != null) {
+            view.put("currency", property.currency());
+        }
+        if (property.display() != null) {
+            view.put("display", property.display());
+        }
+        if ("status".equals(property.type()) && lifecycle != null) {
+            view.put("values", lifecycle.states().stream().map(state -> {
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("id", state.id());
+                item.put("label", state.label());
+                item.put("tone", state.tone());
+                return item;
+            }).toList());
+        } else if ("select".equals(property.type())) {
+            view.put("values", property.options().stream().map(option -> {
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("id", option);
+                item.put("label", option);
+                return item;
+            }).toList());
+        }
+        return view;
+    }
+
+    private void requireNumeric(String field, String function) {
+        RecordProperty property = requireProperty(field);
+        if (!"number".equals(property.type()) && !"money".equals(property.type())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot " + function + " property " + field);
+        }
+    }
+
+    private RecordProperty requireProperty(String field) {
+        if (descriptor == null || descriptor.property(field) == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown property " + field);
+        }
+        return descriptor.property(field);
+    }
+
+    private Number aggregate(Specification<E> spec, String function, String field) {
+        CriteriaBuilder cb = entities.getCriteriaBuilder();
+        CriteriaQuery<Number> query = cb.createQuery(Number.class);
+        Root<E> root = query.from(entityClass());
+        query.select(switch (function) {
+            case "sum" -> cb.sum(root.get(field));
+            case "avg" -> cb.avg(root.get(field));
+            case "count" -> cb.count(root.get(field));
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown aggregate " + function);
+        });
+        query.where(spec.toPredicate(root, query, cb));
+        Number value = entities.createQuery(query).getSingleResult();
+        return value == null ? BigDecimal.ZERO : value;
+    }
+
+    private ZoneId zone() {
+        ZoneId found = ZoneId.of("UTC");
+        for (OrganizationZone candidate : zones) {
+            if (candidate instanceof UtcOrganizationZone) {
+                continue;
+            }
+            try {
+                return candidate.zone();
+            } catch (RuntimeException ignored) {
+                return found;
+            }
+        }
+        return found;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Class<E> entityClass() {
+        return (Class<E>) GenericTypeResolver.resolveTypeArgument(getClass(), RecordController.class);
     }
 
     private static int integer(String value, int fallback) {

@@ -86,6 +86,15 @@ class AccessServiceTest {
     }
 
     @Test
+    void anOrganizationRoleNeverCarriesAnOperatorPermissionEvenFromAnOperator() {
+        UserContext.setPermissions(Set.of("platform.operator.*"));
+        assertThatThrownBy(() -> access.createRole(TENANT, new CreateRoleRequest("OPS", "Ops", null,
+                List.of("platform.operator.organizations.create"))))
+                .hasMessageContaining("granted only by the deployment");
+        verify(customRoles, never()).save(any());
+    }
+
+    @Test
     void onlyKnownPermissionsCanBeGranted() {
         assertThatThrownBy(() -> access.createRole(TENANT, new CreateRoleRequest("JUNIOR", "Junior", null, List.of("anything.at.all"))))
                 .hasMessageContaining("Unknown permission(s): anything.at.all");

@@ -1,0 +1,33 @@
+{
+  "entity": "probe.record",
+  "search": ["code"],
+  "properties": {
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "groupId": { "label": "Groupe", "type": "relation", "target": "probe.group", "filterable": true },
+    "amount": { "label": "Montant", "type": "money", "filterable": true, "sortable": true },
+    "status": { "label": "Statut", "filterable": true },
+    "createdBy": { "label": "Créé par", "type": "person", "filterable": true },
+    "createdAt": { "label": "Créé le", "filterable": true, "sortable": true }
+  },
+  "initial": "DRAFT",
+  "editable": ["DRAFT"],
+  "states": [
+    { "id": "DRAFT", "label": "Draft" },
+    { "id": "SUBMITTED", "label": "Submitted" },
+    { "id": "APPROVED", "label": "Approved" },
+    { "id": "REJECTED", "label": "Rejected" }
+  ],
+  "transitions": [
+    {
+      "id": "submit",
+      "label": "Submit",
+      "from": ["DRAFT"],
+      "to": "SUBMITTED",
+      "permission": "probe.records.record.submit",
+      "requires": ["amount"],
+      "approval": { "role": "PROBE_LEAD", "when": "amount > 1000", "approved": "approve", "rejected": "reject" }
+    },
+    { "id": "approve", "label": "Approve", "from": ["SUBMITTED"], "to": "APPROVED", "system": true },
+    { "id": "reject", "label": "Reject", "from": ["SUBMITTED"], "to": "REJECTED", "system": true }
+  ]
+}

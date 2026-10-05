@@ -27,6 +27,27 @@ class ApplicationManifestEnvironmentTest {
                 .containsEntry("nafura.lab.issuer", "acme-erp-lab")
                 .containsEntry("server.port", 8095)
                 .containsEntry("nafura.lab.users[0].email", "a@acme.local")
-                .containsEntry("nafura.lab.users[0].role", "SUPER_ADMIN");
+                .containsEntry("nafura.lab.users[0].role", "SUPER_ADMIN")
+                .containsEntry("nafura.runtime.signup", "operator");
+    }
+
+    @Test
+    void readsMultiOrganizationsOperatorsAndSignup() throws Exception {
+        Map<String, Object> properties = ApplicationManifestEnvironment.properties(new ObjectMapper().readTree("""
+                { "metadata": { "id": "app.acme-erp" },
+                  "spec": { "runtime": { "tenancy": "multi", "signup": "open" },
+                            "local": { "organizations": [ { "key": "org-a", "name": "A" } ],
+                                       "users": [ { "email": "a@acme.local", "givenName": "A", "familyName": "B", "role": "OWNER",
+                                                    "organizations": [ { "key": "org-a", "role": "OWNER" }, "org-b" ] } ] },
+                            "deploy": { "lab": { "operators": [ "op@acme.local" ] } } } }
+                """));
+
+        assertThat(properties)
+                .containsEntry("nafura.security.tenant.mode", "multi")
+                .containsEntry("nafura.runtime.signup", "open")
+                .containsEntry("nafura.lab.organizations[0].key", "org-a")
+                .containsEntry("nafura.lab.users[0].organizations[0].role", "OWNER")
+                .containsEntry("nafura.lab.users[0].organizations[1].key", "org-b")
+                .containsEntry("nafura.access.operators[0]", "op@acme.local");
     }
 }

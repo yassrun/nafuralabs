@@ -2,8 +2,13 @@
 # bc.demo API scenario against a running host (default http://localhost:8090): records, lifecycle, approval.
 set -euo pipefail
 BASE=${BASE:-http://localhost:8090}
+# The filter grammar of the API, URL-encoded: enc '{"status":{"is":"DRAFT"}}'.
+enc() { printf '%s' "$1" | sed 's/{/%7B/g;s/}/%7D/g;s/"/%22/g;s/:/%3A/g;s/,/%2C/g;s/\[/%5B/g;s/\]/%5D/g;s/ /%20/g'; }
 token() { curl -s -X POST -H 'Content-Type: application/json' -d "{\"email\":\"$1\"}" "$BASE/api/public/lab/session" | sed -E 's/.*"accessToken":"([^"]+)".*/\1/'; }
-TENANT=$(curl -s -H "Authorization: Bearer $(token lead@host.local)" "$BASE/api/v1/me/session" | sed -E 's/.*"tenant":\{"id":"([^"]+)".*/\1/')
+ORGS=$(curl -s -H "Authorization: Bearer $(token lead@host.local)" "$BASE/api/v1/me/organizations")
+org_id() { node -e 'const o=JSON.parse(process.argv[1]); const hit=o.find(x=>x.key===process.argv[2]); if(!hit) process.exit(2); process.stdout.write(hit.id)' "$ORGS" "$1"; }
+TENANT=$(org_id org-a)
+TENANT_B=$(org_id org-b)
 call() { # user method path [json] -> prints "status body"
   local t; t=$(token "$1")
   curl -s -o /tmp/demo-body -w '%{http_code}' -X "$2" -H "Authorization: Bearer $t" -H "X-Tenant-ID: $TENANT" -H 'Content-Type: application/json' ${4:+-d "$4"} "$BASE$3"
@@ -19,7 +24,7 @@ r=$(call $LEAD POST /api/v1/demo/suppliers "{\"code\":\"SCN-001\",\"name\":\"Atl
 r=$(call $LEAD GET "/api/v1/demo/suppliers?q=atlas"); expect "$r" "200 {\"content\":[{" "search supplier"
 [[ "$r" == *'"categoryName":"Categorie scenario"'* ]] && echo "ok   derived categoryName" || { echo "FAIL derived categoryName"; FAILED=1; }
 r=$(call $LEAD POST /api/v1/demo/supplier-contacts "{\"supplierId\":\"$SUP\",\"name\":\"Salma B.\",\"email\":\"salma@atlas.ma\"}"); expect "$r" 201 "create contact"
-r=$(call $LEAD GET "/api/v1/demo/supplier-contacts?supplierId=$SUP"); expect "$r" "200 {\"content\":[{" "contacts of supplier"
+r=$(call $LEAD GET "/api/v1/demo/supplier-contacts?filter=$(enc "{\"supplierId\":{\"is\":\"$SUP\"}}")"); expect "$r" "200 {\"content\":[{" "contacts of supplier"
 r=$(call $VIEWER POST /api/v1/demo/suppliers '{"code":"X","name":"X"}'); expect "$r" 403 "viewer cannot create"
 r=$(call $LEAD POST /api/v1/demo/suppliers '{"code":"","name":"X"}'); expect "$r" 400 "validation"
 
@@ -51,8 +56,8 @@ TOTAL=$(echo "$r" | sed -E 's/.*"totalElements":([0-9]+).*/\1/')
 [[ "$TOTAL" -ge 80 ]] && echo "ok   at least 80 items" || { echo "FAIL item volume: $TOTAL"; FAILED=1; }
 r=$(call $LEAD GET "/api/v1/demo/items?page=0&size=1000"); expect "$r" 200 "items size capped"
 [[ "$r" == *'"size":500'* ]] && echo "ok   page size capped at 500" || { echo "FAIL page cap"; FAILED=1; }
-r=$(call $LEAD GET "/api/v1/demo/purchase-requests?status=DRAFT&page=0&size=5"); expect "$r" 200 "requests by status"
-[[ "$r" == *'"status":"DRAFT"'* && "$r" != *'"status":"ORDERED"'* && "$r" != *'"status":"APPROVED"'* && "$r" != *'"status":"SUBMITTED"'* ]] && echo "ok   status filter is equality" || { echo "FAIL status filter"; FAILED=1; }
+r=$(call $LEAD GET "/api/v1/demo/purchase-requests?filter=$(enc '{"status":{"is":"DRAFT"}}')&page=0&size=5"); expect "$r" 200 "requests by status"
+[[ "$r" == *'"status":"DRAFT"'* && "$r" != *'"status":"ORDERED"'* && "$r" != *'"status":"APPROVED"'* && "$r" != *'"status":"SUBMITTED"'* ]] && echo "ok   status filter" || { echo "FAIL status filter"; FAILED=1; }
 
 r=$(call $LEAD POST /api/v1/demo/purchase-requests/$BIG/duplicate); expect "$r" 201 "duplicate ordered request"
 COPY=$(echo "$r" | field id)
@@ -87,5 +92,26 @@ echo " $(cat /tmp/demo-body)"
 [[ "$EXT" == 200 && "$(cat /tmp/demo-body)" == *'Atlas Import'* ]] && echo "ok   supplier card extracted" || { echo "FAIL extract $EXT"; FAILED=1; }
 EXTV=$(curl -s -o /tmp/demo-body -w '%{http_code}' -X POST -H "Authorization: Bearer $(token $VIEWER)" -H "X-Tenant-ID: $TENANT" -F "file=@${WINCARD};type=application/pdf" "$BASE/api/v1/demo/suppliers/extract" || true)
 expect "$EXTV $(cat /tmp/demo-body)" 403 "viewer cannot extract"
+
+call_tenant() { # user method path tenant [json]
+  local t; t=$(token "$1")
+  curl -s -o /tmp/demo-body -w '%{http_code}' -X "$2" -H "Authorization: Bearer $t" -H "X-Tenant-ID: $4" -H 'Content-Type: application/json' ${5:+-d "$5"} "$BASE$3"
+  echo " $(cat /tmp/demo-body)"
+}
+r=$(call_tenant $LEAD GET "/api/v1/demo/suppliers/$SUP" "$TENANT_B"); expect "$r" 404 "supplier of A is invisible from B"
+r=$(call_tenant $VIEWER GET /api/v1/demo/suppliers "$TENANT_B"); expect "$r" 403 "viewer of A cannot call B"
+r=$(call admin@host.local POST /api/tenants '{"name":"Organisation C","key":"org-c","adminEmail":"owner-c@host.local"}'); expect "$r" 200 "operator creates organization C"
+[[ "$r" == *'"demo.categories"'* ]] && echo "ok   reference categories seeded" || { echo "FAIL reference seed: $r"; FAILED=1; }
+r=$(call $LEAD POST /api/tenants '{"name":"Non","key":"org-x","adminEmail":"x@host.local"}'); expect "$r" 403 "lead cannot create an organization"
+r=$(call_tenant admin@host.local POST "/api/tenants/$TENANT_B/suspend" "$TENANT_B"); expect "$r" 200 "operator suspends B"
+r=$(call_tenant $LEAD GET /api/v1/demo/suppliers "$TENANT_B"); expect "$r" 403 "suspended organization refuses its member"
+r=$(call_tenant admin@host.local POST "/api/tenants/$TENANT_B/resume" "$TENANT_B"); expect "$r" 200 "operator resumes B"
+
+PUB=$(curl -s -o /tmp/demo-body -w '%{http_code}' "$BASE/api/public/demo/items")
+echo " $(cat /tmp/demo-body)"
+[[ "$PUB" == 200 && "$(cat /tmp/demo-body)" == *'Écran publié'* && "$(cat /tmp/demo-body)" != *'Article non publié'* && "$(cat /tmp/demo-body)" != *createdBy* ]] && echo "ok   public catalogue" || { echo "FAIL public catalogue $PUB"; FAILED=1; }
+[[ "$(cat /tmp/demo-body)" != *'Offre confidentielle'* && "$(cat /tmp/demo-body)" != *'Fournisseur discret'* ]] && echo "ok   confidential item withheld" || { echo "FAIL confidential item listed"; FAILED=1; }
+PRIV=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/v1/demo/items")
+[[ "$PRIV" == 401 ]] && echo "ok   private items need a token" || { echo "FAIL private items $PRIV"; FAILED=1; }
 
 exit $FAILED

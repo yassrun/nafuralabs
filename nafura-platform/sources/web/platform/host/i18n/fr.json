@@ -1457,7 +1457,11 @@
     "action": {
       "new": "Nouveau",
       "newAria": "Créer un nouvel enregistrement"
-    }
+    },
+    "me": "Moi",
+    "sum": "Somme",
+    "avg": "Moyenne",
+    "count": "Nombre"
   },
   "approvals": {
     "status": {
@@ -1727,5 +1731,8 @@
   "Delete view": "Supprimer la vue",
   "Customize columns": "Personnaliser les colonnes",
   "Show all": "Tout afficher",
-  "Loading": "Chargement"
+  "Loading": "Chargement",
+  "Today": "Aujourd’hui",
+  "Previous month": "Mois précédent",
+  "Next month": "Mois suivant"
 }

@@ -1,0 +1,10 @@
+{
+  "entity": "demo.category",
+  "search": ["code", "name"],
+  "properties": {
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "name": { "label": "Catégorie", "filterable": true, "sortable": true },
+    "parentId": { "label": "Parent", "type": "relation", "target": "demo.category", "display": "name", "filterable": true },
+    "description": { "label": "Description" }
+  }
+}

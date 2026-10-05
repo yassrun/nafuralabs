@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import ma.nafura.platform.authorization.security.authorization.OperatorPermissions;
 
 /**
  * Roles declared by configuration: the platform's generic roles, each business context's default roles,
@@ -108,6 +109,12 @@ public final class DeclaredRoles {
     }
 
     private static void put(Map<String, Role> roles, Role role, List<String> problems) {
+        for (String permission : role.permissions()) {
+            if (OperatorPermissions.isOperatorPermission(permission)) {
+                problems.add(role.code() + " declares " + permission
+                        + ": platform.operator.* is granted only by spec.deploy.<env>.operators");
+            }
+        }
         Role previous = roles.putIfAbsent(role.code(), role);
         if (previous != null) {
             problems.add("role code " + role.code() + " declared by both " + previous.owner() + " and " + role.owner());

@@ -28,10 +28,29 @@ public class ApplicationManifestEnvironment implements EnvironmentPostProcessor 
         if (manifest == null) {
             return;
         }
-        environment.getPropertySources().addLast(new MapPropertySource("nafuraApplicationManifest", properties(manifest)));
+        environment.getPropertySources().addLast(new MapPropertySource("nafuraApplicationManifest", properties(manifest, deploymentEnv(environment))));
+    }
+
+    /** Lab unless the process is staging or prod. Operators and owners are read from that deployment block. */
+    static String deploymentEnv(ConfigurableEnvironment environment) {
+        for (String profile : environment.getActiveProfiles()) {
+            if ("prod".equals(profile)) {
+                return "prod";
+            }
+        }
+        for (String profile : environment.getActiveProfiles()) {
+            if ("staging".equals(profile)) {
+                return "staging";
+            }
+        }
+        return "lab";
     }
 
     static Map<String, Object> properties(JsonNode manifest) {
+        return properties(manifest, "lab");
+    }
+
+    static Map<String, Object> properties(JsonNode manifest, String deploymentEnv) {
         String id = manifest.path("metadata").path("id").asText().replaceFirst("^app\\.", "");
         String name = manifest.path("spec").path("product").path("name").asText(id);
         Map<String, Object> properties = new HashMap<>();
@@ -40,6 +59,11 @@ public class ApplicationManifestEnvironment implements EnvironmentPostProcessor 
         properties.put("nafura.application.name", name);
         properties.put("nafura.lab.issuer", id + "-lab");
         properties.put("nafura.security.tenant.mode", manifest.path("spec").path("runtime").path("tenancy").asText("single"));
+        String signup = manifest.path("spec").path("runtime").path("signup").asText("operator");
+        if (!"operator".equals(signup) && !"open".equals(signup)) {
+            throw new IllegalStateException("spec.runtime.signup must be \"operator\" or \"open\" (got " + signup + ")");
+        }
+        properties.put("nafura.runtime.signup", signup);
         // The product's OIDC client: tokens issued to another client of the shared realm are refused.
         properties.put("nafura.security.oidc.client-id", id);
         if (manifest.path("spec").path("customRoles").isBoolean()) {
@@ -49,6 +73,13 @@ public class ApplicationManifestEnvironment implements EnvironmentPostProcessor 
         if (local.path("ports").has("api")) {
             properties.put("server.port", local.path("ports").path("api").asInt());
         }
+        JsonNode organizations = local.path("organizations");
+        for (int i = 0; i < organizations.size(); i++) {
+            JsonNode organization = organizations.get(i);
+            String prefix = "nafura.lab.organizations[" + i + "].";
+            properties.put(prefix + "key", organization.path("key").asText());
+            properties.put(prefix + "name", organization.path("name").asText());
+        }
         JsonNode users = local.path("users");
         for (int i = 0; i < users.size(); i++) {
             JsonNode user = users.get(i);
@@ -57,6 +88,26 @@ public class ApplicationManifestEnvironment implements EnvironmentPostProcessor 
             properties.put(prefix + "given-name", user.path("givenName").asText());
             properties.put(prefix + "family-name", user.path("familyName").asText());
             properties.put(prefix + "role", user.path("role").asText());
+            JsonNode memberships = user.path("organizations");
+            for (int j = 0; j < memberships.size(); j++) {
+                JsonNode membership = memberships.get(j);
+                String membershipPrefix = prefix + "organizations[" + j + "].";
+                if (membership.isTextual()) {
+                    properties.put(membershipPrefix + "key", membership.asText());
+                } else {
+                    properties.put(membershipPrefix + "key", membership.path("key").asText());
+                    if (membership.hasNonNull("role")) {
+                        properties.put(membershipPrefix + "role", membership.path("role").asText());
+                    }
+                    if (membership.hasNonNull("audience")) {
+                        properties.put(membershipPrefix + "audience", membership.path("audience").asText());
+                    }
+                }
+            }
+        }
+        JsonNode operators = manifest.path("spec").path("deploy").path(deploymentEnv).path("operators");
+        for (int i = 0; i < operators.size(); i++) {
+            properties.put("nafura.access.operators[" + i + "]", operators.get(i).asText());
         }
         return properties;
     }

@@ -34,10 +34,21 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PublicEndpoint {
-    
+
     /**
      * Optional reason for making this endpoint public.
      * Useful for documentation and audit purposes.
      */
     String reason() default "";
+
+    /**
+     * AGGREGATED: every organization, no organization in the URL.
+     * ORGANISATION: the URL carries the organization's slug ({@code /p/{slug}/}), never its UUID.
+     */
+    Scope scope() default Scope.AGGREGATED;
+
+    enum Scope {
+        AGGREGATED,
+        ORGANISATION
+    }
 }

@@ -69,10 +69,10 @@ public class SingleScopeBootstrap implements ApplicationRunner {
         }
         jdbcTemplate.update(
                 """
-                INSERT INTO tenant (id, tenant_key, name, type, owner_email, application_id, created_at, updated_at)
-                VALUES (?, ?, ?, 'SINGLE', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                INSERT INTO tenant (id, tenant_key, name, type, owner_email, application_id, slug, status, created_at, updated_at)
+                VALUES (?, ?, ?, 'SINGLE', ?, ?, ?, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 """,
-                tenantId, applicationId, applicationName, owners.isEmpty() ? null : owners.get(0), applicationId);
+                tenantId, applicationId, applicationName, owners.isEmpty() ? null : owners.get(0), applicationId, applicationId);
         log.info("Created the organization of {} ({})", applicationId, tenantId);
     }
 

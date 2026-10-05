@@ -9,6 +9,7 @@ import ma.nafura.platform.framework.record.RecordAccess;
 import ma.nafura.platform.tenancy.repository.TenantDomainRepository;
 import org.springframework.beans.factory.ObjectProvider;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
+import ma.nafura.platform.authorization.security.authorization.OperatorDirectory;
 import ma.nafura.platform.authorization.security.authorization.PermissionEnforcementFilter;
 import ma.nafura.platform.authorization.security.jwt.DefaultJwtClaimMapper;
 import ma.nafura.platform.authorization.security.jwt.JwtClaimMapper;
@@ -24,6 +25,7 @@ import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.List;
@@ -81,6 +83,12 @@ public class NafuraSecurityAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
+    public OperatorDirectory operatorDirectory(Environment environment) {
+        return new OperatorDirectory(environment);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "nafura.security.user-context.enabled", havingValue = "true", matchIfMissing = true)
     public UserContextFilter userContextFilter(
             UserRoleRepository userRoleRepository,
@@ -89,7 +97,8 @@ public class NafuraSecurityAutoConfiguration {
             JwtTokenExtractor jwtTokenExtractor,
             AppUserProvisioningService appUserProvisioningService,
             UserPermissionContextService userPermissionContextService,
-            SecurityProperties securityProperties) {
+            SecurityProperties securityProperties,
+            OperatorDirectory operatorDirectory) {
         return new UserContextFilter(
                 userRoleRepository,
                 tenantMembershipRepository,
@@ -97,7 +106,8 @@ public class NafuraSecurityAutoConfiguration {
                 jwtTokenExtractor,
                 appUserProvisioningService,
                 userPermissionContextService,
-                securityProperties);
+                securityProperties,
+                operatorDirectory);
     }
 
     /**

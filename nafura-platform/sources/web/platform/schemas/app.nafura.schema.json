@@ -32,6 +32,7 @@
           "additionalProperties": false,
           "properties": {
             "tenancy": { "enum": ["single", "multi"] },
+            "signup": { "enum": ["operator", "open"] },
             "defaultRoute": { "type": "string", "pattern": "^/" }
           }
         },
@@ -103,6 +104,18 @@
               "additionalProperties": false,
               "properties": { "api": { "type": "number" }, "web": { "type": "number" } }
             },
+            "organizations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["key", "name"],
+                "additionalProperties": false,
+                "properties": {
+                  "key": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+                  "name": { "type": "string" }
+                }
+              }
+            },
             "users": {
               "type": "array",
               "items": {
@@ -113,7 +126,25 @@
                   "email": { "type": "string" },
                   "givenName": { "type": "string" },
                   "familyName": { "type": "string" },
-                  "role": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" }
+                  "role": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+                  "organizations": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+                        {
+                          "type": "object",
+                          "required": ["key"],
+                          "additionalProperties": false,
+                          "properties": {
+                            "key": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+                            "role": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+                            "audience": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+                          }
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -123,6 +154,7 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "lab": { "$ref": "#/$defs/deployment" },
             "staging": { "$ref": "#/$defs/deployment" },
             "prod": { "$ref": "#/$defs/deployment" }
           }
@@ -137,6 +169,11 @@
       "properties": {
         "host": { "type": "string", "pattern": "^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$" },
         "owners": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[^@\\s,'\"`$\\\\]+@[^@\\s,'\"`$\\\\]+$" },
+          "uniqueItems": true
+        },
+        "operators": {
           "type": "array",
           "items": { "type": "string", "pattern": "^[^@\\s,'\"`$\\\\]+@[^@\\s,'\"`$\\\\]+$" },
           "uniqueItems": true

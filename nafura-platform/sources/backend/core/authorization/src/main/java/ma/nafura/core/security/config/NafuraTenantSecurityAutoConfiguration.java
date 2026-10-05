@@ -3,6 +3,7 @@ package ma.nafura.platform.authorization.security.config;
 import ma.nafura.platform.tenancy.repository.TenantMembershipRepository;
 import ma.nafura.platform.tenancy.repository.TenantRepository;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
+import ma.nafura.platform.authorization.security.authorization.OperatorDirectory;
 import ma.nafura.platform.authorization.security.authorization.PublicEndpointRegistry;
 import ma.nafura.platform.authorization.security.jwt.JwtTokenExtractor;
 import ma.nafura.platform.authorization.security.properties.SecurityProperties;
@@ -31,7 +32,8 @@ public class NafuraTenantSecurityAutoConfiguration {
             PublicEndpointRegistry publicEndpointRegistry,
             JwtTokenExtractor jwtTokenExtractor,
             SecurityProperties securityProperties,
-            UserPermissionContextService userPermissionContextService) {
+            UserPermissionContextService userPermissionContextService,
+            OperatorDirectory operatorDirectory) {
         return new TenantContextFilter(
                 tenantRepository,
                 tenantMembershipRepository,
@@ -39,7 +41,8 @@ public class NafuraTenantSecurityAutoConfiguration {
                 publicEndpointRegistry,
                 jwtTokenExtractor,
                 securityProperties,
-                userPermissionContextService
+                userPermissionContextService,
+                operatorDirectory
         );
     }
 }

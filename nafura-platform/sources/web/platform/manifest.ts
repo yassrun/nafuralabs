@@ -48,6 +48,8 @@ export interface NafuraCommonSpec {
 export interface ApplicationRuntimeSpec {
   /** `single` (default): one organization per deployment; `multi`: users switch between organizations. */
   tenancy?: 'single' | 'multi';
+  /** Who may call `POST /api/tenants`. Default `operator`. */
+  signup?: 'operator' | 'open';
   defaultRoute: string;
 }
 
@@ -72,19 +74,29 @@ export interface ApplicationSpec extends NafuraCommonSpec {
   roles?: ApplicationRoleDeclaration[];
   /** false: organizations keep to the declared roles (platform, business contexts, application). Default true. */
   customRoles?: boolean;
-  /** Local run (lab and local-staging): ports, and the lab users offered at login. */
+  /** Local run (lab and local-staging): ports, lab organizations, and the lab users offered at login. */
   local?: {
     ports?: { api: number; web: number };
-    users?: { email: string; givenName: string; familyName: string; role: string }[];
+    organizations?: { key: string; name: string }[];
+    users?: {
+      email: string;
+      givenName: string;
+      familyName: string;
+      role: string;
+      /** Organization keys, or `{ key, role?, audience? }` when the role differs from `role`. */
+      organizations?: Array<string | { key: string; role?: string; audience?: string }>;
+    }[];
   };
   /** Cluster hosts; default `<id>.nafuralabs.staging` and `<id>.nafuralabs.com` (ops/product/run.mjs). */
-  deploy?: { staging?: ApplicationDeployment; prod?: ApplicationDeployment };
+  deploy?: { lab?: ApplicationDeployment; staging?: ApplicationDeployment; prod?: ApplicationDeployment };
 }
 
 export interface ApplicationDeployment {
   host?: string;
-  /** Emails holding OWNER in the organization; they invite and assign everyone else in the app. */
+  /** Emails holding OWNER in the organization; they invite and assign everyone else in the app. Single tenancy. */
   owners?: string[];
+  /** Product operators. The only source of `platform.operator.*`. Role wildcards never cover it. */
+  operators?: string[];
 }
 
 export interface ApplicationRoleDeclaration {

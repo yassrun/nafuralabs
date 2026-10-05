@@ -5,7 +5,7 @@
   "metadata": { "id": "app.platform-host", "version": "0.1.0", "owner": "nafuralabs", "lifecycle": "experimental" },
   "spec": {
     "product": { "name": "Platform Host", "tagline": "Config + BCs", "mark": "/brand/mark.svg" },
-    "runtime": { "tenancy": "single", "defaultRoute": "/" },
+    "runtime": { "tenancy": "multi", "signup": "operator", "defaultRoute": "/" },
     "shell": {
       "topBar": { "enabled": true, "pageContext": true },
       "sidebar": { "enabled": true },
@@ -28,12 +28,28 @@
     "i18n": { "locales": ["fr"] },
     "local": {
       "ports": { "api": 8090, "web": 4400 },
+      "organizations": [
+        { "key": "org-a", "name": "Organisation A" },
+        { "key": "org-b", "name": "Organisation B" }
+      ],
       "users": [
         { "email": "admin@host.local", "givenName": "Host", "familyName": "Admin", "role": "SUPER_ADMIN" },
-        { "email": "reader@host.local", "givenName": "Host", "familyName": "Reader", "role": "READER" },
-        { "email": "lead@host.local", "givenName": "Demo", "familyName": "Lead", "role": "DEMO_LEAD" },
-        { "email": "viewer@host.local", "givenName": "Demo", "familyName": "Viewer", "role": "DEMO_VIEWER" }
+        { "email": "reader@host.local", "givenName": "Host", "familyName": "Reader", "role": "READER", "organizations": ["org-a"] },
+        {
+          "email": "lead@host.local",
+          "givenName": "Demo",
+          "familyName": "Lead",
+          "role": "DEMO_LEAD",
+          "organizations": [
+            { "key": "org-a", "role": "DEMO_LEAD" },
+            { "key": "org-b", "role": "DEMO_VIEWER" }
+          ]
+        },
+        { "email": "viewer@host.local", "givenName": "Demo", "familyName": "Viewer", "role": "DEMO_VIEWER", "organizations": ["org-a"] }
       ]
+    },
+    "deploy": {
+      "lab": { "operators": ["admin@host.local"] }
     }
   }
 }

@@ -4,25 +4,16 @@ import type { RecordPageConfig } from '@platform/platform/record';
 const ITEMS = '/api/v1/demo/items';
 const route = (id: string) => `/demo/items/${id}`;
 const UNITS = ['u', 'kg', 'm', 'm²', 'm³', 'L', 'h'].map((value) => ({ value, label: value }));
-const money = (value: unknown) => (value == null ? '—' : `${Number(value).toLocaleString('fr-MA', { minimumFractionDigits: 2 })} MAD`);
 
 export const ITEMS_LISTING: ListingPageConfig = {
   title: 'Articles',
   subtitle: 'Le catalogue de ce que l’on achète',
   icon: 'package',
   endpoint: ITEMS,
-  searchFields: ['code', 'name', 'categoryName'],
-  filters: [{ key: 'unit', label: 'Unité', type: 'select', options: UNITS }],
-  segments: [
-    { id: 'active', label: 'Actifs', filters: { active: true } },
-    { id: 'all', label: 'Tous' },
-  ],
-  columns: [
-    { key: 'code', field: 'code', label: 'Code', sortable: true, width: '120px', cssClass: 'nf-cell--mono' },
-    { key: 'name', field: 'name', label: 'Désignation', sortable: true },
-    { key: 'category', field: 'categoryName', label: 'Catégorie', sortable: true },
-    { key: 'unit', field: 'unit', label: 'Unité', width: '90px' },
-    { key: 'price', field: 'unitPrice', label: 'Prix unitaire', transform: money, sortable: true, width: '150px' },
+  quickFilters: [{ property: 'categoryId' }, { property: 'unit' }],
+  views: [
+    { id: 'active', label: 'Actifs', layout: 'table', filter: { active: { is: true } }, show: ['code', 'name', 'categoryId', 'unit', 'unitPrice'] },
+    { id: 'all', label: 'Tous', layout: 'table', show: ['code', 'name', 'categoryId', 'unit', 'unitPrice', 'active'] },
   ],
   emptyState: { icon: 'package', title: 'Aucun article', message: 'Ajoutez les articles que vous achetez.' },
   open: (item) => route(String(item['id'])),

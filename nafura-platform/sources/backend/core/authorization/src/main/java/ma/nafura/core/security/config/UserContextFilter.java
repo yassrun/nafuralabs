@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
 import ma.nafura.platform.authorization.repository.UserRoleRepository;
+import ma.nafura.platform.authorization.security.authorization.OperatorDirectory;
 import ma.nafura.platform.authorization.security.jwt.JwtTokenExtractor;
 import ma.nafura.platform.authorization.security.properties.SecurityProperties;
 import ma.nafura.platform.authorization.service.UserPermissionContextService;
@@ -56,6 +57,7 @@ public class UserContextFilter extends OncePerRequestFilter {
     private final AppUserProvisioningService appUserProvisioningService;
     private final UserPermissionContextService userPermissionContextService;
     private final SecurityProperties securityProperties;
+    private final OperatorDirectory operatorDirectory;
 
     @Override
     protected void doFilterInternal(
@@ -92,6 +94,7 @@ public class UserContextFilter extends OncePerRequestFilter {
                 } else {
                     applyNonSuperAdminRoles(emailOpt, email);
                 }
+                operatorDirectory.grantToCurrentUser();
             }
 
             filterChain.doFilter(request, response);

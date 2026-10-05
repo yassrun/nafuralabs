@@ -1,0 +1,36 @@
+{
+  "entity": "demo.supplier",
+  "search": ["code", "name", "city", "email", "contacts.name", "contacts.email"],
+  "properties": {
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "name": { "label": "Raison sociale", "filterable": true, "sortable": true },
+    "categoryId": {
+      "label": "Catégorie",
+      "type": "relation",
+      "target": "demo.category",
+      "display": "categoryName",
+      "filterable": true
+    },
+    "city": { "label": "Ville", "filterable": true, "sortable": true },
+    "active": { "label": "Statut", "filterable": true },
+    "paymentTerms": {
+      "label": "Paiement",
+      "type": "select",
+      "options": ["Comptant", "30 jours", "60 jours", "90 jours"],
+      "filterable": true
+    },
+    "rating": { "label": "Note", "filterable": true, "sortable": true },
+    "email": { "label": "E-mail", "filterable": true },
+    "phone": { "label": "Téléphone" },
+    "address": { "label": "Adresse" },
+    "deliveryDays": { "label": "Délai de livraison (jours)", "filterable": true, "sortable": true },
+    "notes": { "label": "Notes internes" },
+    "contacts": {
+      "label": "Contacts",
+      "type": "relations",
+      "target": "demo.supplier-contact",
+      "via": "supplierId",
+      "filterable": true
+    }
+  }
+}

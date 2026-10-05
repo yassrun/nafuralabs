@@ -11,7 +11,7 @@ const bc = readJson(new URL('../../../../sandbox/bc.manifest.example.json', impo
 // Covers only the keywords our two schemas use; a new keyword must be added here or it is ignored.
 const SUPPORTED = new Set([
   '$schema', '$id', '$ref', '$defs', 'title', 'type', 'required', 'properties',
-  'additionalProperties', 'items', 'const', 'enum', 'pattern',
+  'additionalProperties', 'items', 'const', 'enum', 'pattern', 'oneOf', 'uniqueItems',
 ]);
 
 function typeOf(value) {
@@ -34,7 +34,18 @@ function check(root, schema, value, path, errors) {
   if ('const' in schema && value !== schema.const) errors.push(`${path}: expected ${schema.const}`);
   if (schema.enum && !schema.enum.includes(value)) errors.push(`${path}: not in ${schema.enum.join('|')}`);
   if (schema.pattern && !new RegExp(schema.pattern).test(value)) errors.push(`${path}: does not match ${schema.pattern}`);
+  if (schema.oneOf) {
+    const matches = schema.oneOf.filter((option) => {
+      const nested = [];
+      check(root, option, value, path, nested);
+      return nested.length === 0;
+    });
+    if (matches.length !== 1) errors.push(`${path}: matches ${matches.length} alternatives`);
+  }
   if (schema.items) value.forEach((item, index) => check(root, schema.items, item, `${path}[${index}]`, errors));
+  if (schema.uniqueItems && Array.isArray(value) && new Set(value.map((item) => JSON.stringify(item))).size !== value.length) {
+    errors.push(`${path}: duplicate items`);
+  }
   if (typeOf(value) !== 'object') return;
 
   for (const key of schema.required ?? []) {

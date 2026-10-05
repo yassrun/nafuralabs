@@ -7,7 +7,7 @@ export const NOTES_LISTING: ListingPageConfig = {
   icon: 'file-text',
   endpoint: '/api/v1/demo/notes',
   emptyMessage: 'Aucune note pour le moment.',
-  columns: [{ key: 'title', field: 'title', label: 'Titre', sortable: true }],
+  views: [{ id: 'all', label: 'Toutes', layout: 'table', show: ['title'] }],
   actions: [
     {
       id: 'create',

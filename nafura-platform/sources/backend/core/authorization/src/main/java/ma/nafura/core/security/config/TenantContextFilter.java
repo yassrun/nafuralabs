@@ -8,6 +8,7 @@ import ma.nafura.platform.tenancy.domain.model.TenantMembership;
 import ma.nafura.platform.tenancy.repository.TenantMembershipRepository;
 import ma.nafura.platform.tenancy.repository.TenantRepository;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
+import ma.nafura.platform.authorization.security.authorization.OperatorDirectory;
 import ma.nafura.platform.authorization.security.authorization.PublicEndpointRegistry;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
@@ -60,6 +61,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
     private final JwtTokenExtractor jwtTokenExtractor;
     private final SecurityProperties securityProperties;
     private final UserPermissionContextService userPermissionContextService;
+    private final OperatorDirectory operatorDirectory;
 
     public TenantContextFilter(
             TenantRepository tenantRepository,
@@ -68,7 +70,8 @@ public class TenantContextFilter extends OncePerRequestFilter {
             PublicEndpointRegistry publicEndpointRegistry,
             JwtTokenExtractor jwtTokenExtractor,
             SecurityProperties securityProperties,
-            UserPermissionContextService userPermissionContextService) {
+            UserPermissionContextService userPermissionContextService,
+            OperatorDirectory operatorDirectory) {
         this.tenantRepository = tenantRepository;
         this.tenantMembershipRepository = tenantMembershipRepository;
         this.tenantUserRoleRepository = tenantUserRoleRepository;
@@ -76,6 +79,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
         this.jwtTokenExtractor = jwtTokenExtractor;
         this.securityProperties = securityProperties;
         this.userPermissionContextService = userPermissionContextService;
+        this.operatorDirectory = operatorDirectory;
     }
     
     // Pattern to match /api/tenants/{tenantId}/...
@@ -95,9 +99,13 @@ public class TenantContextFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Self-service tenant creation (no tenant context yet)
-        if ("POST".equalsIgnoreCase(request.getMethod()) && "/api/tenants".equals(path)) {
-            filterChain.doFilter(request, response);
+        // Creating an organization, or asking who I am, does not need an organization yet.
+        if (isIdentityWithoutTenant(request, path)) {
+            try {
+                filterChain.doFilter(request, response);
+            } finally {
+                TenantContext.clear();
+            }
             return;
         }
         
@@ -111,19 +119,24 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // Validate tenant exists (if enabled)
-            if (securityProperties.getTenant().isValidateTenant() && !tenantRepository.existsById(tenantId)) {
+            var tenant = tenantRepository.findById(tenantId).orElse(null);
+            if (securityProperties.getTenant().isValidateTenant() && tenant == null) {
                 log.warn("Tenant not found: {}", tenantId);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Tenant not found");
                 return;
             }
 
-            // Check if super admin (already resolved by UserContextFilter)
             boolean superAdmin = UserContext.isSuperAdmin();
+            boolean operator = operatorDirectory.isCurrentOperator();
+            if (tenant != null && "SUSPENDED".equalsIgnoreCase(tenant.getStatus()) && !operator) {
+                log.warn("Suspended organization refused: {}", tenantId);
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Organization suspended");
+                return;
+            }
 
-            // Verify user is member of tenant (if enabled and not SUPER_ADMIN)
+            // Verify user is member of tenant (if enabled and not SUPER_ADMIN or the product operator)
             if (securityProperties.getTenant().isValidateMembership() &&
-                    !superAdmin && !verifyUserMembership(tenantId)) {
+                    !superAdmin && !operator && !verifyUserMembership(tenantId)) {
                 log.warn("User is not a member of tenant: {}", tenantId);
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied: not a member of this tenant");
                 return;
@@ -144,6 +157,20 @@ public class TenantContextFilter extends OncePerRequestFilter {
         }
     }
     
+    /** Session and the organization list work before one is chosen. Creating an organization too. */
+    private boolean isIdentityWithoutTenant(HttpServletRequest request, String path) {
+        if ("POST".equalsIgnoreCase(request.getMethod()) && "/api/tenants".equals(path)) {
+            return true;
+        }
+        if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            return false;
+        }
+        if (!"/api/v1/me/organizations".equals(path) && !"/api/v1/me/session".equals(path)) {
+            return false;
+        }
+        return extractTenantId(request) == null;
+    }
+
     /**
      * Check if tenant context should be skipped for this path.
      */
@@ -240,6 +267,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 jwtTokenExtractor.getSubject().ifPresent(this::setUserIdIfUuid);
                 UserContext.setPermissions(Set.of("*"));
                 UserContext.setUserRole("SUPER_ADMIN");
+                operatorDirectory.grantToCurrentUser();
                 return;
             }
 
@@ -253,6 +281,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 log.warn("Active membership not found for user {} in tenant {}", email, tenantId);
                 UserContext.setUserRole(null);
                 UserContext.setPermissions(Set.of());
+                operatorDirectory.grantToCurrentUser();
                 return;
             }
 
@@ -263,6 +292,8 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     membership.getUserId());
 
             userPermissionContextService.applyRoleCodes(roleCodes, email);
+            UserContext.setAudience(membership.getAudience());
+            operatorDirectory.grantToCurrentUser();
 
         } catch (Exception e) {
             log.error("Error loading tenant user context: {}", e.getMessage(), e);

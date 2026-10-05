@@ -1,0 +1,9 @@
+{
+  "entity": "probe.group",
+  "search": ["code", "name", "records.code"],
+  "properties": {
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "records": { "label": "Enregistrements", "type": "relations", "target": "probe.record", "via": "groupId", "filterable": true }
+  }
+}

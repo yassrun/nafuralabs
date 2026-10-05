@@ -103,6 +103,16 @@ class DeclaredRolesTest {
     }
 
     @Test
+    void aRoleThatDeclaresTheOperatorPermissionPreventsStartup() throws Exception {
+        JsonNode platform = json.readTree("""
+            {"roles":[{"code":"OWNER","label":"Propriétaire","permissions":["platform.operator.*"]}]}
+            """);
+
+        assertThatThrownBy(() -> DeclaredRoles.resolve(platform, app("[]", "[]"), List.of()))
+                .hasMessageContaining("platform.operator.* is granted only by spec.deploy.<env>.operators");
+    }
+
+    @Test
     void thePlatformRolesFileIsValid() throws Exception {
         JsonNode platform = json.readTree(getClass().getResourceAsStream("/META-INF/nafura/platform/roles.json"));
 

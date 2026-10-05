@@ -1,4 +1,4 @@
-import type { ColumnConfig, FilterFieldConfig, ListingSegment } from '../../../types';
+import type { ColumnConfig, FilterFieldConfig, ListingPreset, ListingSegment } from '../../../types';
 import type { ListingActionItem } from '../../molecules/listing-actions';
 
 /** Row selection on the table. */
@@ -38,6 +38,8 @@ export interface ListingFlatFeatures {
   /** When the selection toggle is shown, whether it starts in multi-select mode. */
   selectionToggleDefaultActive?: boolean;
   pagination: boolean;
+  /** False: only the toolbar (tabs, search, filters, actions) — the host draws the rows (board, calendar). */
+  table: boolean;
   /** Row click: `select` toggles the row (default), `open` only emits `rowClick` (master–detail). */
   rowClick?: 'select' | 'open';
 }
@@ -74,6 +76,8 @@ export interface ListingFlatConfig {
   /** Quick views as tabs above the table (first one active unless `defaultSegment`). */
   segments?: ListingSegment[];
   defaultSegment?: string;
+  /** Ready-made filters shown as pills next to the pinned filters; the active ids are in `query.presets`. */
+  presets?: ListingPreset[];
   /**
    * Filters applied at init (demo / saved view).
    * @deprecated Prefer `query.filters` on the listing query input.
@@ -110,4 +114,5 @@ export const DEFAULT_LISTING_FLAT_FEATURES: ListingFlatFeatures = {
   selectionToggle: false,
   selectionToggleDefaultActive: true,
   pagination: true,
+  table: true,
 };

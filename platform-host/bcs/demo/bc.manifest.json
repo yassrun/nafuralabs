@@ -107,6 +107,10 @@
       { "id": "demo.projects", "label": "Projets", "route": "/demo/projects", "icon": "hard-hat", "permission": "demo.projects.project.read" },
       { "id": "demo.notes", "label": "Notes", "route": "/demo/notes", "icon": "file-text", "permission": "demo.notes.note.read" }
     ],
+    "public": {
+      "routes": ["/catalogue", "/catalogue/:id"],
+      "endpoints": ["GET /api/public/demo/items", "GET /api/public/demo/items/{id}"]
+    },
     "screens": [
       {
         "id": "supplier-overview",

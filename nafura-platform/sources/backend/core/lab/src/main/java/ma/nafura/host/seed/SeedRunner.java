@@ -28,5 +28,6 @@ public class SeedRunner implements ApplicationRunner {
         for (UUID tenantId : tenants.findAll().stream().map(Tenant::getId).toList()) {
             seeder.seed(tenantId);
         }
+        seeder.seedProduct();
     }
 }

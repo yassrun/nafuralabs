@@ -13,7 +13,7 @@ import tools.jackson.databind.json.JsonMapper;
 class SeedCatalogTest {
 
     private static SeedDataset dataset(String id, Kind kind, String... after) {
-        return new SeedDataset(id, kind, List.of(after), List.of(), id, id);
+        return new SeedDataset(id, kind, SeedDataset.Scope.ORGANIZATION, List.of(after), List.of(), id, id);
     }
 
     @Test

@@ -3,44 +3,24 @@ import type { RecordPageConfig } from '@platform/platform/record';
 
 const PROJECTS = '/api/v1/demo/projects';
 const route = (id: string) => `/demo/projects/${id}`;
-const money = (value: unknown) => (value == null ? '—' : `${Number(value).toLocaleString('fr-MA', { maximumFractionDigits: 0 })} MAD`);
-
-const STATUS: Record<string, { label: string; tone: 'default' | 'warning' | 'success' | 'info' }> = {
-  STUDY: { label: 'Étude', tone: 'info' },
-  QUOTE: { label: 'Devis', tone: 'info' },
-  VALIDATION: { label: 'Validation', tone: 'warning' },
-  EXECUTION: { label: 'Réalisation', tone: 'success' },
-  CLOSED: { label: 'Clôturé', tone: 'default' },
-};
 
 export const PROJECTS_LISTING: ListingPageConfig = {
   title: 'Projets',
   subtitle: 'De l’étude à la clôture',
   icon: 'hard-hat',
   endpoint: PROJECTS,
-  searchFields: ['name', 'client', 'city'],
-  segments: [
-    { id: 'all', label: 'Tous' },
-    { id: 'study', label: 'En étude', filters: { status: 'STUDY' } },
-    { id: 'quote', label: 'En devis', filters: { status: ['QUOTE', 'VALIDATION'] } },
-    { id: 'execution', label: 'En réalisation', filters: { status: 'EXECUTION' } },
-    { id: 'closed', label: 'Clôturés', filters: { status: 'CLOSED' } },
-  ],
-  columns: [
-    { key: 'name', field: 'name', label: 'Projet', sortable: true },
-    { key: 'client', field: 'client', label: 'Client', sortable: true },
-    { key: 'city', field: 'city', label: 'Ville' },
-    { key: 'budget', field: 'budget', label: 'Budget', transform: money, sortable: true, width: '150px' },
-    { key: 'progress', field: 'progress', label: 'Avancement', transform: (p) => (p == null ? '—' : `${p} %`), width: '120px' },
+  quickFilters: [{ property: 'city' }],
+  views: [
+    { id: 'all', label: 'Tous', layout: 'table', show: ['name', 'client', 'city', 'budget', 'progress', 'status'], footer: { budget: 'sum' } },
+    { id: 'steps', label: 'Étapes', layout: 'board', groupBy: 'status', hide: ['CLOSED'], card: ['name', 'client', 'budget'] },
     {
-      key: 'status',
-      field: 'status',
-      label: 'Étape',
-      type: 'badge',
-      transform: (status) => STATUS[String(status)]?.label ?? String(status),
-      badgeVariant: (status) => STATUS[String(status)]?.tone ?? 'default',
-      width: '140px',
+      id: 'quote',
+      label: 'En devis',
+      layout: 'table',
+      filter: { status: { in: ['QUOTE', 'VALIDATION'] } },
+      show: ['name', 'client', 'quoteAmount', 'quoteDate', 'status'],
     },
+    { id: 'starts', label: 'Démarrages', layout: 'calendar', date: 'startDate', card: ['name', 'client'] },
   ],
   emptyState: { icon: 'hard-hat', title: 'Aucun projet', message: 'Un projet commence par une étude.' },
   open: (project) => route(String(project['id'])),

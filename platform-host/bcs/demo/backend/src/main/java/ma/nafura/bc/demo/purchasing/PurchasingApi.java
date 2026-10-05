@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.framework.context.TenantContext;
+import ma.nafura.platform.framework.record.PublicRecordController;
 import ma.nafura.platform.framework.record.RecordController;
 import ma.nafura.platform.framework.record.RecordRepository;
 import org.springframework.data.domain.Sort;
@@ -39,8 +40,7 @@ class CategoryController extends RecordController<Category> {
     private final CategoryRepository repository;
 
     @Override protected RecordRepository<Category> repository() { return repository; }
-    @Override protected List<String> searchFields() { return List.of("code", "name"); }
-    @Override protected Set<String> filterFields() { return Set.of("parentId"); }
+    @Override protected String recordResource() { return "records/category.json"; }
     @Override protected String labelField() { return "name"; }
     @Override protected Sort defaultSort() { return Sort.by("name"); }
 }
@@ -54,8 +54,7 @@ class SupplierController extends RecordController<Supplier> {
     private final PurchaseRequestRepository requests;
 
     @Override protected RecordRepository<Supplier> repository() { return repository; }
-    @Override protected List<String> searchFields() { return List.of("code", "name", "city", "email"); }
-    @Override protected Set<String> filterFields() { return Set.of("active", "categoryId", "city"); }
+    @Override protected String recordResource() { return "records/supplier.json"; }
     @Override protected String labelField() { return "name"; }
 
     /** Counts and amounts of the supplier's purchase requests. Read permission of the supplier. */
@@ -108,8 +107,7 @@ class SupplierContactController extends RecordController<SupplierContact> {
     private final SupplierContactRepository repository;
 
     @Override protected RecordRepository<SupplierContact> repository() { return repository; }
-    @Override protected List<String> searchFields() { return List.of("name", "email", "jobTitle"); }
-    @Override protected Set<String> filterFields() { return Set.of("supplierId"); }
+    @Override protected String recordResource() { return "records/supplier-contact.json"; }
     @Override protected String labelField() { return "name"; }
     @Override protected Sort defaultSort() { return Sort.by("name"); }
 }
@@ -122,9 +120,18 @@ class ItemController extends RecordController<Item> {
     private final ItemRepository repository;
 
     @Override protected RecordRepository<Item> repository() { return repository; }
-    @Override protected List<String> searchFields() { return List.of("code", "name"); }
-    @Override protected Set<String> filterFields() { return Set.of("active", "categoryId", "unit"); }
+    @Override protected String recordResource() { return "records/item.json"; }
     @Override protected String labelField() { return "name"; }
+}
+
+@RestController
+@RequestMapping("/api/public/demo/items")
+@RequiredArgsConstructor
+class PublicItemController extends PublicRecordController<Item> {
+    private final ItemRepository repository;
+
+    @Override protected RecordRepository<Item> repository() { return repository; }
+    @Override protected boolean published(Item record) { return record.isPublished(); }
 }
 
 @RestController
@@ -135,10 +142,8 @@ class PurchaseRequestController extends RecordController<PurchaseRequest> {
     private final PurchaseRequestRepository repository;
 
     @Override protected RecordRepository<PurchaseRequest> repository() { return repository; }
-    @Override protected List<String> searchFields() { return List.of("subject"); }
-    @Override protected Set<String> filterFields() { return Set.of("status", "supplierId"); }
     @Override protected String labelField() { return "subject"; }
-    @Override protected String lifecycleResource() { return "lifecycle/purchase-request.json"; }
+    @Override protected String recordResource() { return "records/purchase-request.json"; }
 
     /** A new draft with the same commercial fields. The screen opens that copy (`result: record`). */
     @PostMapping("/{id}/duplicate")

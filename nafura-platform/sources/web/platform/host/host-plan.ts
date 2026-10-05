@@ -28,9 +28,6 @@ export function readApplicationManifest(value: unknown): ApplicationManifest {
   if (!manifest.spec?.runtime) {
     throw new Error(`Application "${manifest.metadata?.id}" has no spec.runtime.`);
   }
-  if (manifest.spec.runtime.tenancy === 'multi') {
-    throw new Error(`Application "${manifest.metadata?.id}": host v1 serves one organization per deployment (spec.runtime.tenancy "single").`);
-  }
   return manifest as ApplicationManifest;
 }
 

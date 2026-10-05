@@ -24,10 +24,12 @@ Deux nouvelles portées d’entité, à côté de `TenantEntity` (inchangé) :
 | Personne | `OwnedEntity` (`ownerId`, audit) | son propriétaire (audience externe) | son propriétaire ; une organisation **seulement à travers une liaison** |
 | Produit | `ProductEntity` (audit) | l’opérateur du produit (spec 09) | tous les utilisateurs authentifiés (et le public si exposé, spec 10) |
 
-- **Liaison** : un enregistrement d’organisation (`TenantEntity`) qui référence un enregistrement de personne, ex. `Application { tenantId, profileId, … }`. Déclaration : `@SharesWith(target = Profile.class, via = "profileId", fields = {...}, while = "status != 'WITHDRAWN'")` (forme à préciser) — l’organisation lit le profil lié, **en lecture seule**, limité aux champs déclarés, tant que la liaison existe et satisfait la condition.
+- **Liaison** : un enregistrement d’organisation (`TenantEntity`) qui référence un enregistrement de personne, ex. `Application { tenantId, profileId, … }`. `@SharesWith` se pose sur l’entité de liaison. Les champs partagés sont une liste explicite : rien n’est partagé par défaut. L’organisation lit le profil lié, **en lecture seule**, limité à cette liste, tant que la liaison existe.
+- Au démarrage, la plateforme recense les `@SharesWith` pour alimenter l’écran de consentement.
+- Postuler (le propriétaire crée la liaison) vaut consentement. Un partage lancé par l’organisation exige un consentement enregistré : une date, la version de ce qui est partagé, et un moyen de le retirer. Un retrait déclenche l’effacement de la spec 11. Si la liste des champs partagés change, on redemande le consentement.
 - Le propriétaire voit les liaisons qui le concernent (ex. ses candidatures) sans voir le reste de l’organisation : projection déclarée sur la liaison.
 - Contrôleurs : `OwnedRecordController<E extends OwnedEntity>` (le propriétaire gère le sien) et `ProductRecordController<E extends ProductEntity>` (opérateur), mêmes conventions que `RecordController`.
-- Seeds : `kind: "reference"` d’un `ProductEntity` appliqué **une fois** au produit, pas par organisation.
+- Seeds : les deux portées reprennent le format existant `kind: "reference"`, avec une portée `produit` ou `organisation`. Pas de nouveau mécanisme. Portée produit : lecture seule pour l’organisation, appliqué une fois. Portée organisation : le référentiel est propre à chaque organisation, qu’elle peut modifier.
 - Schéma : tables sans `tenant_id` pour ces portées ; le garde-fou d’entité (`ddl-auto: validate` + contrôle) refuse une entité métier sans portée déclarée.
 
 ## Sécurité
@@ -41,7 +43,7 @@ Deux nouvelles portées d’entité, à côté de `TenantEntity` (inchangé) :
 Fiche société partagée :
 - `SupplierProfile` (`OwnedEntity`, propriétaire = contact fournisseur externe de la spec 11) : raison sociale, ville, certifications.
 - `Supplier` existant (`TenantEntity`) gagne `profileId` (liaison « référencement ») ; l’organisation voit le profil lié en lecture seule dans la fiche fournisseur.
-- `Category` devient (ou une nouvelle entité devient) `ProductEntity` pour montrer un référentiel commun — **choisir** sans casser l’arbre de catégories existant.
+- Le référentiel commun de la démo est un seed `kind: "reference"` de portée produit, en lecture seule pour les organisations. L’arbre de catégories existant, propre à chaque organisation, ne change pas de portée.
 - `scenario-api.sh` : le contact modifie son profil → 200 ; l’organisation A (liée) le lit → 200 ; l’organisation B (non liée) → 404 ; l’organisation A tente de le modifier → 403.
 - host-test : `CrossOrganizationSharingHostTest`.
 
@@ -56,8 +58,15 @@ Fiche société partagée :
 
 `docs/ARCHITECTURE.md` : règle « Portées des données » ; `docs/PLATFORM.md` : section « Données et API : le record » (trois portées, liaison) et « Données initiales » (seed produit).
 
-## Décisions ouvertes (à trancher avant de coder)
+## Décisions (2026-10-04)
 
-1. **Forme de la déclaration de partage** (`@SharesWith` sur la liaison, ou section `sharing` dans le manifeste du BC) — **recommandation** : annotation sur l’entité de liaison, vérifiée au démarrage ; le manifeste reste réservé aux permissions et à la navigation.
-2. **Consentement** : le propriétaire doit-il consentir explicitement à chaque partage (vivier, recherche par les organisations) — **recommandation** : la création de la liaison par le propriétaire lui-même (postuler) vaut consentement ; tout partage initié par l’organisation exige un consentement enregistré.
-3. **Référentiel produit vs données `reference` par organisation** : quand utiliser l’un ou l’autre — **recommandation** : produit quand l’organisation ne doit pas pouvoir modifier ; par organisation sinon.
+- Le partage se déclare par `@SharesWith` sur l’entité de liaison. Les champs partagés sont une liste explicite, et rien n’est partagé par défaut.
+- Au démarrage, la plateforme recense les `@SharesWith` pour alimenter l’écran de consentement.
+- Postuler vaut consentement. Un partage lancé par l’organisation exige un consentement enregistré, avec une date, la version de ce qui est partagé et un moyen de le retirer. Un retrait déclenche l’effacement de la spec 11. Si la liste des champs partagés change, on redemande le consentement.
+- Le référentiel produit est en lecture seule pour l’organisation ; sinon, le référentiel est propre à chaque organisation. Les deux reprennent le format de seed existant (`kind: "reference"`) avec une portée produit ou organisation, sans nouveau mécanisme.
+
+## État (2026-10-04)
+
+Livré : `@SharesWith` (champs vides par défaut), recensement au démarrage, refus d’une entité `ma.nafura.bc` sans `TenantEntity` / `OwnedEntity` / `ProductEntity`, `scope` `organization` | `product` sur le seed existant. Un seed produit dont l’entité n’est pas `ProductEntity` empêche le démarrage. Les seeds organisation ignorent la portée produit.
+
+Reste : écriture effective des records produit, enregistrement du consentement (date, version, retrait) et le lien vers l’effacement de la spec 11, exemple démo de liaison.

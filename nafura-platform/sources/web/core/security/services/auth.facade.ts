@@ -873,6 +873,17 @@ export class AuthFacade {
   // ─────────────────────────────────────────────────────────────────────────────
 
   /**
+   * Switches the active organization in the existing selector (no new token, no second selector).
+   * The caller reloads so the next requests carry the organization header.
+   */
+  async useOrganization(tenantId: string): Promise<boolean> {
+    const selected = this.state.selectTenant(tenantId);
+    if (!selected) return false;
+    await this.tenantContextService.initialize(tenantId);
+    return true;
+  }
+
+  /**
    * Reload tenant memberships + permissions from the backend.
    * Call after changing the current user's roles so admin screens stay authorized.
    */

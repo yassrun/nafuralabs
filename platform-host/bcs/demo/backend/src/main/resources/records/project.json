@@ -1,0 +1,62 @@
+{
+  "entity": "demo.project",
+  "search": ["name", "client", "city"],
+  "properties": {
+    "name": { "label": "Projet", "filterable": true, "sortable": true },
+    "client": { "label": "Client", "filterable": true, "sortable": true },
+    "city": { "label": "Ville", "filterable": true, "sortable": true },
+    "budget": { "label": "Budget", "type": "money", "filterable": true, "sortable": true, "currency": "MAD" },
+    "progress": { "label": "Avancement", "filterable": true, "sortable": true },
+    "status": { "label": "Étape", "filterable": true },
+    "quoteAmount": { "label": "Montant du devis", "type": "money", "filterable": true, "currency": "MAD" },
+    "quoteDate": { "label": "Date du devis", "filterable": true, "sortable": true },
+    "startDate": { "label": "Démarrage prévu", "filterable": true, "sortable": true },
+    "description": { "label": "Description" },
+    "studyNotes": { "label": "Conclusions de l’étude" },
+    "closingNotes": { "label": "Bilan du projet" }
+  },
+  "initial": "STUDY",
+  "editable": ["STUDY", "QUOTE", "EXECUTION"],
+  "states": [
+    { "id": "STUDY", "label": "Étude", "tone": "info" },
+    { "id": "QUOTE", "label": "Devis", "tone": "info" },
+    { "id": "VALIDATION", "label": "Validation", "tone": "warning" },
+    { "id": "EXECUTION", "label": "Réalisation", "tone": "success" },
+    { "id": "CLOSED", "label": "Clôturé", "tone": "default" }
+  ],
+  "transitions": [
+    {
+      "id": "quote",
+      "label": "Passer au devis",
+      "from": ["STUDY"],
+      "to": "QUOTE",
+      "permission": "demo.projects.project.advance",
+      "requires": ["budget", "studyNotes"]
+    },
+    {
+      "id": "start",
+      "label": "Lancer la réalisation",
+      "from": ["QUOTE"],
+      "to": "VALIDATION",
+      "permission": "demo.projects.project.advance",
+      "requires": ["quoteAmount", "quoteDate", "startDate"],
+      "approval": {
+        "role": "DEMO_LEAD",
+        "when": "quoteAmount > 100000",
+        "title": "Lancement du projet : {name}",
+        "approved": "validate",
+        "rejected": "revise"
+      }
+    },
+    { "id": "validate", "label": "Valider", "from": ["VALIDATION"], "to": "EXECUTION", "system": true },
+    { "id": "revise", "label": "Revoir le devis", "from": ["VALIDATION"], "to": "QUOTE", "system": true },
+    {
+      "id": "close",
+      "label": "Clôturer",
+      "from": ["EXECUTION"],
+      "to": "CLOSED",
+      "permission": "demo.projects.project.advance",
+      "requires": ["closingNotes"]
+    }
+  ]
+}

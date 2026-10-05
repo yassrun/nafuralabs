@@ -30,6 +30,17 @@ export interface HostSession {
   tenant: { id: string; key: string; name: string } | null;
 }
 
+/** GET /api/v1/me/organizations: every membership, audience included. */
+export interface HostOrganization {
+  id: string;
+  key: string;
+  name: string;
+  slug: string;
+  status: string;
+  audience: string;
+  roles: string[];
+}
+
 interface PendingLogin {
   state: string;
   verifier: string;
@@ -38,6 +49,7 @@ interface PendingLogin {
 
 const CONFIG_URL = '/api/public/auth/config';
 const SESSION_URL = '/api/v1/me/session';
+const ORGANIZATIONS_URL = '/api/v1/me/organizations';
 const PERMISSIONS_URL = '/api/v1/me/permissions';
 const CALLBACK_PATH = '/auth/callback';
 /** Refresh this long before the access token expires. */
@@ -229,12 +241,61 @@ export class HostAuthService {
   private async loadAccess(session: HostSession): Promise<void> {
     this.permissions.set(null);
     try {
+      const organizations = await this.fetchOrganizations();
+      const chosen = this.chooseOrganization(organizations, session);
+      if (chosen) {
+        this.current.set({ ...session, tenant: { id: chosen.id, key: chosen.key, name: chosen.name } });
+        this.publishOrganizations(organizations, chosen);
+        await this.tenantContext.initialize(chosen.id);
+      }
       const permissions = await this.fetchAccess();
-      await this.enterTenant(session, permissions);
+      await this.enterTenant(this.current() ?? session, permissions, organizations, chosen);
     } catch {
       // Unknown permissions: guarded navigation stays hidden, the backend still decides.
       this.permissions.set(new Set());
     }
+  }
+
+  private async fetchOrganizations(): Promise<HostOrganization[]> {
+    try {
+      return await firstValueFrom(this.http.get<HostOrganization[]>(ORGANIZATIONS_URL));
+    } catch {
+      return [];
+    }
+  }
+
+  /** Last organization used, otherwise the session's, otherwise the only one, otherwise the first. */
+  private chooseOrganization(organizations: HostOrganization[], session: HostSession): HostOrganization | null {
+    if (!organizations.length) return null;
+    const stored = this.authState.loadPersistedTenant();
+    return organizations.find((organization) => organization.id === stored)
+      ?? organizations.find((organization) => organization.id === session.tenant?.id)
+      ?? organizations[0];
+  }
+
+  private publishOrganizations(organizations: HostOrganization[], chosen: HostOrganization): void {
+    const now = new Date().toISOString();
+    const memberships: TenantMembership[] = organizations.map((organization) => ({
+      tenant: {
+        id: organization.id,
+        name: organization.name,
+        slug: organization.slug || organization.key,
+        status: organization.status === 'SUSPENDED' ? 'suspended' : 'active',
+        enabledFeatures: [],
+        enabledModules: [],
+        features: {},
+        createdAt: now,
+        updatedAt: now,
+      },
+      roles: organization.roles.map((role) => ({ id: role, name: role, description: '', permissions: [], isSystem: true, priority: 0 })),
+      permissions: [],
+      isDefault: organization.id === chosen.id,
+      status: 'active',
+      joinedAt: now,
+      audience: organization.audience,
+    }));
+    this.authState.setTenants(memberships);
+    this.authState.selectTenant(chosen.id);
   }
 
   private async fetchAccess(): Promise<string[]> {
@@ -246,8 +307,39 @@ export class HostAuthService {
     return response.permissions;
   }
 
-  /** Tenant-scoped screens (members, roles, domains) need the organization as current context. */
-  private async enterTenant(session: HostSession, permissions: string[]): Promise<void> {
+  /** Tenant-scoped screens need the organization as current context. Several memberships stay in the one selector. */
+  private async enterTenant(
+    session: HostSession,
+    permissions: string[],
+    organizations: HostOrganization[] = [],
+    chosen: HostOrganization | null = null,
+  ): Promise<void> {
+    if (organizations.length && chosen) {
+      const now = new Date().toISOString();
+      const memberships: TenantMembership[] = organizations.map((organization) => ({
+        tenant: {
+          id: organization.id,
+          name: organization.name,
+          slug: organization.slug || organization.key,
+          status: organization.status === 'SUSPENDED' ? 'suspended' : 'active',
+          enabledFeatures: [],
+          enabledModules: [],
+          features: {},
+          createdAt: now,
+          updatedAt: now,
+        },
+        roles: organization.roles.map((role) => ({ id: role, name: role, description: '', permissions, isSystem: true, priority: 0 })),
+        permissions,
+        isDefault: organization.id === chosen.id,
+        status: 'active',
+        joinedAt: now,
+        audience: organization.audience,
+      }));
+      this.authState.setTenants(memberships);
+      this.authState.selectTenant(chosen.id);
+      await this.tenantContext.initialize(chosen.id);
+      return;
+    }
     if (!session.tenant) return;
     const now = new Date().toISOString();
     const membership: TenantMembership = {

@@ -1,0 +1,19 @@
+{
+  "entity": "demo.item",
+  "search": ["code", "name"],
+  "properties": {
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "name": { "label": "Désignation", "filterable": true, "sortable": true },
+    "categoryId": {
+      "label": "Catégorie",
+      "type": "relation",
+      "target": "demo.category",
+      "display": "categoryName",
+      "filterable": true
+    },
+    "unit": { "label": "Unité", "type": "select", "options": ["u", "kg", "m", "m²", "m³", "L", "h"], "filterable": true },
+    "unitPrice": { "label": "Prix unitaire", "type": "money", "filterable": true, "sortable": true, "currency": "MAD" },
+    "active": { "label": "Article actif", "filterable": true },
+    "description": { "label": "Description" }
+  }
+}

@@ -18,8 +18,6 @@ class ProjectController extends RecordController<Project> {
     private final ProjectRepository repository;
 
     @Override protected RecordRepository<Project> repository() { return repository; }
-    @Override protected List<String> searchFields() { return List.of("name", "client", "city"); }
-    @Override protected Set<String> filterFields() { return Set.of("status"); }
     @Override protected String labelField() { return "name"; }
-    @Override protected String lifecycleResource() { return "lifecycle/project.json"; }
+    @Override protected String recordResource() { return "records/project.json"; }
 }

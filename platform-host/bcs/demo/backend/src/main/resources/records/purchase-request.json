@@ -1,0 +1,69 @@
+{
+  "entity": "demo.purchase-request",
+  "search": ["subject", "supplierName"],
+  "properties": {
+    "subject": { "label": "Objet", "filterable": true, "sortable": true },
+    "supplierId": {
+      "label": "Fournisseur",
+      "type": "relation",
+      "target": "demo.supplier",
+      "display": "supplierName",
+      "filterable": true
+    },
+    "amount": { "label": "Montant", "type": "money", "filterable": true, "sortable": true, "currency": "MAD" },
+    "neededBy": { "label": "Pour le", "filterable": true, "sortable": true },
+    "status": { "label": "Statut", "filterable": true },
+    "createdBy": { "label": "Créée par", "type": "person", "filterable": true },
+    "justification": { "label": "Justification" }
+  },
+  "initial": "DRAFT",
+  "editable": ["DRAFT", "REJECTED"],
+  "states": [
+    { "id": "DRAFT", "label": "Brouillon", "tone": "default" },
+    { "id": "SUBMITTED", "label": "En approbation", "tone": "warning" },
+    { "id": "APPROVED", "label": "Approuvée", "tone": "success" },
+    { "id": "REJECTED", "label": "Rejetée", "tone": "danger" },
+    { "id": "ORDERED", "label": "Commandée", "tone": "info" }
+  ],
+  "transitions": [
+    {
+      "id": "submit",
+      "label": "Soumettre",
+      "from": ["DRAFT", "REJECTED"],
+      "to": "SUBMITTED",
+      "permission": "demo.purchasing.request.submit",
+      "requires": ["subject", "supplierId", "amount"],
+      "approval": {
+        "role": "DEMO_LEAD",
+        "when": "amount > 10000",
+        "title": "Demande d’achat : {subject}",
+        "approved": "approve",
+        "rejected": "reject"
+      }
+    },
+    {
+      "id": "approve",
+      "label": "Approuver",
+      "from": ["SUBMITTED"],
+      "to": "APPROVED",
+      "system": true,
+      "notify": [{"event": "demo.purchasing.request.approved", "to": "createdBy"}]
+    },
+    {
+      "id": "reject",
+      "label": "Rejeter",
+      "from": ["SUBMITTED"],
+      "to": "REJECTED",
+      "system": true,
+      "notify": [{"event": "demo.purchasing.request.rejected", "to": "createdBy"}]
+    },
+    {
+      "id": "order",
+      "label": "Commander",
+      "from": ["APPROVED"],
+      "to": "ORDERED",
+      "permission": "demo.purchasing.request.order",
+      "notify": [{"event": "demo.purchasing.request.ordered", "to": "createdBy"}]
+    }
+  ]
+}

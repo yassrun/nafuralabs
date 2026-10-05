@@ -88,6 +88,7 @@ export function listingQueryToParams(query: ListingQueryState): Record<string, s
     params['scope'] = synced.scope;
   }
   if (synced.segment) params['segment'] = synced.segment;
+  if (synced.presets?.length) params['presets'] = synced.presets.join(',');
 
   const group = synced.filterGroup;
   if (group && group.children.length > 0) {
@@ -149,6 +150,9 @@ export function paramsToListingQuery(
 
   const segment = paramString(params['segment']);
   if (segment) q.segment = segment;
+
+  const presets = paramString(params['presets']);
+  if (presets) q.presets = presets.split(',').map((s) => s.trim()).filter(Boolean);
 
   const scope = paramString(params['scope']) as ListingScope | undefined;
   if (scope === 'mine' || scope === 'archived' || scope === 'all') {

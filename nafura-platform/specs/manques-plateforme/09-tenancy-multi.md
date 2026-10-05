@@ -22,7 +22,8 @@ Tout produit SaaS. `ROADMAP.md` n°6 ; `ARCHITECTURE.md` « État et écarts » 
 - `app.nafura.json` :
   - `spec.runtime.tenancy: "multi"` ;
   - `spec.local.users[].organizations?: string[]` — organisations lab auxquelles un utilisateur lab appartient (clés) ; `spec.local.organizations: [{ key, name }]` créées au démarrage en lab ;
-  - `spec.deploy.<env>.operators` — comptes de l’**opérateur** du produit (super-administration de toutes les organisations), à la place de `owners` qui n’a de sens qu’en `single`.
+  - `spec.deploy.<env>.operators` — comptes de l’**opérateur** du produit (super-administration de toutes les organisations), à la place de `owners` qui n’a de sens qu’en `single` ;
+  - `spec.runtime.signup: "operator" | "open"` — qui peut appeler `POST /api/tenants`. Défaut `operator`. Ce n’est pas un booléen.
 - API (réutiliser l’existant, compléter seulement ce qui manque) :
   - `GET /api/v1/me/organizations` — organisations de l’utilisateur ;
   - création d’une organisation par l’opérateur : nom, clé, administrateur invité → organisation créée, données `reference` des BCs appliquées, invitation envoyée ;
@@ -31,7 +32,7 @@ Tout produit SaaS. `ROADMAP.md` n°6 ; `ARCHITECTURE.md` « État et écarts » 
   - après connexion, organisation active = la seule, sinon la dernière utilisée, sinon un sélecteur ;
   - menu d’organisation (`spec.shell.tenantMenu`) pour changer d’organisation ;
   - `hostAuthInterceptor` (ou un intercepteur de la même famille dans `platform/host-auth`) ajoute l’en-tête d’organisation à chaque appel de l’API du produit ;
-  - **console opérateur** : écrans plateforme « Organisations » (liste, création, suspension) et « Utilisateurs » (tous), visibles avec une permission plateforme dédiée (ex. `platform.operator.*`), jamais par un rôle codé.
+  - **console opérateur** : écrans plateforme « Organisations » (liste, création, suspension) et « Utilisateurs » (tous), visibles avec la permission `platform.operator.*`.
 - Single reste le défaut et ne change pas de comportement.
 
 ## Comportement et sécurité
@@ -39,11 +40,13 @@ Tout produit SaaS. `ROADMAP.md` n°6 ; `ARCHITECTURE.md` « État et écarts » 
 - Isolation : aucune donnée d’une organisation n’est lisible depuis une autre (tous les `RecordController` filtrent déjà par `tenantId` : à couvrir par un host-test multi).
 - Un utilisateur sans appartenance à l’organisation demandée : 403 (pas 404, pas de fuite d’existence au-delà).
 - Les permissions sont **par organisation** (un utilisateur peut être admin ici et lecteur là).
+- `platform.operator.*` ne s’obtient que par la liste `spec.deploy.<env>.operators`. Les jokers des rôles (`*` d’`OWNER`, `platform.*` d’`ORG_ADMIN`) ne la couvrent jamais. Un rôle qui déclare cette permission empêche le démarrage.
+- `POST /api/tenants` est réservé à l’opérateur quand `spec.runtime.signup` vaut `operator` (le défaut). `open` l’ouvre à l’inscription libre.
 - Seeding `demo` : seulement en lab/staging, pour les organisations créées dans ces environnements.
 
 ## Démo
 
-- `platform-host/app.nafura.json` : **ne pas** basculer la démo en multi par défaut si cela casse les scénarios existants ; préférer une seconde configuration de lancement lab multi, ou basculer la démo et adapter `scenario-api.sh` — **choisir et justifier**.
+- `platform-host/app.nafura.json` bascule en `multi`. Les scénarios existants sont adaptés. Un host-test garde le mode `single` sur la fixture `probe-bc`.
 - Deux organisations lab (« Organisation A », « Organisation B ») ; `lead@host.local` dans les deux avec des rôles différents ; `admin@host.local` opérateur.
 - `scenario-api.sh` : créer un fournisseur dans A, le lire depuis B → 404 ; utilisateur de A seulement qui appelle B → 403 ; l’opérateur crée une organisation C → ses catégories `reference` existent.
 - host-test : `MultiTenancyHostTest` (isolation, appartenance, seeding à la création).
@@ -53,14 +56,21 @@ Tout produit SaaS. `ROADMAP.md` n°6 ; `ARCHITECTURE.md` « État et écarts » 
 - [ ] Deux organisations lab, sélecteur d’organisation dans le menu, données isolées.
 - [ ] L’opérateur crée une organisation ; son administrateur reçoit l’invitation (lab : lien visible dans le journal) ; les données de référence sont là.
 - [ ] Une organisation suspendue refuse l’accès à ses membres.
-- [ ] Les produits `single` (dont la démo actuelle) ne changent pas.
+- [ ] La démo tourne en `multi`. Le host-test de `probe-bc` prouve que le mode `single` ne change pas.
 
 ## Documentation
 
 `docs/ARCHITECTURE.md` règle 6 (Organisation) et tableau des écarts ; `docs/PLATFORM.md` § « Connexion et organisation » ; `ops/README.md` si le lancement lab change ; `ROADMAP.md` n°6.
 
-## Décisions ouvertes
+## Décisions (2026-10-04)
 
-- Nom et forme du rôle « opérateur » (permission plateforme `platform.operator.*` recommandée) et sa source en lab/cluster (`spec.deploy.<env>.operators`).
-- Démo : bascule en multi ou seconde configuration — **recommandation** : basculer la démo en multi, car la démo doit exercer toute la plateforme (règle 9), et garder un host-test qui vérifie le mode single sur la fixture `probe-bc`.
-- Inscription libre d’une organisation (`POST /api/tenants`) : ouverte ou réservée à l’opérateur — **recommandation** : réservée à l’opérateur par défaut, ouverture par option d’`app.nafura.json`.
+- L’opérateur est la permission `platform.operator.*`. Sa liste vient de `spec.deploy.<env>.operators`.
+- Cette permission ne s’obtient que par la liste du déploiement. Les jokers des rôles (`*` d’`OWNER`, `platform.*` d’`ORG_ADMIN`) ne la couvrent jamais. Un rôle qui la déclare empêche le démarrage.
+- La démo passe en `multi`. Un host-test garde le mode `single` sur `probe-bc`.
+- `POST /api/tenants` est réservé à l’opérateur par défaut. L’option `spec.runtime.signup: "operator" | "open"` peut l’ouvrir. Ce n’est pas un booléen.
+
+## État (2026-10-04)
+
+Livré : permission opérateur hors des jokers, refus de démarrage si un rôle la déclare, démo `multi` (org A / B, admin opérateur, lead avec un rôle par organisation), `POST /api/tenants` et suspend/resume, seeding à la création, sélecteur d’organisation unique, en-tête `X-Tenant-Id`, host-test `single` sur `probe-bc`, isolation dans `scenario-api.sh`. L’invitation lab est une ligne de journal et une appartenance `INVITED`.
+
+Reste : écrans de console « Organisations » et « Utilisateurs » (pas d’archétype de records plateforme pour les tenants ; l’API tient le contrat). Le jeton `lab-{id}` n’est pas branché sur `InvitationAcceptService`.

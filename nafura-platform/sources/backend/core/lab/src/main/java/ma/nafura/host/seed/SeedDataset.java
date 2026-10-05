@@ -8,9 +8,12 @@ import java.util.Map;
  * of the product. {@code reference} data goes everywhere, prod included; {@code demo} data only where demo data is
  * on (lab, staging). Records are matched by {@code key}: an existing one is never touched.
  */
-public record SeedDataset(String id, Kind kind, List<String> after, List<Block> entities, String source, String checksum) {
+public record SeedDataset(String id, Kind kind, Scope scope, List<String> after, List<Block> entities, String source, String checksum) {
 
     public enum Kind { REFERENCE, DEMO }
+
+    /** Organization: copied into each organization. Product: one read-only set for the whole product. */
+    public enum Scope { ORGANIZATION, PRODUCT }
 
     /**
      * Records of one entity (JPA entity name). A field may reference another record:

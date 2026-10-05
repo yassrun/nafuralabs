@@ -6,6 +6,7 @@ import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
 import org.springframework.stereotype.Service;
 
+import ma.nafura.platform.authorization.security.authorization.OperatorPermissions;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +37,8 @@ public class UserPermissionContextService {
         }
         UserContext.setUserRoles(normalized);
         Set<String> permissions = resolvePermissionsForRoles(normalized);
+        // A role never grants an operator permission: only the deployment's operators list does (OperatorDirectory).
+        permissions.removeIf(OperatorPermissions::isOperatorPermission);
         if (permissions.isEmpty()) {
             log.debug("Roles {} of {} grant no permission", normalized, principal);
         }

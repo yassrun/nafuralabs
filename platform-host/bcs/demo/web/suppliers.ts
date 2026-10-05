@@ -11,31 +11,15 @@ export const SUPPLIERS_LISTING: ListingPageConfig = {
   subtitle: 'Les partenaires d’achat de l’organisation',
   icon: 'building-2',
   endpoint: SUPPLIERS,
-  searchFields: ['code', 'name', 'city', 'categoryName'],
-  segments: [
-    { id: 'active', label: 'Actifs', filters: { active: true } },
-    { id: 'inactive', label: 'Inactifs', filters: { active: false } },
-    { id: 'all', label: 'Tous' },
+  quickFilters: [
+    { id: 'no-contact', label: 'Sans contact', filter: { contacts: { empty: true } } },
+    { property: 'contacts', on: 'name', label: 'Contact' },
+    { property: 'paymentTerms' },
   ],
-  filters: [
-    { key: 'city', label: 'Ville', type: 'text' },
-    { key: 'paymentTerms', label: 'Paiement', type: 'select', options: PAYMENT_TERMS },
-  ],
-  columns: [
-    { key: 'code', field: 'code', label: 'Code', sortable: true, width: '110px', cssClass: 'nf-cell--mono' },
-    { key: 'name', field: 'name', label: 'Raison sociale', sortable: true },
-    { key: 'category', field: 'categoryName', label: 'Catégorie', sortable: true },
-    { key: 'city', field: 'city', label: 'Ville', sortable: true },
-    { key: 'rating', field: 'rating', label: 'Note', transform: (rating) => (rating ? '★'.repeat(Number(rating)) : '—'), width: '110px' },
-    {
-      key: 'active',
-      field: 'active',
-      label: 'Statut',
-      type: 'badge',
-      transform: (active) => (active ? 'Actif' : 'Inactif'),
-      badgeVariant: (active) => (active ? 'success' : 'default'),
-      width: '110px',
-    },
+  views: [
+    { id: 'active', label: 'Actifs', layout: 'table', filter: { active: { is: true } }, show: ['code', 'name', 'categoryId', 'city', 'rating'] },
+    { id: 'inactive', label: 'Inactifs', layout: 'table', filter: { active: { is: false } }, show: ['code', 'name', 'categoryId', 'city', 'rating'] },
+    { id: 'all', label: 'Tous', layout: 'table', show: ['code', 'name', 'categoryId', 'city', 'rating', 'active'] },
   ],
   emptyState: { icon: 'building-2', title: 'Aucun fournisseur', message: 'Créez votre premier fournisseur pour commencer.' },
   open: (supplier) => route(String(supplier['id'])),
@@ -70,16 +54,9 @@ const contactsListing = (supplier: Row): ListingPageConfig => {
   return {
     title: 'Contacts',
     endpoint: '/api/v1/demo/supplier-contacts',
-    query: { supplierId: String(supplier['id']) },
-    searchFields: ['name', 'email', 'jobTitle'],
+    filter: { supplierId: { is: String(supplier['id']) } },
     pageSize: 10,
-    columns: [
-      { key: 'name', field: 'name', label: 'Nom', sortable: true },
-      { key: 'jobTitle', field: 'jobTitle', label: 'Fonction' },
-      { key: 'email', field: 'email', label: 'E-mail' },
-      { key: 'phone', field: 'phone', label: 'Téléphone' },
-      { key: 'main', field: 'mainContact', label: 'Principal', type: 'boolean', width: '110px' },
-    ],
+    views: [{ id: 'all', label: 'Tous', layout: 'table', show: ['name', 'jobTitle', 'email', 'phone', 'mainContact'] }],
     emptyState: { icon: 'users', title: 'Aucun contact', message: 'Ajoutez les interlocuteurs de ce fournisseur.' },
     actions: [
       {

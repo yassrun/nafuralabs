@@ -28,6 +28,7 @@ nafura:
       - { email: viewer@host.local, given-name: Probe, family-name: Viewer, role: PROBE_VIEWER }
       - { email: outsider@host.local, given-name: No, family-name: Role, role: READER }
       - { email: assignee@host.local, given-name: Role, family-name: Assignee, role: READER }
+      - { email: groups@host.local, given-name: Group, family-name: Reader, role: PROBE_GROUP_READER }
   security:
     enabled: true
     jwt:

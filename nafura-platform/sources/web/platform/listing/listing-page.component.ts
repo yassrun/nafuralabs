@@ -8,6 +8,7 @@ import { firstValueFrom } from 'rxjs';
 import { ApiConfigService } from '../../core/config/api-config.service';
 import { PermissionService } from '../../core/security/services/permission.service';
 import { ListingBoardComponent, type ListingBoardColumn, type ListingBoardMove } from '../../lib/anatomy/components/organisms/listing-board';
+import { ListingCalendarComponent, type ListingCalendarItem } from '../../lib/anatomy/components/organisms/listing-calendar';
 import { ListingFlatComponent, type ListingFlatConfig } from '../../lib/anatomy/components/organisms/listing-flat';
 import { listingQueryToParams, paramsToListingQuery } from '../../lib/anatomy/components/organisms/listing-flat/listing-query-url.util';
 import { ListingTreeComponent, type ListingTreeAction, type ListingTreeConfig } from '../../lib/anatomy/components/organisms/listing-tree';
@@ -15,18 +16,26 @@ import type { NfTreeNode } from '../../lib/anatomy/components/organisms/tree-tab
 import { ScreenComponent } from '../../lib/anatomy/components/organisms/page-screen';
 import { ConfirmDialogService } from '../../lib/anatomy/components/services/confirm-dialog.service';
 import { ToastService } from '../../lib/anatomy/components/services/toast.service';
-import type { BadgeVariant, ColumnConfig, FormFieldConfig, ListingQueryState } from '../../lib/anatomy/types';
+import type { FilterFieldConfig, FilterGroup, FormFieldConfig, ListingQueryState } from '../../lib/anatomy/types';
+import { isFilterGroup } from '../../lib/anatomy/types';
 import { effectivePaging } from '../page-action';
-import { serverQueryParams } from './listing-server-query';
-import type { ListingAction, ListingPageConfig, Row } from './listing-page.types';
+import {
+  allOf,
+  columnsOf,
+  filterFields,
+  filterTargets,
+  formatValue,
+  listParams,
+  toRecordFilter,
+  type RecordFilter,
+  type RecordProperties,
+} from './listing-properties';
+import type { ListingAction, ListingPageConfig, ListingView, Row } from './listing-page.types';
 
 const ACTION_PREFIX = 'listing:';
+const DRAWN = new Set(['table', 'board', 'calendar', 'tree']);
+const ALL = 500;
 
-interface LifecycleState {
-  id: string;
-  label: string;
-  tone?: BadgeVariant;
-}
 interface LifecycleTransition {
   id: string;
   label?: string;
@@ -37,26 +46,26 @@ interface LifecycleTransition {
   requires?: string[];
   approval?: { title?: string } | null;
 }
-interface LifecycleDeclaration {
-  entity?: string;
-  states: LifecycleState[];
-  transitions?: LifecycleTransition[];
-}
 interface PageBody {
   content?: unknown;
   items?: unknown;
   totalElements?: number;
 }
+interface Aggregates {
+  sum?: Record<string, number>;
+  avg?: Record<string, number>;
+  count?: Record<string, number>;
+}
 
 /**
- * A whole listing screen from a `ListingPageConfig` (input `listing` or route data `listing`):
- * header, rows loaded from the API, nf-listing-flat (or nf-listing-tree, or nf-listing-board), and the actions.
- * `embedded`: no screen frame — a related list inside a record.
+ * A whole listing screen from a `ListingPageConfig` (input `listing` or route data `listing`): the record's properties
+ * (`GET {endpoint}/properties`), one tab per view, the toolbar of nf-listing-flat (search, quick filters, « + Filtre »)
+ * for every layout, and the rows as a table, a board, a calendar or a tree. `embedded`: no screen frame.
  */
 @Component({
   selector: 'nf-listing-page',
   standalone: true,
-  imports: [NgTemplateOutlet, TranslateModule, ScreenComponent, ListingFlatComponent, ListingTreeComponent, ListingBoardComponent],
+  imports: [NgTemplateOutlet, TranslateModule, ScreenComponent, ListingFlatComponent, ListingTreeComponent, ListingBoardComponent, ListingCalendarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (embedded()) {
@@ -67,15 +76,9 @@ interface PageBody {
       </nf-screen>
     }
     <ng-template #body>
-      @if (showViews()) {
-        <div class="nf-listing-page__views" role="tablist">
-          <button type="button" role="tab" [attr.aria-selected]="view() === 'table'" (click)="setView('table')">{{ 'Table' | translate }}</button>
-          <button type="button" role="tab" [attr.aria-selected]="view() === 'board'" (click)="setView('board')">{{ 'Board' | translate }}</button>
-        </div>
-      }
-      @if (treeConfig(); as tree) {
+      @if (view().layout === 'tree') {
         <nf-listing-tree
-          [config]="tree"
+          [config]="treeConfig()!"
           [nodes]="nodes()"
           [loading]="loading()"
           [readonly]="!canCreateInTree()"
@@ -83,51 +86,68 @@ interface PageBody {
           (rowClick)="selectRow($event)"
           (rowDblClick)="editInTree($event)"
           (action)="onTreeAction($event)" />
-      } @else if (view() === 'board') {
-        <nf-listing-board
-          [columns]="boardColumns()"
-          [card]="boardCard()"
-          [pendingIds]="pending()"
-          [moves]="moves()"
-          [promptId]="promptId()"
-          (open)="open($event)"
-          (dragRow)="onDrag($event)"
-          (dropOn)="onDrop($event)"
-          (move)="fireMove($event.row, $event.transition)"
-          (ask)="onAsk($event)"
-          (more)="more($event)" />
       } @else {
         <nf-listing-flat
           [config]="flat()"
           [items]="items()"
           [loading]="loading()"
           [error]="errorText()"
-          [remote]="server()"
-          [remoteTotal]="server() ? total() : undefined"
-          [query]="server() ? query() : undefined"
+          [remote]="true"
+          [remoteTotal]="total()"
+          [query]="query()"
           (load)="onLoad($event)"
           (retry)="reload()"
           (actionClick)="run($event)"
           (selectionChange)="selection.set($event)"
           (rowClick)="config().open ? open($event) : null"
           (rowDblClick)="open($event)" />
+        @switch (view().layout) {
+          @case ('board') {
+            <nf-listing-board
+              [columns]="boardColumns()"
+              [card]="boardCard"
+              [pendingIds]="pending()"
+              [moves]="moves()"
+              [promptId]="promptId()"
+              (open)="open($event)"
+              (dragRow)="onDrag($event)"
+              (dropOn)="onDrop($event)"
+              (move)="fireMove($event.row, $event.transition)"
+              (ask)="onAsk($event)"
+              (more)="more($event)" />
+          }
+          @case ('calendar') {
+            <nf-listing-calendar [month]="month()" [items]="calendarItems()" (open)="open($event)" (monthChange)="setMonth($event)" />
+          }
+          @case ('table') {
+            @if (footer().length > 0) {
+              <div class="nf-listing-page__footer" role="status">
+                @for (total of footer(); track total.key) {
+                  <span><span class="nf-listing-page__footer-label">{{ total.label }}</span> {{ total.value }}</span>
+                }
+              </div>
+            }
+          }
+        }
       }
     </ng-template>
   `,
   styles: `
     :host { display: block; height: 100%; }
-    .nf-listing-page__views { display: flex; gap: 8px; margin-bottom: 12px; }
-    .nf-listing-page__views button {
-      border: 1px solid var(--nf-border-default, #e5e7eb);
-      background: var(--nf-surface-card, #fff);
-      border-radius: 8px;
-      padding: 6px 12px;
-      cursor: pointer;
+    /* Board and calendar: below the toolbar of nf-listing-flat, scrolling on their own. */
+    nf-listing-calendar, nf-listing-board { flex: 1 1 auto; min-height: 0; overflow: auto; }
+    .nf-listing-page__footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 16px;
+      padding: 8px 12px;
+      margin-top: 8px;
+      border-top: 1px solid var(--nf-border-default, #e5e7eb);
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
     }
-    .nf-listing-page__views button[aria-selected='true'] {
-      background: var(--nf-color-primary-50, #eef2ff);
-      border-color: var(--nf-color-primary-500, #6366f1);
-    }
+    .nf-listing-page__footer-label { font-weight: 400; color: var(--nf-text-secondary, #6b7280); }
   `,
 })
 export class ListingPageComponent {
@@ -146,46 +166,87 @@ export class ListingPageComponent {
   readonly config = computed(() => {
     const config = this.listing() ?? this.routeConfig;
     if (!config) throw new Error('nf-listing-page needs a ListingPageConfig (input or route data "listing").');
+    if (!config.views?.length) throw new Error(`Listing ${config.endpoint} declares no view.`);
+    const undrawn = config.views.find((view) => !DRAWN.has(view.layout));
+    if (undrawn) throw new Error(`Listing ${config.endpoint}: layout "${undrawn.layout}" of view "${undrawn.id}" is not built yet.`);
     return config;
   });
+
+  readonly properties = signal<RecordProperties>({});
+  private readonly targets = signal<Record<string, RecordProperties>>({});
+  private readonly relationOptions = signal<Record<string, Array<{ label: string; value: unknown }>>>({});
 
   readonly items = signal<Row[]>([]);
   readonly total = signal(0);
   readonly loading = signal(true);
-  readonly failed = signal(false);
   readonly errorText = signal<string | null>(null);
   readonly selection = signal<Row[]>([]);
   readonly query = signal<ListingQueryState | undefined>(undefined);
-  readonly view = signal<'table' | 'board'>('table');
-  readonly lifecycle = signal<LifecycleDeclaration | null>(null);
+  private readonly viewId = signal<string | null>(null);
+  private readonly transitions = signal<LifecycleTransition[]>([]);
   readonly boardColumns = signal<ListingBoardColumn<Row>[]>([]);
   readonly pending = signal<string[]>([]);
   readonly moves = signal<ListingBoardMove[]>([]);
   readonly promptId = signal<string | null>(null);
-  private dragged: Row | null = null;
+  readonly month = signal(firstOfMonth(new Date()));
+  readonly calendarItems = signal<ListingCalendarItem<Row>[]>([]);
+  private readonly aggregates = signal<Aggregates | null>(null);
+
+  readonly boardCard = { title: '__title', subtitle: '__subtitle', badge: '__badge', meta: '__meta' };
 
   readonly header = computed(() => {
     const { title, subtitle, icon } = this.config();
     return { title, subtitle, icon };
   });
 
-  readonly server = computed(() => effectivePaging(this.config()) === 'server');
-  readonly showViews = computed(() => !!this.config().board && !this.config().tree && this.config().columns.length > 0);
+  readonly view = computed((): ListingView => {
+    const views = this.config().views;
+    return views.find((view) => view.id === this.viewId()) ?? views[0];
+  });
 
   private readonly allowed = computed(() =>
     (this.config().actions ?? []).filter((action) => !action.permission || this.permissions.hasPermission(action.permission)),
   );
 
+  /** Quick filters not hidden on the current view. */
+  private readonly quickFilters = computed(() => {
+    const hidden = new Set(this.view().hideQuickFilters ?? []);
+    return (this.config().quickFilters ?? []).filter((quick) => !hidden.has('id' in quick ? quick.id : quick.property));
+  });
+
+  private readonly builderFields = computed(() => filterFields(this.properties(), this.targets(), this.relationOptions()));
+
+  /** Builder fields, plus the pinned dropdowns of the quick filters. */
+  private readonly fields = computed((): FilterFieldConfig[] => {
+    const pinned = new Map<string, FilterFieldConfig>();
+    for (const quick of this.quickFilters()) {
+      if ('id' in quick) continue;
+      const key = quick.on ? `${quick.property}.${quick.on}` : quick.property;
+      const field = this.builderFields().find((item) => item.key === key);
+      if (!field) continue;
+      pinned.set(key, {
+        ...field,
+        label: quick.label ?? field.label,
+        type: quick.operator === 'in' ? 'multiselect' : field.type,
+        pinned: true,
+      });
+    }
+    return this.builderFields().map((field) => pinned.get(field.key) ?? field);
+  });
+
   readonly flat = computed((): ListingFlatConfig => {
     const config = this.config();
+    const view = this.view();
     const button = ({ id, label, icon, variant }: ListingAction) => ({ id: ACTION_PREFIX + id, label, icon, variant });
     const rowActions = this.allowed().filter((action) => action.row);
+    const table = view.layout === 'table';
+    const show = view.show ?? Object.keys(this.properties());
     return {
-      columns: this.columns(),
-      filters: config.filters,
-      segments: config.segments,
-      defaultSegment: config.defaultSegment,
-      searchFields: config.searchFields,
+      columns: columnsOf(show, this.properties(), (key, value, row) => this.translate.instant(formatValue(this.properties()[key], value, row as Row))),
+      filters: this.fields(),
+      segments: config.views.length > 1 ? config.views.map(({ id, label }) => ({ id, label })) : undefined,
+      defaultSegment: config.views[0].id,
+      presets: this.quickFilters().flatMap((quick) => ('id' in quick ? [{ id: quick.id, label: quick.label }] : [])),
       emptyMessage: config.emptyMessage,
       emptyState: config.emptyState,
       pageSize: config.pageSize ?? 25,
@@ -196,48 +257,50 @@ export class ListingPageComponent {
         when: action.when as ((item: unknown) => boolean) | undefined,
       })),
       features: {
-        filters: !!config.filters?.length,
+        filters: this.fields().length > 0,
         columnToggle: false,
+        table,
+        pagination: effectivePaging(config, view) === 'server',
         ...(config.open ? { rowClick: 'open' as const, selection: rowActions.length ? ('multiple' as const) : ('none' as const) } : {}),
         ...config.features,
       },
     };
   });
 
-  readonly boardCard = computed(() => this.config().board?.card ?? { title: 'id' });
-
-  /** Status badges read their label and tone from the lifecycle when the column asks for it. */
-  readonly columns = computed((): ColumnConfig[] => {
-    const states = this.lifecycle()?.states;
-    return this.config().columns.map((column) => {
-      if (!column.lifecycle || !states?.length) return column;
+  /** Totals of the whole filtered result, under the table (`view.footer`). */
+  readonly footer = computed(() => {
+    const totals = this.aggregates();
+    return Object.entries(this.view().footer ?? {}).map(([key, aggregate]) => {
+      const property = this.properties()[key];
+      const value = totals?.[aggregate]?.[key];
       return {
-        ...column,
-        type: column.type ?? 'badge',
-        transform: (status: unknown) => states.find((state) => state.id === status)?.label ?? String(status ?? ''),
-        badgeVariant: (status: unknown) => states.find((state) => state.id === status)?.tone ?? 'default',
+        key,
+        label: `${this.translate.instant(`listing.${aggregate}`)} · ${property?.label ?? key}`,
+        value: value == null ? '…' : aggregate === 'count' ? String(value) : formatValue(property, value),
       };
     });
   });
 
   readonly treeConfig = computed((): ListingTreeConfig<Row> | null => {
-    const config = this.config();
-    if (!config.tree) return null;
+    const view = this.view();
+    if (view.layout !== 'tree' || !view.tree) return null;
+    const columns = columnsOf(view.show ?? Object.keys(this.properties()), this.properties(), (key, value, row) =>
+      this.translate.instant(formatValue(this.properties()[key], value, row as Row)),
+    );
     return {
-      columns: config.columns.map((column) => ({ key: column.key, label: column.label, field: column.field })),
-      treeColumnKey: config.columns[0].key,
-      searchFields: config.searchFields,
-      emptyMessage: config.emptyMessage,
+      columns: columns.map((column) => ({ key: column.key, label: column.label, field: column.field })),
+      treeColumnKey: columns[0]?.key ?? 'id',
+      emptyMessage: this.config().emptyMessage,
       initialExpand: 'all',
       features: { search: true, filters: false, columnToggle: false, treeActions: true, bulkSelect: false },
-      actionLabels: config.tree.labels,
+      actionLabels: view.tree.labels,
     };
   });
 
   readonly selectedKey = signal<string | null>(null);
 
   readonly nodes = computed((): NfTreeNode<Row>[] => {
-    const parentField = this.config().tree?.parentField;
+    const parentField = this.view().tree?.parentField;
     if (!parentField) return [];
     const byId = new Map<string, NfTreeNode<Row>>();
     for (const row of this.items()) byId.set(String(row['id']), { key: String(row['id']), data: row, children: [], expanded: true });
@@ -250,7 +313,7 @@ export class ListingPageComponent {
   });
 
   readonly canCreateInTree = computed(() => {
-    const create = this.config().tree?.create;
+    const create = this.view().tree?.create;
     return !!create && this.allowed().some((action) => action.id === create);
   });
 
@@ -260,36 +323,47 @@ export class ListingPageComponent {
       untracked(() => {
         const params = Object.fromEntries(this.route.snapshot.queryParamMap.keys.map((key) => [key, this.route.snapshot.queryParamMap.get(key) ?? '']));
         const initial = paramsToListingQuery(params, { pageSize: config.pageSize ?? 25 });
-        if (config.defaultSegment && !initial.segment) initial.segment = config.defaultSegment;
+        const asked = config.views.find((view) => view.id === (params['view'] || initial.segment));
+        initial.segment = (asked ?? config.views[0]).id;
+        this.viewId.set(initial.segment);
         this.query.set(initial);
-        const asked = params['view'];
-        const fallback = config.board?.defaultView ?? 'board';
-        const wantsBoard = !!config.board && asked !== 'table' && (asked === 'board' || fallback === 'board');
-        this.view.set(wantsBoard ? 'board' : 'table');
-        void this.reload();
+        void this.start();
       });
     });
   }
 
+  private async start(): Promise<void> {
+    await this.loadProperties();
+    await this.reload();
+  }
+
   async reload(): Promise<void> {
-    if (this.needsLifecycle()) void this.loadLifecycle();
-    if (this.view() === 'board' && this.config().board) {
-      await this.loadBoard();
-      return;
+    switch (this.view().layout) {
+      case 'board':
+        await this.loadBoard();
+        break;
+      case 'calendar':
+        await this.loadCalendar();
+        break;
+      default:
+        await this.loadRows();
     }
-    await this.loadTable();
   }
 
   onLoad(query: ListingQueryState): void {
+    const changedView = query.segment != null && query.segment !== this.viewId();
     this.query.set(query);
+    if (changedView) {
+      this.viewId.set(query.segment!);
+      this.aggregates.set(null);
+    }
     this.remember(query);
-    void this.loadTable();
+    void this.reload();
   }
 
-  setView(view: 'table' | 'board'): void {
-    this.view.set(view);
-    this.remember(this.query());
-    void this.reload();
+  setMonth(month: string): void {
+    this.month.set(month);
+    void this.loadCalendar();
   }
 
   open(item: Row): void {
@@ -303,12 +377,12 @@ export class ListingPageComponent {
   }
 
   editInTree(row: Row): void {
-    const action = this.allowed().find((candidate) => candidate.id === this.config().tree?.edit);
+    const action = this.allowed().find((candidate) => candidate.id === this.view().tree?.edit);
     if (action) void this.execute(action, row);
   }
 
   async onTreeAction(event: ListingTreeAction): Promise<void> {
-    const tree = this.config().tree!;
+    const tree = this.view().tree!;
     const create = this.allowed().find((action) => action.id === tree.create);
     if (event.id === 'add-node' && create) {
       await this.execute(create, undefined, { [tree.parentField]: null });
@@ -334,7 +408,6 @@ export class ListingPageComponent {
   }
 
   onDrag(row: Row | null): void {
-    this.dragged = row;
     const status = String(row?.['status'] ?? '');
     this.boardColumns.update((columns) => columns.map((column) => ({ ...column, reachable: !!row && this.reachable(status, column.id).length > 0 })));
   }
@@ -351,22 +424,22 @@ export class ListingPageComponent {
   }
 
   onAsk(row: Row): void {
-    const targets = (this.lifecycle()?.transitions ?? [])
-      .filter((transition) => this.canFire(transition, String(row['status'] ?? '')))
+    const targets = this.transitions()
+      .filter((transition) => this.movesByStatus() && this.canFire(transition, String(row['status'] ?? '')))
       .map((transition) => ({ id: transition.id, label: transition.label || transition.to }));
     this.moves.set(targets);
     this.promptId.set(String(row['id']));
   }
 
-  async more(state: string): Promise<void> {
-    const column = this.boardColumns().find((item) => item.id === state);
+  async more(value: string): Promise<void> {
+    const column = this.boardColumns().find((item) => item.id === value);
     if (!column) return;
     const page = Math.ceil(column.rows.length / (this.config().pageSize ?? 25));
-    const body = await this.fetchPage({ status: state, page: String(page) });
-    const rows = rowsOf(body);
+    const body = await this.fetch(allOf(this.filter(), { [this.view().groupBy!]: { is: value } }), page);
+    const rows = rowsOf(body).map((row) => this.card(row));
     this.boardColumns.update((columns) =>
       columns.map((item) =>
-        item.id === state
+        item.id === value
           ? { ...item, rows: [...item.rows, ...rows], total: body.totalElements ?? item.total, hasMore: item.rows.length + rows.length < (body.totalElements ?? 0) }
           : item,
       ),
@@ -376,7 +449,7 @@ export class ListingPageComponent {
   async fireMove(row: Row, transitionId: string): Promise<void> {
     this.promptId.set(null);
     this.moves.set([]);
-    const transition = this.lifecycle()?.transitions?.find((item) => item.id === transitionId);
+    const transition = this.transitions().find((item) => item.id === transitionId);
     try {
       const updated = await firstValueFrom(this.http.post<Row>(this.url(`${this.config().endpoint}/${row['id']}/transitions/${transitionId}`), {}));
       if (transition?.approval && updated['status'] === transition.to) {
@@ -392,7 +465,7 @@ export class ListingPageComponent {
           return;
         }
         try {
-          await firstValueFrom(this.http.put(this.url(`${this.config().endpoint}/${row['id']}`), { ...row, ...filled }));
+          await firstValueFrom(this.http.put(this.url(`${this.config().endpoint}/${row['id']}`), { ...plain(row), ...filled }));
           await firstValueFrom(this.http.post(this.url(`${this.config().endpoint}/${row['id']}/transitions/${transitionId}`), {}));
           this.toast.success(this.translate.instant('record.transitioned', { state: '' }));
         } catch (again) {
@@ -405,87 +478,180 @@ export class ListingPageComponent {
     }
   }
 
-  private async loadTable(): Promise<void> {
-    this.loading.set(true);
-    this.failed.set(false);
-    this.errorText.set(null);
+  /** The list's fixed filter, the view's, the active pills and the user's builder, as one filter of the grammar. */
+  private filter(): RecordFilter | null {
+    const query = this.query();
+    const active = new Set(query?.presets ?? []);
+    const pills = this.quickFilters().flatMap((quick) => ('id' in quick && active.has(quick.id) ? [quick.filter] : []));
+    const shown = new Set(this.fields().map((field) => field.key));
+    const group = query?.filterGroup ? onlyFields(query.filterGroup, shown) : undefined;
+    return allOf(this.config().filter, this.view().filter, ...pills, toRecordFilter(group, filterTargets(this.properties(), this.targets())));
+  }
+
+  private sorted(query: ListingQueryState | undefined): ListingQueryState | undefined {
+    if (query?.sort?.field) return query;
+    const first = this.view().sort?.[0];
+    if (!first) return query;
+    const [field, direction] = Object.entries(first)[0];
+    return { ...(query ?? { page: 1, pageSize: this.config().pageSize ?? 25, filters: [] }), sort: { field, direction } };
+  }
+
+  private async loadProperties(): Promise<void> {
     try {
-      const query = this.query();
-      const params = this.server() && query
-        ? serverQueryParams(query, { fixed: this.config().query, segments: this.config().segments })
-        : { ...this.config().query, page: '0', size: '500' };
+      const properties = await firstValueFrom(this.http.get<RecordProperties>(this.url(`${this.config().endpoint}/properties`)));
+      this.properties.set(properties);
+      const targets: Record<string, RecordProperties> = {};
+      const options: Record<string, Array<{ label: string; value: unknown }>> = {};
+      await Promise.all(
+        Object.entries(properties)
+          .filter(([, property]) => property.filterable && property.endpoint && property.target)
+          .map(async ([key, property]) => {
+            const [target, values] = await Promise.all([
+              firstValueFrom(this.http.get<RecordProperties>(this.url(`${property.endpoint}/properties`))).catch(() => ({})),
+              property.type === 'relation' && property.options
+                ? firstValueFrom(this.http.get<Array<{ value: unknown; label: unknown }>>(this.url(property.options))).catch(() => [])
+                : Promise.resolve([]),
+            ]);
+            targets[property.target!] = target;
+            if (property.type === 'relation') options[key] = values.map((option) => ({ value: option.value, label: String(option.label ?? option.value) }));
+          }),
+      );
+      this.targets.set(targets);
+      this.relationOptions.set(options);
+    } catch (error) {
+      this.errorText.set(this.message(error));
+    }
+    if (this.properties()['status']?.type === 'status') void this.loadTransitions();
+  }
+
+  private async loadTransitions(): Promise<void> {
+    try {
+      const lifecycle = await firstValueFrom(this.http.get<{ transitions?: LifecycleTransition[] }>(this.url(`${this.config().endpoint}/lifecycle`)));
+      this.transitions.set(lifecycle.transitions ?? []);
+    } catch {
+      this.transitions.set([]);
+    }
+  }
+
+  private async loadRows(): Promise<void> {
+    this.loading.set(true);
+    this.errorText.set(null);
+    const view = this.view();
+    const all = effectivePaging(this.config(), view) === 'client';
+    const filter = this.filter();
+    try {
+      const query = this.sorted(this.query());
+      const params = listParams(all ? { ...(query ?? { filters: [] }), page: 1, pageSize: ALL } as ListingQueryState : query, filter, this.config().pageSize ?? 25);
       const response = await firstValueFrom(this.http.get<unknown>(this.url(this.config().endpoint), { params }));
       this.items.set(rowsOf(response));
       this.total.set(totalOf(response));
+      if (view.layout === 'table' && view.footer) void this.loadAggregates(filter, view);
     } catch (error) {
       this.items.set([]);
       this.total.set(0);
-      this.failed.set(true);
-      const text = error instanceof HttpErrorResponse ? (error.error as { message?: string } | null)?.message : undefined;
-      this.errorText.set(text || this.translate.instant('Unable to load data'));
+      this.errorText.set(this.message(error));
     } finally {
       this.selection.set([]);
       this.loading.set(false);
     }
   }
 
+  private async loadAggregates(filter: RecordFilter | null, view: ListingView): Promise<void> {
+    const params: Record<string, string | string[]> = {};
+    const search = this.query()?.search?.trim();
+    if (search) params['q'] = search;
+    if (filter) params['filter'] = JSON.stringify(filter);
+    for (const [key, aggregate] of Object.entries(view.footer ?? {})) {
+      params[aggregate] = [...((params[aggregate] as string[] | undefined) ?? []), key];
+    }
+    try {
+      this.aggregates.set(await firstValueFrom(this.http.get<Aggregates>(this.url(`${this.config().endpoint}/aggregate`), { params })));
+    } catch {
+      this.aggregates.set(null);
+    }
+  }
+
   private async loadBoard(): Promise<void> {
     this.loading.set(true);
-    const lifecycle = await this.loadLifecycle();
-    const hidden = new Set(this.config().board?.hide ?? []);
-    const states = (lifecycle?.states ?? []).filter((state) => !hidden.has(state.id));
-    const query = this.query();
+    this.items.set([]);
+    this.total.set(0);
+    const view = this.view();
+    const property = this.properties()[view.groupBy ?? ''];
+    const hidden = new Set(view.hide ?? []);
+    const values = (property?.values ?? []).filter((value) => !hidden.has(value.id));
+    const filter = this.filter();
     const columns = await Promise.all(
-      states.map(async (state) => {
-        const body = await this.fetchPage({ status: state.id, page: '0' }, query);
-        const rows = rowsOf(body);
+      values.map(async (value) => {
+        const body = await this.fetch(allOf(filter, { [view.groupBy!]: { is: value.id } }), 0);
+        const rows = rowsOf(body).map((row) => this.card(row));
         const total = body.totalElements ?? rows.length;
-        return {
-          id: state.id,
-          label: state.label,
-          tone: state.tone,
-          total,
-          rows,
-          reachable: false,
-          hasMore: rows.length < total,
-        } satisfies ListingBoardColumn<Row>;
+        return { id: value.id, label: value.label, tone: value.tone, total, rows, reachable: false, hasMore: rows.length < total } satisfies ListingBoardColumn<Row>;
       }),
     );
     this.boardColumns.set(columns);
+    this.total.set(columns.reduce((sum, column) => sum + column.total, 0));
     this.loading.set(false);
   }
 
-  private async fetchPage(extra: Record<string, string>, query = this.query()): Promise<PageBody> {
-    const params = serverQueryParams(query ?? { page: 1, pageSize: this.config().pageSize ?? 25, filters: [] }, {
-      fixed: this.config().query,
-      segments: this.config().segments,
-      extra,
-    });
+  private async loadCalendar(): Promise<void> {
+    this.loading.set(true);
+    const view = this.view();
+    const date = view.date!;
+    const start = this.month();
+    const end = lastOfMonth(start);
+    const body = await this.fetch(allOf(this.filter(), { [date]: { between: [start, end] } }), 0, ALL);
+    const rows = rowsOf(body);
+    const card = view.card ?? [];
+    this.calendarItems.set(
+      rows
+        .filter((row) => row[date] != null)
+        .map((row) => ({
+          id: String(row['id']),
+          date: String(row[date]).slice(0, 10),
+          title: this.text(card[0], row) || String(row['id']),
+          subtitle: card[1] ? this.text(card[1], row) : undefined,
+          row,
+        })),
+    );
+    this.total.set(totalOf(body));
+    this.loading.set(false);
+  }
+
+  private async fetch(filter: RecordFilter | null, page: number, size = this.config().pageSize ?? 25): Promise<PageBody> {
+    const query = this.sorted(this.query());
+    const params = listParams({ ...(query ?? { filters: [] }), page: page + 1, pageSize: size } as ListingQueryState, filter, size);
     try {
       return await firstValueFrom(this.http.get<PageBody>(this.url(this.config().endpoint), { params }));
-    } catch {
+    } catch (error) {
+      this.toast.error(this.message(error));
       return { content: [], totalElements: 0 };
     }
   }
 
-  private async loadLifecycle(): Promise<LifecycleDeclaration | null> {
-    if (!this.needsLifecycle()) return this.lifecycle();
-    if (this.lifecycle()) return this.lifecycle();
-    try {
-      const declaration = await firstValueFrom(this.http.get<LifecycleDeclaration>(this.url(`${this.config().endpoint}/lifecycle`)));
-      this.lifecycle.set(declaration);
-      return declaration;
-    } catch {
-      return null;
-    }
+  /** A board card: the row plus its formatted texts (title, subtitle, badge, meta). */
+  private card(row: Row): Row {
+    const [title, subtitle, badge, meta] = this.view().card ?? [];
+    return {
+      ...row,
+      __title: this.text(title, row) || String(row['id']),
+      __subtitle: subtitle ? this.text(subtitle, row) : undefined,
+      __badge: badge ? this.text(badge, row) : undefined,
+      __meta: meta ? this.text(meta, row) : undefined,
+    };
   }
 
-  private needsLifecycle(): boolean {
-    return !!this.config().board || this.config().columns.some((column) => column.lifecycle);
+  private text(key: string | undefined, row: Row): string {
+    if (!key) return '';
+    return this.translate.instant(formatValue(this.properties()[key], row[key], row));
+  }
+
+  private movesByStatus(): boolean {
+    return this.view().layout === 'board' && this.view().groupBy === 'status';
   }
 
   private reachable(from: string, to: string): ListingBoardMove[] {
-    return (this.lifecycle()?.transitions ?? [])
+    if (!this.movesByStatus()) return [];
+    return this.transitions()
       .filter((transition) => this.canFire(transition, from) && transition.to === to)
       .map((transition) => ({ id: transition.id, label: transition.label || transition.to }));
   }
@@ -495,21 +661,25 @@ export class ListingPageComponent {
   }
 
   private async askRequired(row: Row, fields: string[]): Promise<Record<string, unknown> | null> {
-    const form: FormFieldConfig[] = fields.map((field) => ({
-      key: field,
-      field,
-      label: field,
-      type: typeof row[field] === 'number' || /amount|progress/i.test(field) ? 'number' : 'text',
-      required: true,
-    }));
-    const values = await this.dialogs.form({ title: this.translate.instant('record.requiredFields', { fields: fields.join(', ') }), fields: form });
-    return values;
+    const form: FormFieldConfig[] = fields.map((field) => {
+      const property = this.properties()[field];
+      const numeric = property?.type === 'number' || property?.type === 'money';
+      return {
+        key: field,
+        field,
+        label: property?.label ?? field,
+        type: numeric ? 'number' : property?.type === 'date' ? 'date' : 'text',
+        required: true,
+      } as FormFieldConfig;
+    });
+    const labels = form.map((field) => field.label).join(', ');
+    return this.dialogs.form({ title: this.translate.instant('record.requiredFields', { fields: labels }), fields: form });
   }
 
   private remember(query?: ListingQueryState): void {
     if (this.embedded() || !query) return;
-    const params = listingQueryToParams(query);
-    if (this.showViews()) params['view'] = this.view();
+    const params = listingQueryToParams({ ...query, segment: undefined });
+    if (this.config().views.length > 1) params['view'] = this.view().id;
     void this.router.navigate([], { relativeTo: this.route, queryParams: params, replaceUrl: true });
   }
 
@@ -554,9 +724,8 @@ export class ListingPageComponent {
     if (error instanceof HttpErrorResponse) {
       const text = (error.error as { message?: string } | null)?.message;
       if (text) return text;
-      if (error.status === 400) return this.translate.instant('Action failed');
     }
-    return this.failed() || error ? this.translate.instant('Unable to load data') : this.translate.instant('Action failed');
+    return this.translate.instant('Unable to load data');
   }
 
   private url(path: string): string {
@@ -577,4 +746,30 @@ function totalOf(response: unknown): number {
   if (Array.isArray(response)) return response.length;
   const total = (response as PageBody | null)?.totalElements;
   return typeof total === 'number' ? total : rowsOf(response).length;
+}
+
+/** The builder's tree without clauses on fields this view does not offer (a hidden quick filter). */
+function onlyFields(group: FilterGroup, keys: Set<string>): FilterGroup {
+  return {
+    combinator: group.combinator,
+    children: group.children
+      .map((child) => (isFilterGroup(child) ? onlyFields(child, keys) : child))
+      .filter((child) => (isFilterGroup(child) ? child.children.length > 0 : keys.has(child.field))),
+  };
+}
+
+/** A row without the board's formatted texts, to send back to the API. */
+function plain(row: Row): Row {
+  const { __title, __subtitle, __badge, __meta, ...rest } = row;
+  return rest;
+}
+
+function firstOfMonth(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
+}
+
+function lastOfMonth(first: string): string {
+  const date = new Date(`${first}T00:00:00`);
+  const last = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  return `${last.getFullYear()}-${String(last.getMonth() + 1).padStart(2, '0')}-${String(last.getDate()).padStart(2, '0')}`;
 }

@@ -32,7 +32,45 @@ Une entité métier = `extends TenantEntity` (id, organisation, audit) + Bean Va
 class SupplierController extends RecordController<Supplier> { … }
 ```
 
-`RecordController` donne : liste paginée (`page` à partir de 0, `size` plafonné à 500 et renvoyé tel qu’appliqué), triée, recherchée (`q`) et filtrée (`?champ=valeur`, égalité), `/options` pour les listes de choix, lecture, création, modification, suppression. Permissions : `<domain>.<feature>.<resource>.{read,create,update,delete}` selon la méthode HTTP. Champs dérivés en lecture : `@Formula`.
+`RecordController` donne : liste paginée (`page` à partir de 0, `size` plafonné à 500 et renvoyé tel qu’appliqué), triée (`sort=champ,asc`, propriété `sortable`), recherchée (`q`) et filtrée (`filter`, grammaire ci-dessous), `/options` pour les listes de choix, `/properties`, `/aggregate`, lecture, création, modification, suppression. Permissions : `<domain>.<feature>.<resource>.{read,create,update,delete}` selon la méthode HTTP. Champs dérivés en lecture : `@Formula`.
+
+### Le descripteur du record
+
+`recordResource()` → `resources/records/<record>.json`, un seul fichier par record : ses propriétés, sa recherche et, s’il en a un, son cycle de vie.
+
+```json
+{
+  "entity": "demo.supplier",
+  "search": ["code", "name", "contacts.name"],
+  "properties": {
+    "name": { "label": "Raison sociale", "filterable": true, "sortable": true },
+    "categoryId": { "label": "Catégorie", "type": "relation", "target": "demo.category", "display": "categoryName", "filterable": true },
+    "contacts": { "label": "Contacts", "type": "relations", "target": "demo.supplier-contact", "via": "supplierId", "filterable": true }
+  }
+}
+```
+
+- Seules les propriétés déclarées sont exposées (`GET /properties` : type, libellé, filtrable, triable, valeurs d’un `status` / `select`, API de la cible d’une relation). Type déduit du champ quand il est omis : texte → `text`, nombre → `number`, date → `date`, booléen → `boolean`, `status` → `status` (états du cycle de vie). Le BC précise `label`, `money` (+ `currency`), `select` (+ `options`), `relation` (N-1 : `target`, `display`), `relations` (1-N : `target`, `via`, sans champ propre), `person`, `filterable`, `sortable`.
+- `search` : champs texte de `q` (contient, sans casse), ou `<relation>.<propriété texte de la cible>`.
+- Une propriété sans champ, un type incompatible, une cible ou un `via` inconnu, un chemin de recherche faux empêchent le démarrage (fichier et propriété nommés).
+- `GET /aggregate?sum=…&avg=…&count=…` : sur tout le résultat filtré (même `filter` et `q` que la liste).
+
+### La grammaire des filtres
+
+`filter` (JSON) : un critère `{ "<propriété>": { "<opérateur>": valeur } }`, ou `{ "and" | "or": [ … ] }`, deux niveaux au plus.
+
+| Type | Opérateurs |
+|---|---|
+| `text` | `is`, `isNot`, `contains`, `startsWith`, `empty` |
+| `number`, `money` | `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `between`, `empty` |
+| `date` | `is`, `before`, `after`, `between`, `empty` — dates relatives `today`, `today±Nd`, `startOfMonth`, dans le fuseau de l’organisation |
+| `status`, `select` | `is`, `isNot`, `in`, `notIn` |
+| `relation` | `is`, `in`, `empty`, `where` (sous-filtre sur la cible) |
+| `relations` | `any`, `none` (sous-filtre sur la cible), `empty` |
+| `person` | `is`, `in`, `empty` — valeur `me` |
+| `boolean` | `is` |
+
+Une relation se traverse une fois (`{ "contacts": { "any": { "name": { "contains": "Benali" } } } }`), sur les propriétés filtrables de la cible, toujours dans l’organisation ; il faut la permission de lecture de la cible (403 sinon) et une audience externe ne traverse pas. Propriété non filtrable, opérateur hors type, imbrication trop profonde : 400.
 
 Une action de fiche qui n’est pas une transition est un endpoint du même contrôleur (`POST /{id}/<action>`, `@RequirePermission`). La fiche déclare `result: 'record'` quand la réponse est la fiche à ouvrir (une copie, par exemple) : l’écran navigue vers son id.
 
@@ -42,7 +80,7 @@ Ne pas écrire de service CRUD, de DTO de liste ou de pagination à la main.
 
 ## Cycle de vie et approbations
 
-`lifecycleResource()` → `resources/lifecycle/<record>.json` : états (libellé, ton), `initial`, `editable`, transitions (`from`, `to`, `permission`, `requires`, `approval { role, when, title, approved, rejected }`, `system`, `notify`). La plateforme expose `/lifecycle`, `/{id}/transitions`, `POST /{id}/transitions/{id}` et refuse ce que le JSON interdit (403, 409, 422 avec les champs manquants). Une approbation passe par la boîte unique `/approvals` ; sa décision tire la transition de sortie. Le web dessine le statut et les actions depuis ce JSON.
+Dans le descripteur du record (`records/<record>.json`) : états (libellé, ton), `initial`, `editable`, transitions (`from`, `to`, `permission`, `requires`, `approval { role, when, title, approved, rejected }`, `system`, `notify`). La plateforme expose `/lifecycle`, `/{id}/transitions`, `POST /{id}/transitions/{id}` et refuse ce que le JSON interdit (403, 409, 422 avec les champs manquants). Une approbation passe par la boîte unique `/approvals` ; sa décision tire la transition de sortie. Le web dessine le statut et les actions depuis ce JSON.
 
 `notify` sur une transition : `{ "event": "<id déclaré>", "to": … }`. `to` vaut `createdBy`, `field:<champ>` (UUID d’utilisateur) ou `permission:<id>` (les membres qui ont cette permission — jamais un rôle). L’acteur d’une transition utilisateur n’est pas prévenu ; une issue `system` (approuver, rejeter) prévient quand même `createdBy`. La capability `notifications` coupée : les règles sont ignorées, un avertissement est écrit au démarrage. Un événement non déclaré, un champ inconnu ou une permission non déclarée empêche le démarrage. Le lien est `entityType` + `entityId` ; le web le résout avec `HostBusinessContext.records`.
 
@@ -81,13 +119,34 @@ SQL dans `backend/src/main/resources/db/changelog/schema/v1.0/NNN_<sujet>.sql` (
 ```
 
 - `reference` : partout, prod comprise. `demo` : lab et staging seulement.
+- `scope` : `organization` (défaut, une copie par organisation) ou `product` (un jeu pour le produit, entité `ProductEntity`, lecture seule pour les organisations). Pas d’autre format.
 - `$ref` : l’id d’un record de l’organisation trouvé par ses champs (exactement un). `"$transitions": ["submit"]` : le record passe par son cycle de vie comme un utilisateur.
 - Créé seulement si la clé manque ; jamais modifié ; rejoué seulement si le fichier change. Un jeu invalide bloque le démarrage avec le fichier et le record en cause.
 
 ## Connexion et organisation
 
-- `GET /api/public/auth/config` : mode de connexion de l’environnement. `GET /api/v1/me/session` : qui, quelle organisation. `GET /api/v1/me/permissions` : permissions effectives et domaines coupés.
+- `GET /api/public/auth/config` : mode de connexion de l’environnement. `GET /api/v1/me/session` : qui, quelle organisation, quelle audience. `GET /api/v1/me/organizations` : appartenances (`id`, `key`, `slug`, `audience`, `roles`). `GET /api/v1/me/permissions` : permissions effectives et domaines coupés.
 - `tenancy: single` : l’organisation (clé = id du produit) et ses propriétaires (`spec.deploy.<env>.owners`, rôle `OWNER`) sont créés au démarrage. Les propriétaires invitent et attribuent le reste dans l’application.
+- `tenancy: multi` : `spec.local.organizations` au démarrage lab. Une appartenance lab est une clé, ou `{ key, role?, audience? }` pour un rôle différent par organisation. `POST /api/tenants` (nom, clé, e-mail de l’administrateur) est réservé à `platform.operator.*` quand `spec.runtime.signup` vaut `operator` ; `open` l’ouvre. La création applique les seeds `reference` de portée organisation et journalise l’invitation. `POST /api/tenants/{id}/suspend` et `/resume` exigent `platform.operator.organizations.update`. Une organisation `SUSPENDED` répond 403 à ses membres.
+- L’opérateur est un e-mail de `spec.deploy.<env>.operators` (lab, staging ou prod selon le profil). La permission `platform.operator.*` est ajoutée à sa requête ; `*` et `platform.*` ne la couvrent pas. Un rôle qui la déclare empêche le démarrage.
+
+## Pages publiques
+
+Un BC déclare `spec.public.endpoints` (`GET /api/public/<bc>/…`) et `spec.public.submissions` (`POST`). Seuls ces chemins d’un BC connu sont ouverts sans jeton ; le reste de `/api/public/<bc>/` reste fermé. Les chemins de la plateforme (`/api/public/lab`, invitations) ne sont pas un BC.
+
+`@PublicEndpoint(scope = AGGREGATED | ORGANISATION)` sur le contrôleur. `AGGREGATED` ne filtre pas par organisation. L’URL d’une organisation est son slug (`/p/{slug}/…`), jamais son UUID.
+
+`@PublicField` liste les champs renvoyés. Sans annotation, le champ est absent. `@Confidential` sur un booléen du record le retire entier tant qu’il est vrai (absent de la liste, 404 par id). Un record non publié (`published()` du contrôleur) est absent de la liste et 404 par id.
+
+## Audience externe
+
+L’audience est celle de l’appartenance active (`members` par défaut), portée par la session et le sélecteur d’organisation. Une audience autre que `members` ne lit et n’écrit, via `RecordController`, que les records dont le champ annoté `@OwnedBy` vaut l’utilisateur courant. Pas d’annotation : aucun record. Jamais `createdBy`.
+
+`@Erasure` sur l’entité déclare `ANONYMIZE`, `DELETE` (défaut) ou `RETAIN` (durée `until`). L’exécution de l’effacement et le lien de connexion par e-mail restent à brancher.
+
+## Données hors organisation
+
+`@SharesWith(entity, link, fields)` sur l’entité de liaison. `fields` vide : rien n’est partagé. Au démarrage, `EntityScopeGuard` recense ces annotations et refuse une entité `ma.nafura.bc` qui n’étend ni `TenantEntity`, ni `OwnedEntity`, ni `ProductEntity`. Le consentement versionné (date, version des champs, retrait) n’est pas encore enregistré.
 
 ## Capabilities
 
@@ -96,7 +155,9 @@ Catalogue : `nafura-platform/capabilities.json` (id, modules Gradle, `requires`)
 ## Vérifier
 
 ```bash
+node <produit>/ops/run.mjs check   # les trois ci-dessous, avec le JDK et le Node du projet
 cd nafura-platform/sources/web && npm run -s architecture:check          # manifestes, schémas, garde-fous produit, run.mjs
+cd <produit>/sources/web && npm run -s build:dev                          # types et templates
 cd nafura-platform/sources/backend && ./gradlew :platform:host-tests:test --no-daemon --max-workers=1
 #   host-tests : la plateforme complète + le BC fixture host-tests/probe-bc (rôles, permissions, seeding)
 #   variantes : ./gradlew :platform:host-tests:testWithout-<cap>

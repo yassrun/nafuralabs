@@ -24,9 +24,9 @@ Exemple : synthèse fournisseur du BC démo (`supplier-overview`), ouverte depui
 
 | Besoin | Archétype | Configuration |
 |---|---|---|
-| Liste d’enregistrements (recherche, filtres, tri, pagination, segments, actions) | `nf-listing-page` | `ListingPageConfig`. Pagination `paging: 'server'` (défaut) : page, tri, recherche et filtres d’égalité partent à l’API (`page` commence à 0, `size` plafonné à 500). `paging: 'client'` pour une petite liste. Un arbre est toujours côté client. |
-| Vue tableau (Kanban) | `nf-listing-page` | `board: { columns: 'lifecycle', card, defaultView? }`, exclusif avec `tree`. Une requête par état. Le glisser dépose tire la transition. `?view=board` ou `table`. |
-| Hiérarchie (catégories, arborescences) | `nf-listing-page` en arbre | `ListingPageConfig.tree { parentField, create, edit }` |
+| Liste d’enregistrements | `nf-listing-page` | `ListingPageConfig` : `endpoint` (un `RecordController`), `views`, `quickFilters`, `filter` fixe, `actions`, `open`. Les propriétés (type, libellé, format) viennent de `GET {endpoint}/properties` ; la configuration ne les redéclare pas. |
+| Vues (onglets) | `views[]` | Chacune : `layout`, `filter`, `sort`, `show`, `footer` (`sum` / `avg` / `count` sur tout le résultat filtré). `?view=<id>`. Dispositions : `table` ; `board` (`groupBy`, `card`, `hide` ; groupé par `status`, glisser tire la transition, sinon pas de glisser) ; `calendar` (`date`, `card`) ; `tree` (`tree { parentField, create, edit }`, tout chargé). `timeline`, `gallery`, `list` : nommées, pas construites (erreur à la validation). |
+| Filtres | barre de `nf-listing-flat`, commune à toutes les vues | Trois couches combinées en ET : filtre de la vue ; `quickFilters` de l’éditeur (pastille `{ id, label, filter }`, filtre épinglé `{ property, operator?: 'in' }`, liste déroulante dont les valeurs viennent de la propriété — sur une relation 1-N, `on` désigne une propriété texte de la cible et donne un champ « contient » ; `hideQuickFilters` sur une vue) ; filtres libres (« + Filtre », opérateurs du type, groupes ET/OU, propriétés d’une relation à un saut). Même grammaire que l’API (`PLATFORM.md`). |
 | Action métier sur une fiche | `nf-record-page` | `actions[]` : même contrat qu’une action de liste (`PageAction`), plus `placement`, `result` (`record` ouvre la fiche renvoyée, `download` enregistre le fichier, `none`), `requiresSaved`. |
 | Pièces jointes ou notes d’une fiche | section de fiche | `sections[].kind: 'attachments' \| 'comments'`. Lecture = permission de lecture du record, ajout et suppression = permission de mise à jour. Capability `cap.documents` ou `cap.comments` coupée : section masquée. |
 | Champ mis en forme | champ `richtext` | Stockage Markdown, affichage HTML assaini (`renderMarkdown`). `toolbar: 'basic'` (défaut) ou `'full'`. |
@@ -38,6 +38,8 @@ Exemple : synthèse fournisseur du BC démo (`supplier-overview`), ouverte depui
 | Parcours à statuts | idem | `lifecycle: true` + `layout.kind: 'steps'` avec `states` par étape |
 | Sous-liste d’une fiche (1-N) | section de fiche | `sections[].listing: (record) => ListingPageConfig` |
 | Liste de choix d’une relation | champ `select` | `lookupKey` + `lookups: { clé: '/api/v1/…/options' }` |
+| Page publique | contrôleur `@PublicEndpoint` | `spec.public` du BC (`routes`, `endpoints`, `submissions`). Champs renvoyés = `@PublicField` seulement. La coquille web `/catalogue` et `/p/{slug}` n’est pas encore un archétype. |
+| Plusieurs organisations | menu d’organisation existant | Un seul sélecteur. Il affiche l’audience quand elle n’est pas `members`. Le changement recharge les permissions. |
 | Approbation | rien à faire | `approval` dans le cycle de vie JSON ; la boîte `/approvals` et la fiche le gèrent |
 | Navigation | rien à faire | `navigation` du `bc.manifest.json` (filtrée par permission) |
 
@@ -46,8 +48,9 @@ Ce que l’archétype fait déjà, ne pas le refaire : en-tête et fil d’Arian
 ## Champs, colonnes, filtres
 
 - Champs (`FormFieldConfig.type`) : `text`, `textarea`, `richtext`, `number`, `email`, `password`, `date`, `datetime`, `select`, `multiselect`, `checkbox`, `radio`, `file`, `autocomplete`. Options : `required`, `validation`, `options`, `lookupKey`, `wide`, `placeholder`, `toolbar` (`richtext`).
-- Colonnes (`ColumnConfig.type`) : `text`, `number`, `date`, `datetime`, `relative`, `boolean`, `currency`, `badge` (+ `badgeVariant`). `lifecycle: true` sur un badge lit le libellé et le ton depuis `GET {endpoint}/lifecycle`. Préférer un type à un `transform`.
-- Filtres (`FilterFieldConfig.type`) : `text`, `number`, `date`, `daterange`, `select`, `multiselect`, `boolean`. Vues rapides : `segments`.
+- Colonnes d’une liste : `show` d’une vue ; le format suit le type de la propriété (`money` avec sa devise, `status` en badge avec le ton du cycle de vie, `relation` par son `display`).
+- Filtres d’une liste : déduits des propriétés filtrables ; `FilterFieldConfig.operators` restreint le constructeur aux opérateurs de la grammaire.
+- Temporaire : les écrans d’administration sur des contrôleurs qui ne sont pas des records (clés d’API, webhooks, séquences de numérotation) restent sur `LegacyListingPageComponent` (`columns`, `segments`), seuls tolérés par le garde-fou, jusqu’à leur chantier.
 - Icônes : noms Lucide (`building-2`, `package`, …) enregistrés dans `core/icons/app-lucide-icons.ts` ; une icône absente s’y ajoute (garde-fou).
 - Permissions : chaque `permission` d’une configuration existe dans le manifeste du BC (garde-fou).
 

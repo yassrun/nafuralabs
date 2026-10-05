@@ -6,10 +6,16 @@
     "label": "Sonde",
     "icon": "radar",
     "routesPrefix": "/probe",
-    "permissions": [{ "id": "probe.items.item.read" }, { "id": "probe.items.item.create" }],
+    "permissions": [
+      { "id": "probe.items.item.read" },
+      { "id": "probe.items.item.create" },
+      { "id": "probe.records.group.read" },
+      { "id": "probe.records.record.read" }
+    ],
     "defaultRoles": [
       { "code": "PROBE_VIEWER", "label": "Probe viewer", "permissions": ["probe.items.item.read"] },
-      { "code": "PROBE_WRITER", "label": "Probe writer", "permissions": ["probe.items.item.create"] }
+      { "code": "PROBE_WRITER", "label": "Probe writer", "permissions": ["probe.items.item.create"] },
+      { "code": "PROBE_GROUP_READER", "label": "Probe group reader", "permissions": ["probe.records.group.read"] }
     ]
   }
 }

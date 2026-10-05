@@ -4,6 +4,7 @@ import ma.nafura.platform.authorization.repository.UserRoleRepository;
 import ma.nafura.platform.identity.repository.AppUserRepository;
 import ma.nafura.platform.identity.service.AppUserProvisioningService;
 import ma.nafura.platform.scope.security.scope.DefaultScopeService;
+import ma.nafura.platform.tenancy.repository.TenantRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -38,10 +39,13 @@ public class NafuraLabAutoConfiguration {
     LabSeeder labSeeder(
             LabProperties properties,
             DefaultScopeService defaultScopeService,
+            TenantRepository tenantRepository,
+            @Value("${nafura.security.tenant.mode:single}") String tenantMode,
             JdbcTemplate jdbcTemplate,
             AppUserProvisioningService appUserProvisioningService,
             UserRoleRepository userRoleRepository
     ) {
-        return new LabSeeder(properties, defaultScopeService, jdbcTemplate, appUserProvisioningService, userRoleRepository);
+        return new LabSeeder(properties, defaultScopeService, tenantRepository, "multi".equalsIgnoreCase(tenantMode),
+                jdbcTemplate, appUserProvisioningService, userRoleRepository);
     }
 }

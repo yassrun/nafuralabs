@@ -419,7 +419,8 @@ export class FilterBuilderComponent {
   }
 
   opsForField(key: string): FilterOperator[] {
-    return operatorsForFilterType(this.fieldOf(key)?.type);
+    const field = this.fieldOf(key);
+    return field?.operators ?? operatorsForFilterType(field?.type);
   }
 
   opLabel(op: FilterOperator): string {

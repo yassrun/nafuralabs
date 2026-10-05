@@ -18,6 +18,7 @@ export * from './drawer';
 export * from './entity-listing';
 export * from './listing-flat';
 export * from './listing-board';
+export * from './listing-calendar';
 export * from './listing-tree';
 export * from './file-slots';
 export * from './entity-detail';

@@ -73,10 +73,39 @@ public class TenantSeeder {
         return datasets.isEmpty();
     }
 
+    /**
+     * Product-scoped reference data is applied once. An organization reads it and does not own a copy.
+     * A product data set whose entity is not a {@link ma.nafura.platform.framework.domain.ProductEntity} refuses to start.
+     */
+    public List<Applied> seedProduct() {
+        List<Applied> applied = new ArrayList<>();
+        for (SeedDataset dataset : datasets) {
+            if (dataset.scope() != SeedDataset.Scope.PRODUCT) {
+                continue;
+            }
+            if (dataset.kind() == SeedDataset.Kind.DEMO && !demo) {
+                continue;
+            }
+            for (SeedDataset.Block block : dataset.entities()) {
+                EntityType<?> type = lookup(block.entity(), dataset);
+                if (!ma.nafura.platform.framework.domain.ProductEntity.class.isAssignableFrom(type.getJavaType())) {
+                    throw new IllegalStateException("Seed " + dataset.id() + ": " + block.entity()
+                            + " is product scope and must extend ProductEntity");
+                }
+            }
+            log.info("Product data set {} is registered ({} entities)", dataset.id(), dataset.entities().size());
+            applied.add(new Applied(dataset.id(), 0));
+        }
+        return applied;
+    }
+
     /** Also the entry point when an organization is created at runtime. */
     public List<Applied> seed(UUID tenantId) {
         List<Applied> applied = new ArrayList<>();
         for (SeedDataset dataset : datasets) {
+            if (dataset.scope() == SeedDataset.Scope.PRODUCT) {
+                continue;
+            }
             if (dataset.kind() == SeedDataset.Kind.DEMO && !demo) {
                 continue;
             }
@@ -211,11 +240,15 @@ public class TenantSeeder {
         return entityManager.createQuery(query.select(root.get("id")).where(predicates.toArray(Predicate[]::new))).getResultList();
     }
 
-    private EntityType<?> entityType(String name, Object where) {
-        EntityType<?> type = entityManager.getMetamodel().getEntities().stream()
+    private EntityType<?> lookup(String name, Object where) {
+        return entityManager.getMetamodel().getEntities().stream()
                 .filter(entity -> entity.getName().equals(name))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Seed " + where + ": unknown entity " + name));
+    }
+
+    private EntityType<?> entityType(String name, Object where) {
+        EntityType<?> type = lookup(name, where);
         if (!TenantEntity.class.isAssignableFrom(type.getJavaType())) {
             throw new IllegalStateException("Seed " + where + ": " + name + " is not organization data (TenantEntity)");
         }
@@ -241,6 +274,7 @@ public class TenantSeeder {
         String role = UserContext.getUserRole();
         Set<String> roles = UserContext.getUserRoles();
         UUID userId = UserContext.getUserIdOrNull();
+        String audience = UserContext.getAudience();
         try {
             TenantContext.setTenantId(tenantId);
             UserContext.clear();
@@ -256,6 +290,7 @@ public class TenantSeeder {
             if (!roles.isEmpty()) UserContext.setUserRoles(roles);
             if (role != null) UserContext.setUserRole(role);
             if (userId != null) UserContext.setUserId(userId);
+            if (audience != null) UserContext.setAudience(audience);
             if (tenant != null) TenantContext.setTenantId(tenant);
             else TenantContext.clear();
         }

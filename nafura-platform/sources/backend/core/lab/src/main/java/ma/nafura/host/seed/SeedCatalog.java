@@ -25,7 +25,7 @@ public final class SeedCatalog {
     static final String LOCATION = "classpath*:META-INF/nafura/seed/*.json";
     private static final Pattern ID = Pattern.compile("^[a-z][a-z0-9-]*(\\.[a-z0-9-]+)+$");
 
-    private record File(String id, String kind, List<String> after, List<SeedDataset.Block> entities) {
+    private record File(String id, String kind, String scope, List<String> after, List<SeedDataset.Block> entities) {
     }
 
     private SeedCatalog() {
@@ -49,8 +49,8 @@ public final class SeedCatalog {
         try (InputStream in = resource.getInputStream()) {
             byte[] bytes = in.readAllBytes();
             File file = mapper.readValue(bytes, File.class);
-            return check(new SeedDataset(file.id(), kind(file.kind(), source), file.after() == null ? List.of() : file.after(),
-                    file.entities(), source, sha256(bytes)));
+            return check(new SeedDataset(file.id(), kind(file.kind(), source), scope(file.scope(), source),
+                    file.after() == null ? List.of() : file.after(), file.entities(), source, sha256(bytes)));
         } catch (IOException e) {
             throw new UncheckedIOException("Unreadable seed " + source, e);
         } catch (RuntimeException e) {
@@ -63,6 +63,16 @@ public final class SeedCatalog {
             throw new IllegalStateException("Seed " + source + ": kind must be \"reference\" or \"demo\"");
         }
         return SeedDataset.Kind.valueOf(kind.toUpperCase(Locale.ROOT));
+    }
+
+    private static SeedDataset.Scope scope(String scope, String source) {
+        if (scope == null || scope.isBlank() || "organization".equals(scope) || "organisation".equals(scope)) {
+            return SeedDataset.Scope.ORGANIZATION;
+        }
+        if ("product".equals(scope) || "produit".equals(scope)) {
+            return SeedDataset.Scope.PRODUCT;
+        }
+        throw new IllegalStateException("Seed " + source + ": scope must be \"organization\" or \"product\"");
     }
 
     private static SeedDataset check(SeedDataset dataset) {

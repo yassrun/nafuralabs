@@ -1,44 +1,31 @@
 package ma.nafura.bc.demo;
 
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import ma.nafura.platform.framework.domain.TenantEntity;
 
 @Entity(name = "DemoNote")
 @Table(name = "demo_note")
 @Getter
+@Setter
 @NoArgsConstructor
-public class Note {
+public class Note extends TenantEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(name = "tenant_id", nullable = false)
-    private UUID tenantId;
-
-    @Column(name = "title", nullable = false, length = 200)
+    @NotBlank
+    @Size(max = 200)
+    @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
     public Note(UUID tenantId, String title) {
-        this.tenantId = tenantId;
+        setTenantId(tenantId);
         this.title = title;
-    }
-
-    @PrePersist
-    void onCreate() {
-        createdAt = OffsetDateTime.now();
     }
 }

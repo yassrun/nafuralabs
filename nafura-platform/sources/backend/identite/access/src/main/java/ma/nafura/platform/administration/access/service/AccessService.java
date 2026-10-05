@@ -27,6 +27,7 @@ import ma.nafura.platform.authorization.domain.model.TenantUserRole;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
 import ma.nafura.platform.authorization.service.PermissionMetadataService;
 import ma.nafura.platform.authorization.service.PermissionService;
+import ma.nafura.platform.authorization.security.authorization.OperatorPermissions;
 import ma.nafura.platform.framework.context.UserContext;
 import ma.nafura.platform.tenancy.domain.model.TenantDomain;
 import ma.nafura.platform.tenancy.repository.TenantDomainRepository;
@@ -196,6 +197,10 @@ public class AccessService {
             .map(String::trim)
             .distinct()
             .toList();
+        List<String> operator = permissions.stream().filter(OperatorPermissions::isOperatorPermission).toList();
+        if (!operator.isEmpty()) {
+            throw new IllegalArgumentException("Operator permissions are granted only by the deployment, not by a role: " + String.join(", ", operator));
+        }
         Set<String> known = Set.copyOf(permissionMetadataService.getAllPermissionCodes());
         List<String> unknown = permissions.stream().filter(p -> !known.contains(p)).toList();
         if (!unknown.isEmpty()) {

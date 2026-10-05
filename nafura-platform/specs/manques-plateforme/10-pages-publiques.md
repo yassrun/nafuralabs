@@ -19,21 +19,20 @@ Offres d’emploi, catalogue produits, annuaire : la première page qu’un visi
 - `bc.manifest.json` → `spec.public: { "routes": ["/catalogue", "/catalogue/:id"], "endpoints": ["GET /api/public/<bc>/items/**"] }` — déclaration explicite, validée par le schéma ; un endpoint public doit commencer par `/api/public/<bc>/`.
 - Backend : un BC déclare un contrôleur de lecture publique, ex. `class PublicItemController extends PublicRecordController<Item>` (nouveau, dans `framework/record`) : liste paginée et lecture seulement, **projection explicite** des champs exposés (jamais l’entité entière), filtre obligatoire « publiable » (ex. `published = true`) déclaré par le contrôleur.
 - Le registre `PublicEndpointRegistry` est alimenté par les manifestes au démarrage (pas de liste manuelle dans la configuration Spring).
-- Organisation d’un endpoint public :
-  - `single` : l’organisation du déploiement ;
-  - `multi` (spec 09) : soit agrégation de toutes les organisations (catalogue commun), soit une organisation désignée dans l’URL (`/api/public/<bc>/orgs/{key}/…`). Le contrôleur public le déclare.
+- Le mode d’un endpoint public se déclare sur l’annotation existante `@PublicEndpoint` : `scope = AGGREGATED | ORGANISATION`. On ne crée pas d’annotation nouvelle. La démo montre le catalogue agrégé.
+- Dans l’URL, l’organisation apparaît par un slug (`/p/{slug}/…`), jamais par son UUID. En `single`, le slug est celui de l’organisation du déploiement.
 - Web : routes publiques rendues dans un **shell public** (en-tête simple avec marque du produit et bouton « Se connecter »), sans `hostAuthGuard` ; mêmes archétypes de liste et de fiche en lecture seule (`RecordPageConfig` sans `permissions.update`).
 
-### Projection conditionnelle
+### Projection
 
-Un champ public peut être masqué ou remplacé selon l’enregistrement : `@PublicField(maskedWhen = "confidential", replacement = "publicLabel")` (forme à préciser). Exemple générique : un enregistrement « confidentiel » expose un libellé de remplacement au lieu du nom de l’organisation. La règle s’applique partout où l’enregistrement sort vers un public non membre (pages publiques, audience externe de la spec 11) ; le masquage peut être levé par un état du cycle de vie (déclaré, ex. `revealFrom: "INTERVIEW"`).
+`@PublicField` est une liste explicite : un champ n’est public que s’il porte l’annotation, et tout est masqué par défaut. Le record confidentiel est une condition au niveau du record, distincte des champs. Elle s’applique partout où l’enregistrement sort vers un public non membre (pages publiques, audience externe de la spec 11).
 
 ### Dépôt public (écriture sans connexion)
 
 Un BC peut déclarer **un** endpoint public d’écriture par ressource, pour un dépôt simple (formulaire de contact, candidature) : `spec.public.submissions: ["POST /api/public/<bc>/<ressource>"]`.
 
 - Corps limité aux champs déclarés ; fichiers joints contrôlés (type MIME réel, pas seulement l’extension ; taille max ; un fichier).
-- Protection anti-robot (défi côté serveur, ex. jeton à usage unique délivré par la page publique + piège invisible), limitation de débit par IP **et** par e-mail.
+- Protection anti-robot (défi côté serveur, ex. jeton à usage unique délivré par la page publique + piège invisible), limitation de débit par IP **et** par e-mail sur le dépôt public. La même limite s’applique à l’envoi du lien e-mail (spec 11).
 - Le consentement (case obligatoire, texte et version enregistrés avec horodatage) est une donnée exigée par la déclaration, refusée si absente (422).
 - La réponse ne révèle rien sur l’existence d’un compte ou d’un enregistrement pour cet e-mail.
 - Traitement lourd (lecture de document, spec 08) **après** l’enregistrement, en tâche de fond : le dépôt réussit même si l’extraction échoue.
@@ -62,6 +61,15 @@ Un BC peut déclarer **un** endpoint public d’écriture par ressource, pour un
 
 `docs/PLATFORM.md` : section « Pages publiques » ; `docs/UI.md` : ligne « Page publique » ; schéma `bc.manifest`.
 
-## Décisions ouvertes
+## Décisions (2026-10-04)
 
-- Organisation des pages publiques en `multi` (agrégée ou par organisation) — **recommandation** : les deux, déclarés par le contrôleur public ; la démo montre l’agrégée.
+- Le mode se déclare sur `@PublicEndpoint`, l’annotation existante : `scope = AGGREGATED | ORGANISATION`. On ne crée pas d’annotation nouvelle. La démo montre le catalogue agrégé.
+- Dans l’URL, l’organisation apparaît par un slug (`/p/{slug}/…`), jamais par son UUID.
+- `@PublicField` est une liste explicite : un champ n’est public que s’il porte l’annotation, et tout est masqué par défaut. Le record confidentiel est une condition au niveau du record, distincte des champs.
+- L’inscription implicite et le lien e-mail (spec 11) sont gardés. Une limite de débit s’applique au dépôt public et à l’envoi du lien.
+
+## État (2026-10-04)
+
+Livré : `scope` sur `@PublicEndpoint`, `@PublicField` et `@Confidential`, ouverture seulement des chemins déclarés dans `spec.public`, catalogue démo `GET /api/public/demo/items` (publiés, article confidentiel retiré, non publié en 404, API privée en 401).
+
+Reste : coquille web `/catalogue` et `/p/{slug}` (pas d’archétype public), dépôt public, inscription implicite, limite de débit sur le dépôt et sur l’envoi du lien. Le filtre de slug `ORGANISATION` n’est pas branché : la démo est `AGGREGATED`.

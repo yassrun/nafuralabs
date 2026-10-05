@@ -206,6 +206,14 @@ export interface ListingQueryState {
   columns?: ListingColumnState[];
   /** Active quick view (`ListingSegment.id`). */
   segment?: string;
+  /** Active preset filters (`ListingPreset.id`), toggled as pills. */
+  presets?: string[];
+}
+
+/** A ready-made filter offered as a pill (« Mes demandes », « En retard »): on or off. */
+export interface ListingPreset {
+  id: string;
+  label: string;
 }
 
 /**
@@ -1281,6 +1289,9 @@ export interface FilterFieldConfig {
 
   /** When true, the filter is shown inline in the page and omitted from the +Filter popup. */
   pinned?: boolean;
+
+  /** Operators offered by the builder; defaults to those of `type`. */
+  operators?: FilterOperator[];
 
   /** Default value */
   defaultValue?: unknown;

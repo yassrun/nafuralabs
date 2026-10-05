@@ -12,24 +12,26 @@ export const CATEGORIES_LISTING: ListingPageConfig = {
   subtitle: 'L’arborescence des familles d’achat',
   icon: 'folder-tree',
   endpoint: '/api/v1/demo/categories',
-  searchFields: ['code', 'name'],
   emptyMessage: 'Aucune catégorie',
-  columns: [
-    { key: 'name', field: 'name', label: 'Catégorie' },
-    { key: 'code', field: 'code', label: 'Code' },
-    { key: 'description', field: 'description', label: 'Description' },
-  ],
-  tree: {
-    parentField: 'parentId',
-    create: 'create',
-    edit: 'edit',
-    deleted: 'Catégorie supprimée.',
-    labels: {
-      addNode: 'Nouvelle catégorie',
-      addChild: 'Sous-catégorie',
-      deleteConfirmMessage: 'Supprimer cette catégorie et ses sous-catégories ?',
+  views: [
+    {
+      id: 'tree',
+      label: 'Arborescence',
+      layout: 'tree',
+      show: ['name', 'code', 'description'],
+      tree: {
+        parentField: 'parentId',
+        create: 'create',
+        edit: 'edit',
+        deleted: 'Catégorie supprimée.',
+        labels: {
+          addNode: 'Nouvelle catégorie',
+          addChild: 'Sous-catégorie',
+          deleteConfirmMessage: 'Supprimer cette catégorie et ses sous-catégories ?',
+        },
+      },
     },
-  },
+  ],
   actions: [
     {
       id: 'create',

@@ -2,7 +2,7 @@
 
 ## Objectif
 
-Un produit sert, en plus de ses **membres** (utilisateurs internes invités dans une organisation), une **audience externe** : des personnes qui **s’inscrivent elles-mêmes**, n’appartiennent à aucune organisation, ont leur propre shell, et ne voient que ce qui les concerne.
+Un produit sert, en plus de ses **membres** (utilisateurs internes invités dans une organisation), une **audience externe** : des personnes qui **s’inscrivent elles-mêmes**, ont leur propre shell, et ne voient que ce qui les concerne. L’audience est un attribut de l’appartenance, pas un second compte.
 
 ## Besoin
 
@@ -23,16 +23,17 @@ Candidats, clients finaux, fournisseurs sur un portail, patients : ils ne sont p
 - `bc.manifest.json` :
   - `navigation[].audience` (défaut `members`) — une entrée de menu appartient à une audience ;
   - `defaultRoles[].audience` — un rôle par défaut attribué à toute personne inscrite dans cette audience (ex. `EXTERNAL_SELF`).
-- Identité : une personne externe a un compte de connexion (Keycloak / lab) **sans appartenance à une organisation**, créé implicitement, sans mot de passe. Vérifier ce que Keycloak offre pour la connexion par lien e-mail ; sinon un endpoint plateforme émet un jeton à usage unique, l’échange contre une session, et le compte Keycloak reste sans mot de passe. Cliquer le lien vaut vérification de l’e-mail. En lab, utilisateurs externes déclarés dans `spec.local.users` avec `audience: "external"` et le sélecteur lab habituel.
-- Autorisation « mes données » : nouveau concept de **propriétaire** d’un enregistrement — `@OwnedBy("field")` (ou équivalent déclaratif) sur l’entité, et des permissions d’audience externe qui ne valent **que** sur les enregistrements dont la personne est propriétaire. Le `RecordController` applique ce filtre en liste comme en lecture et en écriture.
-- Session : `GET /api/v1/me/session` renvoie `audience` ; le web choisit le shell et la route par défaut selon l’audience.
+- Un seul compte, plusieurs audiences. L’audience est un attribut de l’appartenance qui existe déjà (`TenantMembership`), pas un second compte. Le sélecteur d’organisation existant est étendu à l’audience : pas de second sélecteur.
+- Identité : le compte (Keycloak / lab) est créé implicitement, sans mot de passe. Vérifier ce que Keycloak offre pour la connexion par lien e-mail ; sinon un endpoint plateforme émet un jeton à usage unique, l’échange contre une session, et le compte Keycloak reste sans mot de passe. Cliquer le lien vaut vérification de l’e-mail. L’envoi du lien est limité en débit (spec 10). En lab, utilisateurs externes déclarés dans `spec.local.users` avec `audience: "external"` et le sélecteur lab habituel.
+- `@OwnedBy` se pose sur le champ qui porte l’utilisateur. Sans annotation, le record n’a pas de propriétaire externe. On ne retombe jamais sur `createdBy`. Les permissions d’audience externe ne valent que sur les enregistrements dont la personne est propriétaire. Le `RecordController` applique ce filtre en liste comme en lecture et en écriture.
+- Session : `GET /api/v1/me/session` renvoie l’audience de l’appartenance active ; le web choisit le shell et la route par défaut selon cette audience.
 
 ## Comportement et sécurité
 
-- Une personne externe n’a jamais d’en-tête d’organisation et ne passe jamais par `TenantContextFilter` pour ses propres données (voir spec 12 pour où vivent ces données).
+- L’audience active est celle de l’appartenance choisie dans le sélecteur. Une audience externe ne voit pas les écrans membres. Ses propres données hors organisation suivent la spec 12.
 - Toute route ou endpoint non déclaré pour l’audience externe lui est refusé (403), y compris les écrans de la plateforme (administration, approbations).
-- Un membre ne devient pas externe et inversement par simple configuration : ce sont deux comptes ou deux profils distincts — **à trancher** (voir décisions).
-- Suppression de compte à la demande de la personne (droit à l’effacement) : exposée dans son espace.
+- Une même personne peut être membre d’une organisation et externe d’une autre : un compte, l’audience sur chaque appartenance, le sélecteur existant pour changer.
+- Effacement à la demande de la personne, exposé dans son espace. Chaque entité déclare son cas : anonymiser (données partagées), supprimer (cas par défaut) ou conserver par obligation légale (gardé sans accès externe jusqu’à la fin de la durée légale).
 
 ## Démo
 
@@ -50,14 +51,20 @@ Portail fournisseur :
 - [ ] Un contact invité se connecte par lien et arrive sur son portail, avec son propre menu.
 - [ ] Il ne voit que ses commandes ; aucun écran membre n’est accessible, même par URL.
 - [ ] Un membre ne voit pas le portail dans son menu.
-- [ ] L’effacement du compte externe supprime ses données personnelles (ou les anonymise, selon la décision).
+- [ ] L’effacement suit la déclaration de chaque entité : anonymiser, supprimer, ou conserver sans accès externe jusqu’à la fin de la durée légale.
 
 ## Documentation
 
 `docs/ARCHITECTURE.md` : nouvelle règle « Audiences » ; `docs/PLATFORM.md` : section « Audience externe » (manifestes, propriétaire, session) ; `docs/UI.md` : shell d’audience ; schémas.
 
-## Décisions ouvertes (à trancher avant de coder)
+## Décisions (2026-10-04)
 
-1. **Une personne à la fois membre et externe** (un recruteur qui postule ailleurs) : un compte avec deux audiences et un sélecteur, ou deux comptes — **recommandation** : un compte, audiences multiples, sélecteur comme pour les organisations.
-2. **Forme de la notion de propriétaire** : annotation sur l’entité (`@OwnedBy`) ou champ standard `ownerId` sur une classe de base — **recommandation** : annotation, pour ne pas imposer un champ à toutes les entités.
-3. **Effacement** : suppression ou anonymisation des données liées (ex. candidatures déjà traitées) — **recommandation** : anonymisation des données partagées, suppression du reste.
+- Un seul compte, plusieurs audiences. L’audience est un attribut de l’appartenance qui existe déjà. Le sélecteur d’organisation existant est étendu à l’audience, sans second sélecteur.
+- `@OwnedBy` se pose sur le champ qui porte l’utilisateur. Sans annotation, le record n’a pas de propriétaire externe. On ne retombe jamais sur `createdBy`.
+- À l’effacement, chaque entité déclare son cas : anonymiser (données partagées), supprimer (cas par défaut) ou conserver par obligation légale (gardé sans accès externe jusqu’à la fin de la durée légale).
+
+## État (2026-10-04)
+
+Livré : `audience` sur `TenantMembership` (défaut `members`), session et sélecteur existant (libellé si l’audience n’est pas `members`), filtre `RecordController` sur le champ `@OwnedBy` pour toute audience externe (aucun record sans annotation, jamais `createdBy`), annotation `@Erasure`.
+
+Reste : exécution de l’effacement, connexion par lien e-mail, utilisateur lab d’audience externe dans la démo, shell d’audience distinct du sélecteur.

@@ -1,5 +1,5 @@
 import type { FormFieldConfig } from '../../../lib/anatomy/types';
-import type { ListingPageConfig } from '../../../platform/listing';
+import type { LegacyListingPageConfig } from '../../../platform/listing/legacy';
 
 interface NumberingSequence extends Record<string, unknown> {
   name: string;
@@ -46,7 +46,7 @@ const body = (values: Record<string, unknown>) => ({
   currentNumber: Number(values['currentNumber']),
 });
 
-export const NUMBERING_SEQUENCES_LISTING: ListingPageConfig<NumberingSequence> = {
+export const NUMBERING_SEQUENCES_LISTING: LegacyListingPageConfig<NumberingSequence> = {
   title: t('title'),
   subtitle: t('subtitle'),
   icon: 'repeat',

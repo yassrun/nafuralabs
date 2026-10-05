@@ -109,7 +109,7 @@ import {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="nf-listing-flat" [class.nf-listing-flat--split]="layout() === 'split'">
+    <div class="nf-listing-flat" [class.nf-listing-flat--split]="layout() === 'split'" [class.nf-listing-flat--bar]="!features().table">
       @if (config().segments?.length) {
         <div class="nf-listing-flat__segments" role="tablist">
           @for (segment of config().segments; track segment.id) {
@@ -127,7 +127,7 @@ import {
         </div>
       }
       <!-- Row 1: Search + Filter Add + Filter Chips (starts left, flows right) -->
-      @if (features().search || features().filters) {
+      @if (features().search || features().filters || presets().length > 0) {
         <div class="nf-listing-flat__filters">
           <div class="nf-listing-flat__filters-row nf-listing-flat__filters-row--top">
             @if (features().search) {
@@ -141,6 +141,21 @@ import {
                   (input)="onSearchChange($any($event.target).value)"
                   [attr.aria-label]="'Search' | translate"
                 />
+              </div>
+            }
+            @if (presets().length > 0) {
+              <div class="nf-listing-flat__presets">
+                @for (preset of presets(); track preset.id) {
+                  <button
+                    type="button"
+                    class="nf-listing-flat__preset"
+                    [class.nf-listing-flat__preset--active]="presetActive(preset.id)"
+                    [attr.aria-pressed]="presetActive(preset.id)"
+                    (click)="togglePreset(preset.id)"
+                  >
+                    {{ preset.label | translate }}
+                  </button>
+                }
               </div>
             }
             @if (features().filters && pinnedFilters().length > 0) {
@@ -382,6 +397,7 @@ import {
         </div>
       </div>
 
+      @if (features().table) {
       <div class="nf-listing-flat__view">
         @if (error(); as message) {
           <nf-data-state state="error" [errorMessage]="message | translate" (retry)="retry.emit()" />
@@ -414,6 +430,7 @@ import {
           />
         }
       </div>
+      }
 
       <!-- Export Configuration Dialog (Anatomy Modal) -->
       @if (exportDialogOpen()) {
@@ -556,7 +573,7 @@ import {
         </div>
       }
 
-      @if (features().pagination && pagerTotal() > 0) {
+      @if (features().table && features().pagination && pagerTotal() > 0) {
         <div class="nf-listing-flat__pager">
           <nf-pagination
             [total]="pagerTotal()"
@@ -707,6 +724,36 @@ import {
         min-height: 0;
         height: 100%;
         gap: 8px;
+      }
+      /* Toolbar only (table: false): its own height; the host draws the rows below. */
+      :host:has(.nf-listing-flat--bar),
+      .nf-listing-flat--bar {
+        height: auto;
+        flex: 0 0 auto;
+      }
+
+      /* ── Ready-made filters (presets) ─────────────────────────────────────── */
+      .nf-listing-flat__presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .nf-listing-flat__preset {
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        background: var(--nf-surface-card, #fff);
+        color: var(--nf-text-secondary, #4b5563);
+        border-radius: 999px;
+        padding: 3px 10px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .nf-listing-flat__preset:hover {
+        border-color: var(--nf-color-primary-300, #a5b4fc);
+      }
+      .nf-listing-flat__preset--active {
+        background: var(--nf-color-primary-50, #eef2ff);
+        border-color: var(--nf-color-primary-500, #6366f1);
+        color: var(--nf-color-primary-700, #4338ca);
       }
 
       /* ── Quick views (segments) ───────────────────────────────────────────── */
@@ -1683,6 +1730,7 @@ export class ListingFlatComponent<T = unknown> {
     () =>
       !!this.search() ||
       this.filterActive() ||
+      (this.listingQuery().presets?.length ?? 0) > 0 ||
       Object.keys(this.activeSegment()?.filters ?? {}).length > 0
   );
 
@@ -1854,6 +1902,17 @@ export class ListingFlatComponent<T = unknown> {
 
   selectSegment(id: string): void {
     this.patchQuery({ segment: id }, true);
+  }
+
+  readonly presets = computed(() => this.config().presets ?? []);
+
+  presetActive(id: string): boolean {
+    return this.listingQuery().presets?.includes(id) ?? false;
+  }
+
+  togglePreset(id: string): void {
+    const active = this.listingQuery().presets ?? [];
+    this.patchQuery({ presets: active.includes(id) ? active.filter((item) => item !== id) : [...active, id] }, true);
   }
   readonly hiddenCount = computed(
     () => this.controlColumns().filter((c) => !c.visible).length

@@ -65,12 +65,14 @@ Le nom du produit n’existe que dans `app.nafura.json`. Le backend le lit au d�
 3. **Permissions, jamais de rôles dans le code.** Un BC déclare ses permissions (`<bc>.<feature>.<ressource>.<action>`) et des rôles par défaut ; le produit compose des rôles transverses ; l’organisation crée les siens. Aucune permission implicite.
 4. **Mêmes migrations partout.** Le changelog est généré depuis les modules composés ; le lab l’applique et valide les entités ; staging et prod le passent par un Job avant le déploiement.
 5. **La connexion appartient à l’environnement** : lab = sélecteur d’utilisateurs sans mot de passe (interdit en prod) ; ailleurs = Keycloak partagé, un client par produit, jeton vérifié (émetteur, signature, destinataire).
-6. **Organisation** : `spec.runtime.tenancy: single` (une organisation par déploiement, créée par la plateforme, propriétaires déclarés par environnement). `multi` est la cible suivante.
-7. **Données initiales = fichiers du BC**, appliqués à chaque organisation à travers les règles des records (validation, cycle de vie), idempotents.
-8. **Un écran = un archétype configuré** (liste, fiche, arbre, assistant, étapes). Voir [UI.md](UI.md).
-9. **Le BC démo exerce toute la plateforme.** Chaque concept et artefact (archétypes et leurs variantes, cycle de vie, approbation, seeding, permissions, capabilities) y a un cas d’usage : c’est sa vitrine et son banc de test. Un concept absent de la démo n’est ni montré ni testé.
-10. **Statut et étapes, au choix du BC** : un parcours en étapes peut être une vue du cycle de vie (étapes = groupes d’états) ou un avancement déduit des données, indépendant du statut ; dans les deux cas, un seul statut stocké par record, et la complétude des étapes peut conditionner une transition.
-11. **Lab mode** : aucun produit n’a encore de données métier en prod (sauf vitrines MBS et corporate). Schéma cible net, pas de migrations défensives.
+6. **Organisation** : `spec.runtime.tenancy: single` (une organisation par déploiement, créée par la plateforme, propriétaires `spec.deploy.<env>.owners`) ou `multi` (plusieurs organisations, opérateur `spec.deploy.<env>.operators`). La permission `platform.operator.*` ne vient que de cette liste : les jokers de rôle ne la couvrent jamais, et un rôle qui la déclare empêche le démarrage. `spec.runtime.signup` vaut `operator` (défaut) ou `open`.
+7. **Données initiales = fichiers du BC**, appliqués à chaque organisation à travers les règles des records (validation, cycle de vie), idempotents. Portée `organization` (défaut, une copie par organisation) ou `product` (un jeu, lecture seule pour les organisations, entités `ProductEntity`).
+8. **Audiences** : un compte, plusieurs audiences. L’audience est un attribut de l’appartenance (`members` par défaut). Une audience externe ne voit que les records dont le champ `@OwnedBy` est cet utilisateur ; sans annotation, elle ne voit rien. On ne retombe jamais sur `createdBy`.
+9. **Portées des données** : une entité de BC (`ma.nafura.bc`) étend `TenantEntity` (organisation), `OwnedEntity` (personne) ou `ProductEntity` (produit). Un partage se déclare par `@SharesWith` sur l’entité de liaison, champs explicites, recensé au démarrage.
+10. **Un écran = un archétype configuré** (liste, fiche, arbre, assistant, étapes). Voir [UI.md](UI.md).
+11. **Le BC démo exerce toute la plateforme.** Chaque concept et artefact (archétypes et leurs variantes, cycle de vie, approbation, seeding, permissions, capabilities) y a un cas d’usage : c’est sa vitrine et son banc de test. Un concept absent de la démo n’est ni montré ni testé.
+12. **Statut et étapes, au choix du BC** : un parcours en étapes peut être une vue du cycle de vie (étapes = groupes d’états) ou un avancement déduit des données, indépendant du statut ; dans les deux cas, un seul statut stocké par record, et la complétude des étapes peut conditionner une transition.
+13. **Lab mode** : aucun produit n’a encore de données métier en prod (sauf vitrines MBS et corporate). Schéma cible net, pas de migrations défensives.
 
 ## Environnements
 
@@ -90,7 +92,12 @@ Lancement : [ops/README.md](../ops/README.md).
 | Host, manifestes, capabilities, BC démo, rôles, connexion, seeding | livrés (`platform-host`) |
 | Notifications : événements déclarés (BC et plateforme), routeur unique, préférences organisation / utilisateur (API), canaux in-app et e-mail | livré (backend) |
 | Notifications : écrans de préférences, canal SMS, modèles de message par canal | à faire |
-| `tenancy: multi` dans le web du host | à faire |
+| Tenancy `multi` : organisations, opérateur, sélecteur, isolation (démo) | livré (API et sélecteur) ; console opérateur (écrans) à faire |
+| Pages publiques : catalogue agrégé `@PublicEndpoint` + `@PublicField` | livré (API) ; coquille `/p/{slug}`, dépôt et limite de débit à faire |
+| Audience externe : attribut d’appartenance, `@OwnedBy` | livré (filtre) ; effacement et lien e-mail à faire |
+| Données hors organisation : `@SharesWith`, portée de seed `product` | livré (garde-fous) ; consentement et écriture du seed produit à faire |
+| Listes : descripteur du record (`records/*.json`), `/properties`, grammaire de filtre avec relations à un saut, `/aggregate`, vues (table, kanban, calendrier, arbre), filtres proposés | livré |
+| Écrans d’administration sur des contrôleurs non-record (clés d’API, webhooks, séquences) et archétype de liste « config-driven » (`lib/anatomy` `ListingPageConfig`) | à migrer (chantier dédié) |
 | Approbation par permission (au lieu d’un rôle), multi-étapes, historique | à faire |
 | Réglages déclarés par BC, documents (impression, marque, import), conversation IA, tableau de bord | à faire |
 | i18n par BC (libellés du BC démo en dur) | à faire |

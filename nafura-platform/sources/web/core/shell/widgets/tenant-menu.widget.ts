@@ -13,6 +13,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../lib/anatomy/components/atoms/avatar/avatar.component';
+import { TenantMembership } from '../../security/models/tenant.models';
 import { AuthFacade } from '../../security/services/auth.facade';
 
 /**
@@ -54,6 +55,22 @@ import { AuthFacade } from '../../security/services/auth.facade';
           </div>
 
           <div class="naf-shell__tenant-panel-divider"></div>
+
+          @if (organizations().length > 1) {
+            @for (organization of organizations(); track organization.tenant.id) {
+              <button
+                type="button"
+                class="naf-shell__tenant-panel-item"
+                (click)="choose(organization.tenant.id, $event)">
+                <lucide-icon name="building-2" [size]="18" class="naf-shell__icon" aria-hidden="true"></lucide-icon>
+                <span>{{ organization.tenant.name }}</span>
+                @if (audienceLabel(organization)) {
+                  <span class="naf-shell__tenant-panel-meta">{{ audienceLabel(organization) }}</span>
+                }
+              </button>
+            }
+            <div class="naf-shell__tenant-panel-divider"></div>
+          }
 
           @if (tenantSettingsEnabled()) {
             <a
@@ -209,6 +226,21 @@ export class TenantMenuWidget {
   readonly fallbackKey = input<string>('');
 
   readonly open = signal(false);
+  readonly organizations = computed(() => this.auth.tenants());
+
+  audienceLabel(membership: TenantMembership): string {
+    const audience = membership.audience?.trim();
+    return audience && audience !== 'members' ? audience : '';
+  }
+
+  async choose(tenantId: string, event: MouseEvent): Promise<void> {
+    event.preventDefault();
+    event.stopPropagation();
+    this.close();
+    if (tenantId === this.auth.currentTenant()?.tenant.id) return;
+    const switched = await this.auth.useOrganization(tenantId);
+    if (switched) location.reload();
+  }
 
   readonly tenantName = computed(() => {
     const membership = this.auth.currentTenant();

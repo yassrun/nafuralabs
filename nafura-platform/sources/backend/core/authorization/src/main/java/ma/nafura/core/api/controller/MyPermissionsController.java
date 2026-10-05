@@ -32,7 +32,7 @@ public class MyPermissionsController {
     }
 
     /** Who is signed in and in which organization, whatever signed them in (lab or OIDC). */
-    public record SessionResponse(String email, String name, Set<String> roles, boolean superAdmin, Organization tenant) {
+    public record SessionResponse(String email, String name, Set<String> roles, boolean superAdmin, String audience, Organization tenant) {
         public record Organization(UUID id, String key, String name) {
         }
     }
@@ -45,7 +45,7 @@ public class MyPermissionsController {
         SessionResponse.Organization tenant = tenantId == null ? null : tenants.findById(tenantId)
                 .map(row -> new SessionResponse.Organization(row.getId(), row.getKey(), row.getName()))
                 .orElse(null);
-        return new SessionResponse(email, name, new TreeSet<>(UserContext.getUserRoles()), UserContext.isSuperAdmin(), tenant);
+        return new SessionResponse(email, name, new TreeSet<>(UserContext.getUserRoles()), UserContext.isSuperAdmin(), UserContext.getAudience(), tenant);
     }
 
     @GetMapping("/api/v1/me/permissions")
