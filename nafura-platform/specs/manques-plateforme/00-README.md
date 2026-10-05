@@ -8,7 +8,7 @@ Les décisions des specs 09 à 12 sont tranchées (2026-10-04). Le socle est liv
 
 Dette front : [13 Découpage des listes](13-decoupage-listes.md) — `nf-listing-flat` et `nf-listing-page` découpés par responsabilité, sans changement visible ni de configuration.
 
-Notifications : [14 Préférences et inbox](14-notifications-preferences.md) — écrans sur l’API `notification-preferences` (utilisateur + organisation) ; filtre d’événement dans l’inbox.
+Notifications : [14 Préférences et inbox](14-notifications-preferences.md) (livré) ; suite [15 Temps réel, digest, e-mail](15-notifications-suite.md) — baseline 6,5/10 → cible ~8/10.
 
 | Spec | Sujet | Décision |
 |---|---|---|

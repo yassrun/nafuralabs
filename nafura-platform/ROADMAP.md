@@ -4,10 +4,7 @@
 
 ## Prochains
 
-0. **Notifications** — backend et écrans de préférences : [PLATFORM.md](docs/PLATFORM.md#notifications), spec [14](specs/manques-plateforme/14-notifications-preferences.md). Reste :
-   - SMS : fournisseur et numéro de l’utilisateur (`AppUser` n’en a pas).
-   - Modèles de message par canal (hors manifeste) ; lien absolu dans l’e-mail (aujourd’hui relatif).
-   - Dette : `AlertRule` / `Broadcast` / `Escalation` sans usage, digest (`EmailDigestJob` vide), adresse d’expédition `noreply@seyrura.com` par défaut, événement `platform.legacy.transition` (Sektor, destinataires par rôle) à supprimer avec Sektor sur le host.
+0. **Notifications** — prefs + inbox : [14](specs/manques-plateforme/14-notifications-preferences.md) (livré). Suite vers ~8/10 : [15](specs/manques-plateforme/15-notifications-suite.md) (SSE branché, digest réel, e-mail absolu + from). Puis : SMS, modèles par canal, dette `AlertRule`/`Broadcast`/`Escalation`, `platform.legacy.transition` avec Sektor sur le host.
 0. **Listes : la suite** — le socle est livré (descripteur du record, grammaire de filtre, vues, filtres proposés : [PLATFORM.md](docs/PLATFORM.md), [UI.md](docs/UI.md)). Reste :
    - Écrans d’administration sur des contrôleurs non-record (clés d’API, webhooks, séquences de numérotation) : passer en `RecordController` (entités sur `TenantEntity` : colonnes `created_by` / `updated_by` ; permissions `…read/write` → `…read/create/update/delete` ; clé et secret jamais sérialisés ; création de clé et révocation surchargées ; statut « expiré » calculé), puis supprimer `LegacyListingPageComponent`.
    - Archétype « config-driven » (`lib/anatomy` `ListingPageConfig`, 7 écrans plateforme) : migrer vers `nf-listing-page`, un seul type de liste.

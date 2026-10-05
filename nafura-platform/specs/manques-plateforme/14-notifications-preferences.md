@@ -76,4 +76,4 @@ Hors chantier (ROADMAP) : SMS et numéro, digest (`EmailDigestJob`), modèles pa
 
 ## État
 
-Lots 1–3 livrés dans ce chantier. Hors chantier : SMS, digest, modèles, temps réel.
+Lots 1–3 livrés. Suite (temps réel, digest, e-mail) : [15](15-notifications-suite.md).
