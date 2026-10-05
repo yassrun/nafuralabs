@@ -3,6 +3,7 @@
 //   local-staging  backend + web locally against the staging infra (port-forwarded PostgreSQL), lab user list
 //   staging        build images, migrate, deploy on the staging cluster (Docker Desktop)
 //   prod           build and push images, migrate, deploy on the prod cluster (asks for confirmation)
+//   check          the checks of AGENTS.md before handing over: architecture, web build, host-tests (nothing started)
 import { spawn, spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -33,6 +34,7 @@ modes
   local-staging    backend + web locally on the staging infra, lab user list (run "staging" once first)
   staging          build, migrate and deploy on the staging cluster
   prod             build, push, migrate and deploy on the prod cluster
+  check            architecture:check, web build (types and templates), platform host-tests
 
 options
   --scope=full|back|front   staging/prod: what to rebuild and roll out (default full)
@@ -192,6 +194,7 @@ function start(label, command, args, { cwd, env } = {}) {
 }
 
 let stopping = false;
+const cleanups = [];
 function stopAll(code = 0) {
   stopping = true;
   for (const child of running) {
@@ -199,6 +202,7 @@ function stopAll(code = 0) {
     if (WINDOWS) spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
     else child.kill('SIGTERM');
   }
+  for (const cleanup of cleanups) cleanup();
   process.exit(code);
 }
 
@@ -289,6 +293,21 @@ function readSecret(kube, namespace, name) {
 
 const exists = (kube, args) => kube(['get', ...args, '--ignore-not-found', '-o', 'name'], { capture: true, quiet: true }).trim() !== '';
 
+// ---------------------------------------------------------------- checks
+
+/** Rule 7 of AGENTS.md, with the project's JDK and Node: nothing starts, nothing deploys. Then `lab` for what is visible. */
+function check(product) {
+  const npm = join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js');
+  exec(process.execPath, [npm, 'run', '-s', 'architecture:check'], { cwd: join(PLATFORM, 'sources/web') });
+  ensureWebDependencies(product);
+  exec(process.execPath, [join(PLATFORM, 'scripts/product-web.mjs'), 'build', '--configuration', 'development'], { cwd: product.web });
+  const [java, args, options] = gradle({ backend: join(PLATFORM, 'sources/backend') }, [':platform:host-tests:test', '--max-workers=1']);
+  exec(java, args, options);
+  console.log(`
+${product.name}: architecture, web build and host-tests pass. Anything visible: run.mjs lab.
+`);
+}
+
 // ---------------------------------------------------------------- local modes
 
 async function local(product, env) {
@@ -307,7 +326,37 @@ async function local(product, env) {
   console.log(`\n${product.name} is up: http://localhost:${product.ports.web}  (API :${product.ports.api}). Ctrl+C stops both.\n`);
 }
 
+/** PID of the lab's embedded PostgreSQL from its lock file (first line of postmaster.pid), or null. */
+export function postmasterPid(lockFile) {
+  if (!existsSync(lockFile)) return null;
+  const pid = Number.parseInt(readFileSync(lockFile, 'utf8').split(/\r?\n/)[0], 10);
+  return Number.isInteger(pid) && pid > 0 ? pid : null;
+}
+
+function isPostgres(pid) {
+  if (WINDOWS) {
+    const out = spawnSync('tasklist', ['/FI', `PID eq ${pid}`, '/FO', 'CSV', '/NH'], { encoding: 'utf8' }).stdout ?? '';
+    return /^"postgres\.exe"/i.test(out.trim());
+  }
+  return /postgres/.test(spawnSync('ps', ['-p', String(pid), '-o', 'comm='], { encoding: 'utf8' }).stdout ?? '');
+}
+
+/**
+ * The embedded PostgreSQL is started by the backend through pg_ctl and outlives it: stopping the lab, or a closed
+ * terminal, leaves it holding the data directory and the next lab cannot start. Stop the one that owns this data.
+ */
+function stopEmbeddedPostgres(product) {
+  const pid = postmasterPid(join(product.backend, 'data/postgres/postmaster.pid'));
+  if (!pid || !isPostgres(pid)) return;
+  console.log(`Stopping the lab's embedded PostgreSQL (pid ${pid}).`);
+  if (WINDOWS) spawnSync('taskkill', ['/pid', String(pid), '/T', '/F'], { stdio: 'ignore' });
+  else process.kill(pid, 'SIGINT');
+}
+
 async function lab(product) {
+  stopEmbeddedPostgres(product);
+  cleanups.push(() => stopEmbeddedPostgres(product));
+  process.on('SIGHUP', () => stopAll(0));
   await local(product, {});
 }
 
@@ -553,6 +602,7 @@ export async function run(productUrl, argv) {
     if (mode === 'lab') await lab(product);
     else if (mode === 'local-staging') await localStaging(product);
     else if (mode === 'staging' || mode === 'prod') await deploy(product, mode, opts);
+    else if (mode === 'check') check(product);
     else {
       console.log(USAGE);
       process.exitCode = mode && !['-h', '--help', 'help'].includes(mode) ? 2 : 0;

@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
 
-import { hostOf, imageOf, keycloakClientOf, namespaceOf, oidcOf, ownersOf, renderKustomization } from './run.mjs';
+import { hostOf, imageOf, keycloakClientOf, namespaceOf, oidcOf, ownersOf, postmasterPid, renderKustomization } from './run.mjs';
 
 const product = (spec = {}) => ({
   id: 'acme-erp',
@@ -62,4 +65,13 @@ test('the product client is public, code + PKCE only, redirecting to its own ori
   assert.equal(staging.attributes['pkce.code.challenge.method'], 'S256');
   assert.deepEqual(staging.redirectUris, ['http://acme-erp.nafuralabs.staging/auth/callback', 'http://localhost:4405/auth/callback']);
   assert.deepEqual(keycloakClientOf(product(), 'prod').redirectUris, ['https://acme-erp.nafuralabs.com/auth/callback']);
+});
+
+test('the lab finds its embedded PostgreSQL from the lock file of its data directory', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'nafura-pg-'));
+  assert.equal(postmasterPid(join(dir, 'postmaster.pid')), null);
+  writeFileSync(join(dir, 'postmaster.pid'), '40164\r\nC:/data/postgres\r\n1791157892\r\n');
+  assert.equal(postmasterPid(join(dir, 'postmaster.pid')), 40164);
+  writeFileSync(join(dir, 'postmaster.pid'), 'garbage\n');
+  assert.equal(postmasterPid(join(dir, 'postmaster.pid')), null);
 });

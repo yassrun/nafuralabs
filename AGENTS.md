@@ -22,5 +22,5 @@ Le modèle à suivre est `platform-host/` (et son BC `bcs/demo`). **Sektor n’e
 4. **Permissions, jamais de rôles** dans le code.
 5. **Lab mode** : pas de données métier en prod (hors vitrines MBS et corporate). Schéma cible net, pas de migrations défensives.
 6. **Rien d’irréversible sans accord** : `prod`, `--yes`, suppression de données partagées, push.
-7. **Vérifier** avant de rendre la main : `npm run -s architecture:check` (web), host-tests (backend), et l’application lancée en `lab` pour tout changement visible.
+7. **Vérifier** avant de rendre la main : `node <produit>/ops/run.mjs check` (architecture, build web, host-tests), puis l’application lancée en `lab` pour tout changement visible.
 8. **Documentation** : mettre à jour le document concerné ci-dessus dans le même changement ; ne pas créer d’autre document.

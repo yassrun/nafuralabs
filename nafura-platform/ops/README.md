@@ -15,12 +15,13 @@ node <produit>/ops/run.mjs lab                      # back + front locaux, Postg
 node <produit>/ops/run.mjs local-staging            # back + front locaux sur la base du staging, sélecteur d’utilisateurs lab
 node <produit>/ops/run.mjs staging [--scope=back|front] [--dry-run]
 node <produit>/ops/run.mjs prod    [--scope=back|front] [--dry-run] [--yes]
+node <produit>/ops/run.mjs check                    # vérifications avant de rendre la main : architecture:check, build web, host-tests
 node nafura-platform/scripts/nafura.mjs new <id> --name "<Nom>"     # nouveau produit
 ```
 
 | Mode | Ce qui tourne | Connexion | Prêt quand |
 |---|---|---|---|
-| `lab` | API `spec.local.ports.api`, web `spec.local.ports.web` | sélecteur d’utilisateurs lab (`spec.local.users`) | le journal affiche `<Nom> is up:` |
+| `lab` | API `spec.local.ports.api`, web `spec.local.ports.web` | sélecteur d’utilisateurs lab (`spec.local.users`) ; en `multi`, organisations `spec.local.organizations` et appartenances `users[].organizations` | le journal affiche `<Nom> is up:` |
 | `local-staging` | idem, base du staging en port-forward | sélecteur d’utilisateurs lab (`spec.local.users`) | idem ; `staging` lancé au moins une fois |
 | `staging` | pods dans `<id>-staging` (Docker Desktop) | Keycloak staging | `rollout status` OK puis réponse HTTP |
 | `prod` | pods dans `<id>-prod` (VPS OVH, images poussées au registry) | Keycloak prod | idem ; confirmation demandée |
@@ -29,7 +30,7 @@ node nafura-platform/scripts/nafura.mjs new <id> --name "<Nom>"     # nouveau pr
 
 ### Règles pour les agents
 
-1. Lancer `lab` en arrière-plan avec sortie dans un fichier (`node.exe ops/run.mjs lab > /tmp/lab.log 2>&1`) et attendre `is up:` ; une seule instance à la fois (ports du manifeste). Arrêt : tuer le terminal, puis `taskkill //F //IM java.exe` et `postgres.exe` si besoin.
+1. Lancer `lab` en arrière-plan avec sortie dans un fichier (`node.exe ops/run.mjs lab > /tmp/lab.log 2>&1`) et attendre `is up:` ; une seule instance à la fois (ports du manifeste). Arrêt : Ctrl+C ou fermer le terminal. Le PostgreSQL embarqué (lancé par `pg_ctl`, il survit au backend) est arrêté à l’arrêt, et au prochain `lab` s’il est resté orphelin (`<produit>/sources/backend/data/postgres/postmaster.pid`).
 2. Session lab pour tester l’API : `POST /api/public/lab/session {"email":"…"}` → `accessToken` ; organisation et rôles : `GET /api/v1/me/session`.
 3. `prod` : toujours `--dry-run` d’abord ; jamais `--yes` sans demande explicite. Ne jamais écrire un mot de passe temporaire dans un fichier.
 4. Un changement de déploiement commun va dans `nafura-platform/ops/product/` (k8s base + surcharges staging/prod, Dockerfiles, `run.mjs` + `run.test.mjs`). `<produit>/ops/k8s/<env>/` ne porte que des patches propres au produit. Jamais de script ops dans un produit.
