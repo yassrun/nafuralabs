@@ -1,44 +1,50 @@
 import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 
+import { formatRelativeTime } from '../../lib/anatomy/utils/relative-time';
 import { PlatformNotificationsService } from './notifications.service';
+import type { PlatformNotification } from './notifications.types';
 
 @Component({
   selector: 'nf-platform-notification-panel',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslateModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="nf-platform-notification-panel" aria-label="Notifications">
       <header class="nf-platform-notification-panel__header">
-        <strong>Notifications</strong>
+        <strong>{{ 'notifications.bell.title' | translate }}</strong>
         @if (notifications.unreadCount() > 0) {
           <button type="button" class="nf-platform-notification-panel__mark-read" (click)="markAllRead()">
-            Tout lire
+            {{ 'notifications.bell.markAllRead' | translate }}
           </button>
         }
       </header>
 
       <div class="nf-platform-notification-panel__list">
         @if (notifications.loading()) {
-          <p class="nf-platform-notification-panel__empty">Chargement...</p>
+          <p class="nf-platform-notification-panel__empty">{{ 'notifications.bell.loading' | translate }}</p>
         } @else if (notifications.error()) {
           <div class="nf-platform-notification-panel__error">
             <p>{{ notifications.error() }}</p>
-            <button type="button" (click)="retry()">Réessayer</button>
+            <button type="button" (click)="retry()">{{ 'notifications.center.retry' | translate }}</button>
           </div>
         } @else if (notifications.notifications().length === 0) {
-          <p class="nf-platform-notification-panel__empty">Aucune notification</p>
+          <p class="nf-platform-notification-panel__empty">{{ 'notifications.bell.empty' | translate }}</p>
         } @else {
           @for (notification of notifications.notifications(); track notification.id) {
           <button
             type="button"
             class="nf-platform-notification-panel__item"
             [class.nf-platform-notification-panel__item--unread]="!notification.read"
-            (click)="openNotification(notification.id, notification.route)">
+            (click)="openNotification(notification)">
+            @if (notification.sourceLabel) {
+              <span class="nf-platform-notification-panel__source">{{ notification.sourceLabel }}</span>
+            }
             <span class="nf-platform-notification-panel__item-title">{{ notification.title }}</span>
-            @if (notification.message) {
-              <span class="nf-platform-notification-panel__item-message">{{ notification.message }}</span>
+            @if (notification.createdAt) {
+              <span class="nf-platform-notification-panel__item-message">{{ relative(notification.createdAt) }}</span>
             }
           </button>
           }
@@ -46,7 +52,7 @@ import { PlatformNotificationsService } from './notifications.service';
       </div>
 
       <footer class="nf-platform-notification-panel__footer">
-        <a routerLink="/notifications" (click)="closed.emit()">Voir tout</a>
+        <a routerLink="/notifications" (click)="closed.emit()">{{ 'notifications.bell.viewAll' | translate }}</a>
       </footer>
     </section>
   `,
@@ -95,6 +101,13 @@ import { PlatformNotificationsService } from './notifications.service';
     }
     .nf-platform-notification-panel__item:hover,
     .nf-platform-notification-panel__item--unread { background: var(--nf-color-primary-50, #eff6ff); }
+    .nf-platform-notification-panel__source {
+      color: var(--nf-color-primary-700, #1d4ed8);
+      font-size: 0.625rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
     .nf-platform-notification-panel__item-title { font-size: 0.8125rem; font-weight: 600; }
     .nf-platform-notification-panel__item-message,
     .nf-platform-notification-panel__empty { color: var(--nf-text-muted, #64748b); font-size: 0.75rem; }
@@ -111,19 +124,18 @@ import { PlatformNotificationsService } from './notifications.service';
 })
 export class PlatformNotificationPanelComponent {
   readonly notifications = inject(PlatformNotificationsService);
-  private readonly router = inject(Router);
   readonly closed = output<void>();
 
   markAllRead(): void { this.notifications.markAllRead(); }
-  markRead(id: string): void { this.notifications.markRead(id); }
 
   retry(): void { void this.notifications.load(); }
 
-  async openNotification(id: string, route?: string): Promise<void> {
-    await this.notifications.markRead(id);
-    if (route) {
-      await this.router.navigateByUrl(route);
-      this.closed.emit();
-    }
+  relative(value: string): string {
+    return formatRelativeTime(value);
+  }
+
+  async openNotification(notification: PlatformNotification): Promise<void> {
+    await this.notifications.open(notification);
+    this.closed.emit();
   }
 }

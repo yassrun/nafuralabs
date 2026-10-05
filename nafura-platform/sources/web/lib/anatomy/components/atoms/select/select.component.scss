@@ -16,6 +16,26 @@
   display: block;
 }
 
+:host(.nf-select--compact) {
+  --nf-input-height: 26px;
+  --nf-font-size-base: 0.75rem;
+  --nf-font-size-sm: 0.6875rem;
+  --nf-border-radius: 6px;
+}
+
+:host(.nf-select--compact) .nf-select-wrapper {
+  gap: 0;
+}
+
+:host(.nf-select--compact) .nf-select-multi__trigger {
+  min-height: 26px;
+  height: 26px;
+  padding: 0 22px 0 8px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+
 .nf-select-wrapper {
   display: flex;
   flex-direction: column;
@@ -189,6 +209,120 @@
 .nf-combobox__opt--active,
 .nf-combobox__opt:hover {
   background: var(--nf-color-primary-50, #eff6ff);
+}
+
+.nf-select-multi {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.nf-select-multi__trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--nf-input-height, 2.5rem);
+  padding: 0 2rem 0 0.75rem;
+  font: inherit;
+  font-size: var(--nf-font-size-base, 1rem);
+  line-height: 1.5;
+  text-align: left;
+  color: var(--nf-color-text, #1a1a1a);
+  background-color: var(--nf-color-background, #ffffff);
+  border: 1px solid var(--nf-color-border, #d1d5db);
+  border-radius: var(--nf-border-radius, 0.375rem);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25em 1.25em;
+}
+
+.nf-select-multi__trigger:disabled {
+  background-color: var(--nf-color-disabled-bg, #f3f4f6);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.nf-select-multi--open .nf-select-multi__trigger,
+.nf-select-multi__trigger:focus {
+  outline: none;
+  border-color: var(--nf-color-primary, #3b82f6);
+  box-shadow: 0 0 0 3px var(--nf-color-primary-alpha-10, rgba(59, 130, 246, 0.1));
+}
+
+.nf-select-multi__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nf-select-multi__value--placeholder {
+  color: var(--nf-color-text-muted, #6b7280);
+}
+
+.nf-select-multi__panel {
+  position: absolute;
+  z-index: 1200;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  display: flex;
+  flex-direction: column;
+  max-height: 16rem;
+  padding: 0.25rem 0 0.375rem;
+  background: var(--nf-color-background, #ffffff);
+  border: 1px solid var(--nf-color-border, #d1d5db);
+  border-radius: var(--nf-border-radius, 0.375rem);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.nf-select-multi__search {
+  margin: 0.25rem 0.5rem 0.375rem;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--nf-color-border, #d1d5db);
+  border-radius: var(--nf-border-radius, 0.375rem);
+  font: inherit;
+  font-size: var(--nf-font-size-sm, 0.875rem);
+}
+
+.nf-select-multi__search:focus {
+  outline: none;
+  border-color: var(--nf-color-primary, #3b82f6);
+}
+
+.nf-select-multi__hint {
+  padding: 0.5rem 0.75rem;
+  font-size: var(--nf-font-size-sm, 0.875rem);
+  color: var(--nf-color-text-muted, #6b7280);
+}
+
+.nf-select-multi__options {
+  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.nf-select-multi__opt {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  font-size: var(--nf-font-size-sm, 0.875rem);
+}
+
+.nf-select-multi__opt--active,
+.nf-select-multi__opt:hover {
+  background: var(--nf-color-primary-50, #eff6ff);
+}
+
+.nf-select-multi__opt input {
+  flex: 0 0 auto;
+  margin: 0;
+  accent-color: var(--nf-color-primary, #3b82f6);
 }
 
 .nf-select-list {

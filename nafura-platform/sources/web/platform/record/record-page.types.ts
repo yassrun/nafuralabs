@@ -94,10 +94,10 @@ export interface RecordSection {
   description?: string;
   /**
    * `fields` (default) shows `fields`, `listing` a related list, `attachments` the files of the record,
-   * `comments` its notes. The entity key sent to the APIs is the lifecycle `entity` when the record has one,
-   * otherwise the last segment of `endpoint`.
+   * `comments` its notes, `audit` its activity trail. The entity key sent to the APIs is the lifecycle
+   * `entity` when the record has one, otherwise the last segment of `endpoint`.
    */
-  kind?: 'fields' | 'attachments' | 'comments';
+  kind?: 'fields' | 'attachments' | 'comments' | 'audit';
   /** Accepted MIME types for `attachments` (defaults of the documents capability when omitted). */
   accept?: string[];
   maxSizeMb?: number;

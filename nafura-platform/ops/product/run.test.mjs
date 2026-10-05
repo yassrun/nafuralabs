@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
-import { hostOf, imageOf, keycloakClientOf, namespaceOf, oidcOf, ownersOf, postmasterPid, renderKustomization } from './run.mjs';
+import { gradleUserHome, hostOf, imageOf, keycloakClientOf, namespaceOf, oidcOf, ownersOf, postmasterPid, renderKustomization } from './run.mjs';
 
 const product = (spec = {}) => ({
   id: 'acme-erp',
@@ -74,4 +74,20 @@ test('the lab finds its embedded PostgreSQL from the lock file of its data direc
   assert.equal(postmasterPid(join(dir, 'postmaster.pid')), 40164);
   writeFileSync(join(dir, 'postmaster.pid'), 'garbage\n');
   assert.equal(postmasterPid(join(dir, 'postmaster.pid')), null);
+});
+
+test('Gradle reuses the developer cache when Cursor sandboxes GRADLE_USER_HOME', () => {
+  const home = process.platform === 'win32' ? 'C:\\Users\\dev' : '/home/dev';
+  const real = join(home, '.gradle');
+  const env = process.platform === 'win32' ? { USERPROFILE: home } : { HOME: home };
+  assert.equal(gradleUserHome({ ...env }), real);
+  assert.equal(gradleUserHome({ ...env, GRADLE_USER_HOME: real }), real);
+  assert.equal(
+    gradleUserHome({
+      ...env,
+      GRADLE_USER_HOME: join(home, 'AppData', 'Local', 'Temp', 'cursor-sandbox-cache', 'abc', 'gradle'),
+    }),
+    real,
+  );
+  assert.equal(gradleUserHome({ ...env, GRADLE_USER_HOME: '/custom/gradle' }), '/custom/gradle');
 });

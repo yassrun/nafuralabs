@@ -1,0 +1,36 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  /* Host is the query container so the toolbar and `.nf-listing-flat` itself can respond too. */
+  container-type: inline-size;
+}
+.nf-listing-flat {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  gap: 8px;
+}
+
+.nf-listing-flat__view {
+  /* Hug content: pager sits right under the table; shrinks + scrolls when space is tight. */
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--nf-border-default, #e5e7eb);
+  border-radius: var(--nf-radius-md, 8px);
+  background: var(--nf-surface-section, #fff);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+.nf-listing-flat__pager {
+  flex: 0 0 auto;
+}
+
+/* Compact container (≤600px): dense toolbar. */
+@container (max-width: 600px) {
+  .nf-listing-flat {
+    gap: 6px;
+  }
+}

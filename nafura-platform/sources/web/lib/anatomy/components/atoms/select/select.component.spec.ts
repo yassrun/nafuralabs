@@ -157,4 +157,22 @@ describe('NfSelectComponent (lookup combobox)', () => {
     expect(component.comboError()).toContain('Impossible');
     expect(component.value()).toBe('still-here');
   });
+
+  it('multiple mode uses chips and a checklist instead of a native multi select', () => {
+    component.multiple = true;
+    component.options = [
+      { value: 'DRAFT', label: 'Brouillon' },
+      { value: 'SUBMITTED', label: 'En approbation' },
+    ];
+    component.writeValue(['DRAFT']);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('select')).toBeNull();
+    expect(root.querySelector('.nf-select-multi__value')?.textContent).toContain('Brouillon');
+    component.toggleMultiPanel();
+    fixture.detectChanges();
+    expect(root.querySelector('input[type="checkbox"]')).not.toBeNull();
+    component.toggleMulti({ value: 'SUBMITTED', label: 'En approbation' });
+    expect(component.values()).toEqual(['DRAFT', 'SUBMITTED']);
+  });
 });

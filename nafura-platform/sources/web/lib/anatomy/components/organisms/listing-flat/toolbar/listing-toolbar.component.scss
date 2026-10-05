@@ -1,0 +1,523 @@
+@use '../listing-checkbox' as *;
+
+:host {
+  display: contents;
+}
+
+/* ── Ready-made filters (presets) ─────────────────────────────────────── */
+.nf-listing-flat__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.nf-listing-flat__preset {
+  border: 1px solid var(--nf-border-default, #e5e7eb);
+  background: var(--nf-surface-card, #fff);
+  color: var(--nf-text-secondary, #4b5563);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.nf-listing-flat__preset:hover {
+  border-color: var(--nf-color-primary-300, #a5b4fc);
+}
+.nf-listing-flat__preset--active {
+  background: var(--nf-color-primary-50, #eef2ff);
+  border-color: var(--nf-color-primary-500, #6366f1);
+  color: var(--nf-color-primary-700, #4338ca);
+}
+
+/* ── Quick views (segments) ───────────────────────────────────────────── */
+.nf-listing-flat__segments {
+  display: flex;
+  gap: 2px;
+  flex: 0 0 auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--nf-border-default, #e5e7eb);
+}
+.nf-listing-flat__segment {
+  flex: 0 0 auto;
+  margin-bottom: -1px;
+  padding: 6px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--nf-text-secondary, #4b5563);
+  cursor: pointer;
+}
+.nf-listing-flat__segment:hover {
+  color: var(--nf-text-primary, #111827);
+}
+.nf-listing-flat__segment:focus-visible {
+  outline: 2px solid var(--nf-primary, #2563eb);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+.nf-listing-flat__segment--active {
+  font-weight: 600;
+  color: var(--nf-primary, #2563eb);
+  border-bottom-color: var(--nf-primary, #2563eb);
+}
+
+/* ── Row 1: Search + Filter Chips ───────────────────────────────── */
+.nf-listing-flat__filters {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.nf-listing-flat__filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+.nf-listing-flat__filters-row--top {
+  align-items: flex-end;
+}
+.nf-listing-flat__filters-row--bottom {
+  align-items: center;
+}
+.nf-listing-flat__search {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 6px;
+  border: 1px solid var(--nf-border-default, #e5e7eb);
+  background: var(--nf-surface-section, #fff);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  flex: 0 1 220px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.nf-listing-flat__search:focus-within {
+  border-color: var(--nf-primary, #2563eb);
+  box-shadow: 0 0 0 2px var(--nf-primary-light, #eff6ff);
+}
+.nf-listing-flat__chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+}
+.nf-listing-flat__add-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 6px;
+  border: 1px solid var(--nf-border-default, #e5e7eb);
+  background: var(--nf-surface-section, #fff);
+  color: var(--nf-text-secondary, #4b5563);
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  flex: 0 0 auto;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  transition: all 0.1s ease;
+}
+.nf-listing-flat__add-filter:hover {
+  background: var(--nf-surface-hover, #f9fafb);
+  border-color: var(--nf-color-gray-300, #d1d5db);
+  color: var(--nf-text-primary, #111827);
+}
+.nf-listing-flat__add-filter--active {
+  background: var(--nf-primary-light, #eff6ff);
+  border-color: var(--nf-primary, #2563eb);
+  color: var(--nf-primary, #2563eb);
+}
+.nf-listing-flat__controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Selection count pill ────────────────────────── */
+.nf-listing-flat__selcount {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--nf-primary, #2563eb);
+  border: 1px solid var(--nf-primary-200, #bfdbfe);
+  background: var(--nf-primary-light, #eff6ff);
+}
+.nf-listing-flat__search-icon {
+  display: inline-flex;
+  color: var(--nf-text-muted, #9ca3af);
+  flex-shrink: 0;
+}
+.nf-listing-flat__search-input {
+  flex: 1;
+  min-width: 60px;
+  padding: 0;
+  font-size: 0.75rem;
+  font-family: inherit;
+  color: var(--nf-text-primary, #111827);
+  background: none;
+  border: none;
+  outline: none;
+}
+.nf-listing-flat__search-input::placeholder {
+  color: var(--nf-input-placeholder-color, var(--nf-text-muted, #9ca3af));
+}
+
+.nf-listing-flat__pinned-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.nf-listing-flat__pinned-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+  flex: 0 1 200px;
+}
+
+.nf-listing-flat__pinned-filter-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--nf-text-muted, #6b7280);
+  line-height: 1.1;
+}
+
+.nf-listing-flat__pinned-filter-control {
+  width: 100%;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--nf-border-default, #e5e7eb);
+  background: var(--nf-surface-section, #fff);
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--nf-text-primary, #111827);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+.nf-listing-flat__pinned-filter-control--select {
+  appearance: none;
+  padding-right: 24px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+}
+
+.nf-listing-flat__pinned-filter:has(nf-select) {
+  min-width: 200px;
+  flex: 0 1 260px;
+  overflow: visible;
+}
+
+.nf-listing-flat__pinned-range {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nf-listing-flat__pinned-range span {
+  font-size: 0.6875rem;
+  color: var(--nf-text-muted, #6b7280);
+}
+
+/* ── Row 2: actions row (Left: Selection Info · Right: Controls & Actions) ── */
+.nf-listing-flat__actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+/* Left side: selection count pill + table controls */
+.nf-listing-flat__actions-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+}
+/* Right side: action buttons */
+.nf-listing-flat__actions-right {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  min-width: 0;
+}
+.nf-listing-flat__projected-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.nf-listing-flat__projected-actions:empty {
+  display: none;
+}
+.nf-listing-flat__actions-wide,
+.nf-listing-flat__actions-compact {
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.nf-listing-flat__actions-wide {
+  display: flex;
+}
+.nf-listing-flat__actions-compact {
+  display: none;
+}
+.nf-listing-flat__actions-compact > * {
+  flex: 0 0 auto;
+}
+@container (max-width: 1000px) {
+  .nf-listing-flat__actions-wide {
+    display: none;
+  }
+  .nf-listing-flat__actions-compact {
+    display: flex;
+  }
+  /*
+    Same compact concept as primary→icon / secondary→⋯ :
+    projected triggers (Import magique, Status, …) drop their labels.
+  */
+  .nf-listing-flat__projected-actions ::ng-deep .nf-button__content {
+    display: none !important;
+  }
+  .nf-listing-flat__projected-actions ::ng-deep button {
+    width: 26px;
+    min-width: 26px;
+    padding-inline: 0;
+  }
+}
+@container (max-width: 700px) {
+  .nf-listing-flat__compact-primary-label ::ng-deep .nf-button__content {
+    display: none;
+  }
+  .nf-listing-flat__compact-primary-label ::ng-deep button {
+    width: 26px;
+    min-width: 26px;
+    padding-inline: 0;
+  }
+}
+.nf-listing-flat__table-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Columns Menu (Anatomy custom styling) ──────────────────── */
+.nf-columns-menu {
+  min-width: 190px;
+  max-width: 260px;
+}
+.nf-columns-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--nf-border-default, #e5e7eb);
+  background: var(--nf-surface-section, #ffffff);
+}
+.nf-columns-menu__title {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--nf-text-muted, #6b7280);
+}
+.nf-columns-menu__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nf-columns-menu__action-btn {
+  background: none;
+  border: none;
+  padding: 1px 4px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--nf-primary, #2563eb);
+  cursor: pointer;
+  border-radius: 3px;
+  line-height: 1.2;
+  transition: background 0.1s ease;
+
+  &:hover {
+    background: var(--nf-primary-light, #eff6ff);
+  }
+}
+.nf-columns-menu__sep {
+  color: var(--nf-border-default, #d1d5db);
+  font-size: 0.6875rem;
+}
+.nf-columns-menu__list {
+  padding: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.nf-columns-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.1s ease;
+
+  &:hover {
+    background-color: var(--nf-surface-hover, #f9fafb);
+  }
+}
+.nf-columns-menu__checkbox {
+  @include nf-listing-checkbox;
+}
+.nf-columns-menu__label {
+  font-size: 0.8125rem;
+  color: var(--nf-text-primary, #111827);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+/* Overlay panels live outside :host — pierce so sizing rules apply */
+:host ::ng-deep {
+  .mat-mdc-menu-panel.nf-listing-flat-menu--columns,
+  .mat-mdc-menu-panel.nf-listing-flat-menu--filter {
+    background: var(--nf-surface-section, #fff);
+    border: 1px solid var(--nf-border-default, #e5e7eb);
+    border-radius: var(--nf-radius-md, 8px);
+    box-shadow: var(--nf-shadow-md, 0 8px 24px rgba(0, 0, 0, 0.12));
+  }
+  .mat-mdc-menu-panel.nf-listing-flat-menu--columns {
+    min-width: 190px !important;
+    max-width: 260px !important;
+
+    .mat-mdc-menu-content {
+      padding: 0 !important;
+    }
+  }
+  .mat-mdc-menu-panel.nf-listing-flat-menu--filter {
+    /* Beat Material's default ~280px max-width so daterange fits. */
+    width: max-content !important;
+    min-width: 320px !important;
+    max-width: min(560px, calc(100vw - 24px)) !important;
+    height: auto !important;
+    max-height: min(80vh, 640px) !important;
+    overflow-x: visible !important;
+    overflow-y: auto !important;
+
+    .mat-mdc-menu-content {
+      padding: 0 !important;
+      overflow: visible !important;
+    }
+  }
+}
+
+/* ── Narrow container (≤720px): stacked search + tidy filter grid ── */
+@container (max-width: 720px) {
+  .nf-listing-flat__filters-row--top {
+    flex-direction: column;
+    /* nowrap is required: column+wrap breaks the grid's intrinsic height. */
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+  .nf-listing-flat__search {
+    flex: 1 1 auto;
+  }
+  .nf-listing-flat__pinned-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    align-items: end;
+    align-content: start;
+    flex: none;
+    gap: 8px;
+  }
+  .nf-listing-flat__pinned-filter {
+    min-width: 0;
+    flex: none;
+  }
+}
+
+/* ── Compact container (≤600px): dense toolbar, scrolling chips & actions ── */
+@container (max-width: 600px) {
+  .nf-listing-flat__chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    padding: 2px 0;
+  }
+  .nf-listing-flat__chips::-webkit-scrollbar {
+    display: none;
+  }
+  .nf-listing-flat__actions-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 0;
+  }
+  .nf-listing-flat__actions-row::-webkit-scrollbar {
+    display: none;
+  }
+  .nf-listing-flat__actions-left,
+  .nf-listing-flat__actions-right,
+  .nf-listing-flat__actions-right > * {
+    flex: 0 0 auto;
+  }
+  .nf-listing-flat__projected-actions ::ng-deep .nf-button__content {
+    display: none !important;
+  }
+  .nf-listing-flat__projected-actions ::ng-deep button {
+    width: 26px;
+    min-width: 26px;
+    padding-inline: 0;
+  }
+
+  /* Split layout: sticky bottom action bar (thumb zone) */
+  .nf-listing-flat__actions-row--split {
+    order: 10;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    padding: 8px 10px;
+    background: var(--nf-surface-section, #fff);
+    border-top: 1px solid var(--nf-border-default, #e5e7eb);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* Overlay panels are viewport-positioned → media query stays correct here. */
+@media (max-width: 640px) {
+  :host ::ng-deep .mat-mdc-menu-panel.nf-listing-flat-menu--filter {
+    width: calc(100vw - 24px) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+}

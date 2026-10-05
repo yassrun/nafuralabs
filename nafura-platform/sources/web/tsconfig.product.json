@@ -37,6 +37,7 @@
       "@ngx-translate/*": ["./node_modules/@ngx-translate/*"],
       "ngx-translate-messageformat-compiler": ["./node_modules/ngx-translate-messageformat-compiler"],
       "lucide-angular": ["./node_modules/lucide-angular"],
+      "marked": ["./node_modules/marked"],
       "ng2-charts": ["./node_modules/ng2-charts"],
       "chart.js": ["./node_modules/chart.js"],
       "chart.js/*": ["./node_modules/chart.js/*"],

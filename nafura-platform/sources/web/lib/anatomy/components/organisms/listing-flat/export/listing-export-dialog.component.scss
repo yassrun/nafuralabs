@@ -1,0 +1,287 @@
+@use '../listing-checkbox' as *;
+
+:host {
+  display: contents;
+}
+
+.nf-export-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: nfFadeIn 0.15s ease-out;
+}
+.nf-export-dialog {
+  background: var(--nf-surface-section, #ffffff);
+  border: 1px solid var(--nf-border-default, #e5e7eb);
+  border-radius: var(--nf-radius-lg, 12px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: nfSlideUp 0.15s ease-out;
+}
+.nf-export-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--nf-border-default, #e5e7eb);
+}
+.nf-export-dialog__header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nf-export-dialog__icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--nf-primary-light, #eff6ff);
+  color: var(--nf-primary, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.nf-export-dialog__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--nf-text-primary, #111827);
+}
+.nf-export-dialog__subtitle {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  color: var(--nf-text-muted, #6b7280);
+}
+.nf-export-dialog__close {
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 6px;
+  color: var(--nf-text-muted, #6b7280);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s ease;
+
+  &:hover {
+    background: var(--nf-surface-hover, #f3f4f6);
+    color: var(--nf-text-primary, #111827);
+  }
+}
+.nf-export-dialog__body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.nf-export-dialog__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nf-export-dialog__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nf-export-dialog__section-title {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--nf-text-muted, #6b7280);
+}
+.nf-export-dialog__column-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nf-export-dialog__action-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--nf-primary, #2563eb);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+.nf-export-dialog__sep {
+  color: var(--nf-border-default, #d1d5db);
+  font-size: 0.6875rem;
+}
+.nf-export-dialog__scope-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nf-export-dialog__scope-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--nf-border-default, #e5e7eb);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+
+  &:hover {
+    background: var(--nf-surface-hover, #f9fafb);
+    border-color: var(--nf-color-gray-300, #d1d5db);
+  }
+
+  &--active {
+    border-color: var(--nf-primary, #2563eb);
+    background: var(--nf-primary-light, #eff6ff);
+  }
+}
+.nf-export-dialog__radio {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1.5px solid var(--nf-border-default, #d1d5db);
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+
+  &:checked {
+    border-color: var(--nf-primary, #2563eb);
+
+    &::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--nf-primary, #2563eb);
+    }
+  }
+}
+.nf-export-dialog__scope-info {
+  display: flex;
+  flex-direction: column;
+}
+.nf-export-dialog__scope-name {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--nf-text-primary, #111827);
+}
+.nf-export-dialog__scope-desc {
+  font-size: 0.6875rem;
+  color: var(--nf-text-muted, #6b7280);
+}
+.nf-export-dialog__columns-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--nf-border-default, #e5e7eb);
+  border-radius: 8px;
+  background: var(--nf-surface-hover, #f9fafb);
+}
+.nf-export-dialog__column-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--nf-surface-section, #ffffff);
+  border: 1px solid var(--nf-border-default, #e5e7eb);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.12s ease;
+
+  &:hover {
+    border-color: var(--nf-primary, #2563eb);
+  }
+}
+.nf-export-dialog__checkbox {
+  @include nf-listing-checkbox;
+}
+.nf-export-dialog__column-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--nf-text-primary, #111827);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nf-export-dialog__format-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  font-size: 0.6875rem;
+  color: var(--nf-text-secondary, #475569);
+}
+.nf-export-dialog__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid var(--nf-border-default, #e5e7eb);
+  background: var(--nf-surface-section, #ffffff);
+}
+.nf-export-dialog__footer-count {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--nf-text-muted, #6b7280);
+}
+.nf-export-dialog__footer-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@keyframes nfFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes nfSlideUp {
+  from { transform: translateY(10px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Small viewports: bottom-sheet presentation. */
+@media (max-width: 520px) {
+  .nf-export-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .nf-export-dialog {
+    max-width: none;
+    max-height: 92dvh;
+    border-radius: var(--nf-radius-lg, 12px) var(--nf-radius-lg, 12px) 0 0;
+    border-bottom: none;
+  }
+  .nf-export-dialog__columns-grid {
+    grid-template-columns: 1fr;
+  }
+  .nf-export-dialog__footer {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}

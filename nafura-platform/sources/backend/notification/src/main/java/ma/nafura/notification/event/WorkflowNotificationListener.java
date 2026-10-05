@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import ma.nafura.platform.authorization.domain.model.TenantUserRole;
+import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
 import ma.nafura.platform.collaboration.notification.service.NotificationRouter;
 import ma.nafura.platform.collaboration.notification.service.NotificationRouter.Message;
 import ma.nafura.platform.collaboration.workflow.domain.model.ApprovalRequest;
@@ -23,6 +25,9 @@ import org.springframework.stereotype.Component;
  * Approvals: the pending approvers are told ({@code platform.approval.requested}); the requester learns the
  * decision ({@code platform.approval.decided}) unless the record has a lifecycle, whose outcome transition
  * carries its own {@code notify}.
+ *
+ * <p>A step with {@code approverId} notifies that user; a step with only {@code approverRole} notifies every
+ * member of that role in the organisation (same rule as the approval inbox).
  */
 @Component
 @RequiredArgsConstructor
@@ -32,6 +37,7 @@ public class WorkflowNotificationListener {
     private final ApprovalRequestRepository approvalRequestRepository;
     private final ApprovalStepRepository approvalStepRepository;
     private final AppUserRepository appUserRepository;
+    private final TenantUserRoleRepository memberships;
     private final LifecycleEngine lifecycles;
 
     @EventListener
@@ -54,9 +60,27 @@ public class WorkflowNotificationListener {
     private void notifyApprovers(ApprovalStateChangedEvent event, ApprovalRequest request) {
         Set<UUID> approverIds = new LinkedHashSet<>();
         for (ApprovalStep step : approvalStepRepository.findByApprovalRequestIdOrderByStepNumberAsc(event.getApprovalRequestId())) {
-            if ("PENDING".equalsIgnoreCase(step.getStatus()) && step.getApproverId() != null) {
-                approverIds.add(step.getApproverId());
+            if (!"PENDING".equalsIgnoreCase(step.getStatus())) {
+                continue;
             }
+            if (step.getApproverId() != null) {
+                approverIds.add(step.getApproverId());
+                continue;
+            }
+            String role = step.getApproverRole();
+            if (role == null || role.isBlank()) {
+                continue;
+            }
+            for (TenantUserRole membership : memberships.findByTenantIdAndRoleCode(event.getTenantId(), role.trim().toUpperCase())) {
+                if (membership.getUserId() != null) {
+                    approverIds.add(membership.getUserId());
+                }
+            }
+        }
+        if (request.getRequestedBy() != null && !request.getRequestedBy().isBlank()) {
+            appUserRepository.findByEmailIgnoreCase(request.getRequestedBy())
+                    .map(AppUser::getId)
+                    .ifPresent(approverIds::remove);
         }
         withTenant(event.getTenantId(), () -> approverIds.forEach(approverId ->
                 router.send(Message.of("platform.approval.requested", approverId, Map.of("title", title(request, event)))

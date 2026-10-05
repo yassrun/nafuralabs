@@ -1,0 +1,71 @@
+<div class="nf-listing-flat" [class.nf-listing-flat--split]="layout() === 'split'">
+  <nf-listing-toolbar
+    [selection]="selection()"
+    [toggleSelectionOn]="toggleSelectionOn()"
+    (actionClick)="onToolbarAction($event)"
+    (toggleSelection)="toggleSelectionMode()"
+  >
+    <ng-content />
+  </nf-listing-toolbar>
+
+  <div class="nf-listing-flat__view">
+    @if (error(); as message) {
+      <nf-data-state state="error" [errorMessage]="message | translate" (retry)="retry.emit()" />
+    } @else if (emptyState(); as empty) {
+      <nf-empty-state
+        [icon]="empty.icon ?? 'inbox'"
+        [title]="empty.title | translate"
+        [message]="empty.message ? (empty.message | translate) : undefined"
+        [actionLabel]="empty.actionLabel ? (empty.actionLabel | translate) : undefined"
+        (action)="actionClick.emit(empty.actionId ?? 'create')"
+      />
+    } @else {
+      <nf-data-table
+        [items]="pageItems()"
+        [columns]="visibleColumns()"
+        [cellTemplates]="resolvedCellTemplates()"
+        [activeRowId]="activeRowId()"
+        [paginateAfter]="0"
+        [rowClickable]="true"
+        [selectable]="tableSelectable()"
+        [selection]="selection()"
+        [sortColumn]="store.sortColumn()"
+        [sortDirection]="store.sortDirection()"
+        [emptyMessage]="store.narrowed() ? 'No results' : (config().emptyMessage ?? 'No items')"
+        [loading]="loading()"
+        (selectionChange)="onTableSelectionChange($event)"
+        (sortChange)="onSortChange($event)"
+        (rowClick)="onRowClick($event)"
+        (rowDblClick)="rowDblClick.emit($event)"
+      />
+    }
+  </div>
+
+  @if (exportOpen()) {
+    @defer (on immediate) {
+      <nf-listing-export-dialog
+        [columns]="config().columns"
+        [visibleColumns]="visibleColumns()"
+        [selection]="selection()"
+        [pageItems]="pageItems()"
+        [filteredItems]="filteredItems()"
+        [page]="store.page()"
+        [filename]="config().exportFilename ?? 'export'"
+        (closed)="exportOpen.set(false)"
+        (exported)="onExported()"
+      />
+    }
+  }
+
+  @if (features().pagination && pagerTotal() > 0) {
+    <div class="nf-listing-flat__pager">
+      <nf-pagination
+        [total]="pagerTotal()"
+        [page]="store.page()"
+        [pageSize]="store.pageSize()"
+        [pageSizeOptions]="pageSizeOptions()"
+        (pageChange)="onPageChange($event)"
+      />
+    </div>
+  }
+</div>

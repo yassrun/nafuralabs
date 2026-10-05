@@ -150,7 +150,8 @@
     "tabs": {
       "general": "Général",
       "localization": "Localisation",
-      "branding": "Apparence"
+      "branding": "Apparence",
+      "notifications": "Notifications"
     },
     "general": {
       "title": "Général",
@@ -195,6 +196,9 @@
       "save": "Enregistrer l'image de marque",
       "save.success": "Image de marque mise à jour",
       "save.error": "Échec de la mise à jour de l'image de marque"
+    },
+    "notifications": {
+      "title": "Notifications de l’organisation"
     }
   },
   "userSettings": {
@@ -272,18 +276,9 @@
     },
     "notifications": {
       "title": "Notifications",
-      "banner": "La diffusion des notifications n'est pas encore active. Vos préférences seront appliquées lorsque les notifications seront activées pour votre organisation.",
-      "email": "Notifications par e-mail",
-      "email.hint": "Recevoir les notifications par e-mail",
-      "inApp": "Notifications dans l'application",
-      "inApp.hint": "Recevoir les notifications dans l'application",
-      "digest": "Fréquence du résumé",
-      "digest.hint": "À quelle fréquence recevoir un résumé",
-      "digest.disabled": "Activez les notifications par e-mail pour configurer le résumé",
-      "digest.none": "Aucun",
-      "digest.daily": "Quotidien",
-      "digest.weekly": "Hebdomadaire",
-      "save": "Enregistrer les préférences",
+      "banner": "Coupez un canal pour un événement. Un événement obligatoire ne peut pas être coupé.",
+      "inApp": "Dans l’application",
+      "email": "E-mail",
       "save.success": "Préférences de notifications mises à jour"
     }
   },
@@ -1205,7 +1200,7 @@
           "label": "Source"
         },
         "status": {
-          "all": "Tous",
+          "all": "Toutes",
           "unread": "Non lues",
           "read": "Lues",
           "label": "Statut"
@@ -1219,10 +1214,23 @@
         }
       },
       "subtitle": "Suivez les mises à jour de workflow, les affectations, les mentions et les événements système.",
-      "unread": "Non lues : {count}",
+      "unread": "{count, plural, =0 {Aucune non lue} one {1 non lue} other {# non lues}}",
       "loading": "Chargement des notifications...",
-      "empty": "Aucune notification ne correspond aux filtres actuels.",
+      "empty": "Aucune notification",
+      "emptyHint": "Les alertes de ce filtre apparaîtront ici.",
+      "refresh": "Actualiser",
+      "retry": "Réessayer",
+      "loadMore": "Charger plus",
       "confirmClearOldRead": "Supprimer les notifications lues de plus de 30 jours ?"
+    },
+    "preferences": {
+      "event": "Événement",
+      "inApp": "Dans l’application",
+      "email": "E-mail",
+      "mandatory": "Obligatoire",
+      "empty": "Aucun événement déclaré.",
+      "userHint": "Vous pouvez couper un canal que l’organisation a laissé ouvert. Un événement obligatoire reste actif.",
+      "orgHint": "Ces canaux bornent tous les membres. Un utilisateur ne peut pas rallumer un canal coupé ici."
     },
     "bell": {
       "ariaLabel": "Ouvrir les notifications",
@@ -1320,6 +1328,22 @@
       "title": "Activité",
       "loading": "Chargement...",
       "loadMore": "Charger plus"
+    },
+    "action": {
+      "create": "a créé",
+      "update": "a modifié",
+      "delete": "a supprimé",
+      "status_change": "a changé le statut",
+      "publish": "a publié",
+      "approve": "a approuvé",
+      "reject": "a rejeté",
+      "assign": "a affecté",
+      "comment": "a commenté",
+      "attach": "a joint un fichier",
+      "emailed": "a envoyé un e-mail",
+      "print": "a imprimé",
+      "export": "a exporté",
+      "submit": "a soumis"
     }
   },
   "workflow": {

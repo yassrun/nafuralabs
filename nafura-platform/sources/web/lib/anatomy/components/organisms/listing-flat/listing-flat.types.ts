@@ -38,8 +38,6 @@ export interface ListingFlatFeatures {
   /** When the selection toggle is shown, whether it starts in multi-select mode. */
   selectionToggleDefaultActive?: boolean;
   pagination: boolean;
-  /** False: only the toolbar (tabs, search, filters, actions) — the host draws the rows (board, calendar). */
-  table: boolean;
   /** Row click: `select` toggles the row (default), `open` only emits `rowClick` (master–detail). */
   rowClick?: 'select' | 'open';
 }
@@ -114,5 +112,4 @@ export const DEFAULT_LISTING_FLAT_FEATURES: ListingFlatFeatures = {
   selectionToggle: false,
   selectionToggleDefaultActive: true,
   pagination: true,
-  table: true,
 };

@@ -9,7 +9,7 @@ import {
   ConfigDrivenSettingsPageStyles,
   ToastService,
 } from '@lib/anatomy';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import type { SettingsPageConfig } from '@lib/anatomy/types';
 import { AuthFacade } from '@core/security/services/auth.facade';
 import { ThemeModeService } from '@core/theme/theme-mode.service';
@@ -19,7 +19,6 @@ import {
   UserSettingsApiService,
   UserProfileSettings,
   UserPreferencesSettings,
-  UserNotificationSettings,
   ActiveSession,
 } from './models';
 import { ProfileSectionComponent } from './sections/profile/profile.section';
@@ -31,7 +30,7 @@ import {
   SecuritySectionComponent,
   ChangePasswordPayload,
 } from './sections/security/security.section';
-import { NotificationsSectionComponent } from './sections/notifications/notifications.section';
+import { PlatformNotificationPreferencesComponent } from '../../platform/notifications/notification-preferences.component';
 
 type UserSettingsTabId =
   | 'profile'
@@ -44,11 +43,12 @@ type UserSettingsTabId =
   standalone: true,
   imports: [
     CommonModule,
+    TranslateModule,
     ...ConfigDrivenSettingsPageImports,
     ProfileSectionComponent,
     PreferencesSectionComponent,
     SecuritySectionComponent,
-    NotificationsSectionComponent,
+    PlatformNotificationPreferencesComponent,
   ],
   template: `
     <nf-page-shell scroll>
@@ -93,12 +93,10 @@ type UserSettingsTabId =
             </app-user-security-section>
           }
           @case ('notifications') {
-            <app-user-notifications-section
-              [data]="notifications()"
-              [loading]="notificationsLoading()"
-              [saving]="notificationsSaving()"
-              (save)="onNotificationsSave($event)">
-            </app-user-notifications-section>
+            <section class="nf-settings-section">
+              <h3>{{ 'userSettings.notifications.title' | translate }}</h3>
+              <nf-platform-notification-preferences layer="user" />
+            </section>
           }
         }
       </div>
@@ -111,6 +109,7 @@ type UserSettingsTabId =
         display: block;
         height: 100%;
       }
+      .nf-settings-section h3 { margin: 0 0 1rem; }
     `,
   ],
 })
@@ -138,7 +137,6 @@ export class UserSettingsPage extends ConfigDrivenSettingsPage {
 
   readonly profile = signal<UserProfileSettings | null>(null);
   readonly preferences = signal<UserPreferencesSettings | null>(null);
-  readonly notifications = signal<UserNotificationSettings | null>(null);
   readonly sessions = signal<ActiveSession[]>([]);
 
   readonly profileLoading = signal(false);
@@ -146,9 +144,6 @@ export class UserSettingsPage extends ConfigDrivenSettingsPage {
 
   readonly preferencesLoading = signal(false);
   readonly preferencesSaving = signal(false);
-
-  readonly notificationsLoading = signal(false);
-  readonly notificationsSaving = signal(false);
 
   /** When true, security tab shows "coming soon" and makes no API calls (Phase 1). */
   readonly securityPhase1 = signal(true);
@@ -224,21 +219,6 @@ export class UserSettingsPage extends ConfigDrivenSettingsPage {
       this.toast.error(this.translate.instant('userSettings.preferences.save.error'));
     } finally {
       this.preferencesSaving.set(false);
-    }
-  }
-
-  async onNotificationsSave(
-    payload: UserNotificationSettings
-  ): Promise<void> {
-    this.notificationsSaving.set(true);
-    try {
-      const saved = await firstValueFrom(this.api.updateNotifications(payload));
-      this.notifications.set(saved);
-      this.toast.success(this.translate.instant('userSettings.notifications.save.success'));
-    } catch (error) {
-      this.toast.error('Failed to update notifications.');
-    } finally {
-      this.notificationsSaving.set(false);
     }
   }
 
@@ -327,10 +307,6 @@ export class UserSettingsPage extends ConfigDrivenSettingsPage {
         if (this.sessions().length > 0) return;
         await this.loadSessions();
         return;
-      case 'notifications':
-        if (this.notifications()) return;
-        await this.loadNotifications();
-        return;
       default:
         return;
     }
@@ -379,18 +355,6 @@ export class UserSettingsPage extends ConfigDrivenSettingsPage {
       });
     } catch {
       this.preferencesTenantHint.set(null);
-    }
-  }
-
-  private async loadNotifications(): Promise<void> {
-    this.notificationsLoading.set(true);
-    try {
-      const data = await firstValueFrom(this.api.getNotifications());
-      this.notifications.set(data);
-    } catch (error) {
-      this.toast.error('Failed to load notification settings.');
-    } finally {
-      this.notificationsLoading.set(false);
     }
   }
 

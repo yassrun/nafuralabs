@@ -4,7 +4,7 @@
 
 ## Prérequis (Windows, Git Bash)
 
-- JDK et Node du projet : `deps/jdk-25*`, `deps/node-v22*` (versions : `nafura-platform/stack.versions.properties`). `run.mjs` trouve le JDK tout seul.
+- JDK et Node du projet : `deps/jdk-25*`, `deps/node-v22*` (versions : `nafura-platform/stack.versions.properties`). `run.mjs` trouve le JDK tout seul. Gradle : cache développeur `~/.gradle` (pas dans `deps/`) ; `run.mjs` y rattache `GRADLE_USER_HOME` si un sandbox Cursor l’a détourné.
 - `export PATH=/c/nf/nafuralabs/deps/node-v22.22.3-win-x64:$PATH` puis `node.exe` (avec `node`, Git Bash répond « stdout is not a tty » dans un pipe).
 - Staging : Docker Desktop avec Kubernetes ; fichier hosts : `<id>.nafuralabs.staging` et `iam.nafuralabs.staging` → `127.0.0.1` (`powershell -File nafura-platform/ops/add-staging-hosts.ps1`, admin).
 

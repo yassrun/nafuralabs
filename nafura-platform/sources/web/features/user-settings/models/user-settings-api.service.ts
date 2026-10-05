@@ -7,7 +7,6 @@ import { ApiConfigService } from '@core/config/api-config.service';
 import type {
   ActiveSession,
   ChangePasswordRequest,
-  UserNotificationSettings,
   UserPreferencesSettings,
   UserProfileSettings,
   UserProfileUpdatePayload,
@@ -42,21 +41,6 @@ export class UserSettingsApiService {
   ): Observable<UserPreferencesSettings> {
     return this.http.put<UserPreferencesSettings>(
       `${this.apiConfig.getApiBaseUrl()}/api/v1/user-settings/preferences`,
-      payload
-    );
-  }
-
-  getNotifications(): Observable<UserNotificationSettings> {
-    return this.http.get<UserNotificationSettings>(
-      `${this.apiConfig.getApiBaseUrl()}/api/v1/user-settings/notifications`
-    );
-  }
-
-  updateNotifications(
-    payload: UserNotificationSettings
-  ): Observable<UserNotificationSettings> {
-    return this.http.put<UserNotificationSettings>(
-      `${this.apiConfig.getApiBaseUrl()}/api/v1/user-settings/notifications`,
       payload
     );
   }

@@ -6,7 +6,7 @@
 //   check          the checks of AGENTS.md before handing over: architecture, web build, host-tests (nothing started)
 import { spawn, spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
 import { createServer, Socket } from 'node:net';
 import { dirname, join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
@@ -262,19 +262,41 @@ function javaHome() {
   return home;
 }
 
+/**
+ * Developer Gradle cache (`~/.gradle`). Cursor agent sandboxes redirect `GRADLE_USER_HOME` to a temp
+ * folder, which re-downloads the wrapper dist and starts a cold daemon — pin back to the real home
+ * (same idea as Mode B's `pin_gradle_user_home`). An explicit non-sandbox value is kept.
+ */
+export function gradleUserHome(env = process.env) {
+  const base = (WINDOWS ? env.USERPROFILE : env.HOME) || env.HOME || env.USERPROFILE;
+  if (!base) return env.GRADLE_USER_HOME;
+  const realHome = join(base, '.gradle');
+  const current = env.GRADLE_USER_HOME ?? '';
+  if (!current || current === realHome) return realHome;
+  if (/cursor-sandbox-cache|AppData[/\\]Local[/\\]Temp/i.test(current)) return realHome;
+  return current;
+}
+
 /** Gradle through its wrapper jar: no gradlew/gradlew.bat, the same on every OS. */
 function gradle(product, args) {
   const home = javaHome();
   return [
     join(home, 'bin', WINDOWS ? 'java.exe' : 'java'),
     ['-cp', join(product.backend, 'gradle/wrapper/gradle-wrapper.jar'), 'org.gradle.wrapper.GradleWrapperMain', '--no-daemon', '--console=plain', ...args],
-    { cwd: product.backend, env: { JAVA_HOME: home } },
+    { cwd: product.backend, env: { JAVA_HOME: home, GRADLE_USER_HOME: gradleUserHome() } },
   ];
 }
 
 function ensureWebDependencies(product) {
   if (existsSync(join(product.web, 'node_modules/@angular/cli'))) return;
   exec(process.execPath, [join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js'), 'ci'], { cwd: product.web });
+}
+
+/** The platform web has no install of its own (a second @angular breaks the bundle): its tests read the product's. */
+function linkPlatformModules(product) {
+  const link = join(PLATFORM, 'sources/web/node_modules');
+  if (existsSync(link)) return;
+  symlinkSync(join(product.web, 'node_modules'), link, 'junction');
 }
 
 function kubectl(env) {
@@ -297,9 +319,10 @@ const exists = (kube, args) => kube(['get', ...args, '--ignore-not-found', '-o',
 
 /** Rule 7 of AGENTS.md, with the project's JDK and Node: nothing starts, nothing deploys. Then `lab` for what is visible. */
 function check(product) {
+  ensureWebDependencies(product);
+  linkPlatformModules(product);
   const npm = join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js');
   exec(process.execPath, [npm, 'run', '-s', 'architecture:check'], { cwd: join(PLATFORM, 'sources/web') });
-  ensureWebDependencies(product);
   exec(process.execPath, [join(PLATFORM, 'scripts/product-web.mjs'), 'build', '--configuration', 'development'], { cwd: product.web });
   const [java, args, options] = gradle({ backend: join(PLATFORM, 'sources/backend') }, [':platform:host-tests:test', '--max-workers=1']);
   exec(java, args, options);

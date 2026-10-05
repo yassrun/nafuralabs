@@ -4,8 +4,7 @@
 
 ## Prochains
 
-0. **Notifications** — livré côté backend (voir [PLATFORM.md](docs/PLATFORM.md#notifications)). Reste :
-   - Écrans : préférences utilisateur (remplace la section notifications des réglages utilisateur, `emailNotifications` / `inAppNotifications` / `digestFrequency`, que rien ne lit) et préférences de l’organisation dans Paramètres.
+0. **Notifications** — backend et écrans de préférences : [PLATFORM.md](docs/PLATFORM.md#notifications), spec [14](specs/manques-plateforme/14-notifications-preferences.md). Reste :
    - SMS : fournisseur et numéro de l’utilisateur (`AppUser` n’en a pas).
    - Modèles de message par canal (hors manifeste) ; lien absolu dans l’e-mail (aujourd’hui relatif).
    - Dette : `AlertRule` / `Broadcast` / `Escalation` sans usage, digest (`EmailDigestJob` vide), adresse d’expédition `noreply@seyrura.com` par défaut, événement `platform.legacy.transition` (Sektor, destinataires par rôle) à supprimer avec Sektor sur le host.

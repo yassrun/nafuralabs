@@ -1,4 +1,5 @@
-export { ListingPageComponent, rowsOf } from './listing-page.component';
+export { ListingPageComponent } from './listing-page.component';
+export { rowsOf } from './listing-page.context';
 export type {
   ListingAction,
   ListingAggregate,

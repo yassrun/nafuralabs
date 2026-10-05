@@ -1,0 +1,132 @@
+<div class="nf-export-backdrop" (click)="closed.emit()">
+  <div class="nf-export-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <div class="nf-export-dialog__header">
+      <div class="nf-export-dialog__header-left">
+        <div class="nf-export-dialog__icon-wrap">
+          <lucide-icon name="download" [size]="16" />
+        </div>
+        <div>
+          <h3 class="nf-export-dialog__title">{{ 'Export data' | translate }}</h3>
+          <p class="nf-export-dialog__subtitle">{{ 'Configure the export scope and column selection' | translate }}</p>
+        </div>
+      </div>
+      <button type="button" class="nf-export-dialog__close" (click)="closed.emit()" [attr.aria-label]="'Close' | translate">
+        <lucide-icon name="x" [size]="16" />
+      </button>
+    </div>
+
+    <div class="nf-export-dialog__body">
+      <!-- Scope Selection -->
+      <div class="nf-export-dialog__section">
+        <span class="nf-export-dialog__section-title">{{ 'Export scope' | translate }}</span>
+        <div class="nf-export-dialog__scope-list">
+          <label class="nf-export-dialog__scope-card" [class.nf-export-dialog__scope-card--active]="scope() === 'all'">
+            <input
+              type="radio"
+              name="exportScope"
+              value="all"
+              class="nf-export-dialog__radio"
+              [checked]="scope() === 'all'"
+              (change)="scope.set('all')"
+            />
+            <div class="nf-export-dialog__scope-info">
+              <span class="nf-export-dialog__scope-name">{{ 'All filtered rows' | translate }}</span>
+              <span class="nf-export-dialog__scope-desc">{{ filteredItems().length }} {{ 'records matching active filters' | translate }}</span>
+            </div>
+          </label>
+
+          <label class="nf-export-dialog__scope-card" [class.nf-export-dialog__scope-card--active]="scope() === 'page'">
+            <input
+              type="radio"
+              name="exportScope"
+              value="page"
+              class="nf-export-dialog__radio"
+              [checked]="scope() === 'page'"
+              (change)="scope.set('page')"
+            />
+            <div class="nf-export-dialog__scope-info">
+              <span class="nf-export-dialog__scope-name">{{ 'Current page only' | translate }}</span>
+              <span class="nf-export-dialog__scope-desc">{{ pageItems().length }} {{ 'records on page' | translate }} {{ page() }}</span>
+            </div>
+          </label>
+
+          @if (selection().length > 0) {
+            <label class="nf-export-dialog__scope-card" [class.nf-export-dialog__scope-card--active]="scope() === 'selection'">
+              <input
+                type="radio"
+                name="exportScope"
+                value="selection"
+                class="nf-export-dialog__radio"
+                [checked]="scope() === 'selection'"
+                (change)="scope.set('selection')"
+              />
+              <div class="nf-export-dialog__scope-info">
+                <span class="nf-export-dialog__scope-name">{{ 'Selected rows' | translate }}</span>
+                <span class="nf-export-dialog__scope-desc">{{ selection().length }} {{ 'currently selected rows' | translate }}</span>
+              </div>
+            </label>
+          }
+        </div>
+      </div>
+
+      <!-- Columns Selection -->
+      <div class="nf-export-dialog__section">
+        <div class="nf-export-dialog__section-header">
+          <span class="nf-export-dialog__section-title">
+            {{ 'Columns' | translate }} ({{ selectedCount() }}/{{ exportColumns().length }})
+          </span>
+          <div class="nf-export-dialog__column-actions">
+            <button type="button" class="nf-export-dialog__action-link" (click)="toggleAll(true)">
+              {{ 'Select all' | translate }}
+            </button>
+            <span class="nf-export-dialog__sep">·</span>
+            <button type="button" class="nf-export-dialog__action-link" (click)="toggleAll(false)">
+              {{ 'Deselect all' | translate }}
+            </button>
+          </div>
+        </div>
+
+        <div class="nf-export-dialog__columns-grid">
+          @for (col of exportColumns(); track col.key) {
+            <label class="nf-export-dialog__column-item">
+              <input
+                type="checkbox"
+                class="nf-export-dialog__checkbox"
+                [checked]="col.selected"
+                (change)="toggleColumn(col.key, $any($event.target).checked)"
+              />
+              <span class="nf-export-dialog__column-label">{{ col.label | translate }}</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <!-- Format note -->
+      <div class="nf-export-dialog__format-note">
+        <lucide-icon name="file-spreadsheet" [size]="14" />
+        <span>{{ 'Format: CSV (UTF-8 with BOM, compatible with Excel, Google Sheets and Calc)' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="nf-export-dialog__footer">
+      <span class="nf-export-dialog__footer-count">
+        {{ targetRows().length }} {{ 'rows to be exported' | translate }}
+      </span>
+      <div class="nf-export-dialog__footer-btns">
+        <nf-button variant="secondary" size="xs" (clicked)="closed.emit()">
+          {{ 'Cancel' | translate }}
+        </nf-button>
+        <nf-button
+          variant="primary"
+          size="xs"
+          iconLibrary="lucide"
+          icon="download"
+          [disabled]="selectedCount() === 0 || targetRows().length === 0"
+          (clicked)="confirm()"
+        >
+          {{ 'Download CSV' | translate }}
+        </nf-button>
+      </div>
+    </div>
+  </div>
+</div>

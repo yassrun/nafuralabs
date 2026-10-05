@@ -1,9 +1,11 @@
 package ma.nafura.host;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
+import ma.nafura.platform.authorization.security.authorization.OperatorPermissions;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.framework.context.UserContext;
 import ma.nafura.platform.identity.domain.model.AppUser;
@@ -76,6 +78,12 @@ public class OrganizationController {
         if (user == null) {
             return List.of();
         }
+        if (UserContext.hasPermission(OperatorPermissions.ALL)) {
+            return tenants.findAll().stream()
+                    .sorted(Comparator.comparing(Tenant::getName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
+                    .map(tenant -> toView(tenant, user.getId()))
+                    .toList();
+        }
         return memberships.findByUserId(user.getId()).stream().map(membership -> toView(membership, user.getId())).toList();
     }
 
@@ -84,9 +92,15 @@ public class OrganizationController {
         if (tenant == null) {
             return new OrganizationMembership(membership.getTenantId(), null, null, null, null, membership.getAudience(), List.of());
         }
+        return toView(tenant, userId);
+    }
+
+    private OrganizationMembership toView(Tenant tenant, UUID userId) {
+        TenantMembership membership = memberships.findByTenantIdAndUserId(tenant.getId(), userId).orElse(null);
+        String audience = membership != null ? membership.getAudience() : "members";
         List<String> roleCodes = roles.findRoleCodesByTenantIdAndUserId(tenant.getId(), userId);
         return new OrganizationMembership(
                 tenant.getId(), tenant.getKey(), tenant.getName(), tenant.getSlug(),
-                tenant.getStatus(), membership.getAudience(), roleCodes);
+                tenant.getStatus(), audience, roleCodes);
     }
 }

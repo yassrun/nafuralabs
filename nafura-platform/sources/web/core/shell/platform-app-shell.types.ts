@@ -100,6 +100,7 @@ export interface TenantSettingsSectionConfig {
   general?: { enabled: boolean };
   localization?: { enabled: boolean };
   branding?: { enabled: boolean };
+  notifications?: { enabled: boolean };
 }
 
 // ─── Module configs ───────────────────────────────────────────────────────────
@@ -187,6 +188,7 @@ export const DEFAULT_APP_SHELL_CONFIG: Omit<AppShellConfig, 'applicationId' | 'a
         general: { enabled: true },
         localization: { enabled: true },
         branding: { enabled: true },
+        notifications: { enabled: true },
       },
     },
   },

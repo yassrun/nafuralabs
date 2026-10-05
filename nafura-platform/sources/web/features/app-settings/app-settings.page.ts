@@ -3,7 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {
   ConfigDrivenSettingsPage,
@@ -12,6 +12,7 @@ import {
   ToastService,
 } from '@lib/anatomy';
 import { ThemeService } from '@core/theme';
+import { PermissionService } from '@core/security/services/permission.service';
 import type { SettingsPageConfig } from '@lib/anatomy/types';
 
 import { TENANT_SETTINGS_CONFIG } from './app-settings.token';
@@ -29,18 +30,21 @@ import { GeneralSectionComponent } from './sections/general/general.section';
 import { GENERAL_TIMEZONE_OPTIONS } from './sections/general/general.config';
 import { LocalizationSectionComponent } from './sections/localization/localization.section';
 import { BrandingSectionComponent, BrandingSectionSavePayload } from './sections/branding/branding.section';
+import { PlatformNotificationPreferencesComponent } from '../../platform/notifications/notification-preferences.component';
 
-type AppSettingsTabId = 'general' | 'localization' | 'branding';
+type AppSettingsTabId = 'general' | 'localization' | 'branding' | 'notifications';
 
 @Component({
   selector: 'app-app-settings-page',
   standalone: true,
   imports: [
     CommonModule,
+    TranslateModule,
     ...ConfigDrivenSettingsPageImports,
     GeneralSectionComponent,
     LocalizationSectionComponent,
     BrandingSectionComponent,
+    PlatformNotificationPreferencesComponent,
   ],
   template: `
     <nf-page-shell scroll>
@@ -80,6 +84,12 @@ type AppSettingsTabId = 'general' | 'localization' | 'branding';
               (save)="onBrandingSave($event)">
             </app-app-settings-branding-section>
           }
+          @case ('notifications') {
+            <section class="nf-settings-section">
+              <h3>{{ 'appSettings.notifications.title' | translate }}</h3>
+              <nf-platform-notification-preferences layer="organisation" />
+            </section>
+          }
         }
       </div>
     </nf-page-shell>
@@ -91,6 +101,9 @@ type AppSettingsTabId = 'general' | 'localization' | 'branding';
         display: block;
         height: 100%;
       }
+      .nf-settings-section h3 {
+        margin: 0 0 1rem;
+      }
     `,
   ],
 })
@@ -101,6 +114,7 @@ export class AppSettingsPage extends ConfigDrivenSettingsPage {
   private readonly router = inject(Router);
   private readonly moduleConfig = inject(TENANT_SETTINGS_CONFIG);
   private readonly themeService = inject(ThemeService);
+  private readonly permissions = inject(PermissionService);
 
   readonly localeOptions = [...LOCALE_OPTIONS];
   readonly timezoneOptions = [...GENERAL_TIMEZONE_OPTIONS];
@@ -119,7 +133,9 @@ export class AppSettingsPage extends ConfigDrivenSettingsPage {
   readonly brandingLoading = signal(false);
   readonly brandingSaving = signal(false);
 
-  readonly config: SettingsPageConfig = this.buildConfig();
+  get config(): SettingsPageConfig {
+    return this.buildConfig();
+  }
 
   protected override onSettingsInit(): void {
     const requestedTab = this.getQueryParam('section') as AppSettingsTabId | null;
@@ -223,6 +239,16 @@ export class AppSettingsPage extends ConfigDrivenSettingsPage {
         id: 'branding',
         labelKey: 'appSettings.tabs.branding',
         icon: 'palette',
+      });
+    }
+    if (
+      this.moduleConfig.sections?.notifications?.enabled !== false &&
+      this.permissions.hasPermission('administration.notifications.configure')
+    ) {
+      tabs.push({
+        id: 'notifications',
+        labelKey: 'appSettings.tabs.notifications',
+        icon: 'bell',
       });
     }
 

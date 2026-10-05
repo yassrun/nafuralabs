@@ -57,6 +57,9 @@ let nextUniqueId = 0;
   templateUrl: './select.component.html',
   styleUrl: './select.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.nf-select--compact]': 'compact',
+  },
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -75,6 +78,10 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
   @Input() label?: string;
   @Input() placeholder?: string;
   @Input() options: NfSelectOption[] = [];
+  /** Several values as chips and a checklist — same atom as the single select. */
+  @Input() multiple = false;
+  /** Toolbar height (listing pinned filters). */
+  @Input() compact = false;
   @Input() required = false;
   @Input() error?: string | null;
   @Input() disabled = false;
@@ -103,6 +110,8 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
   @Input() lookupSearch?: LookupSearchFn;
 
   value = signal<string>('');
+  values = signal<string[]>([]);
+  readonly multiOpen = signal(false);
   focused = signal(false);
   touched = signal(false);
   /** Options shown in the native <select>, including a fallback label for the current value. */
@@ -138,18 +147,30 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
     if (this.blurHandle) clearTimeout(this.blurHandle);
   }
 
-  private onChange: (value: string) => void = () => {};
+  private onChange: (value: string | string[]) => void = () => {};
   private onTouched: () => void = () => {};
 
-  writeValue(value: string): void {
-    this.value.set(value ?? '');
+  writeValue(value: string | string[] | null): void {
+    if (this.multiple) {
+      const next = Array.isArray(value) ? value.map(String) : value != null && value !== '' ? [String(value)] : [];
+      const current = this.values();
+      if (next.length === current.length && next.every((item, index) => item === current[index])) {
+        return;
+      }
+      this.values.set(next);
+      this.value.set('');
+      this.syncDisplayOptions();
+      return;
+    }
+    this.values.set([]);
+    this.value.set((Array.isArray(value) ? value[0] : value) ?? '');
     this.comboEditing.set(false);
     this.comboQuery.set('');
     this.comboOpen.set(false);
     this.syncDisplayOptions();
   }
 
-  registerOnChange(fn: (value: string) => void): void {
+  registerOnChange(fn: (value: string | string[]) => void): void {
     this.onChange = fn;
   }
 
@@ -162,7 +183,120 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
   }
 
   isCombobox(): boolean {
-    return !!this.lookupKey?.trim();
+    return !this.multiple && !!this.lookupKey?.trim();
+  }
+
+  selectedOptions(): NfSelectOption[] {
+    const chosen = new Set(this.values());
+    return this.displayOptions().filter((option) => chosen.has(option.value));
+  }
+
+  multiSummary(): string {
+    const selected = this.selectedOptions();
+    if (!selected.length) return this.placeholder?.trim() || 'Tous';
+    return selected.map((option) => option.label).join(', ');
+  }
+
+  multiHits(): NfSelectOption[] {
+    const q = this.comboQuery().trim().toLowerCase();
+    const options = this.displayOptions().filter((option) => !option.disabled);
+    if (!q) return options;
+    return options.filter(
+      (option) =>
+        String(option.label ?? '').toLowerCase().includes(q) ||
+        String(option.value ?? '').toLowerCase().includes(q),
+    );
+  }
+
+  isMultiSelected(value: string): boolean {
+    return this.values().includes(value);
+  }
+
+  toggleMultiPanel(): void {
+    if (this.disabled) return;
+    this.multiOpen.update((open) => !open);
+    if (this.multiOpen()) {
+      this.comboActive.set(0);
+      this.comboQuery.set('');
+      queueMicrotask(() =>
+        (this.host.nativeElement.querySelector('.nf-select-multi__search') as HTMLInputElement | null)?.focus(),
+      );
+    }
+  }
+
+  onMultiSearch(event: Event): void {
+    this.comboQuery.set((event.target as HTMLInputElement).value ?? '');
+    this.comboActive.set(0);
+  }
+
+  onMultiTriggerKeydown(event: KeyboardEvent): void {
+    if (this.disabled) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeMulti();
+      return;
+    }
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (!this.multiOpen()) this.multiOpen.set(true);
+    }
+  }
+
+  onMultiSearchKeydown(event: KeyboardEvent): void {
+    const hits = this.multiHits();
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeMulti();
+      return;
+    }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (!hits.length) return;
+      this.comboActive.set((this.comboActive() + 1) % hits.length);
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (!hits.length) return;
+      this.comboActive.set((this.comboActive() - 1 + hits.length) % hits.length);
+      return;
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const hit = hits[this.comboActive()];
+      if (hit) this.toggleMulti(hit);
+    }
+    event.stopPropagation();
+  }
+
+  toggleMulti(opt: NfSelectOption): void {
+    if (this.disabled || opt.disabled) return;
+    const next = this.isMultiSelected(opt.value)
+      ? this.values().filter((value) => value !== opt.value)
+      : [...this.values(), opt.value];
+    this.values.set(next);
+    this.onChange(next);
+    this.touched.set(true);
+    this.onTouched();
+    this.cdr.markForCheck();
+  }
+
+  removeMulti(event: Event, value: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.disabled) return;
+    const next = this.values().filter((item) => item !== value);
+    this.values.set(next);
+    this.onChange(next);
+    this.touched.set(true);
+    this.onTouched();
+    this.cdr.markForCheck();
+  }
+
+  private closeMulti(): void {
+    this.multiOpen.set(false);
+    this.comboQuery.set('');
+    this.comboActive.set(0);
   }
 
   comboLocked(): boolean {
@@ -338,11 +472,12 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
 
   @HostListener('document:mousedown', ['$event'])
   onDocumentMouseDown(event: MouseEvent): void {
-    if (!this.comboOpen()) return;
+    if (!this.comboOpen() && !this.multiOpen()) return;
     if (this.host.nativeElement.contains(event.target as Node)) return;
     this.comboOpen.set(false);
     this.comboEditing.set(false);
     this.comboQuery.set('');
+    this.closeMulti();
   }
 
   shouldShowError(): boolean {
@@ -436,6 +571,14 @@ export class NfSelectComponent implements ControlValueAccessor, OnChanges, OnIni
 
   private syncDisplayOptions(): void {
     const opts = this.options ?? [];
+    if (this.multiple) {
+      const missing = this.values()
+        .filter((current) => !opts.some((option) => option.value === current))
+        .map((current) => ({ value: current, label: current }));
+      this.displayOptions.set(missing.length ? [...missing, ...opts] : opts);
+      this.cdr.markForCheck();
+      return;
+    }
     const current = this.value();
     if (current && !opts.some((o) => o.value === current)) {
       const fromHits = this.comboHits().find((o) => o.value === current);

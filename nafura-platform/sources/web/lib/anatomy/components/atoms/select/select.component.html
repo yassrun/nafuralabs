@@ -5,6 +5,59 @@
   </label>
 
   <div class="nf-select-row">
+    <ng-container *ngIf="multiple; else singleSelect">
+      <div class="nf-select-multi" [class.nf-select-multi--open]="multiOpen()">
+        <button
+          type="button"
+          [id]="id"
+          class="nf-select-multi__trigger"
+          aria-haspopup="listbox"
+          [attr.aria-expanded]="multiOpen()"
+          [attr.aria-controls]="id + '-list'"
+          [attr.aria-invalid]="shouldShowError()"
+          [disabled]="disabled"
+          (click)="toggleMultiPanel(); $event.stopPropagation()"
+          (keydown)="onMultiTriggerKeydown($event)"
+        >
+          <span class="nf-select-multi__value" [class.nf-select-multi__value--placeholder]="!selectedOptions().length">
+            {{ multiSummary() }}
+          </span>
+        </button>
+        <div *ngIf="multiOpen()" class="nf-select-multi__panel" [id]="id + '-list'" role="listbox" aria-multiselectable="true">
+          <input
+            type="search"
+            class="nf-select-multi__search"
+            autocomplete="off"
+            placeholder="Rechercher"
+            [value]="comboQuery()"
+            (click)="$event.stopPropagation()"
+            (input)="onMultiSearch($event)"
+            (keydown)="onMultiSearchKeydown($event)"
+          />
+          <div class="nf-select-multi__hint" *ngIf="!multiHits().length">Aucun résultat</div>
+          <div class="nf-select-multi__options">
+            <label
+              *ngFor="let opt of multiHits(); let i = index"
+              [id]="id + '-opt-' + i"
+              class="nf-select-multi__opt"
+              [class.nf-select-multi__opt--active]="i === comboActive()"
+              (mousedown)="$event.preventDefault()"
+              (click)="$event.preventDefault(); toggleMulti(opt)"
+            >
+              <input
+                type="checkbox"
+                tabindex="-1"
+                [checked]="isMultiSelected(opt.value)"
+                [disabled]="disabled || opt.disabled"
+              />
+              <span>{{ opt.label }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #singleSelect>
     <ng-container *ngIf="isCombobox(); else nativeSelect">
       <div class="nf-combobox" [class.nf-combobox--filled]="comboShowsClear()">
         <input
@@ -101,6 +154,7 @@
           {{ option.label }}
         </option>
       </select>
+    </ng-template>
     </ng-template>
 
     <button

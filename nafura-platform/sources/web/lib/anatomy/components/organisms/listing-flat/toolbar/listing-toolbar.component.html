@@ -1,0 +1,339 @@
+@if (config().segments?.length) {
+  <div class="nf-listing-flat__segments" role="tablist">
+    @for (segment of config().segments; track segment.id) {
+      <button
+        type="button"
+        role="tab"
+        class="nf-listing-flat__segment"
+        [class.nf-listing-flat__segment--active]="store.activeSegment()?.id === segment.id"
+        [attr.aria-selected]="store.activeSegment()?.id === segment.id"
+        (click)="store.selectSegment(segment.id)"
+      >
+        {{ segment.label | translate }}
+      </button>
+    }
+  </div>
+}
+<!-- Row 1: Search + Filter Add + Filter Chips (starts left, flows right) -->
+@if (features().search || features().filters || store.presets().length > 0) {
+  <div class="nf-listing-flat__filters">
+    <div class="nf-listing-flat__filters-row nf-listing-flat__filters-row--top">
+      @if (features().search) {
+        <div class="nf-listing-flat__search">
+          <lucide-icon name="search" [size]="14" class="nf-listing-flat__search-icon" />
+          <input
+            type="text"
+            class="nf-listing-flat__search-input"
+            [placeholder]="'Search' | translate"
+            [value]="store.search()"
+            (input)="store.setSearch($any($event.target).value)"
+            [attr.aria-label]="'Search' | translate"
+          />
+        </div>
+      }
+      @if (store.presets().length > 0) {
+        <div class="nf-listing-flat__presets">
+          @for (preset of store.presets(); track preset.id) {
+            <button
+              type="button"
+              class="nf-listing-flat__preset"
+              [class.nf-listing-flat__preset--active]="store.activePresets()[preset.id]"
+              [attr.aria-pressed]="!!store.activePresets()[preset.id]"
+              (click)="store.togglePreset(preset.id)"
+            >
+              {{ preset.label | translate }}
+            </button>
+          }
+        </div>
+      }
+      @if (features().filters && store.pinnedFilters().length > 0) {
+        <div class="nf-listing-flat__pinned-filters">
+          @for (filter of store.pinnedFilters(); track filter.key) {
+            <div class="nf-listing-flat__pinned-filter">
+              <label class="nf-listing-flat__pinned-filter-label" [for]="'filter-' + filter.key">
+                {{ filter.label | translate }}
+              </label>
+              @switch (filter.type) {
+                @case ('select') {
+                  <select
+                    [id]="'filter-' + filter.key"
+                    class="nf-listing-flat__pinned-filter-control nf-listing-flat__pinned-filter-control--select"
+                    [ngModel]="store.pinnedValues()[filter.key]"
+                    (ngModelChange)="store.setFilterValue(filter.key, $event)"
+                  >
+                    <option [ngValue]="null">{{ (filter.placeholder ?? 'All') | translate }}</option>
+                    @for (opt of filter.options ?? []; track opt.value) {
+                      <option [ngValue]="opt.value">{{ opt.label | translate }}</option>
+                    }
+                  </select>
+                }
+                @case ('text') {
+                  <input
+                    [id]="'filter-' + filter.key"
+                    type="text"
+                    class="nf-listing-flat__pinned-filter-control"
+                    [ngModel]="store.pinnedValues()[filter.key]"
+                    (ngModelChange)="store.setFilterValue(filter.key, $event)"
+                    [placeholder]="(filter.placeholder ?? filter.label) | translate"
+                  />
+                }
+                @case ('number') {
+                  <input
+                    [id]="'filter-' + filter.key"
+                    type="number"
+                    class="nf-listing-flat__pinned-filter-control"
+                    [ngModel]="store.pinnedValues()[filter.key]"
+                    (ngModelChange)="onNumberFilter(filter.key, $event)"
+                    [placeholder]="(filter.placeholder ?? filter.label) | translate"
+                  />
+                }
+                @case ('date') {
+                  <input
+                    [id]="'filter-' + filter.key"
+                    type="date"
+                    class="nf-listing-flat__pinned-filter-control"
+                    [ngModel]="store.pinnedValues()[filter.key]"
+                    (ngModelChange)="store.setFilterValue(filter.key, $event)"
+                  />
+                }
+                @case ('boolean') {
+                  <select
+                    [id]="'filter-' + filter.key"
+                    class="nf-listing-flat__pinned-filter-control nf-listing-flat__pinned-filter-control--select"
+                    [ngModel]="store.pinnedValues()[filter.key]"
+                    (ngModelChange)="store.setFilterValue(filter.key, $event)"
+                  >
+                    <option [ngValue]="null">{{ (filter.placeholder ?? 'All') | translate }}</option>
+                    <option [ngValue]="true">{{ 'Yes' | translate }}</option>
+                    <option [ngValue]="false">{{ 'No' | translate }}</option>
+                  </select>
+                }
+                @case ('multiselect') {
+                  <nf-select
+                    [id]="'filter-' + filter.key"
+                    [multiple]="true"
+                    [compact]="true"
+                    [options]="store.pinnedSelectOptions()[filter.key]"
+                    [placeholder]="(filter.placeholder ?? 'All') | translate"
+                    [ngModel]="store.pinnedMultiValues()[filter.key]"
+                    (ngModelChange)="store.setFilterValue(filter.key, $event)"
+                  />
+                }
+                @case ('daterange') {
+                  <div class="nf-listing-flat__pinned-range">
+                    <input
+                      type="date"
+                      class="nf-listing-flat__pinned-filter-control"
+                      [ngModel]="store.pinnedRanges()[filter.key][0]"
+                      (ngModelChange)="store.setRangePart(filter.key, 0, $event)"
+                    />
+                    <span>—</span>
+                    <input
+                      type="date"
+                      class="nf-listing-flat__pinned-filter-control"
+                      [ngModel]="store.pinnedRanges()[filter.key][1]"
+                      (ngModelChange)="store.setRangePart(filter.key, 1, $event)"
+                    />
+                  </div>
+                }
+                @default {
+                  <input
+                    [id]="'filter-' + filter.key"
+                    type="text"
+                    class="nf-listing-flat__pinned-filter-control"
+                    [ngModel]="store.pinnedValues()[filter.key]"
+                    (ngModelChange)="store.setFilterValue(filter.key, $event)"
+                    [placeholder]="(filter.placeholder ?? filter.label) | translate"
+                  />
+                }
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+    <div class="nf-listing-flat__filters-row nf-listing-flat__filters-row--bottom">
+      <div class="nf-listing-flat__chips">
+        @if (store.popupFilters().length > 0) {
+          <button
+            type="button"
+            class="nf-listing-flat__add-filter"
+            [class.nf-listing-flat__add-filter--active]="store.filterActive()"
+            [matMenuTriggerFor]="filterMenu"
+            #filterMenuTrigger="matMenuTrigger"
+            (menuOpened)="onFilterMenuOpened()"
+          >
+            <lucide-icon name="plus" [size]="12" />
+            {{ 'Filter' | translate }}
+          </button>
+          <mat-menu
+            #filterMenu="matMenu"
+            class="nf-listing-flat-menu nf-listing-flat-menu--filter"
+            xPosition="after"
+            yPosition="below"
+          >
+            <div (click)="$event.stopPropagation()">
+              <nf-filter-builder
+                [filters]="store.resolvedFilters()"
+                [advanced]="config().filterMode !== 'simple'"
+                [group]="store.activeFilterGroup()"
+                [openCount]="filterMenuOpenCount()"
+                (apply)="onFilterApply($event)"
+                (clear)="onFilterClear()"
+              />
+            </div>
+          </mat-menu>
+        }
+        <nf-filter-chips
+          [fields]="store.resolvedFilters()"
+          [group]="store.activeFilterGroup()"
+          (removeLeaf)="onRemoveFilterLeaf($event)"
+        />
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Row 2: Selection pill + table controls (LEFT) ➔ Action buttons (RIGHT) -->
+<div class="nf-listing-flat__actions-row" [class.nf-listing-flat__actions-row--split]="splitLayout()">
+  <div class="nf-listing-flat__actions-left">
+    @if (selectionKind() === 'multiple' && selection().length > 0) {
+      <span class="nf-listing-flat__selcount">
+        {{ selection().length }} {{ 'selected' | translate }}
+      </span>
+    }
+    @if (features().columnToggle || features().selectionToggle || store.savedViewsEnabled()) {
+      <div class="nf-listing-flat__table-controls">
+        <div class="nf-listing-flat__controls">
+          @if (features().selectionToggle) {
+            <nf-button
+              variant="secondary"
+              size="xs"
+              iconLibrary="lucide"
+              [icon]="toggleSelectionOn() ? 'x' : 'list-checks'"
+              [active]="toggleSelectionOn()"
+              [tooltip]="(toggleSelectionOn() ? 'Cancel selection' : 'Select rows') | translate"
+              [attr.aria-label]="(toggleSelectionOn() ? 'Cancel selection' : 'Select rows') | translate"
+              (clicked)="toggleSelection.emit()"
+            />
+          }
+          @if (store.savedViewsEnabled()) {
+            @defer (on immediate) {
+              <nf-listing-saved-views />
+            }
+          }
+          @if (features().columnToggle) {
+            <nf-button
+              variant="secondary"
+              size="xs"
+              iconLibrary="lucide"
+              [icon]="store.hiddenCount() > 0 ? 'eye-off' : 'columns'"
+              [active]="store.hiddenCount() > 0"
+              [matMenuTriggerFor]="columnsMenu"
+              [tooltip]="'Customize columns' | translate"
+              [attr.aria-label]="'Customize columns' | translate"
+            >{{ 'Columns' | translate }}</nf-button>
+            <mat-menu
+              #columnsMenu="matMenu"
+              class="nf-listing-flat-menu nf-listing-flat-menu--columns"
+              xPosition="before"
+              yPosition="below"
+            >
+              <div class="nf-columns-menu" (click)="$event.stopPropagation()">
+                <div class="nf-columns-menu__header">
+                  <span class="nf-columns-menu__title">{{ 'Columns' | translate }}</span>
+                  <div class="nf-columns-menu__actions">
+                    <button type="button" class="nf-columns-menu__action-btn" (click)="store.showAllColumns()">
+                      {{ 'Show all' | translate }}
+                    </button>
+                    <span class="nf-columns-menu__sep">·</span>
+                    <button type="button" class="nf-columns-menu__action-btn" (click)="store.resetDefaultColumns()">
+                      {{ 'Reset' | translate }}
+                    </button>
+                  </div>
+                </div>
+                <div class="nf-columns-menu__list">
+                  @for (col of store.controlColumns(); track col.key) {
+                    <label class="nf-columns-menu__item">
+                      <input
+                        type="checkbox"
+                        class="nf-columns-menu__checkbox"
+                        [checked]="col.visible"
+                        (change)="store.setColumnVisibility(col.key, $any($event.target).checked)"
+                      />
+                      <span class="nf-columns-menu__label">{{ col.label | translate }}</span>
+                    </label>
+                  }
+                </div>
+              </div>
+            </mat-menu>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Right: Action buttons -->
+  <div class="nf-listing-flat__actions-right">
+    <!--
+      Projected extras (Status, Import magique, …) stay in the bar.
+      Below the compact container breakpoint they go icon-only — same
+      density concept as primary / ⋯, instead of wrapping as a fat label.
+    -->
+    <div class="nf-listing-flat__projected-actions">
+      <ng-content />
+    </div>
+
+    @if (hasActions()) {
+      @if (isMobile()) {
+        <!-- Mobile: primary action icon-only + everything else in ⋯ -->
+        @if (primaryAction(); as primary) {
+          <nf-button
+            [variant]="primary.variant ?? 'primary'"
+            size="xs"
+            [icon]="primary.icon"
+            [tooltip]="(primary.label ?? primary.id) | translate"
+            [attr.aria-label]="(primary.label ?? primary.id) | translate"
+            (clicked)="actionClick.emit(primary.id)"
+          />
+        }
+        @if (mobileMenuNodes().length > 0) {
+          <nf-action-menu size="xs" [nodes]="mobileMenuNodes()" (actionClick)="actionClick.emit($event)" />
+        }
+      } @else {
+        <div class="nf-listing-flat__actions-wide">
+          <nf-listing-actions
+            [actions]="resolvedActions()"
+            [selectionActions]="visibleSelectionActions()"
+            size="xs"
+            (actionClick)="actionClick.emit($event)"
+          />
+        </div>
+        <div class="nf-listing-flat__actions-compact">
+          @if (visibleSelectionActions().length > 0) {
+            <nf-listing-actions
+              [selectionActions]="visibleSelectionActions()"
+              size="xs"
+              (actionClick)="actionClick.emit($event)"
+            />
+          }
+          @if (primaryAction(); as primary) {
+            <nf-button
+              class="nf-listing-flat__compact-primary-label"
+              [variant]="primary.variant ?? 'primary'"
+              size="xs"
+              [icon]="primary.icon"
+              [tooltip]="(primary.label ?? primary.id) | translate"
+              (clicked)="actionClick.emit(primary.id)"
+            >
+              {{ (primary.label ?? primary.id) | translate }}
+            </nf-button>
+          }
+          @if (compactMenuNodes().length > 0) {
+            <nf-action-menu size="xs" [nodes]="compactMenuNodes()" (actionClick)="actionClick.emit($event)" />
+          }
+        </div>
+      }
+    }
+  </div>
+</div>

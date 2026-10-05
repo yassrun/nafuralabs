@@ -6,6 +6,10 @@ Les décisions des specs 09 à 12 sont tranchées (2026-10-04). Le socle est liv
 
 À faire aussi, complément de la vague 2 : [08 bis Import : valeurs de référentiel](08bis-import-valeurs-referentiel.md).
 
+Dette front : [13 Découpage des listes](13-decoupage-listes.md) — `nf-listing-flat` et `nf-listing-page` découpés par responsabilité, sans changement visible ni de configuration.
+
+Notifications : [14 Préférences et inbox](14-notifications-preferences.md) — écrans sur l’API `notification-preferences` (utilisateur + organisation) ; filtre d’événement dans l’inbox.
+
 | Spec | Sujet | Décision |
 |---|---|---|
 | [09 Tenancy multi](09-tenancy-multi.md) | Plusieurs organisations | `platform.operator.*` uniquement via `spec.deploy.<env>.operators` (les jokers de rôle ne la couvrent jamais) ; démo en `multi`, `probe-bc` reste `single` ; `spec.runtime.signup: "operator" \| "open"` |

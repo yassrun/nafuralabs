@@ -25,12 +25,6 @@ export interface UserPreferencesSettings {
   dateFormat: string | null;
 }
 
-export interface UserNotificationSettings {
-  emailNotifications: boolean;
-  inAppNotifications: boolean;
-  digestFrequency: 'none' | 'daily' | 'weekly';
-}
-
 export interface ActiveSession {
   id: string;
   deviceName: string;

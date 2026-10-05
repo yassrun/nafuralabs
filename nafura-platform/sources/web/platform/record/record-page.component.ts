@@ -29,6 +29,7 @@ import { StatusPipelineComponent, type PipelineStep } from '../../lib/anatomy/co
 import { ConfirmDialogService } from '../../lib/anatomy/components/services/confirm-dialog.service';
 import { ToastService } from '../../lib/anatomy/components/services/toast.service';
 import type { BadgeVariant, FormFieldConfig, LookupContext } from '../../lib/anatomy/types';
+import { AuditTimelineComponent } from '../../features/collaboration/audit';
 import { ListingPageComponent } from '../listing/listing-page.component';
 import { HOST_CAPABILITIES } from '../host/host-capabilities';
 import { RecordCollaborationComponent } from './record-collaboration.component';
@@ -61,6 +62,7 @@ interface SectionView {
   columns: number;
   listing: ListingPageConfig | null;
   collaboration: 'attachments' | 'comments' | null;
+  audit: boolean;
   accept: string[];
   maxSizeMb?: number;
 }
@@ -92,6 +94,7 @@ interface PanelView {
     ErrorStateComponent,
     ListingPageComponent,
     RecordCollaborationComponent,
+    AuditTimelineComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -189,9 +192,12 @@ interface PanelView {
                       [accept]="section.accept"
                       [maxSizeMb]="section.maxSizeMb" />
                   }
+                  @if (section.audit && recordId(); as audited) {
+                    <nf-audit-timeline [entityType]="entityType()" [entityId]="audited" />
+                  }
                   @if (section.listing; as listing) {
                     <nf-listing-page class="nf-record__listing" [listing]="listing" [embedded]="true" />
-                  } @else if (!section.fields.length && !(section.collaboration && recordId())) {
+                  } @else if (!section.fields.length && !(section.collaboration && recordId()) && !(section.audit && recordId())) {
                     <p class="nf-record__after-save">{{ 'record.availableAfterSave' | translate }}</p>
                   }
                 </section>
@@ -334,7 +340,8 @@ export class RecordPageComponent {
   readonly panels = computed((): PanelView[] => {
     const layout = this.layout();
     const record = this.recordId() ? untracked(() => this.record()) : null;
-    const view = (sections: RecordSection[]) => sections.map((section) => this.sectionView(section, record));
+    const view = (sections: RecordSection[]) =>
+      sections.map((section) => this.sectionView(section, record)).filter((section): section is SectionView => section != null);
     if (!layout || layout.kind === 'sections') return [{ id: 'main', label: '', sections: view(layout?.sections ?? []) }];
     if (layout.kind === 'tabs') return layout.tabs.map((tab) => ({ id: tab.id, label: tab.label, sections: view(tab.sections) }));
     return layout.steps.map((step) => ({ id: step.id, label: step.label, sections: view(step.sections), states: step.states }));
@@ -608,30 +615,46 @@ export class RecordPageComponent {
     return Object.fromEntries(loaded);
   }
 
-  private sectionView(section: RecordSection, record: Row | null): SectionView {
+  private sectionView(section: RecordSection, record: Row | null): SectionView | null {
     const columns = section.columns ?? 2;
     const fields = (section.fields ?? []).map((field: RecordField) => ({
       ...field,
       colSpan: field.wide || field.type === 'textarea' || field.type === 'richtext' ? columns : field.colSpan,
     }));
     const kind = section.kind ?? (section.listing ? undefined : 'fields');
-    const collaboration = kind === 'attachments' || kind === 'comments' ? kind : null;
+    if (kind === 'attachments' || kind === 'comments' || kind === 'audit') {
+      if (!this.capabilityOn(kind)) return null;
+      return {
+        title: section.title,
+        description: section.description,
+        fields: [],
+        columns,
+        listing: null,
+        collaboration: kind === 'audit' ? null : kind,
+        audit: kind === 'audit',
+        accept: section.accept ?? ['*'],
+        maxSizeMb: section.maxSizeMb,
+      };
+    }
     return {
       title: section.title,
       description: section.description,
-      fields: collaboration ? [] : fields,
+      fields,
       columns,
-      listing: !collaboration && section.listing && record ? section.listing(record) : null,
-      collaboration: collaboration && this.capabilityOn(collaboration) ? collaboration : null,
+      listing: section.listing && record ? section.listing(record) : null,
+      collaboration: null,
+      audit: false,
       accept: section.accept ?? ['*'],
       maxSizeMb: section.maxSizeMb,
     };
   }
 
-  private capabilityOn(kind: 'attachments' | 'comments'): boolean {
+  private capabilityOn(kind: 'attachments' | 'comments' | 'audit'): boolean {
     const caps = this.capabilities;
     if (!caps) return true;
-    return caps.includes(kind === 'attachments' ? 'cap.documents' : 'cap.comments');
+    if (kind === 'attachments') return caps.includes('cap.documents');
+    if (kind === 'comments') return caps.includes('cap.comments');
+    return caps.includes('cap.audit');
   }
 
   private visibleActions(): RecordAction[] {

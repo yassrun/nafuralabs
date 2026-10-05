@@ -98,6 +98,7 @@ export const PURCHASE_REQUEST_RECORD: RecordPageConfig = {
       },
       { title: 'Pièces jointes', kind: 'attachments', accept: ['application/pdf', 'image/png', 'image/jpeg'], maxSizeMb: 10 },
       { title: 'Notes', kind: 'comments' },
+      { title: 'Activité', kind: 'audit' },
     ],
   },
   messages: { created: 'Demande créée.', saved: 'Demande enregistrée.', deleted: 'Demande supprimée.' },

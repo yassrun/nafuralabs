@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import ma.nafura.platform.framework.audit.Auditable;
 import ma.nafura.platform.framework.domain.TenantEntity;
 import ma.nafura.platform.framework.record.HasStatus;
 import org.hibernate.annotations.Formula;
@@ -20,6 +21,9 @@ import org.hibernate.annotations.Formula;
 /** Draft → submitted → approved (by a lead above 10 000) → ordered: see lifecycle/purchase-request.json. */
 @Entity(name = "DemoPurchaseRequest")
 @Table(name = "demo_purchase_request")
+@Auditable(
+        entityType = "demo.purchase-request",
+        trackedFields = {"subject", "supplierId", "amount", "neededBy", "status", "justification"})
 @Getter
 @Setter
 public class PurchaseRequest extends TenantEntity implements HasStatus {
