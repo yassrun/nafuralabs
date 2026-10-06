@@ -7,7 +7,7 @@
     { "id": "cap.user-settings", "modules": ["user-settings"], "requires": [], "probe": { "get": "/api/v1/user-settings/profile" } },
     { "id": "cap.app-settings", "modules": ["app-settings"], "requires": [], "probe": { "get": "/api/v1/app-settings/general" } },
     { "id": "cap.organization-identity", "modules": ["organization-identity"], "requires": ["cap.app-settings", "cap.documents"], "probe": { "get": "/api/v1/organization/identity" } },
-    { "id": "cap.iam", "modules": ["iam"], "requires": [], "probe": { "get": "/api/public/invitations/preview" } },
+    { "id": "cap.iam", "modules": ["iam"], "requires": ["cap.audit"], "probe": { "get": "/api/public/invitations/preview" } },
     { "id": "cap.subscriptions", "modules": ["subscription"], "requires": [], "probe": { "get": "/api/v1/administration/subscriptions" } },
     { "id": "cap.usage", "modules": ["usage"], "requires": ["cap.documents", "cap.ai"], "probe": { "get": "/api/v1/platform/usage/tenants" } },
     { "id": "cap.sysconfig", "modules": ["sysconfig"], "requires": [], "probe": { "get": "/api/v1/numbering-sequences" } },

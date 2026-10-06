@@ -31,7 +31,7 @@ import { USER_SETTINGS_CONFIG } from '../../features/user-settings/user-settings
 import { APP_SHELL_ACCESS, provideAppShell } from '../app-shell/app-shell.config';
 import { PLATFORM_CAPABILITY_MANIFESTS } from '../capability-catalog';
 import { providePlatformIdentity } from '../identity';
-import { HostAuthCallbackPage, HostAuthService, HostLoginPage, hostAuthGuard, hostAuthInterceptor, provideHostAuth } from '../host-auth';
+import { HostAuthCallbackPage, HostAuthService, HostLoginPage, InviteAcceptPage, hostAuthGuard, hostAuthInterceptor, provideHostAuth } from '../host-auth';
 import type { ApplicationManifest, BusinessContextManifest, NafuraManifest } from '../manifest';
 import { assertNafuraManifestsValid } from '../manifest-validator';
 import { businessContextDomain, projectApplicationConfig, projectAppShellConfig } from '../manifest-projection';
@@ -114,6 +114,7 @@ export function nafuraHostRoutes(app: unknown, businessContexts: readonly HostBu
   return [
     { path: 'login', component: HostLoginPage },
     { path: 'auth/callback', component: HostAuthCallbackPage },
+    { path: 'invite/accept', component: InviteAcceptPage },
     {
       path: '',
       component: NafuraHostShellComponent,

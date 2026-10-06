@@ -11,7 +11,7 @@
       "packages": ["ma.nafura.platform.administration.iam"]
     }
   },
-  "requires": { "core": ["identity", "tenancy", "authorization"], "features": [] },
+  "requires": { "core": ["identity", "tenancy", "authorization"], "features": ["audit"] },
   "conditionalOn": { "profile": "multi-tenant" },
   "manifest": { "key": "iam" }
 }

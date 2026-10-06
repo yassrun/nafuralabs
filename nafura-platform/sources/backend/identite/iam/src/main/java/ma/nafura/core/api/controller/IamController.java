@@ -218,11 +218,11 @@ public class IamController {
         
         String status = iamService.resendInvitation(tenantId, userId);
         TenantMemberResponse member = iamService.getMember(tenantId, userId);
-        return ResponseEntity.ok(new ResendInvitationResponse(
-            member.email(),
-            status.toLowerCase(),
-            "Invitation renvoyée avec succès."
-        ));
+        String delivery = status != null ? status.toLowerCase() : "failed";
+        String message = "sent".equals(delivery)
+                ? "Invitation renvoyée avec succès."
+                : "Invitation régénérée, mais l'e-mail n'a pas pu être envoyé.";
+        return ResponseEntity.ok(new ResendInvitationResponse(member.email(), delivery, message));
     }
 
     // ─────────────────────────────────────────────────────────────────────────────

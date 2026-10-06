@@ -103,8 +103,33 @@ public class AppSettingsService {
             logoUrl,
             faviconUrl,
             map.get("primaryColor"),
+            map.get("secondaryColor"),
+            map.get("accentColor"),
             map.get("tenantDisplayName")
         );
+    }
+
+    /**
+     * Brand colours for email/print templates ({@code brand.primary|secondary|accent}).
+     * Uses defaults when unset.
+     */
+    public BrandColors resolveBrandColors() {
+        try {
+            return resolveBrandColors(TenantContext.getTenantId());
+        } catch (Exception e) {
+            return BrandColors.defaults();
+        }
+    }
+
+    public BrandColors resolveBrandColors(UUID tenantId) {
+        if (tenantId == null) {
+            return BrandColors.defaults();
+        }
+        Map<String, String> map = getSettingsMap(tenantId, PREFIX_BRANDING);
+        return BrandColors.of(
+            map.get("primaryColor"),
+            map.get("secondaryColor"),
+            map.get("accentColor"));
     }
 
     @Transactional
@@ -112,7 +137,18 @@ public class AppSettingsService {
         UUID tenantId = TenantContext.getTenantId();
         setSetting(tenantId, "app.branding.logoUrl", request.logoUrl());
         setSetting(tenantId, "app.branding.faviconUrl", request.faviconUrl());
-        setSetting(tenantId, "app.branding.primaryColor", request.primaryColor());
+        setSetting(
+            tenantId,
+            "app.branding.primaryColor",
+            BrandColors.normalizeOrNull(request.primaryColor()));
+        setSetting(
+            tenantId,
+            "app.branding.secondaryColor",
+            BrandColors.normalizeOrNull(request.secondaryColor()));
+        setSetting(
+            tenantId,
+            "app.branding.accentColor",
+            BrandColors.normalizeOrNull(request.accentColor()));
         setSetting(tenantId, "app.branding.tenantDisplayName", request.tenantDisplayName());
         return getBranding();
     }

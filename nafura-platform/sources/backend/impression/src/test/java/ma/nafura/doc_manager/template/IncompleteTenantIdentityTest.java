@@ -28,7 +28,7 @@ class IncompleteTenantIdentityTest {
         };
         try (MockedStatic<TenantContext> tenant = mockStatic(TenantContext.class)) {
             tenant.when(TenantContext::getTenantId).thenReturn(UUID.randomUUID());
-            var resolver = new TemplateVariableResolver(List.of(), List.of(provider));
+            var resolver = new TemplateVariableResolver(List.of(), List.of(provider), null);
             Context context = new Context();
             context.setVariables(resolver.resolveForPreview("devis"));
             String html = new ThymeleafTemplateConfig().stringTemplateEngine().process(

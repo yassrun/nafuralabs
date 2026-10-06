@@ -4,7 +4,7 @@ public record AppBrandingSettingsResponse(
     String logoUrl,
     String faviconUrl,
     String primaryColor,
+    String secondaryColor,
+    String accentColor,
     String tenantDisplayName
 ) {}
-
-

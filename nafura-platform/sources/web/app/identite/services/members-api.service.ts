@@ -116,8 +116,25 @@ export class MembersApiService extends FeatureApiService<
     return this.getById(memberId);
   }
 
-  async resendInvitation(id: string | number): Promise<void> {
-    await this.post(`${this.membersPath()}/${encodeURIComponent(String(id))}/resend-invitation`, {});
+  async resendInvitation(id: string | number): Promise<{
+    email: string;
+    emailDeliveryStatus: string;
+  }> {
+    return this.post<{ email: string; emailDeliveryStatus: string; message?: string }>(
+      `${this.membersPath()}/${encodeURIComponent(String(id))}/resend-invitation`,
+      {}
+    );
+  }
+
+  async findByEmail(email: string): Promise<Member | null> {
+    const normalized = email.trim().toLowerCase();
+    if (!normalized) {
+      return null;
+    }
+    const page = await this.getAll({ page: 1, pageSize: 20, search: normalized });
+    return (
+      page.items.find((member) => member.email.trim().toLowerCase() === normalized) ?? null
+    );
   }
 
   override async patch(id: string | number, data: Partial<MemberUpdate>): Promise<Member> {

@@ -100,6 +100,9 @@ public class TemplateVariableCatalogService {
 
     private static List<TemplateVariableDescriptor> systemVariables() {
         return List.of(
+                desc("brand.primary", "Couleur primaire (branding)", "string", "#1d4ed8"),
+                desc("brand.secondary", "Couleur secondaire (branding)", "string", "#64748b"),
+                desc("brand.accent", "Couleur accent (branding)", "string", "#0f172a"),
                 desc("today", "Date du jour", "date", null),
                 desc("now", "Date et heure", "datetime", null),
                 desc("currentUser", "Utilisateur courant", "string", null));

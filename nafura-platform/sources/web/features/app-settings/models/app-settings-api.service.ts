@@ -8,6 +8,7 @@ import type {
   AppBrandingSettings,
   AppGeneralSettings,
   AppLocalizationSettings,
+  BrandColorExtractionResult,
 } from './app-settings.model';
 
 @Injectable({ providedIn: 'root' })
@@ -55,6 +56,13 @@ export class AppSettingsApiService {
     return this.http.put<AppBrandingSettings>(
       `${this.apiConfig.getApiBaseUrl()}/api/v1/app-settings/branding`,
       payload
+    );
+  }
+
+  extractBrandColors(): Observable<BrandColorExtractionResult> {
+    return this.http.post<BrandColorExtractionResult>(
+      `${this.apiConfig.getApiBaseUrl()}/api/v1/app-settings/branding/extract-colors`,
+      {}
     );
   }
 

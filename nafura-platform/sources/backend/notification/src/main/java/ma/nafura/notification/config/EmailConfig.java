@@ -3,11 +3,15 @@ package ma.nafura.platform.collaboration.notification.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.function.Supplier;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import ma.nafura.platform.appsettings.service.AppSettingsService;
+import ma.nafura.platform.appsettings.service.BrandColors;
 import ma.nafura.platform.collaboration.notification.service.EmailService;
 import ma.nafura.platform.collaboration.notification.service.EmailTemplateService;
 import ma.nafura.platform.collaboration.notification.service.email.BrevoEmailService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -33,8 +37,13 @@ public class EmailConfig {
             @Value("${app.email.from-address:noreply@nafuralabs.com}") String fromAddress,
             // Empty from-name → product name from app.nafura.json
             @Value("${app.email.from-name:}") String fromName,
-            EmailTemplateService templateService) {
+            @Value("${app.invitation.expiry-days:7}") int invitationExpiryDays,
+            EmailTemplateService templateService,
+            @Autowired(required = false) AppSettingsService appSettingsService) {
         log.info("Configuring email provider: {}", emailProvider);
+        Supplier<BrandColors> brandColors = appSettingsService != null
+            ? appSettingsService::resolveBrandColors
+            : BrandColors::defaults;
 
         switch (emailProvider.toLowerCase()) {
             case "brevo":
@@ -47,9 +56,17 @@ public class EmailConfig {
                 if (senderEmail.isBlank()) {
                     senderEmail = "noreply@nafuralabs.com";
                 }
-                String senderName = senderName(fromName);
-                log.info("Creating Brevo email client (from={} name={})", senderEmail, senderName);
-                return new BrevoEmailService(brevoApiKey.trim(), senderEmail, senderName, templateService);
+                String productName = productName();
+                String senderName = fromName != null && !fromName.isBlank() ? fromName.trim() : productName;
+                log.info("Creating Brevo email client (from={} name={} product={})", senderEmail, senderName, productName);
+                return new BrevoEmailService(
+                        brevoApiKey.trim(),
+                        senderEmail,
+                        senderName,
+                        productName,
+                        invitationExpiryDays,
+                        templateService,
+                        brandColors);
             default:
                 throw new IllegalStateException(
                     String.format("Unsupported email provider: %s. Supported: brevo", emailProvider)
@@ -57,8 +74,7 @@ public class EmailConfig {
         }
     }
 
-    private String senderName(String fromName) {
-        if (fromName != null && !fromName.isBlank()) return fromName.trim();
+    private String productName() {
         Resource manifest = new DefaultResourceLoader().getResource("classpath:nafura/app.nafura.json");
         if (!manifest.exists()) return "Nafura";
         try (InputStream in = manifest.getInputStream()) {
@@ -85,7 +101,7 @@ public class EmailConfig {
                     String subject,
                     String htmlContent,
                     String textContent,
-                    List<EmailAttachment> attachments) {}
+                    List<EmailService.EmailAttachment> attachments) {}
         };
     }
 }

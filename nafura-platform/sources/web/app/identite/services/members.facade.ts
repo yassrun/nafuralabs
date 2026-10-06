@@ -42,8 +42,12 @@ export class MembersFacade extends GridFacade<
     await Promise.all(ids.map((id) => this.deactivateMember(id)));
   }
 
-  async resendInvitation(id: string): Promise<void> {
-    await this.api.resendInvitation(id);
+  async resendInvitation(id: string): Promise<{ email: string; emailDeliveryStatus: string }> {
+    return this.api.resendInvitation(id);
+  }
+
+  async findByEmail(email: string): Promise<Member | null> {
+    return this.api.findByEmail(email);
   }
 
   async removeMember(id: string): Promise<void> {

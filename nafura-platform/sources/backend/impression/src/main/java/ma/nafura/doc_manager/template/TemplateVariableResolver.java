@@ -1,8 +1,11 @@
 package ma.nafura.platform.collaboration.docmanager.template;
 
+import ma.nafura.platform.appsettings.service.AppSettingsService;
+import ma.nafura.platform.appsettings.service.BrandColors;
 import ma.nafura.platform.collaboration.docmanager.api.response.TemplateVariableDescriptor;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,12 +28,15 @@ public class TemplateVariableResolver {
     private final List<EntityDataProvider> entityDataProviders;
     /** Merged lowest-order-first to build {@code tenant.*}. */
     private final List<TenantIdentityProvider> identityProviders;
+    private final AppSettingsService appSettingsService;
 
     public TemplateVariableResolver(
             List<EntityDataProvider> entityDataProviders,
-            List<TenantIdentityProvider> identityProviders) {
+            List<TenantIdentityProvider> identityProviders,
+            @Autowired(required = false) AppSettingsService appSettingsService) {
         this.entityDataProviders = entityDataProviders != null ? entityDataProviders : List.of();
         this.identityProviders = identityProviders != null ? identityProviders : List.of();
+        this.appSettingsService = appSettingsService;
     }
 
     /** First provider declaring support for the type, or empty when none does. */
@@ -72,10 +78,23 @@ public class TemplateVariableResolver {
     private Map<String, Object> commonVariables() {
         Map<String, Object> vars = new HashMap<>();
         vars.put("tenant", fetchTenantData());
+        vars.put("brand", fetchBrandColors());
         vars.put("today", LocalDate.now());
         vars.put("now", OffsetDateTime.now());
         vars.put("currentUser", UserContext.getUserEmail() != null ? UserContext.getUserEmail() : "");
         return vars;
+    }
+
+    private Map<String, Object> fetchBrandColors() {
+        if (appSettingsService == null) {
+            return BrandColors.defaults().asTemplateMap();
+        }
+        try {
+            UUID tenantId = TenantContext.getTenantId();
+            return appSettingsService.resolveBrandColors(tenantId).asTemplateMap();
+        } catch (Exception ignored) {
+            return BrandColors.defaults().asTemplateMap();
+        }
     }
 
     private Map<String, Object> fetchEntityData(String entityType, UUID entityId) {

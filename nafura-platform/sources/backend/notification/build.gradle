@@ -8,6 +8,7 @@ dependencies {
     implementation project(':platform:core:authorization')
     implementation project(':platform:core:authorization-api')
     implementation project(':platform:identite:identity')
+    implementation project(':platform:features:app-settings')
     implementation project(':platform:impression')
     implementation project(':platform:features:collaboration:audit')
     implementation project(':platform:commentaire')
@@ -21,8 +22,8 @@ dependencies {
 
     // Thymeleaf for email template variable substitution (same as Print Templates)
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    // Thymeleaf 3 expression evaluation (optional dep of thymeleaf, not always on the host classpath)
-    implementation 'ognl:ognl:3.4.7'
+    // Thymeleaf 3.1.x calls the 4-arg OgnlContext ctor — that exists in 3.3.x, not in 3.4+.
+    implementation 'ognl:ognl:3.3.4'
 
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

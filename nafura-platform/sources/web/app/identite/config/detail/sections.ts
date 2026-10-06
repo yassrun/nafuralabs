@@ -6,19 +6,13 @@ export const SECTIONS: DetailSectionConfig<Member>[] = [
   {
     id: 'identity',
     title: 'administration.members.sections.identity',
-    fields: ['firstName', 'lastName', 'email', 'displayName'],
+    fields: ['email', 'displayName', 'status', 'invitationEmailStatus', 'joinedAt', 'lastActivityAt'],
     columns: 2,
   },
   {
     id: 'access',
     title: 'administration.members.sections.access',
     fields: ['roleIds'],
-    columns: 1,
-  },
-  {
-    id: 'status',
-    title: 'common.sections.status',
-    fields: ['status'],
     columns: 1,
   },
 ];

@@ -219,7 +219,7 @@ export type FormLayout = 'vertical' | 'horizontal' | 'grid';
             [loading]="loading()"
             [disabled]="!formGroup.valid || loading()"
             (clicked)="onSubmit()"
-          >{{ 'Save' | translate }}</nf-button>
+          >{{ (submitLabel() || 'Save') | translate }}</nf-button>
         </nf-action-bar>
       }
     </form>
@@ -309,6 +309,8 @@ export class FormComponent implements OnInit, OnChanges {
   lookups = input<LookupContext>({});
   /** False when the host owns saving (e.g. a record page save bar). */
   actions = input(true);
+  /** Primary button label. Defaults to Save. */
+  submitLabel = input<string | undefined>(undefined);
 
   // Outputs
   valueChange = output<Record<string, unknown>>();

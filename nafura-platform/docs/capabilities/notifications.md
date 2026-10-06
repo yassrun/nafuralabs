@@ -27,14 +27,21 @@ Un seul chemin : règle métier (`notify` sur transition, mention, affectation, 
 
 **E-mail immédiat.** `EmailChannel` : titre, résumé, lien « Ouvrir ». URLs relatives → absolues via `app.frontend-base-url` (lab : `spec.local.ports.web`). Expéditeur : `app.email.from-address` / `app.email.from-name` (défaut `noreply@nafuralabs.local` + nom produit). Lab host : Brevo si `APP_EMAIL_*` / secrets ops injectés.
 
-**Templates transactionnels** (hors matrice événement × canal) : invitation org, welcome — contenus HTML dédiés, pas un modèle par événement notif.
+**Templates transactionnels** (hors matrice événement × canal) : codes réservés `invitation` et `welcome`.
+
+- **Résolution** : override tenant (`email_templates` même `code` + `tenant_id`) → modèle système (`tenant_id` NULL) → fallback Java `BuiltInEmailTemplates`.
+- **Variables invitation** (toujours injectées) : `product.name` (manifeste), `tenant.name`, `brand.primary` / `brand.secondary` / `brand.accent` (Paramètres organisation → Apparence), `inviter.name`, `inviteLink`, `invitee.email`, `message`, `expiryDays` (`app.invitation.expiry-days`). Pas de marque produit ni « 7 jours » ni couleur en dur dans seed / BuiltIn.
+- **Variables welcome** : `product.name`, `tenant.name`, `brand.*`, `user.firstName`.
+- **Branding** : 3 rôles (`app.branding.primaryColor|secondaryColor|accentColor`) ; déduction IA du logo via `POST /api/v1/app-settings/branding/extract-colors` (module `llm-provider` / `cap.ai`, Gemini vision). Mêmes `brand.*` exposés aux templates d'impression. L'`accentColor` des paramètres document reste indépendant.
+- **UI** : `/administration/email-templates` (édition / preview) ; le chemin invite utilise `renderByCode`.
+- Pas un modèle par événement notif (roadmap lot 2).
 
 **Dette marquée.** `AlertRule` / `Broadcast` / `Escalation` : `@Deprecated`, tables + repos sans lecteur plateforme. `platform.legacy.transition` conservé jusqu’à Sektor sur le host.
 
 ## Contrat
 
 - BC : déclarer les événements dans le manifeste ; utiliser `notify` sur les transitions (jamais un second bus).
-- Produit : ne pas réimplémenter inbox / cloche / prefs ; brancher `app.email.*` et `app.frontend-base-url` pour l’e-mail.
+- Produit : ne pas réimplémenter inbox / cloche / prefs ; brancher `app.email.*` et `app.frontend-base-url` pour l’e-mail ; ne pas hardcoder la marque dans les seeds e-mail (utiliser `product.name`).
 - Permissions : config org = `administration.notifications.configure` ; le reste suit les permissions des records / approvals.
 
 ## Hors scope

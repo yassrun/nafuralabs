@@ -56,9 +56,19 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 
     @Override
     public RenderedEmail renderByCode(String code, Map<String, Object> variables) {
-        EmailTemplate template = repository.findByCodeAndTenantIdIsNull(code)
-                .orElseThrow(() -> new IllegalArgumentException("Email template not found for code: " + code));
-        return render(template, variables);
+        // Tenant override first, then system template (tenant_id NULL).
+        UUID tenantId = TenantContext.getTenantIdOrNull();
+        Optional<EmailTemplate> template = Optional.empty();
+        if (tenantId != null) {
+            template = repository.findByCodeAndTenantId(code, tenantId);
+        }
+        if (template.isEmpty()) {
+            template = repository.findByCodeAndTenantIdIsNull(code);
+        }
+        return render(
+                template.orElseThrow(
+                        () -> new IllegalArgumentException("Email template not found for code: " + code)),
+                variables);
     }
 
     @Override

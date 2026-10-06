@@ -40,6 +40,7 @@ class InvitationAcceptServiceTest {
     @Mock private AppUserRepository appUserRepository;
     @Mock private IdentityKeycloakProvisioningPort keycloakProvisioningPort;
     @Mock private InvitationEmailPort invitationEmailPort;
+    @Mock private MembershipAudit membershipAudit;
 
     @InjectMocks private InvitationAcceptService invitationAcceptService;
 
@@ -78,6 +79,8 @@ class InvitationAcceptServiceTest {
         when(keycloakProvisioningPort.userExists(email)).thenReturn(true);
 
         InvitationAcceptResponse response = invitationAcceptService.accept(new AcceptInvitationRequest(token, null, null, null));
+
+        verify(membershipAudit).accepted(tenantId, userId, email);
 
         assertThat(response.loginRequired()).isTrue();
         assertThat(membership.getStatus()).isEqualTo("ACTIVE");

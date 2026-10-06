@@ -180,15 +180,26 @@
     },
     "branding": {
       "title": "Apparence de l'application",
-      "appearanceHint": "Thème de l'app (couleur, logo sidebar, favicon). L'identité légale se paramètre depuis le switcher entreprise.",
+      "appearanceHint": "Thème de l'app (couleurs, logo sidebar, favicon). Les couleurs brand.* sont utilisées dans les e-mails et modèles d'impression. L'identité légale se paramètre depuis le switcher entreprise.",
       "displayName": "Nom d'affichage",
       "displayName.hint": "Affiché dans la barre latérale et le titre du navigateur",
-      "primaryColor": "Couleur principale",
+      "primaryColor": "Couleur primaire",
+      "secondaryColor": "Couleur secondaire",
+      "accentColor": "Couleur d'accent",
       "primaryColor.default": "Par défaut",
       "primaryColor.reset": "Réinitialiser",
       "primaryColor.preview": "Aperçu",
+      "extractColors": "Déduire les couleurs du logo",
+      "extractColors.hint": "Analyse le logo (PNG/JPG) via l'IA et propose une palette. Cliquez un swatch pour l'assigner au rôle actif.",
+      "extractColors.loading": "Analyse du logo…",
+      "extractColors.success": "Palette proposée — ajustez puis enregistrez",
+      "extractColors.error": "Impossible de déduire les couleurs",
+      "extractColors.noLogo": "Uploadez d'abord un logo (PNG ou JPG)",
+      "extractColors.aiUnavailable": "Fournisseur IA indisponible — configurez Gemini dans Administration → Fournisseurs IA",
+      "activeSlot": "Rôle actif pour les swatches",
+      "candidates": "Palette proposée",
       "logo": "Logo (barre latérale)",
-      "logo.hint": "Logo chrome de l'app — pas le logo des devis / factures. PNG, JPG ou SVG. Max 2 Mo.",
+      "logo.hint": "Logo chrome de l'app — pas le logo des devis / factures. PNG ou JPG pour la déduction IA (SVG accepté pour l'affichage). Max 2 Mo.",
       "logo.change": "Changer",
       "logo.remove": "Supprimer",
       "favicon": "Favicon",
@@ -904,11 +915,13 @@
         "displayName": "Nom affiché",
         "roles": "Rôles",
         "status": "Statut",
+        "invitationEmailStatus": "E-mail d’invitation",
         "lastLoginAt": "Dernière connexion"
       },
       "sections": {
-        "identity": "Identite",
-        "access": "Accès"
+        "identity": "Identité",
+        "access": "Accès",
+        "activity": "Activité"
       },
       "title": "Membres",
       "emptyTitle": "Aucun membre trouve",
@@ -920,7 +933,17 @@
       "status": {
         "active": "Actif",
         "invited": "Invité",
+        "invitedEmailFailed": "Invité · e-mail échoué",
         "suspended": "Suspendu"
+      },
+      "emailStatus": {
+        "sent": "E-mail envoyé",
+        "failed": "E-mail non envoyé",
+        "pending": "E-mail en attente"
+      },
+      "inviteAlready": {
+        "invitedTitle": "Déjà invité",
+        "invitedMessage": "{email} a déjà une invitation en attente. Renvoyer l’e-mail avec un nouveau lien ?"
       },
       "actions": {
         "viewDetail": "Voir le détail",
@@ -978,12 +1001,17 @@
         "inviteSuccess": "Invitation envoyée à {email}.",
         "inviteError": "L'invitation n'a pas pu être envoyée.",
         "inviteDuplicate": "Cette personne est déjà membre ou invitée.",
-        "inviteEmailFailed": "Membre invité, mais l'e-mail n'a pas pu être envoyé à {email}.",
+        "inviteAlreadyActive": "{email} est déjà membre actif de cette organisation.",
+        "inviteAlreadySuspended": "{email} est membre mais désactivé. Réactivez-le plutôt que de l’inviter.",
+        "inviteEmailFailed": "Membre invité, mais l'e-mail n'a pas pu être envoyé à {email}. Utilisez « Renvoyer l’invitation ».",
         "deactivateSuccess": "Membre désactivé.",
         "deactivateSelectedSuccess": "Membres sélectionnés désactivés.",
         "reactivateSuccess": "Membre réactivé.",
         "resendInvitationSuccess": "Invitation renvoyée.",
-        "removeSuccess": "Membre retiré."
+        "resendEmailFailed": "Nouveau lien créé, mais l'e-mail n'a pas pu être envoyé à {email}.",
+        "resendInvitationError": "Le renvoi de l’invitation a échoué.",
+        "removeSuccess": "Membre retiré.",
+        "lastOwner": "L’organisation doit conserver au moins un propriétaire (OWNER) actif."
       }
     },
     "documents": {
@@ -1786,5 +1814,26 @@
   "Loading": "Chargement",
   "Today": "Aujourd’hui",
   "Previous month": "Mois précédent",
-  "Next month": "Mois suivant"
+  "Next month": "Mois suivant",
+  "invite": {
+    "accept": {
+      "title": "Invitation",
+      "pending": "Vérification de l’invitation…",
+      "tenantLabel": "Organisation",
+      "alreadyAccepted": "Vous êtes déjà membre de cette organisation.",
+      "existingAccount": "Activez votre accès à cette organisation.",
+      "activate": "Accepter l’invitation",
+      "createAccount": "Créer mon compte",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "password": "Mot de passe",
+      "passwordHint": "Au moins 8 caractères, une majuscule et un chiffre.",
+      "success": "Invitation acceptée.",
+      "loginToContinue": "Se connecter",
+      "openApp": "Ouvrir l’application",
+      "missingToken": "Lien d’invitation invalide (jeton manquant).",
+      "failed": "Cette invitation est invalide ou a expiré.",
+      "wrongAccount": "Vous êtes connecté avec un autre compte. Déconnectez-vous puis rouvrez le lien."
+    }
+  }
 }

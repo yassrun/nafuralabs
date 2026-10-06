@@ -376,11 +376,35 @@ function stopEmbeddedPostgres(product) {
   else process.kill(pid, 'SIGINT');
 }
 
+/** KEY=value file (gitignored). Strips optional surrounding quotes; ignores blanks and # comments. */
+function loadEnvFile(path) {
+  if (!existsSync(path)) return null;
+  const env = {};
+  for (const raw of readFileSync(path, 'utf8').split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+    const eq = line.indexOf('=');
+    if (eq <= 0) continue;
+    const key = line.slice(0, eq).trim();
+    let value = line.slice(eq + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    env[key] = value;
+  }
+  return env;
+}
+
 async function lab(product) {
   stopEmbeddedPostgres(product);
   cleanups.push(() => stopEmbeddedPostgres(product));
   process.on('SIGHUP', () => stopAll(0));
-  await local(product, {});
+  const brevoLab = join(PLATFORM, 'ops/secrets/.brevo-lab.env');
+  const emailEnv = loadEnvFile(brevoLab);
+  if (!emailEnv?.BREVO_API_KEY) {
+    console.warn(`Lab: no Brevo key at ${brevoLab} — invitation emails will fail (EMAIL_DELIVERY_FAILED).`);
+  }
+  await local(product, emailEnv ?? {});
 }
 
 async function localStaging(product) {

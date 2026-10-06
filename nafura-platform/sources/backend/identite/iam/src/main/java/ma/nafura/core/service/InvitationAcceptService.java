@@ -38,6 +38,7 @@ public class InvitationAcceptService {
     private final AppUserRepository appUserRepository;
     private final IdentityKeycloakProvisioningPort keycloakProvisioningPort;
     private final InvitationEmailPort invitationEmailPort;
+    private final MembershipAudit membershipAudit;
 
     public InvitationPreviewResponse preview(String token) {
         ResolvedInvitation resolved = resolveInvitation(token, false);
@@ -101,6 +102,7 @@ public class InvitationAcceptService {
         membership.setStatus(MEMBER_STATUS_ACTIVE);
         tenantMembershipRepository.save(membership);
         markInvitationAccepted(invitation);
+        membershipAudit.accepted(tenant.getId(), user.getId(), payload.email());
 
         try {
             invitationEmailPort.sendWelcomeEmail(payload.email(), tenant.getName(), user.getName());

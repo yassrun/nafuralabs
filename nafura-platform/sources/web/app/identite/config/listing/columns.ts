@@ -45,11 +45,21 @@ export const COLUMNS: ColumnConfig[] = [
     label: 'administration.members.columns.status',
     field: 'status',
     type: 'badge',
-    transform: (value: unknown) => (value ? `administration.members.status.${value}` : ''),
-    badgeVariant: (value: unknown) => {
-      if (value === 'active') return 'success';
-      if (value === 'invited') return 'warning';
-      if (value === 'suspended') return 'danger';
+    transform: (value: unknown, item: unknown) => {
+      const row = item as MemberListItem;
+      if (row.status === 'invited' && row.invitationEmailStatus === 'failed') {
+        return 'administration.members.status.invitedEmailFailed';
+      }
+      return value ? `administration.members.status.${value}` : '';
+    },
+    badgeVariant: (_value: unknown, item?: unknown) => {
+      const row = item as MemberListItem | undefined;
+      if (row?.status === 'invited' && row.invitationEmailStatus === 'failed') {
+        return 'danger';
+      }
+      if (row?.status === 'active' || _value === 'active') return 'success';
+      if (row?.status === 'invited' || _value === 'invited') return 'warning';
+      if (row?.status === 'suspended' || _value === 'suspended') return 'danger';
       return 'default';
     },
     sortable: true,

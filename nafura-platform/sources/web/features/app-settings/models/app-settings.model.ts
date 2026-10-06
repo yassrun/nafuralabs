@@ -17,5 +17,16 @@ export interface AppBrandingSettings {
   logoUrl: string | null;
   faviconUrl: string | null;
   primaryColor: string | null;
+  secondaryColor: string | null;
+  accentColor: string | null;
   tenantDisplayName: string | null;
+}
+
+export interface BrandColorExtractionResult {
+  candidates: string[];
+  suggested: {
+    primary: string;
+    secondary: string;
+    accent: string;
+  };
 }

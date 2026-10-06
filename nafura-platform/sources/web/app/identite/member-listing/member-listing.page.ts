@@ -1,9 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
-import { firstValueFrom } from 'rxjs';
 
 import {
   ConfirmDialogService,
@@ -11,15 +9,11 @@ import {
   ConfigDrivenListingPageImports,
   ConfigDrivenListingPageStyles,
 } from '@lib/anatomy';
-import type { ListingActionEvent } from '@lib/anatomy/types';
+import type { FormFieldConfig, ListingActionEvent } from '@lib/anatomy/types';
 
 import { MEMBER_LISTING_CONFIG } from '../config';
 import type { MemberListItem } from '../models';
 import { MembersFacade } from '../services';
-import {
-  InviteMemberDialogComponent,
-  type InviteMemberDialogResult,
-} from '../components/invite-member-dialog.component';
 
 @Component({
   selector: 'app-member-listing-page',
@@ -42,7 +36,6 @@ import {
 })
 export class MemberListingPage extends ConfigDrivenListingPage<MemberListItem> {
   private readonly router = inject(Router);
-  private readonly dialog = inject(MatDialog);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly i18n = inject(TranslateService);
 
@@ -134,8 +127,8 @@ export class MemberListingPage extends ConfigDrivenListingPage<MemberListItem> {
         break;
       case 'resend-invitation':
         if (target) {
-          await this.facade.resendInvitation(target.id);
-          this.showSuccess(this.i18n.instant('administration.members.feedback.resendInvitationSuccess'));
+          await this.resendAndFeedback(target.id, target.email);
+          await this.refresh();
         }
         break;
       case 'remove':
@@ -169,55 +162,148 @@ export class MemberListingPage extends ConfigDrivenListingPage<MemberListItem> {
     );
   }
 
+  private async resendAndFeedback(memberId: string, email: string): Promise<void> {
+    try {
+      const result = await this.facade.resendInvitation(memberId);
+      if (result.emailDeliveryStatus === 'failed') {
+        this.showError(
+          this.i18n.instant('administration.members.feedback.resendEmailFailed', { email })
+        );
+      } else {
+        this.showSuccess(
+          this.i18n.instant('administration.members.feedback.resendInvitationSuccess')
+        );
+      }
+    } catch {
+      this.showError(this.i18n.instant('administration.members.feedback.resendInvitationError'));
+    }
+  }
+
   private async openInviteDialog(): Promise<void> {
     await this.facade.ensureLookups();
     const roles = this.facade.lookups()['roles'] ?? [];
-    let initialValue: InviteMemberDialogResult | undefined;
-    let duplicateError = false;
+    const fields: FormFieldConfig[] = [
+      {
+        key: 'email',
+        field: 'email',
+        label: 'administration.members.fields.email',
+        type: 'email',
+        required: true,
+      },
+      {
+        key: 'roleId',
+        field: 'roleId',
+        label: 'administration.members.fields.roles',
+        type: 'select',
+        required: true,
+        options: roles.map((role) => ({ label: String(role.value), value: role.key })),
+      },
+      {
+        key: 'message',
+        field: 'message',
+        label: 'administration.members.fields.message',
+        type: 'textarea',
+        validation: { maxLength: 500 },
+      },
+    ];
+    let values: Record<string, unknown> = {};
 
     while (true) {
-      const dialogRef = this.dialog.open(InviteMemberDialogComponent, {
-        width: '560px',
-        maxWidth: '95vw',
-        data: {
-          roles,
-          initialValue,
-          duplicateError,
-        },
+      const result = await this.confirmDialog.form({
+        title: 'administration.members.invite',
+        submitLabel: 'administration.members.invite',
+        fields,
+        values,
       });
-
-      const result = await firstValueFrom(dialogRef.afterClosed());
       if (!result) {
         return;
       }
+      const email = String(result['email'] ?? '').trim();
+      const roleId = String(result['roleId'] ?? '').trim();
+      const message = String(result['message'] ?? '').trim();
+      values = { email, roleId, message };
 
       try {
         const invited = await this.facade.inviteMember({
-          email: result.email,
-          roleIds: [result.roleId],
-          message: result.message,
+          email,
+          roleIds: [roleId],
+          message: message || undefined,
         });
         if (invited.invitationEmailStatus === 'failed') {
           this.showError(
-            this.i18n.instant('administration.members.feedback.inviteEmailFailed', { email: invited.email })
+            this.i18n.instant('administration.members.feedback.inviteEmailFailed', {
+              email: invited.email,
+            })
           );
         } else {
           this.showSuccess(
-            this.i18n.instant('administration.members.feedback.inviteSuccess', { email: invited.email })
+            this.i18n.instant('administration.members.feedback.inviteSuccess', {
+              email: invited.email,
+            })
           );
         }
         await this.refresh();
         return;
       } catch (error) {
         if (error instanceof HttpErrorResponse && error.status === 409) {
-          initialValue = result;
-          duplicateError = true;
+          const handled = await this.handleInviteConflict(email, error);
+          if (handled) {
+            await this.refresh();
+            return;
+          }
           continue;
         }
-
         this.showError(this.i18n.instant('administration.members.feedback.inviteError'));
         return;
       }
     }
+  }
+
+  /** @returns true when the dialog flow should close (conflict handled or abandoned). */
+  private async handleInviteConflict(email: string, error: HttpErrorResponse): Promise<boolean> {
+    const apiMessage = String(
+      (error.error as { message?: string } | null)?.message ?? ''
+    );
+    const statusMatch = /^MEMBER_EXISTS:([a-z_]+)$/i.exec(apiMessage.trim());
+    let status = statusMatch?.[1]?.toLowerCase() ?? null;
+
+    const existing = await this.facade.findByEmail(email);
+    if (existing?.status) {
+      status = existing.status;
+    }
+
+    if (status === 'invited' && existing) {
+      const resend = await this.confirmDialog.confirm({
+        title: this.i18n.instant('administration.members.inviteAlready.invitedTitle'),
+        message: this.i18n.instant('administration.members.inviteAlready.invitedMessage', {
+          email,
+        }),
+        confirmLabel: this.i18n.instant('administration.members.actions.resendInvitation'),
+        variant: 'default',
+        icon: 'mail',
+      });
+      if (!resend) {
+        return true;
+      }
+      await this.resendAndFeedback(existing.id, existing.email);
+      return true;
+    }
+
+    if (status === 'active') {
+      this.showError(
+        this.i18n.instant('administration.members.feedback.inviteAlreadyActive', { email })
+      );
+      return true;
+    }
+
+    if (status === 'suspended') {
+      this.showError(
+        this.i18n.instant('administration.members.feedback.inviteAlreadySuspended', { email })
+      );
+      return true;
+    }
+
+    this.showError(this.i18n.instant('administration.members.feedback.inviteDuplicate'));
+    return false;
   }
 }

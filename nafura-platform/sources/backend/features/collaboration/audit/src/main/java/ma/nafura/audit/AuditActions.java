@@ -38,4 +38,14 @@ public final class AuditActions {
     public static final String EXPORT = "export";
     /** Workflow submitted for approval (manual). */
     public static final String SUBMIT = "submit";
+    /** Tenant member invited (manual). */
+    public static final String MEMBER_INVITE = "member_invite";
+    /** Tenant invitation accepted (manual). */
+    public static final String MEMBER_ACCEPT = "member_accept";
+    /** Tenant invitation resent (manual). */
+    public static final String MEMBER_RESEND = "member_resend";
+    /** Tenant member roles changed (manual). */
+    public static final String MEMBER_ROLES = "member_roles";
+    /** Tenant member removed (manual). */
+    public static final String MEMBER_REMOVE = "member_remove";
 }

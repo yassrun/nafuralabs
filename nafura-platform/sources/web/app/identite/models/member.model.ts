@@ -16,6 +16,8 @@ export interface Member {
   roles: MemberRole[];
   /** UI helper mapped from roles for detail multi-select forms. */
   roleIds?: string[];
+  /** Invite-only form field (not persisted on the member). */
+  message?: string;
   invitedAt: string | null;
   joinedAt: string | null;
   lastActivityAt: string | null;

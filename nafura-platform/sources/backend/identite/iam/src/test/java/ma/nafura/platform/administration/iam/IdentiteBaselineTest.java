@@ -29,6 +29,7 @@ import ma.nafura.platform.administration.iam.repository.TenantInvitationReposito
 import ma.nafura.platform.administration.iam.service.IamService;
 import ma.nafura.platform.administration.iam.service.InvitationAcceptService;
 import ma.nafura.platform.administration.iam.service.InvitationTokenService;
+import ma.nafura.platform.administration.iam.service.MembershipAudit;
 import ma.nafura.platform.administration.iam.service.TenantInvitationDeliveryService;
 import ma.nafura.platform.administration.iam.service.port.InvitationEmailPort;
 import ma.nafura.platform.administration.access.service.AccessService;
@@ -74,6 +75,7 @@ class IdentiteBaselineTest {
     @Mock private AccessService accessService;
     @Mock private TenantInvitationRepository tenantInvitationRepository;
     @Mock private TenantInvitationDeliveryService tenantInvitationDeliveryService;
+    @Mock private MembershipAudit membershipAudit;
     @Mock private IdentityKeycloakProvisioningPort keycloakProvisioningPort;
     @Mock private InvitationEmailPort invitationEmailPort;
 
@@ -91,6 +93,8 @@ class IdentiteBaselineTest {
     void setUp() {
         stubRepos();
         when(accessService.roleExists(any(), anyString())).thenAnswer(inv -> ROLE_A.equals(inv.getArgument(1)));
+        when(tenantUserRoleRepository.countActiveMembersWithRoleExcludingUser(any(), anyString(), any()))
+                .thenReturn(1L);
         when(tenantInvitationDeliveryService.createAndSendInvitation(any(), any(), any(), any(), any()))
                 .thenReturn("FAILED");
         when(keycloakProvisioningPort.isEnabled()).thenReturn(false);
@@ -107,7 +111,8 @@ class IdentiteBaselineTest {
                 new AppUserProvisioningService(appUserRepository),
                 tenantInvitationRepository,
                 tenantInvitationDeliveryService,
-                accessService);
+                accessService,
+                membershipAudit);
         accept = new InvitationAcceptService(
                 tokens,
                 tenantInvitationRepository,
@@ -115,7 +120,8 @@ class IdentiteBaselineTest {
                 tenantRepository,
                 appUserRepository,
                 keycloakProvisioningPort,
-                invitationEmailPort);
+                invitationEmailPort,
+                membershipAudit);
 
         seedTenant(TENANT_A, "tenant-a", "Tenant A", "admin-a@example.test");
         seedTenant(TENANT_B, "tenant-b", "Tenant B", "admin-b@example.test");
@@ -157,8 +163,8 @@ class IdentiteBaselineTest {
         assertThatThrownBy(
                         () -> iam.inviteMember(
                                 TENANT_A, new InviteMemberRequest(EMAIL_INVITE, List.of(ROLE_A), null)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("User already exists in this tenant");
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("MEMBER_EXISTS:invited");
 
         TenantMemberResponse invitedB =
                 iam.inviteMember(TENANT_B, new InviteMemberRequest(EMAIL_INVITE, List.of(ROLE_A), null));
@@ -333,6 +339,19 @@ class IdentiteBaselineTest {
                                     .map(m -> users.get(m.getUserId()))
                                     .filter(Objects::nonNull)
                                     .anyMatch(u -> u.getEmail().equalsIgnoreCase(email));
+                        });
+        when(tenantMembershipRepository.findByTenantIdAndEmail(any(), anyString()))
+                .thenAnswer(
+                        inv -> {
+                            UUID tenantId = inv.getArgument(0);
+                            String email = inv.getArgument(1);
+                            return memberships.values().stream()
+                                    .filter(m -> tenantId.equals(m.getTenantId()))
+                                    .filter(m -> {
+                                        AppUser user = users.get(m.getUserId());
+                                        return user != null && user.getEmail().equalsIgnoreCase(email);
+                                    })
+                                    .findFirst();
                         });
         when(tenantMembershipRepository.findByTenantIdAndUserIdIn(any(), any()))
                 .thenAnswer(

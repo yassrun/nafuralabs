@@ -4,3 +4,5 @@ export { hostAuthInterceptor } from './host-auth.interceptor';
 export { hostAuthGuard } from './host-auth.guard';
 export { HostLoginPage } from './host-login.page';
 export { HostAuthCallbackPage } from './host-auth-callback.page';
+export { InviteAcceptPage } from './invite-accept.page';
+export { InvitationApiService } from './invitation-api.service';

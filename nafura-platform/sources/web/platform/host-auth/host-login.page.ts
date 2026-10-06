@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { HOST_AUTH_OPTIONS } from './host-auth.config';
 import { HostAuthService } from './host-auth.service';
@@ -106,6 +106,7 @@ import { HostAuthService } from './host-auth.service';
 export class HostLoginPage implements OnInit {
   private readonly auth = inject(HostAuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly options = inject(HOST_AUTH_OPTIONS);
 
   readonly productName = this.options.productName;
@@ -139,12 +140,19 @@ export class HostLoginPage implements OnInit {
     if (!email) return;
     await this.attempt(async () => {
       await this.auth.loginAs(email);
-      await this.router.navigateByUrl(this.auth.homePath());
+      await this.router.navigateByUrl(this.returnUrl());
     });
   }
 
   async connectWithProvider(): Promise<void> {
-    await this.attempt(() => this.auth.redirectToProvider());
+    await this.attempt(() => this.auth.redirectToProvider(this.returnUrl()));
+  }
+
+  private returnUrl(): string {
+    const raw = this.route.snapshot.queryParamMap.get('returnUrl') ?? '';
+    return raw.startsWith('/') && !raw.startsWith('//') && !raw.startsWith('/\\')
+      ? raw
+      : this.auth.homePath();
   }
 
   private async loadLabUsers(): Promise<void> {

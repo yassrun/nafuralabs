@@ -4,11 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
+import ma.nafura.platform.appsettings.service.BrandColors;
 import ma.nafura.platform.collaboration.notification.service.EmailException;
 import ma.nafura.platform.collaboration.notification.service.EmailService;
+import ma.nafura.platform.collaboration.notification.service.EmailService.EmailAttachment;
 import ma.nafura.platform.collaboration.notification.service.EmailTemplateService;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
@@ -23,13 +27,27 @@ public class BrevoEmailService implements EmailService {
     private final RestClient restClient;
     private final String fromAddress;
     private final String fromName;
+    private final String productName;
+    private final int invitationExpiryDays;
     private final EmailTemplateService templateService;
+    private final Supplier<BrandColors> brandColorsSupplier;
     private final ObjectMapper objectMapper;
 
-    public BrevoEmailService(String apiKey, String fromAddress, String fromName, EmailTemplateService templateService) {
+    public BrevoEmailService(
+            String apiKey,
+            String fromAddress,
+            String fromName,
+            String productName,
+            int invitationExpiryDays,
+            EmailTemplateService templateService,
+            Supplier<BrandColors> brandColorsSupplier) {
         this.fromAddress = fromAddress;
         this.fromName = fromName;
+        this.productName = productName != null && !productName.isBlank() ? productName.trim() : "Nafura";
+        this.invitationExpiryDays = invitationExpiryDays > 0 ? invitationExpiryDays : 7;
         this.templateService = templateService;
+        this.brandColorsSupplier =
+            brandColorsSupplier != null ? brandColorsSupplier : BrandColors::defaults;
         this.objectMapper = new ObjectMapper();
         this.restClient = RestClient.builder()
             .baseUrl("https://api.brevo.com/v3")
@@ -45,53 +63,89 @@ public class BrevoEmailService implements EmailService {
         String inviterName,
         String message
     ) {
-        Map<String, Object> variables = Map.of(
-            "tenant", Map.of("name", tenantName != null ? tenantName : "Organization"),
-            "inviter", Map.of("name", inviterName != null && !inviterName.isBlank() ? inviterName : "Un administrateur"),
-            "inviteLink", inviteLink != null ? inviteLink : "",
-            "invitee", Map.of("email", toEmail != null ? toEmail : ""),
-            "message", message != null ? message : ""
-        );
+        BrandColors brand = resolveBrand();
+        Map<String, Object> variables =
+            invitationVariables(toEmail, tenantName, inviteLink, inviterName, message, brand);
         if (templateService != null) {
             try {
                 EmailTemplateService.RenderedEmail rendered = templateService.renderByCode("invitation", variables);
                 sendEmail(toEmail, rendered.subject(), rendered.htmlBody(), rendered.textBody());
                 return;
-            } catch (Exception e) {
-                log.debug("DB template invitation not available, using fallback: {}", e.getMessage());
+            } catch (Throwable e) {
+                // LinkageError (wrong OGNL) must not abort delivery — fall back to built-in HTML.
+                log.debug("DB template invitation not available, using fallback: {}", e.toString());
             }
         }
-        String subject = String.format("Invitation à rejoindre %s sur Nafura", tenantName);
         sendEmail(
             toEmail,
-            subject,
-            BuiltInEmailTemplates.invitationHtml(tenantName, inviteLink, inviterName, message),
-            BuiltInEmailTemplates.invitationText(tenantName, inviteLink, inviterName, message)
+            BuiltInEmailTemplates.invitationSubject(productName, tenantName),
+            BuiltInEmailTemplates.invitationHtml(
+                productName, tenantName, inviteLink, inviterName, message, invitationExpiryDays, brand.primary()),
+            BuiltInEmailTemplates.invitationText(
+                productName, tenantName, inviteLink, inviterName, message, invitationExpiryDays)
         );
     }
 
     @Override
     public void sendWelcomeEmail(String toEmail, String tenantName, String userName) {
-        Map<String, Object> variables = Map.of(
-            "tenant", Map.of("name", tenantName != null ? tenantName : "Organization"),
-            "user", Map.of("firstName", userName != null && !userName.isBlank() ? userName : "User")
-        );
+        BrandColors brand = resolveBrand();
+        Map<String, Object> variables = welcomeVariables(tenantName, userName, brand);
         if (templateService != null) {
             try {
                 EmailTemplateService.RenderedEmail rendered = templateService.renderByCode("welcome", variables);
                 sendEmail(toEmail, rendered.subject(), rendered.htmlBody(), rendered.textBody());
                 return;
-            } catch (Exception e) {
-                log.debug("DB template welcome not available, using fallback: {}", e.getMessage());
+            } catch (Throwable e) {
+                log.debug("DB template welcome not available, using fallback: {}", e.toString());
             }
         }
-        String subject = String.format("Bienvenue dans %s sur Nafura", tenantName);
         sendEmail(
             toEmail,
-            subject,
-            BuiltInEmailTemplates.welcomeHtml(tenantName, userName),
-            BuiltInEmailTemplates.welcomeText(tenantName, userName)
+            BuiltInEmailTemplates.welcomeSubject(productName, tenantName),
+            BuiltInEmailTemplates.welcomeHtml(productName, tenantName, userName, brand.primary()),
+            BuiltInEmailTemplates.welcomeText(productName, tenantName, userName)
         );
+    }
+
+    private BrandColors resolveBrand() {
+        try {
+            BrandColors colors = brandColorsSupplier.get();
+            return colors != null ? colors : BrandColors.defaults();
+        } catch (Exception e) {
+            return BrandColors.defaults();
+        }
+    }
+
+    private Map<String, Object> invitationVariables(
+            String toEmail,
+            String tenantName,
+            String inviteLink,
+            String inviterName,
+            String message,
+            BrandColors brand) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("product", Map.of("name", productName));
+        variables.put("tenant", Map.of("name", tenantName != null ? tenantName : "Organization"));
+        variables.put("brand", brand.asTemplateMap());
+        variables.put(
+            "inviter",
+            Map.of("name", inviterName != null && !inviterName.isBlank() ? inviterName : "Un administrateur"));
+        variables.put("inviteLink", inviteLink != null ? inviteLink : "");
+        variables.put("invitee", Map.of("email", toEmail != null ? toEmail : ""));
+        variables.put("message", message != null ? message : "");
+        variables.put("expiryDays", invitationExpiryDays);
+        return variables;
+    }
+
+    private Map<String, Object> welcomeVariables(String tenantName, String userName, BrandColors brand) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("product", Map.of("name", productName));
+        variables.put("tenant", Map.of("name", tenantName != null ? tenantName : "Organization"));
+        variables.put("brand", brand.asTemplateMap());
+        variables.put(
+            "user",
+            Map.of("firstName", userName != null && !userName.isBlank() ? userName : "User"));
+        return variables;
     }
 
     @Override

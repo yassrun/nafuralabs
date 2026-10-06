@@ -97,6 +97,7 @@ Rappel court : le BC déclare les événements dans `bc.manifest.json` → `noti
 - Le BC déclare chaque permission dans son manifeste, sous son préfixe (`<bc>.`). Le code vérifie des permissions (`@SecuredResource`, `@RequirePermission`, `permission` dans les configurations d’écran), **jamais des rôles** (garde-fou).
 - Rôles, quatre sources : plateforme (`OWNER`, `ORG_ADMIN`, `ORG_MEMBER`), `defaultRoles` du BC, `spec.roles` du produit (`includes: ["bc.x:ROLE"]`), rôles créés par l’organisation (seulement des permissions connues que l’admin possède).
 - Activer ou couper un BC pour une organisation : écran Domaines (code = id du BC sans `bc.`). Coupé, ses permissions sont refusées à tous.
+- Membres et invitations (capability `cap.iam`) : résumé, contrat et roadmap → [capabilities/iam.md](capabilities/iam.md). UI admin : listing + détail config-driven (`nf-entity-detail`) ; acceptation publique `/invite/accept`.
 
 ## Schéma
 

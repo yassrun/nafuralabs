@@ -4,6 +4,7 @@ public record UpdateBrandingRequest(
     String logoUrl,
     String faviconUrl,
     String primaryColor,
+    String secondaryColor,
+    String accentColor,
     String tenantDisplayName
 ) {}
-

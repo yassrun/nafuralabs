@@ -6,6 +6,7 @@ Fichiers gitignored, jamais commités, restent sur la machine :
 |---------|--------|
 | `nafura-platform/ops/secrets/nafura.secrets` | Seed Vault (`bootstrap-env` / `vault-seed`) |
 | `nafura-platform/ops/secrets/dev-staging-local.env` | Mode B local (source dans le shell avant `bootRun`) |
+| `nafura-platform/ops/secrets/.brevo-lab.env` | Lab host (`run.mjs lab`) : `BREVO_API_KEY`, `APP_EMAIL_FROM_*` — même clé que staging |
 
 Seule exception suivie : **ce README** (la forme, jamais les valeurs).
 

@@ -13,14 +13,20 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { ToastService } from '@lib/anatomy';
 import { ApiConfigService } from '@core/config/api-config.service';
 import type { AppBrandingSettings } from '../../models';
 import { AppSettingsApiService } from '../../models';
-import { DEFAULT_PRIMARY_COLOR } from './branding.config';
+import {
+  BrandColorSlot,
+  DEFAULT_ACCENT_COLOR,
+  DEFAULT_PRIMARY_COLOR,
+  DEFAULT_SECONDARY_COLOR,
+} from './branding.config';
 
 const LOGO_MAX_BYTES = 2 * 1024 * 1024;
 const FAVICON_MAX_BYTES = 500 * 1024;
@@ -63,35 +69,6 @@ function buildAssetUrl(baseUrl: string, path: string | null): string {
           <div class="grid">
             <p class="hint appearance-hint">{{ 'appSettings.branding.appearanceHint' | translate }}</p>
 
-            <div class="color-block full-width">
-              <label class="field-label">{{ 'appSettings.branding.primaryColor' | translate }}</label>
-              <div class="color-row">
-                <input
-                  type="color"
-                  class="color-swatch"
-                  [value]="primaryColorValue()"
-                  (input)="onColorPickerInput($event)" />
-                <input
-                  type="text"
-                  class="color-hex"
-                  [value]="primaryColorValue()"
-                  (input)="onHexInput($event)"
-                  placeholder="{{ 'appSettings.branding.primaryColor.default' | translate }}" />
-                <button type="button" class="reset-btn" (click)="resetPrimaryColor()">
-                  {{ 'appSettings.branding.primaryColor.reset' | translate }}
-                </button>
-              </div>
-              <div class="color-preview" *ngIf="primaryColorValue()">
-                <span class="preview-label">{{ 'appSettings.branding.primaryColor.preview' | translate }}</span>
-                <div class="preview-card">
-                  <div class="preview-accent" [style.background]="primaryColorValue()"></div>
-                  <button type="button" class="preview-btn" [style.background]="primaryColorValue()" [style.color]="previewContrast()">
-                    Button
-                  </button>
-                </div>
-              </div>
-            </div>
-
             <div class="upload-block full-width">
               <label class="field-label">{{ 'appSettings.branding.logo' | translate }}</label>
               <div class="upload-area">
@@ -111,6 +88,17 @@ function buildAssetUrl(baseUrl: string, path: string | null): string {
                     <button type="button" mat-stroked-button (click)="removeLogo()" [disabled]="!logoPreviewUrl() && !logoFileName()">
                       {{ 'appSettings.branding.logo.remove' | translate }}
                     </button>
+                    <button
+                      type="button"
+                      mat-stroked-button
+                      (click)="extractColors()"
+                      [disabled]="!logoPreviewUrl() || extracting()">
+                      {{
+                        extracting()
+                          ? ('appSettings.branding.extractColors.loading' | translate)
+                          : ('appSettings.branding.extractColors' | translate)
+                      }}
+                    </button>
                   </div>
                   <input
                     #logoInput
@@ -121,6 +109,124 @@ function buildAssetUrl(baseUrl: string, path: string | null): string {
                 </div>
               </div>
               <p class="hint">{{ 'appSettings.branding.logo.hint' | translate }}</p>
+              <p class="hint">{{ 'appSettings.branding.extractColors.hint' | translate }}</p>
+            </div>
+
+            @if (candidates().length) {
+              <div class="candidates full-width">
+                <label class="field-label">{{ 'appSettings.branding.candidates' | translate }}</label>
+                <div class="candidate-row">
+                  @for (c of candidates(); track c) {
+                    <button
+                      type="button"
+                      class="candidate-swatch"
+                      [style.background]="c"
+                      [attr.title]="c"
+                      (click)="applyCandidate(c)"></button>
+                  }
+                </div>
+                <div class="slot-picker">
+                  <span class="hint">{{ 'appSettings.branding.activeSlot' | translate }}:</span>
+                  <button
+                    type="button"
+                    class="slot-btn"
+                    [class.active]="activeSlot() === 'primaryColor'"
+                    (click)="activeSlot.set('primaryColor')">
+                    {{ 'appSettings.branding.primaryColor' | translate }}
+                  </button>
+                  <button
+                    type="button"
+                    class="slot-btn"
+                    [class.active]="activeSlot() === 'secondaryColor'"
+                    (click)="activeSlot.set('secondaryColor')">
+                    {{ 'appSettings.branding.secondaryColor' | translate }}
+                  </button>
+                  <button
+                    type="button"
+                    class="slot-btn"
+                    [class.active]="activeSlot() === 'accentColor'"
+                    (click)="activeSlot.set('accentColor')">
+                    {{ 'appSettings.branding.accentColor' | translate }}
+                  </button>
+                </div>
+              </div>
+            }
+
+            <div class="color-block full-width">
+              <label class="field-label">{{ 'appSettings.branding.primaryColor' | translate }}</label>
+              <div class="color-row">
+                <input
+                  type="color"
+                  class="color-swatch"
+                  [value]="colorValue('primaryColor')"
+                  (input)="onColorPickerInput('primaryColor', $event)" />
+                <input
+                  type="text"
+                  class="color-hex"
+                  [value]="colorValue('primaryColor')"
+                  (input)="onHexInput('primaryColor', $event)"
+                  placeholder="{{ 'appSettings.branding.primaryColor.default' | translate }}" />
+                <button type="button" class="reset-btn" (click)="resetColor('primaryColor')">
+                  {{ 'appSettings.branding.primaryColor.reset' | translate }}
+                </button>
+              </div>
+            </div>
+
+            <div class="color-block full-width">
+              <label class="field-label">{{ 'appSettings.branding.secondaryColor' | translate }}</label>
+              <div class="color-row">
+                <input
+                  type="color"
+                  class="color-swatch"
+                  [value]="colorValue('secondaryColor')"
+                  (input)="onColorPickerInput('secondaryColor', $event)" />
+                <input
+                  type="text"
+                  class="color-hex"
+                  [value]="colorValue('secondaryColor')"
+                  (input)="onHexInput('secondaryColor', $event)" />
+                <button type="button" class="reset-btn" (click)="resetColor('secondaryColor')">
+                  {{ 'appSettings.branding.primaryColor.reset' | translate }}
+                </button>
+              </div>
+            </div>
+
+            <div class="color-block full-width">
+              <label class="field-label">{{ 'appSettings.branding.accentColor' | translate }}</label>
+              <div class="color-row">
+                <input
+                  type="color"
+                  class="color-swatch"
+                  [value]="colorValue('accentColor')"
+                  (input)="onColorPickerInput('accentColor', $event)" />
+                <input
+                  type="text"
+                  class="color-hex"
+                  [value]="colorValue('accentColor')"
+                  (input)="onHexInput('accentColor', $event)" />
+                <button type="button" class="reset-btn" (click)="resetColor('accentColor')">
+                  {{ 'appSettings.branding.primaryColor.reset' | translate }}
+                </button>
+              </div>
+            </div>
+
+            <div class="color-preview" *ngIf="colorValue('primaryColor')">
+              <span class="preview-label">{{ 'appSettings.branding.primaryColor.preview' | translate }}</span>
+              <div class="preview-card">
+                <div class="preview-accent" [style.background]="colorValue('primaryColor')"></div>
+                <div class="preview-bar">
+                  <span class="preview-chip" [style.background]="colorValue('primaryColor')"></span>
+                  <span class="preview-chip" [style.background]="colorValue('secondaryColor')"></span>
+                  <span class="preview-chip" [style.background]="colorValue('accentColor')"></span>
+                </div>
+                <button
+                  type="button"
+                  class="preview-btn"
+                  [style.background]="colorValue('primaryColor')"
+                  [style.color]="previewContrast()">
+                  Button
+                </button>
+              </div>
             </div>
 
             <div class="upload-block full-width">
@@ -232,7 +338,7 @@ function buildAssetUrl(baseUrl: string, path: string | null): string {
         background: var(--nf-color-surface-hover, #f9fafb);
       }
       .color-preview {
-        margin-top: 0.75rem;
+        margin-top: 0.25rem;
       }
       .preview-label {
         font-size: 0.75rem;
@@ -243,11 +349,21 @@ function buildAssetUrl(baseUrl: string, path: string | null): string {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-        max-width: 200px;
+        max-width: 220px;
       }
       .preview-accent {
         height: 4px;
         border-radius: 2px;
+      }
+      .preview-bar {
+        display: flex;
+        gap: 0.35rem;
+      }
+      .preview-chip {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        border: 1px solid var(--nf-border-default, #e5e7eb);
       }
       .preview-btn {
         padding: 0.4rem 0.75rem;
@@ -255,6 +371,39 @@ function buildAssetUrl(baseUrl: string, path: string | null): string {
         border-radius: 8px;
         font-size: 0.875rem;
         cursor: default;
+      }
+      .candidates .candidate-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+      .candidate-swatch {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        cursor: pointer;
+        padding: 0;
+      }
+      .slot-picker {
+        margin-top: 0.6rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .slot-btn {
+        padding: 0.3rem 0.55rem;
+        font-size: 0.75rem;
+        border-radius: 999px;
+        border: 1px solid var(--nf-border-default, #e5e7eb);
+        background: var(--nf-color-bg-muted, #f3f4f6);
+        cursor: pointer;
+      }
+      .slot-btn.active {
+        border-color: var(--nf-color-primary, #1d4ed8);
+        background: color-mix(in srgb, var(--nf-color-primary, #1d4ed8) 12%, white);
+        font-weight: 600;
       }
       .upload-block .upload-area {
         display: flex;
@@ -296,6 +445,7 @@ function buildAssetUrl(baseUrl: string, path: string | null): string {
       }
       .upload-actions {
         display: flex;
+        flex-wrap: wrap;
         gap: 0.5rem;
       }
       .hidden-file {
@@ -325,6 +475,7 @@ export class BrandingSectionComponent implements OnChanges {
   private readonly api = inject(AppSettingsApiService);
   private readonly apiConfig = inject(ApiConfigService);
   private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
 
   readonly logoAccept = LOGO_ACCEPT;
   readonly faviconAccept = FAVICON_ACCEPT;
@@ -338,12 +489,17 @@ export class BrandingSectionComponent implements OnChanges {
   readonly form = this.fb.group({
     tenantDisplayName: this.fb.control<string | null>(null),
     primaryColor: this.fb.control<string | null>(DEFAULT_PRIMARY_COLOR),
+    secondaryColor: this.fb.control<string | null>(DEFAULT_SECONDARY_COLOR),
+    accentColor: this.fb.control<string | null>(DEFAULT_ACCENT_COLOR),
     logoUrl: this.fb.control<string | null>(null),
     faviconUrl: this.fb.control<string | null>(null),
   });
 
   readonly logoUploading = signal(false);
   readonly faviconUploading = signal(false);
+  readonly extracting = signal(false);
+  readonly candidates = signal<string[]>([]);
+  readonly activeSlot = signal<BrandColorSlot>('primaryColor');
   readonly logoFileName = signal<string | null>(null);
   readonly faviconFileName = signal<string | null>(null);
   readonly logoFileSize = signal<string>('');
@@ -351,8 +507,6 @@ export class BrandingSectionComponent implements OnChanges {
 
   private logoFile: File | null = null;
   private faviconFile: File | null = null;
-
-  readonly primaryColorValue = computed(() => this.form.get('primaryColor')?.value ?? DEFAULT_PRIMARY_COLOR);
 
   readonly logoPreviewUrl = computed(() => {
     const url = this.form.get('logoUrl')?.value;
@@ -366,19 +520,7 @@ export class BrandingSectionComponent implements OnChanges {
     return buildAssetUrl(this.apiConfig.getApiBaseUrl(), url);
   });
 
-  /** Contrast color for preview button (WCAG). */
-  readonly previewContrast = computed(() => {
-    const hex = this.primaryColorValue();
-    if (!hex) return '#ffffff';
-    const h = hex.replace(/^#/, '');
-    const hex6 = h.length === 3 ? h[0] + h[0] + h[1] + h[1] + h[2] + h[2] : h;
-    if (hex6.length !== 6) return '#ffffff';
-    const r = parseInt(hex6.slice(0, 2), 16) / 255;
-    const g = parseInt(hex6.slice(2, 4), 16) / 255;
-    const b = parseInt(hex6.slice(4, 6), 16) / 255;
-    const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    return L > 0.179 ? '#000000' : '#ffffff';
-  });
+  readonly previewContrast = computed(() => contrastText(this.colorValue('primaryColor')));
 
   ngOnChanges(): void {
     if (!this.data) return;
@@ -386,6 +528,8 @@ export class BrandingSectionComponent implements OnChanges {
       {
         tenantDisplayName: this.data.tenantDisplayName ?? null,
         primaryColor: this.data.primaryColor ?? DEFAULT_PRIMARY_COLOR,
+        secondaryColor: this.data.secondaryColor ?? DEFAULT_SECONDARY_COLOR,
+        accentColor: this.data.accentColor ?? DEFAULT_ACCENT_COLOR,
         logoUrl: this.data.logoUrl ?? null,
         faviconUrl: this.data.faviconUrl ?? null,
       },
@@ -400,29 +544,88 @@ export class BrandingSectionComponent implements OnChanges {
     this.faviconFile = null;
   }
 
-  onColorPickerInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const v = input?.value;
-    if (v) this.form.patchValue({ primaryColor: v }, { emitEvent: true });
+  colorValue(slot: BrandColorSlot): string {
+    const fallback =
+      slot === 'primaryColor'
+        ? DEFAULT_PRIMARY_COLOR
+        : slot === 'secondaryColor'
+          ? DEFAULT_SECONDARY_COLOR
+          : DEFAULT_ACCENT_COLOR;
+    return this.form.get(slot)?.value ?? fallback;
   }
 
-  onHexInput(event: Event): void {
+  onColorPickerInput(slot: BrandColorSlot, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const v = input?.value;
+    if (v) this.form.patchValue({ [slot]: v }, { emitEvent: true });
+  }
+
+  onHexInput(slot: BrandColorSlot, event: Event): void {
     const input = event.target as HTMLInputElement;
     let v = (input?.value ?? '').trim();
     if (!v.startsWith('#')) v = '#' + v;
     if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(v)) {
-      this.form.patchValue({ primaryColor: v }, { emitEvent: true });
+      this.form.patchValue({ [slot]: v }, { emitEvent: true });
     }
   }
 
-  resetPrimaryColor(): void {
-    this.form.patchValue({ primaryColor: DEFAULT_PRIMARY_COLOR }, { emitEvent: true });
+  resetColor(slot: BrandColorSlot): void {
+    const value =
+      slot === 'primaryColor'
+        ? DEFAULT_PRIMARY_COLOR
+        : slot === 'secondaryColor'
+          ? DEFAULT_SECONDARY_COLOR
+          : DEFAULT_ACCENT_COLOR;
+    this.form.patchValue({ [slot]: value }, { emitEvent: true });
   }
 
-  private normalizeHex(hex: string): string {
+  applyCandidate(hex: string): void {
+    this.form.patchValue({ [this.activeSlot()]: hex }, { emitEvent: true });
+    this.form.markAsDirty();
+  }
+
+  async extractColors(): Promise<void> {
+    if (!this.form.get('logoUrl')?.value) {
+      this.toast.error(this.translate.instant('appSettings.branding.extractColors.noLogo'));
+      return;
+    }
+    this.extracting.set(true);
+    try {
+      const result = await firstValueFrom(this.api.extractBrandColors());
+      this.candidates.set(result.candidates ?? []);
+      this.form.patchValue(
+        {
+          primaryColor: result.suggested?.primary ?? DEFAULT_PRIMARY_COLOR,
+          secondaryColor: result.suggested?.secondary ?? DEFAULT_SECONDARY_COLOR,
+          accentColor: result.suggested?.accent ?? DEFAULT_ACCENT_COLOR,
+        },
+        { emitEvent: true }
+      );
+      this.form.markAsDirty();
+      this.toast.success(this.translate.instant('appSettings.branding.extractColors.success'));
+    } catch (err) {
+      const status = err instanceof HttpErrorResponse ? err.status : 0;
+      if (status === 503) {
+        this.toast.error(this.translate.instant('appSettings.branding.extractColors.aiUnavailable'));
+      } else if (status === 400) {
+        const msg =
+          typeof (err as HttpErrorResponse).error === 'object' &&
+          (err as HttpErrorResponse).error?.message
+            ? String((err as HttpErrorResponse).error.message)
+            : this.translate.instant('appSettings.branding.extractColors.noLogo');
+        this.toast.error(msg);
+      } else {
+        this.toast.error(this.translate.instant('appSettings.branding.extractColors.error'));
+      }
+    } finally {
+      this.extracting.set(false);
+    }
+  }
+
+  private normalizeHex(hex: string, fallback: string): string {
     let h = hex.replace(/^#/, '');
     if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-    return h.length === 6 ? '#' + h : DEFAULT_PRIMARY_COLOR;
+    return h.length === 6 ? '#' + h : fallback;
   }
 
   async onLogoFileChange(event: Event): Promise<void> {
@@ -448,6 +651,7 @@ export class BrandingSectionComponent implements OnChanges {
       if (url) {
         this.form.patchValue({ logoUrl: url }, { emitEvent: true });
         this.form.markAsDirty();
+        this.candidates.set([]);
       }
     } catch {
       this.toast.error('Failed to upload logo.');
@@ -497,6 +701,7 @@ export class BrandingSectionComponent implements OnChanges {
     this.logoFileName.set(null);
     this.logoFileSize.set('');
     this.logoFile = null;
+    this.candidates.set([]);
   }
 
   removeFavicon(): void {
@@ -509,11 +714,21 @@ export class BrandingSectionComponent implements OnChanges {
 
   submit(): void {
     const raw = this.form.getRawValue();
-    const primary = raw.primaryColor ? this.normalizeHex(raw.primaryColor) : null;
+    const primary = raw.primaryColor
+      ? this.normalizeHex(raw.primaryColor, DEFAULT_PRIMARY_COLOR)
+      : null;
+    const secondary = raw.secondaryColor
+      ? this.normalizeHex(raw.secondaryColor, DEFAULT_SECONDARY_COLOR)
+      : null;
+    const accent = raw.accentColor
+      ? this.normalizeHex(raw.accentColor, DEFAULT_ACCENT_COLOR)
+      : null;
     this.save.emit({
       settings: {
         tenantDisplayName: (this.data?.tenantDisplayName ?? raw.tenantDisplayName?.trim()) || null,
         primaryColor: primary || null,
+        secondaryColor: secondary || null,
+        accentColor: accent || null,
         logoUrl: raw.logoUrl?.trim() || null,
         faviconUrl: raw.faviconUrl?.trim() || null,
       },
@@ -527,4 +742,16 @@ function formatBytes(bytes: number): string {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function contrastText(hex: string): string {
+  if (!hex) return '#ffffff';
+  const h = hex.replace(/^#/, '');
+  const hex6 = h.length === 3 ? h[0] + h[0] + h[1] + h[1] + h[2] + h[2] : h;
+  if (hex6.length !== 6) return '#ffffff';
+  const r = parseInt(hex6.slice(0, 2), 16) / 255;
+  const g = parseInt(hex6.slice(2, 4), 16) / 255;
+  const b = parseInt(hex6.slice(4, 6), 16) / 255;
+  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return L > 0.179 ? '#000000' : '#ffffff';
 }

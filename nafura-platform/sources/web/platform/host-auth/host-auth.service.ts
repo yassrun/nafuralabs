@@ -174,6 +174,31 @@ export class HostAuthService {
     if (this.current()) await this.fetchAccess();
   }
 
+  /**
+   * After accepting an invitation: reload organizations and select the invited tenant.
+   */
+  async selectOrganization(tenantId: string): Promise<void> {
+    const session = this.current();
+    if (!session) {
+      throw new Error('No session');
+    }
+    const organizations = await this.fetchOrganizations();
+    const chosen =
+      organizations.find((organization) => organization.id === tenantId) ?? null;
+    if (!chosen) {
+      throw new Error('Organization not found in memberships');
+    }
+    this.current.set({
+      ...session,
+      tenant: { id: chosen.id, key: chosen.key, name: chosen.name },
+    });
+    this.publishOrganizations(organizations, chosen);
+    await this.tenantContext.initialize(chosen.id);
+    const permissions = await this.fetchAccess();
+    await this.enterTenant(this.current() ?? session, permissions, organizations, chosen);
+    this.authState.persistSession(true);
+  }
+
   private async restore(): Promise<void> {
     let stored = readJson<OidcTokens>(this.storageKey());
     if (!stored) return;

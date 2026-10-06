@@ -40,6 +40,10 @@ public class IamService {
 
     private static final String MEMBER_STATUS_ACTIVE = "ACTIVE";
     private static final String MEMBER_STATUS_INVITED = "INVITED";
+    private static final String MEMBER_STATUS_SUSPENDED = "SUSPENDED";
+    private static final String ROLE_OWNER = "OWNER";
+    static final String LAST_ACTIVE_OWNER_MESSAGE =
+            "The tenant must keep at least one active member with the OWNER role";
 
     private final TenantRepository tenantRepository;
     private final AppUserRepository appUserRepository;
@@ -49,6 +53,7 @@ public class IamService {
     private final TenantInvitationRepository tenantInvitationRepository;
     private final TenantInvitationDeliveryService tenantInvitationDeliveryService;
     private final AccessService accessService;
+    private final MembershipAudit membershipAudit;
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Tenant Info
@@ -207,9 +212,14 @@ public class IamService {
      */
     @Transactional
     public TenantMemberResponse inviteMember(UUID tenantId, InviteMemberRequest request) {
-        // Check if user already exists
-        if (tenantMembershipRepository.existsByTenantIdAndEmail(tenantId, request.email())) {
-            throw new IllegalArgumentException("User already exists in this tenant");
+        // Check if user already exists — message is machine-readable for the UI (MEMBER_EXISTS:<status>).
+        Optional<TenantMembership> existing =
+                tenantMembershipRepository.findByTenantIdAndEmail(tenantId, request.email());
+        if (existing.isPresent()) {
+            String status = existing.get().getStatus() != null
+                    ? existing.get().getStatus().toLowerCase(Locale.ROOT)
+                    : "unknown";
+            throw new IllegalStateException("MEMBER_EXISTS:" + status);
         }
 
         // Reuse existing identity user if present; otherwise create it.
@@ -221,7 +231,8 @@ public class IamService {
             .status(MEMBER_STATUS_INVITED)
             .build();
         membership = tenantMembershipRepository.save(membership);
-        replaceTenantRoles(tenantId, user.getId(), request.roles());
+        List<String> invitedRoles = normalizeRoleCodes(request.roles());
+        replaceTenantRoles(tenantId, user.getId(), invitedRoles);
 
         String emailDeliveryStatus = tenantInvitationDeliveryService.createAndSendInvitation(
             tenantId,
@@ -231,8 +242,11 @@ public class IamService {
             request.message()
         );
 
+        List<String> assignedRoles = getTenantRoleCodes(tenantId, user.getId());
+        membershipAudit.invited(tenantId, user.getId(), user.getEmail(), assignedRoles);
+
         log.info("Invited new member {} to tenant {} emailStatus={}", request.email(), tenantId, emailDeliveryStatus);
-        return toMemberResponse(user, membership, getTenantRoleCodes(tenantId, user.getId()), emailDeliveryStatus);
+        return toMemberResponse(user, membership, assignedRoles, emailDeliveryStatus);
     }
 
     /**
@@ -245,7 +259,12 @@ public class IamService {
         TenantMembership membership = tenantMembershipRepository.findByTenantIdAndUserId(tenantId, userId)
             .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
-        replaceTenantRoles(tenantId, userId, roles);
+        List<String> previousRoles = getTenantRoleCodes(tenantId, userId);
+        List<String> normalizedRoles = normalizeRoleCodes(roles);
+        ensureRetainsActiveOwner(tenantId, userId, membership, previousRoles, normalizedRoles, false);
+
+        replaceTenantRoles(tenantId, userId, normalizedRoles);
+        membershipAudit.rolesChanged(tenantId, userId, user.getEmail(), previousRoles, normalizedRoles);
 
         log.info("Updated roles for member {} in tenant {}", userId, tenantId);
         return toMemberResponse(user, membership, getTenantRoleCodes(tenantId, userId));
@@ -261,8 +280,23 @@ public class IamService {
         TenantMembership membership = tenantMembershipRepository.findByTenantIdAndUserId(tenantId, userId)
             .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
-        membership.setStatus(status.toUpperCase());
+        String previousStatus = membership.getStatus();
+        String nextStatus = status.toUpperCase(Locale.ROOT);
+        if (MEMBER_STATUS_SUSPENDED.equals(nextStatus)) {
+            ensureRetainsActiveOwner(
+                    tenantId,
+                    userId,
+                    membership,
+                    getTenantRoleCodes(tenantId, userId),
+                    getTenantRoleCodes(tenantId, userId),
+                    true);
+        }
+
+        membership.setStatus(nextStatus);
         membership = tenantMembershipRepository.save(membership);
+        if (!Objects.equals(previousStatus, nextStatus)) {
+            membershipAudit.statusChanged(tenantId, userId, user.getEmail(), previousStatus, nextStatus);
+        }
 
         log.info("Updated status for member {} in tenant {} to {}", userId, tenantId, status);
         return toMemberResponse(user, membership, getTenantRoleCodes(tenantId, userId));
@@ -273,9 +307,15 @@ public class IamService {
      */
     @Transactional
     public void removeMember(UUID tenantId, UUID userId) {
-        if (!tenantMembershipRepository.existsByTenantIdAndUserId(tenantId, userId)) {
-            throw new IllegalArgumentException("Member not found");
-        }
+        TenantMembership membership = tenantMembershipRepository.findByTenantIdAndUserId(tenantId, userId)
+            .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+        AppUser user = appUserRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+        List<String> roles = getTenantRoleCodes(tenantId, userId);
+
+        ensureRetainsActiveOwner(tenantId, userId, membership, roles, roles, true);
+
+        membershipAudit.removed(tenantId, userId, user.getEmail(), roles, membership.getStatus());
         tenantUserRoleRepository.deleteByTenantIdAndUserId(tenantId, userId);
         tenantMembershipRepository.deleteByTenantIdAndUserId(tenantId, userId);
         log.info("Removed member {} from tenant {}", userId, tenantId);
@@ -299,10 +339,13 @@ public class IamService {
             user.getEmail(),
             roles
         );
-        if (TenantInvitation.DELIVERY_FAILED.equals(emailDeliveryStatus)) {
-            throw new IllegalStateException("EMAIL_DELIVERY_FAILED");
-        }
-        log.info("Resent invitation to {} in tenant {}", user.getEmail(), tenantId);
+        // Same contract as invite: membership stays INVITED; delivery status is in the response.
+        membershipAudit.resent(tenantId, user.getId(), user.getEmail());
+        log.info(
+                "Resent invitation to {} in tenant {} emailStatus={}",
+                user.getEmail(),
+                tenantId,
+                emailDeliveryStatus);
         return emailDeliveryStatus;
     }
 
@@ -443,15 +486,7 @@ public class IamService {
         return tenantUserRoleRepository.findRoleCodesByTenantIdAndUserId(tenantId, userId);
     }
 
-    private void replaceTenantRoles(UUID tenantId, UUID userId, List<String> roles) {
-        List<String> normalizedRoles = roles == null ? List.of() : roles.stream()
-            .filter(Objects::nonNull)
-            .map(String::trim)
-            .filter(role -> !role.isEmpty())
-            .map(String::toUpperCase)
-            .distinct()
-            .toList();
-
+    private void replaceTenantRoles(UUID tenantId, UUID userId, List<String> normalizedRoles) {
         if (normalizedRoles.isEmpty()) {
             throw new IllegalArgumentException("At least one role is required");
         }
@@ -472,6 +507,40 @@ public class IamService {
                 .build())
             .toList();
         tenantUserRoleRepository.saveAll(tenantRoles);
+    }
+
+    private List<String> normalizeRoleCodes(List<String> roles) {
+        return roles == null ? List.of() : roles.stream()
+            .filter(Objects::nonNull)
+            .map(String::trim)
+            .filter(role -> !role.isEmpty())
+            .map(role -> role.toUpperCase(Locale.ROOT))
+            .distinct()
+            .toList();
+    }
+
+    private void ensureRetainsActiveOwner(
+            UUID tenantId,
+            UUID userId,
+            TenantMembership membership,
+            List<String> currentRoles,
+            List<String> nextRoles,
+            boolean leavingActiveStatus) {
+        if (!MEMBER_STATUS_ACTIVE.equalsIgnoreCase(membership.getStatus())) {
+            return;
+        }
+        if (!currentRoles.contains(ROLE_OWNER)) {
+            return;
+        }
+        boolean losingOwnerRole = !nextRoles.contains(ROLE_OWNER);
+        if (!leavingActiveStatus && !losingOwnerRole) {
+            return;
+        }
+        long otherActiveOwners = tenantUserRoleRepository.countActiveMembersWithRoleExcludingUser(
+                tenantId, ROLE_OWNER, userId);
+        if (otherActiveOwners == 0) {
+            throw new IllegalStateException(LAST_ACTIVE_OWNER_MESSAGE);
+        }
     }
 
     private String mapSortField(String field) {

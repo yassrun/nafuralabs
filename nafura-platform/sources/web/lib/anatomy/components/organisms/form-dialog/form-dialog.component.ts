@@ -10,6 +10,8 @@ export interface FormDialogData {
   title: string;
   fields: FormFieldConfig[];
   values?: Record<string, unknown>;
+  /** Primary button label. Defaults to Save. */
+  submitLabel?: string;
 }
 
 /** A configured form in a dialog; closes with the values, or nothing on cancel. Opened by ConfirmDialogService.form(). */
@@ -20,7 +22,7 @@ export interface FormDialogData {
   template: `
     <div class="nf-form-dialog" [class.nf-form-dialog--wide]="columns > 1">
       <h2 class="nf-form-dialog__title">{{ data.title | translate }}</h2>
-      <nf-form [fields]="data.fields" [values]="values" [columns]="columns" (submit)="dialogRef.close($event)" (cancel)="dialogRef.close()" />
+      <nf-form [fields]="data.fields" [values]="values" [columns]="columns" [submitLabel]="data.submitLabel" (submit)="dialogRef.close($event)" (cancel)="dialogRef.close()" />
     </div>
   `,
   styles: [`

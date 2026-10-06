@@ -19,7 +19,7 @@ class TemplateVariableResolverProviderTest {
     private static final String FACTURE = "facture_client";
 
     private TemplateVariableResolver resolverWith(EntityDataProvider... providers) {
-        return new TemplateVariableResolver(List.of(providers), List.of());
+        return new TemplateVariableResolver(List.of(providers), List.of(), null);
     }
 
     @Test

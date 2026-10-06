@@ -28,6 +28,23 @@ public interface TenantUserRoleRepository extends JpaRepository<TenantUserRole, 
 
     long countByTenantIdAndRoleCode(UUID tenantId, String roleCode);
 
+    @Query(value = "SELECT COUNT(*) FROM tenant_user_role tur " +
+           "INNER JOIN tenant_membership tm ON tm.tenant_id = tur.tenant_id AND tm.user_id = tur.user_id " +
+           "WHERE tur.tenant_id = :tenantId AND UPPER(tur.role_code) = UPPER(:roleCode) " +
+           "AND UPPER(tm.status) = 'ACTIVE'",
+           nativeQuery = true)
+    long countActiveMembersWithRole(@Param("tenantId") UUID tenantId, @Param("roleCode") String roleCode);
+
+    @Query(value = "SELECT COUNT(*) FROM tenant_user_role tur " +
+           "INNER JOIN tenant_membership tm ON tm.tenant_id = tur.tenant_id AND tm.user_id = tur.user_id " +
+           "WHERE tur.tenant_id = :tenantId AND UPPER(tur.role_code) = UPPER(:roleCode) " +
+           "AND UPPER(tm.status) = 'ACTIVE' AND tur.user_id <> :excludeUserId",
+           nativeQuery = true)
+    long countActiveMembersWithRoleExcludingUser(
+            @Param("tenantId") UUID tenantId,
+            @Param("roleCode") String roleCode,
+            @Param("excludeUserId") UUID excludeUserId);
+
     @Query("SELECT tur.roleCode, COUNT(tur) FROM TenantUserRole tur WHERE tur.tenantId = :tenantId GROUP BY tur.roleCode")
     List<Object[]> countMembersByRoleCode(@Param("tenantId") UUID tenantId);
 

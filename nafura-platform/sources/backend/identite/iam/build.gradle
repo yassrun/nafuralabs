@@ -9,6 +9,7 @@ dependencies {
     implementation project(':platform:core:tenancy')
     implementation project(':platform:core:authorization')
     implementation project(':platform:identite:access')
+    implementation project(':platform:features:collaboration:audit')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

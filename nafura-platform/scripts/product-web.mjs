@@ -41,7 +41,10 @@ if (command === 'prepare') {
   prepare();
 } else if (command === 'serve') {
   prepare();
-  ng(['serve', '--host', '127.0.0.1', '--port', String(app.spec.local?.ports?.web ?? 4200), ...rest]);
+  // Platform sources sit outside the product web root. On Windows, Angular's native
+  // watcher (Parcel) does not report those changes, so the browser never reloads.
+  const poll = process.platform === 'win32' ? ['--poll', '1000'] : [];
+  ng(['serve', '--host', '127.0.0.1', '--port', String(app.spec.local?.ports?.web ?? 4200), ...poll, ...rest]);
 } else if (command === 'build') {
   prepare();
   ng(['build', ...rest]);
