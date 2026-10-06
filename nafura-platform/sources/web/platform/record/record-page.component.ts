@@ -193,7 +193,10 @@ interface PanelView {
                       [maxSizeMb]="section.maxSizeMb" />
                   }
                   @if (section.audit && recordId(); as audited) {
-                    <nf-audit-timeline [entityType]="entityType()" [entityId]="audited" />
+                    <nf-audit-timeline
+                      [entityType]="entityType()"
+                      [entityId]="audited"
+                      [refreshToken]="auditRefresh()" />
                   }
                   @if (section.listing; as listing) {
                     <nf-listing-page class="nf-record__listing" [listing]="listing" [embedded]="true" />
@@ -290,6 +293,8 @@ export class RecordPageComponent {
   readonly failed = signal(false);
   readonly busy = signal(false);
   readonly busyId = signal<string | null>(null);
+  /** Bumped after save/transition so the Activité section reloads. */
+  readonly auditRefresh = signal(0);
   readonly activePanel = signal('');
   /** Field key → marker after an extraction (`extracted` or `check`). */
   readonly extracted = signal<Record<string, 'extracted' | 'check'>>({});
@@ -477,6 +482,7 @@ export class RecordPageComponent {
         this.show(saved);
         this.toast.success(this.translate.instant(config.messages?.saved ?? 'record.saved'));
         await this.loadTransitions();
+        this.auditRefresh.update((n) => n + 1);
       }
     } catch (error) {
       this.toast.error(this.errorMessage(error));
@@ -502,6 +508,7 @@ export class RecordPageComponent {
       );
       this.show(record);
       await this.loadTransitions();
+      this.auditRefresh.update((n) => n + 1);
       const reached = this.state();
       this.toast.success(
         this.translate.instant(transition.approval && record['status'] === transition.to ? 'record.awaitingApproval' : 'record.transitioned', {

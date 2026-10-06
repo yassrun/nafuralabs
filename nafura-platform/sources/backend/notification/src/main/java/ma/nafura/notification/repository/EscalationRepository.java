@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
+/** @deprecated See {@link Escalation}. */
+@Deprecated
 @Repository
 public interface EscalationRepository extends TenantScopedRepository<Escalation, UUID> {
 }

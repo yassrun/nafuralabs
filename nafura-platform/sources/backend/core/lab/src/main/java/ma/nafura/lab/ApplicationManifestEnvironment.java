@@ -73,6 +73,10 @@ public class ApplicationManifestEnvironment implements EnvironmentPostProcessor 
         if (local.path("ports").has("api")) {
             properties.put("server.port", local.path("ports").path("api").asInt());
         }
+        if (local.path("ports").has("web")) {
+            int webPort = local.path("ports").path("web").asInt();
+            properties.put("app.frontend-base-url", "http://localhost:" + webPort);
+        }
         JsonNode organizations = local.path("organizations");
         for (int i = 0; i < organizations.size(); i++) {
             JsonNode organization = organizations.get(i);

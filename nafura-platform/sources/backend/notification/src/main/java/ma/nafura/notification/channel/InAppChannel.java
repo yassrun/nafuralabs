@@ -1,6 +1,7 @@
 package ma.nafura.platform.collaboration.notification.channel;
 
 import java.time.OffsetDateTime;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -38,11 +39,18 @@ public class InAppChannel implements NotificationChannel {
                 .isRead(false)
                 .sentAt(OffsetDateTime.now())
                 .build());
-        stream.pushToUser(saved.getTenantId(), saved.getRecipientId(), Map.of(
-                "type", "new_notification",
-                "id", saved.getId().toString(),
-                "title", saved.getTitle(),
-                "source", delivery.event()));
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("type", "new_notification");
+        payload.put("id", saved.getId().toString());
+        payload.put("title", saved.getTitle());
+        payload.put("body", saved.getBody() != null ? saved.getBody() : "");
+        payload.put("source", delivery.event());
+        payload.put("actionUrl", delivery.actionUrl() != null ? delivery.actionUrl() : "");
+        payload.put("entityType", delivery.entityType() != null ? delivery.entityType() : "");
+        payload.put("entityId", delivery.entityId() != null ? delivery.entityId().toString() : "");
+        payload.put("sentAt", saved.getSentAt().toString());
+        payload.put("isRead", false);
+        stream.pushToUser(saved.getTenantId(), saved.getRecipientId(), payload);
         stream.pushRefresh(saved.getTenantId(), saved.getRecipientId(), "notification");
     }
 }

@@ -26,6 +26,7 @@ class ApplicationManifestEnvironmentTest {
                 .containsEntry("nafura.security.oidc.client-id", "acme-erp")
                 .containsEntry("nafura.lab.issuer", "acme-erp-lab")
                 .containsEntry("server.port", 8095)
+                .containsEntry("app.frontend-base-url", "http://localhost:4405")
                 .containsEntry("nafura.lab.users[0].email", "a@acme.local")
                 .containsEntry("nafura.lab.users[0].role", "SUPER_ADMIN")
                 .containsEntry("nafura.runtime.signup", "operator");

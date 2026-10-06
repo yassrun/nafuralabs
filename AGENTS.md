@@ -9,6 +9,7 @@ Point d’entrée de tout agent (Copilot, Cursor, Claude…). Répondre en **fra
 | Architecture cible et état réel | [nafura-platform/docs/ARCHITECTURE.md](nafura-platform/docs/ARCHITECTURE.md) |
 | Construire un BC : manifestes, records, cycles de vie, rôles, migrations, données initiales | [nafura-platform/docs/PLATFORM.md](nafura-platform/docs/PLATFORM.md) |
 | Écrans : archétypes et composants, ce qu’on ne fait pas | [nafura-platform/docs/UI.md](nafura-platform/docs/UI.md) |
+| Capabilities (état + roadmap par cap) | [nafura-platform/docs/capabilities/00-README.md](nafura-platform/docs/capabilities/00-README.md) |
 | Lancer, tester, déployer | [nafura-platform/ops/README.md](nafura-platform/ops/README.md) |
 | Prochains chantiers | [nafura-platform/ROADMAP.md](nafura-platform/ROADMAP.md) |
 
@@ -23,4 +24,4 @@ Le modèle à suivre est `platform-host/` (et son BC `bcs/demo`). **Sektor n’e
 5. **Lab mode** : pas de données métier en prod (hors vitrines MBS et corporate). Schéma cible net, pas de migrations défensives.
 6. **Rien d’irréversible sans accord** : `prod`, `--yes`, suppression de données partagées, push.
 7. **Vérifier** avant de rendre la main : `node <produit>/ops/run.mjs check` (architecture, build web, host-tests), puis l’application lancée en `lab` pour tout changement visible.
-8. **Documentation** : mettre à jour le document concerné ci-dessus dans le même changement ; ne pas créer d’autre document.
+8. **Documentation** : mettre à jour le document concerné ci-dessus dans le même changement ; ne pas créer d’autre document. Pour une **capability**, tenir à jour `nafura-platform/docs/capabilities/<id>.md` (en plus des docs globaux pour le reste).

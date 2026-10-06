@@ -2,7 +2,6 @@ package ma.nafura.platform.collaboration.audit;
 
 import java.util.Collections;
 import java.util.Map;
-import ma.nafura.platform.framework.audit.Auditable;
 import ma.nafura.platform.framework.service.crud.CrudAuditHook;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +20,7 @@ public class CrudAuditHookImpl implements CrudAuditHook {
 
     @Override
     public void afterCreate(Object entity) {
-        if (entity == null || entity.getClass().getAnnotation(Auditable.class) == null) {
+        if (AuditableCapture.meta(entity) == null) {
             return;
         }
         capture.afterCreate(entity);
@@ -29,7 +28,7 @@ public class CrudAuditHookImpl implements CrudAuditHook {
 
     @Override
     public Map<String, Object> beforeUpdate(Object entity) {
-        if (entity == null || entity.getClass().getAnnotation(Auditable.class) == null) {
+        if (AuditableCapture.meta(entity) == null) {
             return Collections.emptyMap();
         }
         return capture.beforeUpdate(entity);
@@ -37,7 +36,7 @@ public class CrudAuditHookImpl implements CrudAuditHook {
 
     @Override
     public void afterUpdate(Object entity, Map<String, Object> beforeSnapshot) {
-        if (entity == null || entity.getClass().getAnnotation(Auditable.class) == null) {
+        if (AuditableCapture.meta(entity) == null) {
             return;
         }
         capture.afterUpdate(entity, beforeSnapshot);
@@ -45,7 +44,7 @@ public class CrudAuditHookImpl implements CrudAuditHook {
 
     @Override
     public void afterDelete(Object entity) {
-        if (entity == null || entity.getClass().getAnnotation(Auditable.class) == null) {
+        if (AuditableCapture.meta(entity) == null) {
             return;
         }
         capture.afterDelete(entity);

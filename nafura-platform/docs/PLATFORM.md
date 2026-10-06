@@ -74,9 +74,11 @@ Une relation se traverse une fois (`{ "contacts": { "any": { "name": { "contains
 
 Une action de fiche qui n’est pas une transition est un endpoint du même contrôleur (`POST /{id}/<action>`, `@RequirePermission`). La fiche déclare `result: 'record'` quand la réponse est la fiche à ouvrir (une copie, par exemple) : l’écran navigue vers son id.
 
-Les pièces jointes et les notes d’un record enregistré par un `RecordController` utilisent la permission de ce record (lecture pour voir, mise à jour pour ajouter ou supprimer), pas `collaboration.*.*`. La clé d’entité envoyée est `lifecycle.entity`, sinon le dernier segment du mapping. Un type d’entité inconnu du registre garde la permission du contrôleur collaboration.
+Les pièces jointes, les notes et la timeline d’activité d’un record enregistré par un `RecordController` utilisent la permission de ce record (lecture pour voir, mise à jour pour ajouter ou supprimer pièces/notes), pas `collaboration.*.*`. La clé d’entité envoyée est `lifecycle.entity`, sinon le dernier segment du mapping. Un type d’entité inconnu du registre garde la permission du contrôleur collaboration. La timeline lit `GET /api/v1/platform/collaboration/audit/timeline` avec `@HostRecordGate` (même contrat que commentaires / pièces jointes).
 
 Ne pas écrire de service CRUD, de DTO de liste ou de pagination à la main.
+
+`@Auditable(entityType, trackedFields)` sur l’entité : chaque création, modification, suppression et transition passe dans `audit_events` (capability `cap.audit`). Si seuls les champs tracked changent et que c’est uniquement `status`, l’action émise est `status_change` (sinon `update`). La fiche lit la timeline via une section `kind: 'audit'` ([UI.md](UI.md)) ; le journal admin (`administration.audit.read`) liste tous les événements et « Voir l’entité » résout l’URL via `HostBusinessContext.records`, comme les notifications. Détail, contrat et roadmap : [capabilities/audit.md](capabilities/audit.md).
 
 ## Cycle de vie et approbations
 
@@ -86,11 +88,9 @@ Dans le descripteur du record (`records/<record>.json`) : états (libellé, ton)
 
 ## Notifications
 
-Le BC déclare ses événements dans `bc.manifest.json` → `notifications` : `id` (sous son préfixe, comme une permission), `label` (écran de préférences), `title` (`{champ}` du record), `channels` (défaut, parmi `in_app`, `email`, `sms`), `mandatory` (l’utilisateur ne peut pas couper). Les événements de la plateforme (approbation, mention, affectation) sont dans `META-INF/nafura/platform/notifications.json` du module `notification`.
+Capability `cap.notifications` : un seul chemin (manifeste / `notify` → `NotificationRouter` → canaux `in_app` / `email`), préférences org/user, inbox, cloche SSE, digest, e-mail absolu + from produit. **État détaillé, contrat et roadmap** : [capabilities/notifications.md](capabilities/notifications.md).
 
-Un seul chemin : règle (`notify`, mention, affectation…) → `NotificationRouter` → canaux retenus → `NotificationChannel` (`in_app`, `email` ; un canal déclaré sans implémentation est ignoré, avertissement au démarrage). Canaux retenus : défaut du manifeste → organisation (coupe ou ajoute) → utilisateur (coupe, sauf `mandatory` ; n’ajoute jamais). API : `GET|PUT /api/v1/platform/collaboration/notification-preferences` (utilisateur courant), `…/organisation` (permission `administration.notifications.configure`). Écrans : Mes paramètres → Notifications (couche utilisateur) ; Paramètres organisation → Notifications (couche organisation). Un interrupteur = un canal ; l’utilisateur ne peut pas rallumer un canal que l’organisation a coupé ; un événement `mandatory` est verrouillé.
-
-Inbox web (`/notifications`) : vues Non lues / Toutes / Lues (`isRead`), filtre par événement (`source`), pagination, libellé d’événement et temps relatif. Le clic ouvre `actionUrl` s’il est posé, sinon la fiche résolue via `HostBusinessContext.records` (`entityType` + `entityId`). Une approbation en attente notifie les membres du rôle de l’étape (ou l’`approverId` s’il est fixé) ; le demandeur n’est pas prévenu de sa propre demande. Suite (SSE sur la cloche, digest, e-mail absolu) : spec [15](../specs/manques-plateforme/15-notifications-suite.md).
+Rappel court : le BC déclare les événements dans `bc.manifest.json` → `notifications` ; `notify` sur une transition ne prévient pas l’acteur (sauf issue `system`). API prefs `GET|PUT …/notification-preferences` (+ `/organisation`). UI : `/notifications`, Mes paramètres / Paramètres organisation → Notifications.
 
 ## Permissions et rôles
 

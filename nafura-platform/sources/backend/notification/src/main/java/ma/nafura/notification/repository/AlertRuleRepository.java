@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
+/** @deprecated See {@link AlertRule}. */
+@Deprecated
 @Repository
 public interface AlertRuleRepository extends TenantScopedRepository<AlertRule, UUID> {
 }

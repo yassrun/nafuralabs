@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, effect, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { PlatformNotificationPanelComponent } from './notification-panel.component';
@@ -10,7 +10,7 @@ import { PlatformNotificationsService } from './notifications.service';
   imports: [LucideAngularModule, PlatformNotificationPanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="nf-platform-notification-bell">
+    <div class="nf-platform-notification-bell" [class.nf-platform-notification-bell--pulse]="pulse()">
       <button
         type="button"
         class="nf-platform-notification-bell__button"
@@ -60,6 +60,24 @@ import { PlatformNotificationsService } from './notifications.service';
       line-height: 16px;
       text-align: center;
     }
+    .nf-platform-notification-bell--pulse .nf-platform-notification-bell__button {
+      animation: nf-bell-pulse 0.6s ease;
+    }
+    .nf-platform-notification-bell--pulse .nf-platform-notification-bell__badge {
+      animation: nf-badge-pop 0.6s ease;
+    }
+    @keyframes nf-bell-pulse {
+      0%, 100% { transform: rotate(0); }
+      20% { transform: rotate(-12deg); }
+      40% { transform: rotate(10deg); }
+      60% { transform: rotate(-6deg); }
+      80% { transform: rotate(4deg); }
+    }
+    @keyframes nf-badge-pop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.25); }
+      100% { transform: scale(1); }
+    }
     nf-platform-notification-panel {
       position: absolute;
       top: calc(100% + 6px);
@@ -77,9 +95,17 @@ import { PlatformNotificationsService } from './notifications.service';
 export class PlatformNotificationBellComponent {
   readonly notifications = inject(PlatformNotificationsService);
   readonly open = signal(false);
+  readonly pulse = signal(false);
 
   constructor() {
     this.notifications.initialize();
+    effect(() => {
+      const tick = this.notifications.livePulse();
+      if (tick <= 0) return;
+      this.pulse.set(true);
+      const handle = setTimeout(() => this.pulse.set(false), 650);
+      return () => clearTimeout(handle);
+    });
   }
 
   @HostListener('document:click', ['$event'])

@@ -51,6 +51,7 @@ import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
 import ma.nafura.platform.framework.domain.TenantEntity;
+import ma.nafura.platform.framework.service.crud.CrudAuditHook;
 
 /**
  * The REST API of a business record, from its entity and repository: list (page, sort, search, filters),
@@ -81,6 +82,9 @@ public abstract class RecordController<E extends TenantEntity> {
 
     @Autowired
     private ObjectProvider<OrganizationZone> zones;
+
+    @Autowired
+    private ObjectProvider<CrudAuditHook> auditHook;
 
     private Lifecycle lifecycle;
     private RecordDescriptor descriptor;
@@ -216,7 +220,9 @@ public abstract class RecordController<E extends TenantEntity> {
         if (body instanceof HasStatus record) {
             record.setStatus(lifecycle != null ? lifecycle.initial() : record.getStatus());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(repository().save(body));
+        E saved = repository().save(body);
+        auditHook.ifAvailable(hook -> hook.afterCreate(saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     /** Replaces the editable fields; id, tenant, audit fields and status stay. */
@@ -225,8 +231,14 @@ public abstract class RecordController<E extends TenantEntity> {
     public E update(@PathVariable UUID id, @Valid @RequestBody E body) {
         E record = require(id);
         requireEditable(record);
+        CrudAuditHook hook = auditHook.getIfAvailable();
+        Map<String, Object> before = hook != null ? hook.beforeUpdate(record) : Map.of();
         BeanUtils.copyProperties(body, record, MANAGED.toArray(String[]::new));
-        return repository().save(record);
+        E saved = repository().save(record);
+        if (hook != null) {
+            hook.afterUpdate(saved, before);
+        }
+        return saved;
     }
 
     @DeleteMapping("/{id}")
@@ -234,6 +246,7 @@ public abstract class RecordController<E extends TenantEntity> {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         E record = require(id);
         requireEditable(record);
+        auditHook.ifAvailable(hook -> hook.afterDelete(record));
         repository().delete(record);
         return ResponseEntity.noContent().build();
     }
@@ -309,7 +322,12 @@ public abstract class RecordController<E extends TenantEntity> {
     public E fire(@PathVariable UUID id, @PathVariable String transition) {
         Lifecycle declared = requireLifecycle();
         E record = require(id);
+        CrudAuditHook hook = auditHook.getIfAvailable();
+        Map<String, Object> before = hook != null ? hook.beforeUpdate(record) : Map.of();
         lifecycles.fire(declared, (HasStatus) record, id, transition, r -> repository().save(record));
+        if (hook != null) {
+            hook.afterUpdate(record, before);
+        }
         return record;
     }
 

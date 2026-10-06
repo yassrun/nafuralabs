@@ -24,6 +24,10 @@ export interface AuditTrailEntry {
   icon?: string;
   /** CSS class for icon color: nf-audit-trail__icon--green, --blue, --amber, --red, --gray */
   iconClass?: string;
+  /** Raw event payload (changes / snapshot) for the detail dialog. */
+  payload?: Record<string, unknown>;
+  entityType?: string;
+  entityId?: string;
 }
 
 /** Action filter value: '' = all, or specific action type */

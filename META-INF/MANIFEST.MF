@@ -1,0 +1,672 @@
+Manifest-Version: 1.0
+Class-Path: file:/C:/Users/yassiveco/Desktop/Nafura%20Platform/nafuralab
+ s/platform-host/sources/backend/build/classes/java/main file:/C:/Users/
+ yassiveco/Desktop/Nafura%20Platform/nafuralabs/platform-host/sources/ba
+ ckend/build/resources/main/ file:/C:/Users/yassiveco/Desktop/Nafura%20P
+ latform/nafuralabs/nafura-platform/sources/backend/features/configurati
+ on/settings/build/libs/settings-0.1.0-SNAPSHOT.jar file:/C:/Users/yassi
+ veco/Desktop/Nafura%20Platform/nafuralabs/nafura-platform/sources/backe
+ nd/core/lab/build/libs/lab-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/
+ Desktop/Nafura%20Platform/nafuralabs/nafura-platform/sources/backend/id
+ entite/iam/build/libs/iam-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/D
+ esktop/Nafura%20Platform/nafuralabs/nafura-platform/sources/backend/ide
+ ntite/access/build/libs/access-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiv
+ eco/Desktop/Nafura%20Platform/nafuralabs/nafura-platform/sources/backen
+ d/features/user-settings/build/libs/user-settings-0.1.0-SNAPSHOT.jar fi
+ le:/C:/Users/yassiveco/Desktop/Nafura%20Platform/nafuralabs/nafura-plat
+ form/sources/backend/features/organization-identity/build/libs/organiza
+ tion-identity-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/Desktop/Nafur
+ a%20Platform/nafuralabs/nafura-platform/sources/backend/features/collab
+ oration/webhook/build/libs/webhook-0.1.0-SNAPSHOT.jar file:/C:/Users/ya
+ ssiveco/Desktop/Nafura%20Platform/nafuralabs/nafura-platform/sources/ba
+ ckend/notification/build/libs/notification-0.1.0-SNAPSHOT.jar file:/C:/
+ Users/yassiveco/Desktop/Nafura%20Platform/nafuralabs/nafura-platform/so
+ urces/backend/impression/build/libs/impression-0.1.0-SNAPSHOT.jar file:
+ /C:/Users/yassiveco/Desktop/Nafura%20Platform/nafuralabs/nafura-platfor
+ m/sources/backend/conversation/ai-agent-runtime/build/libs/ai-agent-run
+ time-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/Desktop/Nafura%20Platf
+ orm/nafuralabs/nafura-platform/sources/backend/features/app-settings/bu
+ ild/libs/app-settings-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/Deskt
+ op/Nafura%20Platform/nafuralabs/nafura-platform/sources/backend/feature
+ s/administration/subscription/build/libs/subscription-0.1.0-SNAPSHOT.ja
+ r file:/C:/Users/yassiveco/Desktop/Nafura%20Platform/nafuralabs/nafura-
+ platform/sources/backend/features/administration/usage/build/libs/usage
+ -0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/Desktop/Nafura%20Platform/
+ nafuralabs/nafura-platform/sources/backend/features/configuration/sysco
+ nfig/build/libs/sysconfig-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/D
+ esktop/Nafura%20Platform/nafuralabs/nafura-platform/sources/backend/fea
+ tures/collaboration/audit/build/libs/audit-0.1.0-SNAPSHOT.jar file:/C:/
+ Users/yassiveco/Desktop/Nafura%20Platform/nafuralabs/nafura-platform/so
+ urces/backend/features/collaboration/tagging/build/libs/tagging-0.1.0-S
+ NAPSHOT.jar file:/C:/Users/yassiveco/Desktop/Nafura%20Platform/nafurala
+ bs/nafura-platform/sources/backend/commentaire/build/libs/commentaire-0
+ .1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/Desktop/Nafura%20Platform/na
+ furalabs/nafura-platform/sources/backend/approbation/build/libs/approba
+ tion-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/Desktop/Nafura%20Platf
+ orm/nafuralabs/nafura-platform/sources/backend/document-extraction/buil
+ d/libs/document-extraction-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/
+ Desktop/Nafura%20Platform/nafuralabs/nafura-platform/sources/backend/do
+ cuments/build/libs/documents-0.1.0-SNAPSHOT.jar file:/C:/Users/yassivec
+ o/Desktop/Nafura%20Platform/nafuralabs/nafura-platform/sources/backend/
+ core/job-runner/build/libs/job-runner-0.1.0-SNAPSHOT.jar file:/C:/Users
+ /yassiveco/Desktop/Nafura%20Platform/nafuralabs/nafura-platform/sources
+ /backend/features/foundation/geo/build/libs/geo-0.1.0-SNAPSHOT.jar file
+ :/C:/Users/yassiveco/Desktop/Nafura%20Platform/nafuralabs/nafura-platfo
+ rm/sources/backend/integrations/google-places/build/libs/google-places-
+ 0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/Desktop/Nafura%20Platform/n
+ afuralabs/nafura-platform/sources/backend/conversation/ai-conversation/
+ build/libs/ai-conversation-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/
+ Desktop/Nafura%20Platform/nafuralabs/platform-host/bcs/demo/backend/bui
+ ld/libs/bc-demo.jar file:/C:/Users/yassiveco/Desktop/Nafura%20Platform/
+ nafuralabs/nafura-platform/sources/backend/core/multi-tenant/build/libs
+ /multi-tenant-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/Desktop/Nafur
+ a%20Platform/nafuralabs/nafura-platform/sources/backend/core/authorizat
+ ion/build/libs/authorization-0.1.0-SNAPSHOT.jar file:/C:/Users/yassivec
+ o/Desktop/Nafura%20Platform/nafuralabs/nafura-platform/sources/backend/
+ core/scope/build/libs/scope-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco
+ /Desktop/Nafura%20Platform/nafuralabs/nafura-platform/sources/backend/c
+ ore/framework/build/libs/framework-0.1.0-SNAPSHOT.jar file:/C:/Users/ya
+ ssiveco/Desktop/Nafura%20Platform/nafuralabs/nafura-platform/sources/ba
+ ckend/core/observability/build/libs/observability-0.1.0-SNAPSHOT.jar fi
+ le:/C:/Users/yassiveco/Desktop/Nafura%20Platform/nafuralabs/nafura-plat
+ form/sources/backend/conversation/ai-agent-api/build/libs/ai-agent-api-
+ 0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/Desktop/Nafura%20Platform/n
+ afuralabs/nafura-platform/sources/backend/features/ai/llm-provider/buil
+ d/libs/llm-provider-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/Desktop
+ /Nafura%20Platform/nafuralabs/nafura-platform/sources/backend/core/tena
+ ncy/build/libs/tenancy-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/Desk
+ top/Nafura%20Platform/nafuralabs/nafura-platform/sources/backend/identi
+ te/identity/build/libs/identity-0.1.0-SNAPSHOT.jar file:/C:/Users/yassi
+ veco/.gradle/caches/modules-2/files-2.1/net.logstash.logback/logstash-l
+ ogback-encoder/8.0/73a2ae828d20f710be8439af3c1a53d21a62dc0f/logstash-lo
+ gback-encoder-8.0.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2
+ /files-2.1/io.minio/minio/8.5.7/c17d6e693cfba62ad0822fde84336bb2ba814ff
+ 3/minio-8.5.7.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/fil
+ es-2.1/io.opentelemetry.instrumentation/opentelemetry-spring-boot-start
+ er/2.28.1/a01183d2a64f37260bbe1cc07f98ee580a37d521/opentelemetry-spring
+ -boot-starter-2.28.1.jar file:/C:/Users/yassiveco/.gradle/caches/module
+ s-2/files-2.1/io.opentelemetry.contrib/opentelemetry-azure-resources/1.
+ 57.0-alpha/d7fa8a6e8f7c927e4f79b59246fc0dc027f2bd5f/opentelemetry-azure
+ -resources-1.57.0-alpha.jar file:/C:/Users/yassiveco/.gradle/caches/mod
+ ules-2/files-2.1/io.opentelemetry.contrib/opentelemetry-aws-resources/1
+ .57.0-alpha/80c41813bdf65e4c0c88c6c1189aa78c76e9d230/opentelemetry-aws-
+ resources-1.57.0-alpha.jar file:/C:/Users/yassiveco/.gradle/caches/modu
+ les-2/files-2.1/io.opentelemetry.contrib/opentelemetry-gcp-resources/1.
+ 57.0-alpha/31b766aa51703529bc8188c2b8bebcf317169933/opentelemetry-gcp-r
+ esources-1.57.0-alpha.jar file:/C:/Users/yassiveco/.gradle/caches/modul
+ es-2/files-2.1/io.opentelemetry.contrib/opentelemetry-cloudfoundry-reso
+ urces/1.57.0-alpha/101af6e396c86b7e843efc3c8ec397492a6e9b84/opentelemet
+ ry-cloudfoundry-resources-1.57.0-alpha.jar file:/C:/Users/yassiveco/.gr
+ adle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core
+ /2.21.5/7ec0c8bf8402fa998f64b2009632d6566a42ceb7/jackson-core-2.21.5.ja
+ r file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.opente
+ lemetry.instrumentation/opentelemetry-spring-boot-autoconfigure/2.28.1/
+ 427ddb82a3edf4292401f8871b031fa5531b87d/opentelemetry-spring-boot-autoc
+ onfigure-2.28.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/f
+ iles-2.1/io.opentelemetry.instrumentation/opentelemetry-sdk-autoconfigu
+ re-support/2.28.1-alpha/a0851f4526d0b0de82eb00ae069b7f3581b44734/opente
+ lemetry-sdk-autoconfigure-support-2.28.1-alpha.jar file:/C:/Users/yassi
+ veco/.gradle/caches/modules-2/files-2.1/io.opentelemetry/opentelemetry-
+ sdk-extension-declarative-config/1.62.0-alpha/f714455048d7b6a3ad4b8467b
+ 94c0f62f95fc350/opentelemetry-sdk-extension-declarative-config-1.62.0-a
+ lpha.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/co
+ m.fasterxml.jackson.core/jackson-databind/2.21.5/84924990b468233a28214a
+ e2c505a9ec24cd6ea6/jackson-databind-2.21.5.jar file:/C:/Users/yassiveco
+ /.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-csv/1.11
+ .0/8f2dc805097da534612128b7cdf491a5a76752bf/commons-csv-1.11.0.jar file
+ :/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.mapstruct/m
+ apstruct/1.5.5.Final/2ca3cbe39b6e9ea8d5ea521965a89bef2a1e8eeb/mapstruct
+ -1.5.5.Final.jar file:/C:/Users/yassiveco/Desktop/Nafura%20Platform/naf
+ uralabs/nafura-platform/sources/backend/core/authorization-api/build/li
+ bs/authorization-api-0.1.0-SNAPSHOT.jar file:/C:/Users/yassiveco/.gradl
+ e/caches/modules-2/files-2.1/io.micrometer/micrometer-registry-promethe
+ us/1.17.1/fa0a245ad6fee4763264dc76d2b3e0166a5f5e47/micrometer-registry-
+ prometheus-1.17.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2
+ /files-2.1/io.micrometer/micrometer-tracing-bridge-otel/1.7.1/f98040db4
+ b3867c90a4b9537bbf3972663fc76d3/micrometer-tracing-bridge-otel-1.7.1.ja
+ r file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.opente
+ lemetry/opentelemetry-exporter-otlp/1.62.0/8e4cb9199ac868332a1213ca2740
+ 8a18905ba369/opentelemetry-exporter-otlp-1.62.0.jar file:/C:/Users/yass
+ iveco/.gradle/caches/modules-2/files-2.1/io.zonky.test/embedded-postgre
+ s/2.2.2/e764686a63618f077240e5cdbbf121266ee74808/embedded-postgres-2.2.
+ 2.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.p
+ ostgresql/postgresql/42.7.13/a6e1bd21b412d6ffb3df23cd13d507bc2cc9e37d/p
+ ostgresql-42.7.13.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2
+ /files-2.1/ognl/ognl/3.4.7/700046e098a91855e98a5e4de7e781aed360c9ed/ogn
+ l-3.4.7.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1
+ /org.locationtech.jts.io/jts-io-common/1.19.0/4c7018119aeb66335746e6748
+ 456c821e304d3a2/jts-io-common-1.19.0.jar file:/C:/Users/yassiveco/.grad
+ le/caches/modules-2/files-2.1/org.locationtech.jts/jts-core/1.19.0/3ff3
+ baa0074445384f9e0068df81fbd0a168395a/jts-core-1.19.0.jar file:/C:/Users
+ /yassiveco/.gradle/caches/modules-2/files-2.1/org.springframework/sprin
+ g-webflux/7.0.9/afecfd67cc223050757c46cb0deb49c63c1e5efc/spring-webflux
+ -7.0.9.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/
+ org.springframework.boot/spring-boot-actuator-autoconfigure/4.1.1/858f3
+ be62af25ba19a8d87003bb9e929187fc5a5/spring-boot-actuator-autoconfigure-
+ 4.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/o
+ rg.springframework.boot/spring-boot-autoconfigure/4.1.1/53c1c604301b418
+ 3faa480a5b9f2fd86a2f043c3/spring-boot-autoconfigure-4.1.1.jar file:/C:/
+ Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.apache.poi/poi-o
+ oxml/5.2.5/df9f2c52371eeba24db8ea8cafa77285c3cc0742/poi-ooxml-5.2.5.jar
+  file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.apache
+ .poi/poi/5.2.5/7e00f6b2f76375fe89022d5a7db8acb71cbd55f5/poi-5.2.5.jar f
+ ile:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.apache.p
+ dfbox/pdfbox/3.0.3/a739bfc1b72d2f98d973cd1419f5ae2decd36068/pdfbox-3.0.
+ 3.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.s
+ pringframework.boot/spring-boot-data-jpa/4.1.1/6bb039309f539b4f9b14e739
+ 8eafcca08a60fd23/spring-boot-data-jpa-4.1.1.jar file:/C:/Users/yassivec
+ o/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-bo
+ ot-liquibase/4.1.1/bad0787b11e653e960b87db09f436da0c5f9b09a/spring-boot
+ -liquibase-4.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/
+ files-2.1/org.springframework.boot/spring-boot-hibernate/4.1.1/79c857ac
+ d2f8716f53ee68f371d708372547e04a/spring-boot-hibernate-4.1.1.jar file:/
+ C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.springframewo
+ rk.boot/spring-boot-jpa/4.1.1/bff6408ab9a9083e608320ceeeec4462cb31be78/
+ spring-boot-jpa-4.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/modul
+ es-2/files-2.1/org.springframework.boot/spring-boot-jdbc/4.1.1/dde73b86
+ 22725ac440d5f3e88c2d41194085564a/spring-boot-jdbc-4.1.1.jar file:/C:/Us
+ ers/yassiveco/.gradle/caches/modules-2/files-2.1/org.springframework.bo
+ ot/spring-boot-webmvc/4.1.1/3057d155bc66412ad906ecdd488e0fd617589151/sp
+ ring-boot-webmvc-4.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/modu
+ les-2/files-2.1/org.springframework.boot/spring-boot-http-converter/4.1
+ .1/886e76307151a64c8710c61e02a2323ab883b87c/spring-boot-http-converter-
+ 4.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/o
+ rg.springframework.boot/spring-boot-validation/4.1.1/e4a77e095430ec3b9f
+ 4c2382c1521fd07750d0f6/spring-boot-validation-4.1.1.jar file:/C:/Users/
+ yassiveco/.gradle/caches/modules-2/files-2.1/org.springframework.boot/s
+ pring-boot-jackson/4.1.1/1defff7e3f9dda050f26e98da3285b4321920dc1/sprin
+ g-boot-jackson-4.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/module
+ s-2/files-2.1/tools.jackson.core/jackson-core/3.1.5/ccd7eb3269b8d33bc09
+ 7b36770f367cdfe2f1150/jackson-core-3.1.5.jar file:/C:/Users/yassiveco/.
+ gradle/caches/modules-2/files-2.1/tools.jackson.core/jackson-databind/3
+ .1.5/782178f0b1fe088803c03b85eb9a406f60519044/jackson-databind-3.1.5.ja
+ r file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/com.faste
+ rxml.jackson.core/jackson-annotations/2.21/b1bc1868bf02dc0bd6c7836257a0
+ 36a331005309/jackson-annotations-2.21.jar file:/C:/Users/yassiveco/.gra
+ dle/caches/modules-2/files-2.1/org.apache.commons/commons-compress/1.28
+ .0/e482f2c7a88dac3c497e96aa420b6a769f59c8d7/commons-compress-1.28.0.jar
+  file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.liquib
+ ase/liquibase-core/5.0.3/2a2b324d218a847ec8fa688b75bc58d0b09f38e2/liqui
+ base-core-5.0.3.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/f
+ iles-2.1/commons-io/commons-io/2.22.0/5b1e18bc0ad651ed878029d83f88d9c81
+ 89fd51e/commons-io-2.22.0.jar file:/C:/Users/yassiveco/.gradle/caches/m
+ odules-2/files-2.1/commons-codec/commons-codec/1.21.0/d95f998db5f89900f
+ e895daf6cd2cddcb2f1d64b/commons-codec-1.21.0.jar file:/C:/Users/yassive
+ co/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-b
+ oot-health/4.1.1/a767dfdac299c48e3488fddd8918b2beb300a640/spring-boot-h
+ ealth-4.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files
+ -2.1/io.micrometer/micrometer-jakarta9/1.17.1/6ac099edc69e8f780bfddaa48
+ bcc7a1d4b84e3c7/micrometer-jakarta9-1.17.1.jar file:/C:/Users/yassiveco
+ /.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boo
+ t-micrometer-metrics/4.1.1/d2fa58fe517a9aefcf99a725b63331151fe63c40/spr
+ ing-boot-micrometer-metrics-4.1.1.jar file:/C:/Users/yassiveco/.gradle/
+ caches/modules-2/files-2.1/org.hibernate.orm/hibernate-core/7.4.5.Final
+ /38682c980381214df8aa66bec69d183bf91e2926/hibernate-core-7.4.5.Final.ja
+ r file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.microm
+ eter/micrometer-core/1.17.1/2a9a38d3d0859022fdf2a93743c0d5fe44796a39/mi
+ crometer-core-1.17.1.jar file:/C:/Users/yassiveco/.gradle/caches/module
+ s-2/files-2.1/io.micrometer/micrometer-tracing/1.7.1/1ef2ac3cdb91e21e9f
+ 549e7284c74b899d917bd2/micrometer-tracing-1.7.1.jar file:/C:/Users/yass
+ iveco/.gradle/caches/modules-2/files-2.1/org.springframework.boot/sprin
+ g-boot-thymeleaf/4.1.1/ee3ff1d68c23151f176cc68197ca9d3aa965c845/spring-
+ boot-thymeleaf-4.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/module
+ s-2/files-2.1/org.springframework.boot/spring-boot-servlet/4.1.1/76881b
+ 573c8639708ce3d520b428209335f007fc/spring-boot-servlet-4.1.1.jar file:/
+ C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.springframewo
+ rk/spring-webmvc/7.0.9/53b41e6290df1a75fe0e0d16608c80a93bb63bdd/spring-
+ webmvc-7.0.9.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/file
+ s-2.1/org.springframework.boot/spring-boot-tomcat/4.1.1/61450290ced8f16
+ d8d00308f1aa81423d7660dc2/spring-boot-tomcat-4.1.1.jar file:/C:/Users/y
+ assiveco/.gradle/caches/modules-2/files-2.1/org.springframework.boot/sp
+ ring-boot-web-server/4.1.1/d1eb8e523013ac3939ae59adc5335a3de704d11b/spr
+ ing-boot-web-server-4.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/m
+ odules-2/files-2.1/org.springframework.boot/spring-boot-security-oauth2
+ -resource-server/4.1.1/ba63603b927a83a8b22de283797eae5392a026be/spring-
+ boot-security-oauth2-resource-server-4.1.1.jar file:/C:/Users/yassiveco
+ /.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boo
+ t-security/4.1.1/8f08145264d1a224c4b9c865d60e47f62f4dd85f/spring-boot-s
+ ecurity-4.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/fil
+ es-2.1/org.springframework.security/spring-security-oauth2-resource-ser
+ ver/7.1.1/e839ba10b324f6a422af433885e1c46ea03b2f99/spring-security-oaut
+ h2-resource-server-7.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/mo
+ dules-2/files-2.1/org.springframework.security/spring-security-web/7.1.
+ 1/449685cf2be4029b1200f1d0860a15caa5c2d05b/spring-security-web-7.1.1.ja
+ r file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.sprin
+ gframework.security/spring-security-oauth2-jose/7.1.1/836354cc1cb1f8758
+ 080a3a09017418beec6d1a1/spring-security-oauth2-jose-7.1.1.jar file:/C:/
+ Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.springframework.
+ security/spring-security-oauth2-core/7.1.1/cc438062959bebb0f1a6cf0fa3b1
+ b22d5b7aae17/spring-security-oauth2-core-7.1.1.jar file:/C:/Users/yassi
+ veco/.gradle/caches/modules-2/files-2.1/org.springframework/spring-web/
+ 7.0.9/c42f4ce0cded1526527296726c4ed30335dfaa10/spring-web-7.0.9.jar fil
+ e:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.springfram
+ ework.boot/spring-boot-data-redis/4.1.1/740047a0b561a91d3c3ae34c9bf893c
+ e571c3bc1/spring-boot-data-redis-4.1.1.jar file:/C:/Users/yassiveco/.gr
+ adle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-da
+ ta-commons/4.1.1/90a5dd56b22c624c8d7eedda11c57f6bc737dc72/spring-boot-d
+ ata-commons-4.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2
+ /files-2.1/org.springframework.boot/spring-boot-sql/4.1.1/1699846d0a695
+ 9d415f06ee76371d48e968d0d3e/spring-boot-sql-4.1.1.jar file:/C:/Users/ya
+ ssiveco/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spr
+ ing-boot-transaction/4.1.1/efb4297a46ffad58e3047604c5f4cdc07440c554/spr
+ ing-boot-transaction-4.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/
+ modules-2/files-2.1/org.springframework.boot/spring-boot-cache/4.1.1/2f
+ e86fbabfa0eb4823539a758aba5044b3333b75/spring-boot-cache-4.1.1.jar file
+ :/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.springframe
+ work.boot/spring-boot-actuator/4.1.1/17252248f9205cfb288b5fd499c821fd07
+ 8a2070/spring-boot-actuator-4.1.1.jar file:/C:/Users/yassiveco/.gradle/
+ caches/modules-2/files-2.1/org.springframework.boot/spring-boot-netty/4
+ .1.1/1865c5b85196ea87fe20722530a921e1376335b4/spring-boot-netty-4.1.1.j
+ ar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.spri
+ ngframework.boot/spring-boot-persistence/4.1.1/34e6dd1adfbce5de42795758
+ 8683d607865c76c7/spring-boot-persistence-4.1.1.jar file:/C:/Users/yassi
+ veco/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring
+ -boot-micrometer-observation/4.1.1/cff84301fdcaeacd0e83b0b5d1ec5a098be8
+ ca7d/spring-boot-micrometer-observation-4.1.1.jar file:/C:/Users/yassiv
+ eco/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-
+ boot/4.1.1/f958dfcba9bc998459cd7862894aa69220645c44/spring-boot-4.1.1.j
+ ar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.spri
+ ngframework.data/spring-data-jpa/4.1.1/44e75d6aaa629c40e03277eddacb2ed5
+ ddd10955/spring-data-jpa-4.1.1.jar file:/C:/Users/yassiveco/.gradle/cac
+ hes/modules-2/files-2.1/org.springframework.security/spring-security-co
+ nfig/7.1.1/6aadefb4acc552578b28f0b95908158861bea08/spring-security-conf
+ ig-7.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.
+ 1/org.springframework.data/spring-data-redis/4.1.1/c9ecf469140068f23adb
+ f71011066d77687fb502/spring-data-redis-4.1.1.jar file:/C:/Users/yassive
+ co/.gradle/caches/modules-2/files-2.1/org.springframework/spring-contex
+ t-support/7.0.9/2eb98af1a2d99e07ed416c7be2fda265072b6ed/spring-context-
+ support-7.0.9.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/fil
+ es-2.1/org.springframework.data/spring-data-keyvalue/4.1.1/865996eb7672
+ 87561da221d385ea7127d6ee2e93/spring-data-keyvalue-4.1.1.jar file:/C:/Us
+ ers/yassiveco/.gradle/caches/modules-2/files-2.1/org.springframework.se
+ curity/spring-security-core/7.1.1/c0373b564151af7a3001ccfbea589bf37dd6d
+ c3b/spring-security-core-7.1.1.jar file:/C:/Users/yassiveco/.gradle/cac
+ hes/modules-2/files-2.1/org.springframework/spring-context/7.0.9/7eb8e0
+ 1ecf1633ddd4d64ca184194f967b6bc0aa/spring-context-7.0.9.jar file:/C:/Us
+ ers/yassiveco/.gradle/caches/modules-2/files-2.1/io.micrometer/micromet
+ er-observation/1.17.1/24c0b05bc06a9ab6f4e09a48949b6eccc179ca15/micromet
+ er-observation-1.17.1.jar file:/C:/Users/yassiveco/.gradle/caches/modul
+ es-2/files-2.1/org.springframework/spring-messaging/7.0.9/f96b6ed4a35f5
+ 856b0bf1e535e7537204bac55b8/spring-messaging-7.0.9.jar file:/C:/Users/y
+ assiveco/.gradle/caches/modules-2/files-2.1/org.springframework/spring-
+ orm/7.0.9/6e3089628cb98c4b8498d4b0c9ff0df17de6afb/spring-orm-7.0.9.jar 
+ file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.springf
+ ramework/spring-jdbc/7.0.9/b1cfa486ba259e5fc93c67db9ad199ac44ac2f6d/spr
+ ing-jdbc-7.0.9.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/fi
+ les-2.1/org.springframework/spring-aop/7.0.9/35f68fd8cdf30444e18835cec1
+ 52f2619c4c46c7/spring-aop-7.0.9.jar file:/C:/Users/yassiveco/.gradle/ca
+ ches/modules-2/files-2.1/org.springframework.data/spring-data-commons/4
+ .1.1/8b6450be618ed20a5f9a0065de23a5b9abb37808/spring-data-commons-4.1.1
+ .jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.sp
+ ringframework/spring-tx/7.0.9/4912434272ba05818632fe87844532ae98a4af40/
+ spring-tx-7.0.9.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/f
+ iles-2.1/org.springframework/spring-oxm/7.0.9/89e2212011923c6cdbcd90489
+ 3f3ebfe37920047/spring-oxm-7.0.9.jar file:/C:/Users/yassiveco/.gradle/c
+ aches/modules-2/files-2.1/org.springframework/spring-beans/7.0.9/2bee42
+ fa948a5f32761fd0838de3baa1f51c0225/spring-beans-7.0.9.jar file:/C:/User
+ s/yassiveco/.gradle/caches/modules-2/files-2.1/org.springframework/spri
+ ng-expression/7.0.9/9452ece85b97fa3e208046cc3a7e985c314b0034/spring-exp
+ ression-7.0.9.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/fil
+ es-2.1/org.springframework/spring-core/7.0.9/e03c619fc5b26931973277f5ba
+ 65ae47967a20e3/spring-core-7.0.9.jar file:/C:/Users/yassiveco/.gradle/c
+ aches/modules-2/files-2.1/io.lettuce/lettuce-core/7.5.2.RELEASE/e67339d
+ c0eb3ceac40fad8213cc2750b7944bb75/lettuce-core-7.5.2.RELEASE.jar file:/
+ C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.projectreactor
+ /reactor-core/3.8.7/cf54bb43d59d6bb9b3ba5c160c975d4a18f351ab/reactor-co
+ re-3.8.7.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.
+ 1/io.micrometer/micrometer-commons/1.17.1/b1c3fdea68c5a81495cf1c16cf290
+ 5c5ad9f30d2/micrometer-commons-1.17.1.jar file:/C:/Users/yassiveco/.gra
+ dle/caches/modules-2/files-2.1/io.micrometer/context-propagation/1.2.1/
+ 8951419f78e7bc7e0db246cd9d987d254b014e29/context-propagation-1.2.1.jar 
+ file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.jspecif
+ y/jspecify/1.0.1/3d60fd98eb8ade73004f4195c37b6317e02cf3d7/jspecify-1.0.
+ 1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.pr
+ ometheus/prometheus-metrics-core/1.7.0/4779014a044c3c300d8ec36eb2a51ecb
+ 7541887/prometheus-metrics-core-1.7.0.jar file:/C:/Users/yassiveco/.gra
+ dle/caches/modules-2/files-2.1/io.prometheus/prometheus-metrics-tracer-
+ common/1.7.0/2feee6463c9ad7a6ef142020c3379835ffeb6701/prometheus-metric
+ s-tracer-common-1.7.0.jar file:/C:/Users/yassiveco/.gradle/caches/modul
+ es-2/files-2.1/io.prometheus/prometheus-metrics-exposition-formats/1.7.
+ 0/e1023556dc6cdcb7142c2635b586782610fdab10/prometheus-metrics-expositio
+ n-formats-1.7.0.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/f
+ iles-2.1/io.opentelemetry.instrumentation/opentelemetry-instrumentation
+ -annotations/2.28.1/840b24595b0a431a6ab8f56a79e488d9248c8107/openteleme
+ try-instrumentation-annotations-2.28.1.jar file:/C:/Users/yassiveco/.gr
+ adle/caches/modules-2/files-2.1/io.opentelemetry.instrumentation/opente
+ lemetry-resources/2.28.1-alpha/c26b1c3abd14f1d6b9ea551e13ba04eb83ef0391
+ /opentelemetry-resources-2.28.1-alpha.jar file:/C:/Users/yassiveco/.gra
+ dle/caches/modules-2/files-2.1/io.opentelemetry.instrumentation/opentel
+ emetry-kafka-clients-2.6/2.28.1-alpha/75de0992ec4abd7c6571e40451620c6d3
+ bae9fe2/opentelemetry-kafka-clients-2.6-2.28.1-alpha.jar file:/C:/Users
+ /yassiveco/.gradle/caches/modules-2/files-2.1/io.opentelemetry.instrume
+ ntation/opentelemetry-mongo-3.1/2.28.1-alpha/68359cdf66d3fbcf505327bb57
+ f6bf870e0fe632/opentelemetry-mongo-3.1-2.28.1-alpha.jar file:/C:/Users/
+ yassiveco/.gradle/caches/modules-2/files-2.1/io.opentelemetry.instrumen
+ tation/opentelemetry-spring-kafka-2.7/2.28.1-alpha/4984f63edd33b014bf41
+ 7c5105545d16bfc301a4/opentelemetry-spring-kafka-2.7-2.28.1-alpha.jar fi
+ le:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.openteleme
+ try.instrumentation/opentelemetry-spring-web-3.1/2.28.1-alpha/ca06bf02b
+ 42e7658304d5106c5eb344badf89979/opentelemetry-spring-web-3.1-2.28.1-alp
+ ha.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.o
+ pentelemetry.instrumentation/opentelemetry-spring-webmvc-5.3/2.28.1-alp
+ ha/3e2d7edfe64a35efc7c770b9cbfd598ccb299602/opentelemetry-spring-webmvc
+ -5.3-2.28.1-alpha.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2
+ /files-2.1/io.opentelemetry.instrumentation/opentelemetry-spring-webflu
+ x-5.3/2.28.1-alpha/88ab237dbdd69d0d1be25940043048cfbb19e77f/opentelemet
+ ry-spring-webflux-5.3-2.28.1-alpha.jar file:/C:/Users/yassiveco/.gradle
+ /caches/modules-2/files-2.1/io.opentelemetry.instrumentation/openteleme
+ try-micrometer-1.5/2.28.1-alpha/759cee91221291139b3adb36bd6c9c2ba0e27b1
+ 2/opentelemetry-micrometer-1.5-2.28.1-alpha.jar file:/C:/Users/yassivec
+ o/.gradle/caches/modules-2/files-2.1/io.opentelemetry.instrumentation/o
+ pentelemetry-log4j-appender-2.17/2.28.1-alpha/a5106ab17a8c979d6e015d590
+ cfbfa3b5c226220/opentelemetry-log4j-appender-2.17-2.28.1-alpha.jar file
+ :/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.opentelemetr
+ y.instrumentation/opentelemetry-logback-appender-1.0/2.28.1-alpha/159d4
+ 89d25dbe1b8c9333f3615687a7a3b412861/opentelemetry-logback-appender-1.0-
+ 2.28.1-alpha.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/file
+ s-2.1/io.opentelemetry.instrumentation/opentelemetry-logback-mdc-1.0/2.
+ 28.1-alpha/53ecb8f3f0a08d0bdb6c41a72982ffe959158989/opentelemetry-logba
+ ck-mdc-1.0-2.28.1-alpha.jar file:/C:/Users/yassiveco/.gradle/caches/mod
+ ules-2/files-2.1/io.opentelemetry.instrumentation/opentelemetry-jdbc/2.
+ 28.1-alpha/20b1da8abe058909e76627c24b43a07368a09489/opentelemetry-jdbc-
+ 2.28.1-alpha.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/file
+ s-2.1/io.opentelemetry.instrumentation/opentelemetry-runtime-telemetry/
+ 2.28.1-alpha/11502ca215756980f258a520925626dc27fac52f/opentelemetry-run
+ time-telemetry-2.28.1-alpha.jar file:/C:/Users/yassiveco/.gradle/caches
+ /modules-2/files-2.1/io.opentelemetry.instrumentation/opentelemetry-spr
+ ing-webmvc-6.0/2.28.1-alpha/7fb2e3e3ebace79ec9bd5cedaa6cc75d7ff11b79/op
+ entelemetry-spring-webmvc-6.0-2.28.1-alpha.jar file:/C:/Users/yassiveco
+ /.gradle/caches/modules-2/files-2.1/io.opentelemetry.instrumentation/op
+ entelemetry-kafka-clients-common-0.11/2.28.1-alpha/535dae3d1632504b0261
+ ece290a4759cda9a4954/opentelemetry-kafka-clients-common-0.11-2.28.1-alp
+ ha.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.o
+ pentelemetry.instrumentation/opentelemetry-reactor-3.1/2.28.1-alpha/ff4
+ 78d259005a28efd08c4c8a1babb6da8e333fe/opentelemetry-reactor-3.1-2.28.1-
+ alpha.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/i
+ o.opentelemetry.instrumentation/opentelemetry-log4j-context-data-2.17-a
+ utoconfigure/2.28.1-alpha/c831b8cb49b19fa39eec9ebd7772e326740713e/opent
+ elemetry-log4j-context-data-2.17-autoconfigure-2.28.1-alpha.jar file:/C
+ :/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.opentelemetry.i
+ nstrumentation/opentelemetry-instrumentation-api-incubator/2.28.1-alpha
+ /a1cf95ff857cf8c810b1f3b8e5b18094fbfb313b/opentelemetry-instrumentation
+ -api-incubator-2.28.1-alpha.jar file:/C:/Users/yassiveco/.gradle/caches
+ /modules-2/files-2.1/io.opentelemetry.instrumentation/opentelemetry-ins
+ trumentation-annotations-support/2.28.1-alpha/1f0c08d0cf1ce939afce963f1
+ 496d39942880d27/opentelemetry-instrumentation-annotations-support-2.28.
+ 1-alpha.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1
+ /io.opentelemetry.instrumentation/opentelemetry-instrumentation-api/2.2
+ 8.1/a774b7bcf0e96cabdfb461cd682c3d9448240d3e/opentelemetry-instrumentat
+ ion-api-2.28.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/fi
+ les-2.1/io.opentelemetry.semconv/opentelemetry-semconv-incubating/1.41.
+ 1-alpha/7dec8e7379076885ec75f1f19686d7a8e30317d5/opentelemetry-semconv-
+ incubating-1.41.1-alpha.jar file:/C:/Users/yassiveco/.gradle/caches/mod
+ ules-2/files-2.1/io.opentelemetry.semconv/opentelemetry-semconv/1.41.1/
+ e03d5a337bd4855b10852acbdbf8a59070746800/opentelemetry-semconv-1.41.1.j
+ ar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/com.zaxx
+ er/HikariCP/7.0.2/c2b43c946b86a14a96342379e22b004c56c6166d/HikariCP-7.0
+ .2.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.
+ thymeleaf/thymeleaf-spring6/3.1.5.RELEASE/d9dcb89be976a321df29518cc634d
+ 89a83973800/thymeleaf-spring6-3.1.5.RELEASE.jar file:/C:/Users/yassivec
+ o/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-classic/1.5
+ .38/bc5873cb4a7f502ce18ce2977d98ad26b9f96444/logback-classic-1.5.38.jar
+  file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.apache
+ .logging.log4j/log4j-to-slf4j/2.25.5/bafb12d62913815e040218e34c80d75ad6
+ db09c1/log4j-to-slf4j-2.25.5.jar file:/C:/Users/yassiveco/.gradle/cache
+ s/modules-2/files-2.1/org.slf4j/jul-to-slf4j/2.0.18/79739c98001d5c9d078
+ d087d5a348ec9e474ec8f/jul-to-slf4j-2.0.18.jar file:/C:/Users/yassiveco/
+ .gradle/caches/modules-2/files-2.1/org.thymeleaf/thymeleaf/3.1.5.RELEAS
+ E/8986b45086f74f7773c440055a2f473817dd3fa8/thymeleaf-3.1.5.RELEASE.jar 
+ file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/redis.clien
+ ts.authentication/redis-authx-core/0.1.1-beta2/4037345ff29fb22c737bab2e
+ d116a34262718ae5/redis-authx-core-0.1.1-beta2.jar file:/C:/Users/yassiv
+ eco/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/2.0.18/78a9e
+ 7a37cd6360e0b818e86341b24123d28d4df/slf4j-api-2.0.18.jar file:/C:/Users
+ /yassiveco/.gradle/caches/modules-2/files-2.1/io.opentelemetry/opentele
+ metry-sdk-extension-incubator/1.62.0-alpha/9d5abb12d16f514d1c2f48039243
+ d09520d7674e/opentelemetry-sdk-extension-incubator-1.62.0-alpha.jar fil
+ e:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.opentelemet
+ ry.contrib/opentelemetry-baggage-processor/1.57.0-alpha/4607ea4cdd3af78
+ 5389b27e9481c3582f9e41c95/opentelemetry-baggage-processor-1.57.0-alpha.
+ jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.open
+ telemetry/opentelemetry-exporter-logging/1.62.0/79ec5f1f23e00da7a8c8a30
+ 136cfbfaf9aa38f93/opentelemetry-exporter-logging-1.62.0.jar file:/C:/Us
+ ers/yassiveco/.gradle/caches/modules-2/files-2.1/io.opentelemetry/opent
+ elemetry-exporter-otlp-common/1.62.0/6f269df0e3f065fbd2e590458e7b2107cd
+ e2a106/opentelemetry-exporter-otlp-common-1.62.0.jar file:/C:/Users/yas
+ siveco/.gradle/caches/modules-2/files-2.1/io.opentelemetry/opentelemetr
+ y-exporter-sender-okhttp/1.62.0/19b5e023db9037a38fe2531afb6e44456e963fb
+ a/opentelemetry-exporter-sender-okhttp-1.62.0.jar file:/C:/Users/yassiv
+ eco/.gradle/caches/modules-2/files-2.1/io.opentelemetry/opentelemetry-e
+ xporter-common/1.62.0/2dafa6ae65cbf1aa321cd644d200f3ff8465284d/opentele
+ metry-exporter-common-1.62.0.jar file:/C:/Users/yassiveco/.gradle/cache
+ s/modules-2/files-2.1/io.opentelemetry.instrumentation/opentelemetry-de
+ clarative-config-bridge/2.28.1-alpha/44da26d391503e2a4ab30e91d183c5cf39
+ 013ab8/opentelemetry-declarative-config-bridge-2.28.1-alpha.jar file:/C
+ :/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.opentelemetry/o
+ pentelemetry-sdk-extension-autoconfigure/1.62.0/302abf92628ded497d03218
+ ccf9c652887a7da86/opentelemetry-sdk-extension-autoconfigure-1.62.0.jar 
+ file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.opentele
+ metry/opentelemetry-sdk-extension-autoconfigure-spi/1.62.0/99bbc1bf4cae
+ 62c793e6eaa3f41436e29710b876/opentelemetry-sdk-extension-autoconfigure-
+ spi-1.62.0.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-
+ 2.1/io.opentelemetry.contrib/opentelemetry-samplers/1.57.0-alpha/69e0a8
+ 28214e30da5d54ad8523c1e647fe99f619/opentelemetry-samplers-1.57.0-alpha.
+ jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.open
+ telemetry/opentelemetry-sdk/1.62.0/6fa52c4641322b14b8bd515eb048bb9b1365
+ d0c/opentelemetry-sdk-1.62.0.jar file:/C:/Users/yassiveco/.gradle/cache
+ s/modules-2/files-2.1/io.opentelemetry/opentelemetry-sdk-trace/1.62.0/7
+ a337d2f887b151d27e734d1c221eb51b1c5b734/opentelemetry-sdk-trace-1.62.0.
+ jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.open
+ telemetry/opentelemetry-sdk-metrics/1.62.0/5838371075930a4a15f7f61240b4
+ b64cb3e924d8/opentelemetry-sdk-metrics-1.62.0.jar file:/C:/Users/yassiv
+ eco/.gradle/caches/modules-2/files-2.1/io.opentelemetry/opentelemetry-s
+ dk-logs/1.62.0/f242422084100da0bd3a5f6f2bcf364aaf4d2c53/opentelemetry-s
+ dk-logs-1.62.0.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/fi
+ les-2.1/io.opentelemetry/opentelemetry-sdk-common/1.62.0/b6742282daab8e
+ 13598b78a83ddfa54f10b5752b/opentelemetry-sdk-common-1.62.0.jar file:/C:
+ /Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.opentelemetry/op
+ entelemetry-extension-trace-propagators/1.62.0/c7e77f33c8d67342ca389548
+ 552f423c006bf483/opentelemetry-extension-trace-propagators-1.62.0.jar f
+ ile:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.opentelem
+ etry/opentelemetry-api-incubator/1.62.0-alpha/91f3bcf6b93261cbaf32dd156
+ e0007aa5fa5b25a/opentelemetry-api-incubator-1.62.0-alpha.jar file:/C:/U
+ sers/yassiveco/.gradle/caches/modules-2/files-2.1/io.opentelemetry/open
+ telemetry-api/1.62.0/c4ee83d77005567852a72e08b945ebb023be1daa/opentelem
+ etry-api-1.62.0.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/f
+ iles-2.1/io.zonky.test.postgres/embedded-postgres-binaries-windows-amd6
+ 4/14.22.0/e6a6523c59a54855f9f373cfb28173e0e022fd0d/embedded-postgres-bi
+ naries-windows-amd64-14.22.0.jar file:/C:/Users/yassiveco/.gradle/cache
+ s/modules-2/files-2.1/io.zonky.test.postgres/embedded-postgres-binaries
+ -darwin-amd64/14.22.0/d640c7edc4343a62941eeda874464e7e44fa2e45/embedded
+ -postgres-binaries-darwin-amd64-14.22.0.jar file:/C:/Users/yassiveco/.g
+ radle/caches/modules-2/files-2.1/io.zonky.test.postgres/embedded-postgr
+ es-binaries-linux-amd64/14.22.0/bbda6f548e3268c7b0ca24530cd3933b9c25112
+ 5/embedded-postgres-binaries-linux-amd64-14.22.0.jar file:/C:/Users/yas
+ siveco/.gradle/caches/modules-2/files-2.1/io.zonky.test.postgres/embedd
+ ed-postgres-binaries-linux-amd64-alpine/14.22.0/85c3546cea606c72adf2e26
+ 4b27af8acd9f7042d/embedded-postgres-binaries-linux-amd64-alpine-14.22.0
+ .jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/com.op
+ encsv/opencsv/5.12.0/bc55d53c0961f8b191c96276e778a9ec67f7dd58/opencsv-5
+ .12.0.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/o
+ rg.apache.commons/commons-text/1.15.0/9899093aa40f0199d6c39b131b8f087cd
+ b37e399/commons-text-1.15.0.jar file:/C:/Users/yassiveco/.gradle/caches
+ /modules-2/files-2.1/org.apache.commons/commons-lang3/3.20.0/65897b3e57
+ 31220962e659e001904af3c3cbeba9/commons-lang3-3.20.0.jar file:/C:/Users/
+ yassiveco/.gradle/caches/modules-2/files-2.1/org.tukaani/xz/1.11/bdfd17
+ 74efb216f506f4f3c5b08c205b308c50aa/xz-1.11.jar file:/C:/Users/yassiveco
+ /.gradle/caches/modules-2/files-2.1/com.google.guava/guava/32.1.3-jre/f
+ 306708742ce2bf0fb0901216183bc14073feae/guava-32.1.3-jre.jar file:/C:/Us
+ ers/yassiveco/.gradle/caches/modules-2/files-2.1/org.checkerframework/c
+ hecker-qual/3.55.1/3d40699936a66b2d4c1f759f2f1a0446c8cf64fc/checker-qua
+ l-3.55.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.
+ 1/com.carrotsearch.thirdparty/simple-xml-safe/2.7.1/45fda5ac6087bc82a20
+ 9d8cdb73f8d0dbdcfc7b/simple-xml-safe-2.7.1.jar file:/C:/Users/yassiveco
+ /.gradle/caches/modules-2/files-2.1/org.bouncycastle/bcprov-jdk18on/1.7
+ 6/3a785d0b41806865ad7e311162bfa3fa60b3965b/bcprov-jdk18on-1.76.jar file
+ :/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.xerial.snap
+ py/snappy-java/1.1.10.5/ac605269f3598506196e469f1fb0d7ed5c55059e/snappy
+ -java-1.1.10.5.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/fi
+ les-2.1/org.javassist/javassist/3.30.2-GA/284580b5e42dfa1b8267058566435
+ d9e93fae7f7/javassist-3.30.2-GA.jar file:/C:/Users/yassiveco/.gradle/ca
+ ches/modules-2/files-2.1/jakarta.annotation/jakarta.annotation-api/3.0.
+ 0/54f928fadec906a99d558536756d171917b9d936/jakarta.annotation-api-3.0.0
+ .jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.ya
+ ml/snakeyaml/2.6/2bc14918a2f8d5414749ab12d0c590cd3198b8c1/snakeyaml-2.6
+ .jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/com.go
+ oglecode.json-simple/json-simple/1.1.1/c9ad4a0850ab676c5c64461a05ca524c
+ dfff59f1/json-simple-1.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/
+ modules-2/files-2.1/org.apache.commons/commons-collections4/4.5.0/e5cf8
+ 9f0c6e132fc970bd9a465fdcb8dbe94f75a/commons-collections4-4.5.0.jar file
+ :/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.apache.comm
+ ons/commons-math3/3.6.1/e4ba98f1d4b3c80ec46392f25e094a6a2e58fcbf/common
+ s-math3-3.6.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/fil
+ es-2.1/com.zaxxer/SparseBitSet/1.3/533eac055afe3d5f614ea95e333afd6c2bde
+ 8f26/SparseBitSet-1.3.jar file:/C:/Users/yassiveco/.gradle/caches/modul
+ es-2/files-2.1/org.apache.poi/poi-ooxml-lite/5.2.5/eaa61452d8f0d13080fb
+ b4757a392f09f90e4c49/poi-ooxml-lite-5.2.5.jar file:/C:/Users/yassiveco/
+ .gradle/caches/modules-2/files-2.1/org.apache.xmlbeans/xmlbeans/5.2.0/6
+ 198ac997b3f234f2b5393fa415f78fac2e06510/xmlbeans-5.2.0.jar file:/C:/Use
+ rs/yassiveco/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4
+ j/log4j-api/2.25.5/6c80ea65e41f7858f7e15cb390c98c36167c7b3a/log4j-api-2
+ .25.5.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/c
+ om.github.virtuald/curvesapi/1.08/3d3d36568154059825089b289dcfca481fe44
+ e2c/curvesapi-1.08.jar file:/C:/Users/yassiveco/.gradle/caches/modules-
+ 2/files-2.1/org.apache.pdfbox/fontbox/3.0.3/9eebd1ee868a79fcf7390283b2b
+ af4179dadb8ed/fontbox-3.0.3.jar file:/C:/Users/yassiveco/.gradle/caches
+ /modules-2/files-2.1/org.apache.pdfbox/pdfbox-io/3.0.3/c40dcf555b72b1d8
+ c0cd19391d63e5b58382b9cb/pdfbox-io-3.0.3.jar file:/C:/Users/yassiveco/.
+ gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.3.6
+ /63e78ca6cd446c0ad166d14f03ed99e7efb3896d/commons-logging-1.3.6.jar fil
+ e:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.springfram
+ ework/spring-aspects/7.0.9/c1a59e3288b75d061034da5a9af4e254d9cd4c82/spr
+ ing-aspects-7.0.9.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2
+ /files-2.1/org.apache.tomcat.embed/tomcat-embed-el/11.0.24/3eafa072a45e
+ 67081452e56576ab4fe68b525fb5/tomcat-embed-el-11.0.24.jar file:/C:/Users
+ /yassiveco/.gradle/caches/modules-2/files-2.1/org.hibernate.validator/h
+ ibernate-validator/9.1.3.Final/1873374b24290d273160e998cb57bfe0f0a5d584
+ /hibernate-validator-9.1.3.Final.jar file:/C:/Users/yassiveco/.gradle/c
+ aches/modules-2/files-2.1/org.hdrhistogram/HdrHistogram/2.2.2/7959933eb
+ cc0f05b2eaa5af0a0c8689fa257b15c/HdrHistogram-2.2.2.jar file:/C:/Users/y
+ assiveco/.gradle/caches/modules-2/files-2.1/io.prometheus/prometheus-me
+ trics-exposition-textformats/1.7.0/c94fc72615c1943e01e4bf4a8451a9c7e91a
+ c213/prometheus-metrics-exposition-textformats-1.7.0.jar file:/C:/Users
+ /yassiveco/.gradle/caches/modules-2/files-2.1/io.prometheus/prometheus-
+ metrics-model/1.7.0/d953f718cf1f62af34f7bf2545645c1f6f4698d5/prometheus
+ -metrics-model-1.7.0.jar file:/C:/Users/yassiveco/.gradle/caches/module
+ s-2/files-2.1/io.prometheus/prometheus-metrics-config/1.7.0/739329fa28a
+ 2372515f14c875d4012b32e17df09/prometheus-metrics-config-1.7.0.jar file:
+ /C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.opentelemetry
+ /opentelemetry-context/1.62.0/365cee4d1f365e4d4a05654742b50aa436c2dd8e/
+ opentelemetry-context-1.62.0.jar file:/C:/Users/yassiveco/.gradle/cache
+ s/modules-2/files-2.1/io.opentelemetry/opentelemetry-common/1.62.0/e646
+ 8bd64a94429b68761f7c13e143c3fdfaafc7/opentelemetry-common-1.62.0.jar fi
+ le:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/aopalliance/a
+ opalliance/1.0/235ba8b489512805ac13a8f9ea77a1ca5ebe3e8/aopalliance-1.0.
+ jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/com.goo
+ gle.guava/failureaccess/1.0.1/1dcf1de382a0bf95a3d8b0849546c88bac1292c9/
+ failureaccess-1.0.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules
+ -2/files-2.1/com.google.guava/listenablefuture/9999.0-empty-to-avoid-co
+ nflict-with-guava/b421526c5f297295adef1c886e5246c39d4ac629/listenablefu
+ ture-9999.0-empty-to-avoid-conflict-with-guava.jar file:/C:/Users/yassi
+ veco/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305
+ /3.0.2/25ea2e8b0c338a877313bd4672d3fe056ea78f0d/jsr305-3.0.2.jar file:/
+ C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/com.google.errorp
+ rone/error_prone_annotations/2.21.1/6d9b10773b5237df178a7b3c1b4208df7d0
+ e7f94/error_prone_annotations-2.21.1.jar file:/C:/Users/yassiveco/.grad
+ le/caches/modules-2/files-2.1/org.reactivestreams/reactive-streams/1.0.
+ 4/3864a1320d97d7b045f729a326e1e077661f31b7/reactive-streams-1.0.4.jar f
+ ile:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.antlr/an
+ tlr4-runtime/4.13.2/fc3db6d844df652a3d5db31c87fa12757f13691d/antlr4-run
+ time-4.13.2.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files
+ -2.1/org.aspectj/aspectjweaver/1.9.25.1/a713c790da4d794c7dfb542b550d4e4
+ 4898d5e23/aspectjweaver-1.9.25.1.jar file:/C:/Users/yassiveco/.gradle/c
+ aches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-websocke
+ t/11.0.24/8cd43556888f042c90115d54b124a4648f2b413f/tomcat-embed-websock
+ et-11.0.24.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-
+ 2.1/org.apache.tomcat.embed/tomcat-embed-core/11.0.24/172bb449cba1a8ffc
+ ffa249727907602a4cc899/tomcat-embed-core-11.0.24.jar file:/C:/Users/yas
+ siveco/.gradle/caches/modules-2/files-2.1/jakarta.validation/jakarta.va
+ lidation-api/3.1.1/ec8622148afc5564235d17af80ea80288d0e7f92/jakarta.val
+ idation-api-3.1.1.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2
+ /files-2.1/org.hibernate.models/hibernate-models/1.1.1/c890a4cc781fd872
+ 0e0e2613b4a24b33cdaa80a1/hibernate-models-1.1.1.jar file:/C:/Users/yass
+ iveco/.gradle/caches/modules-2/files-2.1/org.jboss.logging/jboss-loggin
+ g/3.6.3.Final/1cc9f976725720bb4a66f80af3e3aa6b9890d969/jboss-logging-3.
+ 6.3.Final.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2
+ .1/com.fasterxml/classmate/1.7.3/f61c7e7b81e9249b0f6a05914eff9d54fb09f4
+ a0/classmate-1.7.3.jar file:/C:/Users/yassiveco/.gradle/caches/modules-
+ 2/files-2.1/org.snakeyaml/snakeyaml-engine/2.10/20f311f742d6894de0750b9
+ 2414b3c27a40bb9d5/snakeyaml-engine-2.10.jar file:/C:/Users/yassiveco/.g
+ radle/caches/modules-2/files-2.1/javax.validation/validation-api/2.0.1.
+ Final/cb855558e6271b1b32e716d24cb85c7f583ce09e/validation-api-2.0.1.Fin
+ al.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/com.
+ squareup.okhttp3/okhttp-jvm/5.3.2/f31e8de27feebe1e56d6c9d354a0986b65be0
+ e1d/okhttp-jvm-5.3.2.jar file:/C:/Users/yassiveco/.gradle/caches/module
+ s-2/files-2.1/io.netty/netty-resolver-dns/4.2.17.Final/1f42702711fab2b4
+ 4e8aa8be4ccbd23441ea9024/netty-resolver-dns-4.2.17.Final.jar file:/C:/U
+ sers/yassiveco/.gradle/caches/modules-2/files-2.1/io.netty/netty-handle
+ r/4.2.17.Final/ed53dae90d09306b42bc886fa292510abdf5c5dc/netty-handler-4
+ .2.17.Final.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files
+ -2.1/io.netty/netty-transport-native-unix-common/4.2.17.Final/c404f2366
+ b51136d4a2fde678eec95be6d10ca16/netty-transport-native-unix-common-4.2.
+ 17.Final.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.
+ 1/io.netty/netty-codec-dns/4.2.17.Final/300fd8d673cf801b36bfae0f2557d46
+ ebc9658e5/netty-codec-dns-4.2.17.Final.jar file:/C:/Users/yassiveco/.gr
+ adle/caches/modules-2/files-2.1/io.netty/netty-codec-base/4.2.17.Final/
+ 7034de26b574322f365c790b9d6eb0634edab854/netty-codec-base-4.2.17.Final.
+ jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.nett
+ y/netty-transport/4.2.17.Final/34335dc106caa0aefc242900d38ade65c8de64f4
+ /netty-transport-4.2.17.Final.jar file:/C:/Users/yassiveco/.gradle/cach
+ es/modules-2/files-2.1/io.netty/netty-resolver/4.2.17.Final/6cba9d93bb0
+ 6297cef0b7ac34e3873b6a25b4e3b/netty-resolver-4.2.17.Final.jar file:/C:/
+ Users/yassiveco/.gradle/caches/modules-2/files-2.1/io.netty/netty-buffe
+ r/4.2.17.Final/daba397ff4ce7b22f6ac1e1f419e6e7754c135be/netty-buffer-4.
+ 2.17.Final.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-
+ 2.1/io.netty/netty-common/4.2.17.Final/57fa9e9af0bf70530e2fe1c8c8d6138f
+ 9167cf7a/netty-common-4.2.17.Final.jar file:/C:/Users/yassiveco/.gradle
+ /caches/modules-2/files-2.1/ch.qos.logback/logback-core/1.5.38/7b1d133b
+ 29bf42ff268cf3f71d1308b80480fb8d/logback-core-1.5.38.jar file:/C:/Users
+ /yassiveco/.gradle/caches/modules-2/files-2.1/jakarta.persistence/jakar
+ ta.persistence-api/3.2.0/bb75a113f3fa191c2c7ee7b206d8e674251b3129/jakar
+ ta.persistence-api-3.2.0.jar file:/C:/Users/yassiveco/.gradle/caches/mo
+ dules-2/files-2.1/net.bytebuddy/byte-buddy/1.18.11/8fcc3779ff85fae5164c
+ d1b977798ca1af388e06/byte-buddy-1.18.11.jar file:/C:/Users/yassiveco/.g
+ radle/caches/modules-2/files-2.1/org.glassfish.jaxb/jaxb-runtime/4.0.9/
+ 500c199572538675d2819c938fbafe34935d8d6b/jaxb-runtime-4.0.9.jar file:/C
+ :/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.glassfish.jaxb
+ /jaxb-core/4.0.9/3f32ec949d109d666fa30994223d1c25a47b105f/jaxb-core-4.0
+ .9.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/jaka
+ rta.xml.bind/jakarta.xml.bind-api/4.0.5/161811f36cad3c65991502e80317f2f
+ 6703361df/jakarta.xml.bind-api-4.0.5.jar file:/C:/Users/yassiveco/.grad
+ le/caches/modules-2/files-2.1/jakarta.inject/jakarta.inject-api/2.0.1/4
+ c28afe1991a941d7702fe1362c365f0a8641d1e/jakarta.inject-api-2.0.1.jar fi
+ le:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/jakarta.trans
+ action/jakarta.transaction-api/2.0.1/51a520e3fae406abb84e2e1148e6746ce3
+ f80a1a/jakarta.transaction-api-2.0.1.jar file:/C:/Users/yassiveco/.grad
+ le/caches/modules-2/files-2.1/com.nimbusds/nimbus-jose-jwt/10.9.1/82ab1
+ 5c57686545d989dd2c82cbec5b6b6f1c860/nimbus-jose-jwt-10.9.1.jar file:/C:
+ /Users/yassiveco/.gradle/caches/modules-2/files-2.1/com.squareup.okio/o
+ kio-jvm/3.16.4/ceb794cf0bbf8d0d20f49aa91ce20db7fd77675d/okio-jvm-3.16.4
+ .jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.je
+ tbrains.kotlin/kotlin-stdlib/2.3.21/a2ee2c4e220fee522f0451b723bab2a43f3
+ 481a7/kotlin-stdlib-2.3.21.jar file:/C:/Users/yassiveco/.gradle/caches/
+ modules-2/files-2.1/org.attoparser/attoparser/2.0.7.RELEASE/e5d0e988d91
+ 24139d645bb5872b24dfa23e283cc/attoparser-2.0.7.RELEASE.jar file:/C:/Use
+ rs/yassiveco/.gradle/caches/modules-2/files-2.1/org.unbescape/unbescape
+ /1.1.6.RELEASE/7b90360afb2b860e09e8347112800d12c12b2a13/unbescape-1.1.6
+ .RELEASE.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.
+ 1/org.eclipse.angus/angus-activation/2.0.3/7f80607ea5014fef0b1779e6c33d
+ 63a88a45a563/angus-activation-2.0.3.jar file:/C:/Users/yassiveco/.gradl
+ e/caches/modules-2/files-2.1/jakarta.activation/jakarta.activation-api/
+ 2.1.4/9e5c2a0d75dde71a0bedc4dbdbe47b78a5dc50f8/jakarta.activation-api-2
+ .1.4.jar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/or
+ g.springframework.security/spring-security-crypto/7.1.1/5356e8056e4dcb1
+ 8b12550c422fb12e0c8e742ae/spring-security-crypto-7.1.1.jar file:/C:/Use
+ rs/yassiveco/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotatio
+ ns/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar f
+ ile:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/org.glassfis
+ h.jaxb/txw2/4.0.9/70325ebdebca3e7aae1dfa395fd41fc25d8a6f4e/txw2-4.0.9.j
+ ar file:/C:/Users/yassiveco/.gradle/caches/modules-2/files-2.1/com.sun.
+ istack/istack-commons-runtime/4.1.2/18ec117c85f3ba0ac65409136afa8e42bc7
+ 4e739/istack-commons-runtime-4.1.2.jar
+

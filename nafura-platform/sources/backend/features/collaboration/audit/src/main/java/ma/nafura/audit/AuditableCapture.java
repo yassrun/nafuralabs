@@ -14,8 +14,12 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * Queues audit rows and flushes them before commit so Hibernate interceptors
- * never persist {@code AuditEvent} mid-flush (which would recurse).
+ * Queues audit rows and writes them in {@code beforeCompletion} via {@link #flushPending()}
+ * so Hibernate interceptors never persist {@code AuditEvent} mid-flush (which would recurse).
+ * {@code beforeCompletion} is required: when capture runs from an interceptor during the
+ * commit flush, a sync registered then is too late for {@code beforeCommit} (Spring walks a
+ * snapshot). The writer must not be named {@code flush()} — that resolves to
+ * {@link TransactionSynchronization#flush()} inside the sync and would no-op.
  *
  * <p>Dedupes hook + interceptor for the same entity/action in one transaction.
  */
@@ -65,17 +69,19 @@ public class AuditableCapture {
             return;
         }
         String id = assignedId != null ? assignedId.toString() : AuditableIds.of(entity);
-        if (id == null || !seen(AuditActions.UPDATE, meta.entityType(), id)) {
-            return;
-        }
         String[] fields = meta.trackedFields();
         Map<String, Object> payload = AuditPayloadBuilder.changes(beforeSnapshot, entity, fields);
         if (isEmptyChanges(payload)) {
             return;
         }
-        enqueue(meta.entityType(), id, AuditActions.UPDATE,
-                AuditDetails.updated(meta.entityType(), entity, beforeSnapshot, payload),
-                payload);
+        String action = isStatusOnlyChange(payload) ? AuditActions.STATUS_CHANGE : AuditActions.UPDATE;
+        if (id == null || !seen(action, meta.entityType(), id)) {
+            return;
+        }
+        String details = action.equals(AuditActions.STATUS_CHANGE)
+                ? AuditDetails.statusChanged(meta.entityType(), payload)
+                : AuditDetails.updated(meta.entityType(), entity, beforeSnapshot, payload);
+        enqueue(meta.entityType(), id, action, details, payload);
     }
 
     public void afterDelete(Object entity) {
@@ -105,7 +111,15 @@ public class AuditableCapture {
         if (type.getName().contains("AuditEvent") || type.getName().contains("IntegrationError")) {
             return null;
         }
-        return type.getAnnotation(Auditable.class);
+        // Proxies / bytecode-enhanced subclasses do not redeclare @Auditable.
+        while (type != null && type != Object.class) {
+            Auditable found = type.getAnnotation(Auditable.class);
+            if (found != null) {
+                return found;
+            }
+            type = type.getSuperclass();
+        }
+        return null;
     }
 
     private boolean seen(String action, String entityType, String entityId) {
@@ -120,10 +134,18 @@ public class AuditableCapture {
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             if (Boolean.FALSE.equals(REGISTERED.get())) {
                 REGISTERED.set(Boolean.TRUE);
+                // beforeCompletion — not beforeCommit: Hibernate may flush during another
+                // sync's beforeCommit (interceptor path). Spring's beforeCommit walks a
+                // snapshot, so a sync registered mid-flush would never run beforeCommit.
+                // beforeCompletion still sees us; on rollback the AuditEvent joins the
+                // same TX and is discarded with it.
+                //
+                // Method must not be named flush(): TransactionSynchronization declares
+                // default flush(), and an unqualified flush() inside the sync would no-op.
                 TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                     @Override
-                    public void beforeCommit(boolean readOnly) {
-                        flush();
+                    public void beforeCompletion() {
+                        flushPending();
                     }
 
                     @Override
@@ -133,12 +155,12 @@ public class AuditableCapture {
                 });
             }
         } else {
-            flush();
+            flushPending();
             clear();
         }
     }
 
-    private void flush() {
+    private void flushPending() {
         List<Pending> pending = List.copyOf(QUEUE.get());
         QUEUE.get().clear();
         AuditService auditService = auditService();
@@ -175,6 +197,24 @@ public class AuditableCapture {
         }
         Object changes = payload.get("changes");
         return !(changes instanceof List<?> list) || list.isEmpty();
+    }
+
+    /** Lifecycle transitions typically touch only {@code status} among tracked fields. */
+    @SuppressWarnings("unchecked")
+    static boolean isStatusOnlyChange(Map<String, Object> payload) {
+        if (payload == null) {
+            return false;
+        }
+        Object changes = payload.get("changes");
+        if (!(changes instanceof List<?> list) || list.size() != 1) {
+            return false;
+        }
+        Object first = list.get(0);
+        if (!(first instanceof Map<?, ?> m)) {
+            return false;
+        }
+        Object field = m.get("field");
+        return field != null && "status".equals(field.toString());
     }
 
     private record Pending(

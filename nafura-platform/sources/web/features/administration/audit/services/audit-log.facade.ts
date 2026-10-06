@@ -68,7 +68,7 @@ export class AuditLogFacade {
         { key: 'create', value: 'Create' },
         { key: 'update', value: 'Update' },
         { key: 'delete', value: 'Delete' },
-        { key: 'status_change', value: 'Status change' },
+        { key: 'status_change', value: 'Changement de statut' },
         { key: 'publish', value: 'Publish' },
         { key: 'approve', value: 'Approve' },
         { key: 'reject', value: 'Reject' },

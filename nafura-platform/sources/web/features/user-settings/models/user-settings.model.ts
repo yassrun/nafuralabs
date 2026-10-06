@@ -25,6 +25,15 @@ export interface UserPreferencesSettings {
   dateFormat: string | null;
 }
 
+export type DigestFrequency = 'none' | 'daily' | 'weekly';
+
+/** GET|PUT /api/v1/user-settings/notifications — digest only is driven by the UI (spec 15). */
+export interface UserNotificationSettings {
+  emailNotifications: boolean;
+  inAppNotifications: boolean;
+  digestFrequency: DigestFrequency;
+}
+
 export interface ActiveSession {
   id: string;
   deviceName: string;

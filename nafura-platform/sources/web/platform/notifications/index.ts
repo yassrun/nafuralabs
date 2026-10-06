@@ -4,6 +4,8 @@ export { PlatformNotificationCenterComponent } from './notification-center.compo
 export { PlatformNotificationPreferencesComponent } from './notification-preferences.component';
 export { PREFERENCE_CHANNELS, channelEnabled, channelLocked } from './notification-preferences';
 export { PlatformNotificationsService } from './notifications.service';
+export { PlatformNotificationStreamService } from './notification-stream.service';
+export type { PlatformNotificationStreamPayload } from './notification-stream.service';
 export { PlatformNotificationsApiService, resolveNotificationRoute } from './notifications-api.service';
 export { notificationSourceLabel } from './notification-source';
 export type {

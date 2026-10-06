@@ -8,6 +8,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Legacy alert-rule table — unused by the NotificationRouter. Kept for Sektor until host migration.
+ * @deprecated Do not extend; remove once Sektor is off this schema.
+ */
+@Deprecated
 @Entity
 @Table(name = "alert_rules")
 @Data

@@ -16,7 +16,7 @@ public final class AuditActions {
     public static final String UPDATE = "update";
     /** Entity deleted (auto when @Auditable). */
     public static final String DELETE = "delete";
-    /** Status field changed (manual). */
+    /** Status field changed (auto when @Auditable and only {@code status} differs among tracked fields). */
     public static final String STATUS_CHANGE = "status_change";
     /** Record published (manual). */
     public static final String PUBLISH = "publish";

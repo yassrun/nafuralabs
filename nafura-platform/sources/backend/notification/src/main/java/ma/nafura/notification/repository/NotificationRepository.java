@@ -47,6 +47,18 @@ public interface NotificationRepository extends TenantScopedRepository<Notificat
             @Param("before") OffsetDateTime before);
 
     java.util.List<Notification> findByTenantIdAndIsReadFalse(UUID tenantId);
+
+    @Query("SELECT n FROM Notification n WHERE n.tenantId = :tenantId AND n.channel = 'in_app' "
+            + "AND n.digestedAt IS NULL ORDER BY n.recipientId, n.sentAt ASC")
+    java.util.List<Notification> findUndigestedInApp(@Param("tenantId") UUID tenantId);
+
+    @Modifying
+    @Query("UPDATE Notification n SET n.digestedAt = :now, n.updatedAt = :now "
+            + "WHERE n.tenantId = :tenantId AND n.id IN :ids AND n.digestedAt IS NULL")
+    int markDigested(
+            @Param("tenantId") UUID tenantId,
+            @Param("ids") Collection<UUID> ids,
+            @Param("now") OffsetDateTime now);
 }
 
 

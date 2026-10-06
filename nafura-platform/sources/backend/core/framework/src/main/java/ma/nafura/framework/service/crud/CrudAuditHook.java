@@ -4,8 +4,10 @@ import java.util.Map;
 
 /**
  * Optional hook for auditing CRUD operations.
- * When a bean implementing this interface is present, {@link JpaCrudService} will call it
- * after create/update/delete. Implementations can no-op for entities that are not auditable.
+ * When a bean implementing this interface is present, {@link JpaCrudService} and
+ * {@link ma.nafura.platform.framework.record.RecordController} call it after
+ * create/update/delete (and lifecycle transitions). Implementations no-op for
+ * entities that are not {@link ma.nafura.platform.framework.audit.Auditable}.
  */
 public interface CrudAuditHook {
 

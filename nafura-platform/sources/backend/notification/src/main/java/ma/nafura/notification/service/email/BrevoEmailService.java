@@ -112,10 +112,15 @@ public class BrevoEmailService implements EmailService {
             throw new IllegalArgumentException("At least one 'to' recipient is required");
         }
         try {
+            if (fromAddress == null || fromAddress.isBlank()) {
+                throw new EmailException("Brevo sender email is missing (app.email.from-address)");
+            }
             ObjectNode body = objectMapper.createObjectNode();
             ObjectNode sender = body.putObject("sender");
-            sender.put("email", fromAddress);
-            sender.put("name", fromName);
+            sender.put("email", fromAddress.trim());
+            if (fromName != null && !fromName.isBlank()) {
+                sender.put("name", fromName.trim());
+            }
 
             ArrayNode toNodes = body.putArray("to");
             for (String email : to) {
@@ -147,10 +152,12 @@ public class BrevoEmailService implements EmailService {
                 }
             }
 
+            // JsonNode as body can be serialized empty by RestClient; send explicit JSON bytes.
+            byte[] payload = objectMapper.writeValueAsBytes(body);
             restClient.post()
                 .uri("/smtp/email")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(body)
+                .body(payload)
                 .retrieve()
                 .toBodilessEntity();
 

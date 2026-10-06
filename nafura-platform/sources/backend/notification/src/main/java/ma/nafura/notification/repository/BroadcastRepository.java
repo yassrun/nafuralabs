@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
+/** @deprecated See {@link Broadcast}. */
+@Deprecated
 @Repository
 public interface BroadcastRepository extends TenantScopedRepository<Broadcast, UUID> {
 }

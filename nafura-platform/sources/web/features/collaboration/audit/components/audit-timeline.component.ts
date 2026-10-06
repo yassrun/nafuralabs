@@ -6,9 +6,12 @@
 
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuditApiService, AuditEventDto } from '../services/audit-api.service';
+import { buildAuditDetailsLine, effectiveAuditAction } from '../audit-entry.util';
 import { AuditTrailComponent, AuditTrailEntry } from '../../../../lib/anatomy/components/organisms/audit-trail/audit-trail.component';
+import { AuditEntryDetailDialogComponent } from './audit-entry-detail-dialog.component';
 
 const PAGE_SIZE = 20;
 
@@ -81,11 +84,14 @@ const ACTION_META: Record<string, { icon: string; iconClass: string }> = {
 export class AuditTimelineComponent {
   private readonly api = inject(AuditApiService);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   entityType = input.required<string>();
   entityId = input.required<string>();
   /** When false, does not load until set to true (e.g. tab active). */
   active = input<boolean>(true);
+  /** Bump after save/transition to reload the timeline without remounting. */
+  refreshToken = input<number>(0);
   titleKey = input<string>('audit.timeline.title');
   searchPlaceholderKey = input<string>('audit.timeline.search');
   emptyKey = input<string>('audit.timeline.empty');
@@ -117,20 +123,24 @@ export class AuditTimelineComponent {
     const events = this.rawEvents();
     const translate = this.translate;
     return events.map((e) => {
-      const meta = ACTION_META[e.action] ?? { icon: 'circle', iconClass: 'nf-audit-trail__icon-wrap--gray' };
-      const verbKey = `audit.action.${e.action}`;
-      const verb = translate.instant(verbKey) !== verbKey ? translate.instant(verbKey) : e.action;
-      const details = buildDetailsLine(e);
+      const action = effectiveAuditAction(e.action, e.payload);
+      const meta = ACTION_META[action] ?? { icon: 'circle', iconClass: 'nf-audit-trail__icon-wrap--gray' };
+      const verbKey = `audit.action.${action}`;
+      const verb = translate.instant(verbKey) !== verbKey ? translate.instant(verbKey) : action;
+      const details = buildAuditDetailsLine(e, translate);
       return {
         id: e.id,
         actor: e.actor,
-        action: e.action,
+        action,
         at: e.eventAt,
         details: details ?? e.details ?? undefined,
         target: undefined,
         verb,
         icon: meta.icon,
         iconClass: meta.iconClass,
+        payload: e.payload,
+        entityType: e.entityType,
+        entityId: e.entityId,
       };
     });
   });
@@ -140,6 +150,7 @@ export class AuditTimelineComponent {
       const et = this.entityType();
       const eid = this.entityId();
       const active = this.active();
+      this.refreshToken();
       if (active && et && eid) {
         this.loadFirstPage(et, eid);
       }
@@ -187,16 +198,21 @@ export class AuditTimelineComponent {
     });
   }
 
-  onEntryClick(_entry: AuditTrailEntry): void {}
-}
-
-function buildDetailsLine(e: AuditEventDto): string | undefined {
-  const changes = e.payload?.['changes'] as Array<{ field?: string; from?: unknown; to?: unknown }> | undefined;
-  if (Array.isArray(changes) && changes.length > 0) {
-    if (e.action === 'status_change' && changes.length === 1 && changes[0].field === 'status') {
-      return `${changes[0].from} → ${changes[0].to}`;
-    }
-    return changes.map((c) => `${c.field}: ${c.from} → ${c.to}`).join(', ');
+  onEntryClick(entry: AuditTrailEntry): void {
+    const data: AuditEventDto = {
+      id: entry.id,
+      entityType: entry.entityType ?? this.entityType(),
+      entityId: entry.entityId ?? this.entityId(),
+      action: entry.action,
+      actor: entry.actor,
+      eventAt: entry.at,
+      details: entry.details,
+      payload: entry.payload,
+    };
+    this.dialog.open(AuditEntryDetailDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      data,
+    });
   }
-  return undefined;
 }

@@ -59,6 +59,10 @@ public class Notification {
     @Column(name = "sent_at", nullable = false)
     private OffsetDateTime sentAt;
 
+    /** Set when the row was included in an e-mail digest; null = eligible for the next digest. */
+    @Column(name = "digested_at")
+    private OffsetDateTime digestedAt;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 

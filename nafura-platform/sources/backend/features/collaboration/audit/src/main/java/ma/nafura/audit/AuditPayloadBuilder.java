@@ -2,15 +2,18 @@ package ma.nafura.platform.collaboration.audit;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Builds audit payloads with field-level diffs and snapshots.
  * Supports nested fields via dot notation (e.g. {@code address.city}).
+ * Values are JSON-safe (dates → ISO strings, UUID → string) for Hibernate JSONB.
  */
 public final class AuditPayloadBuilder {
 
@@ -34,8 +37,8 @@ public final class AuditPayloadBuilder {
         List<Map<String, Object>> changeList = new ArrayList<>();
         for (String field : fields) {
             if (field == null || field.isBlank()) continue;
-            Object fromVal = getValue(before, field);
-            Object toVal = getValue(after, field);
+            Object fromVal = jsonSafe(getValue(before, field));
+            Object toVal = jsonSafe(getValue(after, field));
             if (Objects.equals(fromVal, toVal)) continue;
             Map<String, Object> entry = new HashMap<>();
             entry.put("field", field);
@@ -54,8 +57,7 @@ public final class AuditPayloadBuilder {
         Map<String, Object> map = new HashMap<>();
         for (String field : fields) {
             if (field == null || field.isBlank()) continue;
-            Object value = getValue(entity, field);
-            map.put(field, value);
+            map.put(field, jsonSafe(getValue(entity, field)));
         }
         return map;
     }
@@ -98,6 +100,39 @@ public final class AuditPayloadBuilder {
             current = readProperty(current, segment);
         }
         return current;
+    }
+
+    /** Values that Hibernate's JSON mapper can write without JavaTimeModule. */
+    static Object jsonSafe(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof UUID uuid) {
+            return uuid.toString();
+        }
+        if (value instanceof TemporalAccessor temporal) {
+            return temporal.toString();
+        }
+        if (value instanceof Enum<?> e) {
+            return e.name();
+        }
+        if (value instanceof Map<?, ?> map) {
+            Map<String, Object> copy = new HashMap<>();
+            map.forEach((k, v) -> {
+                if (k != null) {
+                    copy.put(k.toString(), jsonSafe(v));
+                }
+            });
+            return copy;
+        }
+        if (value instanceof List<?> list) {
+            List<Object> copy = new ArrayList<>(list.size());
+            for (Object item : list) {
+                copy.add(jsonSafe(item));
+            }
+            return copy;
+        }
+        return value;
     }
 
     private static Object readProperty(Object entity, String property) {

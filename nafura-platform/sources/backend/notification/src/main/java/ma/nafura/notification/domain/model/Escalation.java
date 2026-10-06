@@ -8,6 +8,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Legacy escalation table — unused by the NotificationRouter (workflow escalation is separate).
+ * @deprecated Do not extend; remove once Sektor is off this schema.
+ */
+@Deprecated
 @Entity
 @Table(name = "escalations")
 @Data

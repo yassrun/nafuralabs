@@ -509,7 +509,12 @@
       "detail": {
         "title": "Entrée d'audit",
         "payload": "Modifications",
-        "viewEntity": "Voir {entityType}"
+        "changes": "Modifications",
+        "snapshot": "Valeurs à la création",
+        "field": "Champ",
+        "from": "Avant",
+        "to": "Après",
+        "viewEntity": "Voir l’entité"
       },
       "search": "Rechercher dans le journal...",
       "filters": {
@@ -1232,6 +1237,13 @@
       "userHint": "Vous pouvez couper un canal que l’organisation a laissé ouvert. Un événement obligatoire reste actif.",
       "orgHint": "Ces canaux bornent tous les membres. Un utilisateur ne peut pas rallumer un canal coupé ici."
     },
+    "digest": {
+      "label": "Récapitulatif e-mail",
+      "hint": "Un seul message regroupant vos alertes non encore digérées. Hebdomadaire = lundi matin.",
+      "none": "Aucun",
+      "daily": "Quotidien",
+      "weekly": "Hebdomadaire"
+    },
     "bell": {
       "ariaLabel": "Ouvrir les notifications",
       "markAllRead": "Tout marquer comme lu",
@@ -1344,6 +1356,22 @@
       "print": "a imprimé",
       "export": "a exporté",
       "submit": "a soumis"
+    },
+    "fields": {
+      "subject": "Objet",
+      "supplierId": "Fournisseur",
+      "amount": "Montant",
+      "neededBy": "Besoin pour le",
+      "status": "Statut",
+      "justification": "Justification",
+      "name": "Nom",
+      "title": "Titre",
+      "description": "Description",
+      "code": "Code",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "city": "Ville",
+      "numero": "Numéro"
     }
   },
   "workflow": {

@@ -12,11 +12,25 @@ import org.springframework.stereotype.Component;
 
 /**
  * Captures persist / dirty-flush / delete for {@link Auditable} entities that
- * do not go through {@code JpaCrudService}. Capture is resolved lazily to avoid
- * a JPA bootstrap cycle (interceptor → repository → EntityManagerFactory).
+ * do not go through {@code JpaCrudService} (e.g. {@code RecordController}).
+ * Capture is resolved lazily to avoid a JPA bootstrap cycle
+ * (interceptor → repository → EntityManagerFactory).
+ *
+ * <p>Hibernate 7 calls {@link #onPersist} / {@link #onRemove}; older releases
+ * called {@link #onSave} / {@link #onDelete}. Both pairs are implemented.
  */
 @Component
 public class AuditableHibernateInterceptor implements Interceptor {
+
+    @Override
+    public boolean onPersist(
+            Object entity,
+            Object id,
+            Object[] state,
+            String[] propertyNames,
+            Type[] types) throws CallbackException {
+        return captureCreate(entity, id);
+    }
 
     @Override
     public boolean onSave(
@@ -25,11 +39,7 @@ public class AuditableHibernateInterceptor implements Interceptor {
             Object[] state,
             String[] propertyNames,
             Type[] types) throws CallbackException {
-        AuditableCapture capture = capture();
-        if (capture != null) {
-            capture.afterCreate(entity, id);
-        }
-        return false;
+        return captureCreate(entity, id);
     }
 
     @Override
@@ -52,12 +62,34 @@ public class AuditableHibernateInterceptor implements Interceptor {
     }
 
     @Override
+    public void onRemove(
+            Object entity,
+            Object id,
+            Object[] state,
+            String[] propertyNames,
+            Type[] types) throws CallbackException {
+        captureDelete(entity, id);
+    }
+
+    @Override
     public void onDelete(
             Object entity,
             Object id,
             Object[] state,
             String[] propertyNames,
             Type[] types) throws CallbackException {
+        captureDelete(entity, id);
+    }
+
+    private static boolean captureCreate(Object entity, Object id) {
+        AuditableCapture capture = capture();
+        if (capture != null) {
+            capture.afterCreate(entity, id);
+        }
+        return false;
+    }
+
+    private static void captureDelete(Object entity, Object id) {
         AuditableCapture capture = capture();
         if (capture != null) {
             capture.afterDelete(entity, id);

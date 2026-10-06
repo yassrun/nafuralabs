@@ -1,15 +1,25 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { AuthFacade } from '../../core/security/services/auth.facade';
+import { TenantContextService } from '../../core/tenant/tenant.context';
 import { PlatformNotificationsApiService, resolveNotificationRoute } from './notifications-api.service';
 import type { NotificationInboxView, NotificationPreferenceSetting } from './notifications-api.types';
+import {
+  PlatformNotificationStreamService,
+  type PlatformNotificationStreamPayload,
+} from './notification-stream.service';
 import { PlatformNotification } from './notifications.types';
+import { notificationSourceLabel } from './notification-source';
 
 @Injectable()
 export class PlatformNotificationsService {
   private readonly api = inject(PlatformNotificationsApiService);
   private readonly router = inject(Router);
+  private readonly stream = inject(PlatformNotificationStreamService);
+  private readonly auth = inject(AuthFacade);
+  private readonly tenant = inject(TenantContextService);
 
   readonly loading = signal(false);
   readonly loadingMore = signal(false);
@@ -22,18 +32,43 @@ export class PlatformNotificationsService {
   readonly lastPage = signal(true);
   /** Unread total from the API — independent of the active view filter. */
   readonly unreadCount = signal(0);
+  /** Bumped when a live notification arrives — drives the bell pulse. */
+  readonly livePulse = signal(0);
 
   private initialized = false;
   private page = 0;
+  private streamUnsub: (() => void) | null = null;
 
   readonly hasMore = computed(() => !this.lastPage());
+
+  constructor() {
+    this.streamUnsub = this.stream.subscribe((payload) => this.onStream(payload));
+    effect(() => {
+      const token = this.auth.accessToken();
+      const tenantId = this.tenant.tenantId() ?? this.auth.currentTenant()?.tenant.id ?? null;
+      untracked(() => {
+        if (token && tenantId) {
+          this.stream.connect();
+          this.initialize();
+        } else {
+          this.stream.disconnect();
+          this.resetLocal();
+        }
+      });
+    });
+  }
 
   setNotifications(notifications: readonly PlatformNotification[]): void {
     this.notifications.set(notifications);
   }
 
   add(notification: PlatformNotification): void {
-    this.notifications.update((current) => [notification, ...current]);
+    this.notifications.update((current) => {
+      if (current.some((item) => item.id === notification.id)) {
+        return current;
+      }
+      return [notification, ...current];
+    });
     if (!notification.read) {
       this.unreadCount.update((count) => count + 1);
     }
@@ -175,5 +210,80 @@ export class PlatformNotificationsService {
     if (route) {
       await this.router.navigateByUrl(route);
     }
+  }
+
+  private onStream(payload: PlatformNotificationStreamPayload): void {
+    if (payload.type === 'new_notification' && payload.id) {
+      if (this.notifications().some((item) => item.id === payload.id)) {
+        return;
+      }
+      const notification = this.fromStream(payload);
+      this.unreadCount.update((count) => count + 1);
+      this.livePulse.update((n) => n + 1);
+      if (this.fitsCurrentView(notification)) {
+        this.addWithoutUnreadBump(notification);
+      }
+      return;
+    }
+    if (payload.type === 'refresh') {
+      void this.refreshUnread();
+    }
+  }
+
+  private fitsCurrentView(notification: PlatformNotification): boolean {
+    if (this.view() === 'read') return false;
+    const sourceFilter = this.source();
+    if (sourceFilter && notification.source !== sourceFilter) return false;
+    return true;
+  }
+
+  private addWithoutUnreadBump(notification: PlatformNotification): void {
+    let added = false;
+    this.notifications.update((current) => {
+      if (current.some((item) => item.id === notification.id)) {
+        return current;
+      }
+      added = true;
+      return [notification, ...current];
+    });
+    if (added) {
+      this.totalElements.update((total) => total + 1);
+    }
+  }
+
+  private fromStream(payload: PlatformNotificationStreamPayload): PlatformNotification {
+    const dto = {
+      id: payload.id!,
+      title: payload.title ?? '',
+      body: payload.body,
+      isRead: payload.isRead ?? false,
+      sentAt: payload.sentAt,
+      actionUrl: payload.actionUrl || undefined,
+      entityType: payload.entityType || undefined,
+      entityId: payload.entityId || undefined,
+      source: payload.source,
+    };
+    return {
+      id: dto.id,
+      title: dto.title,
+      message: dto.body,
+      read: dto.isRead ?? false,
+      createdAt: dto.sentAt,
+      entityType: dto.entityType,
+      entityId: dto.entityId,
+      actionUrl: dto.actionUrl,
+      source: dto.source,
+      sourceLabel: notificationSourceLabel(dto.source),
+      route: resolveNotificationRoute(dto),
+    };
+  }
+
+  private resetLocal(): void {
+    this.initialized = false;
+    this.notifications.set([]);
+    this.unreadCount.set(0);
+    this.totalElements.set(0);
+    this.lastPage.set(true);
+    this.error.set(null);
   }
 }

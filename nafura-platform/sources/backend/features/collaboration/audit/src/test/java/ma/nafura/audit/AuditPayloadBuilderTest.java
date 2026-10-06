@@ -51,12 +51,36 @@ class AuditPayloadBuilderTest {
     }
 
     @Test
+    void statusOnlyChangeIsDetected() {
+        Map<String, Object> payload = AuditPayloadBuilder.changes(
+                new Sample("INV-1", "DRAFT", 10), new Sample("INV-1", "ISSUED", 10), "numero", "status", "amount");
+        assertThat(AuditableCapture.isStatusOnlyChange(payload)).isTrue();
+        assertThat(AuditDetails.statusChanged("demo.purchase-request", payload))
+                .isEqualTo("Status of demo.purchase-request from DRAFT to ISSUED");
+    }
+
+    @Test
+    void multiFieldChangeIsNotStatusOnly() {
+        Map<String, Object> payload = AuditPayloadBuilder.changes(
+                new Sample("INV-1", "DRAFT", 10), new Sample("INV-2", "ISSUED", 10), "numero", "status");
+        assertThat(AuditableCapture.isStatusOnlyChange(payload)).isFalse();
+    }
+
+    @Test
     void idsAcceptUuidAndString() {
         assertThat(AuditableIds.of(new Sample("INV-1", "DRAFT", 1)))
                 .isEqualTo("11111111-1111-1111-1111-111111111111");
         UUID uuid = UUID.fromString("11111111-1111-1111-1111-111111111111");
         assertThat(AuditableIds.ofUuid(uuid)).isEqualTo(uuid.toString());
         assertThat(AuditableIds.ofUuid(null)).isNull();
+    }
+
+    @Test
+    void jsonSafeConvertsTemporalAndUuid() {
+        assertThat(AuditPayloadBuilder.jsonSafe(UUID.fromString("11111111-1111-1111-1111-111111111111")))
+                .isEqualTo("11111111-1111-1111-1111-111111111111");
+        assertThat(AuditPayloadBuilder.jsonSafe(java.time.LocalDate.of(2026, 11, 1)))
+                .isEqualTo("2026-11-01");
     }
 
     static final class Sample {

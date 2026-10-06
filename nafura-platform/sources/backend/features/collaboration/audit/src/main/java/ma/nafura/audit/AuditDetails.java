@@ -42,6 +42,20 @@ public final class AuditDetails {
         return "Updated " + entityType + " " + firstTracked(entity, keys);
     }
 
+    @SuppressWarnings("unchecked")
+    public static String statusChanged(String entityType, Map<String, Object> payload) {
+        Object changesObj = payload != null ? payload.get("changes") : null;
+        if (changesObj instanceof List<?> changes && !changes.isEmpty()) {
+            Object first = changes.get(0);
+            if (first instanceof Map<?, ?> m) {
+                Object from = m.get("from");
+                Object to = m.get("to");
+                return "Status of " + entityType + " from " + from + " to " + to;
+            }
+        }
+        return "Status of " + entityType + " changed";
+    }
+
     private static String firstTracked(Object entity, String[] fields) {
         if (fields == null) {
             return "—";

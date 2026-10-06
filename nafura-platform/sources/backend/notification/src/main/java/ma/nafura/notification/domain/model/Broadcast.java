@@ -8,6 +8,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Legacy broadcast table — unused by the NotificationRouter.
+ * @deprecated Do not extend; remove once Sektor is off this schema.
+ */
+@Deprecated
 @Entity
 @Table(name = "broadcasts")
 @Data

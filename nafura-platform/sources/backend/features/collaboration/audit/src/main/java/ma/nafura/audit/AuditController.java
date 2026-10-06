@@ -1,8 +1,10 @@
 package ma.nafura.platform.collaboration.audit;
 
 import ma.nafura.platform.collaboration.audit.domain.model.AuditEvent;
+import ma.nafura.platform.authorization.security.authorization.HostRecordGate;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
+import ma.nafura.platform.framework.record.RecordAccess;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +26,22 @@ import java.util.Map;
 public class AuditController {
 
     private final AuditService auditService;
+    private final RecordAccess recordAccess;
 
+    /**
+     * Entity-scoped timeline. When {@code entityType} is a host record, read access
+     * follows that record (same as comments/attachments), not {@code collaboration.collaboration.audit.read}.
+     */
+    @HostRecordGate
     @GetMapping("/timeline")
     public ResponseEntity<Page<AuditEvent>> getTimeline(
             @RequestParam String entityType,
             @RequestParam String entityId,
             Pageable pageable) {
-        Page<AuditEvent> page = auditService.getTimeline(entityType, entityId, pageable);
+        String type = one(entityType);
+        String id = one(entityId);
+        gate(type, id);
+        Page<AuditEvent> page = auditService.getTimeline(type, id, pageable);
         return ResponseEntity.ok(page);
     }
 
@@ -60,6 +71,19 @@ public class AuditController {
                 .build();
         Page<AuditEvent> page = auditService.getLog(query, pageable);
         return ResponseEntity.ok(page);
+    }
+
+    private void gate(String entityType, String entityId) {
+        if (recordAccess.known(entityType)) {
+            recordAccess.require(entityType, entityId, false);
+        }
+    }
+
+    private static String one(String value) {
+        if (value == null) return null;
+        int comma = value.indexOf(',');
+        String first = (comma < 0 ? value : value.substring(0, comma)).trim();
+        return first.isEmpty() ? null : first;
     }
 
     private static String trimToNull(String s) {

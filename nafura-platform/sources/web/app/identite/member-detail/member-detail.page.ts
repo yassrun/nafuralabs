@@ -10,6 +10,7 @@ import {
   DetailFacade,
   type PageHeaderConfig,
 } from '@lib/anatomy';
+import { ButtonComponent } from '@lib/anatomy/components/atoms/button';
 import type { DetailActionEvent } from '@lib/anatomy/types';
 
 import {
@@ -22,12 +23,54 @@ import { MembersFacade } from '../services';
 @Component({
   selector: 'app-member-detail-page',
   standalone: true,
-  imports: [...ConfigDrivenDetailPageImports, TranslateModule],
+  imports: [...ConfigDrivenDetailPageImports, TranslateModule, ButtonComponent],
   template: `
     <nf-page-shell scroll>
       <nf-page-header
         [config]="headerConfig"
         (actionClick)="onHeaderAction($event)">
+        @if (mode() !== 'create' && canWrite()) {
+          @if (item(); as member) {
+            <div actions class="member-header-actions">
+              @if (member.status === 'invited') {
+                <nf-button
+                  variant="secondary"
+                  [disabled]="isSaving()"
+                  [loading]="isSaving()"
+                  (clicked)="resendInvitation()">
+                  {{ 'administration.members.detail.actions.resend' | translate }}
+                </nf-button>
+              }
+              @if (member.status === 'suspended') {
+                <nf-button
+                  variant="primary"
+                  [disabled]="isSaving()"
+                  [loading]="isSaving()"
+                  (clicked)="reactivateMember()">
+                  {{ 'administration.members.detail.actions.reactivate' | translate }}
+                </nf-button>
+              }
+              @if (member.status === 'active') {
+                <nf-button
+                  variant="danger"
+                  [disabled]="isSaving()"
+                  [loading]="isSaving()"
+                  (clicked)="deactivateMember()">
+                  {{ 'administration.members.detail.actions.deactivate' | translate }}
+                </nf-button>
+              }
+              @if (member.status !== 'active') {
+                <nf-button
+                  variant="danger"
+                  [disabled]="isSaving()"
+                  [loading]="isSaving()"
+                  (clicked)="removeMember()">
+                  {{ 'administration.members.detail.actions.remove' | translate }}
+                </nf-button>
+              }
+            </div>
+          }
+        }
       </nf-page-header>
 
       @if (mode() === 'create') {
@@ -126,52 +169,6 @@ import { MembersFacade } from '../services';
               </div>
             }
           </section>
-
-          @if (canWrite()) {
-            <section class="member-section">
-              <div class="section-header">
-                <h3>{{ 'administration.members.detail.actions.title' | translate }}</h3>
-              </div>
-              <div class="member-actions">
-                @if (member.status === 'active') {
-                  <button
-                    type="button"
-                    class="action-btn action-btn-danger"
-                    [disabled]="isSaving()"
-                    (click)="deactivateMember()">
-                    {{ 'administration.members.detail.actions.deactivate' | translate }}
-                  </button>
-                }
-                @if (member.status === 'suspended') {
-                  <button
-                    type="button"
-                    class="action-btn action-btn-primary"
-                    [disabled]="isSaving()"
-                    (click)="reactivateMember()">
-                    {{ 'administration.members.detail.actions.reactivate' | translate }}
-                  </button>
-                }
-                @if (member.status === 'invited') {
-                  <button
-                    type="button"
-                    class="action-btn"
-                    [disabled]="isSaving()"
-                    (click)="resendInvitation()">
-                    {{ 'administration.members.detail.actions.resend' | translate }}
-                  </button>
-                }
-                @if (member.status !== 'active') {
-                  <button
-                    type="button"
-                    class="action-btn action-btn-danger"
-                    [disabled]="isSaving()"
-                    (click)="removeMember()">
-                    {{ 'administration.members.detail.actions.remove' | translate }}
-                  </button>
-                }
-              </div>
-            </section>
-          }
         </div>
         }
       }
@@ -322,8 +319,14 @@ import { MembersFacade } from '../services';
         gap: 0.5rem;
       }
 
-      .role-editor-actions,
-      .member-actions {
+      .member-header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .role-editor-actions {
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
@@ -347,12 +350,6 @@ import { MembersFacade } from '../services';
       .action-btn-primary {
         background: #2563eb;
         border-color: #2563eb;
-        color: #ffffff;
-      }
-
-      .action-btn-danger {
-        background: #b91c1c;
-        border-color: #b91c1c;
         color: #ffffff;
       }
 

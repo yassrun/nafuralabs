@@ -26,17 +26,13 @@ public class EmailConfig {
     @Value("${app.email.provider:brevo}")
     private String emailProvider;
 
-    @Value("${app.email.from-address:noreply@seyrura.com}")
-    private String fromAddress;
-
-    /** Empty: the product's name ({@code spec.product.name} of {@code app.nafura.json}). */
-    @Value("${app.email.from-name:}")
-    private String fromName;
-
     @Bean
     @ConditionalOnMissingBean(EmailService.class)
     public EmailService emailService(
             @Value("${brevo.api-key:}") String brevoApiKey,
+            @Value("${app.email.from-address:noreply@nafuralabs.com}") String fromAddress,
+            // Empty from-name → product name from app.nafura.json
+            @Value("${app.email.from-name:}") String fromName,
             EmailTemplateService templateService) {
         log.info("Configuring email provider: {}", emailProvider);
 
@@ -47,8 +43,13 @@ public class EmailConfig {
                     log.warn("Brevo API key not set; using no-op email service (emails will not be sent)");
                     return noOpEmailService();
                 }
-                log.info("Creating Brevo email client");
-                return new BrevoEmailService(brevoApiKey.trim(), fromAddress, senderName(), templateService);
+                String senderEmail = fromAddress == null ? "" : fromAddress.trim();
+                if (senderEmail.isBlank()) {
+                    senderEmail = "noreply@nafuralabs.com";
+                }
+                String senderName = senderName(fromName);
+                log.info("Creating Brevo email client (from={} name={})", senderEmail, senderName);
+                return new BrevoEmailService(brevoApiKey.trim(), senderEmail, senderName, templateService);
             default:
                 throw new IllegalStateException(
                     String.format("Unsupported email provider: %s. Supported: brevo", emailProvider)
@@ -56,8 +57,8 @@ public class EmailConfig {
         }
     }
 
-    private String senderName() {
-        if (fromName != null && !fromName.isBlank()) return fromName;
+    private String senderName(String fromName) {
+        if (fromName != null && !fromName.isBlank()) return fromName.trim();
         Resource manifest = new DefaultResourceLoader().getResource("classpath:nafura/app.nafura.json");
         if (!manifest.exists()) return "Nafura";
         try (InputStream in = manifest.getInputStream()) {

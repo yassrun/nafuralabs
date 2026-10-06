@@ -21,6 +21,8 @@ dependencies {
 
     // Thymeleaf for email template variable substitution (same as Print Templates)
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    // Thymeleaf 3 expression evaluation (optional dep of thymeleaf, not always on the host classpath)
+    implementation 'ognl:ognl:3.4.7'
 
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
