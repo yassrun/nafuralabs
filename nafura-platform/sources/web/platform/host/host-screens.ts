@@ -101,7 +101,7 @@ const ADMINISTRATION_SCREENS: readonly AdministrationScreen[] = [
   { section: 'scheduledJobs', path: 'scheduled-jobs', capability: 'cap.foundation', nav: { id: 'admin-jobs', label: 'Tâches planifiées', icon: 'calendar-clock', permission: 'administration.scheduled-jobs.read' } },
   { section: 'webhooks', path: 'webhooks', capability: 'cap.webhooks', nav: { id: 'admin-webhooks', label: 'Webhooks', icon: 'webhook', permission: 'administration.webhooks.read' } },
   { section: 'apiKeys', path: 'api-keys', capability: 'cap.foundation', nav: { id: 'admin-api-keys', label: 'Clés API', icon: 'shield', permission: 'administration.api-keys.read' } },
-  { section: 'aiProviders', path: 'ai-providers', capability: 'cap.ai', nav: { id: 'admin-ai', label: 'Fournisseurs IA', icon: 'sparkles', permission: 'tenant.settings.read' } },
+  { section: 'aiProviders', path: 'ai-providers', capability: 'cap.ai', nav: { id: 'admin-ai', label: 'Fournisseurs IA', icon: 'sparkles', permission: 'administration.ai.read' } },
   { section: 'numberingSequences', path: 'numbering-sequences', capability: 'cap.sysconfig', nav: { id: 'admin-numbering', label: 'Numérotation', icon: 'repeat', permission: 'settings.sysconfig.numbering-sequence.read' } },
   { section: 'subscriptions', path: 'subscriptions', capability: 'cap.subscriptions', nav: { id: 'admin-subscriptions', label: 'Abonnements', icon: 'wallet', permission: 'tenant.subscriptions.read' } },
 ];

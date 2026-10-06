@@ -71,18 +71,50 @@ function authProviders(application: ApplicationManifest) {
 export interface HostBusinessContext {
   readonly manifest: BusinessContextManifest;
   readonly routes: Routes;
-  /** Record routes by entity type (`demo.purchase-request` → `/demo/purchase-requests/{id}`): approvals link to them. */
+  /** @deprecated declare `spec.records` in bc.manifest.json: read at startup, without loading the BC's screens. */
   readonly records?: Readonly<Record<string, string>>;
 }
 
-function businessContextRoutes(contexts: readonly HostBusinessContext[]): Routes {
-  return contexts.map(({ manifest, routes }) => {
+/**
+ * A business context whose screens load on first visit: only its manifest is in the initial bundle. This is what
+ * `business-contexts.generated.ts` declares, so that a BC's archetypes (lists, records, charts) never slow the first page.
+ */
+export interface LazyHostBusinessContext {
+  readonly manifest: BusinessContextManifest;
+  readonly load: () => Promise<{ default: HostBusinessContext } | HostBusinessContext>;
+}
+
+export type HostBusinessContextEntry = HostBusinessContext | LazyHostBusinessContext;
+
+const isLazy = (context: HostBusinessContextEntry): context is LazyHostBusinessContext => 'load' in context;
+
+function businessContextRoutes(contexts: readonly HostBusinessContextEntry[]): Routes {
+  return contexts.map((context) => {
+    const { manifest } = context;
     const prefix = manifest.spec.routesPrefix?.replace(/^\/+|\/+$/g, '');
     if (!prefix) {
       throw new Error(`Business context "${manifest.metadata.id}" has no spec.routesPrefix to mount its routes.`);
     }
-    return { path: prefix, canActivate: [businessContextEnabled(manifest)], children: routes };
+    const guard = { path: prefix, canActivate: [businessContextEnabled(manifest)] };
+    if (!isLazy(context)) return { ...guard, children: context.routes };
+    return {
+      ...guard,
+      loadChildren: () =>
+        context.load().then((module) => {
+          const loaded = 'default' in module ? module.default : module;
+          registerEntityRoutes(loaded.records ?? {});
+          return loaded.routes;
+        }),
+    };
   });
+}
+
+/** Record routes: from the manifest (always available) and, for an eagerly loaded BC, the deprecated `records`. */
+function registerBusinessContextRecords(contexts: readonly HostBusinessContextEntry[]): void {
+  for (const context of contexts) {
+    registerEntityRoutes(context.manifest.spec.records ?? {});
+    if (!isLazy(context)) registerEntityRoutes(context.records ?? {});
+  }
 }
 
 /** A business context the organization switched off is not reachable, even by URL (its API refuses too). */
@@ -107,7 +139,7 @@ function screensOf(plan: HostPlan) {
 }
 
 /** Routes of a host app: sign-in, then the platform shell with every enabled capability and business context. */
-export function nafuraHostRoutes(app: unknown, businessContexts: readonly HostBusinessContext[] = []): Routes {
+export function nafuraHostRoutes(app: unknown, businessContexts: readonly HostBusinessContextEntry[] = []): Routes {
   const screens = screensOf(planFrom(app, businessContexts.map((context) => context.manifest)));
   const home = screens.homePath;
 
@@ -132,12 +164,12 @@ export function nafuraHostRoutes(app: unknown, businessContexts: readonly HostBu
 /** Everything a host app's `app.config.ts` used to wire by hand, derived from `app.nafura.json`. */
 export function provideNafuraHost(
   app: unknown,
-  businessContexts: readonly HostBusinessContext[] = [],
+  businessContexts: readonly HostBusinessContextEntry[] = [],
 ): EnvironmentProviders {
   const plan = planFrom(app, businessContexts.map((context) => context.manifest));
   const screens = screensOf(plan);
   registerApplicationConfig(projectApplicationConfig(plan.application));
-  businessContexts.forEach((context) => registerEntityRoutes(context.records ?? {}));
+  registerBusinessContextRecords(businessContexts);
   const locale = plan.application.spec.i18n?.locales[0] ?? 'fr';
 
   return makeEnvironmentProviders([

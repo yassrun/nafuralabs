@@ -143,6 +143,8 @@ export interface BusinessContextSpec extends NafuraCommonSpec {
   label: string;
   icon?: string;
   routesPrefix?: string;
+  /** Record route by entity type (`demo.purchase-request` → `/demo/purchase-requests/{id}`): approvals, notifications and audit link to it. */
+  records?: Record<string, string>;
   defaultRoles?: DefaultRoleDeclaration[];
   notifications?: NotificationDeclaration[];
   navigation?: BusinessContextNavigationItem[];

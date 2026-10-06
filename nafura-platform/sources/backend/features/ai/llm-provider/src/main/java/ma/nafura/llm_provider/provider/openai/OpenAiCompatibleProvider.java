@@ -56,13 +56,14 @@ public class OpenAiCompatibleProvider implements AiProvider {
     public CompletableFuture<LlmResponse> call(NormalizedLlmRequest request, LlmCallContext context) {
         String requestId = UUID.randomUUID().toString();
         String model = effectiveModel(context);
-        if (apiKey == null || apiKey.isBlank()) {
+        String key = effectiveApiKey(context);
+        if (key == null || key.isBlank()) {
             log.warn("{} API key is not configured. Falling back to mock LLM response.", providerName);
             return CompletableFuture.completedFuture(mapMockResponse(requestId, context, request, model));
         }
 
         return Mono.fromCallable(() -> buildRequest(request, model))
-            .flatMap(this::callApi)
+            .flatMap(body -> callApi(body, model, key))
             .map(response -> mapToLlmResponse(response, requestId, context, request, model))
             .toFuture();
     }
@@ -72,6 +73,13 @@ public class OpenAiCompatibleProvider implements AiProvider {
             return context.getModelOverride().trim();
         }
         return defaultModel;
+    }
+
+    private String effectiveApiKey(LlmCallContext context) {
+        if (context != null && context.getApiKeyOverride() != null && !context.getApiKeyOverride().isBlank()) {
+            return context.getApiKeyOverride();
+        }
+        return apiKey;
     }
 
     public String getDefaultModel() {
@@ -181,10 +189,10 @@ public class OpenAiCompatibleProvider implements AiProvider {
         return body;
     }
 
-    private Mono<JsonNode> callApi(Map<String, Object> body) {
+    private Mono<JsonNode> callApi(Map<String, Object> body, String model, String key) {
         return webClient.post()
-            .uri("/chat/completions")
-            .header("Authorization", "Bearer " + apiKey)
+            .uri(buildUri(model))
+            .header(authHeaderName(), authHeaderValue(key))
             .header("Content-Type", "application/json")
             .bodyValue(body)
             .retrieve()
@@ -198,13 +206,34 @@ public class OpenAiCompatibleProvider implements AiProvider {
                     )))
                 )
             )
-            .bodyToMono(JsonNode.class)
+            // String → readTree: Jackson cannot construct abstract JsonNode via bodyToMono(JsonNode.class).
+            .bodyToMono(String.class)
+            .map(bodyText -> {
+                try {
+                    return objectMapper.readTree(bodyText == null || bodyText.isBlank() ? "{}" : bodyText);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to parse " + providerName + " response: " + e.getMessage(), e);
+                }
+            })
             .onErrorMap(Exception.class, e -> {
                 if (e instanceof RuntimeException re) {
                     return re;
                 }
                 return new RuntimeException("Failed to call " + providerName + " API: " + e.getMessage(), e);
             });
+    }
+
+    /** OpenAI-compatible chat completions path; Azure overrides this with a deployment path. */
+    protected String buildUri(String model) {
+        return "/chat/completions";
+    }
+
+    protected String authHeaderName() {
+        return "Authorization";
+    }
+
+    protected String authHeaderValue(String key) {
+        return "Bearer " + key;
     }
 
     private LlmResponse mapToLlmResponse(

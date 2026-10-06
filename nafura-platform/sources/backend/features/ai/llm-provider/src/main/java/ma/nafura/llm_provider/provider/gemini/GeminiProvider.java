@@ -46,13 +46,14 @@ public class GeminiProvider implements AiProvider {
     @Override
     public CompletableFuture<LlmResponse> call(NormalizedLlmRequest request, LlmCallContext context) {
         String requestId = UUID.randomUUID().toString();
-        if (apiKey == null || apiKey.isEmpty()) {
+        String key = effectiveApiKey(context);
+        if (key == null || key.isEmpty()) {
             log.warn("Gemini API key is not configured. Falling back to mock LLM response.");
             return CompletableFuture.completedFuture(mapMockResponse(requestId, context, request));
         }
 
         return buildGeminiRequest(request)
-            .flatMap(geminiRequest -> callGeminiApi(geminiRequest, effectiveModel(context)))
+            .flatMap(geminiRequest -> callGeminiApi(geminiRequest, effectiveModel(context), key))
             .map(response -> mapToLlmResponse(response, requestId, context, request, effectiveModel(context)))
             .toFuture();
     }
@@ -62,6 +63,13 @@ public class GeminiProvider implements AiProvider {
             return context.getModelOverride().trim();
         }
         return model;
+    }
+
+    private String effectiveApiKey(LlmCallContext context) {
+        if (context != null && context.getApiKeyOverride() != null && !context.getApiKeyOverride().isBlank()) {
+            return context.getApiKeyOverride();
+        }
+        return apiKey;
     }
 
     public String getDefaultModel() {
@@ -193,13 +201,13 @@ public class GeminiProvider implements AiProvider {
         });
     }
 
-    private Mono<JsonNode> callGeminiApi(Map<String, Object> requestBody, String effectiveModel) {
+    private Mono<JsonNode> callGeminiApi(Map<String, Object> requestBody, String effectiveModel, String key) {
         String url = String.format("%s/v1beta/models/%s:generateContent",
             baseUrl, effectiveModel);
 
         return webClient.post()
             .uri(url)
-            .header("x-goog-api-key", apiKey)
+            .header("x-goog-api-key", key)
             .bodyValue(requestBody)
             .retrieve()
             .onStatus(status -> status.isError(), response -> {
@@ -210,7 +218,15 @@ public class GeminiProvider implements AiProvider {
                         return Mono.error(new RuntimeException(errorMessage));
                     });
             })
-            .bodyToMono(JsonNode.class)
+            // String → readTree: Jackson cannot construct abstract JsonNode via bodyToMono(JsonNode.class).
+            .bodyToMono(String.class)
+            .map(bodyText -> {
+                try {
+                    return objectMapper.readTree(bodyText == null || bodyText.isBlank() ? "{}" : bodyText);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to parse Gemini response: " + e.getMessage(), e);
+                }
+            })
             .onErrorMap(Exception.class, e -> {
                 if (e instanceof RuntimeException) {
                     return e;

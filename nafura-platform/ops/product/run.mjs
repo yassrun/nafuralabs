@@ -6,11 +6,13 @@
 //   check          the checks of AGENTS.md before handing over: architecture, web build, host-tests (nothing started)
 import { spawn, spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
+import { createWriteStream, existsSync, mkdirSync, readFileSync, rmSync, statfsSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
 import { createServer, Socket } from 'node:net';
 import { dirname, join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
+
+import { install as installToolchain, toolchainPaths, toolchainRoot } from './toolchain.mjs';
 
 const PLATFORM = fileURLToPath(new URL('../..', import.meta.url));
 const WORKSPACE = join(PLATFORM, '..');
@@ -35,16 +37,21 @@ modes
   staging          build, migrate and deploy on the staging cluster
   prod             build, push, migrate and deploy on the prod cluster
   check            architecture:check, web build (types and templates), platform host-tests
+  toolchain        install or update the toolchain (JDK, Node, caches) outside the repository
+  doctor           check the toolchain, write rights, ports, orphan processes, disk space
+  stop             stop everything lab started (API, web, embedded PostgreSQL), nothing else
+  clean            delete the product's build outputs (--data: also its lab database)
 
 options
   --scope=full|back|front   staging/prod: what to rebuild and roll out (default full)
   --dry-run                 staging/prod: print the plan and the rendered manifests, change nothing
   --yes                     prod: skip the confirmation
+  --data                    clean: also delete the lab database
 
 environment
-  KUBE_CONTEXT   cluster context (default docker-desktop for staging, nafura-vps-prod for prod)
-  REGISTRY       image registry for prod (default ${ENVIRONMENTS.prod.registry})
-  JAVA_HOME      JDK (default: <workspace>/deps/jdk-*)`;
+  NAFURA_TOOLCHAIN   toolchain folder (default %LOCALAPPDATA%\\nafura on Windows, ~/.nafura elsewhere)
+  KUBE_CONTEXT       cluster context (default docker-desktop for staging, nafura-vps-prod for prod)
+  REGISTRY           image registry for prod (default ${ENVIRONMENTS.prod.registry})`;
 
 // ---------------------------------------------------------------- product
 
@@ -170,22 +177,37 @@ function exec(command, args, { cwd, env, input, capture = false, dryRun = false,
 }
 
 const running = [];
+let logStream = null;
+
+/** Every line also goes to <toolchain>/logs/<product>/<mode>.log, read by agents that do not see the terminal. */
+function log(line) {
+  console.log(line);
+  logStream?.write(`${line}\n`);
+}
+
+function openLog(product, mode) {
+  const dir = toolchainPaths().logs(product.id);
+  mkdirSync(dir, { recursive: true });
+  logStream = createWriteStream(join(dir, `${mode}.log`), { flags: 'w' });
+  return join(dir, `${mode}.log`);
+}
 
 function start(label, command, args, { cwd, env } = {}) {
   const child = spawn(command, args, { cwd, env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
+  child.nafuraLabel = label;
   const prefix = (stream) => {
     let rest = '';
     stream.on('data', (chunk) => {
       const lines = (rest + chunk).split(/\r?\n/);
       rest = lines.pop();
-      for (const line of lines) console.log(`[${label}] ${line}`);
+      for (const line of lines) log(`[${label}] ${line}`);
     });
   };
   prefix(child.stdout);
   prefix(child.stderr);
   child.on('exit', (code) => {
     if (!stopping) {
-      console.error(`[${label}] exited (${code}); stopping.`);
+      log(`[${label}] exited (${code}); stopping.`);
       stopAll(1);
     }
   });
@@ -199,9 +221,13 @@ function stopAll(code = 0) {
   stopping = true;
   for (const child of running) {
     if (child.exitCode !== null) continue;
-    if (WINDOWS) spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
+    // The Gradle client alone (not its tree): the daemon it started stays warm for the next run and cancels bootRun.
+    const tree = child.nafuraLabel === 'api' ? [] : ['/T'];
+    if (WINDOWS) spawnSync('taskkill', ['/pid', String(child.pid), ...tree, '/F'], { stdio: 'ignore' });
     else child.kill('SIGTERM');
   }
+  // bootRun runs under the Gradle daemon, not under the launcher: stop what still listens on the product's ports.
+  if (localProduct) stopWorkspaceListeners(localProduct);
   for (const cleanup of cleanups) cleanup();
   process.exit(code);
 }
@@ -248,33 +274,25 @@ function stackVersion(key) {
   return line?.slice(key.length + 1).trim();
 }
 
-/** The JDK of the stack version: JAVA_HOME when it matches, else <workspace>/deps/jdk-*. */
+const SETUP = 'install it: nafura-platform\\ops\\bootstrap.cmd (Windows) or sh nafura-platform/ops/bootstrap.sh, then retry';
+
+/** The toolchain's JDK only: a JDK on the machine (JAVA_HOME, PATH, deps/) is never used. */
 function javaHome() {
-  const wanted = stackVersion('java.version');
-  const deps = join(WORKSPACE, 'deps');
-  const candidates = [
-    process.env.JAVA_HOME,
-    ...(existsSync(deps) ? readdirSync(deps).filter((name) => name.startsWith('jdk')).map((name) => join(deps, name)) : []),
-  ].filter(Boolean);
-  const major = (home) => readFileSync(join(home, 'release'), 'utf8').match(/JAVA_VERSION="(\d+)/)?.[1];
-  const home = candidates.find((candidate) => existsSync(join(candidate, 'release')) && major(candidate) === wanted);
-  if (!home) throw new Error(`No JDK ${wanted}: set JAVA_HOME to one, or unpack it under ${deps}.`);
-  return home;
+  const tools = toolchainPaths();
+  if (!existsSync(tools.java)) throw new Error(`No toolchain JDK at ${tools.jdk}: ${SETUP}.`);
+  return tools.jdk;
 }
 
-/**
- * Developer Gradle cache (`~/.gradle`). Cursor agent sandboxes redirect `GRADLE_USER_HOME` to a temp
- * folder, which re-downloads the wrapper dist and starts a cold daemon — pin back to the real home
- * (same idea as Mode B's `pin_gradle_user_home`). An explicit non-sandbox value is kept.
- */
+/** The toolchain's Node and npm for everything run.mjs starts (web, npm ci, checks). */
+function nodeTools() {
+  const tools = toolchainPaths();
+  if (!existsSync(tools.nodeExe)) throw new Error(`No toolchain Node at ${tools.node}: ${SETUP}.`);
+  return { node: tools.nodeExe, npm: tools.npmCli, env: { npm_config_cache: tools.npmCache } };
+}
+
+/** Gradle's caches, wrapper distribution and daemon live in the toolchain, whatever GRADLE_USER_HOME says. */
 export function gradleUserHome(env = process.env) {
-  const base = (WINDOWS ? env.USERPROFILE : env.HOME) || env.HOME || env.USERPROFILE;
-  if (!base) return env.GRADLE_USER_HOME;
-  const realHome = join(base, '.gradle');
-  const current = env.GRADLE_USER_HOME ?? '';
-  if (!current || current === realHome) return realHome;
-  if (/cursor-sandbox-cache|AppData[/\\]Local[/\\]Temp/i.test(current)) return realHome;
-  return current;
+  return toolchainPaths(toolchainRoot(env)).gradle;
 }
 
 /** Gradle through its wrapper jar: no gradlew/gradlew.bat, the same on every OS. */
@@ -282,14 +300,17 @@ function gradle(product, args) {
   const home = javaHome();
   return [
     join(home, 'bin', WINDOWS ? 'java.exe' : 'java'),
-    ['-cp', join(product.backend, 'gradle/wrapper/gradle-wrapper.jar'), 'org.gradle.wrapper.GradleWrapperMain', '--no-daemon', '--console=plain', ...args],
+    // Daemon kept between runs (toolchain GRADLE_USER_HOME). The configuration cache is opted in per task (lab only:
+    // host-tests and nafura-migrations.gradle are not compatible with it yet).
+    ['-cp', join(product.backend, 'gradle/wrapper/gradle-wrapper.jar'), 'org.gradle.wrapper.GradleWrapperMain', '--console=plain', ...args],
     { cwd: product.backend, env: { JAVA_HOME: home, GRADLE_USER_HOME: gradleUserHome() } },
   ];
 }
 
 function ensureWebDependencies(product) {
   if (existsSync(join(product.web, 'node_modules/@angular/cli'))) return;
-  exec(process.execPath, [join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js'), 'ci'], { cwd: product.web });
+  const tools = nodeTools();
+  exec(tools.node, [tools.npm, 'ci'], { cwd: product.web, env: tools.env });
 }
 
 /** The platform web has no install of its own (a second @angular breaks the bundle): its tests read the product's. */
@@ -321,9 +342,9 @@ const exists = (kube, args) => kube(['get', ...args, '--ignore-not-found', '-o',
 function check(product) {
   ensureWebDependencies(product);
   linkPlatformModules(product);
-  const npm = join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js');
-  exec(process.execPath, [npm, 'run', '-s', 'architecture:check'], { cwd: join(PLATFORM, 'sources/web') });
-  exec(process.execPath, [join(PLATFORM, 'scripts/product-web.mjs'), 'build', '--configuration', 'development'], { cwd: product.web });
+  const tools = nodeTools();
+  exec(tools.node, [tools.npm, 'run', '-s', 'architecture:check'], { cwd: join(PLATFORM, 'sources/web'), env: tools.env });
+  exec(tools.node, [join(PLATFORM, 'scripts/product-web.mjs'), 'build', '--configuration', 'development'], { cwd: product.web, env: tools.env });
   const [java, args, options] = gradle({ backend: join(PLATFORM, 'sources/backend') }, [':platform:host-tests:test', '--max-workers=1']);
   exec(java, args, options);
   console.log(`
@@ -333,20 +354,31 @@ ${product.name}: architecture, web build and host-tests pass. Anything visible: 
 
 // ---------------------------------------------------------------- local modes
 
+let localProduct = null;
+
 async function local(product, env) {
+  localProduct = product;
   await assertFree(product.ports.api, 'api');
   await assertFree(product.ports.web, 'web');
   ensureWebDependencies(product);
   process.on('SIGINT', () => stopAll(0));
   process.on('SIGTERM', () => stopAll(0));
 
-  const [java, args, options] = gradle(product, ['bootRun']);
-  start('api', java, args, { ...options, env: { ...options.env, ...env } });
-  start('web', process.execPath, [join(PLATFORM, 'scripts/product-web.mjs'), 'serve'], { cwd: product.web });
+  const tools = nodeTools();
+  const [java, args, options] = gradle(product, ['--configuration-cache', 'bootRun']);
+  const startedAt = Date.now();
+  const api = start('api', java, args, { ...options, env: { ...options.env, ...env } });
+  const web = start('web', tools.node, [join(PLATFORM, 'scripts/product-web.mjs'), 'serve'], { cwd: product.web, env: tools.env });
+  writePids(product, { launcher: process.pid, api: api.pid, web: web.pid });
+  cleanups.push(() => removePids(product));
 
-  await waitHttp(`http://127.0.0.1:${product.ports.api}/actuator/health`, 600);
-  await waitHttp(`http://127.0.0.1:${product.ports.web}/`, 600);
-  console.log(`\n${product.name} is up: http://localhost:${product.ports.web}  (API :${product.ports.api}). Ctrl+C stops both.\n`);
+  // Both measured from the same start, in parallel: each line says when that side became ready.
+  const seconds = () => Math.round((Date.now() - startedAt) / 1000);
+  await Promise.all([
+    waitHttp(`http://127.0.0.1:${product.ports.api}/actuator/health`, 600).then(() => log(`API ready after ${seconds()}s.`)),
+    waitHttp(`http://127.0.0.1:${product.ports.web}/`, 600).then(() => log(`Web ready after ${seconds()}s.`)),
+  ]);
+  log(`\n${product.name} is up: http://localhost:${product.ports.web}  (API :${product.ports.api}). Ctrl+C or "run.mjs stop" stops everything.\n`);
 }
 
 /** PID of the lab's embedded PostgreSQL from its lock file (first line of postmaster.pid), or null. */
@@ -364,16 +396,194 @@ function isPostgres(pid) {
   return /postgres/.test(spawnSync('ps', ['-p', String(pid), '-o', 'comm='], { encoding: 'utf8' }).stdout ?? '');
 }
 
+/** The lab database, in the toolchain (outside the repository): <toolchain>/data/<product>/postgres. */
+export function labDataDir(product, root = toolchainRoot()) {
+  return join(toolchainPaths(root).data(product.id), 'postgres');
+}
+
 /**
  * The embedded PostgreSQL is started by the backend through pg_ctl and outlives it: stopping the lab, or a closed
- * terminal, leaves it holding the data directory and the next lab cannot start. Stop the one that owns this data.
+ * terminal, leaves it holding the data directory and the next lab cannot start. Stop the one that owns this data
+ * (and one left in the repository by a lab older than the toolchain).
  */
 function stopEmbeddedPostgres(product) {
-  const pid = postmasterPid(join(product.backend, 'data/postgres/postmaster.pid'));
-  if (!pid || !isPostgres(pid)) return;
-  console.log(`Stopping the lab's embedded PostgreSQL (pid ${pid}).`);
+  for (const dir of [labDataDir(product), join(product.backend, 'data/postgres')]) {
+    const pid = postmasterPid(join(dir, 'postmaster.pid'));
+    if (!pid || !isPostgres(pid)) continue;
+    log(`Stopping the lab's embedded PostgreSQL (pid ${pid}).`);
+    killTree(pid);
+  }
+}
+
+function killTree(pid) {
   if (WINDOWS) spawnSync('taskkill', ['/pid', String(pid), '/T', '/F'], { stdio: 'ignore' });
-  else process.kill(pid, 'SIGINT');
+  else {
+    try {
+      process.kill(pid, 'SIGTERM');
+    } catch {
+      // already gone
+    }
+  }
+}
+
+function killProcess(pid) {
+  if (WINDOWS) spawnSync('taskkill', ['/pid', String(pid), '/F'], { stdio: 'ignore' });
+  else {
+    try {
+      process.kill(pid, 'SIGTERM');
+    } catch {
+      // already gone
+    }
+  }
+}
+
+const pidsFile = (product) => join(toolchainPaths().logs(product.id), 'lab.pids.json');
+
+function writePids(product, pids) {
+  mkdirSync(dirname(pidsFile(product)), { recursive: true });
+  writeFileSync(pidsFile(product), JSON.stringify(pids));
+}
+
+function removePids(product) {
+  try {
+    unlinkSync(pidsFile(product));
+  } catch {
+    // already gone
+  }
+}
+
+/** PIDs listening on a local port (the Spring Boot process runs under Gradle, the dev server under ng). */
+function listeners(port) {
+  if (WINDOWS) {
+    const out = spawnSync('netstat', ['-ano', '-p', 'TCP'], { encoding: 'utf8' }).stdout ?? '';
+    return [...new Set(out.split(/\r?\n/).map((line) => line.trim().split(/\s+/))
+      .filter((cols) => cols[3] === 'LISTENING' && cols[1]?.endsWith(`:${port}`)).map((cols) => Number(cols[4])))];
+  }
+  const out = spawnSync('lsof', ['-t', `-iTCP:${port}`, '-sTCP:LISTEN'], { encoding: 'utf8' }).stdout ?? '';
+  return out.split(/\s+/).filter(Boolean).map(Number);
+}
+
+/** Command line of a process, to kill only what belongs to this workspace. */
+function commandLine(pid) {
+  if (WINDOWS) {
+    const out = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', `(Get-CimInstance Win32_Process -Filter "ProcessId=${pid}").CommandLine`], { encoding: 'utf8' }).stdout ?? '';
+    return out.trim();
+  }
+  return (spawnSync('ps', ['-p', String(pid), '-o', 'args='], { encoding: 'utf8' }).stdout ?? '').trim();
+}
+
+/** Everything lab started for this product, and only that: its recorded processes, its ports, its PostgreSQL. */
+function stopLab(product) {
+  let stopped = 0;
+  if (existsSync(pidsFile(product))) {
+    const pids = JSON.parse(readFileSync(pidsFile(product), 'utf8'));
+    // Web with its tree; the launcher and the Gradle client alone, so that the Gradle daemon stays warm.
+    for (const [what, pid] of Object.entries(pids)) {
+      if (!pid) continue;
+      log(`Stopping ${what} (pid ${pid}).`);
+      if (what === 'web') killTree(pid);
+      else killProcess(pid);
+      stopped++;
+    }
+    removePids(product);
+  }
+  stopped += stopWorkspaceListeners(product);
+  stopEmbeddedPostgres(product);
+  log(stopped ? `${product.name}: lab stopped.` : `${product.name}: nothing of the lab was running.`);
+}
+
+/** Processes of this workspace listening on the product's ports; a process from elsewhere is never touched. */
+function stopWorkspaceListeners(product) {
+  const normalize = (path) => path.toLowerCase().replaceAll('/', '\\').replace(/\\+$/, '');
+  const workspace = normalize(WORKSPACE);
+  let stopped = 0;
+  for (const [what, port] of [['API', product.ports.api], ['web', product.ports.web]]) {
+    for (const pid of listeners(port)) {
+      const cmd = normalize(commandLine(pid));
+      if (cmd.includes(workspace)) {
+        log(`Stopping the ${what} still listening on ${port} (pid ${pid}).`);
+        killTree(pid);
+        stopped++;
+      } else if (cmd) {
+        log(`Port ${port} is held by a process outside this workspace (pid ${pid}): left alone.`);
+      }
+    }
+  }
+  return stopped;
+}
+
+// ---------------------------------------------------------------- doctor, clean
+
+/** Checks the machine against the toolchain contract; fixes nothing silently. Exit code 1 on any failure. */
+async function doctor(product) {
+  const tools = toolchainPaths();
+  const results = [];
+  const report = (level, message) => results.push({ level, message });
+
+  report('INFO', `toolchain: ${tools.root}`);
+  try {
+    mkdirSync(tools.root, { recursive: true });
+    const probe = join(tools.root, `.doctor-${process.pid}`);
+    writeFileSync(probe, 'ok');
+    unlinkSync(probe);
+    report('OK', 'toolchain folder writable');
+  } catch (error) {
+    report('FAIL', `toolchain folder not writable (${error.message}): set NAFURA_TOOLCHAIN to a folder you own`);
+  }
+  if (existsSync(tools.nodeExe)) report('OK', `Node ${tools.nodeName}`);
+  else report('FAIL', `Node missing at ${tools.node}: ${SETUP}`);
+  if (!existsSync(tools.java)) report('FAIL', `JDK missing at ${tools.jdk}: ${SETUP}`);
+  else {
+    // The failure that motivated the toolchain: a JDK that starts but cannot write (low-integrity executable).
+    const probeDir = join(tools.gradle, `.doctor-${process.pid}`);
+    const source = join(tools.root, 'DoctorProbe.java');
+    writeFileSync(source, 'public class DoctorProbe { public static void main(String[] a) throws Exception { java.nio.file.Files.createDirectories(java.nio.file.Path.of(a[0])); java.io.File f = java.io.File.createTempFile("probe", ".tmp"); f.delete(); System.out.println("ok"); } }');
+    const result = spawnSync(tools.java, [source, probeDir], { encoding: 'utf8' });
+    rmSync(probeDir, { recursive: true, force: true });
+    if (result.stdout?.trim() === 'ok') report('OK', 'JDK runs and writes to the Gradle cache and the temp folder');
+    else report('FAIL', `JDK cannot write (${(result.stderr || result.error?.message || '').split(/\r?\n/)[0]}): run doctor again after "toolchain"; if it persists, see ops/README.md § Outillage`);
+  }
+  if (WINDOWS) {
+    for (const [what, path] of [['repository', WORKSPACE], ['toolchain', tools.root]]) {
+      const acl = spawnSync('icacls', [path], { encoding: 'utf8' }).stdout ?? '';
+      if (/Mandatory Label\\Low/i.test(acl)) {
+        report(what === 'toolchain' ? 'FAIL' : 'WARN', `${what} carries a low-integrity label (set by a sandbox such as Codex): programs started from it cannot write elsewhere${what === 'toolchain' ? '' : '; harmless as long as the JDK and Node come from the toolchain'}`);
+      }
+    }
+  }
+  if (/\s/.test(WORKSPACE)) report('INFO', `the repository path contains spaces (${WORKSPACE}): supported, but scripts must quote paths`);
+  for (const [what, port] of [['API', product.ports.api], ['web', product.ports.web]]) {
+    const pids = listeners(port);
+    if (pids.length) report('WARN', `port ${port} (${what}) in use by pid ${pids.join(', ')}: "run.mjs stop" if it is a previous lab`);
+    else report('OK', `port ${port} (${what}) free`);
+  }
+  const pg = postmasterPid(join(labDataDir(product), 'postmaster.pid')) ?? postmasterPid(join(product.backend, 'data/postgres/postmaster.pid'));
+  if (pg && isPostgres(pg)) report('WARN', `the lab's PostgreSQL runs (pid ${pg}) without a lab: "run.mjs stop"`);
+  try {
+    const fs = statfsSync(existsSync(tools.root) ? tools.root : WORKSPACE);
+    const freeGb = (fs.bavail * fs.bsize) / 1024 ** 3;
+    report(freeGb < 5 ? 'WARN' : 'OK', `${freeGb.toFixed(1)} GB free on the toolchain drive${freeGb < 5 ? ' (5 GB recommended)' : ''}`);
+  } catch {
+    // statfs unsupported: skip
+  }
+  for (const { level, message } of results) console.log(`${level.padEnd(5)} ${message}`);
+  if (results.some((r) => r.level === 'FAIL')) process.exitCode = 1;
+}
+
+/** Build outputs of the product; with --data, its lab database too (refused while the lab runs). */
+function clean(product, { data = false } = {}) {
+  for (const dir of [join(product.backend, 'build'), join(product.web, '.angular'), join(product.web, 'dist')]) {
+    if (existsSync(dir)) {
+      log(`Deleting ${dir}`);
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+  if (data) {
+    const pid = postmasterPid(join(labDataDir(product), 'postmaster.pid'));
+    if (pid && isPostgres(pid)) throw new Error('The lab database is in use: "run.mjs stop" first.');
+    log(`Deleting the lab database ${labDataDir(product)}`);
+    rmSync(labDataDir(product), { recursive: true, force: true });
+  }
 }
 
 /** KEY=value file (gitignored). Strips optional surrounding quotes; ignores blanks and # comments. */
@@ -396,15 +606,18 @@ function loadEnvFile(path) {
 }
 
 async function lab(product) {
+  const logFile = openLog(product, 'lab');
+  log(`Log: ${logFile}`);
   stopEmbeddedPostgres(product);
   cleanups.push(() => stopEmbeddedPostgres(product));
   process.on('SIGHUP', () => stopAll(0));
   const brevoLab = join(PLATFORM, 'ops/secrets/.brevo-lab.env');
   const emailEnv = loadEnvFile(brevoLab);
   if (!emailEnv?.BREVO_API_KEY) {
-    console.warn(`Lab: no Brevo key at ${brevoLab} — invitation emails will fail (EMAIL_DELIVERY_FAILED).`);
+    log(`Lab: no Brevo key at ${brevoLab} — invitation emails will fail (EMAIL_DELIVERY_FAILED).`);
   }
-  await local(product, emailEnv ?? {});
+  mkdirSync(dirname(labDataDir(product)), { recursive: true });
+  await local(product, { ...(emailEnv ?? {}), NAFURA_LAB_DATA_DIR: labDataDir(product) });
 }
 
 async function localStaging(product) {
@@ -462,7 +675,8 @@ function buildBackend(product, env, dryRun) {
 
 function buildWeb(product, env, dryRun) {
   ensureWebDependencies(product);
-  exec(process.execPath, [join(PLATFORM, 'scripts/product-web.mjs'), 'build'], { cwd: product.web, dryRun });
+  const tools = nodeTools();
+  exec(tools.node, [join(PLATFORM, 'scripts/product-web.mjs'), 'build'], { cwd: product.web, env: tools.env, dryRun });
   exec('docker', ['build', '-f', join(PRODUCT_OPS, 'Dockerfile.web'), '--build-context', `ops=${PRODUCT_OPS}`,
     '-t', imageOf(product, env, 'web'), join(product.web, 'dist/app/browser')], { dryRun });
 }
@@ -630,11 +844,12 @@ async function deploy(product, env, { scope = 'full', dryRun = false, yes = fals
 // ---------------------------------------------------------------- entry
 
 function options(args) {
-  const parsed = { dryRun: false, yes: false };
+  const parsed = { dryRun: false, yes: false, data: false };
   for (let i = 0; i < args.length; i++) {
     const [flag, value] = args[i].split('=');
     if (flag === '--dry-run') parsed.dryRun = true;
     else if (flag === '--yes') parsed.yes = true;
+    else if (flag === '--data') parsed.data = true;
     else if (flag === '--scope') parsed.scope = value ?? args[++i];
     else throw new Error(`Unknown option ${args[i]}\n\n${USAGE}`);
   }
@@ -650,6 +865,10 @@ export async function run(productUrl, argv) {
     else if (mode === 'local-staging') await localStaging(product);
     else if (mode === 'staging' || mode === 'prod') await deploy(product, mode, opts);
     else if (mode === 'check') check(product);
+    else if (mode === 'toolchain') await installToolchain();
+    else if (mode === 'doctor') await doctor(product);
+    else if (mode === 'stop') stopLab(product);
+    else if (mode === 'clean') clean(product, opts);
     else {
       console.log(USAGE);
       process.exitCode = mode && !['-h', '--help', 'help'].includes(mode) ? 2 : 0;

@@ -12,6 +12,7 @@ dependencies {
     implementation project(':platform:approbation')
     implementation project(':platform:features:administration:subscription')
     implementation project(':platform:features:app-settings')
+    implementation project(':platform:features:collaboration:audit')
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'

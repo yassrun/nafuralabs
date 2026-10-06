@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -48,6 +49,7 @@ public class LlmService {
     private final LlmExecutionProperties executionProperties;
     private final Executor llmAuditExecutor;
     private final Optional<MeterRegistry> meterRegistry;
+    private final TenantAiPolicyService policyService;
 
     public LlmService(
         AiProvider aiProvider,
@@ -56,7 +58,8 @@ public class LlmService {
         LlmRequestNormalizer requestNormalizer,
         LlmExecutionProperties executionProperties,
         @Qualifier("llmAuditExecutor") Executor llmAuditExecutor,
-        @Autowired(required = false) MeterRegistry meterRegistry
+        @Autowired(required = false) MeterRegistry meterRegistry,
+        TenantAiPolicyService policyService
     ) {
         this.aiProvider = aiProvider;
         this.costCalculator = costCalculator;
@@ -65,6 +68,7 @@ public class LlmService {
         this.executionProperties = executionProperties;
         this.llmAuditExecutor = llmAuditExecutor;
         this.meterRegistry = Optional.ofNullable(meterRegistry);
+        this.policyService = policyService;
     }
 
     /**
@@ -82,6 +86,20 @@ public class LlmService {
 
     public CompletableFuture<LlmResponse> callLlm(LlmRequest request, LlmCallContext context) {
         LlmCallContext normalizedContext = normalizeContext(context);
+
+        String tenantId = normalizedContext.getTenantId();
+        if (tenantId != null) {
+            TenantAiPolicyService.AiRuntimePolicy policy = policyService.policyFor(tenantId);
+            if (!policy.enabled()) {
+                return CompletableFuture.failedFuture(
+                    new IllegalStateException("AI is disabled for this organization"));
+            }
+            if (isBudgetExceeded(tenantId, policy.monthlyBudgetUsd())) {
+                return CompletableFuture.failedFuture(
+                    new IllegalStateException("Monthly AI budget exceeded"));
+            }
+        }
+
         NormalizedLlmRequest normalizedRequest = requestNormalizer.normalize(request, normalizedContext);
         String scopeKey = buildScopeKey(normalizedContext);
         String idempotencyKey = trimToNull(normalizedContext.getIdempotencyKey());
@@ -417,7 +435,8 @@ public class LlmService {
         event.setProvider(response.getProvider() != null ? response.getProvider() : aiProvider.getProviderName());
         event.setModel(response.getModel() != null && !response.getModel().isEmpty() ? response.getModel() : UNKNOWN);
         event.setLatencyMs(latencyMs);
-        event.setResponseContent(response.getContent());
+        // Privacy default: do not persist response payloads unless the tenant opted in.
+        event.setResponseContent(shouldRetainPayload(context) ? response.getContent() : null);
 
         if (response.getUsage() != null) {
             event.setTokensIn(response.getUsage().getInputTokens());
@@ -451,6 +470,31 @@ public class LlmService {
             // Audit must not fail the caller (e.g. BL extraction) when logging is misconfigured.
             log.warn("Failed to persist LLM usage audit event for request {}: {}", response.getRequestId(), e.getMessage());
         }
+    }
+
+    private boolean shouldRetainPayload(LlmCallContext context) {
+        String tenantId = context.getTenantId();
+        if (tenantId == null) {
+            return false;
+        }
+        return policyService.policyFor(tenantId).retainPayloads();
+    }
+
+    private boolean isBudgetExceeded(String tenantId, BigDecimal monthlyBudgetUsd) {
+        if (monthlyBudgetUsd == null) {
+            return false;
+        }
+        BigDecimal spent = usageEventRepository.sumCostSince(tenantId, currentMonthStartUtc());
+        return spent.compareTo(monthlyBudgetUsd) >= 0;
+    }
+
+    private static Instant currentMonthStartUtc() {
+        return Instant.now()
+            .atZone(ZoneOffset.UTC)
+            .toLocalDate()
+            .withDayOfMonth(1)
+            .atStartOfDay(ZoneOffset.UTC)
+            .toInstant();
     }
 
     private void recordRequestMetric(LlmResponse response, LlmCallContext context, String status) {

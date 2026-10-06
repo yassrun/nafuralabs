@@ -39,5 +39,6 @@ lab / check / chemins UI
 | `cap.notifications` | [notifications.md](notifications.md) |
 | `cap.audit` | [audit.md](audit.md) |
 | `cap.iam` | [iam.md](iam.md) |
+| `cap.ai` | [ai.md](ai.md) |
 
 Les autres ids du catalogue n’ont pas encore de fichier.

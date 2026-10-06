@@ -7,7 +7,7 @@
 
 1. `bcs/<nom>/bc.manifest.json` (id `bc.<nom>`) et `bcs/<nom>/backend/build.gradle` = `apply from: '…/nafura-platform/gradle/nafura-bc.gradle'`.
 2. L’id dans `app.nafura.json` `spec.businessContexts`. Gradle compose `bcs/<nom>/backend` en `:bc-<nom>` ; le web génère la liste des BCs (`business-contexts.generated.ts`, ignoré par git).
-3. `bcs/<nom>/web/index.ts` : `export default` un `HostBusinessContext` (manifeste, routes, routes des records).
+3. `bcs/<nom>/web/index.ts` : `export default` un `HostBusinessContext` (manifeste, routes). Il est chargé **à la première visite** du BC : le module généré n’importe au démarrage que les manifestes (`LazyHostBusinessContext`), pour que les archétypes et leurs dépendances ne pèsent pas sur la première page. Les liens vers une fiche (approbations, notifications, audit) se déclarent dans le manifeste : `spec.records` (`{ "demo.purchase-request": "/demo/purchase-requests/{id}" }`, sous `routesPrefix`, avec `{id}`).
 4. Backend : une `@AutoConfiguration` (`@ComponentScan @EntityScan @EnableJpaRepositories`) listée dans `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`.
 
 Rien d’autre dans le produit : les garde-fous (`npm run architecture:check`) refusent tout fichier hors configuration, points d’entrée et BCs, et toute mention du nom du produit hors `app.nafura.json`.
@@ -17,7 +17,7 @@ Rien d’autre dans le produit : les garde-fous (`npm run architecture:check`) r
 | Fichier | Contient | Schéma |
 |---|---|---|
 | `app.nafura.json` | `metadata.id`, `spec.product` (`name`, `mark`, `logo`), `spec.runtime` (`tenancy`, `defaultRoute`), `spec.shell`, `spec.businessContexts`, `spec.capabilities.disabled`, `spec.roles`, `spec.customRoles`, `spec.i18n`, `spec.local` (ports, utilisateurs lab), `spec.deploy.<env>` (`host`, `owners`) | `sources/web/platform/schemas/app.nafura.schema.json` |
-| `bc.manifest.json` | `label`, `icon`, `routesPrefix`, `permissions`, `defaultRoles`, `notifications`, `navigation`, `requires`, `screens` (écrans spécifiques : `id`, `label`, `reason`) | `sources/web/platform/schemas/bc.manifest.schema.json` |
+| `bc.manifest.json` | `label`, `icon`, `routesPrefix`, `records` (liens vers les fiches par type d’entité), `permissions`, `defaultRoles`, `notifications`, `navigation`, `requires`, `screens` (écrans spécifiques : `id`, `label`, `reason`) | `sources/web/platform/schemas/bc.manifest.schema.json` |
 
 Les deux sont validés au build (web) et lus au démarrage (backend). Pas de second format.
 

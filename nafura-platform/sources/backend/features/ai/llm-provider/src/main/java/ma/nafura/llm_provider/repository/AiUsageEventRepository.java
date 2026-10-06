@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,10 @@ public interface AiUsageEventRepository extends JpaRepository<AiUsageEvent, Long
     Optional<AiUsageEvent> findByScopeKeyAndIdempotencyKey(String scopeKey, String idempotencyKey);
 
     Page<AiUsageEvent> findByScopeKey(String scopeKey, Pageable pageable);
+
+    @Query("SELECT COALESCE(SUM(e.costUsd), 0) FROM AiUsageEvent e " +
+           "WHERE e.tenantId = :tenantId AND e.createdAt >= :from")
+    BigDecimal sumCostSince(@Param("tenantId") String tenantId, @Param("from") Instant from);
     
     /**
      * Callers must pass non-null {@code from}/{@code to}. PostgreSQL cannot infer JDBC types for

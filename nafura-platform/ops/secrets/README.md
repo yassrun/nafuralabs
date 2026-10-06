@@ -36,7 +36,9 @@ secret/nafura/{env}/
 │   │   ├── email/brevo        # api_key
 │   │   └── ai/
 │   │       ├── gemini         # api_key
-│   │       └── deepseek       # api_key (Sektor : AI_PROVIDER=deepseek)
+│   │       ├── deepseek       # api_key (Sektor : AI_PROVIDER=deepseek)
+│   │       ├── openai         # api_key
+│   │       └── azure-openai   # api_key + endpoint (deployment dans app.ai.azure.*)
 │   └── security/invitation    # token_secret
 └── apps/
     └── {app-id}/
@@ -176,6 +178,28 @@ kubectl -n sektor-prod rollout restart deploy/sektor-btp-backend
 
 ```bash
 vault kv put secret/nafura/prod/platform/integrations/ai/gemini api_key="…"
+```
+
+### IA — clés plateforme (fallback) & master key BYOK
+
+Clés plateforme (fallback quand aucune clé d’organisation BYOK n’est posée dans `Administration → Fournisseurs IA`) :
+
+| Variable d’env | Chemin Vault |
+|----------------|--------------|
+| `AI_GEMINI_API_KEY` | `platform/integrations/ai/gemini` → `api_key` |
+| `AI_DEEPSEEK_API_KEY` | `platform/integrations/ai/deepseek` → `api_key` |
+| `AI_OPENAI_API_KEY` | `platform/integrations/ai/openai` → `api_key` |
+| `AI_AZURE_OPENAI_API_KEY` (+ `AI_AZURE_OPENAI_ENDPOINT`) | `platform/integrations/ai/azure-openai` → `api_key`, `endpoint` |
+
+**BYOK** (saisie de clé par organisation) : la master key de chiffrement AES-256-GCM doit être présente, sinon l’UI désactive la saisie (fallback plateforme inchangé) et `PUT /credentials/{provider}` répond 503.
+
+| Variable d’env | Rôle |
+|----------------|------|
+| `AI_CREDENTIALS_MASTER_KEY` | Chiffre les secrets `tenant_ai_credential` ; jamais exposée, jamais dans les logs ni l’audit |
+
+```bash
+vault kv put secret/nafura/prod/platform/integrations/ai/openai api_key="…"
+vault kv put secret/nafura/prod/platform/integrations/ai/azure-openai api_key="…" endpoint="https://…openai.azure.com"
 ```
 
 ### Venue Catalog

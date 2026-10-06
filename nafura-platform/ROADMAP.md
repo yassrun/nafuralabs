@@ -4,9 +4,11 @@
 
 ## Prochains
 
+00. **Outillage et build sans machine ni admin** — **en premier** : le lab ne démarre plus (dépôt en intégrité basse, JDK dans le dépôt) et reste lent. Contrat et écarts : [ops/README.md](ops/README.md) § Outillage. Ordre : outillage hors dépôt + `bootstrap` + `toolchain` + `doctor` → daemon et caches Gradle → base du lab hors dépôt et `stop` → `@angular/build`. Pas de Docker ni de dev container (postes clients sans Docker).
 0. **Notifications** — état ~8/10 + suite : [docs/capabilities/notifications.md](docs/capabilities/notifications.md) § Roadmap.
 0 bis. **Audit** — état ~8/10 + suite : [docs/capabilities/audit.md](docs/capabilities/audit.md) § Roadmap.
 0 ter. **IAM / Membres** — état ~5/10 → 8/10 : [docs/capabilities/iam.md](docs/capabilities/iam.md) § Roadmap (UX archétype, accept invite host, last OWNER, audit).
+0 quater. **IA / Fournisseurs** — livré ~8/10 (BYOK, catalogue, quotas, privacy, RBAC/audit, UI) : [docs/capabilities/ai.md](docs/capabilities/ai.md). Préalable utile à Conversation IA.
 0. **Listes : la suite** — le socle est livré (descripteur du record, grammaire de filtre, vues, filtres proposés : [PLATFORM.md](docs/PLATFORM.md), [UI.md](docs/UI.md)). Reste :
    - Écrans d’administration sur des contrôleurs non-record (clés d’API, webhooks, séquences de numérotation) : passer en `RecordController` (entités sur `TenantEntity` : colonnes `created_by` / `updated_by` ; permissions `…read/write` → `…read/create/update/delete` ; clé et secret jamais sérialisés ; création de clé et révocation surchargées ; statut « expiré » calculé), puis supprimer `LegacyListingPageComponent`.
    - Archétype « config-driven » (`lib/anatomy` `ListingPageConfig`, 7 écrans plateforme) : migrer vers `nf-listing-page`, un seul type de liste.
@@ -14,7 +16,7 @@
 1. **Statuts et approbations** — approbateur désigné par permission (plus par rôle), approbations multi-étapes, historique des transitions, notifications aux approbateurs.
 2. **Réglages** — réglages déclarés par un BC (manifeste), rendus par l’écran Paramètres ; tableau de bord sans widgets métier en dur.
 3. **Documents** — impression personnalisée (modèles, marque de l’organisation ; le lab n’a pas Gotenberg). L’import d’une fiche depuis un endpoint du BC est livré (`RecordPageConfig.import`). Reste le type de document `{ domain, type }` : aujourd’hui il vit en base (`DocTypeController`), pas dans un seed de référence — ne pas inventer un second format.
-4. **Conversation IA et chat** — un seul concept de conversation, outils tirés des BCs.
+4. **Conversation IA et chat** — un seul concept de conversation, outils tirés des BCs. Runtime / admin fournisseurs : [docs/capabilities/ai.md](docs/capabilities/ai.md).
 5. **Composants métier** — montants, BTP ; i18n par BC ; écrans utilisables sur mobile ; surcharge du design par produit.
 6. **Tenancy `multi`** — API, isolation, sélecteur et seeding à la création : livrés (voir [PLATFORM.md](docs/PLATFORM.md#connexion-et-organisation)). Reste la console opérateur (écrans Organisations et Utilisateurs), le lien d’invitation branché sur `InvitationAcceptService`, la coquille publique, le débit, l’effacement et le consentement de partage.
 7. **Sektor sur le host** — `app.nafura.json` + BCs Sektor, suppression de `socle`, plus de vérification de rôle ; e2e Sektor verts.

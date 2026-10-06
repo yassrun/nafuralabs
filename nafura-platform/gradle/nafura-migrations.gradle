@@ -12,7 +12,7 @@ def productModuleRank = [
         item: 20, etudes: 30, stock: 30, achats: 40, chantiers: 50, approbations: 60, ventes: 60,
 ]
 
-ext.nafuraMigrationSortKey = { String relativePath ->
+def nafuraMigrationSortKey = { String relativePath ->
     def lower = relativePath.replace('\\', '/').toLowerCase(Locale.ROOT)
     def filename = relativePath.tokenize('/').last()
 
@@ -72,20 +72,24 @@ ext.nafuraMigrationSortKey = { String relativePath ->
 }
 
 /** Stable id from the repo-relative path only: reordering other migrations never retargets it. */
-ext.nafuraChangeSetId = { String relativePath ->
+def nafuraChangeSetId = { String relativePath ->
     def digest = MessageDigest.getInstance('SHA-256')
     digest.update(relativePath.replace('\\', '/').getBytes('UTF-8'))
     return "m-${digest.digest().encodeHex().toString().substring(0, 24)}"
 }
 
 /** Module dirs (src/main/resources/db) → ordered SQL entries, as ops/lifecycle selects them. */
-ext.nafuraMigrationEntries = { Collection<File> moduleDirs ->
+def nafuraMigrationEntries = { Collection<File> moduleDirs ->
     def entries = []
     moduleDirs.each { File moduleDir ->
         def dbRoot = new File(moduleDir, 'src/main/resources/db')
         def changelog = new File(dbRoot, 'changelog')
         def migration = new File(dbRoot, 'migration')
-        def pick = { File root -> root.isDirectory() ? fileTree(root) { include '**/*.sql' }.files.toList() : [] }
+        def pick = { File root ->
+            def found = []
+            if (root.isDirectory()) root.eachFileRecurse(groovy.io.FileType.FILES) { if (it.name.endsWith('.sql')) found << it }
+            return found
+        }
         def selected = pick(changelog) ?: pick(migration)
         selected.each { File sql ->
             def relativePath = repoRoot.toPath().relativize(sql.canonicalFile.toPath()).toString().replace('\\', '/')
@@ -97,7 +101,7 @@ ext.nafuraMigrationEntries = { Collection<File> moduleDirs ->
     return entries.sort { left, right -> nafuraMigrationSortKey(left.relativePath) <=> nafuraMigrationSortKey(right.relativePath) }
 }
 
-ext.nafuraChangelogYaml = { List entries, Closure<String> sqlPathOf ->
+def nafuraChangelogYaml = { List entries, Closure<String> sqlPathOf ->
     def yaml = ['databaseChangeLog:', '']
     entries.each { entry ->
         def filename = entry.relativePath.tokenize('/').last()
@@ -116,6 +120,12 @@ ext.nafuraChangelogYaml = { List entries, Closure<String> sqlPathOf ->
     return yaml.join('\n') + '\n'
 }
 
+// Helpers stay script locals (configuration-cache safe: no project lookup when a task runs), shared via ext.
+ext.nafuraMigrationSortKey = nafuraMigrationSortKey
+ext.nafuraChangeSetId = nafuraChangeSetId
+ext.nafuraMigrationEntries = nafuraMigrationEntries
+ext.nafuraChangelogYaml = nafuraChangelogYaml
+
 /**
  * Registers `<taskName>` generating nafura/db/ (changelog-master.yaml + SQL) from the project
  * modules of `classpath` (platform modules and product BCs). Returns the output as a FileCollection
@@ -123,26 +133,30 @@ ext.nafuraChangelogYaml = { List entries, Closure<String> sqlPathOf ->
  */
 ext.nafuraMigrationsFor = { Configuration classpath, String taskName ->
     def outputDir = layout.buildDirectory.dir("generated/${taskName}")
+    // Configuration-cache safe: nothing below reads the project or the Configuration while the task runs.
+    def resolvedArtifacts = classpath.incoming.artifacts.resolvedArtifacts
+    def entriesOf = nafuraMigrationEntries
+    def yamlOf = nafuraChangelogYaml
     def task = tasks.register(taskName) {
         description = 'Generates the Liquibase changelog of the modules on the runtime classpath (lab mode).'
         inputs.files(classpath)
         outputs.dir(outputDir)
         doLast {
             def root = outputDir.get().asFile
-            project.delete(root)
+            root.deleteDir()
             def db = new File(root, 'nafura/db')
             // A project artifact is <projectDir>/build/libs/<name>.jar.
-            def moduleDirs = classpath.incoming.artifacts.artifacts
+            def moduleDirs = resolvedArtifacts.get()
                     .findAll { it.id.componentIdentifier instanceof ProjectComponentIdentifier }
                     .collect { it.file.parentFile.parentFile.parentFile }
                     .unique()
-            def entries = nafuraMigrationEntries(moduleDirs)
+            def entries = entriesOf(moduleDirs)
             entries.each { entry ->
                 def target = new File(db, "migrations/${entry.relativePath}")
                 target.parentFile.mkdirs()
                 target.bytes = entry.source.bytes
             }
-            new File(db, 'changelog-master.yaml').text = nafuraChangelogYaml(entries) { "migrations/${it.relativePath}" }
+            new File(db, 'changelog-master.yaml').text = yamlOf(entries) { "migrations/${it.relativePath}" }
             logger.lifecycle("${taskName}: ${entries.size()} SQL migrations from ${moduleDirs.size()} modules")
         }
     }

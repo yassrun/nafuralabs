@@ -2,14 +2,18 @@ package ma.nafura.platform.ai.llm.config;
 
 import ma.nafura.platform.ai.llm.cost.CostCalculator;
 import ma.nafura.platform.ai.llm.cost.DefaultCostCalculator;
+import ma.nafura.platform.ai.llm.provider.AiCredentialPort;
 import ma.nafura.platform.ai.llm.provider.AiProvider;
 import ma.nafura.platform.ai.llm.provider.AiProviderRegistry;
 import ma.nafura.platform.ai.llm.provider.AiRuntimePreferencePort;
 import ma.nafura.platform.ai.llm.provider.RoutingAiProvider;
 import ma.nafura.platform.ai.llm.provider.gemini.GeminiProvider;
 import ma.nafura.platform.ai.llm.provider.gemini.GeminiProviderFactory;
+import ma.nafura.platform.ai.llm.provider.openai.AzureOpenAiProviderFactory;
 import ma.nafura.platform.ai.llm.provider.openai.DeepSeekProviderFactory;
 import ma.nafura.platform.ai.llm.provider.openai.OpenAiCompatibleProvider;
+import ma.nafura.platform.ai.llm.provider.openai.OpenAiProviderFactory;
+import ma.nafura.platform.ai.llm.service.AiCredentialCipher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -31,6 +35,9 @@ public class LlmProviderConfig {
     @Value("${ai.provider:gemini}")
     private String provider;
 
+    @Value("${ai.credentials.master-key:}")
+    private String credentialsMasterKey;
+
     @Value("${ai.gemini.api-key:}")
     private String geminiApiKey;
 
@@ -49,6 +56,33 @@ public class LlmProviderConfig {
     @Value("${ai.deepseek.model:deepseek-flash}")
     private String deepseekModel;
 
+    @Value("${ai.openai.api-key:}")
+    private String openaiApiKey;
+
+    @Value("${ai.openai.base-url:https://api.openai.com}")
+    private String openaiBaseUrl;
+
+    @Value("${ai.openai.model:gpt-4o-mini}")
+    private String openaiModel;
+
+    @Value("${ai.azure-openai.api-key:}")
+    private String azureApiKey;
+
+    @Value("${ai.azure-openai.endpoint:}")
+    private String azureEndpoint;
+
+    @Value("${ai.azure-openai.deployment:}")
+    private String azureDeployment;
+
+    @Value("${ai.azure-openai.api-version:2024-08-01-preview}")
+    private String azureApiVersion;
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AiCredentialCipher aiCredentialCipher() {
+        return new AiCredentialCipher(credentialsMasterKey);
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public AiProviderRegistry aiProviderRegistry() {
@@ -59,6 +93,14 @@ public class LlmProviderConfig {
         OpenAiCompatibleProvider deepseek =
             DeepSeekProviderFactory.create(deepseekApiKey, deepseekBaseUrl, deepseekModel);
         providers.put("deepseek", deepseek);
+
+        OpenAiCompatibleProvider openai =
+            OpenAiProviderFactory.create(openaiApiKey, openaiBaseUrl, openaiModel);
+        providers.put("openai", openai);
+
+        OpenAiCompatibleProvider azure =
+            AzureOpenAiProviderFactory.create(azureApiKey, azureEndpoint, azureDeployment, azureApiVersion);
+        providers.put("azure-openai", azure);
 
         String defaultName = provider != null ? provider.trim().toLowerCase() : "gemini";
         if (!providers.containsKey(defaultName)) {
@@ -72,9 +114,14 @@ public class LlmProviderConfig {
     @ConditionalOnMissingBean(name = "aiProvider")
     public AiProvider aiProvider(
         AiProviderRegistry registry,
-        @Autowired(required = false) AiRuntimePreferencePort preferencePort
+        @Autowired(required = false) AiRuntimePreferencePort preferencePort,
+        @Autowired(required = false) AiCredentialPort credentialPort
     ) {
-        return new RoutingAiProvider(registry, Optional.ofNullable(preferencePort));
+        return new RoutingAiProvider(
+            registry,
+            Optional.ofNullable(preferencePort),
+            Optional.ofNullable(credentialPort)
+        );
     }
 
     @Bean

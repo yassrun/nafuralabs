@@ -7,6 +7,10 @@
     "label": "Démo",
     "icon": "flask-conical",
     "routesPrefix": "/demo",
+    "records": {
+      "demo.purchase-request": "/demo/purchase-requests/{id}",
+      "demo.project": "/demo/projects/{id}"
+    },
     "permissions": [
       { "id": "demo.notes.note.read" },
       { "id": "demo.notes.note.create" },

@@ -20,7 +20,7 @@
     { "id": "cap.webhooks", "modules": ["webhook"], "requires": ["cap.notifications", "cap.approvals"], "probe": { "get": "/api/v1/platform/admin/webhooks" } },
     { "id": "cap.jobs", "modules": ["job-runner"], "requires": [], "probe": { "class": "ma.nafura.platform.jobrunner.JobRunnerAutoConfiguration" } },
     { "id": "cap.geo", "modules": ["geo", "google-places"], "requires": [], "probe": { "class": "ma.nafura.platform.geo.GeoPlatformAutoConfiguration" } },
-    { "id": "cap.ai", "modules": ["llm-provider", "ai-agent-api", "ai-conversation", "ai-agent-runtime"], "requires": ["cap.approvals", "cap.subscriptions", "cap.app-settings"], "probe": { "get": "/api/v1/platform/admin/ai-providers" } },
+    { "id": "cap.ai", "modules": ["llm-provider", "ai-agent-api", "ai-conversation", "ai-agent-runtime"], "requires": ["cap.approvals", "cap.subscriptions", "cap.app-settings", "cap.audit"], "probe": { "get": "/api/v1/platform/admin/ai-providers" } },
     { "id": "cap.document-extraction", "modules": ["document-extraction"], "requires": ["cap.ai", "cap.documents"], "probe": { "get": "/api/doc-types/domains" } }
   ]
 }

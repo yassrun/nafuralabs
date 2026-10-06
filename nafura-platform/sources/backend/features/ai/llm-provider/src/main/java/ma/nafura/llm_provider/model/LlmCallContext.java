@@ -33,5 +33,8 @@ public class LlmCallContext {
 
     /** Runtime override from tenant AI preference (optional). */
     private String modelOverride;
+
+    /** Per-call API key override (tenant BYOK); null means use the provider's platform key. */
+    private String apiKeyOverride;
 }
 

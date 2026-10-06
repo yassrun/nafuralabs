@@ -9,7 +9,7 @@ export const AI_PROVIDERS_ROUTES: Routes = [
       import('./ai-providers.page').then((m) => m.AiProvidersPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['tenant.settings.read'],
+      permissions: ['administration.ai.read'],
       title: 'administration.aiProviders.title',
     },
   },

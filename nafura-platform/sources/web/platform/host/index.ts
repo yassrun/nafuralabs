@@ -1,4 +1,10 @@
-export { nafuraHostRoutes, provideNafuraHost, type HostBusinessContext } from './provide-nafura-host';
+export {
+  nafuraHostRoutes,
+  provideNafuraHost,
+  type HostBusinessContext,
+  type HostBusinessContextEntry,
+  type LazyHostBusinessContext,
+} from './provide-nafura-host';
 export { NafuraHostRootComponent, NafuraHostShellComponent } from './nafura-host-shell.component';
 export {
   planHost,

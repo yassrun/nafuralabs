@@ -15,7 +15,7 @@
 
 **Timeline fiche.** Section `kind: 'audit'` ([UI.md](../UI.md)). Lecture `GET /api/v1/platform/collaboration/audit/timeline` avec `@HostRecordGate` (même contrat que commentaires / pièces jointes) : permission du record (lecture pour voir), clé d’entité = `lifecycle.entity` sinon dernier segment du mapping.
 
-**Journal admin.** Permission `administration.audit.read` : liste tous les événements du tenant. « Voir l’entité » résout l’URL via `HostBusinessContext.records` (comme les notifications). Détail d’événement exposé en UI (champs / valeurs utiles, pas une ligne opaque).
+**Journal admin.** Permission `administration.audit.read` : liste tous les événements du tenant. « Voir l’entité » résout l’URL via `spec.records` du manifeste du BC (comme les notifications). Détail d’événement exposé en UI (champs / valeurs utiles, pas une ligne opaque).
 
 **Export.** Export CSV du journal (parcours admin).
 

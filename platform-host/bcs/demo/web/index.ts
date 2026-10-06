@@ -47,10 +47,6 @@ export const demoBusinessContext: HostBusinessContext = {
     recordRoute('projects/:id', PROJECT_RECORD),
     listing('notes', NOTES_LISTING),
   ],
-  records: {
-    'demo.purchase-request': '/demo/purchase-requests/{id}',
-    'demo.project': '/demo/projects/{id}',
-  },
 };
 
 export default demoBusinessContext;

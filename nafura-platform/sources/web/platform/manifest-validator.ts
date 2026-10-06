@@ -16,6 +16,8 @@ export type ManifestValidationIssueCode =
   | 'navigation-outside-prefix'
   | 'navigation-unknown-permission'
   | 'navigation-invalid-node'
+  | 'record-invalid-entity'
+  | 'record-outside-prefix'
   | 'role-unknown-reference'
   | 'duplicate-role-code';
 
@@ -170,6 +172,18 @@ function validateBusinessContexts(
       item.children?.forEach(visit);
     };
     (context.spec.navigation ?? []).forEach(visit);
+
+    for (const [entityType, route] of Object.entries(context.spec.records ?? {})) {
+      if (!/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+$/.test(entityType)) {
+        issues.push({ code: 'record-invalid-entity', message: `Record "${entityType}" of "${id}" is not an entity type (<bc>.<record>).` });
+      }
+      if (!route.includes('{id}') || !prefix || !isUnderPrefix(route, prefix)) {
+        issues.push({
+          code: 'record-outside-prefix',
+          message: `Record "${entityType}" of "${id}" routes to "${route}": expected a route under ${prefix ?? 'its prefix'} with {id}.`,
+        });
+      }
+    }
   }
 
   validateRoles(manifests, contexts, issues);

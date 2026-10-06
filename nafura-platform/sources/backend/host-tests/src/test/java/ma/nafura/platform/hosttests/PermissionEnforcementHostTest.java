@@ -45,12 +45,17 @@ class PermissionEnforcementHostTest {
     }
 
     @Test
-    void aiProvidersAdministrationNeedsTenantSettingsPermissions() throws Exception {
+    void aiProvidersAdministrationNeedsAdministrationAiPermissions() throws Exception {
         assumeThat(disabled()).doesNotContain("cap.ai");
         String outsider = token("outsider@host.local");
 
         assertThat(send(outsider, "GET", "/api/v1/platform/admin/ai-providers", null)).isEqualTo(403);
+        assertThat(send(outsider, "GET", "/api/v1/platform/admin/ai-providers/limits", null)).isEqualTo(403);
         assertThat(send(outsider, "PUT", "/api/v1/platform/admin/ai-providers", "{}")).isEqualTo(403);
+        assertThat(send(outsider, "PUT", "/api/v1/platform/admin/ai-providers/limits", "{}")).isEqualTo(403);
+        assertThat(send(outsider, "PUT", "/api/v1/platform/admin/ai-providers/credentials/gemini", "{\"secret\":\"x\"}")).isEqualTo(403);
+        assertThat(send(outsider, "DELETE", "/api/v1/platform/admin/ai-providers/credentials/gemini", null)).isEqualTo(403);
+        assertThat(send(outsider, "POST", "/api/v1/platform/admin/ai-providers/test", "{}")).isEqualTo(403);
         assertThat(send(token("admin@host.local"), "GET", "/api/v1/platform/admin/ai-providers", null)).isEqualTo(200);
     }
 

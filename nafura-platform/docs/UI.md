@@ -41,7 +41,7 @@ Exemple : synthèse fournisseur du BC démo (`supplier-overview`), ouverte depui
 | Page publique | contrôleur `@PublicEndpoint` | `spec.public` du BC (`routes`, `endpoints`, `submissions`). Champs renvoyés = `@PublicField` seulement. La coquille web `/catalogue` et `/p/{slug}` n’est pas encore un archétype. |
 | Plusieurs organisations | menu d’organisation existant | Un seul sélecteur. Il affiche l’audience quand elle n’est pas `members`. Le changement recharge les permissions. |
 | Approbation | rien à faire | `approval` dans le cycle de vie JSON ; la boîte `/approvals` et la fiche le gèrent ; les membres du rôle sont notifiés |
-| Notifications (inbox) | écran plateforme `/notifications` | Vues Non lues / Toutes / Lues, filtre événement, lignes avec libellé + temps relatif ; clic → `actionUrl` ou fiche via `HostBusinessContext.records` ; cloche live via SSE (`platform/notifications`) |
+| Notifications (inbox) | écran plateforme `/notifications` | Vues Non lues / Toutes / Lues, filtre événement, lignes avec libellé + temps relatif ; clic → `actionUrl` ou fiche via `spec.records` du manifeste du BC ; cloche live via SSE (`platform/notifications`) |
 | Préférences de notification | Mes paramètres → Notifications ; Paramètres organisation → Notifications | Matrice événement × canal (`in_app`, `email`) ; fréquence digest e-mail (`none`/`daily`/`weekly`) au-dessus de la matrice (user) ; org : permission `administration.notifications.configure` |
 | Navigation | rien à faire | `navigation` du `bc.manifest.json` (filtrée par permission) |
 

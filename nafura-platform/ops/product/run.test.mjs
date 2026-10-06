@@ -4,7 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
-import { gradleUserHome, hostOf, imageOf, keycloakClientOf, namespaceOf, oidcOf, ownersOf, postmasterPid, renderKustomization } from './run.mjs';
+import { gradleUserHome, hostOf, imageOf, keycloakClientOf, labDataDir, namespaceOf, oidcOf, ownersOf, postmasterPid, renderKustomization } from './run.mjs';
+import { toolchainPaths, toolchainRoot } from './toolchain.mjs';
 
 const product = (spec = {}) => ({
   id: 'acme-erp',
@@ -76,18 +77,27 @@ test('the lab finds its embedded PostgreSQL from the lock file of its data direc
   assert.equal(postmasterPid(join(dir, 'postmaster.pid')), null);
 });
 
-test('Gradle reuses the developer cache when Cursor sandboxes GRADLE_USER_HOME', () => {
-  const home = process.platform === 'win32' ? 'C:\\Users\\dev' : '/home/dev';
-  const real = join(home, '.gradle');
-  const env = process.platform === 'win32' ? { USERPROFILE: home } : { HOME: home };
-  assert.equal(gradleUserHome({ ...env }), real);
-  assert.equal(gradleUserHome({ ...env, GRADLE_USER_HOME: real }), real);
-  assert.equal(
-    gradleUserHome({
-      ...env,
-      GRADLE_USER_HOME: join(home, 'AppData', 'Local', 'Temp', 'cursor-sandbox-cache', 'abc', 'gradle'),
-    }),
-    real,
-  );
-  assert.equal(gradleUserHome({ ...env, GRADLE_USER_HOME: '/custom/gradle' }), '/custom/gradle');
+test('Gradle caches live in the toolchain, whatever GRADLE_USER_HOME or ~/.gradle say', () => {
+  assert.equal(gradleUserHome({ NAFURA_TOOLCHAIN: join('t', 'nf'), GRADLE_USER_HOME: '/custom/gradle' }), join('t', 'nf', 'gradle'));
+});
+
+test('the toolchain sits outside the repository: NAFURA_TOOLCHAIN, else LOCALAPPDATA on Windows, else ~/.nafura', () => {
+  assert.equal(toolchainRoot({ NAFURA_TOOLCHAIN: 'D:\\nf', LOCALAPPDATA: 'C:\\x' }, 'win32'), 'D:\\nf');
+  assert.equal(toolchainRoot({ LOCALAPPDATA: join('C:', 'Users', 'dev', 'AppData', 'Local') }, 'win32'), join('C:', 'Users', 'dev', 'AppData', 'Local', 'nafura'));
+  assert.equal(toolchainRoot({ HOME: join('home', 'dev') }, 'linux'), join('home', 'dev', '.nafura'));
+});
+
+test('each tool is found at a fixed place for the pinned versions', () => {
+  const versions = { 'jdk.release': 'jdk-25.0.4.1+1', 'node.version': '22.22.3' };
+  const win = toolchainPaths('nf', versions, 'win32', 'x64');
+  assert.equal(win.java, join('nf', 'jdk', 'jdk-25.0.4.1+1', 'bin', 'java.exe'));
+  assert.equal(win.nodeExe, join('nf', 'node', 'node-v22.22.3-win-x64', 'node.exe'));
+  assert.equal(win.npmCli, join('nf', 'node', 'node-v22.22.3-win-x64', 'node_modules', 'npm', 'bin', 'npm-cli.js'));
+  const mac = toolchainPaths('nf', versions, 'darwin', 'arm64');
+  assert.equal(mac.java, join('nf', 'jdk', 'jdk-25.0.4.1+1', 'Contents', 'Home', 'bin', 'java'));
+  assert.equal(mac.nodeExe, join('nf', 'node', 'node-v22.22.3-darwin-arm64', 'bin', 'node'));
+});
+
+test('the lab database lives in the toolchain, one folder per product', () => {
+  assert.equal(labDataDir(product(), 'nf'), join('nf', 'data', 'acme-erp', 'postgres'));
 });

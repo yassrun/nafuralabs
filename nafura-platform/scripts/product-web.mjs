@@ -9,19 +9,29 @@ const web = process.cwd();
 const product = resolve(web, '../..');
 const app = JSON.parse(readFileSync(join(product, 'app.nafura.json'), 'utf8'));
 
-/** spec.businessContexts → src/business-contexts.generated.ts (git-ignored): main.ts stays the same in every product. */
-function businessContextsModule(ids) {
-  const imports = ids.map((id, index) => {
-    const path = `bcs/${id.replace(/^bc\./, '')}/web/index.ts`;
-    if (!existsSync(join(product, path))) throw new Error(`app.nafura.json lists '${id}' but ${path} does not exist.`);
-    return `import bc${index} from '../../../${path.replace(/\/index\.ts$/, '')}';`;
+/**
+ * spec.businessContexts → src/business-contexts.generated.ts (git-ignored): main.ts stays the same in every product.
+ * Only each BC's manifest is imported at startup; its screens (and the archetypes they pull) load on first visit.
+ */
+export function businessContextsModule(ids, exists = (path) => existsSync(join(product, path))) {
+  const entries = ids.map((id, index) => {
+    const dir = `bcs/${id.replace(/^bc\./, '')}`;
+    if (!exists(`${dir}/web/index.ts`)) throw new Error(`app.nafura.json lists '${id}' but ${dir}/web/index.ts does not exist.`);
+    if (!exists(`${dir}/bc.manifest.json`)) throw new Error(`app.nafura.json lists '${id}' but ${dir}/bc.manifest.json does not exist.`);
+    return {
+      importLine: `import manifest${index} from '../../../${dir}/bc.manifest.json';`,
+      entry: `  { manifest: manifest${index} as BusinessContextManifest, load: () => import('../../../${dir}/web') },`,
+    };
   });
   return [
     '// Generated from app.nafura.json (spec.businessContexts) by nafura-platform/scripts/product-web.mjs. Do not edit.',
-    "import type { HostBusinessContext } from '@platform/platform/host';",
-    ...imports,
+    "import type { LazyHostBusinessContext } from '@platform/platform/host';",
+    "import type { BusinessContextManifest } from '@platform/platform/manifest';",
+    ...entries.map((e) => e.importLine),
     '',
-    `export const businessContexts: readonly HostBusinessContext[] = [${ids.map((_, index) => `bc${index}`).join(', ')}];`,
+    'export const businessContexts: readonly LazyHostBusinessContext[] = [',
+    ...entries.map((e) => e.entry),
+    '];',
     '',
   ].join('\n');
 }

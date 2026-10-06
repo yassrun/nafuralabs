@@ -33,6 +33,7 @@ const versionKeys = {
   '@angular/material': 'angular-material.version',
   '@angular/cli': 'angular-cli.version',
   '@angular-devkit/build-angular': 'angular-devkit.version',
+  '@angular/build': 'angular-devkit.version',
   typescript: 'typescript.version',
   rxjs: 'rxjs.version',
   tslib: 'tslib.version',
