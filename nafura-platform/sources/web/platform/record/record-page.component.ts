@@ -32,6 +32,7 @@ import type { BadgeVariant, FormFieldConfig, LookupContext } from '../../lib/ana
 import { AuditTimelineComponent } from '../../features/collaboration/audit';
 import { ListingPageComponent } from '../listing/listing-page.component';
 import { HOST_CAPABILITIES } from '../host/host-capabilities';
+import { ruleRefusal } from '../page-action';
 import { RecordCollaborationComponent } from './record-collaboration.component';
 import type { ListingPageConfig, Row } from '../listing/listing-page.types';
 import type { RecordAction, RecordField, RecordPageConfig, RecordSection } from './record-page.types';
@@ -819,14 +820,13 @@ export class RecordPageComponent {
   /** Server error in words: field errors with their labels, or the message (required fields of a transition). */
   private errorMessage(error: unknown): string {
     if (!(error instanceof HttpErrorResponse)) return this.translate.instant('Action failed');
-    const body = error.error as { message?: string; fieldErrors?: { field: string; message: string }[] } | null;
+    const body = error.error as { message?: string } | null;
     const label = (key: string) => {
       const field = this.allFields().find((candidate) => candidate.key === key || candidate.field === key);
       return field ? this.translate.instant(field.label) : key;
     };
-    if (body?.fieldErrors?.length) {
-      return body.fieldErrors.map((fieldError) => `${label(fieldError.field)} : ${fieldError.message}`).join(' · ');
-    }
+    const refusal = ruleRefusal(error, label);
+    if (refusal) return refusal;
     const required = body?.message?.match(/^Required fields: (.+)$/);
     if (required) {
       return this.translate.instant('record.requiredFields', { fields: required[1].split(', ').map(label).join(', ') });

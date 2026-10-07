@@ -45,6 +45,18 @@ export interface PageRequest {
   url?: string;
 }
 
+/**
+ * What a business rule of the record answered, to show as is: the reason of a refusal (409 `RECORD_REFUSED`) or the
+ * field errors (422, Bean Validation) with their labels. `null` for any other error.
+ */
+export function ruleRefusal(error: unknown, label: (field: string) => string = (field) => field): string | null {
+  // An HttpErrorResponse, recognised by its shape: this file stays free of Angular (node tests import it).
+  const body = (error as { error?: unknown } | null)?.error as { code?: string; message?: string; fieldErrors?: { field: string; message: string }[] } | null | undefined;
+  if (body?.code === 'RECORD_REFUSED' && body.message) return body.message;
+  if (body?.fieldErrors?.length) return body.fieldErrors.map((fieldError) => `${label(fieldError.field)} : ${fieldError.message}`).join(' · ');
+  return null;
+}
+
 /** A tree view loads every row. Otherwise the server pages, unless `paging: 'client'`. */
 export function effectivePaging(config: { paging?: 'server' | 'client' }, view?: { layout?: string }): 'server' | 'client' {
   if (view?.layout === 'tree') return 'client';

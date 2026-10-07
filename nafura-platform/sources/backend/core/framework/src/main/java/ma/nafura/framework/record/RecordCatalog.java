@@ -2,6 +2,7 @@ package ma.nafura.platform.framework.record;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 public class RecordCatalog implements SmartInitializingSingleton {
 
     private final Map<String, Target> byEntity = new LinkedHashMap<>();
+    private final Map<Class<?>, Rules> rulesByType = new LinkedHashMap<>();
 
     /** A registered record: where its API lives and who may read it ({@code null}: no permission declared). */
     public record Target(RecordDescriptor descriptor, String basePath, String readPermission) {
@@ -29,6 +31,29 @@ public class RecordCatalog implements SmartInitializingSingleton {
         if (previous != null) {
             throw new IllegalStateException("Invalid record " + descriptor.source() + ": entity " + descriptor.entity() + " is already declared by " + previous.descriptor().source());
         }
+    }
+
+    /**
+     * The business rules of a record type, from its {@link RecordController}: the seed applies them as the API does.
+     * {@code validate} returns field → message (empty: valid).
+     */
+    public interface Rules {
+        Map<String, String> validate(Object record);
+
+        void beforeSave(Object record);
+
+        void afterSave(Object record);
+    }
+
+    public void registerRules(Class<?> type, Rules rules) {
+        Rules previous = rulesByType.putIfAbsent(type, rules);
+        if (previous != null) {
+            throw new IllegalStateException("Record " + type.getName() + " has two RecordControllers: its rules must live in one");
+        }
+    }
+
+    public Optional<Rules> rules(Class<?> type) {
+        return Optional.ofNullable(rulesByType.get(type));
     }
 
     public Target target(String entity) {

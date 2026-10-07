@@ -97,7 +97,8 @@ Lancement : [ops/README.md](../ops/README.md).
 | Audience externe : attribut d’appartenance, `@OwnedBy` | livré (filtre) ; effacement et lien e-mail à faire |
 | Données hors organisation : `@SharesWith`, portée de seed `product` | livré (garde-fous) ; consentement et écriture du seed produit à faire |
 | Listes : descripteur du record (`records/*.json`), `/properties`, grammaire de filtre avec relations à un saut, `/aggregate`, vues (table, kanban, calendrier, arbre), filtres proposés | livré |
-| Écrans d’administration sur des contrôleurs non-record (clés d’API, webhooks, séquences) et archétype de liste « config-driven » (`lib/anatomy` `ListingPageConfig`) | à migrer (chantier dédié) |
+| Écrans d’administration sur l’archétype du host : clés d’API, webhooks | livré (records) |
+| Écrans d’administration encore hors archétype : séquences (`LegacyListingPageComponent`), 7 écrans sur `ConfigDrivenListingPage` (`lib/anatomy` `ListingPageConfig`) | à migrer ([spec 01](../specs/revue-plateforme/01-liste-unique.md)) |
 | Approbation par permission (au lieu d’un rôle), multi-étapes, historique | à faire |
 | Réglages déclarés par BC, documents (impression, marque, import), conversation IA, tableau de bord | à faire |
 | i18n par BC (libellés du BC démo en dur) | à faire |

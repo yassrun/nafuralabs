@@ -5,6 +5,7 @@ import ma.nafura.platform.authorization.domain.model.ApiKey;
 import ma.nafura.platform.authorization.repository.ApiKeyRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
+import ma.nafura.platform.framework.record.RecordRuleException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,58 +24,46 @@ public class ApiKeyService {
     private final ApiKeyGenerator apiKeyGenerator;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    /** Creates a key outside the API (assistant). The API goes through {@link ApiKeyController}, which calls {@link #issue}. */
     @Transactional
     public GeneratedApiKey createApiKey(String name, List<String> requestedPermissions, OffsetDateTime expiresAt) {
-        UUID tenantId = TenantContext.getTenantId();
-        UUID creatorId = UserContext.getUserId();
-
-        long existing = apiKeyRepository.countByTenantIdAndActiveIsTrue(tenantId);
-        if (existing >= apiKeyProperties.getMaxKeysPerTenant()) {
-            throw new IllegalStateException("Maximum number of API keys reached for tenant");
-        }
-
-        String plainKey = apiKeyGenerator.generatePlainKey(apiKeyProperties.getRandomLength());
-        String keyPrefix = apiKeyGenerator.extractPrefix(plainKey);
-
-        // A key never exceeds its creator: same rule as the filter (exact, `*`, `prefix.*`).
-        String[] effectivePermissions = requestedPermissions == null
-                ? new String[0]
-                : requestedPermissions.stream()
-                    .filter(UserContext::hasPermission)
-                    .distinct()
-                    .toArray(String[]::new);
-
-        ApiKey apiKey = ApiKey.builder()
-                .tenantId(tenantId)
-                .name(name)
-                .keyHash(passwordEncoder.encode(plainKey))
-                .keyPrefix(keyPrefix)
-                .permissions(effectivePermissions)
-                .createdBy(creatorId)
-                .expiresAt(expiresAt)
-                .active(true)
-                .build();
-
+        ApiKey apiKey = new ApiKey();
+        apiKey.setTenantId(TenantContext.getTenantId());
+        apiKey.setName(name);
+        apiKey.setPermissions(requestedPermissions == null ? new String[0] : requestedPermissions.toArray(String[]::new));
+        apiKey.setExpiresAt(expiresAt);
+        issue(apiKey);
         apiKeyRepository.save(apiKey);
-
-        return new GeneratedApiKey(apiKey, plainKey);
+        return new GeneratedApiKey(apiKey, apiKey.getPlainKey());
     }
 
-    @Transactional(readOnly = true)
-    public List<ApiKey> listForTenant(UUID tenantId) {
-        return apiKeyRepository.findAll().stream()
-                .filter(k -> tenantId.equals(k.getTenantId()))
-                .toList();
+    /** A new key: under the tenant's quota, permissions cut to the issuer's, hash stored, plain key set once. */
+    void issue(ApiKey apiKey) {
+        long existing = apiKeyRepository.countByTenantIdAndActiveIsTrue(apiKey.getTenantId());
+        if (existing >= apiKeyProperties.getMaxKeysPerTenant()) {
+            throw RecordRuleException.refused("Nombre maximal de clés actives atteint pour l’organisation");
+        }
+        String plainKey = apiKeyGenerator.generatePlainKey(apiKeyProperties.getRandomLength());
+        apiKey.setPermissions(withinIssuer(apiKey.getPermissions()));
+        apiKey.setKeyHash(passwordEncoder.encode(plainKey));
+        apiKey.setKeyPrefix(apiKeyGenerator.extractPrefix(plainKey));
+        apiKey.setActive(true);
+        apiKey.setPlainKey(plainKey);
+    }
+
+    /** A key never exceeds whoever issues or edits it: same rule as the filter (exact, `*`, `prefix.*`). */
+    String[] withinIssuer(String[] requested) {
+        return requested == null
+                ? new String[0]
+                : Arrays.stream(requested).filter(UserContext::hasPermission).distinct().toArray(String[]::new);
     }
 
     @Transactional
     public void revoke(UUID tenantId, UUID id) {
-        apiKeyRepository.findById(id)
-                .filter(k -> tenantId.equals(k.getTenantId()))
-                .ifPresent(k -> {
-                    k.setActive(false);
-                    apiKeyRepository.save(k);
-                });
+        apiKeyRepository.findByIdAndTenantId(id, tenantId).ifPresent(k -> {
+            k.setActive(false);
+            apiKeyRepository.save(k);
+        });
     }
 
     @Transactional
@@ -106,4 +95,3 @@ public class ApiKeyService {
     public record ApiKeyAuthenticationResult(UUID id, UUID tenantId, List<String> permissions) {
     }
 }
-

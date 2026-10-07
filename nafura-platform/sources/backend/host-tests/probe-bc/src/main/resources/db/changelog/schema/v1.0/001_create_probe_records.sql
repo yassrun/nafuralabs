@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS probe_record (
     group_id    UUID REFERENCES probe_group(id) ON DELETE SET NULL,
     amount      NUMERIC(14, 2),
     status      VARCHAR(30),
+    reference   VARCHAR(60),
     created_by  UUID,
     updated_by  UUID,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),

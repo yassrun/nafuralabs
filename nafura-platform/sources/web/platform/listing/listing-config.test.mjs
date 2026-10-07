@@ -30,9 +30,7 @@ const isList = (value) => value && typeof value === 'object' && 'endpoint' in va
 const isLegacyList = (value) => value && typeof value === 'object' && 'endpoint' in value && 'columns' in value;
 // TEMPORARY: administration screens on non-record controllers, on LegacyListingPageComponent until their chantier.
 const LEGACY = new Set([
-  'features/administration/api-keys/api-keys.listing.ts',
   'features/administration/numbering-sequences/numbering-sequences.listing.ts',
-  'features/administration/webhooks/webhooks.listing.ts',
 ]);
 const files = walk(web, (_, name) => name.endsWith('.listing.ts'));
 const bcFiles = walk(join(root, 'platform-host/bcs'), (full, name) => name.endsWith('.ts') && full.split(/[\\/]/).includes('web'), ['backend']);

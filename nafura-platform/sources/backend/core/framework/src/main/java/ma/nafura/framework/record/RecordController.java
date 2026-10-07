@@ -1,6 +1,8 @@
 package ma.nafura.platform.framework.record;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -33,6 +35,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,12 +61,16 @@ import ma.nafura.platform.framework.service.crud.CrudAuditHook;
  * options for selects, read, create, update, delete, and its lifecycle when it has one.
  * A business context writes {@code @SecuredResource(...) class XController extends RecordController<X>}:
  * permissions follow the HTTP method, Bean Validation on the entity validates the body.
+ * Business logic goes in {@link #validate}, {@link #beforeSave}, {@link #afterSave}, {@link #beforeDelete} and
+ * {@link #readOnlyFields}; redefining an endpoint of this class fails startup.
  */
 public abstract class RecordController<E extends TenantEntity> {
 
     private static final Logger log = LoggerFactory.getLogger(RecordController.class);
     private static final Set<String> MANAGED = Set.of("id", "tenantId", "createdAt", "updatedAt", "createdBy", "updatedBy", "status");
     private static final int MAX_PAGE = 500;
+    private static final Set<String> ENDPOINTS = Set.of(
+            "list", "options", "get", "create", "update", "delete", "properties", "aggregate", "lifecycle", "transitions", "fire");
 
     @Autowired
     private LifecycleEngine lifecycles;
@@ -105,10 +112,37 @@ public abstract class RecordController<E extends TenantEntity> {
         return null;
     }
 
+    /**
+     * Rules across fields, field → message. Not empty refuses the save (422, field errors) and nothing is stored.
+     * {@code previous} is a detached copy of the stored record, {@code null} while creating. Also applied to seeds.
+     */
+    protected Map<String, String> validate(E record, E previous) {
+        return Map.of();
+    }
+
+    /** Computed values and normalisation, after {@link #validate}, in the transaction. Also applied to seeds. */
+    protected void beforeSave(E record, E previous) {
+    }
+
+    /** Effects once the record and its audit are saved (a parent's total, lines), in the transaction. Also applied to seeds. */
+    protected void afterSave(E saved, E previous) {
+    }
+
+    /** After the editable check: throw {@link RecordRuleException#refused} to keep the record (409). */
+    protected void beforeDelete(E record) {
+    }
+
+    /** Fields the API never writes (hash, secret, values set by {@link #beforeSave}): ignored in a create or update body. */
+    protected Set<String> readOnlyFields() {
+        return Set.of();
+    }
+
     @PostConstruct
     void registerRecord() {
+        refuseRedefinedEndpoints();
         String resource = recordResource();
         Class<?> recordType = GenericTypeResolver.resolveTypeArgument(getClass(), RecordController.class);
+        registerRules(recordType);
         if (resource != null) {
             descriptor = RecordDescriptor.load(resource, recordType);
             lifecycle = descriptor.lifecycle();
@@ -119,6 +153,41 @@ public abstract class RecordController<E extends TenantEntity> {
             records.register(descriptor, mappingPath(), readPermission());
         }
         registerAccess();
+    }
+
+    /** An endpoint redefined by a subclass would skip the editable check, the audit or the rules. */
+    private void refuseRedefinedEndpoints() {
+        for (Class<?> type = ClassUtils.getUserClass(getClass()); type != null && type != RecordController.class; type = type.getSuperclass()) {
+            for (Method method : type.getDeclaredMethods()) {
+                if (method.isBridge() || method.isSynthetic() || Modifier.isStatic(method.getModifiers())) continue;
+                if (ENDPOINTS.contains(method.getName())) {
+                    throw new IllegalStateException(type.getName() + " redefines the endpoint " + method.getName()
+                            + "() of RecordController: use validate, beforeSave, afterSave, beforeDelete or readOnlyFields");
+                }
+            }
+        }
+    }
+
+    /** The seed applies the same rules as the API. */
+    private void registerRules(Class<?> recordType) {
+        if (recordType == null) return;
+        records.registerRules(recordType, new RecordCatalog.Rules() {
+            @Override
+            public Map<String, String> validate(Object record) {
+                Map<String, String> errors = RecordController.this.validate(entity(record), null);
+                return errors == null ? Map.of() : errors;
+            }
+
+            @Override
+            public void beforeSave(Object record) {
+                RecordController.this.beforeSave(entity(record), null);
+            }
+
+            @Override
+            public void afterSave(Object record) {
+                RecordController.this.afterSave(entity(record), null);
+            }
+        });
     }
 
     /** Entity key of attachments and notes: the lifecycle entity, otherwise the last segment of the mapping. */
@@ -220,24 +289,32 @@ public abstract class RecordController<E extends TenantEntity> {
         if (body instanceof HasStatus record) {
             record.setStatus(lifecycle != null ? lifecycle.initial() : record.getStatus());
         }
+        clearReadOnly(body);
+        check(body, null);
+        beforeSave(body, null);
         E saved = repository().save(body);
         auditHook.ifAvailable(hook -> hook.afterCreate(saved));
+        afterSave(saved, null);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    /** Replaces the editable fields; id, tenant, audit fields and status stay. */
+    /** Replaces the editable fields; id, tenant, audit fields, status and {@link #readOnlyFields} stay. */
     @PutMapping("/{id}")
     @Transactional
     public E update(@PathVariable UUID id, @Valid @RequestBody E body) {
         E record = require(id);
         requireEditable(record);
+        E previous = copy(record);
         CrudAuditHook hook = auditHook.getIfAvailable();
         Map<String, Object> before = hook != null ? hook.beforeUpdate(record) : Map.of();
-        BeanUtils.copyProperties(body, record, MANAGED.toArray(String[]::new));
+        BeanUtils.copyProperties(body, record, kept());
+        check(record, previous);
+        beforeSave(record, previous);
         E saved = repository().save(record);
         if (hook != null) {
             hook.afterUpdate(saved, before);
         }
+        afterSave(saved, previous);
         return saved;
     }
 
@@ -246,6 +323,7 @@ public abstract class RecordController<E extends TenantEntity> {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         E record = require(id);
         requireEditable(record);
+        beforeDelete(record);
         auditHook.ifAvailable(hook -> hook.afterDelete(record));
         repository().delete(record);
         return ResponseEntity.noContent().build();
@@ -361,6 +439,41 @@ public abstract class RecordController<E extends TenantEntity> {
 
     private E require(UUID id) {
         return find(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Record not found: " + id));
+    }
+
+    private void check(E record, E previous) {
+        Map<String, String> errors = validate(record, previous);
+        if (errors != null && !errors.isEmpty()) {
+            throw RecordRuleException.fields(errors);
+        }
+    }
+
+    /** Properties an update body never overwrites. */
+    private String[] kept() {
+        return Stream.concat(MANAGED.stream(), readOnlyFields().stream()).distinct().toArray(String[]::new);
+    }
+
+    /** A create body cannot set a read-only field: it gets the value of a new record. */
+    private void clearReadOnly(E record) {
+        Set<String> readOnly = readOnlyFields();
+        if (readOnly.isEmpty()) return;
+        BeanWrapperImpl fresh = new BeanWrapperImpl(BeanUtils.instantiateClass(entityClass()));
+        BeanWrapperImpl target = new BeanWrapperImpl(record);
+        for (String field : readOnly) {
+            target.setPropertyValue(field, fresh.getPropertyValue(field));
+        }
+    }
+
+    /** A detached copy of the stored state, for {@code previous}. */
+    private E copy(E record) {
+        E copy = BeanUtils.instantiateClass(entityClass());
+        BeanUtils.copyProperties(record, copy);
+        return copy;
+    }
+
+    @SuppressWarnings("unchecked")
+    private E entity(Object record) {
+        return (E) record;
     }
 
     private void requireEditable(E record) {

@@ -99,8 +99,22 @@ class PermissionEnforcementHostTest {
                 .build();
         HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
-        assertThat(response.body()).contains("\"permissions\":[\"probe.items.item.read\"]");
+        assertThat(response.statusCode()).as(response.body()).isEqualTo(201);
+        assertThat(response.body()).contains("\"permissions\":[\"probe.items.item.read\"]", "\"plainKey\":\"").doesNotContain("keyHash");
+    }
+
+    @Test
+    void anApiKeyIsRevokedBeforeItCanBeDeletedAndNeverShowsItsKeyAgain() throws Exception {
+        String admin = token("admin@host.local");
+        String created = sendForBody(admin, "POST", "/api/v1/platform/admin/api-keys", "{\"name\":\"revoke-me\",\"permissions\":[]}");
+        Matcher id = Pattern.compile("\"id\"\\s*:\\s*\"([^\"]+)\"").matcher(created);
+        assertThat(id.find()).as(created).isTrue();
+        String path = "/api/v1/platform/admin/api-keys/" + id.group(1);
+
+        assertThat(sendForBody(admin, "GET", path, null)).doesNotContain("plainKey").doesNotContain("keyHash").contains("\"state\":\"Active\"");
+        assertThat(send(admin, "DELETE", path, null)).as("an active key is revoked first").isEqualTo(409);
+        assertThat(sendForBody(admin, "POST", path + "/revoke", null)).contains("\"active\":false");
+        assertThat(send(admin, "DELETE", path, null)).isEqualTo(204);
     }
 
     @Test
@@ -113,6 +127,7 @@ class PermissionEnforcementHostTest {
         assertThat(id.find()).as(created).isTrue();
         String path = "/api/v1/platform/admin/webhooks/" + id.group(1);
 
+        assertThat(created).doesNotContain("s3cret");
         assertThat(sendForBody(admin, "POST", path + "/test", null)).contains("\"success\":false");
         assertThat(send(admin, "PUT", path,
                 "{\"name\":\"probe\",\"url\":\"http://127.0.0.1:9/hook\",\"secret\":\"\",\"events\":[\"ENTITY_UPDATED\"],\"active\":false}"))

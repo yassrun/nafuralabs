@@ -21,8 +21,8 @@ public class PlatformAdminNavigationRegistry implements NavigationRegistry {
                 target(List.of("user settings", "profile"), "/user-settings", "User Settings", null, null),
                 target(List.of("members", "member", "équipe"), "/administration/members", "Members", "administration.members.read", "member"),
                 target(List.of("roles", "role"), "/administration/roles", "Roles", "administration.roles.read", null),
-                target(List.of("webhooks", "webhook"), "/administration/webhooks", "Webhooks", "administration.webhooks.read", null),
-                target(List.of("api keys", "api-keys", "apikey"), "/administration/api-keys", "API Keys", "administration.api-keys.read", "api-key"),
+                target(List.of("webhooks", "webhook"), "/administration/webhooks", "Webhooks", "administration.integrations.webhooks.read", null),
+                target(List.of("api keys", "api-keys", "apikey"), "/administration/api-keys", "API Keys", "administration.integrations.api-keys.read", "api-key"),
                 target(List.of("workflows", "workflow"), "/administration/workflows", "Workflows", "administration.workflows.read", null),
                 target(List.of("numbering", "numérotation"), "/administration/numbering-sequences", "Numbering", "administration.numbering-sequences.read", null),
                 target(List.of("scheduled jobs", "jobs"), "/administration/scheduled-jobs", "Scheduled Jobs", "administration.scheduled-jobs.read", null)

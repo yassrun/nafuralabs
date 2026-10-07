@@ -1,127 +1,69 @@
 package ma.nafura.platform.collaboration.webhook.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
-import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import ma.nafura.platform.framework.domain.TenantEntity;
+import org.hibernate.annotations.Formula;
 
-import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
+/** An outgoing webhook of the organization. Its secret signs the deliveries and is never sent back. */
 @Entity
 @Table(name = "webhook_configs")
-public class WebhookConfig {
+@Getter
+@Setter
+public class WebhookConfig extends TenantEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
-
-    @Column(name = "tenant_id", nullable = false)
-    private UUID tenantId;
-
+    @NotBlank
+    @Size(max = 100)
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
+    @NotBlank
+    @Size(max = 500)
+    @Pattern(regexp = "^https?://.+", message = "Adresse http(s) attendue")
     @Column(name = "url", nullable = false, length = 500)
     private String url;
 
+    /** Written by a request, never read back: a blank one on update keeps the stored secret. */
+    @Size(max = 200)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "secret", nullable = false, length = 200)
     private String secret;
 
+    @NotEmpty
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "webhook_config_events", joinColumns = @JoinColumn(name = "webhook_id"))
     @Column(name = "event", nullable = false, length = 100)
-    private List<WebhookEvent> events;
+    private List<WebhookEvent> events = new ArrayList<>();
 
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
+    /** Outcome of the latest delivery, in words: what the list shows and filters on. */
+    @Setter(AccessLevel.NONE)
+    @Formula("(select case d.status when 'SUCCESS' then 'Réussie' when 'FAILED' then 'Échouée' else 'En attente' end"
+            + " from webhook_deliveries d where d.webhook_id = id order by d.created_at desc limit 1)")
+    private String lastDeliveryStatus;
 
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public UUID getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(UUID tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getSecret() {
-        return secret;
-    }
-
-    public void setSecret(String secret) {
-        this.secret = secret;
-    }
-
-    public List<WebhookEvent> getEvents() {
-        return events;
-    }
-
-    public void setEvents(List<WebhookEvent> events) {
-        this.events = events;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public OffsetDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(OffsetDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public OffsetDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(OffsetDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+    @Setter(AccessLevel.NONE)
+    @Formula("(select count(*) from webhook_config_events e where e.webhook_id = id)")
+    private Integer eventCount;
 }
-

@@ -52,7 +52,7 @@ Ce que l’archétype fait déjà, ne pas le refaire : en-tête et fil d’Arian
 - Champs (`FormFieldConfig.type`) : `text`, `textarea`, `richtext`, `number`, `email`, `password`, `date`, `datetime`, `select`, `multiselect`, `checkbox`, `radio`, `file`, `autocomplete`. Options : `required`, `validation`, `options`, `lookupKey`, `wide`, `placeholder`, `toolbar` (`richtext`).
 - Colonnes d’une liste : `show` d’une vue ; le format suit le type de la propriété (`money` avec sa devise, `status` en badge avec le ton du cycle de vie, `relation` par son `display`).
 - Filtres d’une liste : déduits des propriétés filtrables ; `FilterFieldConfig.operators` restreint le constructeur aux opérateurs de la grammaire.
-- Temporaire : les écrans d’administration sur des contrôleurs qui ne sont pas des records (clés d’API, webhooks, séquences de numérotation) restent sur `LegacyListingPageComponent` (`columns`, `segments`), seuls tolérés par le garde-fou, jusqu’à leur chantier.
+- Temporaire : l’écran des séquences de numérotation (contrôleur qui n’est pas un record) reste sur `LegacyListingPageComponent` (`columns`, `segments`), seul toléré par le garde-fou, jusqu’à son chantier ([spec 01](../specs/revue-plateforme/01-liste-unique.md)). Clés d’API et webhooks sont des records (`/api/v1/platform/admin/…`, permissions `administration.integrations.{api-keys,webhooks}.*`).
 - Icônes : noms Lucide (`building-2`, `package`, …) enregistrés dans `core/icons/app-lucide-icons.ts` ; une icône absente s’y ajoute (garde-fou).
 - Permissions : chaque `permission` d’une configuration existe dans le manifeste du BC (garde-fou).
 

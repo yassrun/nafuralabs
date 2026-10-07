@@ -1,58 +1,34 @@
-import type { LegacyListingPageConfig } from '../../../platform/listing/legacy';
+import type { ListingPageConfig, Row } from '../../../platform/listing/listing-page.types';
 
-interface ApiKey extends Record<string, unknown> {
-  name: string;
-  keyPrefix: string | null;
-  permissions: string[];
-  expiresAt: string | null;
-  active: boolean;
-}
-
-const status = (key: ApiKey): 'active' | 'revoked' | 'expired' =>
-  !key.active ? 'revoked' : key.expiresAt && new Date(key.expiresAt) < new Date() ? 'expired' : 'active';
-
+const ENDPOINT = '/api/v1/platform/admin/api-keys';
+const PERMISSION = 'administration.integrations.api-keys';
 const EXPIRY_DAYS: Record<string, number | null> = { never: null, '30d': 30, '90d': 90, '1y': 365 };
+const COLUMNS = ['name', 'keyPrefix', 'permissionCount', 'expiresAt', 'lastUsedAt', 'state'];
 
-export const API_KEYS_LISTING: LegacyListingPageConfig<ApiKey> = {
+/** API keys: a record. The key is shown once after creation; a key is revoked, then deleted. */
+export const API_KEYS_LISTING: ListingPageConfig = {
   title: 'administration.apiKeys.title',
   subtitle: 'administration.apiKeys.subtitle',
   icon: 'key-round',
-  endpoint: '/api/v1/platform/admin/api-keys',
-  emptyMessage: 'administration.apiKeys.empty',
-  searchFields: ['name'],
-  segments: [
-    { id: 'active', label: 'administration.apiKeys.segments.active', filters: { active: true } },
-    { id: 'revoked', label: 'administration.apiKeys.segments.revoked', filters: { active: false } },
-    { id: 'all', label: 'administration.apiKeys.segments.all' },
+  endpoint: ENDPOINT,
+  views: [
+    { id: 'active', label: 'administration.apiKeys.segments.active', layout: 'table', filter: { state: { is: 'Active' } }, show: COLUMNS },
+    { id: 'revoked', label: 'administration.apiKeys.segments.revoked', layout: 'table', filter: { state: { in: ['Révoquée', 'Expirée'] } }, show: COLUMNS },
+    { id: 'all', label: 'administration.apiKeys.segments.all', layout: 'table', show: COLUMNS },
   ],
-  columns: [
-    { key: 'name', field: 'name', label: 'administration.apiKeys.columns.name', sortable: true },
-    { key: 'key', field: 'keyPrefix', label: 'administration.apiKeys.columns.key', transform: (prefix) => `${prefix || 'nfk_'}••••`, cssClass: 'nf-cell--mono' },
-    { key: 'permissions', field: 'permissions', label: 'administration.apiKeys.columns.permissions', transform: (permissions) => String((permissions as string[] | null)?.length ?? 0), width: '120px' },
-    { key: 'expires', field: 'expiresAt', label: 'administration.apiKeys.columns.expires', type: 'date', sortable: true },
-    { key: 'lastUsed', field: 'lastUsedAt', label: 'administration.apiKeys.columns.lastUsed', type: 'relative', sortable: true },
-    {
-      key: 'status',
-      field: 'active',
-      label: 'administration.apiKeys.columns.status',
-      type: 'badge',
-      transform: (_, key) => `administration.apiKeys.status.${status(key as ApiKey)}`,
-      badgeVariant: (_, key) => ({ active: 'success', revoked: 'danger', expired: 'warning' } as const)[status(key as ApiKey)],
-      width: '130px',
-    },
-  ],
+  emptyState: { icon: 'key-round', title: 'administration.apiKeys.empty', message: 'administration.apiKeys.emptyHint' },
   actions: [
     {
       id: 'create',
       label: 'administration.apiKeys.actions.create',
       icon: 'plus',
       variant: 'primary',
-      permission: 'administration.api-keys.write',
+      permission: `${PERMISSION}.create`,
       form: {
         title: 'administration.apiKeys.dialog.createTitle',
         fields: [
           { key: 'name', field: 'name', label: 'administration.apiKeys.fields.name', type: 'text', required: true },
-          { key: 'permissions', field: 'permissions', label: 'administration.apiKeys.fields.permissions', type: 'text', placeholder: 'demo.notes.note.read, demo.notes.note.create' },
+          { key: 'permissions', field: 'permissions', label: 'administration.apiKeys.fields.permissions', type: 'text', placeholder: 'demo.purchasing.supplier.read, demo.purchasing.supplier.create' },
           {
             key: 'expiry',
             field: 'expiry',
@@ -62,6 +38,7 @@ export const API_KEYS_LISTING: LegacyListingPageConfig<ApiKey> = {
             options: Object.keys(EXPIRY_DAYS).map((value) => ({ value, label: `administration.apiKeys.expiry.${value}` })),
           },
         ],
+        values: () => ({ expiry: '90d' }),
         body: ({ name, permissions, expiry }) => {
           const days = EXPIRY_DAYS[String(expiry)];
           return {
@@ -80,11 +57,23 @@ export const API_KEYS_LISTING: LegacyListingPageConfig<ApiKey> = {
       label: 'administration.apiKeys.actions.revoke',
       icon: 'ban',
       variant: 'danger',
-      permission: 'administration.api-keys.write',
-      when: (key) => key.active,
+      permission: `${PERMISSION}.update`,
+      when: (key: Row) => key['active'] === true,
       confirm: { title: 'administration.apiKeys.actions.revoke', message: 'administration.apiKeys.actions.revokeConfirm', confirmLabel: 'administration.apiKeys.actions.revoke', danger: true },
-      request: { method: 'DELETE' },
+      request: { method: 'POST', url: `${ENDPOINT}/{id}/revoke` },
       success: 'administration.apiKeys.revoked',
+    },
+    {
+      id: 'delete',
+      row: true,
+      label: 'administration.apiKeys.actions.delete',
+      icon: 'trash-2',
+      variant: 'danger',
+      permission: `${PERMISSION}.delete`,
+      when: (key: Row) => key['active'] !== true,
+      confirm: { title: 'administration.apiKeys.actions.delete', message: 'administration.apiKeys.actions.deleteConfirm', confirmLabel: 'administration.apiKeys.actions.delete', danger: true },
+      request: { method: 'DELETE' },
+      success: 'administration.apiKeys.deleted',
     },
   ],
 };

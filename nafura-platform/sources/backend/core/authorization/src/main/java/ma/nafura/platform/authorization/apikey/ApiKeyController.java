@@ -1,102 +1,72 @@
 package ma.nafura.platform.authorization.apikey;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import java.time.OffsetDateTime;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+
 import ma.nafura.platform.authorization.domain.model.ApiKey;
 import ma.nafura.platform.authorization.repository.ApiKeyRepository;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
-import ma.nafura.platform.framework.context.TenantContext;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
+import ma.nafura.platform.framework.record.RecordController;
+import ma.nafura.platform.framework.record.RecordRepository;
+import ma.nafura.platform.framework.record.RecordRuleException;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * API keys of the organization, a record: creating one issues the key (shown once), {@code /revoke} turns it off,
+ * deleting is for revoked keys only. Permissions: administration.integrations.api-keys.{read,create,update,delete}.
+ */
 @RestController
 @RequestMapping("/api/v1/platform/admin/api-keys")
-@SecuredResource(domain = "administration", feature = "administration", resource = "api-keys")
-public class ApiKeyController {
+@SecuredResource(domain = "administration", feature = "integrations", resource = "api-keys")
+public class ApiKeyController extends RecordController<ApiKey> {
 
-    private final ApiKeyService apiKeyService;
-    private final ApiKeyRepository apiKeyRepository;
+    private final ApiKeyService apiKeys;
+    private final ApiKeyRepository repository;
 
-    public ApiKeyController(ApiKeyService apiKeyService, ApiKeyRepository apiKeyRepository) {
-        this.apiKeyService = apiKeyService;
-        this.apiKeyRepository = apiKeyRepository;
+    public ApiKeyController(ApiKeyService apiKeys, ApiKeyRepository repository) {
+        this.apiKeys = apiKeys;
+        this.repository = repository;
     }
 
-    @GetMapping
-    @RequirePermission(value = "administration.api-keys.read", fullPermission = true)
-    public Page<ApiKeyDto> list(Pageable pageable) {
-        UUID tenantId = TenantContext.getTenantId();
-        return apiKeyRepository.findByTenantIdOrderByCreatedAtDesc(tenantId, pageable)
-                .map(ApiKeyController::toDto);
+    @Override protected RecordRepository<ApiKey> repository() { return repository; }
+    @Override protected String recordResource() { return "records/api-key.json"; }
+    @Override protected String labelField() { return "name"; }
+
+    @Override
+    protected Set<String> readOnlyFields() {
+        return Set.of("keyHash", "keyPrefix", "lastUsedAt", "active", "plainKey");
     }
 
-    @PostMapping
-    @RequirePermission(value = "administration.api-keys.write", fullPermission = true)
-    public ResponseEntity<CreateApiKeyResponse> create(@Valid @RequestBody CreateApiKeyRequest request) {
-        ApiKeyService.GeneratedApiKey generated = apiKeyService.createApiKey(
-                request.name(),
-                request.permissions() != null ? request.permissions() : List.of(),
-                request.expiresAt()
-        );
-        return ResponseEntity.ok(new CreateApiKeyResponse(toDto(generated.apiKey()), generated.plainKey()));
+    @Override
+    protected void beforeSave(ApiKey key, ApiKey previous) {
+        if (previous == null) {
+            apiKeys.issue(key);
+        } else {
+            key.setPermissions(apiKeys.withinIssuer(key.getPermissions()));
+        }
     }
 
-    @DeleteMapping("/{id}")
-    @RequirePermission(value = "administration.api-keys.write", fullPermission = true)
-    public ResponseEntity<Void> revoke(@PathVariable UUID id) {
-        apiKeyService.revoke(TenantContext.getTenantId(), id);
-        return ResponseEntity.noContent().build();
+    @Override
+    protected void beforeDelete(ApiKey key) {
+        if (key.isActive()) {
+            throw RecordRuleException.refused("Révoquez la clé avant de la supprimer");
+        }
     }
 
-    private static ApiKeyDto toDto(ApiKey apiKey) {
-        return new ApiKeyDto(
-                apiKey.getId(),
-                apiKey.getTenantId(),
-                apiKey.getName(),
-                apiKey.getKeyPrefix(),
-                apiKey.getPermissions() != null ? List.of(apiKey.getPermissions()) : List.of(),
-                apiKey.getCreatedBy(),
-                apiKey.getExpiresAt(),
-                apiKey.getLastUsedAt(),
-                apiKey.isActive(),
-                apiKey.getCreatedAt(),
-                apiKey.getUpdatedAt()
-        );
+    /** Turns the key off at once; it stays listed as revoked. */
+    @PostMapping("/{id}/revoke")
+    @RequirePermission("update")
+    @Transactional
+    public ApiKey revoke(@PathVariable UUID id) {
+        ApiKey key = find(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "API key not found"));
+        key.setActive(false);
+        return repository.save(key);
     }
-
-    public record CreateApiKeyRequest(
-            @NotBlank @Size(max = 100) String name,
-            List<String> permissions,
-            OffsetDateTime expiresAt
-    ) {}
-
-    public record ApiKeyDto(
-            UUID id,
-            UUID tenantId,
-            String name,
-            String keyPrefix,
-            List<String> permissions,
-            UUID createdBy,
-            OffsetDateTime expiresAt,
-            OffsetDateTime lastUsedAt,
-            boolean active,
-            OffsetDateTime createdAt,
-            OffsetDateTime updatedAt
-    ) {}
-
-    public record CreateApiKeyResponse(ApiKeyDto apiKey, String plainKey) {}
 }
-

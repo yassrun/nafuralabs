@@ -493,7 +493,9 @@
       "actions": {
         "create": "Générer une clé API",
         "revoke": "Révoquer",
-        "revokeConfirm": "Êtes-vous sûr de vouloir révoquer cette clé API ? Cette action est irréversible."
+        "revokeConfirm": "Êtes-vous sûr de vouloir révoquer cette clé API ? Cette action est irréversible.",
+        "delete": "Supprimer",
+        "deleteConfirm": "Supprimer définitivement cette clé révoquée ?"
       },
       "created": {
         "title": "Clé API créée",
@@ -524,7 +526,9 @@
         "expired": "Expirée"
       },
       "revoked": "Clé API révoquée.",
-      "empty": "Aucune clé API pour le moment."
+      "empty": "Aucune clé API pour le moment.",
+      "emptyHint": "Générez une clé pour qu’un outil externe appelle l’API au nom de l’organisation.",
+      "deleted": "Clé API supprimée."
     },
     "audit": {
       "title": "Journal d'audit",
@@ -857,7 +861,13 @@
       "title": "Webhooks",
       "subtitle": "Configurer les notifications d'événements sortants",
       "loading": "Chargement des webhooks...",
-      "empty": "Aucun webhook configuré."
+      "empty": "Aucun webhook configuré.",
+      "views": {
+        "all": "Tous",
+        "active": "Actifs",
+        "failing": "En échec"
+      },
+      "emptyHint": "Un webhook envoie les événements de l’organisation à une adresse de votre choix."
     },
     "workflows": {
       "stepDialog": {

@@ -78,6 +78,24 @@ Les pièces jointes, les notes et la timeline d’activité d’un record enregi
 
 Ne pas écrire de service CRUD, de DTO de liste ou de pagination à la main.
 
+### Logique métier du record
+
+Le contrôleur porte la logique du record par cinq méthodes protégées, jamais en redéfinissant un endpoint (`create`, `update`, `delete`, `list`, `get`… : une redéfinition empêche le démarrage, parce qu'elle contournerait le contrôle d'édition, l'audit ou ces règles).
+
+| Méthode | Quand | Effet |
+|---|---|---|
+| `validate(record, previous)` | après Bean Validation | champ → message ; non vide : 422, `fieldErrors` comme Bean Validation, rien n'est enregistré |
+| `beforeSave(record, previous)` | après `validate` | valeurs calculées, normalisation |
+| `afterSave(saved, previous)` | après l'enregistrement et l'audit | effets (total d'un parent, lignes) ; une exception annule tout |
+| `beforeDelete(record)` | après le contrôle d'édition | `throw RecordRuleException.refused("…")` : 409 `RECORD_REFUSED`, la raison est affichée telle quelle |
+| `readOnlyFields()` | création et modification | champs jamais écrits par le corps de la requête (empreinte, secret, valeur calculée) |
+
+- `previous` est une copie détachée du record enregistré, `null` à la création. Tout se passe dans la transaction de la requête.
+- `RecordRuleException.fields(Map)` (422) ou `refused(raison)` (409) peut être levée de n'importe laquelle de ces méthodes.
+- Les données initiales passent par `validate`, `beforeSave` et `afterSave` (avec `previous` à `null`) : un jeu qui enfreint une règle bloque le démarrage, fichier et record nommés.
+- La liste et la fiche affichent la raison d'un refus ou les erreurs de champ, avec leurs libellés.
+- Exemples : BC démo (`SupplierController` : code en majuscules, suppression refusée s'il a des demandes ; `PurchaseRequestController` : justification obligatoire au-delà de 20 000).
+
 `@Auditable(entityType, trackedFields)` sur l’entité : chaque création, modification, suppression et transition passe dans `audit_events` (capability `cap.audit`). Si seuls les champs tracked changent et que c’est uniquement `status`, l’action émise est `status_change` (sinon `update`). La fiche lit la timeline via une section `kind: 'audit'` ([UI.md](UI.md)) ; le journal admin (`administration.audit.read`) liste tous les événements et « Voir l’entité » résout l’URL via `HostBusinessContext.records`, comme les notifications. Détail, contrat et roadmap : [capabilities/audit.md](capabilities/audit.md).
 
 ## Cycle de vie et approbations

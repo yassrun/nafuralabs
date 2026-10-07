@@ -16,6 +16,7 @@ import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.record.PublicRecordController;
 import ma.nafura.platform.framework.record.RecordController;
+import ma.nafura.platform.framework.record.RecordRuleException;
 import ma.nafura.platform.framework.record.RecordRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
@@ -56,6 +57,20 @@ class SupplierController extends RecordController<Supplier> {
     @Override protected RecordRepository<Supplier> repository() { return repository; }
     @Override protected String recordResource() { return "records/supplier.json"; }
     @Override protected String labelField() { return "name"; }
+
+    /** Codes are stored in capitals, whatever was typed. */
+    @Override
+    protected void beforeSave(Supplier supplier, Supplier previous) {
+        supplier.setCode(supplier.getCode().trim().toUpperCase());
+    }
+
+    /** A supplier with purchase requests is deactivated, not deleted. */
+    @Override
+    protected void beforeDelete(Supplier supplier) {
+        if (!requests.findByTenantIdAndSupplierId(TenantContext.getTenantId(), supplier.getId()).isEmpty()) {
+            throw RecordRuleException.refused("Ce fournisseur a des demandes d’achat : désactivez-le plutôt que de le supprimer.");
+        }
+    }
 
     /** Counts and amounts of the supplier's purchase requests. Read permission of the supplier. */
     @GetMapping("/{id}/overview")
@@ -139,11 +154,23 @@ class PublicItemController extends PublicRecordController<Item> {
 @SecuredResource(domain = "demo", feature = "purchasing", resource = "request")
 @RequiredArgsConstructor
 class PurchaseRequestController extends RecordController<PurchaseRequest> {
+    private static final BigDecimal JUSTIFIED_ABOVE = new BigDecimal("20000");
+
     private final PurchaseRequestRepository repository;
 
     @Override protected RecordRepository<PurchaseRequest> repository() { return repository; }
     @Override protected String labelField() { return "subject"; }
     @Override protected String recordResource() { return "records/purchase-request.json"; }
+
+    /** Above 20 000, a request says why. */
+    @Override
+    protected Map<String, String> validate(PurchaseRequest request, PurchaseRequest previous) {
+        boolean large = request.getAmount() != null && request.getAmount().compareTo(JUSTIFIED_ABOVE) > 0;
+        if (large && (request.getJustification() == null || request.getJustification().isBlank())) {
+            return Map.of("justification", "Obligatoire au-delà de 20 000");
+        }
+        return Map.of();
+    }
 
     /** A new draft with the same commercial fields. The screen opens that copy (`result: record`). */
     @PostMapping("/{id}/duplicate")

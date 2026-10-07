@@ -1,133 +1,102 @@
 package ma.nafura.platform.collaboration.webhook.controller;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 import java.time.OffsetDateTime;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.collaboration.webhook.domain.model.WebhookConfig;
 import ma.nafura.platform.collaboration.webhook.domain.model.WebhookDelivery;
-import ma.nafura.platform.collaboration.webhook.domain.model.WebhookEvent;
+import ma.nafura.platform.collaboration.webhook.repository.WebhookConfigRepository;
 import ma.nafura.platform.collaboration.webhook.repository.WebhookDeliveryRepository;
 import ma.nafura.platform.collaboration.webhook.service.WebhookDispatcher;
 import ma.nafura.platform.collaboration.webhook.service.WebhookService;
+import ma.nafura.platform.framework.record.RecordController;
+import ma.nafura.platform.framework.record.RecordRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * Outgoing webhooks of the organization, a record, plus their deliveries and a test call.
+ * Permissions: administration.integrations.webhooks.{read,create,update,delete}.
+ */
 @RestController
 @RequestMapping("/api/v1/platform/admin/webhooks")
-@SecuredResource(domain = "administration", feature = "administration", resource = "webhooks")
-public class WebhookController {
+@SecuredResource(domain = "administration", feature = "integrations", resource = "webhooks")
+public class WebhookController extends RecordController<WebhookConfig> {
 
-    private final WebhookService webhookService;
-    private final WebhookDeliveryRepository webhookDeliveryRepository;
-    private final WebhookDispatcher webhookDispatcher;
+    private final WebhookConfigRepository repository;
+    private final WebhookDeliveryRepository deliveries;
+    private final WebhookDispatcher dispatcher;
+    private final WebhookService rules;
 
-    public WebhookController(
-            WebhookService webhookService,
-            WebhookDeliveryRepository webhookDeliveryRepository,
-            WebhookDispatcher webhookDispatcher
-    ) {
-        this.webhookService = webhookService;
-        this.webhookDeliveryRepository = webhookDeliveryRepository;
-        this.webhookDispatcher = webhookDispatcher;
+    public WebhookController(WebhookConfigRepository repository, WebhookDeliveryRepository deliveries,
+                             WebhookDispatcher dispatcher, WebhookService rules) {
+        this.repository = repository;
+        this.deliveries = deliveries;
+        this.dispatcher = dispatcher;
+        this.rules = rules;
     }
 
-    @GetMapping
-    @RequirePermission(value = "administration.webhooks.read", fullPermission = true)
-    public Page<WebhookConfigDto> list(Pageable pageable) {
-        return webhookService.listForTenant(pageable).map(this::toDto);
+    @Override protected RecordRepository<WebhookConfig> repository() { return repository; }
+    @Override protected String recordResource() { return "records/webhook.json"; }
+    @Override protected String labelField() { return "name"; }
+
+    @Override
+    protected Map<String, String> validate(WebhookConfig webhook, WebhookConfig previous) {
+        if (previous == null && blank(webhook.getSecret())) {
+            return Map.of("secret", "Obligatoire à la création");
+        }
+        return Map.of();
     }
 
-    @PostMapping
-    @RequirePermission(value = "administration.webhooks.write", fullPermission = true)
-    public ResponseEntity<WebhookConfigDto> create(@Valid @RequestBody CreateWebhookRequest request) {
-        WebhookConfig created = webhookService.create(
-                new WebhookService.WebhookUpsertRequest(
-                        request.name(),
-                        request.url(),
-                        request.secret(),
-                        request.events(),
-                        request.active()
-                )
-        );
-        return ResponseEntity.ok(toDto(created));
+    @Override
+    protected void beforeSave(WebhookConfig webhook, WebhookConfig previous) {
+        if (previous == null) {
+            rules.requireRoomFor(webhook.getTenantId());
+        }
+        webhook.setName(webhook.getName().trim());
+        webhook.setUrl(webhook.getUrl().trim());
+        webhook.setSecret(blank(webhook.getSecret()) ? previous.getSecret() : webhook.getSecret().trim());
     }
 
-    @PutMapping("/{id}")
-    @RequirePermission(value = "administration.webhooks.write", fullPermission = true)
-    public ResponseEntity<WebhookConfigDto> update(
-            @PathVariable UUID id,
-            @Valid @RequestBody UpdateWebhookRequest request
-    ) {
-        WebhookConfig updated = webhookService.update(
-                id,
-                new WebhookService.WebhookUpsertRequest(
-                        request.name(),
-                        request.url(),
-                        request.secret(),
-                        request.events(),
-                        request.active()
-                )
-        );
-        return ResponseEntity.ok(toDto(updated));
-    }
-
-    @DeleteMapping("/{id}")
-    @RequirePermission(value = "administration.webhooks.write", fullPermission = true)
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        webhookService.delete(id);
-        return ResponseEntity.noContent().build();
+    @Override
+    protected void beforeDelete(WebhookConfig webhook) {
+        rules.deleteDeliveries(webhook.getId());
     }
 
     @GetMapping("/{id}/deliveries")
-    @RequirePermission(value = "administration.webhooks.read", fullPermission = true)
+    @RequirePermission("read")
     public Page<WebhookDeliveryDto> listDeliveries(@PathVariable UUID id, Pageable pageable) {
-        webhookService.getById(id); // tenant guard
-        return webhookDeliveryRepository.findByWebhookIdOrderByCreatedAtDesc(id, pageable)
-                .map(this::toDeliveryDto);
+        require(id);
+        return deliveries.findByWebhookIdOrderByCreatedAtDesc(id, pageable).map(WebhookController::toDeliveryDto);
     }
 
     @PostMapping("/{id}/test")
-    @RequirePermission(value = "administration.webhooks.write", fullPermission = true)
-    public ResponseEntity<TestWebhookResponse> test(@PathVariable UUID id) {
-        WebhookConfig config = webhookService.getById(id);
-        WebhookDelivery delivery = webhookDispatcher.triggerTest(config);
+    @RequirePermission("update")
+    public TestWebhookResponse test(@PathVariable UUID id) {
+        WebhookDelivery delivery = dispatcher.triggerTest(require(id));
         boolean success = delivery != null && delivery.getStatus() == WebhookDelivery.Status.SUCCESS;
-        return ResponseEntity.ok(new TestWebhookResponse(success, delivery != null ? delivery.getResponseCode() : null));
+        return new TestWebhookResponse(success, delivery != null ? delivery.getResponseCode() : null);
     }
 
-    private WebhookConfigDto toDto(WebhookConfig config) {
-        WebhookDelivery latest = webhookDeliveryRepository
-                .findFirstByWebhookIdOrderByCreatedAtDesc(config.getId())
-                .orElse(null);
-
-        return new WebhookConfigDto(
-                config.getId(),
-                config.getName(),
-                config.getUrl(),
-                config.getEvents(),
-                config.isActive(),
-                config.getCreatedAt(),
-                config.getUpdatedAt(),
-                latest != null ? latest.getStatus().name() : null
-        );
+    private WebhookConfig require(UUID id) {
+        return find(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Webhook not found"));
     }
 
-    private WebhookDeliveryDto toDeliveryDto(WebhookDelivery delivery) {
+    private static boolean blank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private static WebhookDeliveryDto toDeliveryDto(WebhookDelivery delivery) {
         return new WebhookDeliveryDto(
                 delivery.getId(),
                 delivery.getWebhookId(),
@@ -142,33 +111,6 @@ public class WebhookController {
                 delivery.getLastAttemptAt()
         );
     }
-
-    public record CreateWebhookRequest(
-            @NotBlank @Size(max = 100) String name,
-            @NotBlank @Size(max = 500) String url,
-            @NotBlank @Size(max = 200) String secret,
-            @NotEmpty List<WebhookEvent> events,
-            Boolean active
-    ) {}
-
-    public record UpdateWebhookRequest(
-            @NotBlank @Size(max = 100) String name,
-            @NotBlank @Size(max = 500) String url,
-            @Size(max = 200) String secret,
-            @NotEmpty List<WebhookEvent> events,
-            Boolean active
-    ) {}
-
-    public record WebhookConfigDto(
-            UUID id,
-            String name,
-            String url,
-            List<WebhookEvent> events,
-            boolean active,
-            OffsetDateTime createdAt,
-            OffsetDateTime updatedAt,
-            String lastDeliveryStatus
-    ) {}
 
     public record WebhookDeliveryDto(
             UUID id,
@@ -186,4 +128,3 @@ public class WebhookController {
 
     public record TestWebhookResponse(boolean success, Integer responseCode) {}
 }
-

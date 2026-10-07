@@ -2,6 +2,7 @@ package ma.nafura.platform.framework.api.error;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import ma.nafura.platform.framework.record.RecordRuleException;
 import ma.nafura.platform.framework.service.crud.CrudNotFoundException;
 import ma.nafura.platform.framework.service.crud.CrudOperationException;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,27 @@ public class GlobalExceptionHandler {
                 fields,
                 correlationId(request));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /** A rule of a record: its field errors (422, same body as Bean Validation) or its reason (409). */
+    @ExceptionHandler(RecordRuleException.class)
+    public ResponseEntity<ApiError> handleRecordRule(
+            RecordRuleException ex,
+            HttpServletRequest request) {
+        if (ex.errors().isEmpty()) {
+            ApiError error = ApiError.simple("RECORD_REFUSED", "record.refused", ex.getMessage(), correlationId(request));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        }
+        List<ApiFieldError> fields = ex.errors().entrySet().stream()
+                .map(entry -> new ApiFieldError(entry.getKey(), "validation.rule", entry.getValue()))
+                .toList();
+        ApiError error = ApiError.withFields(
+                "VALIDATION_ERROR",
+                "validation.failed",
+                "Validation failed",
+                fields,
+                correlationId(request));
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(error);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

@@ -26,6 +26,7 @@ import ma.nafura.platform.framework.domain.TenantEntity;
 import ma.nafura.platform.framework.record.HasStatus;
 import ma.nafura.platform.framework.record.Lifecycle;
 import ma.nafura.platform.framework.record.LifecycleEngine;
+import ma.nafura.platform.framework.record.RecordCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -55,10 +56,11 @@ public class TenantSeeder {
     private final JdbcTemplate jdbc;
     private final Validator validator;
     private final LifecycleEngine lifecycles;
+    private final RecordCatalog records;
     private final JsonMapper mapper;
 
     public TenantSeeder(List<SeedDataset> datasets, boolean demo, EntityManager entityManager, TransactionTemplate transactions,
-                        JdbcTemplate jdbc, Validator validator, LifecycleEngine lifecycles, JsonMapper mapper) {
+                        JdbcTemplate jdbc, Validator validator, LifecycleEngine lifecycles, RecordCatalog records, JsonMapper mapper) {
         this.datasets = datasets;
         this.demo = demo;
         this.entityManager = entityManager;
@@ -66,6 +68,7 @@ public class TenantSeeder {
         this.jdbc = jdbc;
         this.validator = validator;
         this.lifecycles = lifecycles;
+        this.records = records;
         this.mapper = mapper.rebuild().enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
     }
 
@@ -184,8 +187,18 @@ public class TenantSeeder {
             throw new IllegalStateException("Seed " + where + " is invalid: " + violations.stream()
                     .map(v -> v.getPropertyPath() + " " + v.getMessage()).sorted().collect(Collectors.joining(", ")));
         }
+        Optional<RecordCatalog.Rules> rules = records.rules(type.getJavaType());
+        if (rules.isPresent()) {
+            Map<String, String> errors = rules.get().validate(record);
+            if (!errors.isEmpty()) {
+                throw new IllegalStateException("Seed " + where + " breaks a rule of the record: " + errors.entrySet().stream()
+                        .map(e -> e.getKey() + " " + e.getValue()).sorted().collect(Collectors.joining(", ")));
+            }
+            rules.get().beforeSave(record);
+        }
         entityManager.persist(record);
         entityManager.flush();
+        rules.ifPresent(found -> found.afterSave(record));
         if (transitions.isEmpty()) {
             return;
         }

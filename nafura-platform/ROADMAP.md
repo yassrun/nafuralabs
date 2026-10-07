@@ -5,12 +5,13 @@
 ## Prochains
 
 00. **Outillage et build sans machine ni admin** — **en premier** : le lab ne démarre plus (dépôt en intégrité basse, JDK dans le dépôt) et reste lent. Contrat et écarts : [ops/README.md](ops/README.md) § Outillage. Ordre : outillage hors dépôt + `bootstrap` + `toolchain` + `doctor` → daemon et caches Gradle → base du lab hors dépôt et `stop` → `@angular/build`. Pas de Docker ni de dev container (postes clients sans Docker).
+0 quinquies. **Revue de la plateforme (2026-10-07)** — doublons, extensibilité, habillage produit : [specs/revue-plateforme/00-AUDIT.md](specs/revue-plateforme/00-AUDIT.md) (specs 01 à 10, à affecter).
 0. **Notifications** — état ~8/10 + suite : [docs/capabilities/notifications.md](docs/capabilities/notifications.md) § Roadmap.
 0 bis. **Audit** — état ~8/10 + suite : [docs/capabilities/audit.md](docs/capabilities/audit.md) § Roadmap.
 0 ter. **IAM / Membres** — état ~5/10 → 8/10 : [docs/capabilities/iam.md](docs/capabilities/iam.md) § Roadmap (UX archétype, accept invite host, last OWNER, audit).
 0 quater. **IA / Fournisseurs** — livré ~8/10 (BYOK, catalogue, quotas, privacy, RBAC/audit, UI) : [docs/capabilities/ai.md](docs/capabilities/ai.md). Préalable utile à Conversation IA.
 0. **Listes : la suite** — le socle est livré (descripteur du record, grammaire de filtre, vues, filtres proposés : [PLATFORM.md](docs/PLATFORM.md), [UI.md](docs/UI.md)). Reste :
-   - Écrans d’administration sur des contrôleurs non-record (clés d’API, webhooks, séquences de numérotation) : passer en `RecordController` (entités sur `TenantEntity` : colonnes `created_by` / `updated_by` ; permissions `…read/write` → `…read/create/update/delete` ; clé et secret jamais sérialisés ; création de clé et révocation surchargées ; statut « expiré » calculé), puis supprimer `LegacyListingPageComponent`.
+   - Écrans d’administration sur des contrôleurs non-record : clés d’API et webhooks livrés ; reste les séquences de numérotation, puis supprimer `LegacyListingPageComponent` ([spec 01](specs/revue-plateforme/01-liste-unique.md)).
    - Archétype « config-driven » (`lib/anatomy` `ListingPageConfig`, 7 écrans plateforme) : migrer vers `nf-listing-page`, un seul type de liste.
    - Plus tard : vues enregistrées par l’utilisateur, rollups, `timeline`, `gallery`, `list`, regroupement à deux niveaux.
 1. **Statuts et approbations** — approbateur désigné par permission (plus par rôle), approbations multi-étapes, historique des transitions, notifications aux approbateurs.

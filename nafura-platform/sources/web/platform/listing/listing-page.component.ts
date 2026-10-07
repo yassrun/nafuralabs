@@ -16,7 +16,7 @@ import { ConfirmDialogService } from '../../lib/anatomy/components/services/conf
 import { ToastService } from '../../lib/anatomy/components/services/toast.service';
 import type { FilterFieldConfig, FilterGroup, ListingQueryState, LookupContext } from '../../lib/anatomy/types';
 import { isFilterGroup } from '../../lib/anatomy/types';
-import { effectivePaging } from '../page-action';
+import { effectivePaging, ruleRefusal } from '../page-action';
 import { ListingBoardViewComponent } from './listing-board-view.component';
 import { ListingCalendarViewComponent } from './listing-calendar-view.component';
 import { LISTING_PAGE, rowsOf, totalOf, type ListingPageContext, type PageBody } from './listing-page.context';
@@ -477,8 +477,12 @@ export class ListingPageComponent implements ListingPageContext {
       } else if (action.success) {
         this.toast.success(this.translate.instant(action.success));
       }
-    } catch {
-      this.toast.error(this.translate.instant('Action failed'));
+    } catch (error) {
+      const label = (key: string) => {
+        const field = action.form?.fields.find((candidate) => candidate.key === key || candidate.field === key);
+        return field ? this.translate.instant(field.label) : key;
+      };
+      this.toast.error(ruleRefusal(error, label) ?? this.translate.instant('Action failed'));
     }
     await this.reload();
   }

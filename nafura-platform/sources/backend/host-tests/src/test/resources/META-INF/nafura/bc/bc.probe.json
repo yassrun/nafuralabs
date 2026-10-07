@@ -10,7 +10,10 @@
       { "id": "probe.items.item.read" },
       { "id": "probe.items.item.create" },
       { "id": "probe.records.group.read" },
-      { "id": "probe.records.record.read" }
+      { "id": "probe.records.record.read" },
+      { "id": "probe.records.record.create" },
+      { "id": "probe.records.record.update" },
+      { "id": "probe.records.record.delete" }
     ],
     "defaultRoles": [
       { "code": "PROBE_VIEWER", "label": "Probe viewer", "permissions": ["probe.items.item.read"] },

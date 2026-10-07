@@ -31,4 +31,8 @@ public class ProbeRecord extends TenantEntity implements HasStatus {
     private BigDecimal amount;
 
     private String status;
+
+    /** Set by the controller (beforeSave), never by a request body (readOnlyFields). */
+    @Size(max = 60)
+    private String reference;
 }

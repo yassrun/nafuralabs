@@ -1,43 +1,41 @@
 package ma.nafura.platform.authorization.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import ma.nafura.platform.framework.domain.TenantEntity;
+import org.hibernate.annotations.Formula;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
+/**
+ * An API key of the organization. Only its hash is stored; the plain key is returned once, by the create response.
+ * A key never exceeds the permissions of whoever issued it.
+ */
 @Entity
 @Table(name = "api_keys", indexes = {
     @Index(name = "idx_api_keys_tenant_active", columnList = "tenant_id,is_active"),
     @Index(name = "idx_api_keys_prefix", columnList = "key_prefix", unique = true)
 })
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ApiKey {
+@Getter
+@Setter
+public class ApiKey extends TenantEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(name = "tenant_id", nullable = false)
-    private UUID tenantId;
-
+    @NotBlank
+    @Size(max = 100)
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
+    @JsonIgnore
     @Column(name = "key_hash", nullable = false, length = 200)
     private String keyHash;
 
@@ -45,10 +43,7 @@ public class ApiKey {
     private String keyPrefix;
 
     @Column(name = "permissions", nullable = false)
-    private String[] permissions;
-
-    @Column(name = "created_by", nullable = false)
-    private UUID createdBy;
+    private String[] permissions = new String[0];
 
     @Column(name = "expires_at")
     private OffsetDateTime expiresAt;
@@ -59,22 +54,17 @@ public class ApiKey {
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 
-    @Column(name = "created_at", updatable = false)
-    private OffsetDateTime createdAt;
+    /** Active, revoked or expired: what the list shows and filters on. */
+    @Setter(AccessLevel.NONE)
+    @Formula("(case when not is_active then 'Révoquée' when expires_at is not null and expires_at < now() then 'Expirée' else 'Active' end)")
+    private String state;
 
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
+    @Setter(AccessLevel.NONE)
+    @Formula("(cardinality(permissions))")
+    private Integer permissionCount;
 
-    @PrePersist
-    protected void onCreate() {
-        OffsetDateTime now = OffsetDateTime.now();
-        createdAt = now;
-        updatedAt = now;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
-    }
+    /** The plain key, only in the response that created it. */
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String plainKey;
 }
-

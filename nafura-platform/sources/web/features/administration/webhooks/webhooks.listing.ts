@@ -1,16 +1,9 @@
 import type { FormFieldConfig } from '../../../lib/anatomy/types';
-import type { LegacyListingPageConfig } from '../../../platform/listing/legacy';
-
-interface Webhook extends Record<string, unknown> {
-  id: string;
-  name: string;
-  url: string;
-  events: string[];
-  active: boolean;
-  lastDeliveryStatus: string | null;
-}
+import type { ListingPageConfig, Row } from '../../../platform/listing/listing-page.types';
 
 const ENDPOINT = '/api/v1/platform/admin/webhooks';
+const PERMISSION = 'administration.integrations.webhooks';
+const COLUMNS = ['name', 'url', 'eventCount', 'active', 'lastDeliveryStatus', 'createdAt'];
 const EVENTS = [
   'ENTITY_CREATED',
   'ENTITY_UPDATED',
@@ -48,37 +41,27 @@ const fields = (secretRequired: boolean): FormFieldConfig[] => [
 const randomSecret = (): string =>
   Array.from(crypto.getRandomValues(new Uint8Array(24)), (byte) => byte.toString(16).padStart(2, '0')).join('');
 
-export const WEBHOOKS_LISTING: LegacyListingPageConfig<Webhook> = {
+/** Outgoing webhooks: a record. The secret is written, never read back; a blank one on update keeps it. */
+export const WEBHOOKS_LISTING: ListingPageConfig = {
   title: 'administration.webhooks.title',
   subtitle: 'administration.webhooks.subtitle',
   icon: 'webhook',
   endpoint: ENDPOINT,
-  emptyMessage: 'administration.webhooks.empty',
-  searchFields: ['name', 'url'],
-  open: (webhook) => `/administration/webhooks/${webhook.id}`,
-  columns: [
-    { key: 'name', field: 'name', label: 'administration.webhooks.columns.name', sortable: true },
-    { key: 'url', field: 'url', label: 'administration.webhooks.columns.url', cssClass: 'nf-cell--mono' },
-    { key: 'events', field: 'events', label: 'administration.webhooks.columns.events', transform: (events) => String((events as string[] | null)?.length ?? 0), width: '110px' },
-    { key: 'active', field: 'active', label: 'administration.webhooks.columns.active', type: 'boolean', width: '90px' },
-    {
-      key: 'lastDelivery',
-      field: 'lastDeliveryStatus',
-      label: 'administration.webhooks.columns.lastDelivery',
-      type: 'badge',
-      transform: (status) => `administration.webhooks.delivery.${status ?? 'NONE'}`,
-      badgeVariant: (status) => (status === 'SUCCESS' ? 'success' : status === 'FAILED' ? 'danger' : 'default'),
-      width: '150px',
-    },
-    { key: 'createdAt', field: 'createdAt', label: 'administration.webhooks.columns.created', type: 'relative', sortable: true, width: '140px' },
+  quickFilters: [{ property: 'lastDeliveryStatus' }],
+  views: [
+    { id: 'all', label: 'administration.webhooks.views.all', layout: 'table', show: COLUMNS },
+    { id: 'active', label: 'administration.webhooks.views.active', layout: 'table', filter: { active: { is: true } }, show: COLUMNS },
+    { id: 'failing', label: 'administration.webhooks.views.failing', layout: 'table', filter: { lastDeliveryStatus: { is: 'Échouée' } }, show: COLUMNS, hideQuickFilters: ['lastDeliveryStatus'] },
   ],
+  emptyState: { icon: 'webhook', title: 'administration.webhooks.empty', message: 'administration.webhooks.emptyHint' },
+  open: (webhook: Row) => `/administration/webhooks/${webhook['id']}`,
   actions: [
     {
       id: 'create',
       label: 'administration.webhooks.actions.create',
       icon: 'plus',
       variant: 'primary',
-      permission: 'administration.webhooks.write',
+      permission: `${PERMISSION}.create`,
       form: {
         title: 'administration.webhooks.dialog.createTitle',
         fields: fields(true),
@@ -92,11 +75,12 @@ export const WEBHOOKS_LISTING: LegacyListingPageConfig<Webhook> = {
       row: true,
       label: 'administration.webhooks.actions.edit',
       icon: 'pencil',
-      permission: 'administration.webhooks.write',
+      permission: `${PERMISSION}.update`,
       form: {
         title: 'administration.webhooks.dialog.editTitle',
         fields: fields(false),
-        values: (webhook) => ({ name: webhook?.name, url: webhook?.url, events: webhook?.events, active: webhook?.active }),
+        values: (webhook) => ({ name: webhook?.['name'], url: webhook?.['url'], events: webhook?.['events'], active: webhook?.['active'] }),
+        body: (values) => ({ ...values, secret: values['secret'] ?? '' }),
       },
       request: { method: 'PUT' },
       success: 'administration.webhooks.saved',
@@ -106,7 +90,7 @@ export const WEBHOOKS_LISTING: LegacyListingPageConfig<Webhook> = {
       row: true,
       label: 'administration.webhooks.actions.test',
       icon: 'send',
-      permission: 'administration.webhooks.write',
+      permission: `${PERMISSION}.update`,
       request: { method: 'POST', url: `${ENDPOINT}/{id}/test` },
       success: 'administration.webhooks.actions.testSuccess',
       failed: (response) => response['success'] !== true,
@@ -118,7 +102,7 @@ export const WEBHOOKS_LISTING: LegacyListingPageConfig<Webhook> = {
       label: 'administration.webhooks.actions.delete',
       icon: 'trash-2',
       variant: 'danger',
-      permission: 'administration.webhooks.write',
+      permission: `${PERMISSION}.delete`,
       confirm: { title: 'administration.webhooks.actions.delete', message: 'administration.webhooks.deleteConfirm', confirmLabel: 'administration.webhooks.actions.delete', danger: true },
       request: { method: 'DELETE' },
       success: 'administration.webhooks.deleted',

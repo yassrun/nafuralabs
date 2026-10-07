@@ -10,6 +10,7 @@ import ma.nafura.host.seed.TenantSeeder;
 import ma.nafura.lab.LabProperties;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
 import ma.nafura.platform.framework.record.LifecycleEngine;
+import ma.nafura.platform.framework.record.RecordCatalog;
 import ma.nafura.platform.identity.repository.AppUserRepository;
 import ma.nafura.platform.identity.service.AppUserProvisioningService;
 import ma.nafura.platform.scope.security.scope.DefaultScopeService;
@@ -43,13 +44,14 @@ public class NafuraHostAutoConfiguration {
             PlatformTransactionManager transactionManager,
             JdbcTemplate jdbcTemplate,
             Validator validator,
-            LifecycleEngine lifecycles
+            LifecycleEngine lifecycles,
+            RecordCatalog records
     ) {
         if (demo && environment.acceptsProfiles(Profiles.of("prod"))) {
             throw new IllegalStateException("nafura.seed.demo=true is forbidden with the 'prod' profile");
         }
         return new TenantSeeder(SeedCatalog.load(resources, jsonMapper), demo, entityManager,
-                new TransactionTemplate(transactionManager), jdbcTemplate, validator, lifecycles, jsonMapper);
+                new TransactionTemplate(transactionManager), jdbcTemplate, validator, lifecycles, records, jsonMapper);
     }
 
     @Bean

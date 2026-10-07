@@ -2,9 +2,7 @@ package ma.nafura.platform.collaboration.webhook.repository;
 
 import ma.nafura.platform.collaboration.webhook.domain.model.WebhookConfig;
 import ma.nafura.platform.collaboration.webhook.domain.model.WebhookEvent;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
+import ma.nafura.platform.framework.record.RecordRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -12,11 +10,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface WebhookConfigRepository extends JpaRepository<WebhookConfig, UUID> {
+public interface WebhookConfigRepository extends RecordRepository<WebhookConfig> {
 
     long countByTenantId(UUID tenantId);
-
-    Page<WebhookConfig> findByTenantIdOrderByCreatedAtDesc(UUID tenantId, Pageable pageable);
 
     Optional<WebhookConfig> findByIdAndTenantId(UUID id, UUID tenantId);
 

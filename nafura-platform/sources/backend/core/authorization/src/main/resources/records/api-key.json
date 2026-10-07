@@ -1,0 +1,14 @@
+{
+  "entity": "administration.api-key",
+  "search": ["name", "keyPrefix"],
+  "properties": {
+    "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "keyPrefix": { "label": "Clé" },
+    "state": { "label": "État", "type": "select", "options": ["Active", "Révoquée", "Expirée"], "filterable": true },
+    "permissionCount": { "label": "Permissions", "type": "number", "sortable": true },
+    "expiresAt": { "label": "Expire le", "type": "date", "filterable": true, "sortable": true },
+    "lastUsedAt": { "label": "Dernière utilisation", "type": "date", "filterable": true, "sortable": true },
+    "createdBy": { "label": "Créée par", "type": "person", "filterable": true },
+    "createdAt": { "label": "Créée le", "filterable": true, "sortable": true }
+  }
+}

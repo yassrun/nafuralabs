@@ -1,0 +1,13 @@
+{
+  "entity": "administration.webhook",
+  "search": ["name", "url"],
+  "properties": {
+    "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "url": { "label": "Adresse", "filterable": true },
+    "eventCount": { "label": "Événements", "type": "number", "sortable": true },
+    "active": { "label": "Actif", "filterable": true },
+    "lastDeliveryStatus": { "label": "Dernier envoi", "type": "select", "options": ["Réussie", "Échouée", "En attente"], "filterable": true },
+    "createdBy": { "label": "Créé par", "type": "person", "filterable": true },
+    "createdAt": { "label": "Créé le", "filterable": true, "sortable": true }
+  }
+}
