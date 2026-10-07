@@ -1,6 +1,7 @@
 import { computed, effect, inject, Injectable, signal, untracked, type OnDestroy, type Signal } from '@angular/core';
 
-import type { FilterFieldConfig, FilterGroup, ListingQueryState, LookupContext } from '../../../types';
+import type { FilterFieldConfig, FilterGroup, ListingQueryState, ListingSort, LookupContext } from '../../../types';
+import { LISTING_MAX_SORT_LEVELS } from '../../../types';
 import type { NfSelectOption } from '../../atoms/select';
 import type { ListingControlsColumn } from '../../molecules/listing-controls';
 import { DEFAULT_LISTING_FLAT_FEATURES, type ListingFlatConfig } from './listing-flat.types';
@@ -60,8 +61,18 @@ export class ListingQueryStore implements OnDestroy {
   readonly filterActive = computed(() => collectLeaves(this.activeFilterGroup()).length > 0);
   readonly page = computed(() => this.listingQuery().page);
   readonly pageSize = computed(() => this.listingQuery().pageSize);
-  readonly sortColumn = computed(() => this.listingQuery().sort?.field);
-  readonly sortDirection = computed(() => this.listingQuery().sort?.direction);
+  /** Sort levels in priority order. */
+  readonly sorts = computed(() => this.listingQuery().sort ?? []);
+  readonly sortActive = computed(() => this.sorts().length > 0);
+  /** First level — drives the table header indicator. */
+  readonly sortColumn = computed(() => this.sorts()[0]?.field);
+  readonly sortDirection = computed(() => this.sorts()[0]?.direction);
+  readonly sortableColumns = computed(() =>
+    (this.config().columns ?? []).filter((c) => c.sortable && c.key)
+  );
+  readonly canAddSortLevel = computed(
+    () => this.sorts().length < LISTING_MAX_SORT_LEVELS && this.sortableColumns().length > 0
+  );
 
   readonly activeSegment = computed(() => {
     const segments = this.config().segments ?? [];
@@ -215,6 +226,45 @@ export class ListingQueryStore implements OnDestroy {
   /** Replaces the whole filter group (builder Apply / Clear, chip remove, pinned filter). */
   replaceFilterGroup(group: FilterGroup, resetPage = true): void {
     this.patchQuery(withSyncedFilters({ ...this.listingQuery(), filterGroup: group }), resetPage);
+  }
+
+  /** Replaces all sort levels (empty / null clears to the API default). */
+  setSorts(sorts: ListingSort[] | null): void {
+    const next = (sorts ?? []).filter((s) => s?.field && (s.direction === 'asc' || s.direction === 'desc')).slice(0, LISTING_MAX_SORT_LEVELS);
+    this.patchQuery({ sort: next.length ? next : null }, true);
+  }
+
+  /** Column header: one level only (toggle / replace). Multi-sort is the toolbar panel. */
+  setPrimarySort(field: string, direction: ListingSort['direction'] | null): void {
+    this.setSorts(direction ? [{ field, direction }] : null);
+  }
+
+  updateSortLevel(index: number, patch: Partial<ListingSort>): void {
+    const levels = [...this.sorts()];
+    if (index < 0 || index >= levels.length) return;
+    levels[index] = { ...levels[index], ...patch };
+    this.setSorts(levels);
+  }
+
+  addSortLevel(): void {
+    if (!this.canAddSortLevel()) return;
+    const used = new Set(this.sorts().map((s) => s.field));
+    const next = this.sortableColumns().find((c) => !used.has(c.key));
+    if (!next) return;
+    this.setSorts([...this.sorts(), { field: next.key, direction: 'asc' }]);
+  }
+
+  removeSortLevel(index: number): void {
+    this.setSorts(this.sorts().filter((_, i) => i !== index));
+  }
+
+  moveSortLevel(index: number, delta: -1 | 1): void {
+    const levels = [...this.sorts()];
+    const target = index + delta;
+    if (index < 0 || target < 0 || index >= levels.length || target >= levels.length) return;
+    const [row] = levels.splice(index, 1);
+    levels.splice(target, 0, row);
+    this.setSorts(levels);
   }
 
   selectSegment(id: string): void {

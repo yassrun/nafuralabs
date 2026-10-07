@@ -284,19 +284,23 @@ function compareValues(a: unknown, b: unknown): number {
   return sa.localeCompare(sb, undefined, { numeric: true, sensitivity: 'base' });
 }
 
-/** Client-side sort for local listing mode. */
+/** Client-side multi-sort for local listing mode (priority order). */
 export function sortItemsLocally<T>(
   items: T[],
-  sort: ListingSort | null | undefined,
+  sort: ListingSort[] | null | undefined,
   columns: ColumnConfig[]
 ): T[] {
-  if (!sort?.field || !sort.direction) return items;
-  const col = columns.find((c) => c.key === sort.field || c.field === sort.field);
-  const field = col?.field ?? sort.field;
-  const dir = sort.direction === 'desc' ? -1 : 1;
-  return [...items].sort(
-    (left, right) => compareValues(fieldValue(left, field), fieldValue(right, field)) * dir
-  );
+  const levels = (sort ?? []).filter((s) => s?.field && (s.direction === 'asc' || s.direction === 'desc'));
+  if (!levels.length) return items;
+  return [...items].sort((left, right) => {
+    for (const level of levels) {
+      const col = columns.find((c) => c.key === level.field || c.field === level.field);
+      const field = col?.field ?? level.field;
+      const cmp = compareValues(fieldValue(left, field), fieldValue(right, field));
+      if (cmp !== 0) return level.direction === 'desc' ? -cmp : cmp;
+    }
+    return 0;
+  });
 }
 
 export function controlColumnsFromQuery(

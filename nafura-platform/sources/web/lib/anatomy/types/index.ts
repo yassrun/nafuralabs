@@ -174,11 +174,14 @@ export function isFilterGroup(node: FilterNode): node is FilterGroup {
 /** Listing scope (server applies tenant + scope rules). */
 export type ListingScope = 'all' | 'mine' | 'archived';
 
-/** Sort specification for listing query. */
+/** One sort level (Notion multi-sort: several levels in priority order). */
 export interface ListingSort {
   field: string;
   direction: SortDirection;
 }
+
+/** Max sort levels in the listing toolbar (Notion-style panel). */
+export const LISTING_MAX_SORT_LEVELS = 5;
 
 /** Column visibility state (saved views / toolbar). */
 export interface ListingColumnState {
@@ -199,7 +202,8 @@ export interface ListingQueryState {
   filters: FilterClause[];
   /** Notion-style filter tree (source of truth for advanced builder). */
   filterGroup?: FilterGroup;
-  sort?: ListingSort | null;
+  /** Sort levels in priority order (`null` / empty = default API order). */
+  sort?: ListingSort[] | null;
   page: number;
   pageSize: number;
   scope?: ListingScope;

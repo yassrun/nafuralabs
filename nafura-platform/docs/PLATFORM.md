@@ -32,7 +32,7 @@ Une entité métier = `extends TenantEntity` (id, organisation, audit) + Bean Va
 class SupplierController extends RecordController<Supplier> { … }
 ```
 
-`RecordController` donne : liste paginée (`page` à partir de 0, `size` plafonné à 500 et renvoyé tel qu’appliqué), triée (`sort=champ,asc`, propriété `sortable`), recherchée (`q`) et filtrée (`filter`, grammaire ci-dessous), `/options` pour les listes de choix, `/properties`, `/aggregate`, lecture, création, modification, suppression. Permissions : `<domain>.<feature>.<resource>.{read,create,update,delete}` selon la méthode HTTP. Champs dérivés en lecture : `@Formula`.
+`RecordController` donne : liste paginée (`page` à partir de 0, `size` plafonné à 500 et renvoyé tel qu’appliqué), triée (`sort=champ:asc` répétable : `sort=neededBy:asc&sort=amount:desc` — deux-points, pas de virgule : Spring découperait `champ,asc` en deux valeurs ; propriété `sortable`), recherchée (`q`) et filtrée (`filter`, grammaire ci-dessous), `/options` pour les listes de choix, `/properties`, `/aggregate`, lecture, création, modification, suppression. Permissions : `<domain>.<feature>.<resource>.{read,create,update,delete}` selon la méthode HTTP. Champs dérivés en lecture : `@Formula`.
 
 ### Le descripteur du record
 

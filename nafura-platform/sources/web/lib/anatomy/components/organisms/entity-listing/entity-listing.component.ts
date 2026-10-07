@@ -267,7 +267,7 @@ export class EntityListingComponent<TItem = unknown> {
         this.query.set({
           ...createDefaultListingQuery(cfg.pagination.defaultPageSize),
           sort: cfg.defaultSort
-            ? { field: cfg.defaultSort.column, direction: cfg.defaultSort.direction ?? 'asc' }
+            ? [{ field: cfg.defaultSort.column, direction: cfg.defaultSort.direction ?? 'asc' }]
             : null,
         });
         this.applyFilterValues(init ?? {});
@@ -329,12 +329,13 @@ export class EntityListingComponent<TItem = unknown> {
 
   protected buildQuery(): Record<string, unknown> {
     const q = this.query();
-    const sorted = q.sort ? this.config().columns.find((c) => c.key === q.sort!.field) : undefined;
+    const primary = q.sort?.[0];
+    const sorted = primary ? this.config().columns.find((c) => c.key === primary.field) : undefined;
     return {
       page: q.page,
       pageSize: q.pageSize,
-      sortBy: q.sort ? (sorted?.field ?? q.sort.field) : undefined,
-      sortDirection: q.sort?.direction,
+      sortBy: primary ? (sorted?.field ?? primary.field) : undefined,
+      sortDirection: primary?.direction,
       search: q.search || undefined,
       ...this.activeSegment()?.filters,
       ...this.filterValues(),

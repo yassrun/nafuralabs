@@ -83,6 +83,8 @@ Livré : outillage hors du dépôt (`bootstrap.cmd`, `bootstrap.sh`, `ops/produc
 | Outillage, sans daemon | 45 s | 45 s |
 | **Outillage, daemon chaud + cache de configuration** | **18 s** (dont Spring Boot 15 s) | ≈ 15 s (compilation esbuild), en parallèle de l’API |
 
+Requêtes de l’API en `lab` : **≈ 1,5 s → ≈ 35 ms** (2026-10-07) depuis que le PostgreSQL embarqué passe par un pool HikariCP. Sans pool, chaque requête SQL ouvrait une connexion, soit un processus PostgreSQL sous Windows. Toute `DataSource` du lab passe par un pool, comme en cluster.
+
 Bundle initial du web en production : 2,24 Mo → **1,51 Mo** (500 → 343 Ko transférés) depuis le chargement à la demande des BCs (`@angular/build` remplace `@angular-devkit/build-angular`, 430 paquets npm en moins).
 
 | Écart restant | Cible |

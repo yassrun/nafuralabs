@@ -201,7 +201,7 @@ export class ListingFlatComponent<T = unknown> {
   }
 
   protected onSortChange(ev: SortChangeEvent): void {
-    this.store.patchQuery({ sort: ev.direction ? { field: ev.column, direction: ev.direction } : null }, true);
+    this.store.setPrimarySort(ev.column, ev.direction ?? null);
   }
 
   /** Single mode: row click toggles the selected row (highlight, no checkboxes). */

@@ -15,7 +15,7 @@
   </div>
 }
 <!-- Row 1: Search + Filter Add + Filter Chips (starts left, flows right) -->
-@if (features().search || features().filters || store.presets().length > 0) {
+@if (features().search || features().filters || store.presets().length > 0 || store.sortableColumns().length > 0) {
   <div class="nf-listing-flat__filters">
     <div class="nf-listing-flat__filters-row nf-listing-flat__filters-row--top">
       @if (features().search) {
@@ -181,6 +181,78 @@
                 (apply)="onFilterApply($event)"
                 (clear)="onFilterClear()"
               />
+            </div>
+          </mat-menu>
+        }
+        @if (store.sortableColumns().length > 0) {
+          <button
+            type="button"
+            class="nf-listing-flat__add-filter"
+            [class.nf-listing-flat__add-filter--active]="store.sortActive()"
+            [matMenuTriggerFor]="sortMenu"
+            #sortMenuTrigger="matMenuTrigger"
+          >
+            <lucide-icon name="arrow-up-down" [size]="12" />
+            {{ 'Sort' | translate }}
+            @if (store.sorts().length > 0) {
+              <span class="nf-listing-flat__sort-count">{{ store.sorts().length }}</span>
+            }
+          </button>
+          <mat-menu
+            #sortMenu="matMenu"
+            class="nf-listing-flat-menu nf-listing-flat-menu--sort"
+            xPosition="after"
+            yPosition="below"
+          >
+            <div class="nf-listing-flat__sort-panel" (click)="$event.stopPropagation()">
+              @if (store.sorts().length === 0) {
+                <p class="nf-listing-flat__sort-empty">{{ 'No sort applied' | translate }}</p>
+              }
+              @for (level of store.sorts(); track $index; let i = $index) {
+                <div class="nf-listing-flat__sort-row">
+                  <select
+                    class="nf-listing-flat__sort-field"
+                    [ngModel]="level.field"
+                    (ngModelChange)="onSortFieldChange(i, $event)"
+                    [attr.aria-label]="'Sort property' | translate"
+                  >
+                    @for (col of store.sortableColumns(); track col.key) {
+                      <option [ngValue]="col.key" [disabled]="isSortFieldTaken(col.key, i)">
+                        {{ col.label | translate }}
+                      </option>
+                    }
+                  </select>
+                  <select
+                    class="nf-listing-flat__sort-dir"
+                    [ngModel]="level.direction"
+                    (ngModelChange)="onSortDirectionChange(i, $event)"
+                    [attr.aria-label]="'Sort direction' | translate"
+                  >
+                    <option value="asc">{{ 'Ascending' | translate }}</option>
+                    <option value="desc">{{ 'Descending' | translate }}</option>
+                  </select>
+                  <button type="button" class="nf-listing-flat__sort-icon-btn" (click)="store.moveSortLevel(i, -1)" [disabled]="i === 0" [attr.aria-label]="'Move sort up' | translate">
+                    <lucide-icon name="chevron-up" [size]="14" />
+                  </button>
+                  <button type="button" class="nf-listing-flat__sort-icon-btn" (click)="store.moveSortLevel(i, 1)" [disabled]="i === store.sorts().length - 1" [attr.aria-label]="'Move sort down' | translate">
+                    <lucide-icon name="chevron-down" [size]="14" />
+                  </button>
+                  <button type="button" class="nf-listing-flat__sort-icon-btn" (click)="store.removeSortLevel(i)" [attr.aria-label]="'Remove sort' | translate">
+                    <lucide-icon name="x" [size]="14" />
+                  </button>
+                </div>
+              }
+              <div class="nf-listing-flat__sort-actions">
+                <button type="button" class="nf-listing-flat__sort-link" (click)="store.addSortLevel()" [disabled]="!store.canAddSortLevel()">
+                  <lucide-icon name="plus" [size]="12" />
+                  {{ 'Add sort' | translate }}
+                </button>
+                @if (store.sortActive()) {
+                  <button type="button" class="nf-listing-flat__sort-link nf-listing-flat__sort-link--muted" (click)="store.setSorts(null)">
+                    {{ 'Clear sort' | translate }}
+                  </button>
+                }
+              </div>
             </div>
           </mat-menu>
         }

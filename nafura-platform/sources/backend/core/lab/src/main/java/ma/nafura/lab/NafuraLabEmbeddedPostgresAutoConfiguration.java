@@ -7,6 +7,8 @@ import java.time.Duration;
 
 import javax.sql.DataSource;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -33,8 +35,13 @@ public class NafuraLabEmbeddedPostgresAutoConfiguration {
                 .start();
     }
 
-    @Bean
+    /** Pooled: the embedded datasource opens a connection per call, and a PostgreSQL connection is a process on Windows. */
+    @Bean(destroyMethod = "close")
     DataSource dataSource(EmbeddedPostgres labEmbeddedPostgres) {
-        return labEmbeddedPostgres.getPostgresDatabase();
+        HikariConfig config = new HikariConfig();
+        config.setDataSource(labEmbeddedPostgres.getPostgresDatabase());
+        config.setPoolName("lab");
+        config.setMaximumPoolSize(10);
+        return new HikariDataSource(config);
     }
 }

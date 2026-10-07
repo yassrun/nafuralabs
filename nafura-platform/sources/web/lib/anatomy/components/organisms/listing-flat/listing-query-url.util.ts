@@ -4,6 +4,8 @@ import type {
   FilterOperator,
   ListingQueryState,
   ListingScope,
+  ListingSort,
+  SortDirection,
 } from '../../../types';
 import { isFilterGroup } from '../../../types';
 import {
@@ -81,8 +83,12 @@ export function listingQueryToParams(query: ListingQueryState): Record<string, s
   if (search) params['search'] = search;
   params['page'] = String(synced.page);
   params['size'] = String(synced.pageSize);
-  if (synced.sort?.field && synced.sort.direction) {
-    params['sort'] = `${synced.sort.field},${synced.sort.direction}`;
+  // `field:dir` — not comma: Spring would split `field,asc` into two List entries.
+  const sorts = (synced.sort ?? []).filter((s) => s?.field && (s.direction === 'asc' || s.direction === 'desc'));
+  if (sorts.length === 1) {
+    params['sort'] = `${sorts[0].field}:${sorts[0].direction}`;
+  } else if (sorts.length > 1) {
+    params['sort'] = sorts.map((s) => `${s.field}:${s.direction}`);
   }
   if (synced.scope && synced.scope !== 'all') {
     params['scope'] = synced.scope;
@@ -140,12 +146,33 @@ export function paramsToListingQuery(
   const size = paramNumber(params['size']);
   if (size != null && size >= 1) q.pageSize = size;
 
-  const sortRaw = paramString(params['sort']);
-  if (sortRaw) {
-    const [field, direction] = sortRaw.split(',');
-    if (field && (direction === 'asc' || direction === 'desc')) {
-      q.sort = { field, direction };
+  const sortEntries = paramStringList(params['sort']);
+  if (sortEntries.length) {
+    const sorts: ListingSort[] = [];
+    for (let i = 0; i < sortEntries.length; i++) {
+      const raw = sortEntries[i];
+      if (raw === 'asc' || raw === 'desc') continue;
+      let field: string;
+      let direction: SortDirection = 'asc';
+      if (raw.includes(':')) {
+        const [f, d] = raw.split(':', 2);
+        field = f;
+        if (d === 'asc' || d === 'desc') direction = d;
+      } else if (raw.includes(',')) {
+        const [f, d] = raw.split(',', 2);
+        field = f;
+        if (d === 'asc' || d === 'desc') direction = d;
+      } else {
+        field = raw;
+        const next = sortEntries[i + 1];
+        if (next === 'asc' || next === 'desc') {
+          direction = next;
+          i++;
+        }
+      }
+      if (field) sorts.push({ field, direction });
     }
+    if (sorts.length) q.sort = sorts;
   }
 
   const segment = paramString(params['segment']);
@@ -192,6 +219,11 @@ function paramString(value: string | string[] | undefined): string | undefined {
   if (value == null) return undefined;
   const s = Array.isArray(value) ? value[0] : value;
   return s?.trim() || undefined;
+}
+
+function paramStringList(value: string | string[] | undefined): string[] {
+  if (value == null) return [];
+  return (Array.isArray(value) ? value : [value]).map((s) => s.trim()).filter(Boolean);
 }
 
 function paramNumber(value: string | string[] | undefined): number | undefined {

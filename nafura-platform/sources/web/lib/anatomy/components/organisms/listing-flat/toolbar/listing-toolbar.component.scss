@@ -139,6 +139,105 @@
   border-color: var(--nf-primary, #2563eb);
   color: var(--nf-primary, #2563eb);
 }
+.nf-listing-flat__sort-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  margin-left: 2px;
+  border-radius: 999px;
+  background: var(--nf-primary, #2563eb);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.nf-listing-flat__sort-panel {
+  min-width: 320px;
+  max-width: 420px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nf-listing-flat__sort-empty {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--nf-text-secondary, #6b7280);
+}
+.nf-listing-flat__sort-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nf-listing-flat__sort-field,
+.nf-listing-flat__sort-dir {
+  height: 28px;
+  border: 1px solid var(--nf-border-default, #e5e7eb);
+  border-radius: 6px;
+  background: var(--nf-surface-section, #fff);
+  font-size: 0.75rem;
+  font-family: inherit;
+  color: var(--nf-text-primary, #111827);
+}
+.nf-listing-flat__sort-field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.nf-listing-flat__sort-dir {
+  flex: 0 0 auto;
+  width: 7.5rem;
+}
+.nf-listing-flat__sort-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--nf-text-secondary, #6b7280);
+  cursor: pointer;
+}
+.nf-listing-flat__sort-icon-btn:hover:not(:disabled) {
+  background: var(--nf-surface-hover, #f3f4f6);
+  color: var(--nf-text-primary, #111827);
+}
+.nf-listing-flat__sort-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.nf-listing-flat__sort-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 2px;
+}
+.nf-listing-flat__sort-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--nf-primary, #2563eb);
+  cursor: pointer;
+}
+.nf-listing-flat__sort-link:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.nf-listing-flat__sort-link--muted {
+  color: var(--nf-text-secondary, #6b7280);
+}
 .nf-listing-flat__controls {
   display: flex;
   align-items: center;

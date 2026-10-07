@@ -25,7 +25,7 @@ export const PURCHASE_REQUESTS_LISTING: ListingPageConfig = {
       label: 'À commander',
       layout: 'table',
       filter: { status: { is: 'APPROVED' } },
-      sort: [{ neededBy: 'asc' }],
+      sort: [{ neededBy: 'asc' }, { amount: 'desc' }],
       show: ['subject', 'supplierId', 'amount', 'neededBy'],
       footer: { amount: 'sum' },
       hideQuickFilters: ['status'],

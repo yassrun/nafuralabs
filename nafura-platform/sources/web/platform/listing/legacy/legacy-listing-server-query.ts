@@ -21,8 +21,10 @@ export function serverQueryParams(
   params['size'] = String(query.pageSize || 25);
   const search = query.search?.trim();
   if (search) params['q'] = search;
-  if (query.sort?.field && query.sort.direction) {
-    params['sort'] = `${query.sort.field},${query.sort.direction}`;
+  const sorts = (query.sort ?? []).filter((s) => s?.field && (s.direction === 'asc' || s.direction === 'desc'));
+  if (sorts.length) {
+    // Colon avoids Spring splitting `field,asc` into two list entries.
+    params['sort'] = `${sorts[0].field}:${sorts[0].direction}`;
   }
   const segmentId = query.segment;
   const segment = (options.segments ?? []).find((item) => item.id === segmentId) ?? (options.segments ?? [])[0];

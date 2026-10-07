@@ -178,6 +178,18 @@ export class ListingToolbarComponent {
   protected onNumberFilter(key: string, value: unknown): void {
     this.store.setFilterValue(key, value != null && value !== '' ? +value : null);
   }
+
+  protected isSortFieldTaken(field: string, exceptIndex: number): boolean {
+    return this.store.sorts().some((s, i) => i !== exceptIndex && s.field === field);
+  }
+
+  protected onSortFieldChange(index: number, field: string): void {
+    this.store.updateSortLevel(index, { field });
+  }
+
+  protected onSortDirectionChange(index: number, direction: 'asc' | 'desc'): void {
+    this.store.updateSortLevel(index, { direction });
+  }
 }
 
 function toMenuNode(a: ListingActionItem): ActionMenuNode {

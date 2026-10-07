@@ -287,11 +287,18 @@ export class ListingPageComponent implements ListingPageContext {
     effect(() => {
       const config = this.config();
       untracked(() => {
-        const params = Object.fromEntries(this.route.snapshot.queryParamMap.keys.map((key) => [key, this.route.snapshot.queryParamMap.get(key) ?? '']));
+        const params: Record<string, string | string[]> = {};
+        for (const key of this.route.snapshot.queryParamMap.keys) {
+          const all = this.route.snapshot.queryParamMap.getAll(key);
+          params[key] = all.length <= 1 ? (all[0] ?? '') : all;
+        }
         const initial = paramsToListingQuery(params, { pageSize: config.pageSize ?? 25 });
         const asked = config.views.find((view) => view.id === (params['view'] || initial.segment));
         initial.segment = (asked ?? config.views[0]).id;
         this.viewId.set(initial.segment);
+        if (!initial.sort?.length) {
+          initial.sort = this.viewSortLevels(initial.segment);
+        }
         this.query.set(initial);
         this.loadTick.set(0);
         void this.start();
@@ -314,12 +321,15 @@ export class ListingPageComponent implements ListingPageContext {
 
   onLoad(query: ListingQueryState): void {
     const changedView = query.segment != null && query.segment !== this.viewId();
-    this.query.set(query);
+    let next = query;
     if (changedView) {
       this.viewId.set(query.segment!);
       this.aggregates.set(null);
+      // New view: take its configured multi-sort (Notion view default), unless the URL already set one.
+      next = { ...query, sort: this.viewSortLevels(query.segment!) };
     }
-    this.remember(query);
+    this.query.set(next);
+    this.remember(next);
     void this.reload();
   }
 
@@ -350,12 +360,23 @@ export class ListingPageComponent implements ListingPageContext {
     return allOf(this.config().filter, this.view().filter, ...pills, toRecordFilter(group, filterTargets(this.properties(), this.targets())));
   }
 
+  private viewSortLevels(viewId?: string): ListingQueryState['sort'] {
+    const view = this.config().views.find((v) => v.id === viewId) ?? this.view();
+    const levels: NonNullable<ListingQueryState['sort']> = [];
+    for (const entry of view.sort ?? []) {
+      const [field, direction] = Object.entries(entry)[0] ?? [];
+      if (field && (direction === 'asc' || direction === 'desc')) {
+        levels.push({ field, direction });
+      }
+    }
+    return levels.length ? levels : null;
+  }
+
   private sorted(query: ListingQueryState | undefined): ListingQueryState | undefined {
-    if (query?.sort?.field) return query;
-    const first = this.view().sort?.[0];
-    if (!first) return query;
-    const [field, direction] = Object.entries(first)[0];
-    return { ...(query ?? { page: 1, pageSize: this.config().pageSize ?? 25, filters: [] }), sort: { field, direction } };
+    if (query?.sort?.length) return query;
+    const levels = this.viewSortLevels();
+    if (!levels?.length) return query;
+    return { ...(query ?? { page: 1, pageSize: this.config().pageSize ?? 25, filters: [] }), sort: levels };
   }
 
   private async loadProperties(): Promise<void> {

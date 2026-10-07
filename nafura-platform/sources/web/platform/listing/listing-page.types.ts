@@ -24,7 +24,7 @@ export interface ListingView {
   layout: ListingLayout;
   /** Fixed filter of the view (the grammar of the API). */
   filter?: RecordFilter;
-  /** `[{ neededBy: 'asc' }]`: the first entry is applied. */
+  /** `[{ neededBy: 'asc' }, { amount: 'desc' }]`: all levels, in priority order (Notion multi-sort). */
   sort?: Array<Record<string, 'asc' | 'desc'>>;
   /** Table: visible properties, in order. */
   show?: string[];

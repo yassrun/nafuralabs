@@ -248,10 +248,13 @@ public abstract class RecordController<E extends TenantEntity> {
     }
 
     @GetMapping
-    public Map<String, Object> list(@RequestParam Map<String, String> params) {
+    public Map<String, Object> list(
+            @RequestParam Map<String, String> params,
+            @RequestParam(value = "sort", required = false) List<String> sortParams) {
         int page = Math.max(integer(params.get("page"), 0), 0);
         int size = Math.min(Math.max(integer(params.get("size"), 20), 1), MAX_PAGE);
-        Page<E> result = repository().findAll(specification(params), PageRequest.of(page, size, sort(params.get("sort"))));
+        // Repeated `sort=field,dir` (Notion multi-sort); Map alone would keep only the first value.
+        Page<E> result = repository().findAll(specification(params), PageRequest.of(page, size, sort(sortParams)));
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("content", result.getContent());
         body.put("totalElements", result.getTotalElements());
@@ -525,23 +528,61 @@ public abstract class RecordController<E extends TenantEntity> {
                 });
     }
 
-    private Sort sort(String sort) {
-        if (sort == null || sort.isBlank()) {
+    /**
+     * Multi-sort: repeated {@code sort=field:asc} (preferred). Also accepts {@code field,asc} and the
+     * Spring-split form {@code [field, asc, …]} where a comma inside one query value becomes two list entries.
+     */
+    private Sort sort(List<String> sortParams) {
+        if (sortParams == null || sortParams.isEmpty()) {
             return defaultSort();
         }
-        String[] parts = sort.split(",");
-        Sort.Direction direction = parts.length > 1 && parts[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-        String field = parts[0];
-        if (field.isBlank()) {
-            return defaultSort();
-        }
-        if (descriptor != null) {
-            RecordProperty property = descriptor.property(field);
-            if (property == null || !property.sortable()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Property " + field + " is not sortable");
+        List<Sort.Order> orders = new ArrayList<>();
+        for (int i = 0; i < sortParams.size(); i++) {
+            String entry = sortParams.get(i);
+            if (entry == null || entry.isBlank()) {
+                continue;
             }
+            if (entry.equalsIgnoreCase("asc") || entry.equalsIgnoreCase("desc")) {
+                continue; // orphan direction from a previous Spring comma-split
+            }
+            String field;
+            Sort.Direction direction = Sort.Direction.ASC;
+            if (entry.contains(":")) {
+                String[] parts = entry.split(":", 2);
+                field = parts[0].trim();
+                if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("desc")) {
+                    direction = Sort.Direction.DESC;
+                }
+            } else if (entry.contains(",")) {
+                String[] parts = entry.split(",", 2);
+                field = parts[0].trim();
+                if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("desc")) {
+                    direction = Sort.Direction.DESC;
+                }
+            } else {
+                field = entry.trim();
+                if (i + 1 < sortParams.size()) {
+                    String next = sortParams.get(i + 1);
+                    if (next != null && (next.equalsIgnoreCase("asc") || next.equalsIgnoreCase("desc"))) {
+                        if (next.equalsIgnoreCase("desc")) {
+                            direction = Sort.Direction.DESC;
+                        }
+                        i++;
+                    }
+                }
+            }
+            if (field.isBlank()) {
+                continue;
+            }
+            if (descriptor != null) {
+                RecordProperty property = descriptor.property(field);
+                if (property == null || !property.sortable()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Property " + field + " is not sortable");
+                }
+            }
+            orders.add(new Sort.Order(direction, field));
         }
-        return Sort.by(direction, field);
+        return orders.isEmpty() ? defaultSort() : Sort.by(orders);
     }
 
     private Map<String, Object> propertyView(RecordProperty property) {

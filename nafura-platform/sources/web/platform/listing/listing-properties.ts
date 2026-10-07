@@ -187,15 +187,25 @@ export function allOf(...filters: Array<RecordFilter | null | undefined>): Recor
   return present.length === 1 ? present[0] : { and: present };
 }
 
-/** Query string of a server-paged list (page is 0-based). */
-export function listParams(query: ListingQueryState | undefined, filter: RecordFilter | null, pageSize: number): Record<string, string> {
-  const params: Record<string, string> = {
+/** Query string of a server-paged list (page is 0-based). Repeated `sort` = multi-level. */
+export function listParams(
+  query: ListingQueryState | undefined,
+  filter: RecordFilter | null,
+  pageSize: number
+): Record<string, string | string[]> {
+  const params: Record<string, string | string[]> = {
     page: String(Math.max(0, (query?.page ?? 1) - 1)),
     size: String(query?.pageSize || pageSize),
   };
   const search = query?.search?.trim();
   if (search) params['q'] = search;
-  if (query?.sort?.field && query.sort.direction) params['sort'] = `${query.sort.field},${query.sort.direction}`;
+  // Colon, not comma: Spring binds `sort=field,asc` as two list values.
+  const sorts = (query?.sort ?? []).filter((s) => s?.field && (s.direction === 'asc' || s.direction === 'desc'));
+  if (sorts.length === 1) {
+    params['sort'] = `${sorts[0].field}:${sorts[0].direction}`;
+  } else if (sorts.length > 1) {
+    params['sort'] = sorts.map((s) => `${s.field}:${s.direction}`);
+  }
   if (filter) params['filter'] = JSON.stringify(filter);
   return params;
 }
