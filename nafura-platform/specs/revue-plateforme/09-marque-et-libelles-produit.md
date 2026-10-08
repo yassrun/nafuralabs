@@ -37,13 +37,14 @@ Un produit déclare dans `app.nafura.json` ses couleurs, et un BC ses libellés,
     "primary": "#0f766e",
     "accent": "#f59e0b",
     "radius": "md",
-    "density": "comfortable"
+    "density": "comfortable",
+    "font": "Plus Jakarta Sans"
   }
 }
 ```
 
 - Ordre d'application : jetons de la plateforme → `spec.theme` → `TenantBranding` de l'organisation (si l'organisation a le droit de personnaliser : `spec.theme.tenantOverride`, `true` par défaut).
-- `ThemeService` dérive les nuances et le contraste à partir de `primary` et `accent`, comme il le fait déjà pour l'organisation.
+- `ThemeService` écrit `--nf-brand-primary` et `--nf-brand-accent` ; les variantes (`-hover`, `-subtle`…) en dérivent en CSS et `--nf-primary-contrast` reste calculé par `contrastText` (spec 11, lot 1). `radius` choisit `--nf-radius-control` et `--nf-radius-card` dans l'échelle, `density` pose `nf-density-compact`, `font` remplace `--nf-font-family` (police embarquée, pas de CDN).
 - Uniquement des jetons : pas de CSS libre dans le produit. Le garde-fou continue de refuser tout `.scss` dans un produit ou un BC.
 - Contrôle de contraste au build : `architecture:check` refuse un `primary` dont le contraste avec le texte est inférieur à 4,5:1 (le texte est calculé par `contrastText`).
 
