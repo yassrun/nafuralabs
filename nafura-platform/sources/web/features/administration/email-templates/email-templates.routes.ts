@@ -1,16 +1,18 @@
 import { Routes } from '@angular/router';
 
 import { routePermissionGuard } from '@core/security/guards/permission.guard';
+import { ListingPageComponent } from '../../../platform/listing';
+import { EMAIL_TEMPLATES_LISTING } from './email-templates.listing';
 
 export const EMAIL_TEMPLATES_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./email-template-listing').then((m) => m.EmailTemplateListingPage),
+    component: ListingPageComponent,
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.email.read'],
+      permissions: ['administration.notifications.email-templates.read'],
       title: 'administration.emailTemplates.title',
+      listing: EMAIL_TEMPLATES_LISTING,
     },
   },
   {
@@ -19,7 +21,7 @@ export const EMAIL_TEMPLATES_ROUTES: Routes = [
       import('./email-template-editor').then((m) => m.EmailTemplateEditorPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.email.write'],
+      permissions: ['administration.notifications.email-templates.create'],
       title: 'administration.emailTemplates.create',
     },
   },
@@ -29,7 +31,7 @@ export const EMAIL_TEMPLATES_ROUTES: Routes = [
       import('./email-template-editor').then((m) => m.EmailTemplateEditorPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.email.read'],
+      permissions: ['administration.notifications.email-templates.read'],
       title: 'administration.emailTemplates.editor.title',
     },
   },

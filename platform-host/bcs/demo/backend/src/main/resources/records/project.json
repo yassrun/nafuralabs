@@ -41,7 +41,7 @@
       "permission": "demo.projects.project.advance",
       "requires": ["quoteAmount", "quoteDate", "startDate"],
       "approval": {
-        "role": "DEMO_LEAD",
+        "permission": "demo.projects.project.approve",
         "when": "quoteAmount > 100000",
         "title": "Lancement du projet : {name}",
         "approved": "validate",

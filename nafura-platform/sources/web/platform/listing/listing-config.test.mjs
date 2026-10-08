@@ -28,10 +28,6 @@ function walk(dir, keep, skip = []) {
 
 const isList = (value) => value && typeof value === 'object' && 'endpoint' in value && 'views' in value;
 const isLegacyList = (value) => value && typeof value === 'object' && 'endpoint' in value && 'columns' in value;
-// TEMPORARY: administration screens on non-record controllers, on LegacyListingPageComponent until their chantier.
-const LEGACY = new Set([
-  'features/administration/numbering-sequences/numbering-sequences.listing.ts',
-]);
 const files = walk(web, (_, name) => name.endsWith('.listing.ts'));
 const bcFiles = walk(join(root, 'platform-host/bcs'), (full, name) => name.endsWith('.ts') && full.split(/[\\/]/).includes('web'), ['backend']);
 
@@ -48,15 +44,15 @@ const bcListings = await Promise.all(
 
 const french = (key) => key.split('.').reduce((node, part) => (node && typeof node === 'object' ? node[part] : undefined), fr) ?? fr[key];
 
-test('listing configs are discovered; only the named administration screens are still legacy', () => {
-  assert.ok(listings.length + legacyListings.length >= 1, 'at least one *.listing.ts');
+test('listing configs are discovered; no legacy column-based lists remain', () => {
+  assert.ok(listings.length >= 1, 'at least one *.listing.ts');
   assert.ok(bcListings.length >= 6, `business context lists found: ${bcListings.length}`);
-  assert.deepEqual(legacyListings.map(([file]) => file).filter((file) => !LEGACY.has(file)), []);
+  assert.deepEqual(legacyListings.map(([file]) => file), []);
 });
 
 test('every text of a listing screen is translated into French', () => {
   const missing = [];
-  for (const [file, config] of [...listings, ...legacyListings]) {
+  for (const [file, config] of listings) {
     const texts = [
       config.title,
       config.subtitle,
@@ -91,7 +87,7 @@ test('every text of a listing screen is translated into French', () => {
 
 test('every permission of a listing action is one the backend enforces', () => {
   const enforced = backendPermissions();
-  const unknown = [...listings, ...legacyListings].flatMap(([file, config]) =>
+  const unknown = listings.flatMap(([file, config]) =>
     (config.actions ?? []).filter((action) => action.permission && !enforced.has(action.permission)).map((action) => `${file}: ${action.permission}`),
   );
   assert.deepEqual(unknown, []);
@@ -125,7 +121,6 @@ test('a tree view is loaded whole; other views are paged by the server unless th
 test('lists keep one format: views and quick filters, never columns, segments, board or searchFields', () => {
   const legacy = [];
   for (const file of [...files, ...bcFiles]) {
-    if (LEGACY.has(relative(web, file).split(sep).join('/'))) continue;
     const source = readFileSync(file, 'utf8');
     if (!/ListingPageConfig/.test(source)) continue;
     for (const key of ['segments:', 'defaultSegment:', 'searchFields:', 'board:', 'columns:']) {

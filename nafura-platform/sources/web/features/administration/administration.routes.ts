@@ -105,6 +105,11 @@ export const ADMINISTRATION_ROUTES: Routes = [
       ),
   },
   {
+    path: 'scope-grants',
+    loadChildren: () =>
+      import('./scope-grants/scope-grants.routes').then((m) => m.SCOPE_GRANTS_ROUTES),
+  },
+  {
     path: 'subscriptions',
     loadChildren: () =>
       import('./subscriptions/subscriptions.routes').then(

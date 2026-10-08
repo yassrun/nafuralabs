@@ -17,7 +17,7 @@ import type { WorkflowStepDto } from '../models';
 export interface WorkflowStepDialogData {
   step?: WorkflowStepDto;
   stepNumber: number;
-  roleOptions: { value: string; label: string }[];
+  permissionOptions: { value: string; label: string }[];
 }
 
 @Component({
@@ -42,9 +42,9 @@ export interface WorkflowStepDialogData {
           <input matInput formControlName="name" />
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ 'administration.workflows.stepDialog.approverRole' | translate }}</mat-label>
-          <mat-select formControlName="approverRole">
-            @for (opt of data.roleOptions; track opt.value) {
+          <mat-label>{{ 'administration.workflows.stepDialog.approverPermission' | translate }}</mat-label>
+          <mat-select formControlName="approverPermission">
+            @for (opt of data.permissionOptions; track opt.value) {
               <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
             }
           </mat-select>
@@ -54,10 +54,10 @@ export interface WorkflowStepDialogData {
           <input matInput type="number" formControlName="timeoutHours" min="1" />
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ 'administration.workflows.stepDialog.escalationRole' | translate }}</mat-label>
-          <mat-select formControlName="escalationRole">
+          <mat-label>{{ 'administration.workflows.stepDialog.escalationPermission' | translate }}</mat-label>
+          <mat-select formControlName="escalationPermission">
             <mat-option value="">{{ 'common.none' | translate }}</mat-option>
-            @for (opt of data.roleOptions; track opt.value) {
+            @for (opt of data.permissionOptions; track opt.value) {
               <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
             }
           </mat-select>
@@ -98,9 +98,9 @@ export class WorkflowStepDialogComponent implements OnInit {
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
-    approverRole: ['', Validators.required],
+    approverPermission: ['', Validators.required],
     timeoutHours: [null as number | null, [Validators.min(1)]],
-    escalationRole: [''],
+    escalationPermission: [''],
     condition: [''],
   });
 
@@ -109,9 +109,9 @@ export class WorkflowStepDialogComponent implements OnInit {
     if (step) {
       this.form.patchValue({
         name: step.name,
-        approverRole: step.approverRole,
+        approverPermission: step.approverPermission,
         timeoutHours: step.timeoutHours ?? null,
-        escalationRole: step.escalationRole ?? '',
+        escalationPermission: step.escalationPermission ?? '',
         condition: step.condition ?? '',
       });
     }
@@ -123,9 +123,9 @@ export class WorkflowStepDialogComponent implements OnInit {
     const result: WorkflowStepDto = {
       stepNumber: this.data.stepNumber,
       name: v.name,
-      approverRole: v.approverRole,
+      approverPermission: v.approverPermission,
       timeoutHours: v.timeoutHours ?? undefined,
-      escalationRole: v.escalationRole || undefined,
+      escalationPermission: v.escalationPermission || undefined,
       condition: v.condition || undefined,
     };
     this.dialogRef.close(result);

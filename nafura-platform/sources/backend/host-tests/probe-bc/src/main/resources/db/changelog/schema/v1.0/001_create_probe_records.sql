@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS probe_group (
     tenant_id   UUID NOT NULL,
     code        VARCHAR(40) NOT NULL,
     name        VARCHAR(120) NOT NULL,
+    parent_id   UUID,
     created_by  UUID,
     updated_by  UUID,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),

@@ -11,7 +11,11 @@ import org.springframework.stereotype.Component;
  * Injects {@link CrudAuditHook} into every {@link JpaCrudService} bean so that
  * entities annotated with {@link ma.nafura.platform.framework.audit.Auditable}
  * are automatically audited on create/update/delete.
+ *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. L'audit des records
+ *             passe par {@link CrudAuditHook} depuis {@link ma.nafura.platform.framework.record.RecordController}.
  */
+@Deprecated(since = "2026-10", forRemoval = true)
 @Component
 public class JpaCrudServiceAuditPostProcessor implements BeanPostProcessor {
 

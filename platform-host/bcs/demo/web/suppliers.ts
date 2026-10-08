@@ -105,13 +105,42 @@ const IDENTITY: RecordSection = {
   ],
 };
 
+const COUNTRIES = [
+  { value: 'MA', label: 'Maroc' },
+  { value: 'FR', label: 'France' },
+  { value: 'ES', label: 'Espagne' },
+  { value: 'DE', label: 'Allemagne' },
+  { value: 'BE', label: 'Belgique' },
+  { value: 'OTHER', label: 'Autre' },
+];
+
 const COORDINATES: RecordSection = {
   title: 'Coordonnées',
   fields: [
     { key: 'email', field: 'email', label: 'E-mail', type: 'email' },
-    { key: 'phone', field: 'phone', label: 'Téléphone', type: 'text' },
-    { key: 'city', field: 'city', label: 'Ville', type: 'text' },
+    { key: 'phone', field: 'phone', label: 'Téléphone', type: 'phone-ma' },
+    { key: 'ice', field: 'ice', label: 'ICE', type: 'ice' },
+    { key: 'rib', field: 'rib', label: 'RIB', type: 'rib' },
+    { key: 'country', field: 'country', label: 'Pays', type: 'select', options: COUNTRIES, required: true },
+    { key: 'city', field: 'city', label: 'Ville', type: 'city-ma' },
     { key: 'address', field: 'address', label: 'Adresse', type: 'text', wide: true },
+  ],
+};
+
+/** Shown only when the supplier is not Moroccan — VAT number for foreign suppliers. */
+const INTERNATIONAL: RecordSection = {
+  title: 'International',
+  description: 'Identifiants fiscaux hors Maroc.',
+  visible: (supplier) => String(supplier['country'] ?? 'MA') !== 'MA',
+  fields: [
+    {
+      key: 'vatNumber',
+      field: 'vatNumber',
+      label: 'N° de TVA',
+      type: 'text',
+      requiredWhen: (supplier) => String(supplier['country'] ?? 'MA') !== 'MA',
+      validation: { maxLength: 40 },
+    },
   ],
 };
 
@@ -139,7 +168,7 @@ export const SUPPLIER_RECORD: RecordPageConfig = {
     update: 'demo.purchasing.supplier.update',
     delete: 'demo.purchasing.supplier.delete',
   },
-  defaults: { active: true, paymentTerms: '30 jours' },
+  defaults: { active: true, paymentTerms: '30 jours', country: 'MA' },
   actions: [
     {
       id: 'overview',
@@ -159,7 +188,20 @@ export const SUPPLIER_RECORD: RecordPageConfig = {
   layout: {
     kind: 'tabs',
     tabs: [
-      { id: 'general', label: 'Général', sections: [IDENTITY, COORDINATES] },
+      { id: 'general', label: 'Général', sections: [IDENTITY, COORDINATES, INTERNATIONAL] },
+      {
+        id: 'overview',
+        label: 'Synthèse',
+        sections: [
+          {
+            title: 'Synthèse',
+            description: 'Demandes et montant cumulé pour ce fournisseur.',
+            kind: 'screen',
+            loadScreen: () =>
+              import('./screens/supplier-overview/supplier-overview.component').then((m) => m.SupplierOverviewComponent),
+          },
+        ],
+      },
       { id: 'contacts', label: 'Contacts', sections: [{ title: 'Interlocuteurs', listing: contactsListing }] },
       { id: 'terms', label: 'Conditions', sections: [TERMS] },
     ],
@@ -168,7 +210,7 @@ export const SUPPLIER_RECORD: RecordPageConfig = {
     kind: 'steps',
     steps: [
       { id: 'identity', label: 'Identité', sections: [IDENTITY] },
-      { id: 'coordinates', label: 'Coordonnées', sections: [COORDINATES] },
+      { id: 'coordinates', label: 'Coordonnées', sections: [COORDINATES, INTERNATIONAL] },
       { id: 'terms', label: 'Conditions', sections: [TERMS] },
     ],
   },

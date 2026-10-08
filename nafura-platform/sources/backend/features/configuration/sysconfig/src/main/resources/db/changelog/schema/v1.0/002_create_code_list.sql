@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS code_list (
     code           VARCHAR(50) NOT NULL,
     name           VARCHAR(200) NOT NULL,
     description    TEXT,
+    created_by     UUID,
+    updated_by     UUID,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );

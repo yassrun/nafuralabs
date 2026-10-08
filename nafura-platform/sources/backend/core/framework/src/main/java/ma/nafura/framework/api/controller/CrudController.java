@@ -30,22 +30,13 @@ import java.util.stream.Collectors;
  * Generic REST controller providing standard CRUD endpoints.
  * Subclasses only need to provide the service instance and path mapping.
  *
- * Standard routes:
- * - GET    /{basePath}              → list with pagination & sorting
- * - GET    /{basePath}/lookup       → lightweight lookup list (key/value)
- * - GET    /{basePath}/count        → count total entities
- * - GET    /{basePath}/{id}         → get by ID
- * - POST   /{basePath}              → create
- * - PUT    /{basePath}/{id}         → update
- * - DELETE /{basePath}/{id}         → delete
- * - POST   /{basePath}/batch        → create batch
- * - DELETE /{basePath}/batch        → delete batch
- *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser {@link ma.nafura.platform.framework.record.RecordController}.
  * @param <TId>     Entity ID type
  * @param <TEntity> Entity type
  * @param <TCreate> Create DTO type
  * @param <TUpdate> Update DTO type
  */
+@Deprecated(since = "2026-10", forRemoval = true)
 @Validated
 public abstract class CrudController<TId, TEntity, TCreate, TUpdate> {
 

@@ -13,12 +13,15 @@
       { "id": "probe.records.record.read" },
       { "id": "probe.records.record.create" },
       { "id": "probe.records.record.update" },
-      { "id": "probe.records.record.delete" }
+      { "id": "probe.records.record.delete" },
+      { "id": "probe.records.record.submit" },
+      { "id": "probe.records.record.approve" }
     ],
     "defaultRoles": [
       { "code": "PROBE_VIEWER", "label": "Probe viewer", "permissions": ["probe.items.item.read"] },
-      { "code": "PROBE_WRITER", "label": "Probe writer", "permissions": ["probe.items.item.create"] },
-      { "code": "PROBE_GROUP_READER", "label": "Probe group reader", "permissions": ["probe.records.group.read"] }
+      { "code": "PROBE_WRITER", "label": "Probe writer", "permissions": ["probe.items.item.create", "probe.records.record.approve"] },
+      { "code": "PROBE_GROUP_READER", "label": "Probe group reader", "permissions": ["probe.records.group.read"] },
+      { "code": "PROBE_NODE", "label": "Probe node", "permissions": ["probe.records.group.read", "probe.records.record.read"] }
     ]
   }
 }

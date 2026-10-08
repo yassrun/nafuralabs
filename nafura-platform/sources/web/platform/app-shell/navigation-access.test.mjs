@@ -9,7 +9,7 @@ const sections = [
     label: 'Administration',
     items: [
       { id: 'roles', label: 'Rôles', route: '/administration/roles', permission: 'tenant.roles.read' },
-      { id: 'audit', label: 'Audit', route: '/administration/audit', permission: 'administration.audit.read' },
+      { id: 'audit', label: 'Audit', route: '/administration/audit', permission: 'administration.audit.log.read' },
     ],
   },
   { id: 'demo', label: 'Démo', items: [{ id: 'notes', label: 'Notes', route: '/demo/notes', permission: 'demo.notes.note.read' }] },

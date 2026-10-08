@@ -6,8 +6,10 @@ import ma.nafura.platform.framework.service.crud.CrudAuditHook;
 import org.springframework.stereotype.Component;
 
 /**
- * JpaCrudService path. The Hibernate interceptor covers custom {@code save()}
- * calls; {@link AuditableCapture} dedupes both in the same transaction.
+ * Audit hook for {@link ma.nafura.platform.framework.record.RecordController}
+ * (and the deprecated {@code JpaCrudService} path still used by Sektor).
+ * {@link AuditableHibernateInterceptor} covers other {@code save()} calls;
+ * {@link AuditableCapture} dedupes both in the same transaction.
  */
 @Component
 public class CrudAuditHookImpl implements CrudAuditHook {

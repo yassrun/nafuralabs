@@ -1,5 +1,6 @@
 /**
- * Anatomy Page Classes
+ * Héritage Sektor — ne pas utiliser pour de nouveaux écrans.
+ * Archétypes du host : voir docs/UI.md.
  */
 
 export { FeaturePageClass } from './feature-page.class';
@@ -7,7 +8,7 @@ export { FeatureListPageClass } from './feature-list-page.class';
 export type { ListPageRouteConfig, ListPageDeleteConfig } from './feature-list-page.class';
 export { FeatureDetailPageClass } from './feature-detail-page.class';
 
-// Config-driven approach (recommended for new pages)
+// Config-driven (héritage Sektor — préférer les archétypes du host)
 export {
   ConfigDrivenListingPage,
   ConfigDrivenListingPageImports,

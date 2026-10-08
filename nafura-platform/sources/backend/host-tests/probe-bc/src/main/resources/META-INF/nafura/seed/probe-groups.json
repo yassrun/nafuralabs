@@ -7,7 +7,8 @@
       "key": ["code"],
       "records": [
         { "code": "G1", "name": "Group one" },
-        { "code": "G2", "name": "Group two" }
+        { "code": "G2", "name": "Group two" },
+        { "code": "CHILD", "name": "Child of one", "parentId": { "$ref": "ProbeGroup", "code": "G1" } }
       ]
     }
   ]

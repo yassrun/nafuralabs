@@ -52,9 +52,7 @@ test("approbation-plier-arbre", () => {
     true
   );
   assert.equal(
-    exists(
-      "nafura-platform/sources/web/app/approbation/workflows/workflow-listing/workflow-listing.page.ts"
-    ),
+    exists("nafura-platform/sources/web/app/approbation/workflows/workflows.listing.ts"),
     true
   );
   assert.equal(

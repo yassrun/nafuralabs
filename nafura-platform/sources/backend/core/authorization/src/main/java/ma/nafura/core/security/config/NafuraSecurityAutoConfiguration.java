@@ -5,6 +5,7 @@ import ma.nafura.platform.authorization.apikey.ApiKeyProperties;
 import ma.nafura.platform.authorization.apikey.ApiKeyService;
 import ma.nafura.platform.authorization.repository.UserRoleRepository;
 import ma.nafura.platform.tenancy.repository.TenantMembershipRepository;
+import ma.nafura.platform.framework.scope.DataScope;
 import ma.nafura.platform.framework.record.RecordAccess;
 import ma.nafura.platform.tenancy.repository.TenantDomainRepository;
 import org.springframework.beans.factory.ObjectProvider;
@@ -120,8 +121,9 @@ public class NafuraSecurityAutoConfiguration {
     public PermissionEnforcementFilter permissionEnforcementFilter(
             List<HandlerMapping> handlerMappings,
             ObjectProvider<TenantDomainRepository> tenantDomains,
-            ObjectProvider<RecordAccess> recordAccess) {
-        return new PermissionEnforcementFilter(handlerMappings, tenantDomains, recordAccess);
+            ObjectProvider<RecordAccess> recordAccess,
+            ObjectProvider<DataScope> dataScope) {
+        return new PermissionEnforcementFilter(handlerMappings, tenantDomains, recordAccess, dataScope);
     }
 }
 

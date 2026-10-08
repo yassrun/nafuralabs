@@ -39,6 +39,9 @@ ${ConfigDrivenDetailPageStyles}
   }
 `;
 
+/**
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser un écran spécifique déclaré (`spec.screens`) en attendant un archétype.
+ */
 @Directive()
 export abstract class ConfigDrivenDocumentWorkspacePage<TItem> extends ConfigDrivenDetailPage<TItem> {
   protected readonly translate = inject(TranslateService);

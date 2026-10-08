@@ -96,19 +96,15 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
     @Transactional
     public EmailTemplate create(EmailTemplateCreateRequest request) {
         UUID tenantId = Boolean.TRUE.equals(request.isSystem()) ? null : TenantContext.getTenantId();
-        OffsetDateTime now = OffsetDateTime.now();
-        EmailTemplate t = EmailTemplate.builder()
-                .tenantId(tenantId)
-                .code(request.code())
-                .name(request.name())
-                .subject(request.subject())
-                .htmlBody(request.htmlBody())
-                .textBody(request.textBody())
-                .entityType(request.entityType())
-                .isSystem(request.isSystem() != null ? request.isSystem() : false)
-                .createdAt(now)
-                .updatedAt(now)
-                .build();
+        EmailTemplate t = new EmailTemplate();
+        t.setTenantId(tenantId);
+        t.setCode(request.code());
+        t.setName(request.name());
+        t.setSubject(request.subject());
+        t.setHtmlBody(request.htmlBody());
+        t.setTextBody(request.textBody());
+        t.setEntityType(request.entityType());
+        t.setIsSystem(request.isSystem() != null ? request.isSystem() : false);
         return repository.save(t);
     }
 
@@ -120,7 +116,6 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
         t.setSubject(request.subject());
         t.setHtmlBody(request.htmlBody());
         t.setTextBody(request.textBody());
-        t.setUpdatedAt(OffsetDateTime.now());
         return repository.save(t);
     }
 

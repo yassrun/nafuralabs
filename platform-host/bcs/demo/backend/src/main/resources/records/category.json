@@ -6,5 +6,6 @@
     "name": { "label": "Catégorie", "filterable": true, "sortable": true },
     "parentId": { "label": "Parent", "type": "relation", "target": "demo.category", "display": "name", "filterable": true },
     "description": { "label": "Description" }
-  }
+  },
+  "scope": { "node": true, "parent": "parentId" }
 }

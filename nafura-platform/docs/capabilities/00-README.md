@@ -40,5 +40,6 @@ lab / check / chemins UI
 | `cap.audit` | [audit.md](audit.md) |
 | `cap.iam` | [iam.md](iam.md) |
 | `cap.ai` | [ai.md](ai.md) |
+| `cap.approvals` | [approvals.md](approvals.md) |
 
 Les autres ids du catalogue n’ont pas encore de fichier.

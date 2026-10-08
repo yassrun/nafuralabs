@@ -46,6 +46,8 @@ export const ConfigDrivenWizardPageStyles = `
  * Subclass must provide:
  * - config: Wizard page configuration
  * - handleSubmit: Final submit handler
+ *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser `RecordPageConfig.createLayout` en `steps`.
  */
 @Directive()
 export abstract class ConfigDrivenWizardPage extends BasePageClass {

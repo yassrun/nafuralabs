@@ -189,18 +189,18 @@ public class TenantPresetOrchestratorService {
             .anyMatch(s -> code.equalsIgnoreCase(s.getCode()))) {
             return;
         }
-        numberingSequenceRepository.save(NumberingSequence.builder()
-            .tenantId(tenantId)
-            .code(code)
-            .name(name)
-            .prefix(prefix)
-            .separator("-")
-            .yearFormat("YYYY")
-            .padLength(3)
-            .incrementBy(1)
-            .currentNumber(0L)
-            .resetPolicy("YEARLY")
-            .build());
+        NumberingSequence sequence = new NumberingSequence();
+        sequence.setTenantId(tenantId);
+        sequence.setCode(code);
+        sequence.setName(name);
+        sequence.setPrefix(prefix);
+        sequence.setSeparator("-");
+        sequence.setYearFormat("YYYY");
+        sequence.setPadLength(3);
+        sequence.setIncrementBy(1);
+        sequence.setCurrentNumber(0L);
+        sequence.setResetPolicy("YEARLY");
+        numberingSequenceRepository.save(sequence);
     }
 
     private void persistMeta(UUID tenantId, ApplyPresetRequest request) throws Exception {

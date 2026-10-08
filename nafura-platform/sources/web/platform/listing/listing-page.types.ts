@@ -1,6 +1,9 @@
+import type { Type } from '@angular/core';
+
 import type { ListingEmptyState, ListingFlatFeatures } from '../../lib/anatomy/components/organisms/listing-flat';
 import type { ListingTreeActionLabels } from '../../lib/anatomy/components/organisms/listing-tree';
 import type { PageAction, PageForm, PageRequest, Row } from '../page-action';
+import type { ListingHeaderLoader } from './listing-header.context';
 import type { RecordFilter } from './listing-properties';
 
 export type { PageAction, PageForm, PageRequest, Row };
@@ -86,6 +89,13 @@ export interface ListingPageConfig<T = Row> {
   actions?: ListingAction<T>[];
   /** Route opened by a click on a row (its checkbox selects it). */
   open?: (item: T) => string;
+  /**
+   * Declared screen (`placement: "listing-header"`) between the toolbar and the rows.
+   * Prefer {@link loadHeader} so the chunk loads on demand.
+   */
+  header?: Type<unknown>;
+  /** Lazy loader of the header screen component. */
+  loadHeader?: ListingHeaderLoader;
 }
 
 /** A list action is a {@link PageAction} that may target the selected row. */

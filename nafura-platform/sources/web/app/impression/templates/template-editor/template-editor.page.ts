@@ -394,7 +394,20 @@ export class TemplateEditorPage implements OnInit, OnDestroy, CanComponentDeacti
   }
 
   private async loadTemplate(id: string | null): Promise<void> {
-    if (!id || id === 'new') {
+    if (id === 'new') {
+      const dialogRef = this.dialog.open(CreateTemplateDialogComponent, {
+        width: '520px',
+        maxWidth: '95vw',
+      });
+      const result = await firstValueFrom(dialogRef.afterClosed()) as PrintTemplate | undefined;
+      if (result?.id) {
+        await this.router.navigate(['/administration/documents/templates', result.id], { replaceUrl: true });
+      } else {
+        await this.router.navigate(['/administration/documents/templates']);
+      }
+      return;
+    }
+    if (!id) {
       await this.router.navigate(['/administration/documents/templates']);
       return;
     }

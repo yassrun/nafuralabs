@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The caller's approval inbox. Open to every member: the service lists only the steps of the caller's
- * roles in the current tenant, and only a holder of a step's role may decide it.
+ * The caller's approval inbox. Open to every member: the service lists only the steps whose
+ * permission the caller holds in the current organisation; the decision re-checks that permission.
  */
 @RestController
 @RequestMapping("/api/v1/platform/collaboration/approvals")

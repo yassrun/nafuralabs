@@ -13,9 +13,11 @@
 
 **Capture.** `@Auditable(entityType, trackedFields)` sur l’entité : création, modification, suppression et transition → `audit_events`. Si seuls les champs tracked changent et que c’est uniquement `status`, l’action émise est `status_change` (sinon `update`). Les écritures passent par un flush fiable (`flushPending`) pour ne pas perdre d’événements en fin de requête.
 
+**Branchements CRUD.** Un seul chemin plateforme : `RecordController` → `CrudAuditHook`. L’ancien branchement `JpaCrudService` + `JpaCrudServiceAuditPostProcessor` est déprécié (Sektor uniquement). `AuditableHibernateInterceptor` couvre les `save()` hors contrôleur ; `AuditableCapture` déduplique dans la même transaction.
+
 **Timeline fiche.** Section `kind: 'audit'` ([UI.md](../UI.md)). Lecture `GET /api/v1/platform/collaboration/audit/timeline` avec `@HostRecordGate` (même contrat que commentaires / pièces jointes) : permission du record (lecture pour voir), clé d’entité = `lifecycle.entity` sinon dernier segment du mapping.
 
-**Journal admin.** Permission `administration.audit.read` : liste tous les événements du tenant. « Voir l’entité » résout l’URL via `spec.records` du manifeste du BC (comme les notifications). Détail d’événement exposé en UI (champs / valeurs utiles, pas une ligne opaque).
+**Journal admin.** `ReadOnlyRecordController` sur `GET /api/v1/platform/collaboration/audit/log` (`records/audit-event.json`, `nf-listing-page`). Permission `administration.audit.log.read`. « Voir l’entité » résout l’URL via `spec.records` du manifeste du BC (comme les notifications). Détail d’événement en fiche (`/administration/audit/:id`).
 
 **Export.** Export CSV du journal (parcours admin).
 
@@ -25,7 +27,7 @@
 
 - BC : annoter les entités métier pertinentes `@Auditable` ; ne pas écrire un second journal.
 - Fiche : section `kind: 'audit'` — pas de composant parallèle.
-- Admin : une permission `administration.audit.read` pour le journal global ; la timeline fiche reste sur la permission du record.
+- Admin : une permission `administration.audit.log.read` pour le journal global ; la timeline fiche reste sur la permission du record.
 
 ## Hors scope
 

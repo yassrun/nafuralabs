@@ -52,7 +52,10 @@ export interface RecordPropertyView {
 export type RecordProperties = Record<string, RecordPropertyView>;
 
 /** The filter grammar of the API: a criterion `{ property: { operator: value } }` or `and` / `or` of them. */
-export type RecordFilter = { and: RecordFilter[] } | { or: RecordFilter[] } | { [property: string]: Record<string, unknown> };
+export type RecordFilter =
+  | { and: RecordFilter[] }
+  | { or: RecordFilter[] }
+  | { readonly [property: string]: Record<string, unknown> };
 
 /** Operators the grammar accepts, per property type, as the builder names them. */
 const BUILDER_OPERATORS: Record<PropertyType, FilterOperator[]> = {

@@ -8,5 +8,5 @@ import java.util.UUID;
  */
 public interface ApprovalGateway {
 
-    void request(String entityType, UUID entityId, String title, String approverRole);
+    void request(String entityType, UUID entityId, String title, String approverPermission);
 }

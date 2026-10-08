@@ -20,10 +20,10 @@ CREATE TABLE IF NOT EXISTS workflow_steps (
     workflow_template_id  UUID NOT NULL,
     step_number           INT NOT NULL,
     name                  VARCHAR(200) NOT NULL,
-    approver_role         VARCHAR(80) NOT NULL,
+    approver_permission   VARCHAR(120) NOT NULL,
     "condition"           TEXT,
     timeout_hours         INT,
-    escalation_role       VARCHAR(80),
+    escalation_permission VARCHAR(120),
     created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 );

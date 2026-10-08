@@ -26,12 +26,12 @@ public class WorkflowStepDto {
     private String name;
 
     @NotBlank
-    private String approverRole;
+    private String approverPermission;
 
     @Min(1)
     private Integer timeoutHours;
 
-    private String escalationRole;
+    private String escalationPermission;
 
     private String condition;
 }

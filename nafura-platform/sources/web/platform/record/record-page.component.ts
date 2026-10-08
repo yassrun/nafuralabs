@@ -3,7 +3,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
+  Type,
   computed,
+  forwardRef,
   inject,
   input,
   signal,
@@ -35,7 +37,11 @@ import { HOST_CAPABILITIES } from '../host/host-capabilities';
 import { ruleRefusal } from '../page-action';
 import { RecordCollaborationComponent } from './record-collaboration.component';
 import type { ListingPageConfig, Row } from '../listing/listing-page.types';
+import type { RecordProperties } from '../listing/listing-properties';
+import { resolveRecordField } from './form-field-from-property';
 import type { RecordAction, RecordField, RecordPageConfig, RecordSection } from './record-page.types';
+import { RECORD_SECTION, type RecordSectionContext, type ScreenLoader } from './record-section.context';
+import { RecordScreenHostComponent } from './record-screen-host.component';
 
 interface LifecycleState {
   id: string;
@@ -46,6 +52,8 @@ interface LifecycleDeclaration {
   entity?: string;
   initial: string;
   editable?: string[];
+  /** Per-status allow-list; the form locks every other field. */
+  editableFields?: Record<string, string[]>;
   states: LifecycleState[];
 }
 interface Transition {
@@ -66,6 +74,9 @@ interface SectionView {
   audit: boolean;
   accept: string[];
   maxSizeMb?: number;
+  screen?: Type<unknown>;
+  loadScreen?: ScreenLoader;
+  screenPending?: boolean;
 }
 interface PanelView {
   id: string;
@@ -96,6 +107,14 @@ interface PanelView {
     ListingPageComponent,
     RecordCollaborationComponent,
     AuditTimelineComponent,
+    RecordScreenHostComponent,
+  ],
+  providers: [
+    {
+      provide: RECORD_SECTION,
+      useFactory: (page: RecordPageComponent): RecordSectionContext => page.sectionContext(),
+      deps: [forwardRef(() => RecordPageComponent)],
+    },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -173,6 +192,7 @@ interface PanelView {
                     <nf-form
                       [fields]="section.fields"
                       [values]="formValues()"
+                      [record]="mergedRecord()"
                       [columns]="section.columns"
                       layout="grid"
                       [lookups]="lookups()"
@@ -199,8 +219,12 @@ interface PanelView {
                       [entityId]="audited"
                       [refreshToken]="auditRefresh()" />
                   }
-                  @if (section.listing; as listing) {
+                  @if (section.screen || section.loadScreen) {
+                    <nf-record-screen-host [screen]="section.screen" [loadScreen]="section.loadScreen" />
+                  } @else if (section.listing; as listing) {
                     <nf-listing-page class="nf-record__listing" [listing]="listing" [embedded]="true" />
+                  } @else if (section.screenPending) {
+                    <p class="nf-record__after-save">{{ 'record.availableAfterSave' | translate }}</p>
                   } @else if (!section.fields.length && !(section.collaboration && recordId()) && !(section.audit && recordId())) {
                     <p class="nf-record__after-save">{{ 'record.availableAfterSave' | translate }}</p>
                   }
@@ -288,6 +312,8 @@ export class RecordPageComponent {
   /** Edits not saved yet. */
   readonly draft = signal<Row>({});
   readonly lookups = signal<LookupContext>({});
+  /** `GET {endpoint}/properties` — used to deduce form field types when omitted. */
+  readonly properties = signal<RecordProperties>({});
   readonly lifecycle = signal<LifecycleDeclaration | null>(null);
   readonly transitions = signal<Transition[]>([]);
   readonly loading = signal(true);
@@ -318,10 +344,46 @@ export class RecordPageComponent {
 
   readonly editable = computed(() => {
     if (this.creating()) return this.allowed(this.config().permissions.create);
-    const editableStates = this.lifecycle()?.editable;
-    const status = String(this.record()?.['status'] ?? '');
-    return this.canUpdate() && (!editableStates?.length || editableStates.includes(status));
+    const saved = this.record();
+    if (saved && this.config().readonlyWhen?.(saved as never)) return false;
+    return this.canUpdate() && this.editableState();
   });
+
+  /** Merged record (saved + draft) for screen sections and field conditions. */
+  readonly mergedRecord = computed((): Row => ({ ...(this.record() ?? {}), ...this.draft() }));
+
+  /**
+   * Stable key of visibility / lock / required outcomes. Panels rebuild only when a
+   * condition flips (status, country, …), not on every keystroke (avoids NG0100 / focus loss).
+   */
+  private readonly conditionKey = computed(() => {
+    const record = this.mergedRecord();
+    const lifecycle = this.lifecycle();
+    const status = String(record['status'] ?? '');
+    const parts: string[] = [`status:${status}`];
+    const allowed = lifecycle?.editableFields?.[status];
+    if (allowed) parts.push(`ef:${allowed.join(',')}`);
+    for (const section of this.allSections()) {
+      if (section.visible) parts.push(`s:${section.title ?? ''}:${section.visible(record) !== false}`);
+      for (const field of section.fields ?? []) {
+        if (field.visible) parts.push(`v:${field.key}:${field.visible(record) !== false}`);
+        if (field.locked) parts.push(`l:${field.key}:${!!field.locked(record)}`);
+        if (field.requiredWhen) parts.push(`r:${field.key}:${!!field.requiredWhen(record)}`);
+      }
+    }
+    return parts.join('|');
+  });
+
+  /** Injection surface for `kind: 'screen'` section components. */
+  sectionContext(): RecordSectionContext {
+    return {
+      record: this.mergedRecord,
+      saved: this.record.asReadonly(),
+      editable: this.editable,
+      patch: (values) => this.patch(values as Row),
+      reload: () => this.load(),
+    };
+  }
 
   readonly header = computed(() => {
     const config = this.config();
@@ -341,13 +403,17 @@ export class RecordPageComponent {
   readonly layoutKind = computed(() => this.layout()?.kind ?? 'sections');
 
   /** Panels: one for sections, one per tab or step. Related lists exist once the record is saved.
-   *  Rebuilt only when another record is shown, so saving keeps the forms (and the focus) in place. */
+   *  Structure rebuilds when the record id or a field/section condition flips — not on every keystroke. */
   private readonly recordId = computed(() => (this.record()?.['id'] as string | undefined) ?? null);
   readonly panels = computed((): PanelView[] => {
+    this.conditionKey();
     const layout = this.layout();
-    const record = this.recordId() ? untracked(() => this.record()) : null;
+    const saved = this.recordId() ? untracked(() => this.record()) : null;
+    const draft = untracked(() => this.mergedRecord());
     const view = (sections: RecordSection[]) =>
-      sections.map((section) => this.sectionView(section, record)).filter((section): section is SectionView => section != null);
+      sections
+        .map((section) => this.sectionView(section, saved, draft))
+        .filter((section): section is SectionView => section != null);
     if (!layout || layout.kind === 'sections') return [{ id: 'main', label: '', sections: view(layout?.sections ?? []) }];
     if (layout.kind === 'tabs') return layout.tabs.map((tab) => ({ id: tab.id, label: tab.label, sections: view(tab.sections) }));
     return layout.steps.map((step) => ({ id: step.id, label: step.label, sections: view(step.sections), states: step.states }));
@@ -417,17 +483,19 @@ export class RecordPageComponent {
     this.loading.set(true);
     this.failed.set(false);
     try {
-      const [record, lookups, lifecycle] = await Promise.all([
+      const [record, lookups, lifecycle, properties] = await Promise.all([
         this.id() ? firstValueFrom(this.http.get<Row>(this.url(`${config.endpoint}/${this.id()}`))) : Promise.resolve(null),
         this.loadLookups(),
         config.lifecycle ? firstValueFrom(this.http.get<LifecycleDeclaration>(this.url(`${config.endpoint}/lifecycle`))) : Promise.resolve(null),
+        firstValueFrom(this.http.get<RecordProperties>(this.url(`${config.endpoint}/properties`))).catch(() => ({})),
       ]);
       if (!this.id() && !this.allowed(config.permissions.create)) {
         this.toast.warning(this.translate.instant('Access denied'));
         void this.router.navigateByUrl(config.back.route);
         return;
       }
-      this.lookups.set(lookups);
+      this.properties.set(properties);
+      this.lookups.set({ ...lookups, ...(await this.relationLookups(properties, lookups)) });
       this.lifecycle.set(lifecycle);
       this.show(record);
       await this.loadTransitions();
@@ -468,7 +536,7 @@ export class RecordPageComponent {
       return;
     }
     const config = this.config();
-    const body = { ...(config.defaults ?? {}), ...(this.record() ?? {}), ...this.draft() };
+    const body = this.saveBody();
     this.busy.set(true);
     try {
       if (this.creating()) {
@@ -623,13 +691,74 @@ export class RecordPageComponent {
     return Object.fromEntries(loaded);
   }
 
-  private sectionView(section: RecordSection, record: Row | null): SectionView | null {
+  /**
+   * For fields without an explicit type whose property is a `relation`,
+   * `resolveRecordField` sets `lookupKey` to the field key — load `/options` if not already in lookups.
+   */
+  private async relationLookups(properties: RecordProperties, existing: LookupContext): Promise<LookupContext> {
+    const needed = new Map<string, string>();
+    for (const field of this.configFields()) {
+      if (field.type || field.lookupKey || field.options?.length) continue;
+      const property = properties[field.field] ?? properties[field.key];
+      if (property?.type !== 'relation' || !property.options || existing[field.key]) continue;
+      needed.set(field.key, property.options);
+    }
+    const loaded = await Promise.all(
+      [...needed.entries()].map(async ([key, path]) => {
+        const options = await firstValueFrom(this.http.get<{ value: unknown; label: unknown }[]>(this.url(path))).catch(() => []);
+        return [key, options.map((option) => ({ key: option.value as string, value: String(option.label ?? '') }))] as const;
+      }),
+    );
+    return Object.fromEntries(loaded);
+  }
+
+  private allSections(): RecordSection[] {
+    const layout = (this.creating() && this.config().createLayout) || this.config().layout;
+    if (!layout || layout.kind === 'sections') return layout?.sections ?? [];
+    if (layout.kind === 'tabs') return layout.tabs.flatMap((tab) => tab.sections);
+    return layout.steps.flatMap((step) => step.sections);
+  }
+
+  private configFields(): RecordField[] {
+    return this.allSections().flatMap((section) => section.fields ?? []);
+  }
+
+  /** Body for create/update: drop `computed` keys (display only, never stored). */
+  private saveBody(): Row {
+    const config = this.config();
+    const body: Row = { ...(config.defaults ?? {}), ...(this.record() ?? {}), ...this.draft() };
+    for (const field of this.configFields()) {
+      if (field.type === 'computed') {
+        delete body[field.field];
+        delete body[field.key];
+      }
+    }
+    return body;
+  }
+
+  private sectionView(section: RecordSection, saved: Row | null, draft: Row): SectionView | null {
+    if (section.visible && section.visible(draft) === false) return null;
     const columns = section.columns ?? 2;
-    const fields = (section.fields ?? []).map((field: RecordField) => ({
-      ...field,
-      colSpan: field.wide || field.type === 'textarea' || field.type === 'richtext' ? columns : field.colSpan,
-    }));
-    const kind = section.kind ?? (section.listing ? undefined : 'fields');
+    const properties = this.properties();
+    const status = String(draft['status'] ?? '');
+    const allowed = this.lifecycle()?.editableFields?.[status];
+    const fields = (section.fields ?? [])
+      .filter((field) => !field.visible || field.visible(draft) !== false)
+      .map((field: RecordField) => {
+        const resolved = resolveRecordField(field, properties);
+        const locked =
+          !!field.locked?.(draft) ||
+          (allowed != null && !allowed.includes(field.field) && !allowed.includes(field.key));
+        const required = !!field.required || !!field.requiredWhen?.(draft);
+        return {
+          ...resolved,
+          required,
+          disabled: !!resolved.disabled || locked,
+          readonly: !!resolved.readonly || resolved.type === 'computed',
+          colSpan: field.wide || resolved.type === 'textarea' || resolved.type === 'richtext' ? columns : field.colSpan,
+        };
+      });
+    const kind = section.kind ?? (section.listing ? undefined : section.loadScreen || section.screen ? 'screen' : 'fields');
     if (kind === 'attachments' || kind === 'comments' || kind === 'audit') {
       if (!this.capabilityOn(kind)) return null;
       return {
@@ -644,16 +773,48 @@ export class RecordPageComponent {
         maxSizeMb: section.maxSizeMb,
       };
     }
+    if (kind === 'screen') {
+      const requiresSaved = section.requiresSaved !== false;
+      if (requiresSaved && !saved) {
+        return {
+          title: section.title,
+          description: section.description,
+          fields: [],
+          columns,
+          listing: null,
+          collaboration: null,
+          audit: false,
+          accept: section.accept ?? ['*'],
+          maxSizeMb: section.maxSizeMb,
+          screenPending: true,
+        };
+      }
+      return {
+        title: section.title,
+        description: section.description,
+        fields: [],
+        columns,
+        listing: null,
+        collaboration: null,
+        audit: false,
+        accept: section.accept ?? ['*'],
+        maxSizeMb: section.maxSizeMb,
+        screen: section.screen,
+        loadScreen: section.loadScreen,
+      };
+    }
+    const requiresSaved = section.requiresSaved !== false;
     return {
       title: section.title,
       description: section.description,
       fields,
       columns,
-      listing: section.listing && record ? section.listing(record) : null,
+      listing: section.listing && (!requiresSaved || saved) && saved ? section.listing(saved) : null,
       collaboration: null,
       audit: false,
       accept: section.accept ?? ['*'],
       maxSizeMb: section.maxSizeMb,
+      screenPending: !!(section.listing && requiresSaved && !saved),
     };
   }
 
@@ -801,8 +962,11 @@ export class RecordPageComponent {
   }
 
   private editableState(): boolean {
-    const editableStates = this.lifecycle()?.editable;
-    return !editableStates?.length || editableStates.includes(String(this.record()?.['status'] ?? ''));
+    const lifecycle = this.lifecycle();
+    const status = String(this.record()?.['status'] ?? '');
+    if (lifecycle?.editableFields && status in lifecycle.editableFields) return true;
+    const editableStates = lifecycle?.editable;
+    return !editableStates?.length || editableStates.includes(status);
   }
 
   private allowed(permission?: string): boolean {

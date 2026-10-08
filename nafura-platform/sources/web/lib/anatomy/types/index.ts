@@ -509,7 +509,10 @@ export interface ColumnConfig {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Form field type.
+ * Form field type (`nf-form`, `RecordPageConfig`, `PageForm`).
+ *
+ * Moroccan atoms: `money`, `ice`, `rib`, `phone-ma`, `city-ma`.
+ * When omitted on a record field, the type is taken from `GET {endpoint}/properties`.
  */
 export type FormFieldType =
   | 'text'
@@ -526,7 +529,16 @@ export type FormFieldType =
   | 'file'
   | 'autocomplete'
   | 'richtext'
-  | 'custom';
+  | 'money'
+  | 'ice'
+  | 'rib'
+  | 'phone-ma'
+  | 'city-ma'
+  /** Display-only value from {@link FormFieldConfig.compute}; never submitted. */
+  | 'computed';
+
+/** Display format of a `computed` field. */
+export type ComputedFieldFormat = 'money' | 'number' | 'date' | 'percent';
 
 /**
  * Form field configuration.
@@ -538,8 +550,11 @@ export interface FormFieldConfig {
   /** Field label */
   label: string;
 
-  /** Field type */
-  type: FormFieldType;
+  /**
+   * Field type. Optional on a record field when the page knows `/properties`:
+   * the property type is applied (`money` → `money`, `relation` → `select`, …).
+   */
+  type?: FormFieldType;
 
   /** Field name in form data */
   field: string;
@@ -565,6 +580,12 @@ export interface FormFieldConfig {
   /** Lookup key for dynamic options */
   lookupKey?: string;
 
+  /**
+   * Currency code for `money` (e.g. `MAD`). Falls back to the property's
+   * `currency` from `/properties`, then `MAD`.
+   */
+  currency?: string;
+
   /** Validation rules */
   validation?: {
     min?: number;
@@ -582,6 +603,15 @@ export interface FormFieldConfig {
 
   /** `richtext` toolbar. `basic` (default): bold, italic, lists, link. `full` adds headings and quote. */
   toolbar?: 'basic' | 'full';
+
+  /**
+   * `computed` only: pure function of the current record (draft). Display only;
+   * the value is never sent. Persist via the server (`@Formula`, `beforeSave`).
+   */
+  compute?: (record: Record<string, unknown>) => unknown;
+
+  /** `computed` only: how to render the result. */
+  format?: ComputedFieldFormat;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -589,13 +619,11 @@ export interface FormFieldConfig {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Extended form field type for detail pages.
+ * Extended form field type for detail pages (`nf-entity-detail`).
  *
- * Moroccan-specific atoms (rendered by `<nf-entity-detail>`):
- * - `ice`       — 15-digit ICE (Identifiant Commun de l'Entreprise) with checksum.
- * - `rib`       — 24-digit Moroccan RIB.
- * - `phone-ma`  — Moroccan phone (+212 6/7 XX XX XX XX, stored as E.164).
- * - `money-ma`  — Number stored as raw value, rendered with fr-MA formatting + MAD suffix.
+ * @deprecated Prefer {@link FormFieldType} via `nf-form` / `RecordPageConfig`.
+ * Kept for Sektor until [02 — fiche unique](../../../specs/revue-plateforme/02-fiche-unique.md).
+ * Moroccan atoms on the host: use `money`, `ice`, `rib`, `phone-ma`, `city-ma` on `FormFieldType`.
  */
 export type DetailFieldType =
   | 'text'

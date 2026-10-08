@@ -1,0 +1,15 @@
+{
+  "entity": "administration.email-template",
+  "search": ["code", "name", "subject"],
+  "properties": {
+    "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "subject": { "label": "Objet", "filterable": true, "sortable": true },
+    "typeLabel": { "label": "Type", "type": "select", "options": ["Système", "Personnalisé"], "filterable": true },
+    "isSystem": { "label": "Système", "type": "boolean", "filterable": true },
+    "entityType": { "label": "Type d'entité", "filterable": true, "sortable": true },
+    "updatedAt": { "label": "Modifié le", "filterable": true, "sortable": true },
+    "createdBy": { "label": "Créé par", "type": "person", "filterable": true },
+    "createdAt": { "label": "Créé le", "filterable": true, "sortable": true }
+  }
+}

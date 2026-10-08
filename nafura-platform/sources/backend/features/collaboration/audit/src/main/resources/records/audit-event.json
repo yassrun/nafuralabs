@@ -1,0 +1,12 @@
+{
+  "entity": "administration.audit-event",
+  "search": ["actor", "details", "entityType", "entityId", "action"],
+  "properties": {
+    "eventAt": { "label": "Date", "filterable": true, "sortable": true },
+    "actor": { "label": "Acteur", "filterable": true, "sortable": true },
+    "action": { "label": "Action", "filterable": true, "sortable": true },
+    "entityType": { "label": "Type d'entité", "filterable": true, "sortable": true },
+    "entityId": { "label": "Identifiant", "filterable": true, "sortable": true },
+    "details": { "label": "Détails", "filterable": true }
+  }
+}

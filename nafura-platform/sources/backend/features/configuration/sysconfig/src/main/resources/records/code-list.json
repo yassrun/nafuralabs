@@ -1,0 +1,11 @@
+{
+  "entity": "settings.code-list",
+  "search": ["code", "name", "description"],
+  "properties": {
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "description": { "label": "Description" },
+    "createdBy": { "label": "Créé par", "type": "person", "filterable": true },
+    "createdAt": { "label": "Créé le", "filterable": true, "sortable": true }
+  }
+}

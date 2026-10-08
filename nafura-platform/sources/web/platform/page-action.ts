@@ -37,6 +37,8 @@ export interface PageForm<T = Row> {
   values?: (item?: T) => Record<string, unknown>;
   /** Form values → request body (default: the values). */
   body?: (values: Record<string, unknown>, item?: T) => unknown;
+  /** Options of fields declared with `lookupKey`: `{ members: '/api/…/options' }` (`[{ value, label }]`). */
+  lookups?: Record<string, string>;
 }
 
 export interface PageRequest {

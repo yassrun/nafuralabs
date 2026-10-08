@@ -2,7 +2,7 @@
 
 > Revue sur trois axes : fonctionnalités et maturité, homogénéité et UX, intégration et extensibilité.
 > Faite en lisant la doc (`docs/`, `ROADMAP.md`, `capabilities.json`) et le code (`RecordController`, `Lifecycle`, archétypes liste et fiche, BC démo, `lib/anatomy`). Rien n'a été lancé.
-> Les chantiers qui en découlent sont les specs 01 à 10 de ce dossier, à affecter une par une.
+> Les chantiers qui en découlent sont les specs 01 à 11 de ce dossier, à affecter une par une.
 
 ## Synthèse
 
@@ -60,6 +60,7 @@ Cause commune : `lib/anatomy` porte l'ancienne architecture (celle de Sektor), e
 - **Fiche** : pas de champ affiché ou verrouillé selon le record, pas de valeur calculée à l'affichage (spec 08).
 - **Écrans d'administration** : un comportement de liste différent de celui des écrans métier (D1, D2).
 - Mobile : règle posée (UI.md), pas de campagne de vérification.
+- **Formulaires et design system** (ajout 2026-10-08) : grille limitée à 1 ou 2 colonnes, pas de groupes dans une section, deux gabarits de champ, deux sources de jetons, thème Material `indigo-pink` sans lien avec les jetons (spec 11).
 
 ## 3. Intégration et extensibilité
 
@@ -99,9 +100,10 @@ Chaque option enrichit un artefact existant (règle 3 d'AGENTS.md). Aucune ne cr
 | 06 | [Points d'accroche du record](06-points-accroche-record.md) | Extensibilité | M | back | — |
 | 07 | [Section d'écran dans une fiche ou une liste](07-section-ecran.md) | Extensibilité | M | front | — |
 | 08 | [Champs conditionnels et calculés](08-champs-conditionnels.md) | Extensibilité / UX | S | front | — |
-| 09 | [Marque et libellés du produit](09-marque-et-libelles-produit.md) | Extensibilité / UX | M | front | — |
+| 09 | [Marque et libellés du produit](09-marque-et-libelles-produit.md) | Extensibilité / UX | M | front | 11 (lot 1) |
 | 10 | [Approbation par permission](10-approbation-par-permission.md) | Maturité | M | back + front | — |
+| 11 | [Formulaires et design system](11-formulaires-et-design-system.md) | Homogénéité / UX | L | front | — |
 
-Ordre conseillé : 04 → 03 → 06 → 05 → 01 → 07 → 02 → 08 → 10 → 09. Les specs 03, 04, 06 et 08 peuvent partir en parallèle.
+Ordre conseillé : 04 → 03 → 06 → 05 → 01 → 07 → 02 → 08 → 10 → 11 → 09. Les specs 03, 04, 06 et 08 peuvent partir en parallèle.
 
 Chaque spec suit le gabarit de `specs/manques-plateforme/` (Objectif, Besoin, Existant, Contrat en lots, Règles, Vérification, Critères d'acceptation, Documentation). Elle est supprimée une fois livrée ; le comportement passe alors dans `docs/`.

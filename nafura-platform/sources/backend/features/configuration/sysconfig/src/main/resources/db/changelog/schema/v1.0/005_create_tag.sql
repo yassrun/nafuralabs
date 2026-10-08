@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS tag (
     code           VARCHAR(50) NOT NULL,
     name           VARCHAR(200) NOT NULL,
     color          VARCHAR(20),
+    created_by     UUID,
+    updated_by     UUID,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );

@@ -20,7 +20,7 @@ public interface ApprovalService {
 
     void reject(UUID approvalRequestId, String comment);
 
-    /** Pending approval requests for the current user (where their role matches current step). FIFO. */
+    /** Pending approval requests for the current user (where they hold the step permission). FIFO. */
     List<ApprovalDashboardItem> getPendingForCurrentUser();
 
     /** Count of pending approvals for the current user. */

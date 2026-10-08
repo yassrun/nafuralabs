@@ -4,12 +4,18 @@ import type { RecordPageConfig } from '@platform/platform/record';
 const REQUESTS = '/api/v1/demo/purchase-requests';
 const route = (id: string) => `/demo/purchase-requests/${id}`;
 const money = (value: unknown) => (value == null ? '—' : `${Number(value).toLocaleString('fr-MA', { minimumFractionDigits: 2 })} MAD`);
+/** Demo VAT rate for the computed TTC (display only). */
+const VAT = 0.2;
 
 export const PURCHASE_REQUESTS_LISTING: ListingPageConfig = {
   title: 'Demandes d’achat',
   subtitle: 'Approuvées par un responsable au-delà de 10 000 MAD',
   icon: 'shopping-cart',
   endpoint: REQUESTS,
+  loadHeader: () =>
+    import('./screens/purchase-requests-header/purchase-requests-header.component').then(
+      (m) => m.PurchaseRequestsHeaderComponent,
+    ),
   quickFilters: [
     { id: 'mine', label: 'Mes demandes', filter: { createdBy: { is: 'me' } } },
     { id: 'late', label: 'En retard', filter: { and: [{ neededBy: { before: 'today' } }, { status: { notIn: ['ORDERED', 'REJECTED'] } }] } },
@@ -46,7 +52,7 @@ export const PURCHASE_REQUESTS_LISTING: ListingPageConfig = {
   ],
 };
 
-/** A record with a lifecycle: status badge, transitions in the toolbar, editable only as a draft. */
+/** A record with a lifecycle: status badge, transitions in the toolbar, conditional fields. */
 export const PURCHASE_REQUEST_RECORD: RecordPageConfig = {
   title: (request) => String(request['subject']),
   subtitle: (request) => [request['supplierName'], money(request['amount'])].filter(Boolean).join(' · '),
@@ -87,13 +93,35 @@ export const PURCHASE_REQUEST_RECORD: RecordPageConfig = {
     sections: [
       {
         title: 'Demande',
-        description: 'Au-delà de 10 000 MAD, la soumission part en approbation chez un responsable.',
+        description: 'Au-delà de 10 000 MAD, la soumission part en approbation chez un responsable. En approbation, seul le commentaire reste modifiable.',
         fields: [
           { key: 'subject', field: 'subject', label: 'Objet', type: 'text', required: true, wide: true },
           { key: 'supplierId', field: 'supplierId', label: 'Fournisseur', type: 'select', lookupKey: 'suppliers' },
-          { key: 'amount', field: 'amount', label: 'Montant (MAD)', type: 'number', validation: { min: 0 } },
+          { key: 'amount', field: 'amount', label: 'Montant HT', validation: { min: 0 } },
+          {
+            key: 'amountTtc',
+            field: 'amountTtc',
+            label: 'Montant TTC',
+            type: 'computed',
+            format: 'money',
+            currency: 'MAD',
+            compute: (request) => {
+              const ht = Number(request['amount'] ?? 0);
+              return Number.isFinite(ht) ? ht * (1 + VAT) : null;
+            },
+            helpText: 'HT × 1,20 (affichage seulement, non enregistré).',
+          },
           { key: 'neededBy', field: 'neededBy', label: 'Pour le', type: 'date' },
           { key: 'justification', field: 'justification', label: 'Justification', type: 'textarea' },
+          { key: 'comment', field: 'comment', label: 'Commentaire', type: 'textarea' },
+          {
+            key: 'rejectionReason',
+            field: 'rejectionReason',
+            label: 'Motif du rejet',
+            type: 'textarea',
+            visible: (request) => request['status'] === 'REJECTED',
+            requiredWhen: (request) => request['status'] === 'REJECTED',
+          },
         ],
       },
       { title: 'Pièces jointes', kind: 'attachments', accept: ['application/pdf', 'image/png', 'image/jpeg'], maxSizeMb: 10 },

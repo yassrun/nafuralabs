@@ -94,16 +94,17 @@ const ADMINISTRATION_SCREENS: readonly AdministrationScreen[] = [
   { section: 'members', path: 'members', capability: 'cap.iam', nav: { id: 'admin-members', label: 'Membres', icon: 'users', permission: 'tenant.members.read' } },
   { section: 'roles', path: 'roles', capability: 'cap.access', nav: { id: 'admin-roles', label: 'Rôles', icon: 'shield-check', permission: 'tenant.roles.read' } },
   { section: 'domainActivation', path: 'domain-activation', capability: 'cap.access', nav: { id: 'admin-domains', label: 'Modules', icon: 'puzzle', permission: 'tenant.settings.read' } },
-  { section: 'audit', path: 'audit', capability: 'cap.audit', nav: { id: 'admin-audit', label: 'Journal d’audit', icon: 'scroll-text', permission: 'administration.audit.read' } },
-  { section: 'templates', path: 'documents', capability: 'cap.documents', nav: { id: 'admin-documents', label: 'Documents', icon: 'file-text', permission: 'administration.templates.read' } },
-  { section: 'emailTemplates', path: 'email-templates', capability: 'cap.notifications', nav: { id: 'admin-email-templates', label: 'Modèles d’e-mail', icon: 'send', permission: 'administration.email.read' } },
-  { section: 'workflows', path: 'workflows', capability: 'cap.approvals', nav: { id: 'admin-workflows', label: 'Workflows', icon: 'git-branch', permission: 'administration.workflows.read' } },
-  { section: 'scheduledJobs', path: 'scheduled-jobs', capability: 'cap.foundation', nav: { id: 'admin-jobs', label: 'Tâches planifiées', icon: 'calendar-clock', permission: 'administration.scheduled-jobs.read' } },
+  { section: 'audit', path: 'audit', capability: 'cap.audit', nav: { id: 'admin-audit', label: 'Journal d’audit', icon: 'scroll-text', permission: 'administration.audit.log.read' } },
+  { section: 'templates', path: 'documents', capability: 'cap.documents', nav: { id: 'admin-documents', label: 'Documents', icon: 'file-text', permission: 'administration.documents.templates.read' } },
+  { section: 'emailTemplates', path: 'email-templates', capability: 'cap.notifications', nav: { id: 'admin-email-templates', label: 'Modèles d’e-mail', icon: 'send', permission: 'administration.notifications.email-templates.read' } },
+  { section: 'workflows', path: 'workflows', capability: 'cap.approvals', nav: { id: 'admin-workflows', label: 'Workflows', icon: 'git-branch', permission: 'administration.approvals.workflows.read' } },
+  { section: 'scheduledJobs', path: 'scheduled-jobs', capability: 'cap.foundation', nav: { id: 'admin-jobs', label: 'Tâches planifiées', icon: 'calendar-clock', permission: 'administration.operations.scheduled-jobs.read' } },
   { section: 'webhooks', path: 'webhooks', capability: 'cap.webhooks', nav: { id: 'admin-webhooks', label: 'Webhooks', icon: 'webhook', permission: 'administration.integrations.webhooks.read' } },
   { section: 'apiKeys', path: 'api-keys', capability: 'cap.foundation', nav: { id: 'admin-api-keys', label: 'Clés API', icon: 'shield', permission: 'administration.integrations.api-keys.read' } },
   { section: 'aiProviders', path: 'ai-providers', capability: 'cap.ai', nav: { id: 'admin-ai', label: 'Fournisseurs IA', icon: 'sparkles', permission: 'administration.ai.read' } },
   { section: 'numberingSequences', path: 'numbering-sequences', capability: 'cap.sysconfig', nav: { id: 'admin-numbering', label: 'Numérotation', icon: 'repeat', permission: 'settings.sysconfig.numbering-sequence.read' } },
   { section: 'subscriptions', path: 'subscriptions', capability: 'cap.subscriptions', nav: { id: 'admin-subscriptions', label: 'Abonnements', icon: 'wallet', permission: 'tenant.subscriptions.read' } },
+  { section: 'scopeGrants', path: 'scope-grants', capability: 'cap.access', nav: { id: 'admin-scope-grants', label: 'Périmètres', icon: 'folder-tree', permission: 'tenant.members.scope-grant.read' } },
 ];
 
 export interface HostScreens {

@@ -52,12 +52,7 @@ export class TemplatesApiService {
       params = params.set('page', String(page)).set('size', String(size));
       if (query['sortBy']) params = params.set('sort', String(query['sortBy']));
       if (query['sortDirection']) params = params.set('direction', String(query['sortDirection']));
-      if (query['entityType']) params = params.set('entityType', String(query['entityType']));
-      const qType = query['type'];
-      if (qType === 'system' || qType === 'custom') {
-        params = params.set('system', qType === 'system' ? 'true' : 'false');
-      }
-      if (query['search']) params = params.set('search', String(query['search']));
+      if (query['search']) params = params.set('q', String(query['search']));
     }
     const res = await firstValueFrom(
       this.http.get<{ content: PrintTemplate[]; totalElements: number }>(this.url(BASE), {

@@ -19,7 +19,13 @@ export type ManifestValidationIssueCode =
   | 'record-invalid-entity'
   | 'record-outside-prefix'
   | 'role-unknown-reference'
-  | 'duplicate-role-code';
+  | 'duplicate-role-code'
+  | 'bc-provides-other'
+  | 'bc-contract-version'
+  | 'bc-undeclared-api'
+  | 'bc-undeclared-event'
+  | 'bc-requires-unknown-api'
+  | 'bc-requires-unknown-event';
 
 export interface ManifestValidationIssue {
   code: ManifestValidationIssueCode;
@@ -186,7 +192,79 @@ function validateBusinessContexts(
     }
   }
 
+  validateContracts(contexts, issues);
   validateRoles(manifests, contexts, issues);
+}
+
+/** A business context publishes its own records and events, and consumes those of another by version. */
+function validateContracts(
+  contexts: readonly BusinessContextManifest[],
+  issues: ManifestValidationIssue[],
+): void {
+  const byId = new Map(contexts.map((context) => [context.metadata.id, context]));
+
+  for (const context of contexts) {
+    const id = context.metadata.id;
+    const records = new Set(Object.keys(context.spec.records ?? {}));
+    const events = new Set((context.spec.notifications ?? []).map((notification) => notification.id));
+    for (const provided of context.spec.provides ?? []) {
+      if (provided.id !== id) {
+        issues.push({
+          code: 'bc-provides-other',
+          message: `Business context "${id}" publishes "${provided.id}": it publishes only itself.`,
+        });
+      }
+      if (provided.version !== context.metadata.version) {
+        issues.push({
+          code: 'bc-contract-version',
+          message: `Business context "${id}" publishes ${provided.version} instead of ${context.metadata.version}.`,
+        });
+      }
+      for (const api of provided.api ?? []) {
+        if (!records.has(api)) {
+          issues.push({
+            code: 'bc-undeclared-api',
+            message: `Business context "${id}" publishes api "${api}" which is not in spec.records.`,
+          });
+        }
+      }
+      for (const event of provided.events ?? []) {
+        if (!events.has(event)) {
+          issues.push({
+            code: 'bc-undeclared-event',
+            message: `Business context "${id}" publishes event "${event}" which is not in spec.notifications.`,
+          });
+        }
+      }
+    }
+  }
+
+  for (const context of contexts) {
+    for (const requirement of context.spec.requires ?? []) {
+      if (!requirement.id.startsWith('bc.')) continue;
+      const provider = byId.get(requirement.id);
+      const contract = provider?.spec.provides?.find((item) => item.id === requirement.id);
+      if (!provider || !contract) continue;
+      const api = new Set(contract.api ?? []);
+      const events = new Set(contract.events ?? []);
+      for (const required of requirement.api ?? []) {
+        if (!api.has(required)) {
+          issues.push({
+            code: 'bc-requires-unknown-api',
+            message: `Business context "${context.metadata.id}" requires unpublished api "${required}" of "${requirement.id}".`,
+          });
+        }
+      }
+      for (const required of requirement.events ?? []) {
+        if (!events.has(required)) {
+          issues.push({
+            code: 'bc-requires-unknown-event',
+            message: `Business context "${context.metadata.id}" requires unpublished event "${required}" of "${requirement.id}".`,
+          });
+        }
+      }
+    }
+  }
 }
 
 /** Application roles only compose roles and permissions of the business contexts it embeds. */

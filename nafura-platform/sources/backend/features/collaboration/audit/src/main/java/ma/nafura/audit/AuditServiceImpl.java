@@ -42,16 +42,15 @@ public class AuditServiceImpl implements AuditService {
         if (actor == null || actor.isBlank()) {
             actor = "system";
         }
-        AuditEvent event = AuditEvent.builder()
-                .tenantId(tenantId)
-                .entityType(entityType)
-                .entityId(entityId)
-                .action(action)
-                .actor(actor)
-                .eventAt(OffsetDateTime.now())
-                .details(details)
-                .payload(payload)
-                .build();
+        AuditEvent event = AuditEvent.of(
+                tenantId,
+                entityType,
+                entityId,
+                action,
+                actor,
+                OffsetDateTime.now(),
+                details,
+                payload);
         return auditEventRepository.save(event);
     }
 

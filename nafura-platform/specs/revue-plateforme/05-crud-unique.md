@@ -27,7 +27,15 @@ Toute ressource CRUD de la plateforme est un `RecordController`. `CrudService` /
 
 ### Lot 1 — Inventaire
 
-Une table dans cette spec (à compléter par la personne affectée) : ressource, entité, base actuelle, permissions, endpoints hors CRUD, écrans web qui l'appellent, et usage par Sektor (`grep` sur `sektor/sources/backend`).
+| Ressource | Entité | Base (avant → après) | Permissions | Endpoints hors CRUD | Écrans web | Sektor |
+|---|---|---|---|---|---|---|
+| Séquences | `NumberingSequence` | `NumberingSequenceControllerBase` / `JpaCrudService` → `RecordController` + `records/numbering-sequence.json` | `settings.sysconfig.numbering-sequence.{read,create,update,delete}` | `GET /preview`, `POST /{id}/next` | `features/administration/numbering-sequences` (LegacyListing) ; API services sysconfig | Repo + seed onboarding (`TenantPresetOrchestratorService`, `OnboardingCompletenessService`) — pas l’API HTTP |
+| Tags | `Tag` (`SysconfigTag`) | `TagControllerBase` → `RecordController` + `records/tag.json` | `settings.sysconfig.tag.{read,create,update,delete}` | — | `features/configuration/sysconfig/pages/tags` (API) | aucun |
+| Listes de codes | `CodeList` | `CodeListControllerBase` → `RecordController` + `records/code-list.json` | `settings.sysconfig.code-list.{read,create,update,delete}` | — | `…/pages/code-lists` | aucun |
+| Valeurs de référence | `ReferenceValue` | `ReferenceValueControllerBase` → `RecordController` + `records/reference-value.json` | `settings.sysconfig.reference-value.{read,create,update,delete}` | — | `…/pages/reference-values` | aucun |
+| Calendriers | `Calendar` | `CalendarControllerBase` → `RecordController` + `records/calendar.json` | `settings.sysconfig.calendar.{read,create,update,delete}` | — | `…/pages/calendars` | aucun |
+
+**Écart Sektor (lot 3) :** Sektor consomme encore massivement `CrudService` / `JpaCrudService` / `*ControllerBase` dans ses BCs (catalogue, achats, finance…). La couche reste dans le framework, marquée `@deprecated` ; garde-fou `legacy-crud-forbidden.test.mjs` interdit tout nouvel usage dans `nafura-platform/sources/backend`.
 
 ### Lot 2 — Migration ressource par ressource
 
@@ -58,9 +66,9 @@ Ordre conseillé : séquences de numérotation (débloque 01), tags, listes de c
 
 ## Critères d'acceptation
 
-- [ ] Aucune ressource de `nafura-platform/sources/backend` ne s'appuie sur `CrudService` ou `*ControllerBase`.
-- [ ] Chaque ressource migrée répond à `GET …/properties`.
-- [ ] L'audit des ressources migrées passe par `CrudAuditHook` uniquement.
+- [x] Aucune ressource de `nafura-platform/sources/backend` ne s'appuie sur `CrudService` ou `*ControllerBase`.
+- [x] Chaque ressource migrée répond à `GET …/properties`.
+- [x] L'audit des ressources migrées passe par `CrudAuditHook` uniquement.
 
 ## Documentation
 

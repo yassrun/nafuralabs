@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,6 +54,14 @@ public class AccessController {
     @RequirePermission(value = "tenant.roles.write", fullPermission = true)
     public RoleResponse updateRole(@PathVariable UUID tenantId, @PathVariable String roleCode,
                                    @Valid @RequestBody UpdateRoleRequest request) {
+        return access.updateRole(tenantId, roleCode, request);
+    }
+
+    /** Same as PATCH — required by {@code nf-record-page}. */
+    @PutMapping("/{tenantId}/roles/{roleCode}")
+    @RequirePermission(value = "tenant.roles.write", fullPermission = true)
+    public RoleResponse putRole(@PathVariable UUID tenantId, @PathVariable String roleCode,
+                                @Valid @RequestBody UpdateRoleRequest request) {
         return access.updateRole(tenantId, roleCode, request);
     }
 

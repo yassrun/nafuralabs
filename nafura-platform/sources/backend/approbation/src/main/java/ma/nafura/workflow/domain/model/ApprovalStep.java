@@ -29,8 +29,8 @@ public class ApprovalStep {
     @Column(name = "step_number", nullable = false)
     private Integer stepNumber;
 
-    @Column(name = "approver_role", nullable = false, length = 80)
-    private String approverRole;
+    @Column(name = "approver_permission", nullable = false, length = 120)
+    private String approverPermission;
 
     @Column(name = "approver_id")
     private UUID approverId;
@@ -61,4 +61,3 @@ public class ApprovalStep {
         this.updatedAt = OffsetDateTime.now();
     }
 }
-

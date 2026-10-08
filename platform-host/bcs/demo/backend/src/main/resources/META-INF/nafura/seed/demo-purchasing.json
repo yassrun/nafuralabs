@@ -9,17 +9,20 @@
       "records": [
         {
           "code": "F-001", "name": "Atlas Bureautique", "categoryId": { "$ref": "DemoCategory", "code": "BUR" },
-          "email": "contact@atlas-bureautique.ma", "phone": "+212 522 40 10 10", "city": "Casablanca",
+          "email": "contact@atlas-bureautique.ma", "phone": "+212522401010", "ice": "001234567890123",
+          "rib": "007780000000123456789057", "city": "Casablanca",
           "address": "45 boulevard Zerktouni", "paymentTerms": "30J", "deliveryDays": 3, "rating": 4
         },
         {
           "code": "F-002", "name": "Maghreb IT Services", "categoryId": { "$ref": "DemoCategory", "code": "IT" },
-          "email": "ventes@maghreb-it.ma", "phone": "+212 537 70 22 30", "city": "Rabat",
+          "email": "ventes@maghreb-it.ma", "phone": "+212537702230", "ice": "002345678901234",
+          "rib": "007780000000123456789057", "city": "Rabat",
           "paymentTerms": "60J", "deliveryDays": 7, "rating": 5
         },
         {
           "code": "F-003", "name": "Matériaux du Souss", "categoryId": { "$ref": "DemoCategory", "code": "BTP" },
-          "email": "commandes@materiaux-souss.ma", "city": "Agadir", "paymentTerms": "30J", "deliveryDays": 10, "rating": 3
+          "email": "commandes@materiaux-souss.ma", "phone": "+212528821100", "city": "Agadir",
+          "paymentTerms": "30J", "deliveryDays": 10, "rating": 3
         },
         {
           "code": "F-004", "name": "Nord Mobilier", "categoryId": { "$ref": "DemoCategory", "code": "BUR-MOB" },

@@ -23,7 +23,6 @@ import type { WorkflowStepDto } from '../models';
 import { WorkflowsFacade, WorkflowTemplatesApiService } from '../services';
 import { WorkflowStepDialogComponent } from '../components/workflow-step-dialog.component';
 import { RolesApiService } from '../../../../features/administration/iam/roles/services/roles-api.service';
-import type { Role } from '../../../../features/administration/iam/roles/models/role.model';
 
 function toKebab(s: string): string {
   return s
@@ -91,12 +90,12 @@ function toKebab(s: string): string {
               <li class="workflow-editor__step">
                 <span class="workflow-editor__step-num">{{ i + 1 }}.</span>
                 <span class="workflow-editor__step-info">
-                  {{ step.name }} — {{ step.approverRole }}
+                  {{ step.name }} — {{ step.approverPermission }}
                   @if (step.timeoutHours) {
                     <span class="workflow-editor__step-meta">
                       {{ step.timeoutHours }}h
-                      @if (step.escalationRole) {
-                        → {{ step.escalationRole }}
+                      @if (step.escalationPermission) {
+                        → {{ step.escalationPermission }}
                       }
                     </span>
                   }
@@ -171,7 +170,7 @@ export class WorkflowEditorPage implements OnInit {
 
   readonly steps = signal<WorkflowStepDto[]>([]);
   readonly entityTypes = signal<string[]>([]);
-  readonly roleOptions = signal<{ value: string; label: string }[]>([]);
+  readonly permissionOptions = signal<{ value: string; label: string }[]>([]);
   readonly saving = signal(false);
   readonly isNew = computed(() => this.route.snapshot.paramMap.get('id') === 'new');
 
@@ -197,10 +196,16 @@ export class WorkflowEditorPage implements OnInit {
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     this.entityTypes.set(await this.workflowTemplatesApi.getEntityTypes());
-    const rolesRes = await this.rolesApi.getAll({ page: 0, pageSize: 500 }).catch(() => ({ items: [] as Role[], total: 0 }));
-    this.roleOptions.set(
-      (rolesRes.items ?? []).map((r) => ({ value: r.roleCode ?? r.id, label: r.name ?? r.roleCode ?? r.id }))
-    );
+    const catalog = await this.rolesApi.getPermissionsCatalog().catch(() => []);
+    const options: { value: string; label: string }[] = [];
+    for (const group of catalog) {
+      for (const perm of group.permissions ?? []) {
+        if (perm.code) {
+          options.push({ value: perm.code, label: perm.name ? `${perm.name} (${perm.code})` : perm.code });
+        }
+      }
+    }
+    this.permissionOptions.set(options);
 
     if (!id || id === 'new') {
       this.form.patchValue({ isActive: true });
@@ -241,7 +246,7 @@ export class WorkflowEditorPage implements OnInit {
         width: '420px',
         data: {
           stepNumber: this.steps().length + 1,
-          roleOptions: this.roleOptions(),
+          permissionOptions: this.permissionOptions(),
         },
       })
       .afterClosed()
@@ -260,7 +265,7 @@ export class WorkflowEditorPage implements OnInit {
         data: {
           step: { ...step, stepNumber: index + 1 },
           stepNumber: index + 1,
-          roleOptions: this.roleOptions(),
+          permissionOptions: this.permissionOptions(),
         },
       })
       .afterClosed()
@@ -296,9 +301,9 @@ export class WorkflowEditorPage implements OnInit {
     const stepsPayload = this.steps().map((s, i) => ({
       stepNumber: i + 1,
       name: s.name,
-      approverRole: s.approverRole,
+      approverPermission: s.approverPermission,
       timeoutHours: s.timeoutHours ?? undefined,
-      escalationRole: s.escalationRole ?? undefined,
+      escalationPermission: s.escalationPermission ?? undefined,
       condition: s.condition ?? undefined,
     }));
 

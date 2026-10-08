@@ -1,74 +1,128 @@
 package ma.nafura.platform.collaboration.workflow;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import ma.nafura.platform.authorization.security.authorization.RequirePermission;
-import ma.nafura.platform.authorization.security.authorization.SecuredResource;
-import ma.nafura.platform.collaboration.workflow.api.WorkflowTemplateCreateRequest;
-import ma.nafura.platform.collaboration.workflow.api.WorkflowTemplateDto;
-import ma.nafura.platform.collaboration.workflow.api.WorkflowTemplateUpdateRequest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
+import ma.nafura.platform.authorization.security.authorization.RequirePermission;
+import ma.nafura.platform.authorization.security.authorization.SecuredResource;
+import ma.nafura.platform.collaboration.workflow.domain.model.WorkflowTemplate;
+import ma.nafura.platform.collaboration.workflow.repository.WorkflowInstanceRepository;
+import ma.nafura.platform.collaboration.workflow.repository.WorkflowTemplateRepository;
+import ma.nafura.platform.framework.context.TenantContext;
+import ma.nafura.platform.framework.record.RecordController;
+import ma.nafura.platform.framework.record.RecordRepository;
+import ma.nafura.platform.framework.record.RecordRuleException;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+/**
+ * Approval workflow templates of the organization, a record, plus entity-type metadata.
+ * Permissions: administration.approvals.workflows.{read,create,update,delete}.
+ */
 @RestController
 @RequestMapping("/api/v1/platform/collaboration/workflow/templates")
-@SecuredResource(domain = "administration", feature = "administration", resource = "workflows")
-@RequiredArgsConstructor
-public class WorkflowTemplateController {
+@SecuredResource(domain = "administration", feature = "approvals", resource = "workflows")
+public class WorkflowTemplateController extends RecordController<WorkflowTemplate> {
 
-    private final WorkflowTemplateService templateService;
+    private static final String STATUS_RUNNING = "RUNNING";
 
-    @GetMapping
-    @RequirePermission(value = "administration.workflows.read", fullPermission = true)
-    public ResponseEntity<Page<WorkflowTemplateDto>> list(Pageable pageable) {
-        return ResponseEntity.ok(templateService.list(pageable));
+    private final WorkflowTemplateRepository repository;
+    private final WorkflowTemplateService templates;
+    private final WorkflowInstanceRepository instances;
+
+    public WorkflowTemplateController(
+            WorkflowTemplateRepository repository,
+            WorkflowTemplateService templates,
+            WorkflowInstanceRepository instances) {
+        this.repository = repository;
+        this.templates = templates;
+        this.instances = instances;
     }
 
-    @GetMapping("/{id}")
-    @RequirePermission(value = "administration.workflows.read", fullPermission = true)
-    public ResponseEntity<WorkflowTemplateDto> get(@PathVariable UUID id) {
-        return ResponseEntity.ok(templateService.get(id));
+    @Override
+    protected RecordRepository<WorkflowTemplate> repository() {
+        return repository;
     }
 
-    @PostMapping
-    @RequirePermission(value = "administration.workflows.write", fullPermission = true)
-    public ResponseEntity<WorkflowTemplateDto> create(@Valid @RequestBody WorkflowTemplateCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(templateService.create(request));
+    @Override
+    protected String recordResource() {
+        return "records/workflow-template.json";
     }
 
-    @PutMapping("/{id}")
-    @RequirePermission(value = "administration.workflows.write", fullPermission = true)
-    public ResponseEntity<WorkflowTemplateDto> update(
-            @PathVariable UUID id,
-            @Valid @RequestBody WorkflowTemplateUpdateRequest request) {
-        return ResponseEntity.ok(templateService.update(id, request));
+    @Override
+    protected String labelField() {
+        return "name";
     }
 
-    @DeleteMapping("/{id}")
-    @RequirePermission(value = "administration.workflows.write", fullPermission = true)
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        templateService.delete(id);
-        return ResponseEntity.noContent().build();
+    @Override
+    protected Sort defaultSort() {
+        return Sort.by(Sort.Direction.DESC, "updatedAt");
     }
 
-    @PatchMapping("/{id}/active")
-    @RequirePermission(value = "administration.workflows.write", fullPermission = true)
-    public ResponseEntity<WorkflowTemplateDto> setActive(
-            @PathVariable UUID id,
-            @RequestParam boolean active) {
-        return ResponseEntity.ok(templateService.setActive(id, active));
+    @Override
+    protected Set<String> readOnlyFields() {
+        return Set.of("stepCount");
+    }
+
+    @Override
+    protected Map<String, String> validate(WorkflowTemplate template, WorkflowTemplate previous) {
+        UUID tenantId = TenantContext.getTenantId();
+        String code = template.getCode() == null ? "" : template.getCode().trim();
+        String entityType = template.getEntityType() == null ? "" : template.getEntityType().trim();
+        var existing = repository.findByTenantIdAndEntityTypeAndCode(tenantId, entityType, code);
+        if (existing.isPresent() && (previous == null || !existing.get().getId().equals(previous.getId()))) {
+            return Map.of("code", "Ce code existe déjà pour ce type d'entité");
+        }
+        return Map.of();
+    }
+
+    @Override
+    protected void beforeSave(WorkflowTemplate template, WorkflowTemplate previous) {
+        templates.prepareSave(template, previous);
+    }
+
+    @Override
+    protected void beforeDelete(WorkflowTemplate template) {
+        long activeCount = instances.countByTemplateIdAndStatus(template.getId(), STATUS_RUNNING);
+        if (activeCount > 0) {
+            throw RecordRuleException.refused(
+                    "Cannot delete template: " + activeCount + " active workflow instance(s) exist");
+        }
     }
 
     @GetMapping("/entity-types")
-    @RequirePermission(value = "administration.workflows.read", fullPermission = true)
-    public ResponseEntity<Map<String, List<String>>> getEntityTypes() {
-        return ResponseEntity.ok(templateService.getEntityTypes());
+    @RequirePermission("read")
+    public Map<String, List<String>> getEntityTypes() {
+        return templates.getEntityTypes();
+    }
+
+    @PostMapping("/{id}/activate")
+    @RequirePermission("update")
+    @Transactional
+    public WorkflowTemplate activate(@PathVariable UUID id) {
+        return setActive(id, true);
+    }
+
+    @PostMapping("/{id}/deactivate")
+    @RequirePermission("update")
+    @Transactional
+    public WorkflowTemplate deactivate(@PathVariable UUID id) {
+        return setActive(id, false);
+    }
+
+    private WorkflowTemplate setActive(UUID id, boolean active) {
+        WorkflowTemplate template = find(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workflow template not found"));
+        template.setIsActive(active);
+        return repository.save(template);
     }
 }

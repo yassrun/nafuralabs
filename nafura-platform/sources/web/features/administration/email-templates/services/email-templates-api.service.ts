@@ -39,11 +39,7 @@ export class EmailTemplatesApiService {
       if (sortBy) {
         params = params.set('sort', sortDir ? `${sortBy},${sortDir}` : String(sortBy));
       }
-      const qType = query['type'];
-      if (qType === 'system' || qType === 'custom') {
-        params = params.set('system', qType === 'system' ? 'true' : 'false');
-      }
-      if (query['entityType']) params = params.set('entityType', String(query['entityType']));
+      if (query['search']) params = params.set('q', String(query['search']));
     }
     const res = await firstValueFrom(
       this.http.get<{ content: EmailTemplate[]; totalElements: number }>(this.url(BASE), {

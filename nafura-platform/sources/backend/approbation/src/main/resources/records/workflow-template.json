@@ -1,0 +1,14 @@
+{
+  "entity": "administration.workflow-template",
+  "search": ["name", "code", "entityType"],
+  "properties": {
+    "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "entityType": { "label": "Type d'entité", "filterable": true, "sortable": true },
+    "stepCount": { "label": "Étapes", "type": "number", "sortable": true },
+    "isActive": { "label": "Actif", "filterable": true },
+    "updatedAt": { "label": "Modifié le", "filterable": true, "sortable": true },
+    "createdBy": { "label": "Créé par", "type": "person", "filterable": true },
+    "createdAt": { "label": "Créé le", "filterable": true, "sortable": true }
+  }
+}

@@ -6,27 +6,24 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import ma.nafura.platform.configuration.sysconfig.domain.model.NumberingSequence;
-import ma.nafura.platform.configuration.sysconfig.mapper.NumberingSequenceMapper;
 import ma.nafura.platform.configuration.sysconfig.repository.NumberingSequenceRepository;
-import ma.nafura.platform.configuration.sysconfig.service.base.NumberingSequenceServiceBase;
 import ma.nafura.platform.framework.autonumber.NumberSequenceGenerator;
-import ma.nafura.platform.framework.service.crud.CrudOperationException;
+import ma.nafura.platform.framework.context.TenantContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Custom service for NumberingSequence entity.
- * Generated once — safe for manual custom business logic.
- * Implements NumberSequenceGenerator for @AutoNumbered entity support.
+ * Allocates the next value of a numbering sequence (by id or by code for {@link NumberSequenceGenerator}).
  */
 @Service
-public class NumberingSequenceService extends NumberingSequenceServiceBase implements NumberSequenceGenerator {
+public class NumberingSequenceService implements NumberSequenceGenerator {
 
     private final NumberingSequenceRepository repository;
 
-    public NumberingSequenceService(NumberingSequenceRepository repository, NumberingSequenceMapper mapper) {
-        super(repository, mapper);
+    public NumberingSequenceService(NumberingSequenceRepository repository) {
         this.repository = repository;
     }
 
@@ -35,6 +32,30 @@ public class NumberingSequenceService extends NumberingSequenceServiceBase imple
     public Optional<String> generateNextNumber(String sequenceCode, UUID tenantId) {
         return repository.findByCodeAndTenantIdForUpdate(sequenceCode, tenantId)
             .map(this::generateNextFromSequence);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public String generateNext(UUID id) {
+        NumberingSequence sequence = repository.findById(id)
+            .filter(s -> TenantContext.getTenantId().equals(s.getTenantId()))
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "NumberingSequence not found: " + id));
+        NumberingSequence locked = repository
+            .findByCodeAndTenantIdForUpdate(sequence.getCode(), TenantContext.getTenantId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "NumberingSequence not found for tenant"));
+        return generateNextFromSequence(locked);
+    }
+
+    public String preview(
+        String prefix,
+        String separator,
+        String yearFormat,
+        Integer padLength,
+        Long currentNumber
+    ) {
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        long number = currentNumber != null ? currentNumber : 0L;
+        int pad = padLength != null ? padLength : 0;
+        return formatNumber(prefix, separator, yearFormat, pad, number, now);
     }
 
     private String generateNextFromSequence(NumberingSequence lockedSequence) {
@@ -79,31 +100,8 @@ public class NumberingSequenceService extends NumberingSequenceServiceBase imple
             now
         );
 
-        save(lockedSequence);
+        repository.save(lockedSequence);
         return formatted;
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String generateNext(UUID id) {
-        NumberingSequence sequence = findById(id)
-            .orElseThrow(() -> new CrudOperationException("NumberingSequence not found: " + id));
-        NumberingSequence locked = repository
-            .findByCodeAndTenantIdForUpdate(sequence.getCode(), tenantId())
-            .orElseThrow(() -> new CrudOperationException("NumberingSequence not found for tenant: " + tenantId()));
-        return generateNextFromSequence(locked);
-    }
-
-    public String preview(
-        String prefix,
-        String separator,
-        String yearFormat,
-        Integer padLength,
-        Long currentNumber
-    ) {
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        long number = currentNumber != null ? currentNumber : 0L;
-        int pad = padLength != null ? padLength : 0;
-        return formatNumber(prefix, separator, yearFormat, pad, number, now);
     }
 
     private String formatNumber(
@@ -151,4 +149,3 @@ public class NumberingSequenceService extends NumberingSequenceServiceBase imple
         return sb.toString();
     }
 }
-

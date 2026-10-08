@@ -12,7 +12,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import ma.nafura.platform.collaboration.workflow.api.ApprovalDashboardItem;
 import ma.nafura.platform.collaboration.workflow.api.WorkflowStepDto;
 import ma.nafura.platform.collaboration.workflow.api.WorkflowTemplateCreateRequest;
 import ma.nafura.platform.collaboration.workflow.api.WorkflowTemplateDto;
@@ -40,6 +42,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -49,8 +52,8 @@ class ApprobationBaselineTest {
     private static final UUID TENANT_B = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
     private static final String ENTITY_TYPE = "record";
     private static final UUID ENTITY_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
-    private static final String ROLE_USER = "approver";
-    private static final String ROLE_OTHER = "reviewer";
+    private static final String PERM_APPROVE = "demo.purchasing.request.approve";
+    private static final String PERM_OTHER = "demo.purchasing.request.order";
 
     @Mock
     private ApprovalRequestRepository requestRepository;
@@ -82,7 +85,7 @@ class ApprobationBaselineTest {
     void setUp() {
         TenantContext.setTenantId(TENANT_A);
         UserContext.setUserEmail("a@example.com");
-        UserContext.setUserRole(ROLE_USER);
+        UserContext.setPermissions(Set.of(PERM_APPROVE));
         stubApprovalRepos();
         stubChainRepos();
         approvals = new ApprovalServiceImpl(requestRepository, approvalStepRepository, events);
@@ -112,7 +115,7 @@ class ApprobationBaselineTest {
 
     @Test
     void accepter() {
-        ApprovalRequest pending = pendingOneStep(ROLE_USER);
+        ApprovalRequest pending = pendingOneStepAs("other@example.com", PERM_APPROVE);
 
         approvals.approve(pending.getId(), "ok");
 
@@ -122,7 +125,7 @@ class ApprobationBaselineTest {
 
     @Test
     void refuser() {
-        ApprovalRequest pending = pendingOneStep(ROLE_USER);
+        ApprovalRequest pending = pendingOneStepAs("other@example.com", PERM_APPROVE);
 
         approvals.reject(pending.getId(), null);
 
@@ -131,8 +134,36 @@ class ApprobationBaselineTest {
     }
 
     @Test
+    void sansPermissionRefuse() {
+        ApprovalRequest pending = pendingOneStepAs("other@example.com", PERM_APPROVE);
+        UserContext.setPermissions(Set.of());
+
+        assertThatThrownBy(() -> approvals.approve(pending.getId(), null))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("403");
+    }
+
+    @Test
+    void demandeurNePeutPasSAutoApprouver() {
+        ApprovalRequest pending = pendingOneStep(PERM_APPROVE);
+        assertThatThrownBy(() -> approvals.approve(pending.getId(), null))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("own request");
+    }
+
+    @Test
+    void boiteFiltreParPermission() {
+        ApprovalRequest visible = pendingOneStepAs("other@example.com", PERM_APPROVE);
+        pendingOneStepAs("other@example.com", PERM_OTHER);
+
+        List<ApprovalDashboardItem> inbox = approvals.getPendingForCurrentUser();
+
+        assertThat(inbox).extracting(ApprovalDashboardItem::getId).containsExactly(visible.getId());
+    }
+
+    @Test
     void deuxTenants() {
-        ApprovalRequest ofA = pendingOneStep(ROLE_USER);
+        ApprovalRequest ofA = pendingOneStepAs("other@example.com", PERM_APPROVE);
 
         TenantContext.setTenantId(TENANT_B);
         Page<ApprovalRequest> listedB = approvals.listByEntity(
@@ -145,7 +176,7 @@ class ApprobationBaselineTest {
 
     @Test
     void etapes() {
-        ApprovalRequest pending = pendingTwoSteps(ROLE_USER, ROLE_OTHER);
+        ApprovalRequest pending = pendingTwoStepsAs("other@example.com", PERM_APPROVE, PERM_OTHER);
 
         approvals.approve(pending.getId(), "step-1");
 
@@ -172,22 +203,38 @@ class ApprobationBaselineTest {
                 .isInstanceOf(CrudNotFoundException.class);
     }
 
-    private ApprovalRequest pendingOneStep(String role) {
-        return approvals.requestApproval(
-                ENTITY_TYPE,
-                ENTITY_ID,
-                "En attente",
-                List.of(ApprovalStepDefinition.builder().stepNumber(1).approverRole(role).build()));
+    private ApprovalRequest pendingOneStep(String permission) {
+        return pendingOneStepAs(UserContext.getUserEmail(), permission);
     }
 
-    private ApprovalRequest pendingTwoSteps(String firstRole, String secondRole) {
-        return approvals.requestApproval(
-                ENTITY_TYPE,
-                ENTITY_ID,
-                "Deux étapes",
-                List.of(
-                        ApprovalStepDefinition.builder().stepNumber(1).approverRole(firstRole).build(),
-                        ApprovalStepDefinition.builder().stepNumber(2).approverRole(secondRole).build()));
+    private ApprovalRequest pendingOneStepAs(String requestedBy, String permission) {
+        String previous = UserContext.getUserEmail();
+        UserContext.setUserEmail(requestedBy);
+        try {
+            return approvals.requestApproval(
+                    ENTITY_TYPE,
+                    ENTITY_ID,
+                    "En attente",
+                    List.of(ApprovalStepDefinition.builder().stepNumber(1).approverPermission(permission).build()));
+        } finally {
+            UserContext.setUserEmail(previous);
+        }
+    }
+
+    private ApprovalRequest pendingTwoStepsAs(String requestedBy, String first, String second) {
+        String previous = UserContext.getUserEmail();
+        UserContext.setUserEmail(requestedBy);
+        try {
+            return approvals.requestApproval(
+                    ENTITY_TYPE,
+                    ENTITY_ID,
+                    "Deux étapes",
+                    List.of(
+                            ApprovalStepDefinition.builder().stepNumber(1).approverPermission(first).build(),
+                            ApprovalStepDefinition.builder().stepNumber(2).approverPermission(second).build()));
+        } finally {
+            UserContext.setUserEmail(previous);
+        }
     }
 
     private WorkflowTemplateCreateRequest chainRequest() {
@@ -198,7 +245,7 @@ class ApprobationBaselineTest {
                 .steps(List.of(WorkflowStepDto.builder()
                         .stepNumber(1)
                         .name("Décider")
-                        .approverRole(ROLE_USER)
+                        .approverPermission(PERM_APPROVE)
                         .build()))
                 .build();
     }
@@ -273,15 +320,12 @@ class ApprobationBaselineTest {
                             .sorted(Comparator.comparing(ApprovalStep::getStepNumber))
                             .toList();
                 });
-        when(approvalStepRepository.findByTenantIdAndStatusAndApproverRole(any(), any(), any()))
+        when(approvalStepRepository.findByTenantIdAndStatus(any(), any()))
                 .thenAnswer(inv -> {
                     UUID tenant = inv.getArgument(0);
                     String status = inv.getArgument(1);
-                    String role = inv.getArgument(2);
                     return approvalSteps.values().stream()
-                            .filter(s -> tenant.equals(s.getTenantId())
-                                    && status.equals(s.getStatus())
-                                    && role.equals(s.getApproverRole()))
+                            .filter(s -> tenant.equals(s.getTenantId()) && status.equals(s.getStatus()))
                             .toList();
                 });
     }

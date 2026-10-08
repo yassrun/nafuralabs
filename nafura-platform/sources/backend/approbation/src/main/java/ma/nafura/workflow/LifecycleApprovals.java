@@ -19,9 +19,9 @@ public class LifecycleApprovals implements ApprovalGateway {
     private final LifecycleEngine lifecycles;
 
     @Override
-    public void request(String entityType, UUID entityId, String title, String approverRole) {
+    public void request(String entityType, UUID entityId, String title, String approverPermission) {
         approvals.requestApproval(entityType, entityId, title,
-                List.of(ApprovalStepDefinition.builder().stepNumber(1).approverRole(approverRole).build()));
+                List.of(ApprovalStepDefinition.builder().stepNumber(1).approverPermission(approverPermission).build()));
     }
 
     @EventListener

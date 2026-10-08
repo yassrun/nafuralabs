@@ -62,6 +62,8 @@ export const ConfigDrivenDashboardPageStyles = `
  * - config: Dashboard page configuration
  * - dataProvider: Snapshot provider
  * - mapSnapshot: Map snapshot into view-model signals
+ *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser un écran spécifique déclaré (`spec.screens`) en attendant un archétype.
  */
 @Directive()
 export abstract class ConfigDrivenDashboardPage<TSnapshot> extends BasePageClass {

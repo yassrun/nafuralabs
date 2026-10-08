@@ -18,8 +18,10 @@ import ma.nafura.platform.framework.service.crud.CrudNotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -54,11 +56,15 @@ public class ApprovalServiceImpl implements ApprovalService {
                 .build();
         request = requestRepository.save(request);
         for (ApprovalStepDefinition def : workflow) {
+            String permission = def.getApproverPermission();
+            if (permission == null || permission.isBlank()) {
+                throw new IllegalArgumentException("Approval step needs an approver permission");
+            }
             ApprovalStep step = ApprovalStep.builder()
                     .tenantId(tenantId)
                     .approvalRequestId(request.getId())
                     .stepNumber(def.getStepNumber())
-                    .approverRole(def.getApproverRole() != null ? def.getApproverRole() : "approver")
+                    .approverPermission(permission.trim())
                     .approverId(def.getApproverId())
                     .status(STATUS_PENDING)
                     .build();
@@ -108,7 +114,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         }
         List<ApprovalStep> steps = stepRepository.findByApprovalRequestIdOrderByStepNumberAsc(approvalRequestId);
         ApprovalStep current = steps.stream().filter(s -> STATUS_PENDING.equals(s.getStatus())).findFirst().orElse(null);
-        requireApprover(current);
+        requireApprover(current, request);
         if (current != null) {
             current.setStatus(STATUS_APPROVED);
             current.setDecidedAt(OffsetDateTime.now());
@@ -148,7 +154,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         }
         ApprovalStep current = stepRepository.findByApprovalRequestIdOrderByStepNumberAsc(approvalRequestId).stream()
                 .filter(s -> STATUS_PENDING.equals(s.getStatus())).findFirst().orElse(null);
-        requireApprover(current);
+        requireApprover(current, request);
         if (current != null) {
             current.setStatus(STATUS_REJECTED);
             current.setDecidedAt(OffsetDateTime.now());
@@ -187,10 +193,12 @@ public class ApprovalServiceImpl implements ApprovalService {
             return List.of();
         }
         Map<UUID, String> requestIdToStepName = steps.stream()
-                .collect(Collectors.toMap(ApprovalStep::getApprovalRequestId, ApprovalStep::getApproverRole, (a, b) -> a));
+                .collect(Collectors.toMap(ApprovalStep::getApprovalRequestId, ApprovalStep::getApproverPermission, (a, b) -> a));
+        String me = UserContext.getUserEmail();
         List<ApprovalRequest> requests = requestRepository.findByTenantIdAndIdInOrderByRequestedAtAsc(tenantId, requestIds);
         return requests.stream()
                 .filter(r -> STATUS_PENDING.equals(r.getStatus()))
+                .filter(r -> me == null || !me.equalsIgnoreCase(r.getRequestedBy()))
                 .map(r -> toDashboardItem(r, requestIdToStepName.get(r.getId())))
                 .toList();
     }
@@ -198,37 +206,41 @@ public class ApprovalServiceImpl implements ApprovalService {
     @Override
     @Transactional(readOnly = true)
     public long getPendingCountForCurrentUser() {
-        UUID tenantId = TenantContext.getTenantId();
-        List<UUID> requestIds = pendingStepsForCurrentUser(tenantId).stream()
-                .map(ApprovalStep::getApprovalRequestId)
-                .distinct()
-                .toList();
-        if (requestIds.isEmpty()) {
-            return 0;
-        }
-        return requestRepository.findByTenantIdAndIdInOrderByRequestedAtAsc(tenantId, requestIds).stream()
-                .filter(r -> STATUS_PENDING.equals(r.getStatus()))
-                .count();
+        return getPendingForCurrentUser().size();
     }
 
-    /** Steps waiting on any role the user holds. */
+    /** Steps waiting on a permission the user holds (or a designated approver id). */
     private List<ApprovalStep> pendingStepsForCurrentUser(UUID tenantId) {
-        java.util.Set<String> roles = new java.util.HashSet<>(UserContext.getUserRoles());
-        String primary = UserContext.getUserRole();
-        if (primary != null && !primary.isBlank()) {
-            roles.add(primary.trim().toUpperCase());
-        }
-        if (roles.isEmpty()) {
-            return List.of();
-        }
-        return stepRepository.findByTenantIdAndStatusAndApproverRoleIn(tenantId, STATUS_PENDING, roles);
+        UUID userId = UserContext.getUserIdOrNull();
+        return stepRepository.findByTenantIdAndStatus(tenantId, STATUS_PENDING).stream()
+                .filter(step -> canSeeStep(step, userId))
+                .toList();
     }
 
-    /** Only a holder of the step's role decides it. */
-    private static void requireApprover(ApprovalStep step) {
-        if (step != null && !UserContext.hasRole(step.getApproverRole()) && !UserContext.isSuperAdmin()) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.FORBIDDEN, "Not an approver of this step");
+    private static boolean canSeeStep(ApprovalStep step, UUID userId) {
+        if (step.getApproverId() != null && userId != null && step.getApproverId().equals(userId)) {
+            return true;
+        }
+        String permission = step.getApproverPermission();
+        return permission != null && !permission.isBlank() && UserContext.hasPermission(permission);
+    }
+
+    /** Permission checked at decision time; the requester never decides their own request. */
+    private static void requireApprover(ApprovalStep step, ApprovalRequest request) {
+        if (step == null) {
+            return;
+        }
+        String me = UserContext.getUserEmail();
+        if (me != null && request.getRequestedBy() != null && me.equalsIgnoreCase(request.getRequestedBy())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot approve your own request");
+        }
+        UUID userId = UserContext.getUserIdOrNull();
+        if (step.getApproverId() != null && userId != null && step.getApproverId().equals(userId)) {
+            return;
+        }
+        String permission = step.getApproverPermission();
+        if (permission == null || permission.isBlank() || !UserContext.hasPermission(permission)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not an approver of this step");
         }
     }
 
@@ -262,4 +274,3 @@ public class ApprovalServiceImpl implements ApprovalService {
                 .build();
     }
 }
-

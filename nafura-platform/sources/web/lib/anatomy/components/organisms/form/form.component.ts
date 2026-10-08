@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed, OnInit, OnChanges, SimpleChanges, inject } from '@angular/core';
+import { Component, input, output, computed, OnInit, OnChanges, SimpleChanges, inject, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,8 +10,13 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { FormFieldConfig, LookupContext } from '../../../types';
+import { ComputedFieldFormat, FormFieldConfig, FormFieldType, LookupContext } from '../../../types';
 import { ButtonComponent } from '../../atoms/button';
+import { IceInputComponent } from '../../atoms/ice-input/ice-input.component';
+import { MoneyInputComponent } from '../../atoms/money-input/money-input.component';
+import { PhoneMaInputComponent } from '../../atoms/phone-ma-input/phone-ma-input.component';
+import { RibInputComponent } from '../../atoms/rib-input/rib-input.component';
+import { VilleMaSelectComponent } from '../../atoms/ville-ma-select/ville-ma-select.component';
 import { ActionBarComponent } from '../../molecules/action-bar';
 import { RichtextComponent } from './richtext.component';
 
@@ -56,6 +61,11 @@ export type FormLayout = 'vertical' | 'horizontal' | 'grid';
     ButtonComponent,
     ActionBarComponent,
     RichtextComponent,
+    IceInputComponent,
+    RibInputComponent,
+    PhoneMaInputComponent,
+    MoneyInputComponent,
+    VilleMaSelectComponent,
   ],
   template: `
     <form
@@ -69,7 +79,7 @@ export type FormLayout = 'vertical' | 'horizontal' | 'grid';
             class="nf-form__field"
             [style.grid-column]="getFieldSpan(field)"
           >
-            @switch (field.type) {
+            @switch (fieldType(field)) {
               @case ('textarea') {
                 <mat-form-field appearance="outline" class="nf-form__mat-field">
                   <mat-label>{{ field.label | translate }}</mat-label>
@@ -186,12 +196,92 @@ export type FormLayout = 'vertical' | 'horizontal' | 'grid';
                   [maxLength]="field.validation?.maxLength"
                   [formControlName]="field.key" />
               }
+              @case ('money') {
+                <div class="nf-form__atom-field">
+                  <label class="nf-form__atom-label">{{ field.label | translate }}</label>
+                  <nf-money-input
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '0') | translate"
+                    [currency]="field.currency || 'MAD'" />
+                  @if (field.helpText) {
+                    <span class="nf-form__help-text">{{ field.helpText | translate }}</span>
+                  }
+                  @if (showAtomError(field)) {
+                    <span class="nf-form__atom-error">{{ getErrorMessage(field) }}</span>
+                  }
+                </div>
+              }
+              @case ('ice') {
+                <div class="nf-form__atom-field">
+                  <label class="nf-form__atom-label">{{ field.label | translate }}</label>
+                  <nf-ice-input
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '00000 00000 00000') | translate" />
+                  @if (field.helpText) {
+                    <span class="nf-form__help-text">{{ field.helpText | translate }}</span>
+                  }
+                  @if (showAtomError(field)) {
+                    <span class="nf-form__atom-error">{{ getErrorMessage(field) }}</span>
+                  }
+                </div>
+              }
+              @case ('rib') {
+                <div class="nf-form__atom-field">
+                  <label class="nf-form__atom-label">{{ field.label | translate }}</label>
+                  <nf-rib-input
+                    [formControlName]="field.key"
+                    [strictKey]="true"
+                    [placeholder]="(field.placeholder || 'XXX XXX XXXXXXXXXXXXXXXX XX') | translate" />
+                  @if (field.helpText) {
+                    <span class="nf-form__help-text">{{ field.helpText | translate }}</span>
+                  }
+                  @if (showAtomError(field)) {
+                    <span class="nf-form__atom-error">{{ getErrorMessage(field) }}</span>
+                  }
+                </div>
+              }
+              @case ('phone-ma') {
+                <div class="nf-form__atom-field">
+                  <label class="nf-form__atom-label">{{ field.label | translate }}</label>
+                  <nf-phone-ma-input
+                    [formControlName]="field.key"
+                    [placeholder]="(field.placeholder || '+212 6 XX XX XX XX') | translate" />
+                  @if (field.helpText) {
+                    <span class="nf-form__help-text">{{ field.helpText | translate }}</span>
+                  }
+                  @if (showAtomError(field)) {
+                    <span class="nf-form__atom-error">{{ getErrorMessage(field) }}</span>
+                  }
+                </div>
+              }
+              @case ('city-ma') {
+                <div class="nf-form__atom-field">
+                  <nf-ville-ma-select
+                    [formControlName]="field.key"
+                    [label]="field.label | translate"
+                    [placeholder]="(field.placeholder || 'Sélectionner une ville') | translate"
+                    [required]="!!field.required"
+                    [error]="showAtomError(field) ? getErrorMessage(field) : null" />
+                  @if (field.helpText) {
+                    <span class="nf-form__help-text">{{ field.helpText | translate }}</span>
+                  }
+                </div>
+              }
+              @case ('computed') {
+                <div class="nf-form__computed">
+                  <span class="nf-form__atom-label">{{ field.label | translate }}</span>
+                  <span class="nf-form__computed-value">{{ computedLabels()[field.key] }}</span>
+                  @if (field.helpText) {
+                    <span class="nf-form__help-text">{{ field.helpText | translate }}</span>
+                  }
+                </div>
+              }
               @default {
                 <mat-form-field appearance="outline" class="nf-form__mat-field">
                   <mat-label>{{ field.label | translate }}</mat-label>
                   <input
                     matInput
-                    [type]="field.type === 'password' ? 'password' : field.type === 'email' ? 'email' : 'text'"
+                    [type]="fieldType(field) === 'password' ? 'password' : fieldType(field) === 'email' ? 'email' : 'text'"
                     [formControlName]="field.key"
                     [placeholder]="(field.placeholder || '') | translate"
                     [readonly]="field.readonly"
@@ -284,6 +374,37 @@ export type FormLayout = 'vertical' | 'horizontal' | 'grid';
       color: var(--nf-color-text-secondary, #666);
     }
 
+    .nf-form__atom-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .nf-form__atom-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--nf-color-text-secondary, #64748b);
+    }
+
+    .nf-form__atom-error {
+      font-size: 0.75rem;
+      color: #dc2626;
+    }
+
+    .nf-form__computed {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px 0;
+    }
+
+    .nf-form__computed-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--nf-color-text, #0f172a);
+    }
+
     .nf-form__actions {
       padding-top: 8px;
       border-top: 1px solid var(--nf-color-border, #e0e0e0);
@@ -302,6 +423,11 @@ export class FormComponent implements OnInit, OnChanges {
   // Inputs
   fields = input.required<FormFieldConfig[]>();
   values = input<Record<string, unknown>>({});
+  /**
+   * Full draft of the host record (saved + edits). Used by `computed` fields so a value
+   * can depend on siblings outside this form section.
+   */
+  record = input<Record<string, unknown>>({});
   layout = input<FormLayout>('vertical');
   columns = input<number>(1);
   loading = input<boolean>(false);
@@ -319,6 +445,8 @@ export class FormComponent implements OnInit, OnChanges {
 
   // Form group
   formGroup = new FormGroup({});
+  /** Live form values for `computed` labels (updated on valueChanges). */
+  private readonly formSnapshot = signal<Record<string, unknown>>({});
 
   // Computed
   formClasses = computed(() => {
@@ -330,8 +458,34 @@ export class FormComponent implements OnInit, OnChanges {
     return `repeat(${cols}, 1fr)`;
   });
 
+  /** Labels of `computed` fields; recomputed when the host record or form values change. */
+  readonly computedLabels = computed((): Record<string, string> => {
+    const draft = { ...this.record(), ...this.values(), ...this.formSnapshot() };
+    const labels: Record<string, string> = {};
+    for (const field of this.fields()) {
+      if ((field.type ?? 'text') !== 'computed') continue;
+      labels[field.key] = formatComputed(field.compute?.(draft), field.format, field.currency);
+    }
+    return labels;
+  });
+
+  constructor() {
+    effect(() => {
+      const fields = this.fields();
+      const disabled = this.disabled();
+      const values = this.values();
+      if (!this.hasControlsFor(fields)) {
+        this.buildForm();
+        return;
+      }
+      this.syncMeta(fields, disabled, values);
+    });
+  }
+
   ngOnInit(): void {
-    this.buildForm();
+    if (!this.hasControls()) {
+      this.buildForm();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -342,19 +496,56 @@ export class FormComponent implements OnInit, OnChanges {
     }
   }
 
+  fieldType(field: FormFieldConfig): FormFieldType {
+    return field.type ?? 'text';
+  }
+
+  showAtomError(field: FormFieldConfig): boolean {
+    const control = this.formGroup.get(field.key);
+    return !!control && control.invalid && (control.dirty || control.touched);
+  }
+
+  private editableFields(): FormFieldConfig[] {
+    return this.fields().filter((field) => this.fieldType(field) !== 'computed');
+  }
+
   private hasControls(): boolean {
-    const fields = this.fields();
-    return fields.length === Object.keys(this.formGroup.controls).length && fields.every((field) => this.formGroup.contains(field.key));
+    return this.hasControlsFor(this.fields());
+  }
+
+  private hasControlsFor(fields: FormFieldConfig[]): boolean {
+    const editable = fields.filter((field) => (field.type ?? 'text') !== 'computed');
+    return (
+      editable.length === Object.keys(this.formGroup.controls).length &&
+      editable.every((field) => this.formGroup.contains(field.key))
+    );
   }
 
   private initialValue(field: FormFieldConfig): unknown {
     // A checkbox has two states: unchecked is false, never null.
-    return this.values()[field.key] ?? field.defaultValue ?? (field.type === 'checkbox' ? false : null);
+    return this.values()[field.key] ?? field.defaultValue ?? (this.fieldType(field) === 'checkbox' ? false : null);
+  }
+
+  /** Same field keys: update values / disabled / required in place (keeps focus). */
+  private syncMeta(fields: FormFieldConfig[], formDisabled: boolean, values: Record<string, unknown>): void {
+    for (const field of fields) {
+      if (this.fieldType(field) === 'computed') continue;
+      const control = this.formGroup.get(field.key);
+      if (!control) continue;
+      const next = values[field.key] ?? field.defaultValue ?? (this.fieldType(field) === 'checkbox' ? false : null);
+      if (!sameValue(control.value, next) && !control.dirty) {
+        control.reset(next, { emitEvent: false });
+      }
+      control.setValidators(this.validatorsOf(field));
+      control.updateValueAndValidity({ emitEvent: false });
+      if (field.disabled || formDisabled) control.disable({ emitEvent: false });
+      else control.enable({ emitEvent: false });
+    }
   }
 
   /** New values or state on the same fields: update the controls in place (keeps focus and bindings). */
   private resetForm(): void {
-    for (const field of this.fields()) {
+    for (const field of this.editableFields()) {
       const control = this.formGroup.get(field.key)!;
       control.reset(this.initialValue(field), { emitEvent: false });
       if (field.disabled || this.disabled()) control.disable({ emitEvent: false });
@@ -362,50 +553,35 @@ export class FormComponent implements OnInit, OnChanges {
     }
   }
 
+  private validatorsOf(field: FormFieldConfig) {
+    const validators = [];
+    if (field.required) validators.push(Validators.required);
+    if (field.validation?.minLength) validators.push(Validators.minLength(field.validation.minLength));
+    if (field.validation?.maxLength) validators.push(Validators.maxLength(field.validation.maxLength));
+    if (field.validation?.min !== undefined) validators.push(Validators.min(field.validation.min));
+    if (field.validation?.max !== undefined) validators.push(Validators.max(field.validation.max));
+    if (field.validation?.pattern) validators.push(Validators.pattern(field.validation.pattern));
+    if (this.fieldType(field) === 'email') validators.push(Validators.email);
+    return validators;
+  }
+
   private buildForm(): void {
     const group: Record<string, FormControl> = {};
 
     for (const field of this.fields()) {
-      const validators = [];
-
-      if (field.required) {
-        validators.push(Validators.required);
-      }
-
-      if (field.validation?.minLength) {
-        validators.push(Validators.minLength(field.validation.minLength));
-      }
-
-      if (field.validation?.maxLength) {
-        validators.push(Validators.maxLength(field.validation.maxLength));
-      }
-
-      if (field.validation?.min !== undefined) {
-        validators.push(Validators.min(field.validation.min));
-      }
-
-      if (field.validation?.max !== undefined) {
-        validators.push(Validators.max(field.validation.max));
-      }
-
-      if (field.validation?.pattern) {
-        validators.push(Validators.pattern(field.validation.pattern));
-      }
-
-      if (field.type === 'email') {
-        validators.push(Validators.email);
-      }
-
+      if (this.fieldType(field) === 'computed') continue;
       group[field.key] = new FormControl(
         { value: this.initialValue(field), disabled: field.disabled || this.disabled() },
-        validators
+        this.validatorsOf(field),
       );
     }
 
     this.formGroup = new FormGroup(group);
+    this.formSnapshot.set(this.formGroup.getRawValue() as Record<string, unknown>);
 
     // Emit value changes
     this.formGroup.valueChanges.subscribe((values) => {
+      this.formSnapshot.set(this.formGroup.getRawValue() as Record<string, unknown>);
       this.valueChange.emit(values as Record<string, unknown>);
     });
   }
@@ -434,39 +610,50 @@ export class FormComponent implements OnInit, OnChanges {
     const control = this.formGroup.get(field.key);
     if (!control || !control.errors) return '';
     const label = this.translateLabel(field.label);
+    const errors = control.errors;
 
-    if (control.errors['required']) {
+    if (errors['required']) {
       return this.t('form.errors.required', `${label} is required`, { label });
     }
-    if (control.errors['minlength']) {
-      return this.t('form.errors.minLength', `${label} must be at least ${control.errors['minlength'].requiredLength} characters`, {
+    if (errors['minlength']) {
+      return this.t('form.errors.minLength', `${label} must be at least ${errors['minlength'].requiredLength} characters`, {
         label,
-        count: control.errors['minlength'].requiredLength,
+        count: errors['minlength'].requiredLength,
       });
     }
-    if (control.errors['maxlength']) {
-      return this.t('form.errors.maxLength', `${label} must be at most ${control.errors['maxlength'].requiredLength} characters`, {
+    if (errors['maxlength']) {
+      return this.t('form.errors.maxLength', `${label} must be at most ${errors['maxlength'].requiredLength} characters`, {
         label,
-        count: control.errors['maxlength'].requiredLength,
+        count: errors['maxlength'].requiredLength,
       });
     }
-    if (control.errors['min']) {
-      return this.t('form.errors.min', `${label} must be at least ${control.errors['min'].min}`, {
+    if (errors['min']) {
+      return this.t('form.errors.min', `${label} must be at least ${errors['min'].min}`, {
         label,
-        value: control.errors['min'].min,
+        value: errors['min'].min,
       });
     }
-    if (control.errors['max']) {
-      return this.t('form.errors.max', `${label} must be at most ${control.errors['max'].max}`, {
+    if (errors['max']) {
+      return this.t('form.errors.max', `${label} must be at most ${errors['max'].max}`, {
         label,
-        value: control.errors['max'].max,
+        value: errors['max'].max,
       });
     }
-    if (control.errors['email']) {
+    if (errors['email']) {
       return this.t('form.errors.email', `${label} must be a valid email`, { label });
     }
-    if (control.errors['pattern']) {
+    if (errors['pattern']) {
       return this.t('form.errors.pattern', `${label} has an invalid format`, { label });
+    }
+    if (errors['ice']) {
+      return this.t('form.errors.ice', `${label} : ICE invalide — 15 chiffres requis`, { label });
+    }
+    if (errors['rib']) {
+      const message = typeof errors['rib']?.message === 'string' ? errors['rib'].message : null;
+      return message ?? this.t('form.errors.rib', `${label} : RIB invalide — 24 chiffres et clé`, { label });
+    }
+    if (errors['phoneMa']) {
+      return this.t('form.errors.phoneMa', `${label} : numéro marocain invalide`, { label });
     }
 
     return this.t('form.errors.invalid', 'Invalid value');
@@ -490,5 +677,39 @@ export class FormComponent implements OnInit, OnChanges {
   private t(key: string, fallback: string, params?: Record<string, unknown>): string {
     const translated = this.translate.instant(key, params);
     return translated === key ? fallback : translated;
+  }
+}
+
+function sameValue(a: unknown, b: unknown): boolean {
+  const empty = (value: unknown) => value === null || value === undefined || value === '';
+  if (empty(a) && empty(b)) return true;
+  return a === b;
+}
+
+function formatComputed(value: unknown, format: ComputedFieldFormat | undefined, currency?: string): string {
+  if (value == null || value === '') return '—';
+  switch (format) {
+    case 'money': {
+      const amount = Number(value);
+      if (Number.isNaN(amount)) return String(value);
+      return `${amount.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency ?? 'MAD'}`;
+    }
+    case 'percent': {
+      const ratio = Number(value);
+      if (Number.isNaN(ratio)) return String(value);
+      return `${(ratio * 100).toLocaleString('fr-MA', { maximumFractionDigits: 2 })} %`;
+    }
+    case 'number': {
+      const amount = Number(value);
+      if (Number.isNaN(amount)) return String(value);
+      return amount.toLocaleString('fr-MA');
+    }
+    case 'date': {
+      if (value instanceof Date) return value.toLocaleDateString('fr-MA');
+      const parsed = new Date(String(value));
+      return Number.isNaN(parsed.getTime()) ? String(value) : parsed.toLocaleDateString('fr-MA');
+    }
+    default:
+      return String(value);
   }
 }

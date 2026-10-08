@@ -6,33 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks an entity for CRUD generation.
- * Entities with this annotation will get auto-generated:
- * - DTOs (Create/Update) - if generateDto = true
- * - MapStruct Mapper - if generateMapper = true
- * - Service (extending JpaCrudService) - if generateService = true
- * - REST Controller (extending CrudController) - if generateController = true
+ * Marks an entity for CRUD generation (legacy generator).
  *
- * Generated services use a base/wrapper pattern:
- * - xxxServiceBase: auto-generated base (always regenerated)
- * - xxxService: custom wrapper (generated once, never overwritten)
- *
- * Example:
- * <pre>
- * @Entity
- * @Exposed(apiPath = "/api/items", product = "agora")
- * public class Item { ... }
- *
- * @Entity
- * @Exposed(
- *     apiPath = "/api/countries",
- *     product = "agora",
- *     generateDto = false,
- *     generateService = true
- * )
- * public class Country { ... }
- * </pre>
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser {@link ma.nafura.platform.framework.record.RecordController}
+ *             et un descripteur {@code records/*.json}.
  */
+@Deprecated(since = "2026-10", forRemoval = true)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Exposed {

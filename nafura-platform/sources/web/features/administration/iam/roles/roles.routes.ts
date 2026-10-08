@@ -1,33 +1,41 @@
 import { Routes } from '@angular/router';
 
 import { routePermissionGuard } from '@core/security/guards/permission.guard';
+import { ListingPageComponent } from '@platform/platform/listing';
+import { RecordPageComponent, unsavedChangesGuard } from '@platform/platform/record';
+
+import { ROLE_RECORD, ROLES_LISTING } from './roles.record';
 
 export const ROLES_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () => import('./role-listing').then((m) => m.RoleListingPage),
+    component: ListingPageComponent,
     canActivate: [routePermissionGuard],
     data: {
+      listing: ROLES_LISTING,
       permissionsAny: ['administration.role.read', 'tenant.roles.read'],
       title: 'Roles',
     },
   },
   {
     path: 'new',
-    loadComponent: () => import('./role-detail').then((m) => m.RoleDetailPage),
+    component: RecordPageComponent,
     canActivate: [routePermissionGuard],
+    canDeactivate: [unsavedChangesGuard],
     data: {
+      record: ROLE_RECORD,
       permissionsAny: ['administration.role.create', 'tenant.roles.write'],
       title: 'New Role',
     },
   },
   {
     path: ':id',
-    loadComponent: () => import('./role-detail').then((m) => m.RoleDetailPage),
+    component: RecordPageComponent,
     canActivate: [routePermissionGuard],
+    canDeactivate: [unsavedChangesGuard],
     data: {
+      record: ROLE_RECORD,
       permissionsAny: ['administration.role.read', 'tenant.roles.read'],
-      title: 'Role Details',
     },
   },
 ];

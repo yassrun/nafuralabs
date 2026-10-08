@@ -1,6 +1,5 @@
 export * from './models';
-export * from './config';
 export * from './services';
-export * from './template-listing';
 export * from './template-editor';
 export * from './components';
+export { PRINT_TEMPLATES_LISTING } from './templates.listing';

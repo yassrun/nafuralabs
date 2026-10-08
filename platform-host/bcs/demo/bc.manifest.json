@@ -11,6 +11,18 @@
       "demo.purchase-request": "/demo/purchase-requests/{id}",
       "demo.project": "/demo/projects/{id}"
     },
+    "provides": [
+      {
+        "id": "bc.demo",
+        "version": "0.2.0",
+        "api": ["demo.project", "demo.purchase-request"],
+        "events": [
+          "demo.purchasing.request.approved",
+          "demo.purchasing.request.rejected",
+          "demo.purchasing.request.ordered"
+        ]
+      }
+    ],
     "permissions": [
       { "id": "demo.notes.note.read" },
       { "id": "demo.notes.note.create" },
@@ -36,6 +48,7 @@
       { "id": "demo.purchasing.request.update" },
       { "id": "demo.purchasing.request.delete" },
       { "id": "demo.purchasing.request.submit" },
+      { "id": "demo.purchasing.request.approve" },
       { "id": "demo.purchasing.request.order" },
       { "id": "demo.purchasing.request.duplicate" },
       { "id": "demo.purchasing.request.print" },
@@ -43,7 +56,8 @@
       { "id": "demo.projects.project.create" },
       { "id": "demo.projects.project.update" },
       { "id": "demo.projects.project.delete" },
-      { "id": "demo.projects.project.advance" }
+      { "id": "demo.projects.project.advance" },
+      { "id": "demo.projects.project.approve" }
     ],
     "defaultRoles": [
       {
@@ -87,6 +101,7 @@
           "demo.purchasing.request.update",
           "demo.purchasing.request.delete",
           "demo.purchasing.request.submit",
+          "demo.purchasing.request.approve",
           "demo.purchasing.request.order",
           "demo.purchasing.request.duplicate",
           "demo.purchasing.request.print",
@@ -94,7 +109,8 @@
           "demo.projects.project.create",
           "demo.projects.project.update",
           "demo.projects.project.delete",
-          "demo.projects.project.advance"
+          "demo.projects.project.advance",
+          "demo.projects.project.approve"
         ]
       }
     ],
@@ -119,7 +135,14 @@
       {
         "id": "supplier-overview",
         "label": "Synthèse fournisseur",
-        "reason": "Tableau de synthèse calculé (demandes par état, montant cumulé, graphique), sans formulaire."
+        "reason": "Tableau de synthèse calculé (demandes par état, montant cumulé, graphique), sans formulaire.",
+        "placement": ["page", "section"]
+      },
+      {
+        "id": "purchase-requests-header",
+        "label": "Indicateurs demandes d’achat",
+        "reason": "Montant filtré et nombre de demandes en retard au-dessus de la liste.",
+        "placement": ["listing-header"]
       }
     ]
   }

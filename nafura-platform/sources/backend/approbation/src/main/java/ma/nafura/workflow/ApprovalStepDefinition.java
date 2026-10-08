@@ -9,7 +9,6 @@ import java.util.UUID;
 @Builder
 public class ApprovalStepDefinition {
     private int stepNumber;
-    private String approverRole;
+    private String approverPermission;
     private UUID approverId;
 }
-

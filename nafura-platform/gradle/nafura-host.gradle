@@ -1,5 +1,6 @@
 // Applied by a product backend: derives platform modules from app.nafura.json (spec.capabilities.disabled).
 import groovy.json.JsonSlurper
+import org.gradle.api.artifacts.ProjectDependency
 
 def platformRoot = file("${buildscript.sourceFile.parentFile}/..")
 def catalog = new JsonSlurper().parse(new File(platformRoot, 'capabilities.json')).capabilities
@@ -49,3 +50,17 @@ tasks.named('bootJar') { archiveFileName = "${applicationId}-backend.jar" }
 // Lab mode applies the SQL of exactly the modules composed above (nafura-migrations.gradle).
 apply from: new File(platformRoot, 'gradle/nafura-migrations.gradle')
 nafuraMigrations(configurations.runtimeClasspath)
+
+// A business context depends on another's published contract, never on its Gradle project.
+gradle.projectsEvaluated {
+    rootProject.subprojects.findAll { it.path.startsWith(':bc-') }.each { bc ->
+        bc.configurations.each { cfg ->
+            cfg.dependencies.withType(ProjectDependency).each { dep ->
+                def path = dep.dependencyProject.path
+                if (path.startsWith(':bc-') && path != bc.path) {
+                    throw new GradleException("${bc.path} depends on ${path}: a business context uses another's published contract, never its code.")
+                }
+            }
+        }
+    }
+}

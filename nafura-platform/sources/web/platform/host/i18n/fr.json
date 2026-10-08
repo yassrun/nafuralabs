@@ -297,12 +297,17 @@
     "navigation": {
       "templates": "Modèles d'impression",
       "numberingSequences": "Séquences de numérotation",
+      "scopeGrants": "Périmètres",
       "title": "Administration",
       "members": "Membres",
       "hub": "Accueil administration"
     },
     "templates": {
       "title": "Modèles d'impression",
+      "subtitle": "Modèles PDF utilisés pour imprimer les documents de l’organisation",
+      "views": {
+        "all": "Tous"
+      },
       "create": "Nouveau modèle",
       "clone": "Dupliquer le modèle",
       "editor": {
@@ -382,17 +387,46 @@
         "facture_client": "Facture client"
       }
     },
+    "scopeGrants": {
+      "title": "Périmètres",
+      "subtitle": "Un rôle limité à un enregistrement et à ses descendants (dossier, agence, portefeuille).",
+      "empty": "Aucun périmètre.",
+      "emptyHint": "Limitez un rôle à un nœud : la personne ne voit que ce nœud et ce qui en dépend.",
+      "saved": "Périmètre enregistré.",
+      "deleted": "Périmètre retiré.",
+      "deleteConfirm": "Retirer ce périmètre ? Le rôle de l’organisation, s’il y en a un, ne change pas.",
+      "views": { "all": "Tous" },
+      "fields": {
+        "user": "Utilisateur",
+        "role": "Rôle",
+        "entity": "Record",
+        "record": "Nœud"
+      },
+      "dialog": {
+        "createTitle": "Limiter un rôle",
+        "editTitle": "Modifier le périmètre"
+      },
+      "actions": {
+        "create": "Limiter un rôle",
+        "edit": "Modifier",
+        "delete": "Retirer"
+      }
+    },
     "numberingSequences": {
       "title": "Séquences de numérotation",
       "subtitle": "Configurer la numérotation automatique des documents",
       "loading": "Chargement des séquences...",
       "empty": "Aucune séquence configurée.",
+      "emptyHint": "Créez une séquence pour numéroter automatiquement les documents de l’organisation.",
       "none": "Aucun",
       "saved": "Séquence enregistrée.",
       "deleted": "Séquence supprimée.",
       "deleteConfirm": "Supprimer cette séquence ? Les documents déjà numérotés gardent leur numéro.",
       "saving": "Enregistrement...",
       "preview": "Aperçu",
+      "views": {
+        "all": "Toutes"
+      },
       "fields": {
         "name": "Nom",
         "code": "Code",
@@ -532,11 +566,16 @@
     },
     "audit": {
       "title": "Journal d'audit",
+      "subtitle": "Événements de l’organisation",
+      "views": {
+        "all": "Tous"
+      },
       "columns": {
         "date": "Date",
         "actor": "Acteur",
         "action": "Action",
         "entityType": "Type d'entité",
+        "entityId": "Identifiant",
         "details": "Détails"
       },
       "exportSuccess": "{count, plural, =0 {Aucune entrée exportée.} one {1 entrée exportée.} other {# entrées exportées.}}",
@@ -589,6 +628,11 @@
       "error": "Échec du chargement des modules."
     },
     "emailTemplates": {
+      "title": "Modèles d'e-mail",
+      "subtitle": "Modèles utilisés pour les e-mails système et métier",
+      "views": {
+        "all": "Tous"
+      },
       "create": "Nouveau modèle d'e-mail",
       "systemNames": {
         "invitation": "Invitation d’un membre",
@@ -625,7 +669,6 @@
         "previewEmpty": "Cliquez sur Aperçu pour afficher avec des données d'exemple.",
         "title": "Éditeur de modèle d'e-mail"
       },
-      "title": "Modèles d'e-mail",
       "loadError": "Modèle introuvable.",
       "saveSuccess": "Modèle enregistré.",
       "saveError": "Échec de l'enregistrement.",
@@ -756,6 +799,9 @@
       },
       "title": "Tâches planifiées",
       "subtitle": "Surveiller et gérer les tâches en arrière-plan",
+      "views": {
+        "all": "Toutes"
+      },
       "jobs": {
         "email-digest": "Récapitulatif quotidien des notifications",
         "audit-archive": "Rapport de volume du journal d’audit",
@@ -870,12 +916,26 @@
       "emptyHint": "Un webhook envoie les événements de l’organisation à une adresse de votre choix."
     },
     "workflows": {
+      "subtitle": "Définir les chaînes d'approbation par type d'entité",
+      "views": {
+        "all": "Tous",
+        "active": "Actifs",
+        "inactive": "Inactifs"
+      },
+      "emptyHint": "Créez un modèle pour définir les étapes et les rôles approbateurs.",
+      "actions": {
+        "activate": "Activer",
+        "deactivate": "Désactiver",
+        "delete": "Supprimer",
+        "activated": "Modèle activé.",
+        "deactivated": "Modèle désactivé."
+      },
       "stepDialog": {
         "title": "Étape du workflow",
         "stepName": "Nom de l'étape",
-        "approverRole": "Rôle approbateur",
+        "approverPermission": "Permission d'approbation",
         "timeoutHours": "Délai (heures)",
-        "escalationRole": "Rôle d'escalade",
+        "escalationPermission": "Permission d'escalade",
         "condition": "Condition (SpEL, optionnel)"
       },
       "columns": {
@@ -1468,6 +1528,9 @@
       "max": "{label} : au plus {value}.",
       "email": "{label} : adresse e-mail invalide.",
       "pattern": "{label} : format invalide.",
+      "ice": "{label} : ICE invalide — 15 chiffres requis.",
+      "rib": "{label} : RIB invalide — 24 chiffres et clé.",
+      "phoneMa": "{label} : numéro marocain invalide.",
       "invalid": "Valeur invalide."
     }
   },

@@ -1,5 +1,8 @@
 package ma.nafura.platform.hosttests.probe;
 
+import java.util.UUID;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -21,4 +24,7 @@ public class ProbeGroup extends TenantEntity {
     @NotBlank
     @Size(max = 120)
     private String name;
+
+    @Column(name = "parent_id")
+    private UUID parentId;
 }

@@ -8,10 +8,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
+import ma.nafura.platform.framework.scope.DataScope;
 import ma.nafura.platform.framework.record.RecordAccess;
 import ma.nafura.platform.tenancy.repository.TenantDomainRepository;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.annotation.Order;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -51,6 +53,7 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
     private final List<HandlerMapping> handlerMappings;
     private final ObjectProvider<TenantDomainRepository> tenantDomains;
     private final ObjectProvider<RecordAccess> recordAccess;
+    private final ObjectProvider<DataScope> dataScope;
     
     @Override
     protected void doFilterInternal(
@@ -121,7 +124,7 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
                 ));
                 return;
             }
-            if (!UserContext.hasPermission(requiredPermission)) {
+            if (!admitted(requiredPermission, handlerMethod)) {
                 log.warn("Permission denied: {} for user {} (role: {})", 
                         requiredPermission,
                         UserContext.getUserEmail(),
@@ -158,6 +161,15 @@ public class PermissionEnforcementFilter extends OncePerRequestFilter {
      * A domain the tenant switched off refuses its API to everyone: the first segment of a permission
      * is the domain code (bc.demo → demo.notes.note.read).
      */
+    /** Organisation-wide permission, or a grant on a record this controller scopes. */
+    private boolean admitted(String permission, HandlerMethod handler) {
+        if (UserContext.hasPermission(permission)) {
+            return true;
+        }
+        DataScope scope = dataScope.getIfAvailable();
+        return scope != null && scope.admits(permission, ClassUtils.getUserClass(handler.getBeanType()));
+    }
+
     private boolean isDomainDisabled(String permission) {
         UUID tenantId = TenantContext.getTenantIdOrNull();
         TenantDomainRepository domains = tenantDomains.getIfAvailable();

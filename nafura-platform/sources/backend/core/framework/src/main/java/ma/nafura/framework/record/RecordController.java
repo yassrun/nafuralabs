@@ -1,37 +1,20 @@
 package ma.nafura.platform.framework.record;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.GenericTypeResolver;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,8 +25,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import org.slf4j.Logger;
@@ -52,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.framework.context.TenantContext;
-import ma.nafura.platform.framework.context.UserContext;
 import ma.nafura.platform.framework.domain.TenantEntity;
 import ma.nafura.platform.framework.service.crud.CrudAuditHook;
 
@@ -62,15 +42,14 @@ import ma.nafura.platform.framework.service.crud.CrudAuditHook;
  * A business context writes {@code @SecuredResource(...) class XController extends RecordController<X>}:
  * permissions follow the HTTP method, Bean Validation on the entity validates the body.
  * Business logic goes in {@link #validate}, {@link #beforeSave}, {@link #afterSave}, {@link #beforeDelete} and
- * {@link #readOnlyFields}; redefining an endpoint of this class fails startup.
+ * {@link #readOnlyFields}; redefining an endpoint of this class or {@link ReadOnlyRecordController} fails startup.
  */
-public abstract class RecordController<E extends TenantEntity> {
+public abstract class RecordController<E extends TenantEntity> extends ReadOnlyRecordController<E> {
 
     private static final Logger log = LoggerFactory.getLogger(RecordController.class);
     private static final Set<String> MANAGED = Set.of("id", "tenantId", "createdAt", "updatedAt", "createdBy", "updatedBy", "status");
-    private static final int MAX_PAGE = 500;
     private static final Set<String> ENDPOINTS = Set.of(
-            "list", "options", "get", "create", "update", "delete", "properties", "aggregate", "lifecycle", "transitions", "fire");
+            "create", "update", "delete", "lifecycle", "transitions", "fire");
 
     @Autowired
     private LifecycleEngine lifecycles;
@@ -82,35 +61,9 @@ public abstract class RecordController<E extends TenantEntity> {
     private ObjectProvider<LifecycleNotifications> notifications;
 
     @Autowired
-    private RecordCatalog records;
-
-    @Autowired
-    private EntityManager entities;
-
-    @Autowired
-    private ObjectProvider<OrganizationZone> zones;
-
-    @Autowired
     private ObjectProvider<CrudAuditHook> auditHook;
 
     private Lifecycle lifecycle;
-    private RecordDescriptor descriptor;
-
-    protected abstract RecordRepository<E> repository();
-
-    /** Field shown by {@code /options}. */
-    protected String labelField() {
-        return "id";
-    }
-
-    protected Sort defaultSort() {
-        return Sort.by(Sort.Direction.DESC, "createdAt");
-    }
-
-    /** Classpath JSON of the record, e.g. {@code "records/purchase-request.json"}; none by default. */
-    protected String recordResource() {
-        return null;
-    }
 
     /**
      * Rules across fields, field → message. Not empty refuses the save (422, field errors) and nothing is stored.
@@ -137,29 +90,32 @@ public abstract class RecordController<E extends TenantEntity> {
         return Set.of();
     }
 
-    @PostConstruct
-    void registerRecord() {
-        refuseRedefinedEndpoints();
-        String resource = recordResource();
-        Class<?> recordType = GenericTypeResolver.resolveTypeArgument(getClass(), RecordController.class);
+    @Override
+    protected void afterRecordRegistered(Class<?> recordType) {
+        refuseRedefinedWriteEndpoints();
         registerRules(recordType);
-        if (resource != null) {
-            descriptor = RecordDescriptor.load(resource, recordType);
+        RecordDescriptor descriptor = descriptor();
+        if (descriptor != null) {
             lifecycle = descriptor.lifecycle();
             if (lifecycle != null) {
-                checkNotify(lifecycle, recordType, resource);
+                String source = recordResource();
+                checkNotify(lifecycle, recordType, source);
+                checkApproval(lifecycle, source);
                 lifecycles.<HasStatus>register(recordType, lifecycle, id -> find(id).map(HasStatus.class::cast), r -> repository().save(cast(r)));
             }
-            records.register(descriptor, mappingPath(), readPermission());
         }
         registerAccess();
     }
 
     /** An endpoint redefined by a subclass would skip the editable check, the audit or the rules. */
-    private void refuseRedefinedEndpoints() {
-        for (Class<?> type = ClassUtils.getUserClass(getClass()); type != null && type != RecordController.class; type = type.getSuperclass()) {
+    private void refuseRedefinedWriteEndpoints() {
+        for (Class<?> type = ClassUtils.getUserClass(getClass());
+                type != null && type != RecordController.class && type != ReadOnlyRecordController.class;
+                type = type.getSuperclass()) {
             for (Method method : type.getDeclaredMethods()) {
-                if (method.isBridge() || method.isSynthetic() || Modifier.isStatic(method.getModifiers())) continue;
+                if (method.isBridge() || method.isSynthetic() || Modifier.isStatic(method.getModifiers())) {
+                    continue;
+                }
                 if (ENDPOINTS.contains(method.getName())) {
                     throw new IllegalStateException(type.getName() + " redefines the endpoint " + method.getName()
                             + "() of RecordController: use validate, beforeSave, afterSave, beforeDelete or readOnlyFields");
@@ -170,8 +126,10 @@ public abstract class RecordController<E extends TenantEntity> {
 
     /** The seed applies the same rules as the API. */
     private void registerRules(Class<?> recordType) {
-        if (recordType == null) return;
-        records.registerRules(recordType, new RecordCatalog.Rules() {
+        if (recordType == null) {
+            return;
+        }
+        records().registerRules(recordType, new RecordCatalog.Rules() {
             @Override
             public Map<String, String> validate(Object record) {
                 Map<String, String> errors = RecordController.this.validate(entity(record), null);
@@ -193,39 +151,43 @@ public abstract class RecordController<E extends TenantEntity> {
     /** Entity key of attachments and notes: the lifecycle entity, otherwise the last segment of the mapping. */
     private void registerAccess() {
         SecuredResource secured = getClass().getAnnotation(SecuredResource.class);
-        if (secured == null || recordAccess == null) return;
+        if (secured == null || recordAccess == null) {
+            return;
+        }
         String scope = secured.domain() + "." + secured.feature() + "." + secured.resource();
         recordAccess.register(recordKey(), scope + ".read", scope + ".update", id -> find(id).isPresent());
     }
 
-    private String readPermission() {
-        SecuredResource secured = getClass().getAnnotation(SecuredResource.class);
-        return secured == null ? null : secured.domain() + "." + secured.feature() + "." + secured.resource() + ".read";
-    }
-
-    private String mappingPath() {
-        RequestMapping mapping = getClass().getAnnotation(RequestMapping.class);
-        return mapping != null && mapping.value().length > 0 ? mapping.value()[0] : "";
-    }
-
     private String recordKey() {
-        if (lifecycle != null && lifecycle.entity() != null && !lifecycle.entity().isBlank()) return lifecycle.entity();
+        if (lifecycle != null && lifecycle.entity() != null && !lifecycle.entity().isBlank()) {
+            return lifecycle.entity();
+        }
         String path = mappingPath();
         int slash = path.lastIndexOf('/');
         return slash >= 0 ? path.substring(slash + 1) : path;
     }
 
+    private String mappingPath() {
+        org.springframework.web.bind.annotation.RequestMapping mapping =
+                getClass().getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+        return mapping != null && mapping.value().length > 0 ? mapping.value()[0] : "";
+    }
+
     private void checkNotify(Lifecycle declared, Class<?> recordType, String source) {
         boolean any = declared.transitions().stream().anyMatch(t -> t.notifications() != null && !t.notifications().isEmpty());
-        if (!any) return;
+        if (!any) {
+            return;
+        }
         if (notifications == null || notifications.getIfAvailable() == null) {
             log.warn("Lifecycle {} declares notify but notifications are disabled; they will be ignored ({})", declared.entity(), source);
         }
         Set<String> permissions = DeclaredPermissions.load();
         Set<String> events = DeclaredNotifications.load().keySet();
-        Set<String> properties = recordType == null ? Set.of() : Stream.of(org.springframework.beans.BeanUtils.getPropertyDescriptors(recordType)).map(d -> d.getName()).collect(java.util.stream.Collectors.toSet());
+        Set<String> properties = recordType == null ? Set.of() : Stream.of(BeanUtils.getPropertyDescriptors(recordType)).map(d -> d.getName()).collect(java.util.stream.Collectors.toSet());
         for (Lifecycle.Transition transition : declared.transitions()) {
-            if (transition.notifications() == null) continue;
+            if (transition.notifications() == null) {
+                continue;
+            }
             for (Lifecycle.Notify notify : transition.notifications()) {
                 if (!events.contains(notify.event())) {
                     throw new IllegalStateException("Invalid lifecycle " + source + ": " + transition.id() + " notifies undeclared event " + notify.event());
@@ -247,41 +209,22 @@ public abstract class RecordController<E extends TenantEntity> {
         }
     }
 
-    @GetMapping
-    public Map<String, Object> list(
-            @RequestParam Map<String, String> params,
-            @RequestParam(value = "sort", required = false) List<String> sortParams) {
-        int page = Math.max(integer(params.get("page"), 0), 0);
-        int size = Math.min(Math.max(integer(params.get("size"), 20), 1), MAX_PAGE);
-        // Repeated `sort=field,dir` (Notion multi-sort); Map alone would keep only the first value.
-        Page<E> result = repository().findAll(specification(params), PageRequest.of(page, size, sort(sortParams)));
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("content", result.getContent());
-        body.put("totalElements", result.getTotalElements());
-        body.put("size", size);
-        return body;
-    }
-
-    /** {@code [{ value, label }]} for selects and lookups. */
-    @GetMapping("/options")
-    public List<Map<String, Object>> options(@RequestParam(value = "q", required = false) String q) {
-        Map<String, String> params = new LinkedHashMap<>();
-        if (q != null) {
-            params.put("q", q);
+    /** Approval permissions must be declared in a BC manifest (same rule as {@code notify}). */
+    private void checkApproval(Lifecycle declared, String source) {
+        Set<String> permissions = DeclaredPermissions.load();
+        if (permissions.isEmpty()) {
+            return;
         }
-        return repository().findAll(specification(params), PageRequest.of(0, MAX_PAGE, Sort.by(labelField()))).stream()
-                .map(record -> {
-                    Map<String, Object> option = new LinkedHashMap<>();
-                    option.put("value", record.getId());
-                    option.put("label", new BeanWrapperImpl(record).getPropertyValue(labelField()));
-                    return option;
-                })
-                .toList();
-    }
-
-    @GetMapping("/{id}")
-    public E get(@PathVariable UUID id) {
-        return require(id);
+        for (Lifecycle.Transition transition : declared.transitions()) {
+            if (transition.approval() == null) {
+                continue;
+            }
+            String permission = transition.approval().permission();
+            if (!permissions.contains(permission)) {
+                throw new IllegalStateException("Invalid lifecycle " + source + ": " + transition.id()
+                        + " approval uses undeclared permission " + permission);
+            }
+        }
     }
 
     @PostMapping
@@ -294,6 +237,7 @@ public abstract class RecordController<E extends TenantEntity> {
         }
         clearReadOnly(body);
         check(body, null);
+        place(body, "create");
         beforeSave(body, null);
         E saved = repository().save(body);
         auditHook.ifAvailable(hook -> hook.afterCreate(saved));
@@ -305,13 +249,14 @@ public abstract class RecordController<E extends TenantEntity> {
     @PutMapping("/{id}")
     @Transactional
     public E update(@PathVariable UUID id, @Valid @RequestBody E body) {
-        E record = require(id);
+        E record = require(id, permission("update"));
         requireEditable(record);
         E previous = copy(record);
         CrudAuditHook hook = auditHook.getIfAvailable();
         Map<String, Object> before = hook != null ? hook.beforeUpdate(record) : Map.of();
-        BeanUtils.copyProperties(body, record, kept());
+        BeanUtils.copyProperties(body, record, kept(record));
         check(record, previous);
+        place(record, "update");
         beforeSave(record, previous);
         E saved = repository().save(record);
         if (hook != null) {
@@ -324,53 +269,12 @@ public abstract class RecordController<E extends TenantEntity> {
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        E record = require(id);
+        E record = require(id, permission("delete"));
         requireEditable(record);
         beforeDelete(record);
         auditHook.ifAvailable(hook -> hook.afterDelete(record));
         repository().delete(record);
         return ResponseEntity.noContent().build();
-    }
-
-    /** Declared properties: type, label, whether they can be filtered or sorted, and the values of a status or a select. */
-    @GetMapping("/properties")
-    public Map<String, Object> properties() {
-        if (descriptor == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This record has no properties");
-        }
-        Map<String, Object> body = new LinkedHashMap<>();
-        descriptor.properties().forEach((key, property) -> body.put(key, propertyView(property)));
-        return body;
-    }
-
-    /** Sum, average and count of the whole filtered result, not of the current page. */
-    @GetMapping("/aggregate")
-    public Map<String, Object> aggregate(
-            @RequestParam Map<String, String> params,
-            @RequestParam(value = "sum", required = false) List<String> sums,
-            @RequestParam(value = "avg", required = false) List<String> avgs,
-            @RequestParam(value = "count", required = false) List<String> counts) {
-        Specification<E> spec = specification(params);
-        Map<String, Object> sum = new LinkedHashMap<>();
-        Map<String, Object> avg = new LinkedHashMap<>();
-        Map<String, Object> count = new LinkedHashMap<>();
-        for (String field : sums == null ? List.<String>of() : sums) {
-            requireNumeric(field, "sum");
-            sum.put(field, aggregate(spec, "sum", field));
-        }
-        for (String field : avgs == null ? List.<String>of() : avgs) {
-            requireNumeric(field, "avg");
-            avg.put(field, aggregate(spec, "avg", field));
-        }
-        for (String field : counts == null ? List.<String>of() : counts) {
-            requireProperty(field);
-            count.put(field, aggregate(spec, "count", field));
-        }
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("sum", sum);
-        body.put("avg", avg);
-        body.put("count", count);
-        return body;
     }
 
     /** Declared states and transitions (labels, tones) — the UI draws the status from it. */
@@ -412,38 +316,6 @@ public abstract class RecordController<E extends TenantEntity> {
         return record;
     }
 
-    protected Optional<E> find(UUID id) {
-        UUID tenantId = TenantContext.getTenantId();
-        return repository().findById(id).filter(record -> tenantId.equals(record.getTenantId()) && visibleToCaller(record));
-    }
-
-    /** External audiences only see records they own. No {@link OwnedBy} means no external owner, so nothing. */
-    private boolean visibleToCaller(E record) {
-        if (!externalAudience()) return true;
-        String field = ownerField();
-        if (field == null) return false;
-        Object owner = new BeanWrapperImpl(record).getPropertyValue(field);
-        UUID userId = UserContext.getUserIdOrNull();
-        return userId != null && userId.equals(owner);
-    }
-
-    private boolean externalAudience() {
-        return !"members".equals(UserContext.getAudience());
-    }
-
-    private String ownerField() {
-        Class<?> type = GenericTypeResolver.resolveTypeArgument(getClass(), RecordController.class);
-        if (type == null) return null;
-        for (Field field : type.getDeclaredFields()) {
-            if (field.getAnnotation(OwnedBy.class) != null) return field.getName();
-        }
-        return null;
-    }
-
-    private E require(UUID id) {
-        return find(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Record not found: " + id));
-    }
-
     private void check(E record, E previous) {
         Map<String, String> errors = validate(record, previous);
         if (errors != null && !errors.isEmpty()) {
@@ -451,15 +323,33 @@ public abstract class RecordController<E extends TenantEntity> {
         }
     }
 
-    /** Properties an update body never overwrites. */
-    private String[] kept() {
-        return Stream.concat(MANAGED.stream(), readOnlyFields().stream()).distinct().toArray(String[]::new);
+    /**
+     * Properties an update body never overwrites: managed and {@link #readOnlyFields}, plus every field
+     * outside {@code editableFields} for the current status (ignored silently, like managed fields).
+     */
+    private String[] kept(E existing) {
+        Set<String> keep = new java.util.LinkedHashSet<>(MANAGED);
+        keep.addAll(readOnlyFields());
+        if (lifecycle != null && existing instanceof HasStatus status) {
+            lifecycle.editableFieldsOf(status.getStatus()).ifPresent(allowed -> {
+                for (java.beans.PropertyDescriptor descriptor : BeanUtils.getPropertyDescriptors(entityClass())) {
+                    String name = descriptor.getName();
+                    if ("class".equals(name) || allowed.contains(name)) {
+                        continue;
+                    }
+                    keep.add(name);
+                }
+            });
+        }
+        return keep.toArray(String[]::new);
     }
 
     /** A create body cannot set a read-only field: it gets the value of a new record. */
     private void clearReadOnly(E record) {
         Set<String> readOnly = readOnlyFields();
-        if (readOnly.isEmpty()) return;
+        if (readOnly.isEmpty()) {
+            return;
+        }
         BeanWrapperImpl fresh = new BeanWrapperImpl(BeanUtils.instantiateClass(entityClass()));
         BeanWrapperImpl target = new BeanWrapperImpl(record);
         for (String field : readOnly) {
@@ -492,200 +382,9 @@ public abstract class RecordController<E extends TenantEntity> {
         return lifecycle;
     }
 
-    private Specification<E> specification(Map<String, String> params) {
-        UUID tenantId = TenantContext.getTenantId();
-        RecordFilter.Context context = filterContext(tenantId);
-        Specification<E> search = RecordFilter.search(params.get("q"), descriptor, context);
-        Specification<E> filter = descriptor == null ? null : RecordFilter.compile(params.get("filter"), descriptor.properties(), context);
-        return (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get("tenantId"), tenantId));
-            if (externalAudience()) {
-                String field = ownerField();
-                UUID userId = UserContext.getUserIdOrNull();
-                if (field == null || userId == null) {
-                    predicates.add(cb.disjunction());
-                } else {
-                    predicates.add(cb.equal(root.get(field), userId));
-                }
-            }
-            for (Specification<E> extra : Arrays.asList(search, filter)) {
-                if (extra == null) continue;
-                Predicate predicate = extra.toPredicate(root, query, cb);
-                if (predicate != null) predicates.add(predicate);
-            }
-            return cb.and(predicates.toArray(Predicate[]::new));
-        };
-    }
-
-    private RecordFilter.Context filterContext(UUID tenantId) {
-        ZoneId zone = zone();
-        return new RecordFilter.Context(tenantId, UserContext.getUserIdOrNull(), LocalDate.now(zone), zone, externalAudience(),
-                records::target,
-                entity -> {
-                    RecordCatalog.Target target = records.target(entity);
-                    return target != null && (target.readPermission() == null || UserContext.hasPermission(target.readPermission()));
-                });
-    }
-
-    /**
-     * Multi-sort: repeated {@code sort=field:asc} (preferred). Also accepts {@code field,asc} and the
-     * Spring-split form {@code [field, asc, …]} where a comma inside one query value becomes two list entries.
-     */
-    private Sort sort(List<String> sortParams) {
-        if (sortParams == null || sortParams.isEmpty()) {
-            return defaultSort();
-        }
-        List<Sort.Order> orders = new ArrayList<>();
-        for (int i = 0; i < sortParams.size(); i++) {
-            String entry = sortParams.get(i);
-            if (entry == null || entry.isBlank()) {
-                continue;
-            }
-            if (entry.equalsIgnoreCase("asc") || entry.equalsIgnoreCase("desc")) {
-                continue; // orphan direction from a previous Spring comma-split
-            }
-            String field;
-            Sort.Direction direction = Sort.Direction.ASC;
-            if (entry.contains(":")) {
-                String[] parts = entry.split(":", 2);
-                field = parts[0].trim();
-                if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("desc")) {
-                    direction = Sort.Direction.DESC;
-                }
-            } else if (entry.contains(",")) {
-                String[] parts = entry.split(",", 2);
-                field = parts[0].trim();
-                if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("desc")) {
-                    direction = Sort.Direction.DESC;
-                }
-            } else {
-                field = entry.trim();
-                if (i + 1 < sortParams.size()) {
-                    String next = sortParams.get(i + 1);
-                    if (next != null && (next.equalsIgnoreCase("asc") || next.equalsIgnoreCase("desc"))) {
-                        if (next.equalsIgnoreCase("desc")) {
-                            direction = Sort.Direction.DESC;
-                        }
-                        i++;
-                    }
-                }
-            }
-            if (field.isBlank()) {
-                continue;
-            }
-            if (descriptor != null) {
-                RecordProperty property = descriptor.property(field);
-                if (property == null || !property.sortable()) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Property " + field + " is not sortable");
-                }
-            }
-            orders.add(new Sort.Order(direction, field));
-        }
-        return orders.isEmpty() ? defaultSort() : Sort.by(orders);
-    }
-
-    private Map<String, Object> propertyView(RecordProperty property) {
-        Map<String, Object> view = new LinkedHashMap<>();
-        view.put("label", property.label());
-        view.put("type", property.type());
-        view.put("filterable", property.filterable());
-        view.put("sortable", property.sortable());
-        if (property.target() != null) {
-            view.put("target", property.target());
-            String endpoint = records.endpoint(property.target());
-            if (endpoint != null) {
-                view.put("endpoint", endpoint);
-                view.put("options", endpoint + "/options");
-            }
-        }
-        if (property.via() != null) {
-            view.put("via", property.via());
-        }
-        if (property.currency() != null) {
-            view.put("currency", property.currency());
-        }
-        if (property.display() != null) {
-            view.put("display", property.display());
-        }
-        if ("status".equals(property.type()) && lifecycle != null) {
-            view.put("values", lifecycle.states().stream().map(state -> {
-                Map<String, Object> item = new LinkedHashMap<>();
-                item.put("id", state.id());
-                item.put("label", state.label());
-                item.put("tone", state.tone());
-                return item;
-            }).toList());
-        } else if ("select".equals(property.type())) {
-            view.put("values", property.options().stream().map(option -> {
-                Map<String, Object> item = new LinkedHashMap<>();
-                item.put("id", option);
-                item.put("label", option);
-                return item;
-            }).toList());
-        }
-        return view;
-    }
-
-    private void requireNumeric(String field, String function) {
-        RecordProperty property = requireProperty(field);
-        if (!"number".equals(property.type()) && !"money".equals(property.type())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot " + function + " property " + field);
-        }
-    }
-
-    private RecordProperty requireProperty(String field) {
-        if (descriptor == null || descriptor.property(field) == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown property " + field);
-        }
-        return descriptor.property(field);
-    }
-
-    private Number aggregate(Specification<E> spec, String function, String field) {
-        CriteriaBuilder cb = entities.getCriteriaBuilder();
-        CriteriaQuery<Number> query = cb.createQuery(Number.class);
-        Root<E> root = query.from(entityClass());
-        query.select(switch (function) {
-            case "sum" -> cb.sum(root.get(field));
-            case "avg" -> cb.avg(root.get(field));
-            case "count" -> cb.count(root.get(field));
-            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown aggregate " + function);
-        });
-        query.where(spec.toPredicate(root, query, cb));
-        Number value = entities.createQuery(query).getSingleResult();
-        return value == null ? BigDecimal.ZERO : value;
-    }
-
-    private ZoneId zone() {
-        ZoneId found = ZoneId.of("UTC");
-        for (OrganizationZone candidate : zones) {
-            if (candidate instanceof UtcOrganizationZone) {
-                continue;
-            }
-            try {
-                return candidate.zone();
-            } catch (RuntimeException ignored) {
-                return found;
-            }
-        }
-        return found;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Class<E> entityClass() {
-        return (Class<E>) GenericTypeResolver.resolveTypeArgument(getClass(), RecordController.class);
-    }
-
-    private static int integer(String value, int fallback) {
-        try {
-            return value == null ? fallback : Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return fallback;
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private E cast(HasStatus record) {
         return (E) record;
     }
 }
+

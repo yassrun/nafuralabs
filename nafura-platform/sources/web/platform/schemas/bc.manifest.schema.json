@@ -80,7 +80,12 @@
             "type": "object",
             "required": ["id", "version"],
             "additionalProperties": false,
-            "properties": { "id": { "type": "string" }, "version": { "$ref": "#/$defs/version" } }
+            "properties": {
+              "id": { "type": "string" },
+              "version": { "$ref": "#/$defs/version" },
+              "api": { "type": "array", "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$" } },
+              "events": { "type": "array", "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$" } }
+            }
           }
         },
         "requires": {
@@ -92,7 +97,9 @@
             "properties": {
               "id": { "type": "string" },
               "version": { "type": "string", "pattern": "^\\^\\d+\\.\\d+\\.\\d+$" },
-              "optional": { "type": "boolean" }
+              "optional": { "type": "boolean" },
+              "api": { "type": "array", "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$" } },
+              "events": { "type": "array", "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$" } }
             }
           }
         },
@@ -114,7 +121,12 @@
             "properties": {
               "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
               "label": { "type": "string" },
-              "reason": { "type": "string" }
+              "reason": { "type": "string" },
+              "placement": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": { "enum": ["page", "section", "listing-header"] }
+              }
             }
           }
         },

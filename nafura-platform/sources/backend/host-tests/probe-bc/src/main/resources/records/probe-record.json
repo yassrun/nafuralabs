@@ -9,6 +9,7 @@
     "createdBy": { "label": "Créé par", "type": "person", "filterable": true },
     "createdAt": { "label": "Créé le", "filterable": true, "sortable": true }
   },
+  "scope": { "of": "probe.group", "field": "groupId" },
   "initial": "DRAFT",
   "editable": ["DRAFT"],
   "states": [
@@ -25,7 +26,7 @@
       "to": "SUBMITTED",
       "permission": "probe.records.record.submit",
       "requires": ["amount"],
-      "approval": { "role": "PROBE_LEAD", "when": "amount > 1000", "approved": "approve", "rejected": "reject" }
+      "approval": { "permission": "probe.records.record.approve", "when": "amount > 1000", "approved": "approve", "rejected": "reject" }
     },
     { "id": "approve", "label": "Approve", "from": ["SUBMITTED"], "to": "APPROVED", "system": true },
     { "id": "reject", "label": "Reject", "from": ["SUBMITTED"], "to": "REJECTED", "system": true }

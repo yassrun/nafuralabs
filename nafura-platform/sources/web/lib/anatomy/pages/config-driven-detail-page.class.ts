@@ -200,7 +200,7 @@ export const ConfigDrivenDetailPageStyles = `
  * - Toast notifications
  * - Navigation
  *
- * @stable
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser `nf-record-page`.
  *
  * Subclass must provide:
  * - facade: Entity-specific facade

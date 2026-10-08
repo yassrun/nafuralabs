@@ -95,28 +95,27 @@ public class DocumentTemplateService {
         }
         TemplateBodyValidator.validate(body);
 
-        DocumentTemplate t = DocumentTemplate.builder()
-                .tenantId(tenantId)
-                .code(request.getCode())
-                .name(request.getName())
-                .entityType(
-                        request.getEntityType() != null && !request.getEntityType().isBlank()
-                                ? request.getEntityType()
-                                : (source != null ? source.getEntityType() : request.getEntityType()))
-                .format(request.getFormat() != null && !request.getFormat().isBlank()
-                        ? request.getFormat()
-                        : (source != null && source.getFormat() != null ? source.getFormat() : "pdf"))
-                .templateBody(body)
-                .isSystem(false)
-                .paperSize(firstNonBlank(request.getPaperSize(), source != null ? source.getPaperSize() : null, "A4"))
-                .orientation(firstNonBlank(
-                        request.getOrientation(), source != null ? source.getOrientation() : null, "portrait"))
-                .marginsCss(firstNonBlank(
-                        request.getMarginsCss(), source != null ? source.getMarginsCss() : null, null))
-                .metadata(firstNonBlank(request.getMetadata(), source != null ? source.getMetadata() : null, null))
-                .isDefault(request.getIsDefault() != null ? request.getIsDefault() : false)
-                .isActive(request.getIsActive() != null ? request.getIsActive() : true)
-                .build();
+        DocumentTemplate t = new DocumentTemplate();
+        t.setTenantId(tenantId);
+        t.setCode(request.getCode());
+        t.setName(request.getName());
+        t.setEntityType(
+                request.getEntityType() != null && !request.getEntityType().isBlank()
+                        ? request.getEntityType()
+                        : (source != null ? source.getEntityType() : request.getEntityType()));
+        t.setFormat(request.getFormat() != null && !request.getFormat().isBlank()
+                ? request.getFormat()
+                : (source != null && source.getFormat() != null ? source.getFormat() : "pdf"));
+        t.setTemplateBody(body);
+        t.setIsSystem(false);
+        t.setPaperSize(firstNonBlank(request.getPaperSize(), source != null ? source.getPaperSize() : null, "A4"));
+        t.setOrientation(firstNonBlank(
+                request.getOrientation(), source != null ? source.getOrientation() : null, "portrait"));
+        t.setMarginsCss(firstNonBlank(
+                request.getMarginsCss(), source != null ? source.getMarginsCss() : null, null));
+        t.setMetadata(firstNonBlank(request.getMetadata(), source != null ? source.getMetadata() : null, null));
+        t.setIsDefault(request.getIsDefault() != null ? request.getIsDefault() : false);
+        t.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
         return repository.save(t);
     }
 

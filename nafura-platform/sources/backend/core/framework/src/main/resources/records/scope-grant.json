@@ -1,0 +1,10 @@
+{
+  "entity": "platform.scope-grant",
+  "search": ["roleCode", "entity"],
+  "properties": {
+    "userId": { "label": "Utilisateur", "type": "person", "filterable": true },
+    "roleCode": { "label": "Rôle", "filterable": true, "sortable": true },
+    "entity": { "label": "Record", "filterable": true, "sortable": true },
+    "recordId": { "label": "Nœud", "type": "person", "filterable": true }
+  }
+}

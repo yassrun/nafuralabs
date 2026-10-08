@@ -86,6 +86,7 @@ export interface AdministrationSectionConfig {
   aiProviders?: { enabled: boolean };
   numberingSequences?: { enabled: boolean };
   subscriptions?: { enabled: boolean };
+  scopeGrants?: { enabled: boolean };
 }
 
 export interface UserSettingsSectionConfig {
@@ -171,6 +172,7 @@ export const DEFAULT_APP_SHELL_CONFIG: Omit<AppShellConfig, 'applicationId' | 'a
         aiProviders: { enabled: true },
         numberingSequences: { enabled: true },
         subscriptions: { enabled: true },
+        scopeGrants: { enabled: true },
       },
     },
     userSettings: {

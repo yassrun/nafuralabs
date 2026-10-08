@@ -139,7 +139,7 @@ export const ConfigDrivenListingPageStyles = `
  * - Refresh mechanism
  * - Header config generation
  *
- * @stable
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser `nf-listing-page`.
  *
  * Subclass must provide:
  * - facade: Entity-specific facade

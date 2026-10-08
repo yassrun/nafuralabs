@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS reference_value (
     code           VARCHAR(50) NOT NULL,
     name           VARCHAR(200) NOT NULL,
     sort_order     INTEGER,
+    created_by     UUID,
+    updated_by     UUID,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );

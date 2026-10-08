@@ -1,36 +1,30 @@
 import { Routes } from '@angular/router';
 
 import { routePermissionGuard } from '@core/security/guards/permission.guard';
+import { ListingPageComponent } from '@platform/platform/listing';
+import { RecordPageComponent, unsavedChangesGuard } from '@platform/platform/record';
+
+import { MEMBER_RECORD, MEMBERS_LISTING } from './members.record';
 
 export const MEMBERS_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./member-listing').then((m) => m.MemberListingPage),
+    component: ListingPageComponent,
     canActivate: [routePermissionGuard],
     data: {
+      listing: MEMBERS_LISTING,
       permissionsAny: ['administration.members.read', 'tenant.members.read'],
       title: 'Members',
     },
   },
   {
-    path: 'new',
-    loadComponent: () =>
-      import('./member-detail').then((m) => m.MemberDetailPage),
-    canActivate: [routePermissionGuard],
-    data: {
-      permissionsAny: ['administration.members.write', 'tenant.members.write'],
-      title: 'Invite Member',
-    },
-  },
-  {
     path: ':id',
-    loadComponent: () =>
-      import('./member-detail').then((m) => m.MemberDetailPage),
+    component: RecordPageComponent,
     canActivate: [routePermissionGuard],
+    canDeactivate: [unsavedChangesGuard],
     data: {
+      record: MEMBER_RECORD,
       permissionsAny: ['administration.members.read', 'tenant.members.read'],
-      title: 'Member Details',
     },
   },
 ];

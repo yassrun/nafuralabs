@@ -12,6 +12,8 @@
       "filterable": true
     },
     "city": { "label": "Ville", "filterable": true, "sortable": true },
+    "country": { "label": "Pays", "filterable": true },
+    "vatNumber": { "label": "N° de TVA" },
     "active": { "label": "Statut", "filterable": true },
     "paymentTerms": {
       "label": "Paiement",
@@ -22,6 +24,8 @@
     "rating": { "label": "Note", "filterable": true, "sortable": true },
     "email": { "label": "E-mail", "filterable": true },
     "phone": { "label": "Téléphone" },
+    "ice": { "label": "ICE" },
+    "rib": { "label": "RIB" },
     "address": { "label": "Adresse" },
     "deliveryDays": { "label": "Délai de livraison (jours)", "filterable": true, "sortable": true },
     "notes": { "label": "Notes internes" },

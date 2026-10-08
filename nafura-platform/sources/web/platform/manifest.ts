@@ -15,12 +15,20 @@ export type NafuraCompatibleVersion = `^${number}.${number}.${number}`;
 export interface CapabilityContract {
   id: string;
   version: NafuraVersion;
+  /** Record entity keys a business context publishes. A subset of its {@code spec.records}. */
+  api?: string[];
+  /** Notification event ids a business context publishes. A subset of its {@code spec.notifications}. */
+  events?: string[];
 }
 
 export interface CapabilityRequirement {
   id: string;
   version: NafuraCompatibleVersion;
   optional?: boolean;
+  /** Record keys consumed from the provider's published api. */
+  api?: string[];
+  /** Event ids consumed from the provider's published events. */
+  events?: string[];
 }
 
 export interface PermissionDeclaration {

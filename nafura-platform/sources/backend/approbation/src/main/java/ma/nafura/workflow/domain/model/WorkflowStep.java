@@ -32,8 +32,8 @@ public class WorkflowStep {
     @Column(name = "name", nullable = false, length = 200)
     private String name;
 
-    @Column(name = "approver_role", nullable = false, length = 80)
-    private String approverRole;
+    @Column(name = "approver_permission", nullable = false, length = 120)
+    private String approverPermission;
 
     @Column(name = "condition")
     private String condition;
@@ -41,8 +41,8 @@ public class WorkflowStep {
     @Column(name = "timeout_hours")
     private Integer timeoutHours;
 
-    @Column(name = "escalation_role", length = 80)
-    private String escalationRole;
+    @Column(name = "escalation_permission", length = 120)
+    private String escalationPermission;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
@@ -61,4 +61,3 @@ public class WorkflowStep {
         this.updatedAt = OffsetDateTime.now();
     }
 }
-

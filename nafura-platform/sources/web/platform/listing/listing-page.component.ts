@@ -33,6 +33,8 @@ import {
 } from './listing-properties';
 import type { ListingAction, ListingPageConfig, ListingView, Row } from './listing-page.types';
 import { ListingTreeViewComponent } from './listing-tree-view.component';
+import { LISTING_HEADER, type ListingAggregateSpec, type ListingHeaderContext } from './listing-header.context';
+import { ListingHeaderHostComponent } from './listing-header-host.component';
 
 const ACTION_PREFIX = 'listing:';
 const DRAWN = new Set(['table', 'board', 'calendar', 'tree']);
@@ -63,8 +65,17 @@ interface Aggregates {
     ListingTreeViewComponent,
     ListingBoardViewComponent,
     ListingCalendarViewComponent,
+    ListingHeaderHostComponent,
   ],
-  providers: [ListingQueryStore, { provide: LISTING_PAGE, useExisting: forwardRef(() => ListingPageComponent) }],
+  providers: [
+    ListingQueryStore,
+    { provide: LISTING_PAGE, useExisting: forwardRef(() => ListingPageComponent) },
+    {
+      provide: LISTING_HEADER,
+      useFactory: (page: ListingPageComponent): ListingHeaderContext => page.headerContext(),
+      deps: [forwardRef(() => ListingPageComponent)],
+    },
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (embedded()) {
@@ -81,9 +92,15 @@ interface Aggregates {
             <nf-listing-toolbar (actionClick)="run($event)" />
           </div>
         </div>
+        @if (hasCustomHeader()) {
+          <nf-listing-header-host class="nf-listing-page__custom-header" [header]="config().header" [loadHeader]="config().loadHeader" />
+        }
       }
       @switch (view().layout) {
         @case ('tree') {
+          @if (hasCustomHeader()) {
+            <nf-listing-header-host class="nf-listing-page__custom-header" [header]="config().header" [loadHeader]="config().loadHeader" />
+          }
           @defer (on immediate) {
             <nf-listing-tree-view />
           }
@@ -112,7 +129,11 @@ interface Aggregates {
             (actionClick)="run($event)"
             (selectionChange)="selection.set($event)"
             (rowClick)="config().open ? open($event) : null"
-            (rowDblClick)="open($event)" />
+            (rowDblClick)="open($event)">
+            @if (!bar() && hasCustomHeader()) {
+              <nf-listing-header-host nfListingHeader class="nf-listing-page__custom-header" [header]="config().header" [loadHeader]="config().loadHeader" />
+            }
+          </nf-listing-flat>
           @if (footer().length > 0) {
             <div class="nf-listing-page__footer" role="status">
               @for (total of footer(); track total.key) {
@@ -144,6 +165,7 @@ interface Aggregates {
       font-weight: 600;
     }
     .nf-listing-page__footer-label { font-weight: 400; color: var(--nf-text-secondary, #6b7280); }
+    .nf-listing-page__custom-header { display: block; margin: 0 0 12px; }
   `,
 })
 export class ListingPageComponent implements ListingPageContext {
@@ -195,6 +217,8 @@ export class ListingPageComponent implements ListingPageContext {
 
   /** Board and calendar: the toolbar alone, the view draws the rows. */
   protected readonly bar = computed(() => this.view().layout === 'board' || this.view().layout === 'calendar');
+
+  protected readonly hasCustomHeader = computed(() => !!(this.config().header || this.config().loadHeader));
 
   private readonly allowed = computed(() =>
     (this.config().actions ?? []).filter((action) => !action.permission || this.permissions.hasPermission(action.permission)),
@@ -360,6 +384,39 @@ export class ListingPageComponent implements ListingPageContext {
     return allOf(this.config().filter, this.view().filter, ...pills, toRecordFilter(group, filterTargets(this.properties(), this.targets())));
   }
 
+  private readonly headerFilter = computed(() => this.filter());
+  private readonly headerQ = computed(() => this.query()?.search?.trim() ?? '');
+
+  /** Injection surface for a listing `header` screen. */
+  headerContext(): ListingHeaderContext {
+    return {
+      filter: this.headerFilter,
+      q: this.headerQ,
+      aggregate: (spec) => this.aggregateForHeader(spec),
+    };
+  }
+
+  private async aggregateForHeader(
+    spec: ListingAggregateSpec,
+    extra?: RecordFilter | null,
+  ): Promise<Record<string, Record<string, number>>> {
+    const params: Record<string, string | string[]> = {};
+    const search = this.headerQ();
+    if (search) params['q'] = search;
+    const filter = allOf(this.filter(), extra ?? null);
+    if (filter) params['filter'] = JSON.stringify(filter);
+    for (const [aggregate, keys] of Object.entries(spec)) {
+      if (keys?.length) params[aggregate] = keys;
+    }
+    try {
+      return await firstValueFrom(
+        this.http.get<Record<string, Record<string, number>>>(this.url(`${this.config().endpoint}/aggregate`), { params }),
+      );
+    } catch {
+      return {};
+    }
+  }
+
   private viewSortLevels(viewId?: string): ListingQueryState['sort'] {
     const view = this.config().views.find((v) => v.id === viewId) ?? this.view();
     const levels: NonNullable<ListingQueryState['sort']> = [];
@@ -479,7 +536,13 @@ export class ListingPageComponent implements ListingPageContext {
     }
     let body: unknown;
     if (action.form) {
-      const values = await this.dialogs.form({ title: action.form.title, fields: action.form.fields, values: action.form.values?.(item) });
+      const lookups = await this.loadFormLookups(action.form.lookups);
+      const values = await this.dialogs.form({
+        title: action.form.title,
+        fields: action.form.fields,
+        values: action.form.values?.(item),
+        lookups,
+      });
       if (!values) return;
       const filled = { ...defaults, ...values };
       body = action.form.body ? action.form.body(filled, item) : item && action.request?.method === 'PUT' ? { ...item, ...filled } : filled;
@@ -506,6 +569,17 @@ export class ListingPageComponent implements ListingPageContext {
       this.toast.error(ruleRefusal(error, label) ?? this.translate.instant('Action failed'));
     }
     await this.reload();
+  }
+
+  private async loadFormLookups(paths?: Record<string, string>): Promise<LookupContext | undefined> {
+    if (!paths || !Object.keys(paths).length) return undefined;
+    const entries = await Promise.all(
+      Object.entries(paths).map(async ([key, path]) => {
+        const options = await firstValueFrom(this.http.get<{ value: unknown; label: unknown }[]>(this.url(path))).catch(() => []);
+        return [key, options.map((option) => ({ key: option.value as string, value: String(option.label ?? '') }))] as const;
+      }),
+    );
+    return Object.fromEntries(entries);
   }
 
   message(error: unknown): string {

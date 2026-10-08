@@ -19,7 +19,7 @@ Un seul chemin : règle métier (`notify` sur transition, mention, affectation, 
 
 **Préférences.** `GET|PUT /api/v1/platform/collaboration/notification-preferences` (utilisateur) ; `…/organisation` (`administration.notifications.configure`). UI : Mes paramètres → Notifications ; Paramètres organisation → Notifications. Un interrupteur = un canal ; l’utilisateur ne rallume pas un canal coupé par l’org ; `mandatory` verrouillé.
 
-**Inbox.** `/notifications` : Non lues / Toutes / Lues, filtre `source`, pagination, libellé, temps relatif. Clic → `actionUrl` ou fiche via `spec.records` du manifeste du BC (`entityType` + `entityId`). Approbation en attente : membres du rôle (ou `approverId`) ; le demandeur n’est pas prévenu de sa propre demande.
+**Inbox.** `/notifications` : Non lues / Toutes / Lues, filtre `source`, pagination, libellé, temps relatif. Clic → `actionUrl` ou fiche via `spec.records` du manifeste du BC (`entityType` + `entityId`). Approbation en attente : détenteurs de la permission (ou `approverId`) ; le demandeur n’est pas prévenu de sa propre demande.
 
 **Temps réel.** `GET …/notifications/stream` (SSE). Un seul client web (`PlatformNotificationStreamService`) : ouverture à l’auth + tenant, fermeture déconnexion / changement d’org. Livraison in-app → badge cloche + préfixe liste.
 

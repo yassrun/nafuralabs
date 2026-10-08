@@ -98,6 +98,35 @@ test('roleChecks detects role APIs and declared role codes in code', () => {
 });
 
 for (const product of HOST_PRODUCTS) {
+  test(`${product} business contexts depend on a published contract, never on another context's code`, () => {
+    const root = join(repo, product, 'bcs');
+    if (!existsSync(root)) return;
+    const offenders = [];
+    for (const name of readdirSync(root)) {
+      const backend = join(root, name, 'backend');
+      if (!existsSync(backend)) continue;
+      const walk = (dir) => {
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+          if (SKIPPED_DIRS.has(entry.name)) continue;
+          const full = join(dir, entry.name);
+          if (entry.isDirectory()) walk(full);
+          else if (entry.name.endsWith('.java') || entry.name.endsWith('.gradle') || entry.name.endsWith('.kts')) {
+            const source = readFileSync(full, 'utf8');
+            if (/project\s*\(\s*['"]:bc-/.test(source)) offenders.push(relative(root, full));
+            const own = name.replace(/-/g, '');
+            for (const match of source.matchAll(/import\s+(?:static\s+)?ma\.nafura\.bc\.([a-z0-9_]+)/g)) {
+              if (match[1] !== own) offenders.push(`${relative(root, full)}: ${match[1]}`);
+            }
+          }
+        }
+      };
+      walk(backend);
+    }
+    assert.deepEqual(offenders, []);
+  });
+}
+
+for (const product of HOST_PRODUCTS) {
   test(`${product} business contexts check permissions, never roles`, () => {
     const codes = declaredRoleCodes(product);
     if (product === 'platform-host') assert.ok(codes.length > 0, 'declared roles found');

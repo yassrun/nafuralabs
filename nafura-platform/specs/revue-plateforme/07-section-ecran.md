@@ -91,12 +91,16 @@ header?: Type<unknown>;
 3. Le garde-fou refuse une section non déclarée (essai temporaire).
 4. Largeur mobile.
 
+## État (2026-10-08)
+
+Livré : `kind: 'screen'` + `RECORD_SECTION`, `ListingPageConfig.loadHeader` + `LISTING_HEADER`, `placement` dans le schéma et `bc-screens.test`, démo (synthèse fournisseur en section + en-tête demandes).
+
 ## Critères d'acceptation
 
-- [ ] `kind: 'screen'` et `ListingPageConfig.header` sont livrés, avec leurs contextes.
-- [ ] `placement` est dans le schéma et contrôlé.
-- [ ] Le BC démo exerce les deux.
-- [ ] Le composant est chargé à la demande (chunk séparé visible dans le build).
+- [x] `kind: 'screen'` et `ListingPageConfig.header` sont livrés, avec leurs contextes.
+- [x] `placement` est dans le schéma et contrôlé.
+- [x] Le BC démo exerce les deux.
+- [x] Le composant est chargé à la demande (`loadScreen` / `loadHeader`).
 
 ## Documentation
 

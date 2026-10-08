@@ -62,10 +62,10 @@ Un seul jeu de types de champs : `FormFieldType`, rendu par `nf-form`, utilisabl
 
 ## Critères d'acceptation
 
-- [ ] Les 5 types marocains et `money` sont utilisables dans `RecordPageConfig` et dans `PageForm`.
-- [ ] Le BC démo en utilise au moins trois (règle 11 d'ARCHITECTURE.md).
-- [ ] Annotations serveur `@Ice`, `@Rib`, `@PhoneMa` testées.
-- [ ] `custom` est documenté ou retiré.
+- [x] Les 5 types marocains et `money` sont utilisables dans `RecordPageConfig` et dans `PageForm`.
+- [x] Le BC démo en utilise au moins trois (règle 11 d'ARCHITECTURE.md).
+- [x] Annotations serveur `@Ice`, `@Rib`, `@PhoneMa` testées.
+- [x] `custom` est documenté ou retiré.
 
 ## Documentation
 

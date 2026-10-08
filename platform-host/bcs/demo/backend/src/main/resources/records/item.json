@@ -15,5 +15,6 @@
     "unitPrice": { "label": "Prix unitaire", "type": "money", "filterable": true, "sortable": true, "currency": "MAD" },
     "active": { "label": "Article actif", "filterable": true },
     "description": { "label": "Description" }
-  }
+  },
+  "scope": { "of": "demo.category", "field": "categoryId" }
 }

@@ -1,6 +1,6 @@
 # 09 — Marque et libellés du produit
 
-> Revue 2026-10-07, axes extensibilité et UX. Taille **M** (front). Aucune dépendance.
+> Revue 2026-10-07, axes extensibilité et UX. Taille **M** (front). Le lot 1 dépend du lot 1 de la spec [11](11-formulaires-et-design-system.md) (jetons uniques, thème Material alimenté par les jetons).
 > Recoupe « surcharge du design par produit » et « i18n par BC » (ROADMAP 5).
 
 ## Objectif

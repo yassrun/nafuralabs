@@ -39,6 +39,8 @@ import { Observable } from 'rxjs';
  * Extend this class for feature-level pages.
  * Provides route handling and lifecycle management.
  *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser les archétypes du host (`nf-listing-page` / `nf-record-page`).
+ *
  * @example
  * ```typescript
  * @Component({...})

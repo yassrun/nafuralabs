@@ -75,7 +75,7 @@ class PermissionEnforcementHostTest {
         String outsider = token("outsider@host.local");
 
         assertThat(send(outsider, "GET", "/api/v1/platform/admin/scheduled-jobs", null)).isEqualTo(403);
-        assertThat(send(outsider, "POST", "/api/v1/platform/admin/scheduled-jobs/any/trigger", null)).isEqualTo(403);
+        assertThat(send(outsider, "POST", "/api/v1/platform/admin/scheduled-jobs/by-key/any/trigger", null)).isEqualTo(403);
         assertThat(send(token("admin@host.local"), "GET", "/api/v1/platform/admin/scheduled-jobs", null)).isEqualTo(200);
     }
 
@@ -144,6 +144,9 @@ class PermissionEnforcementHostTest {
                         + "\"resetPolicy\":\"YEARLY\",\"currentNumber\":1,\"incrementBy\":1,\"padLength\":4}");
 
         assertThat(created).contains("\"separator\":\"-\"", "\"yearFormat\":\"YYYY\"", "\"resetPolicy\":\"YEARLY\"");
+        assertThat(created).contains("\"preview\"");
+        assertThat(sendForBody(admin, "GET", "/api/v1/numbering-sequences/properties", null))
+                .contains("\"code\"", "\"name\"", "\"currentNumber\"", "\"preview\"", "\"resetLabel\"");
     }
 
     private String sendForBody(String token, String method, String path, String json) throws Exception {

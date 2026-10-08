@@ -1,6 +1,9 @@
+import type { Type } from '@angular/core';
+
 import type { FormFieldConfig } from '../../lib/anatomy/types';
 import type { PageAction } from '../page-action';
 import type { ListingPageConfig, Row } from '../listing/listing-page.types';
+import type { ScreenLoader } from './record-section.context';
 
 /**
  * One business record as configuration: where it is read and saved, how its form is laid out
@@ -39,6 +42,8 @@ export interface RecordPageConfig<T extends Row = Row> {
    * Same contract as a list action, plus where the button sits and what the response is.
    */
   actions?: RecordAction<T>[];
+  /** When true, the record is read-only regardless of `permissions.update` (e.g. a system role). */
+  readonlyWhen?: (record: T) => boolean;
   /**
    * Create the record from a dropped document: the file is extracted, the form opens pre-filled,
    * nothing is stored until the user saves. `endpoint` is a BC extraction (`multipart` field `file`)
@@ -94,10 +99,11 @@ export interface RecordSection {
   description?: string;
   /**
    * `fields` (default) shows `fields`, `listing` a related list, `attachments` the files of the record,
-   * `comments` its notes, `audit` its activity trail. The entity key sent to the APIs is the lifecycle
-   * `entity` when the record has one, otherwise the last segment of `endpoint`.
+   * `comments` its notes, `audit` its activity trail, `screen` a declared BC/platform screen body.
+   * The entity key sent to the APIs is the lifecycle `entity` when the record has one, otherwise the
+   * last segment of `endpoint`.
    */
-  kind?: 'fields' | 'attachments' | 'comments' | 'audit';
+  kind?: 'fields' | 'attachments' | 'comments' | 'audit' | 'screen';
   /** Accepted MIME types for `attachments` (defaults of the documents capability when omitted). */
   accept?: string[];
   maxSizeMb?: number;
@@ -106,7 +112,31 @@ export interface RecordSection {
   columns?: 1 | 2;
   /** A related list of the saved record (e.g. its contacts). */
   listing?: (record: Row) => ListingPageConfig;
+  /**
+   * `kind: 'screen'`: component of a screen declared with `placement: "section"`.
+   * Prefer {@link loadScreen} so the chunk is loaded on demand.
+   */
+  screen?: Type<unknown>;
+  /** Lazy loader of the screen component (separate chunk). */
+  loadScreen?: ScreenLoader;
+  /** Shown only when the record is saved. Default true for `kind: 'screen'` and `listing`. */
+  requiresSaved?: boolean;
+  /** Shown only when true (evaluated on the draft). Same idiom as {@link PageAction.when}. */
+  visible?: (record: Row) => boolean;
 }
 
-/** A form field; `wide` spans the whole row (textarea defaults to wide). */
-export type RecordField = FormFieldConfig & { wide?: boolean };
+/**
+ * A form field; `wide` spans the whole row (textarea defaults to wide).
+ * Conditions (`visible`, `locked`, `requiredWhen`) are pure functions of the draft — no HTTP.
+ * A hidden field keeps its draft value and is still sent (no silent wipe).
+ * `requiredWhen` is UX only: the server rule lives in `validate`.
+ */
+export type RecordField = FormFieldConfig & {
+  wide?: boolean;
+  /** Shown only when true (evaluated on the draft). */
+  visible?: (record: Row) => boolean;
+  /** Locked when true, on top of lifecycle editability / `editableFields`. */
+  locked?: (record: Row) => boolean;
+  /** Required when true, on top of `required`. */
+  requiredWhen?: (record: Row) => boolean;
+};

@@ -21,9 +21,13 @@ CREATE TABLE IF NOT EXISTS demo_supplier (
     name           VARCHAR(160) NOT NULL,
     category_id    UUID REFERENCES demo_category(id) ON DELETE SET NULL,
     email          VARCHAR(160),
-    phone          VARCHAR(40),
+    phone          VARCHAR(20),
+    ice            VARCHAR(15),
+    rib            VARCHAR(24),
     city           VARCHAR(80),
     address        VARCHAR(300),
+    country        VARCHAR(2) NOT NULL DEFAULT 'MA',
+    vat_number     VARCHAR(40),
     active         BOOLEAN NOT NULL DEFAULT TRUE,
     payment_terms  VARCHAR(20),
     delivery_days  INTEGER,
@@ -70,18 +74,20 @@ CREATE TABLE IF NOT EXISTS demo_item (
 CREATE INDEX IF NOT EXISTS idx_demo_item_tenant ON demo_item(tenant_id);
 
 CREATE TABLE IF NOT EXISTS demo_purchase_request (
-    id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id      UUID NOT NULL,
-    subject        VARCHAR(200) NOT NULL,
-    supplier_id    UUID REFERENCES demo_supplier(id) ON DELETE SET NULL,
-    amount         NUMERIC(14, 2),
-    needed_by      DATE,
-    justification  VARCHAR(2000),
-    status         VARCHAR(30) NOT NULL,
-    created_by     UUID,
-    updated_by     UUID,
-    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+    id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id          UUID NOT NULL,
+    subject            VARCHAR(200) NOT NULL,
+    supplier_id        UUID REFERENCES demo_supplier(id) ON DELETE SET NULL,
+    amount             NUMERIC(14, 2),
+    needed_by          DATE,
+    justification      VARCHAR(2000),
+    comment            VARCHAR(2000),
+    rejection_reason   VARCHAR(2000),
+    status             VARCHAR(30) NOT NULL,
+    created_by         UUID,
+    updated_by         UUID,
+    created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_demo_purchase_request_tenant ON demo_purchase_request(tenant_id);
 

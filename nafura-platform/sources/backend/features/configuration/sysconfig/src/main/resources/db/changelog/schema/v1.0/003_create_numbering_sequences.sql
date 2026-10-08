@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS numbering_sequences (
     reset_policy   VARCHAR(20),
     year_format    VARCHAR(10),
     last_reset_at  TIMESTAMPTZ,
+    created_by     UUID,
+    updated_by     UUID,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );

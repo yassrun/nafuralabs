@@ -5,7 +5,12 @@ import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-/** Convenience wrapper for publishing {@link ErpEntityTransitionEvent}. */
+/**
+ * Convenience wrapper for publishing {@link ErpEntityTransitionEvent}.
+ *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser {@code notify} du cycle de vie JSON.
+ */
+@Deprecated(forRemoval = true)
 @Service
 public class ErpNotificationPublisher {
 

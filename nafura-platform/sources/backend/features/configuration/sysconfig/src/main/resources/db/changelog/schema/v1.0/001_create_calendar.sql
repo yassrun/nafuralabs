@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS calendar (
     time_zone_id   VARCHAR(50),
     description    TEXT,
     is_active      BOOLEAN DEFAULT true,
+    created_by     UUID,
+    updated_by     UUID,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );

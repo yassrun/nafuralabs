@@ -10,6 +10,7 @@ import {
   type ChartData,
   type KpiItem,
 } from '@platform/platform/screen-kit';
+import { RECORD_SECTION } from '@platform/platform/record';
 import { ScreenState } from '@platform/platform/screen/screen-page.component';
 
 interface Overview {
@@ -26,7 +27,11 @@ const LABELS: Record<string, string> = {
   ORDERED: 'Commandée',
 };
 
-/** Calculated supplier summary. Declared as `supplier-overview` in the demo manifest. */
+/**
+ * Calculated supplier summary.
+ * Declared as `supplier-overview` with placements `page` and `section`.
+ * As a page it uses {@link ScreenState}; as a record section it uses {@link RECORD_SECTION}.
+ */
 @Component({
   selector: 'demo-supplier-overview',
   standalone: true,
@@ -42,7 +47,8 @@ export class SupplierOverviewComponent {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(ApiConfigService);
-  private readonly screen = inject(ScreenState);
+  private readonly screen = inject(ScreenState, { optional: true });
+  private readonly section = inject(RECORD_SECTION, { optional: true });
 
   readonly kpis = signal<KpiItem[]>([]);
   readonly chart = signal<ChartData<'bar'>>({ labels: [], datasets: [{ data: [] }] });
@@ -51,14 +57,30 @@ export class SupplierOverviewComponent {
     void this.load();
   }
 
+  private supplierId(): string | null {
+    const fromRoute = this.route.snapshot.paramMap.get('id');
+    if (fromRoute && fromRoute !== 'new') return fromRoute;
+    const saved = this.section?.saved();
+    const id = saved?.['id'];
+    return id == null ? null : String(id);
+  }
+
+  private setLoading(on: boolean): void {
+    this.screen?.loading.set(on);
+  }
+
+  private setError(message: string | null): void {
+    this.screen?.error.set(message);
+  }
+
   private async load(): Promise<void> {
-    const id = this.route.snapshot.paramMap.get('id');
+    const id = this.supplierId();
     if (!id) {
-      this.screen.error.set('Fournisseur introuvable.');
+      this.setError('Fournisseur introuvable.');
       return;
     }
-    this.screen.loading.set(true);
-    this.screen.error.set(null);
+    this.setLoading(true);
+    this.setError(null);
     try {
       const base = this.api.getApiBaseUrl().replace(/\/+$/, '');
       const overview = await firstValueFrom(this.http.get<Overview>(`${base}/api/v1/demo/suppliers/${id}/overview`));
@@ -73,9 +95,9 @@ export class SupplierOverviewComponent {
         datasets: [{ label: 'Demandes', data: entries.map(([, count]) => count) }],
       });
     } catch {
-      this.screen.error.set('Impossible de charger la synthèse.');
+      this.setError('Impossible de charger la synthèse.');
     } finally {
-      this.screen.loading.set(false);
+      this.setLoading(false);
     }
   }
 }

@@ -1,17 +1,14 @@
 package ma.nafura.platform.configuration.sysconfig.repository;
 
+import java.util.UUID;
 import ma.nafura.platform.configuration.sysconfig.domain.model.Calendar;
-import ma.nafura.platform.framework.repository.TenantScopedRepository;
+import ma.nafura.platform.framework.record.RecordRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.UUID;
-
-/**
- * Repository for Calendar entity.
- * Generated once — add custom queries here.
- */
 @Repository
-public interface CalendarRepository extends TenantScopedRepository<Calendar, UUID> {
+public interface CalendarRepository extends RecordRepository<Calendar> {
+
+    boolean existsByTenantIdAndCodeIgnoreCase(UUID tenantId, String code);
+
+    boolean existsByTenantIdAndCodeIgnoreCaseAndIdNot(UUID tenantId, String code, UUID id);
 }
-
-

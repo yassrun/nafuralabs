@@ -9,7 +9,10 @@ import org.springframework.context.ApplicationEvent;
 /**
  * Published when an ERP domain entity changes state in a way that should notify users
  * (situation soumise, congé approuvé, BC validé, approbation en attente, etc.).
+ *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser {@code notify} du cycle de vie JSON.
  */
+@Deprecated(forRemoval = true)
 @Getter
 public class ErpEntityTransitionEvent extends ApplicationEvent {
 

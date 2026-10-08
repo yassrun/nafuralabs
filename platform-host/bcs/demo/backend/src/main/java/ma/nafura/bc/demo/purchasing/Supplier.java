@@ -14,6 +14,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import ma.nafura.platform.framework.domain.TenantEntity;
+import ma.nafura.platform.framework.validation.Ice;
+import ma.nafura.platform.framework.validation.PhoneMa;
+import ma.nafura.platform.framework.validation.Rib;
 import org.hibernate.annotations.Formula;
 
 @Entity(name = "DemoSupplier")
@@ -41,14 +44,31 @@ public class Supplier extends TenantEntity {
     @Size(max = 160)
     private String email;
 
-    @Size(max = 40)
+    @PhoneMa
+    @Size(max = 20)
     private String phone;
+
+    @Ice
+    @Size(max = 15)
+    private String ice;
+
+    @Rib
+    @Size(max = 24)
+    private String rib;
 
     @Size(max = 80)
     private String city;
 
     @Size(max = 300)
     private String address;
+
+    /** ISO 3166-1 alpha-2; {@code MA} hides the International section on the record page. */
+    @Size(min = 2, max = 2)
+    private String country = "MA";
+
+    @Column(name = "vat_number")
+    @Size(max = 40)
+    private String vatNumber;
 
     private boolean active = true;
 

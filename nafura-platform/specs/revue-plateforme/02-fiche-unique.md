@@ -61,11 +61,15 @@ Les fiches de la plateforme passent par `nf-record-page` et `RecordPageConfig`. 
 3. En `reader@host.local` : fiches en lecture seule, aucune action.
 4. Garde de sortie : quitter avec des modifications non enregistrées affiche la confirmation.
 
+## État (2026-10-08)
+
+Livré : fiches rôle et membre en `RecordPageConfig` ; permissions en section écran ; membres du rôle en section listing ; listes IAM en `nf-listing-page` (01 lot 5) ; allowlist détail vidée. Façades `/api/v1/platform/admin/{roles,members}`.
+
 ## Critères d'acceptation
 
-- [ ] Détail rôle et détail membre sont des `RecordPageConfig`.
-- [ ] `role-members-section.component.ts`, `member-detail.page.ts` et `role-detail.page.ts` sont supprimés (ou réduits à leur configuration).
-- [ ] Plus aucune référence à `ConfigDrivenDetailPage` ni `nf-entity-detail` hors `lib/anatomy` et Sektor.
+- [x] Détail rôle et détail membre sont des `RecordPageConfig`.
+- [x] `role-members-section.component.ts`, `member-detail.page.ts` et `role-detail.page.ts` sont supprimés (ou réduits à leur configuration).
+- [x] Plus aucune référence à `ConfigDrivenDetailPage` ni `nf-entity-detail` hors `lib/anatomy` et Sektor.
 
 ## Documentation
 

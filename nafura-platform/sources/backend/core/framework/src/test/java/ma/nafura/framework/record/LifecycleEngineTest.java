@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.web.server.ResponseStatusException;
 
 import ma.nafura.platform.framework.context.UserContext;
+import ma.nafura.platform.framework.scope.DataScope;
 
 class LifecycleEngineTest {
 
@@ -43,8 +45,8 @@ class LifecycleEngineTest {
     @BeforeEach
     void setUp() {
         StaticListableBeanFactory beans = new StaticListableBeanFactory();
-        beans.addBean("gateway", (ApprovalGateway) (type, entityId, title, role) -> opened.add(type + "|" + title + "|" + role));
-        engine = new LifecycleEngine(beans.getBeanProvider(ApprovalGateway.class), events::add);
+        beans.addBean("gateway", (ApprovalGateway) (type, entityId, title, permission) -> opened.add(type + "|" + title + "|" + permission));
+        engine = new LifecycleEngine(beans.getBeanProvider(ApprovalGateway.class), events::add, beans.getBeanProvider(DataScope.class));
         engine.register(Object.class, lifecycle, entityId -> Optional.of(request), r -> { });
         UserContext.setPermissions(Set.of("test.purchase.request.submit", "test.purchase.request.order"));
     }
@@ -69,7 +71,7 @@ class LifecycleEngineTest {
         engine.fire(lifecycle, request, id, "submit", r -> { });
 
         assertThat(request.getStatus()).isEqualTo("SUBMITTED");
-        assertThat(opened).containsExactly("test.purchase-request|Request Laptops|LEAD");
+        assertThat(opened).containsExactly("test.purchase-request|Request Laptops|test.purchase.request.approve");
 
         engine.onApprovalDecided("test.purchase-request", id, false);
         assertThat(request.getStatus()).isEqualTo("REJECTED");
@@ -100,10 +102,43 @@ class LifecycleEngineTest {
 
     @Test
     void anInconsistentDeclarationFailsAtLoading() {
-        Lifecycle broken = new Lifecycle("x", "NOPE", List.of(), lifecycle.states(), lifecycle.transitions());
+        Lifecycle broken = new Lifecycle("x", "NOPE", List.of(), null, lifecycle.states(), lifecycle.transitions());
         assertThatThrownBy(() -> broken.validated("broken.json")).hasMessageContaining("initial state NOPE");
         assertThat(lifecycle.isEditable("DRAFT")).isTrue();
         assertThat(lifecycle.isEditable("APPROVED")).isFalse();
+        assertThat(lifecycle.isEditable("SUBMITTED")).isFalse();
+    }
+
+    @Test
+    void editableFieldsMakeAStatusPartiallyEditable() {
+        Lifecycle partial = new Lifecycle(
+                "test.purchase-request",
+                "DRAFT",
+                List.of("DRAFT", "REJECTED"),
+                Map.of("SUBMITTED", List.of("comment")),
+                lifecycle.states(),
+                lifecycle.transitions()).validated("test");
+        assertThat(partial.isEditable("SUBMITTED")).isTrue();
+        assertThat(partial.isEditable("APPROVED")).isFalse();
+        assertThat(partial.editableFieldsOf("SUBMITTED")).contains(List.of("comment"));
+        assertThat(partial.editableFieldsOf("DRAFT")).isEmpty();
+    }
+
+    @Test
+    void anApprovalWithoutPermissionFailsAtLoading() {
+        Lifecycle.Transition submit = lifecycle.transition("submit").orElseThrow();
+        Lifecycle.Transition brokenSubmit = new Lifecycle.Transition(
+                submit.id(), submit.label(), submit.from(), submit.to(), submit.permission(),
+                submit.system(), submit.requires(),
+                new Lifecycle.Approval(null, "amount > 10000", "x", "approve", "reject"),
+                submit.notifications());
+        List<Lifecycle.Transition> transitions = lifecycle.transitions().stream()
+                .map(t -> "submit".equals(t.id()) ? brokenSubmit : t)
+                .toList();
+        Lifecycle broken = new Lifecycle(lifecycle.entity(), lifecycle.initial(), lifecycle.editable(),
+                lifecycle.editableFields(), lifecycle.states(), transitions);
+        assertThatThrownBy(() -> broken.validated("broken-approval.json"))
+                .hasMessageContaining("approval needs a permission");
     }
 
     @Test

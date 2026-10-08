@@ -1,15 +1,15 @@
 /**
  * Workflow template and step models for admin template management.
- * Aligns with backend WorkflowTemplateDto and 08a spec.
+ * Aligns with backend WorkflowTemplateDto.
  */
 
 export interface WorkflowStepDto {
   id?: string;
   stepNumber: number;
   name: string;
-  approverRole: string;
+  approverPermission: string;
   timeoutHours?: number | null;
-  escalationRole?: string | null;
+  escalationPermission?: string | null;
   condition?: string | null;
 }
 

@@ -87,6 +87,6 @@ Un cycle de vie désigne ses approbateurs par une **permission**, jamais par un 
 - `docs/UI.md`, ligne « Approbation » : « les détenteurs de la permission sont notifiés ».
 - `ROADMAP.md` 1 : retirer « approbateur désigné par permission » et « notifications aux approbateurs ».
 
-## Décisions ouvertes
+## Décisions
 
-1. Les **modèles de workflow** administrables et l'approbation du cycle de vie JSON font-ils doublon ? Si oui, lequel reste ? À trancher avant les approbations multi-étapes. Recommandation : le cycle de vie JSON est la seule source ; un modèle administrable ne pourrait que **paramétrer** des seuils ou des étapes déclarés par le BC, sans créer de second moteur.
+1. **Tranché.** Le cycle de vie JSON est la seule source d’approbation métier. Les modèles de workflow administrables restent pour **paramétrer** des chaînes (permission, seuil, délai) sans second moteur. Les multi-étapes exposées au cycle de vie restent hors scope (suite ROADMAP).

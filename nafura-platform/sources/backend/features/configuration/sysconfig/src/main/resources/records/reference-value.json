@@ -1,0 +1,12 @@
+{
+  "entity": "settings.reference-value",
+  "search": ["code", "name"],
+  "properties": {
+    "codeListId": { "label": "Liste", "type": "relation", "target": "settings.code-list", "filterable": true },
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "sortOrder": { "label": "Ordre", "type": "number", "sortable": true },
+    "createdBy": { "label": "Créé par", "type": "person", "filterable": true },
+    "createdAt": { "label": "Créé le", "filterable": true, "sortable": true }
+  }
+}

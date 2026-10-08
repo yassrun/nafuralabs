@@ -1,0 +1,13 @@
+{
+  "entity": "settings.calendar",
+  "search": ["code", "name"],
+  "properties": {
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "timeZoneId": { "label": "Fuseau" },
+    "description": { "label": "Description" },
+    "isActive": { "label": "Actif", "filterable": true },
+    "createdBy": { "label": "Créé par", "type": "person", "filterable": true },
+    "createdAt": { "label": "Créé le", "filterable": true, "sortable": true }
+  }
+}

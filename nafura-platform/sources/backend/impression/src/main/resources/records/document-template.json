@@ -1,0 +1,18 @@
+{
+  "entity": "administration.document-template",
+  "search": ["code", "name", "entityType"],
+  "properties": {
+    "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "entityType": { "label": "Type d'entité", "filterable": true, "sortable": true },
+    "typeLabel": { "label": "Type", "type": "select", "options": ["Système", "Personnalisé"], "filterable": true },
+    "isSystem": { "label": "Système", "type": "boolean", "filterable": true },
+    "paperSize": { "label": "Format papier", "filterable": true, "sortable": true },
+    "format": { "label": "Format", "filterable": true },
+    "isDefault": { "label": "Par défaut", "type": "boolean", "filterable": true },
+    "isActive": { "label": "Actif", "type": "boolean", "filterable": true },
+    "updatedAt": { "label": "Modifié le", "filterable": true, "sortable": true },
+    "createdBy": { "label": "Créé par", "type": "person", "filterable": true },
+    "createdAt": { "label": "Créé le", "filterable": true, "sortable": true }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "entity": "settings.tag",
+  "search": ["code", "name"],
+  "properties": {
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "color": { "label": "Couleur" },
+    "createdBy": { "label": "Créé par", "type": "person", "filterable": true },
+    "createdAt": { "label": "Créé le", "filterable": true, "sortable": true }
+  }
+}

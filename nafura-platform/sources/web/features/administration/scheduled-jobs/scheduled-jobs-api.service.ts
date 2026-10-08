@@ -9,6 +9,18 @@ import type {
   ScheduledJobSummary,
 } from './scheduled-jobs.models';
 
+interface ScheduledJobRecordRow {
+  id: string;
+  jobKey: string;
+  description: string;
+  cron: string;
+  tenantScoped: boolean;
+  enabled: boolean;
+  lastStatus?: 'RUNNING' | 'SUCCESS' | 'FAILED' | null;
+  lastStartedAt?: string | null;
+  lastDurationMs?: number | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ScheduledJobsApiService {
   private readonly http = inject(HttpClient);
@@ -22,11 +34,11 @@ export class ScheduledJobsApiService {
 
   async listJobs(): Promise<ScheduledJobSummary[]> {
     const res = await firstValueFrom(
-      this.http.get<ScheduledJobSummary[]>(
+      this.http.get<{ content?: ScheduledJobRecordRow[] }>(
         this.url('/api/v1/platform/admin/scheduled-jobs')
       )
     );
-    return res ?? [];
+    return (res?.content ?? []).map((row) => this.toSummary(row));
   }
 
   async getExecutions(
@@ -46,7 +58,7 @@ export class ScheduledJobsApiService {
     return firstValueFrom(
       this.http.get<PageResponse<JobExecution>>(
         this.url(
-          `/api/v1/platform/admin/scheduled-jobs/${encodeURIComponent(key)}/executions`
+          `/api/v1/platform/admin/scheduled-jobs/by-key/${encodeURIComponent(key)}/executions`
         ),
         { params: httpParams }
       )
@@ -57,13 +69,28 @@ export class ScheduledJobsApiService {
     return firstValueFrom(
       this.http.post<{ executionId: string | null }>(
         this.url(
-          `/api/v1/platform/admin/scheduled-jobs/${encodeURIComponent(
-            key
-          )}/trigger`
+          `/api/v1/platform/admin/scheduled-jobs/by-key/${encodeURIComponent(key)}/trigger`
         ),
         {}
       )
     );
   }
-}
 
+  private toSummary(row: ScheduledJobRecordRow): ScheduledJobSummary {
+    return {
+      key: row.jobKey,
+      description: row.description,
+      cron: row.cron,
+      tenantScoped: row.tenantScoped,
+      enabled: row.enabled,
+      lastExecution: row.lastStatus
+        ? {
+            id: row.id,
+            startedAt: row.lastStartedAt ?? '',
+            status: row.lastStatus,
+            durationMs: row.lastDurationMs,
+          }
+        : undefined,
+    };
+  }
+}

@@ -197,7 +197,12 @@
       "type": "object",
       "required": ["id", "version"],
       "additionalProperties": false,
-      "properties": { "id": { "type": "string" }, "version": { "$ref": "#/$defs/version" } }
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "$ref": "#/$defs/version" },
+        "api": { "type": "array", "items": { "type": "string" } },
+        "events": { "type": "array", "items": { "type": "string" } }
+      }
     },
     "requirement": {
       "type": "object",
@@ -206,7 +211,9 @@
       "properties": {
         "id": { "type": "string" },
         "version": { "type": "string", "pattern": "^\\^\\d+\\.\\d+\\.\\d+$" },
-        "optional": { "type": "boolean" }
+        "optional": { "type": "boolean" },
+        "api": { "type": "array", "items": { "type": "string" } },
+        "events": { "type": "array", "items": { "type": "string" } }
       }
     },
     "i18n": {

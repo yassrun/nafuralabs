@@ -2,16 +2,18 @@ import { Routes } from '@angular/router';
 
 import { unsavedChangesGuard } from '@core/guards/unsaved-changes.guard';
 import { routePermissionGuard } from '@core/security/guards/permission.guard';
+import { ListingPageComponent } from '../../../platform/listing';
+import { PRINT_TEMPLATES_LISTING } from './templates.listing';
 
 export const TEMPLATES_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./template-listing').then((m) => m.TemplateListingPage),
+    component: ListingPageComponent,
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.templates.read'],
+      permissions: ['administration.documents.templates.read'],
       title: 'administration.templates.title',
+      listing: PRINT_TEMPLATES_LISTING,
     },
   },
   {
@@ -21,7 +23,7 @@ export const TEMPLATES_ROUTES: Routes = [
     canActivate: [routePermissionGuard],
     canDeactivate: [unsavedChangesGuard],
     data: {
-      permissions: ['administration.templates.write'],
+      permissions: ['administration.documents.templates.create'],
       title: 'administration.templates.create',
     },
   },
@@ -32,7 +34,7 @@ export const TEMPLATES_ROUTES: Routes = [
     canActivate: [routePermissionGuard],
     canDeactivate: [unsavedChangesGuard],
     data: {
-      permissions: ['administration.templates.read'],
+      permissions: ['administration.documents.templates.read'],
       title: 'administration.templates.editor.title',
     },
   },

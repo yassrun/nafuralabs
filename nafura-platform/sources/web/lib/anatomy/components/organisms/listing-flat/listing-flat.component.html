@@ -8,6 +8,10 @@
     <ng-content />
   </nf-listing-toolbar>
 
+  <div class="nf-listing-flat__header">
+    <ng-content select="[nfListingHeader]" />
+  </div>
+
   <div class="nf-listing-flat__view">
     @if (error(); as message) {
       <nf-data-state state="error" [errorMessage]="message | translate" (retry)="retry.emit()" />

@@ -70,7 +70,7 @@ class TransitionNotifierTest {
         Lifecycle.Notify notify = new Lifecycle.Notify("demo.row.done", "createdBy");
         Lifecycle.Transition transition = new Lifecycle.Transition(
                 "go", "Aller", List.of("A"), "B", system ? null : "demo.row.go", system, List.of(), null, List.of(notify));
-        return new Lifecycle("demo.row", "A", List.of(), List.of(new Lifecycle.State("A", "A", "default"), new Lifecycle.State("B", "B", "success")), List.of(transition));
+        return new Lifecycle("demo.row", "A", List.of(), null, List.of(new Lifecycle.State("A", "A", "default"), new Lifecycle.State("B", "B", "success")), List.of(transition));
     }
 
     private static Row row() {

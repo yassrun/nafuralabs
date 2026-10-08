@@ -26,7 +26,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/v1/platform/document-settings")
-@SecuredResource(domain = "administration", feature = "administration", resource = "templates")
+@SecuredResource(domain = "administration", feature = "documents", resource = "templates")
 @RequiredArgsConstructor
 public class DocumentSettingsController {
 
@@ -38,14 +38,14 @@ public class DocumentSettingsController {
      * @param entityType optional; omitted returns the tenant-wide defaults
      */
     @GetMapping
-    @RequirePermission(value = "administration.templates.read", fullPermission = true)
+    @RequirePermission("read")
     public ResponseEntity<DocumentSettingsPayload> get(
             @RequestParam(required = false) String entityType) {
         return ResponseEntity.ok(settingsService.get(entityType));
     }
 
     @PutMapping
-    @RequirePermission(value = "administration.templates.write", fullPermission = true)
+    @RequirePermission("update")
     public ResponseEntity<DocumentSettingsPayload> save(
             @RequestParam(required = false) String entityType,
             @Valid @RequestBody DocumentSettingsPayload payload) {
@@ -53,7 +53,7 @@ public class DocumentSettingsController {
     }
 
     @PostMapping("/reset")
-    @RequirePermission(value = "administration.templates.write", fullPermission = true)
+    @RequirePermission("update")
     public ResponseEntity<DocumentSettingsPayload> reset(
             @RequestParam(required = false) String entityType) {
         return ResponseEntity.ok(settingsService.reset(entityType));
@@ -65,7 +65,7 @@ public class DocumentSettingsController {
      * changed away from.
      */
     @PostMapping("/preview")
-    @RequirePermission(value = "administration.templates.read", fullPermission = true)
+    @RequirePermission("read")
     public ResponseEntity<String> preview(
             @RequestParam String entityType, @Valid @RequestBody DocumentSettingsPayload payload) {
         try {
@@ -108,7 +108,7 @@ public class DocumentSettingsController {
 
     /** Data an administrator may insert into free text, for the "insert a value" menu. */
     @GetMapping("/tokens")
-    @RequirePermission(value = "administration.templates.read", fullPermission = true)
+    @RequirePermission("read")
     public ResponseEntity<Map<String, List<String>>> tokens() {
         return ResponseEntity.ok(
                 Map.of("tokens", DocumentTokenResolver.allowedTokens().stream().sorted().toList()));

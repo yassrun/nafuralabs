@@ -4,6 +4,8 @@
   "properties": {
     "code": { "label": "Code", "filterable": true, "sortable": true },
     "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "parentId": { "label": "Parent", "type": "relation", "target": "probe.group", "display": "name", "filterable": true },
     "records": { "label": "Enregistrements", "type": "relations", "target": "probe.record", "via": "groupId", "filterable": true }
-  }
+  },
+  "scope": { "node": true, "parent": "parentId" }
 }

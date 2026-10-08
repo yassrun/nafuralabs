@@ -74,11 +74,8 @@ export class WorkflowTemplatesApiService {
   }
 
   async setActive(id: string, active: boolean): Promise<WorkflowTemplate> {
-    return firstValueFrom(
-      this.http.patch<WorkflowTemplate>(this.url(`${BASE}/${id}/active`), null, {
-        params: new HttpParams().set('active', String(active)),
-      })
-    );
+    const action = active ? 'activate' : 'deactivate';
+    return firstValueFrom(this.http.post<WorkflowTemplate>(this.url(`${BASE}/${id}/${action}`), null));
   }
 
   async getEntityTypes(): Promise<string[]> {

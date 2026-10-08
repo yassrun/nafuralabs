@@ -100,7 +100,7 @@ export class WorkflowApiService {
     entityType: string,
     entityId: string,
     title: string,
-    workflow: { stepNumber: number; approverRole: string; approverId?: string }[]
+    workflow: { stepNumber: number; approverPermission: string; approverId?: string }[]
   ): Observable<ApprovalRequestDto> {
     return this.http.post<ApprovalRequestDto>(this.url(`${APPROVALS_BASE}/request`), {
       entityType,

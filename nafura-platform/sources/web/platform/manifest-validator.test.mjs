@@ -251,3 +251,52 @@ test('rejects role codes declared twice across business contexts and the applica
 
   assert.deepEqual(codes([app, achats(), clash]), ['duplicate-role-code', 'duplicate-role-code']);
 });
+
+test('a business context consumes another published api and events, not its code', () => {
+  const provider = businessContext('bc.chantiers', {
+    routesPrefix: '/chantiers',
+    permissions: [{ id: 'chantiers.chantier.read' }],
+    records: { 'chantiers.chantier': '/chantiers/{id}' },
+    notifications: [{ id: 'chantiers.chantier.opened', label: 'Ouvert', title: 'Ouvert', channels: ['in_app'] }],
+    provides: [{
+      id: 'bc.chantiers',
+      version: '1.0.0',
+      api: ['chantiers.chantier'],
+      events: ['chantiers.chantier.opened'],
+    }],
+  });
+  const consumer = businessContext('bc.achats', {
+    routesPrefix: '/achats',
+    permissions: [{ id: 'achats.commande.read' }],
+    requires: [{
+      id: 'bc.chantiers',
+      version: '^1.0.0',
+      api: ['chantiers.chantier'],
+      events: ['chantiers.chantier.opened'],
+    }],
+  });
+
+  assert.deepEqual(codes([provider, consumer]), []);
+});
+
+test('rejects a contract that publishes or consumes what the provider did not declare', () => {
+  const provider = businessContext('bc.chantiers', {
+    routesPrefix: '/chantiers',
+    permissions: [{ id: 'chantiers.chantier.read' }],
+    records: { 'chantiers.chantier': '/chantiers/{id}' },
+    provides: [{ id: 'bc.chantiers', version: '1.1.0', api: ['chantiers.inconnu'] }],
+  });
+  const foreign = businessContext('bc.achats', {
+    routesPrefix: '/achats',
+    permissions: [{ id: 'achats.commande.read' }],
+    provides: [{ id: 'bc.autre', version: '1.0.0' }],
+    requires: [{ id: 'bc.chantiers', version: '^1.0.0', events: ['chantiers.chantier.opened'] }],
+  });
+
+  assert.deepEqual(codes([provider, foreign]).sort(), [
+    'bc-contract-version',
+    'bc-provides-other',
+    'bc-requires-unknown-event',
+    'bc-undeclared-api',
+  ]);
+});

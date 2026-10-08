@@ -52,9 +52,11 @@ class DeclaredRolesHostTest {
         RolePermissionRepository repository = rolePermissions.getObject();
 
         assertThat(permissionsOf(repository, "PROBE_VIEWER")).containsExactly("probe.items.item.read");
-        assertThat(permissionsOf(repository, "PROBE_WRITER")).containsExactly("probe.items.item.create");
+        assertThat(permissionsOf(repository, "PROBE_WRITER"))
+                .containsExactlyInAnyOrder("probe.items.item.create", "probe.records.record.approve");
         assertThat(permissionsOf(repository, "PROBE_LEAD"))
-                .containsExactlyInAnyOrder("probe.items.item.read", "probe.items.item.create");
+                .containsExactlyInAnyOrder(
+                        "probe.items.item.read", "probe.items.item.create", "probe.records.record.approve");
     }
 
     @Test

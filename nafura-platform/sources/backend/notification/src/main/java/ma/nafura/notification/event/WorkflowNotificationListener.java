@@ -7,6 +7,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import ma.nafura.platform.authorization.domain.model.TenantUserRole;
 import ma.nafura.platform.authorization.repository.TenantUserRoleRepository;
+import ma.nafura.platform.authorization.service.PermissionService;
 import ma.nafura.platform.collaboration.notification.service.NotificationRouter;
 import ma.nafura.platform.collaboration.notification.service.NotificationRouter.Message;
 import ma.nafura.platform.collaboration.workflow.domain.model.ApprovalRequest;
@@ -26,8 +27,8 @@ import org.springframework.stereotype.Component;
  * decision ({@code platform.approval.decided}) unless the record has a lifecycle, whose outcome transition
  * carries its own {@code notify}.
  *
- * <p>A step with {@code approverId} notifies that user; a step with only {@code approverRole} notifies every
- * member of that role in the organisation (same rule as the approval inbox).
+ * <p>A step with {@code approverId} notifies that user; a step with only {@code approverPermission} notifies
+ * every member who holds that permission in the organisation (same rule as the approval inbox).
  */
 @Component
 @RequiredArgsConstructor
@@ -38,6 +39,7 @@ public class WorkflowNotificationListener {
     private final ApprovalStepRepository approvalStepRepository;
     private final AppUserRepository appUserRepository;
     private final TenantUserRoleRepository memberships;
+    private final PermissionService permissions;
     private final LifecycleEngine lifecycles;
 
     @EventListener
@@ -67,12 +69,13 @@ public class WorkflowNotificationListener {
                 approverIds.add(step.getApproverId());
                 continue;
             }
-            String role = step.getApproverRole();
-            if (role == null || role.isBlank()) {
+            String permission = step.getApproverPermission();
+            if (permission == null || permission.isBlank()) {
                 continue;
             }
-            for (TenantUserRole membership : memberships.findByTenantIdAndRoleCode(event.getTenantId(), role.trim().toUpperCase())) {
-                if (membership.getUserId() != null) {
+            for (TenantUserRole membership : memberships.findByTenantId(event.getTenantId())) {
+                if (membership.getUserId() != null
+                        && permissions.hasPermission(membership.getRoleCode(), permission)) {
                     approverIds.add(membership.getUserId());
                 }
             }

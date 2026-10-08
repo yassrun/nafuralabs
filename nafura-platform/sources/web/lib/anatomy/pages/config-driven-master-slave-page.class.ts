@@ -95,7 +95,7 @@ export interface PanelRouteConfig {
  * - listingFacade, detailFacade, panelListingConfig, panelDetailConfig, panelRoutes, headerTitle
  * - getItemId(row) optional if list item has non-'id' key
  *
- * @stable
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser un écran spécifique déclaré (`spec.screens`) en attendant un archétype.
  *
  * @typeParam TItem - Detail entity type
  * @typeParam TListItem - List row type (must have id or override getItemId)

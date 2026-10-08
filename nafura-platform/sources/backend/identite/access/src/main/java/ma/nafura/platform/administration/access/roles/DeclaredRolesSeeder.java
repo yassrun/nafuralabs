@@ -63,6 +63,7 @@ public class DeclaredRolesSeeder implements ApplicationRunner {
                 contexts.add(read(context));
             }
         }
+        BusinessContextContracts.check(contexts);
         Map<String, DeclaredRoles.Role> roles = DeclaredRoles.resolve(read(resources.getResource(PLATFORM_ROLES)), manifest, contexts);
         transaction.executeWithoutResult(status -> roles.values().forEach(this::sync));
         permissionService.invalidateAllRoleCaches();

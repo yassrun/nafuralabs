@@ -1,16 +1,18 @@
 import { Routes } from '@angular/router';
 
 import { routePermissionGuard } from '@core/security/guards/permission.guard';
+import { ListingPageComponent } from '../../../platform/listing';
+import { WORKFLOWS_LISTING } from './workflows.listing';
 
 export const WORKFLOWS_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./workflow-listing').then((m) => m.WorkflowListingPage),
+    component: ListingPageComponent,
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.workflows.read'],
+      permissions: ['administration.approvals.workflows.read'],
       title: 'administration.workflows.title',
+      listing: WORKFLOWS_LISTING,
     },
   },
   {
@@ -19,7 +21,7 @@ export const WORKFLOWS_ROUTES: Routes = [
       import('./workflow-editor').then((m) => m.WorkflowEditorPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.workflows.write'],
+      permissions: ['administration.approvals.workflows.create'],
       title: 'administration.workflows.create',
     },
   },
@@ -29,7 +31,7 @@ export const WORKFLOWS_ROUTES: Routes = [
       import('./workflow-editor').then((m) => m.WorkflowEditorPage),
     canActivate: [routePermissionGuard],
     data: {
-      permissions: ['administration.workflows.read'],
+      permissions: ['administration.approvals.workflows.read'],
       title: 'administration.workflows.editorTitle',
     },
   },

@@ -1,0 +1,19 @@
+{
+  "entity": "settings.numbering-sequence",
+  "search": ["code", "name", "prefix"],
+  "properties": {
+    "code": { "label": "Code", "filterable": true, "sortable": true },
+    "name": { "label": "Nom", "filterable": true, "sortable": true },
+    "prefix": { "label": "Préfixe", "filterable": true, "sortable": true },
+    "preview": { "label": "Aperçu" },
+    "currentNumber": { "label": "Compteur", "type": "number", "sortable": true },
+    "incrementBy": { "label": "Incrément", "type": "number" },
+    "padLength": { "label": "Padding", "type": "number" },
+    "separator": { "label": "Séparateur" },
+    "yearFormat": { "label": "Format année", "type": "select", "options": ["YYYY", "YY"], "filterable": true },
+    "resetPolicy": { "label": "Politique", "type": "select", "options": ["NEVER", "YEARLY", "MONTHLY"], "filterable": true },
+    "resetLabel": { "label": "Réinitialisation", "type": "select", "options": ["Jamais", "Annuel", "Mensuel"], "filterable": true },
+    "createdBy": { "label": "Créé par", "type": "person", "filterable": true },
+    "createdAt": { "label": "Créé le", "filterable": true, "sortable": true }
+  }
+}

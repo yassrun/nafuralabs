@@ -23,6 +23,7 @@ public class ScheduledJobExecutor {
     private final ScheduledJobExecutionRepository executionRepository;
     private final ScheduledJobProperties properties;
     private final ObjectProvider<TenantProvider> tenantProvider;
+    private final ObjectProvider<ScheduledJobRecordSync> recordSync;
 
     @PostConstruct
     public void scheduleJobs() {
@@ -100,7 +101,7 @@ public class ScheduledJobExecutor {
                 .status(ScheduledJobStatus.RUNNING)
                 .build();
 
-        execution = executionRepository.save(execution);
+        final ScheduledJobExecution running = executionRepository.save(execution);
 
         try {
             if (tenantId != null) {
@@ -113,25 +114,27 @@ public class ScheduledJobExecutor {
             OffsetDateTime end = OffsetDateTime.now();
             long durationMs = end.toInstant().toEpochMilli() - start.toInstant().toEpochMilli();
 
-            execution.setEndedAt(end);
-            execution.setDurationMs(durationMs);
-            execution.setStatus(ScheduledJobStatus.SUCCESS);
-            executionRepository.save(execution);
+            running.setEndedAt(end);
+            running.setDurationMs(durationMs);
+            running.setStatus(ScheduledJobStatus.SUCCESS);
+            executionRepository.save(running);
+            recordSync.ifAvailable(sync -> sync.refreshLastExecution(running));
         } catch (Exception ex) {
             log.error("Scheduled job '{}' failed for tenant {}: {}", job.key(), tenantId, ex.getMessage(), ex);
             OffsetDateTime end = OffsetDateTime.now();
             long durationMs = end.toInstant().toEpochMilli() - start.toInstant().toEpochMilli();
 
-            execution.setEndedAt(end);
-            execution.setDurationMs(durationMs);
-            execution.setStatus(ScheduledJobStatus.FAILED);
+            running.setEndedAt(end);
+            running.setDurationMs(durationMs);
+            running.setStatus(ScheduledJobStatus.FAILED);
 
             String message = ex.getMessage();
             if (message != null && message.length() > 2000) {
                 message = message.substring(0, 2000);
             }
-            execution.setErrorMessage(message);
-            executionRepository.save(execution);
+            running.setErrorMessage(message);
+            executionRepository.save(running);
+            recordSync.ifAvailable(sync -> sync.refreshLastExecution(running));
         } finally {
             if (tenantId != null) {
                 TenantContext.clear();

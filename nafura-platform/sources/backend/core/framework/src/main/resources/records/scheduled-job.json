@@ -1,0 +1,20 @@
+{
+  "entity": "administration.scheduled-job",
+  "search": ["jobKey", "description", "nameKey"],
+  "properties": {
+    "nameKey": { "label": "Nom", "filterable": true, "sortable": true },
+    "jobKey": { "label": "Clé", "filterable": true, "sortable": true },
+    "cron": { "label": "Planification", "filterable": true, "sortable": true },
+    "tenantScoped": { "label": "Par organisation", "filterable": true, "sortable": true },
+    "enabled": { "label": "Activé", "filterable": true, "sortable": true },
+    "lastStatus": {
+      "label": "Dernier statut",
+      "type": "select",
+      "options": ["SUCCESS", "FAILED", "RUNNING"],
+      "filterable": true,
+      "sortable": true
+    },
+    "lastStartedAt": { "label": "Dernière exécution", "filterable": true, "sortable": true },
+    "lastDurationMs": { "label": "Durée (ms)", "type": "number", "sortable": true }
+  }
+}

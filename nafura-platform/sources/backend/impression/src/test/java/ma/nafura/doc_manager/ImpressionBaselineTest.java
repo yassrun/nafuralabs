@@ -122,19 +122,19 @@ class ImpressionBaselineTest {
     }
 
     private DocumentTemplate modele(UUID tenant) {
-        return DocumentTemplate.builder()
-                .id(TEMPLATE_ID)
-                .tenantId(tenant)
-                .code("fiche-a")
-                .name("Fiche A")
-                .entityType("fiche")
-                .format("pdf")
-                .templateBody("<p th:text=\"${titre}\">x</p>")
-                .isSystem(false)
-                .paperSize("A4")
-                .orientation("portrait")
-                .isActive(true)
-                .build();
+        DocumentTemplate t = new DocumentTemplate();
+        t.setId(TEMPLATE_ID);
+        t.setTenantId(tenant);
+        t.setCode("fiche-a");
+        t.setName("Fiche A");
+        t.setEntityType("fiche");
+        t.setFormat("pdf");
+        t.setTemplateBody("<p th:text=\"${titre}\">x</p>");
+        t.setIsSystem(false);
+        t.setPaperSize("A4");
+        t.setOrientation("portrait");
+        t.setIsActive(true);
+        return t;
     }
 
     private void stubRepo() {

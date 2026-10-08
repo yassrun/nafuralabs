@@ -23,11 +23,13 @@ import java.util.UUID;
 /**
  * Core, tenant-aware CRUD service with standard behavior.
  *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser {@link ma.nafura.platform.framework.record.RecordController}.
  * @param <TId>     Entity ID type
  * @param <TEntity> Entity type
  * @param <TCreate> Create DTO type
  * @param <TUpdate> Update DTO type
  */
+@Deprecated(since = "2026-10", forRemoval = true)
 public abstract class CrudService<TId, TEntity, TCreate, TUpdate> {
 
     private static final int DEFAULT_PAGE = 0;

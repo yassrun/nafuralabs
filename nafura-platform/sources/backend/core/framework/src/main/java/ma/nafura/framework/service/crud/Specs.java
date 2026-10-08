@@ -7,20 +7,11 @@ import java.util.Collection;
 /**
  * Utility class for building common JPA Specifications.
  * Provides fluent API for constructing type-safe queries.
- * 
- * Example usage:
- * <pre>
- * import static ma.nafura.platform.framework.service.crud.Specs.*;
- * 
- * Specification<Item> spec = Specs.<Item>builder()
- *     .and(equal("type", ItemType.PRODUCT))
- *     .and(equal("isActive", true))
- *     .and(like("name", "%widget%"))
- *     .build();
- * 
- * List<Item> items = itemService.findByCriteria(spec, 0, 20);
- * </pre>
+ *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser {@link ma.nafura.platform.framework.record.RecordController}
+ *             et la grammaire de filtre du descripteur {@code records/*.json}.
  */
+@Deprecated(since = "2026-10", forRemoval = true)
 public class Specs {
 
     /**

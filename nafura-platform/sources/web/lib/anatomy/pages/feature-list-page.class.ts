@@ -73,6 +73,8 @@ export interface ListPageDeleteConfig<TItem> {
  *
  * Extend for pages that display lists/collections of items.
  *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser `nf-listing-page`.
+ *
  * @typeParam TListItem - The type of items in the list
  * @typeParam TFacade - The facade type (must implement at least PartialCrudFacade)
  *

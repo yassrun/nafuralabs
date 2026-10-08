@@ -1,5 +1,10 @@
 package ma.nafura.platform.collaboration.workflow;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import ma.nafura.platform.collaboration.workflow.api.WorkflowStepDto;
 import ma.nafura.platform.collaboration.workflow.api.WorkflowTemplateCreateRequest;
 import ma.nafura.platform.collaboration.workflow.api.WorkflowTemplateDto;
@@ -11,16 +16,10 @@ import ma.nafura.platform.collaboration.workflow.repository.WorkflowStepReposito
 import ma.nafura.platform.collaboration.workflow.repository.WorkflowTemplateRepository;
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.service.crud.CrudNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,15 +32,59 @@ public class WorkflowTemplateService {
     private final WorkflowInstanceRepository instanceRepository;
 
     public Map<String, List<String>> getEntityTypes() {
-        return Map.of("entityTypes", List.of(
-                "Invoice", "Quote", "Receipt", "Order", "PurchaseOrder", "Contract", "Document"
-        ));
+        return Map.of(
+                "entityTypes",
+                List.of("Invoice", "Quote", "Receipt", "Order", "PurchaseOrder", "Contract", "Document"));
+    }
+
+    /** Normalises fields and steps before {@link WorkflowTemplateController} persists the record. */
+    public void prepareSave(WorkflowTemplate template, WorkflowTemplate previous) {
+        UUID tenantId = TenantContext.getTenantId();
+        if (template.getCode() != null) {
+            template.setCode(template.getCode().trim());
+        }
+        if (template.getName() != null) {
+            template.setName(template.getName().trim());
+        }
+        if (template.getEntityType() != null) {
+            template.setEntityType(template.getEntityType().trim());
+        }
+        if (template.getDescription() != null) {
+            template.setDescription(template.getDescription().trim());
+        }
+        if (template.getIsActive() == null) {
+            template.setIsActive(true);
+        }
+        if (previous != null) {
+            stepRepository.findByWorkflowTemplateIdOrderByStepNumberAsc(template.getId()).forEach(stepRepository::delete);
+        }
+        List<WorkflowStep> steps = template.getSteps() == null ? new ArrayList<>() : template.getSteps();
+        for (int i = 0; i < steps.size(); i++) {
+            WorkflowStep step = steps.get(i);
+            step.setTenantId(tenantId);
+            step.setWorkflowTemplateId(template.getId());
+            if (step.getStepNumber() == null) {
+                step.setStepNumber(i + 1);
+            }
+            if (step.getName() != null) {
+                step.setName(step.getName().trim());
+            }
+            if (step.getApproverPermission() != null) {
+                step.setApproverPermission(step.getApproverPermission().trim());
+            }
+            if (step.getEscalationPermission() != null) {
+                step.setEscalationPermission(step.getEscalationPermission().trim());
+            }
+            if (step.getCondition() != null) {
+                step.setCondition(step.getCondition().trim());
+            }
+        }
+        template.setSteps(steps);
     }
 
     public Page<WorkflowTemplateDto> list(Pageable pageable) {
         UUID tenantId = TenantContext.getTenantId();
-        return templateRepository.findByTenantId(tenantId, pageable)
-                .map(this::toDtoWithStepCount);
+        return templateRepository.findByTenantId(tenantId, pageable).map(this::toDtoWithStepCount);
     }
 
     /**
@@ -55,7 +98,8 @@ public class WorkflowTemplateService {
     }
 
     public WorkflowTemplateDto get(UUID id) {
-        WorkflowTemplate template = templateRepository.findByIdAndTenantId(id, TenantContext.getTenantId())
+        WorkflowTemplate template = templateRepository
+                .findByIdAndTenantId(id, TenantContext.getTenantId())
                 .orElseThrow(() -> new CrudNotFoundException("Workflow template not found: " + id));
         List<WorkflowStep> steps = stepRepository.findByWorkflowTemplateIdOrderByStepNumberAsc(id);
         return toDto(template, steps);
@@ -64,17 +108,19 @@ public class WorkflowTemplateService {
     @Transactional
     public WorkflowTemplateDto create(WorkflowTemplateCreateRequest request) {
         UUID tenantId = TenantContext.getTenantId();
-        if (templateRepository.findByTenantIdAndEntityTypeAndCode(tenantId, request.getEntityType(), request.getCode()).isPresent()) {
+        if (templateRepository
+                .findByTenantIdAndEntityTypeAndCode(tenantId, request.getEntityType(), request.getCode())
+                .isPresent()) {
             throw new IllegalArgumentException("Workflow template already exists with code: " + request.getCode());
         }
         WorkflowTemplate template = WorkflowTemplate.builder()
-                .tenantId(tenantId)
                 .code(request.getCode().trim())
                 .name(request.getName().trim())
                 .entityType(request.getEntityType().trim())
                 .description(request.getDescription() != null ? request.getDescription().trim() : null)
                 .isActive(request.getIsActive() != null ? request.getIsActive() : true)
                 .build();
+        template.setTenantId(tenantId);
         template = templateRepository.save(template);
         saveSteps(template.getId(), tenantId, request.getSteps());
         return get(template.getId());
@@ -82,7 +128,8 @@ public class WorkflowTemplateService {
 
     @Transactional
     public WorkflowTemplateDto update(UUID id, WorkflowTemplateUpdateRequest request) {
-        WorkflowTemplate template = templateRepository.findByIdAndTenantId(id, TenantContext.getTenantId())
+        WorkflowTemplate template = templateRepository
+                .findByIdAndTenantId(id, TenantContext.getTenantId())
                 .orElseThrow(() -> new CrudNotFoundException("Workflow template not found: " + id));
         UUID tenantId = TenantContext.getTenantId();
         template.setCode(request.getCode().trim());
@@ -98,11 +145,13 @@ public class WorkflowTemplateService {
 
     @Transactional
     public void delete(UUID id) {
-        WorkflowTemplate template = templateRepository.findByIdAndTenantId(id, TenantContext.getTenantId())
+        WorkflowTemplate template = templateRepository
+                .findByIdAndTenantId(id, TenantContext.getTenantId())
                 .orElseThrow(() -> new CrudNotFoundException("Workflow template not found: " + id));
         long activeCount = instanceRepository.countByTemplateIdAndStatus(id, STATUS_RUNNING);
         if (activeCount > 0) {
-            throw new IllegalStateException("Cannot delete template: " + activeCount + " active workflow instance(s) exist");
+            throw new IllegalStateException(
+                    "Cannot delete template: " + activeCount + " active workflow instance(s) exist");
         }
         stepRepository.findByWorkflowTemplateIdOrderByStepNumberAsc(id).forEach(stepRepository::delete);
         templateRepository.delete(template);
@@ -110,7 +159,8 @@ public class WorkflowTemplateService {
 
     @Transactional
     public WorkflowTemplateDto setActive(UUID id, boolean active) {
-        WorkflowTemplate template = templateRepository.findByIdAndTenantId(id, TenantContext.getTenantId())
+        WorkflowTemplate template = templateRepository
+                .findByIdAndTenantId(id, TenantContext.getTenantId())
                 .orElseThrow(() -> new CrudNotFoundException("Workflow template not found: " + id));
         template.setIsActive(active);
         templateRepository.save(template);
@@ -118,8 +168,9 @@ public class WorkflowTemplateService {
     }
 
     private void saveSteps(UUID templateId, UUID tenantId, List<WorkflowStepDto> stepDtos) {
-        if (stepDtos == null || stepDtos.isEmpty()) return;
-        List<WorkflowStep> steps = new ArrayList<>();
+        if (stepDtos == null || stepDtos.isEmpty()) {
+            return;
+        }
         for (int i = 0; i < stepDtos.size(); i++) {
             WorkflowStepDto dto = stepDtos.get(i);
             int stepNumber = dto.getStepNumber() != null ? dto.getStepNumber() : (i + 1);
@@ -128,17 +179,19 @@ public class WorkflowTemplateService {
                     .workflowTemplateId(templateId)
                     .stepNumber(stepNumber)
                     .name(dto.getName().trim())
-                    .approverRole(dto.getApproverRole().trim())
+                    .approverPermission(dto.getApproverPermission().trim())
                     .timeoutHours(dto.getTimeoutHours())
-                    .escalationRole(dto.getEscalationRole() != null ? dto.getEscalationRole().trim() : null)
+                    .escalationPermission(dto.getEscalationPermission() != null ? dto.getEscalationPermission().trim() : null)
                     .condition(dto.getCondition() != null ? dto.getCondition().trim() : null)
                     .build();
-            steps.add(stepRepository.save(step));
+            stepRepository.save(step);
         }
     }
 
     private WorkflowTemplateDto toDtoWithStepCount(WorkflowTemplate template) {
-        int stepCount = stepRepository.findByWorkflowTemplateIdOrderByStepNumberAsc(template.getId()).size();
+        int stepCount = template.getStepCount() != null
+                ? template.getStepCount()
+                : stepRepository.findByWorkflowTemplateIdOrderByStepNumberAsc(template.getId()).size();
         return WorkflowTemplateDto.builder()
                 .id(template.getId())
                 .code(template.getCode())
@@ -158,9 +211,9 @@ public class WorkflowTemplateService {
                         .id(s.getId())
                         .stepNumber(s.getStepNumber())
                         .name(s.getName())
-                        .approverRole(s.getApproverRole())
+                        .approverPermission(s.getApproverPermission())
                         .timeoutHours(s.getTimeoutHours())
-                        .escalationRole(s.getEscalationRole())
+                        .escalationPermission(s.getEscalationPermission())
                         .condition(s.getCondition())
                         .build())
                 .toList();

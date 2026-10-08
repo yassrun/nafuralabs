@@ -11,7 +11,7 @@ export const DOCUMENT_SETTINGS_ROUTES: Routes = [
     canActivate: [routePermissionGuard],
     canDeactivate: [unsavedChangesGuard],
     data: {
-      permissions: ['administration.templates.read'],
+      permissions: ['administration.documents.templates.read'],
       title: 'administration.documents.title',
     },
   },

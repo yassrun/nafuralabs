@@ -14,10 +14,15 @@
     "neededBy": { "label": "Pour le", "filterable": true, "sortable": true },
     "status": { "label": "Statut", "filterable": true },
     "createdBy": { "label": "Créée par", "type": "person", "filterable": true },
-    "justification": { "label": "Justification" }
+    "justification": { "label": "Justification" },
+    "comment": { "label": "Commentaire" },
+    "rejectionReason": { "label": "Motif du rejet" }
   },
   "initial": "DRAFT",
   "editable": ["DRAFT", "REJECTED"],
+  "editableFields": {
+    "SUBMITTED": ["comment"]
+  },
   "states": [
     { "id": "DRAFT", "label": "Brouillon", "tone": "default" },
     { "id": "SUBMITTED", "label": "En approbation", "tone": "warning" },
@@ -34,7 +39,7 @@
       "permission": "demo.purchasing.request.submit",
       "requires": ["subject", "supplierId", "amount"],
       "approval": {
-        "role": "DEMO_LEAD",
+        "permission": "demo.purchasing.request.approve",
         "when": "amount > 10000",
         "title": "Demande d’achat : {subject}",
         "approved": "approve",

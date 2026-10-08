@@ -7,7 +7,7 @@
 | Catalogue | `cap.iam` (membres, invitations) ; rôles / catalogue = `cap.access` |
 | Modules | `iam` (+ `access` pour les rôles) |
 | Requires | (catalogue : aucun) ; runtime : tenancy, identity, authorization |
-| Note | **~7/10** → cible **~8/10** (lots 1–4 livrés ; reste permissions + invite lab org) |
+| Note | **~8/10** (lots 1–4 + UX archétypes host ; reste alignement permissions + invite lab org) |
 
 Pas de `cap.members` : les « membres » sont le produit visible de `cap.iam`.
 
@@ -22,7 +22,7 @@ Pas de `cap.members` : les « membres » sont le produit visible de `cap.iam`.
 - **Déjà présent** → HTTP 409 `MEMBER_EXISTS:<status>` (`invited` \| `active` \| `suspended`). UI : si `invited`, proposer **Renvoyer** ; si `active` / `suspended`, message dédié (pas de 2ᵉ invite).
 - **Renvoyer** = nouveau token (ancien révoqué) + nouvel e-mail. Même contrat livraison : réponse avec `emailDeliveryStatus` `sent` \| `failed` (pas d’exception sur échec mail).
 
-**UI host** : `/administration/members` (listing + `nf-form-dialog` invite), `/administration/members/:id` (`nf-entity-detail` + actions lifecycle), `/administration/roles`, **`/invite/accept`** (public, hors shell ; login avec `returnUrl`). Liste : badge « Invité · e-mail échoué » quand `invitationEmailStatus=failed`.
+**UI host** : `/administration/members` (`nf-listing-page` + invite en action de liste), `/administration/members/:id` (`nf-record-page` + actions), `/administration/roles` (liste + fiche `nf-record-page`, permissions en section écran, membres du rôle en section listing), **`/invite/accept`** (public, hors shell ; login avec `returnUrl`). API record-compatible : `/api/v1/platform/admin/members` et `/api/v1/platform/admin/roles`.
 
 **Accès** : seul le statut `ACTIVE` passe le filtre de contexte tenant. Multi-org : N `TenantMembership` par `AppUser`. Audience sur l’appartenance (défaut `members`) ; l’invite ne pose pas d’audience.
 
@@ -30,12 +30,14 @@ Pas de `cap.members` : les « membres » sont le produit visible de `cap.iam`.
 
 **Audit membership (lot 4)** : événements manuels `cap.audit` (`entityType` `tenant-member`) pour invite, accept, resend, changement de rôles, suspend/reactivate, remove — via `MembershipAudit` + `AuditService`.
 
+**Périmètre** : un rôle d’appartenance reste valable pour toute l’organisation. Le limiter à un nœud est un grant (`tenant.members.scope-grant.*`, écran Périmètres) — voir [PLATFORM.md](../PLATFORM.md) § Permissions et rôles.
+
 **Hors livré** : transfert OWNER explicite, SCIM, bulk CSV, unifier `administration.members.*` vs `tenant.members.*`.
 
 ## Contrat
 
 - Un seul chemin d’invitation : `IamService` → token → e-mail → `InvitationAcceptService`.
-- UI admin : archétypes anatomy (`ConfigDrivenListingPage` / `ConfigDrivenDetailPage` + `nf-entity-detail`), pas de fiche maison.
+- UI admin : archétypes host (`nf-listing-page` / `nf-record-page`), pas de fiche maison.
 - Permissions dans le code API : `tenant.members.*` / `tenant.roles.*` ; jamais de rôles hardcodés dans les écrans.
 - Rôles custom et matrice : `cap.access` (`nf-permission-picker`).
 
@@ -50,7 +52,7 @@ Pas de `cap.members` : les « membres » sont le produit visible de `cap.iam`.
 
 | Lot | Livrable | Done quand |
 |---|---|---|
-| **1 — UX archétype** | Détail membre = `nf-entity-detail` + actions config | **Livré** |
+| **1 — UX archétype** | Membres et rôles = `nf-listing-page` + `nf-record-page` (specs 01 lot 5 / 02) | **Livré** |
 | **2 — Accept invite host** | Page publique `/invite/accept` (preview + accept + session) | **Livré** — route host hors shell ; login honore `returnUrl` |
 | **3 — Garde-fous OWNER** | Interdire suspend/remove/dé-rôler le dernier OWNER actif | **Livré** — backend 409 + toast UI ; transfert OWNER explicite = plus tard |
 | **4 — Audit membership** | Événements invite / accept / resend / roles / suspend / remove | **Livré** — `MembershipAudit` (`tenant-member`) |

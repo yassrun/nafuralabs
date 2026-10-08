@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS approval_steps (
     tenant_id            UUID NOT NULL,
     approval_request_id  UUID NOT NULL,
     step_number          INT NOT NULL,
-    approver_role        VARCHAR(80) NOT NULL,
+    approver_permission  VARCHAR(120) NOT NULL,
     approver_id          UUID,
     status               VARCHAR(30) NOT NULL,
     decided_at           TIMESTAMPTZ,

@@ -17,7 +17,7 @@ export class RecentItemsService {
 
   /**
    * Track a visit. Accepts either a full SearchResult (e.g. from palette navigation)
-   * or a RecentItem payload (e.g. from ConfigDrivenDetailPage).
+   * or a RecentItem payload (entityType + entityId + title + route from a record screen).
    * Dedupes by entityType+entityId when both present, otherwise by route.
    */
   trackVisit(item: SearchResult | RecentItemPayload): void {

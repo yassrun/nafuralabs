@@ -22,6 +22,8 @@ import { LoadingState } from '../types';
  *
  * Extend for pages that display a single item.
  *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser `nf-record-page`.
+ *
  * @typeParam TItem - The type of the item
  */
 @Directive()

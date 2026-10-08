@@ -41,7 +41,7 @@ flowchart TB
 
 - **Core** (toujours présent) : `cap.foundation` (framework, record, multi-tenant, observabilité, settings), `cap.lab` (runtime du host : manifeste, organisation, seeding, mode lab), `cap.access` (rôles et permissions).
 - **Capabilities** : tout le reste (`iam`, `approvals`, `documents`, `notifications`, `ai`, …). Le host les embarque **toutes**, testées ensemble ; un produit en retire par `spec.capabilities.disabled`. Il n’en ajoute jamais. État livré et roadmap par cap : [docs/capabilities/](capabilities/00-README.md).
-- **BC** (business context) : le métier d’un produit. Il dépend des API publiques de la plateforme, jamais d’un autre BC ni de Sektor.
+- **BC** (business context) : le métier d’un produit. Il dépend des API publiques de la plateforme et, s’il le déclare, du contrat publié d’un autre BC (`provides` / `requires` : version, records, événements). Jamais du code d’un autre BC, ni de Sektor.
 
 ## Un produit
 
@@ -62,7 +62,7 @@ Le nom du produit n’existe que dans `app.nafura.json`. Le backend le lit au d�
 
 1. **Configurer, pas coder.** Un BC déclare ; la plateforme lit. Pas de générateur qui copie du code dans le produit.
 2. **Une seule implémentation par besoin.** Un besoin générique remonte dans la plateforme une fois, sous un seul artefact (une liste, une fiche, une sidebar, un mécanisme de rôles). Jamais de copie dans un produit.
-3. **Permissions, jamais de rôles dans le code.** Un BC déclare ses permissions (`<bc>.<feature>.<ressource>.<action>`) et des rôles par défaut ; le produit compose des rôles transverses ; l’organisation crée les siens. Aucune permission implicite.
+3. **Permissions, jamais de rôles dans le code.** Un BC déclare ses permissions (`<bc>.<feature>.<ressource>.<action>`) et des rôles par défaut ; le produit compose des rôles transverses ; l’organisation crée les siens. Aucune permission implicite. Un rôle d’appartenance couvre toute l’organisation. Un **périmètre** (`scope` sur le descripteur du record, enregistrement `scope-grant`) limite un rôle à un nœud et à ses descendants.
 4. **Mêmes migrations partout.** Le changelog est généré depuis les modules composés ; le lab l’applique et valide les entités ; staging et prod le passent par un Job avant le déploiement.
 5. **La connexion appartient à l’environnement** : lab = sélecteur d’utilisateurs sans mot de passe (interdit en prod) ; ailleurs = Keycloak partagé, un client par produit, jeton vérifié (émetteur, signature, destinataire).
 6. **Organisation** : `spec.runtime.tenancy: single` (une organisation par déploiement, créée par la plateforme, propriétaires `spec.deploy.<env>.owners`) ou `multi` (plusieurs organisations, opérateur `spec.deploy.<env>.operators`). La permission `platform.operator.*` ne vient que de cette liste : les jokers de rôle ne la couvrent jamais, et un rôle qui la déclare empêche le démarrage. `spec.runtime.signup` vaut `operator` (défaut) ou `open`.
@@ -90,6 +90,8 @@ Lancement : [ops/README.md](../ops/README.md).
 | Sujet | État |
 |---|---|
 | Host, manifestes, capabilities, BC démo, rôles, connexion, seeding | livrés (`platform-host`) |
+| Contrat entre BCs : `provides` / `requires` (version, records, événements), refus d’une dépendance de code | livré |
+| Périmètre : rôle limité à un nœud de record et à ses descendants | livré |
 | Notifications : événements déclarés (BC et plateforme), routeur unique, préférences organisation / utilisateur (API), canaux in-app et e-mail | livré (backend) |
 | Notifications : écrans de préférences, canal SMS, modèles de message par canal | à faire |
 | Tenancy `multi` : organisations, opérateur, sélecteur, isolation (démo) | livré (API et sélecteur) ; console opérateur (écrans) à faire |
@@ -97,14 +99,16 @@ Lancement : [ops/README.md](../ops/README.md).
 | Audience externe : attribut d’appartenance, `@OwnedBy` | livré (filtre) ; effacement et lien e-mail à faire |
 | Données hors organisation : `@SharesWith`, portée de seed `product` | livré (garde-fous) ; consentement et écriture du seed produit à faire |
 | Listes : descripteur du record (`records/*.json`), `/properties`, grammaire de filtre avec relations à un saut, `/aggregate`, vues (table, kanban, calendrier, arbre), filtres proposés | livré |
-| Écrans d’administration sur l’archétype du host : clés d’API, webhooks | livré (records) |
-| Écrans d’administration encore hors archétype : séquences (`LegacyListingPageComponent`), 7 écrans sur `ConfigDrivenListingPage` (`lib/anatomy` `ListingPageConfig`) | à migrer ([spec 01](../specs/revue-plateforme/01-liste-unique.md)) |
-| Approbation par permission (au lieu d’un rôle), multi-étapes, historique | à faire |
+| Écrans d’administration sur l’archétype du host : clés d’API, webhooks, séquences, modèles d’impression, modèles d’e-mail, workflows ; `LegacyListingPageComponent` supprimé | livré (records) |
+| CRUD serveur unique : sysconfig (séquences, tags, listes de codes, valeurs de référence, calendriers) en `RecordController` ; `CrudService` / `JpaCrudService` dépréciés (Sektor) | livré ([spec 05](../specs/revue-plateforme/05-crud-unique.md)) |
+| Écrans d’administration encore hors archétype : 2 écrans sur `ConfigDrivenListingPage` (membres, rôles) | à migrer ([spec 01](../specs/revue-plateforme/01-liste-unique.md) lot 5) |
+| Approbation par permission (plus par rôle) + notif aux détenteurs | livré ([capabilities/approvals.md](capabilities/approvals.md)) ; multi-étapes et historique à faire |
 | Réglages déclarés par BC, documents (impression, marque, import), conversation IA, tableau de bord | à faire |
 | i18n par BC (libellés du BC démo en dur) | à faire |
 | BC démo couvrant chaque concept et artefact (règle 9) ; étapes déduites des données et conditions de transition calculées (règle 10) | à faire |
 | Écrans spécifiques d’un BC ([UI.md](UI.md)) : `spec.screens`, `ScreenPageComponent`, façade `screen-kit`, garde-fou | livré (démo : synthèse fournisseur) |
-| Sektor sur le host (supprimer `socle`, vérifications de rôles `OWNER`) | à faire |
+| Héritage Sektor dans `lib/anatomy` et `core/framework/event` : isolé (`@deprecated`, garde-fous), supprimé avec Sektor sur le host | isolé ([spec 04](../specs/revue-plateforme/04-heritage-sektor.md)) |
+| Sektor sur le host (supprimer `socle`, vérifications de rôles `OWNER`, classes marquées) | à faire |
 | Publication (BOM Maven, paquets npm) à la place de `includeBuild` et des alias source | après Sektor |
 | `platform/lab-auth` : seulement pour `sandbox` | à migrer |
 

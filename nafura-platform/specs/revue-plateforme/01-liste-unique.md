@@ -3,7 +3,7 @@
 > Revue 2026-10-07, doublon D1. Taille **L** (front + back). Dépend de [05](05-crud-unique.md) pour les séquences de numérotation.
 > Reprend et détaille le chantier « Listes : la suite » de `ROADMAP.md`.
 
-## État (2026-10-07)
+## État (2026-10-08)
 
 - **Lot 1 livré** : clés d'API et webhooks sont des `RecordController` (`records/api-key.json`, `records/webhook.json`), affichés par `nf-listing-page`.
   - Permissions : `administration.integrations.{api-keys,webhooks}.{read,create,update,delete}`, couvertes par `administration.*` des rôles plateforme.
@@ -11,6 +11,18 @@
   - Webhook : secret en écriture seule, gardé si vide en modification ; quota ; envois supprimés avec le webhook ; dernier envoi calculé.
   - Migrations : `authorization/005_api_keys_record.sql`, `webhook/003_webhook_configs_record.sql`.
   - Tests : `PermissionEnforcementHostTest` (création, révocation, suppression, secret).
+- **Lot 2 livré** : séquences de numérotation → `nf-listing-page` + `ListingPageConfig` (`numbering-sequences.listing.ts`) ; aperçu et libellé de réinitialisation en `@Formula` (`preview`, `resetLabel`).
+- **Lot 3 livré** : modèles d'impression et modèles d'e-mail → `RecordController` (`records/document-template.json`, `records/email-template.json`) + `nf-listing-page` (`templates.listing.ts`, `email-templates.listing.ts`).
+  - Permissions : `administration.documents.templates.{read,create,update,delete}` et `administration.documents.templates.editBody` ; `administration.notifications.email-templates.{read,create,update,delete}`.
+  - Impression : `DocumentTemplate` étend `TenantEntity` ; libellé de type en `@Formula` (`typeLabel`) ; endpoints spéciaux (preview, render, variables…) conservés sur `TemplateController`.
+  - E-mail : `tenant_id` nullable pour les modèles système ; `RecordController.includeSharedTenantRows()` expose aussi les lignes `tenant_id IS NULL` (sans dupliquer les seeds par tenant).
+  - Migrations : `impression/.../004_document_templates_record.sql`, `notification/.../006_email_templates_record.sql`.
+- **Lot 4 livré** : workflows d'approbation → `RecordController` (`records/workflow-template.json`) + `workflows.listing.ts` ; activer / désactiver en actions de ligne (`POST /{id}/activate|deactivate`) ; permissions `administration.approvals.workflows.{read,create,update,delete}` ; migration `approbation/.../003_workflow_templates_record.sql`.
+- **Lot 0 + lot 6 livrés** : `ReadOnlyRecordController<E>` dans `core/framework/record` (liste, `/options`, `/properties`, `/aggregate`, `GET /{id}` ; pas de create/update/delete). `RecordController` en hérite.
+  - Journal d'audit : `AuditLogController` + `records/audit-event.json` + `audit.listing.ts` ; permission `administration.audit.log.read` ; migration `audit/.../003_audit_events_record.sql` ; fiche `/administration/audit/:id` (export CSV non repris — écart).
+  - Tâches planifiées : table `scheduled_jobs` synchronisée depuis le registre + `ScheduledJobController` + `records/scheduled-job.json` + `scheduled-jobs.listing.ts` ; permissions `administration.operations.scheduled-jobs.{read,update}` (déclencher = `update`) ; migration `framework/.../008_create_scheduled_jobs.sql` ; détail par clé inchangé (`/by-key/{key}/…`).
+- **Lot 5 livré** : membres et rôles → façades `/api/v1/platform/admin/{members,roles}` + `nf-listing-page` ; invite = action de liste ; fiches → [02](02-fiche-unique.md).
+- **Lot 7 (partiel)** : `platform/listing/legacy/` et `LegacyListingPageComponent` supprimés. Allowlist ConfigDrivenListing plateforme vide.
 - Reste hors lot : la page de détail d'un webhook (historique des envois) est encore une page propre sur `nf-listing-flat`. L'outil de l'agent IA (`AgentPermissionChecker`) vérifie encore `administration.api-keys.write` (schéma propre à l'IA, à reprendre avec la cap IA).
 
 ## Objectif
@@ -30,16 +42,16 @@ Tous les écrans de liste de la plateforme passent par `nf-listing-page` et le `
 
 | Écran | Archétype | Endpoint | Record côté serveur ? |
 |---|---|---|---|
-| Workflows d'approbation | `ConfigDrivenListingPage` | `/api/v1/platform/collaboration/workflow/templates` | non |
+| Workflows d'approbation | `nf-listing-page` | `/api/v1/platform/collaboration/workflow/templates` | oui (`workflow-template.json`) |
 | Membres | `ConfigDrivenListingPage` | `/api/tenants/{tenantId}/…` | non |
-| Modèles d'impression | `ConfigDrivenListingPage` | `/api/v1/platform/templates` | non |
-| Journal d'audit | `ConfigDrivenListingPage` | `/api/v1/platform/collaboration/audit/log` | non (lecture seule) |
-| Modèles d'e-mail | `ConfigDrivenListingPage` | `/api/v1/platform/email…` | non |
+| Modèles d'impression | `nf-listing-page` | `/api/v1/platform/templates` | oui |
+| Journal d'audit | `nf-listing-page` | `/api/v1/platform/collaboration/audit/log` | oui (`audit-event.json`, lecture seule) |
+| Modèles d'e-mail | `nf-listing-page` | `/api/v1/platform/email-templates` | oui |
 | Rôles | `ConfigDrivenListingPage` | `/api/tenants/{tenantId}/roles` | non |
-| Tâches planifiées | `ConfigDrivenListingPage` | `/api/v1/platform/admin/scheduled…` | non (registre de code + dernière exécution) |
-| Clés d'API | `LegacyListingPageComponent` | `/api/v1/platform/admin/api…` | non |
-| Webhooks | `LegacyListingPageComponent` | `/api/v1/platform/admin/webhooks` | non |
-| Séquences de numérotation | `LegacyListingPageComponent` | `/api/v1/numbering-sequences` | `CrudService` (voir 05) |
+| Tâches planifiées | `nf-listing-page` | `/api/v1/platform/admin/scheduled-jobs` | oui (`scheduled-job.json`, lecture seule) |
+| Clés d'API | `nf-listing-page` | `/api/v1/platform/admin/api-keys` | oui |
+| Webhooks | `nf-listing-page` | `/api/v1/platform/admin/webhooks` | oui |
+| Séquences de numérotation | `nf-listing-page` | `/api/v1/numbering-sequences` | oui |
 
 - `nf-listing-page` attend un endpoint `RecordController` : lignes paginées, `/properties`, `/aggregate`, `/lifecycle`.
 - Seuls `RecordController` et le BC de test `ProbeRecordsApi` en héritent dans `nafura-platform/sources/backend`.
@@ -102,7 +114,7 @@ Pour chaque écran :
 - `docs/ARCHITECTURE.md` (État et écarts) et `ROADMAP.md` : retirer les deux puces correspondantes.
 - `docs/PLATFORM.md` : `ReadOnlyRecordController` si le lot 0 est retenu.
 
-## Décisions ouvertes
+## Décisions
 
-1. Journal d'audit et tâches planifiées : `ReadOnlyRecordController` (recommandé), ou les laisser sur l'ancien archétype jusqu'à la suppression de Sektor ?
-2. Membres : sont-ils un record (`membership` du tenant) ou une vue sur Keycloak + appartenance ? La réponse conditionne le lot 5.
+1. **Lot 0 — livré** : `ReadOnlyRecordController<E extends TenantEntity>` dans `core/framework/record` ; `RecordController` en hérite. Même descripteur `records/<record>.json` ; expose liste, `/options`, `/properties`, `/aggregate`, `GET /{id}` ; pas de create/update/delete.
+2. **Ouverte — Membres** : record (`membership` du tenant) ou vue Keycloak + appartenance ? Conditionne le lot 5 ; chevauche [02](02-fiche-unique.md) pour les fiches.

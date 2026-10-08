@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.BeanUtils;
 
+import ma.nafura.platform.framework.scope.RecordScope;
+
 /**
  * The single description of a record ({@code records/<record>.json}): its properties, the fields searched by
  * {@code q}, and its lifecycle when it has one. A declaration that does not match the entity fails at startup,
@@ -34,7 +36,8 @@ public record RecordDescriptor(
         Class<?> type,
         Map<String, RecordProperty> properties,
         List<String> search,
-        Lifecycle lifecycle) {
+        Lifecycle lifecycle,
+        RecordScope scope) {
 
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final Set<String> TYPES = Set.of(
@@ -81,11 +84,13 @@ public record RecordDescriptor(
                 search.add(path);
             }
         }
+        RecordScope scope = scope(source, root.get("scope"), fields);
         Lifecycle lifecycle = null;
         if (root.hasNonNull("states") || root.hasNonNull("initial") || root.hasNonNull("transitions")) {
             ObjectNode copy = ((ObjectNode) root).deepCopy();
             copy.remove("properties");
             copy.remove("search");
+            copy.remove("scope");
             try {
                 lifecycle = JSON.treeToValue(copy, Lifecycle.class).validated(source);
             } catch (IOException e) {
@@ -94,7 +99,43 @@ public record RecordDescriptor(
                 throw e;
             }
         }
-        return new RecordDescriptor(source, entity, recordType, properties, List.copyOf(search), lifecycle);
+        return new RecordDescriptor(source, entity, recordType, properties, List.copyOf(search), lifecycle, scope);
+    }
+
+    /**
+     * A record is a scope node ({@code node}, optional {@code parent} of the same type) or it sits in the scope of
+     * another node ({@code of} + {@code field}). Grants apply to the node and, through {@code parent}, its descendants.
+     */
+    private static RecordScope scope(String source, JsonNode node, Map<String, Class<?>> fields) {
+        if (node == null || node.isNull()) {
+            return null;
+        }
+        if (!node.isObject()) {
+            throw new IllegalStateException("Invalid record " + source + ": scope must be an object");
+        }
+        boolean tree = bool(node, "node");
+        String parent = text(node, "parent");
+        String of = text(node, "of");
+        String field = text(node, "field");
+        if (tree == (of != null)) {
+            throw new IllegalStateException("Invalid record " + source + ": scope is a node or a reference (of), not both");
+        }
+        if (tree) {
+            if (field != null) {
+                throw new IllegalStateException("Invalid record " + source + ": a scope node has no field");
+            }
+            if (parent != null && fields.get(parent) != UUID.class) {
+                throw new IllegalStateException("Invalid record " + source + ": scope parent " + parent + " is not a UUID field");
+            }
+            return new RecordScope(true, parent, null, null);
+        }
+        if (parent != null) {
+            throw new IllegalStateException("Invalid record " + source + ": a scope reference has no parent");
+        }
+        if (of == null || of.isBlank() || field == null || fields.get(field) != UUID.class) {
+            throw new IllegalStateException("Invalid record " + source + ": scope of needs a target and a UUID field");
+        }
+        return new RecordScope(false, null, of, field);
     }
 
     public RecordProperty property(String key) {

@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Outgoing webhooks of the organization, a record, plus their deliveries and a test call.
@@ -86,10 +84,6 @@ public class WebhookController extends RecordController<WebhookConfig> {
         WebhookDelivery delivery = dispatcher.triggerTest(require(id));
         boolean success = delivery != null && delivery.getStatus() == WebhookDelivery.Status.SUCCESS;
         return new TestWebhookResponse(success, delivery != null ? delivery.getResponseCode() : null);
-    }
-
-    private WebhookConfig require(UUID id) {
-        return find(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Webhook not found"));
     }
 
     private static boolean blank(String value) {

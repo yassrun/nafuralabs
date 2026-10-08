@@ -20,6 +20,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import ma.nafura.platform.framework.context.TenantContext;
 import ma.nafura.platform.framework.context.UserContext;
+import ma.nafura.platform.framework.domain.PlatformEntity;
+import ma.nafura.platform.framework.scope.DataScope;
 import ma.nafura.platform.framework.record.Lifecycle.Transition;
 
 /** Fires lifecycle transitions: permission, source state, required fields, approval, event. */
@@ -45,12 +47,15 @@ public class LifecycleEngine {
 
     private final ObjectProvider<ApprovalGateway> approvals;
     private final ApplicationEventPublisher events;
+    private final ObjectProvider<DataScope> scopes;
     private final Map<String, Binding<?>> bindings = new ConcurrentHashMap<>();
     private final Map<Class<?>, Lifecycle> byRecordType = new ConcurrentHashMap<>();
 
-    public LifecycleEngine(ObjectProvider<ApprovalGateway> approvals, ApplicationEventPublisher events) {
+    public LifecycleEngine(ObjectProvider<ApprovalGateway> approvals, ApplicationEventPublisher events,
+                           ObjectProvider<DataScope> scopes) {
         this.approvals = approvals;
         this.events = events;
+        this.scopes = scopes;
     }
 
     /** Called by each {@link RecordController} with a lifecycle, so approval outcomes find their record. */
@@ -71,6 +76,18 @@ public class LifecycleEngine {
         return binding.loader().apply(id).map(HasStatus.class::cast);
     }
 
+    /** Organisation-wide permission, or a grant whose closure contains this record. */
+    private boolean allowed(Lifecycle lifecycle, HasStatus record, String permission) {
+        if (UserContext.hasPermission(permission)) {
+            return true;
+        }
+        DataScope scope = scopes == null ? null : scopes.getIfAvailable();
+        if (scope == null || lifecycle == null || !(record instanceof PlatformEntity entity)) {
+            return false;
+        }
+        return scope.visible(lifecycle.entity(), entity.getId(), record, permission);
+    }
+
     /** The lifecycle declared for records of this entity class, if any. */
     public Optional<Lifecycle> lifecycleOf(Class<?> recordType) {
         return Optional.ofNullable(byRecordType.get(recordType));
@@ -79,7 +96,7 @@ public class LifecycleEngine {
     /** Transitions the current user may fire now. */
     public List<Transition> available(Lifecycle lifecycle, HasStatus record) {
         return lifecycle.transitions().stream()
-                .filter(t -> !t.system() && t.allowedFrom(record.getStatus()) && UserContext.hasPermission(t.permission()))
+                .filter(t -> !t.system() && t.allowedFrom(record.getStatus()) && allowed(lifecycle, record, t.permission()))
                 .toList();
     }
 
@@ -99,7 +116,7 @@ public class LifecycleEngine {
             if (!systemAllowed) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Transition not permitted: " + transitionId);
             }
-        } else if (!UserContext.hasPermission(transition.permission())) {
+        } else if (!allowed(lifecycle, record, transition.permission())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Transition not permitted: " + transitionId);
         }
         if (!transition.allowedFrom(record.getStatus())) {
@@ -119,7 +136,7 @@ public class LifecycleEngine {
                     throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Approvals are not available");
                 }
                 saver.accept(record);
-                gateway.request(lifecycle.entity(), id, title(approval.title(), record, transition), approval.role());
+                gateway.request(lifecycle.entity(), id, title(approval.title(), record, transition), approval.permission());
                 return;
             }
             apply(lifecycle, record, id, lifecycle.transition(approval.approved()).orElseThrow());

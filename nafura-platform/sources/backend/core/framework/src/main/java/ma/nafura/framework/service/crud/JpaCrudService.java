@@ -31,11 +31,13 @@ import java.util.UUID;
  * Default CRUD implementation backed by a tenant-aware JPA repository.
  * Auto-implements mapping via EntityMapper, eliminating manual createEntity/applyUpdate overrides.
  *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser {@link ma.nafura.platform.framework.record.RecordController}.
  * @param <TId>     Entity ID type
  * @param <TEntity> Entity type
  * @param <TCreate> Create DTO type
  * @param <TUpdate> Update DTO type
  */
+@Deprecated(since = "2026-10", forRemoval = true)
 public abstract class JpaCrudService<TId, TEntity, TCreate, TUpdate>
     extends CrudService<TId, TEntity, TCreate, TUpdate> {
 

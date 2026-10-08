@@ -1,43 +1,45 @@
 package ma.nafura.platform.collaboration.notification.domain.model;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import lombok.Setter;
+import ma.nafura.platform.framework.domain.TenantEntity;
+import org.hibernate.annotations.Formula;
 
 /**
  * Email template stored in DB with Thymeleaf variable substitution.
- * System templates (invitation, welcome) have tenantId null; custom templates are per-tenant.
+ * System templates ({@code tenantId} null) are shared; custom templates are per-tenant.
  */
 @Entity
 @Table(name = "email_templates", indexes = {
-    @Index(name = "idx_email_templates_tenant_code", columnList = "tenant_id, code"),
-    @Index(name = "idx_email_templates_system", columnList = "is_system, code")
+    @jakarta.persistence.Index(name = "idx_email_templates_tenant_code", columnList = "tenant_id, code"),
+    @jakarta.persistence.Index(name = "idx_email_templates_system", columnList = "is_system, code")
 })
-@Data
+@AttributeOverride(name = "tenantId", column = @Column(name = "tenant_id", nullable = true))
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class EmailTemplate {
+public class EmailTemplate extends TenantEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    /** Null for system templates; required for custom templates. */
-    @Column(name = "tenant_id")
-    private UUID tenantId;
-
+    @NotBlank
+    @Size(max = 80)
     @Column(name = "code", nullable = false, length = 80)
     private String code;
 
+    @NotBlank
+    @Size(max = 200)
     @Column(name = "name", nullable = false, length = 200)
     private String name;
 
+    @NotBlank
+    @Size(max = 500)
     @Column(name = "subject", nullable = false, length = 500)
     private String subject;
 
@@ -48,28 +50,14 @@ public class EmailTemplate {
     private String textBody;
 
     /** Entity type for entity emails (e.g. "invoice"); null for system emails. */
+    @Size(max = 80)
     @Column(name = "entity_type", length = 80)
     private String entityType;
 
     @Column(name = "is_system", nullable = false)
-    @Builder.Default
     private Boolean isSystem = false;
 
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        OffsetDateTime now = OffsetDateTime.now();
-        if (this.createdAt == null) this.createdAt = now;
-        if (this.updatedAt == null) this.updatedAt = now;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = OffsetDateTime.now();
-    }
+    @Setter(AccessLevel.NONE)
+    @Formula("case when is_system = true then 'Système' else 'Personnalisé' end")
+    private String typeLabel;
 }

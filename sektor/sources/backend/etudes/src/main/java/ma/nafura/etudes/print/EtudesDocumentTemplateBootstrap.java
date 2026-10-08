@@ -110,20 +110,19 @@ public class EtudesDocumentTemplateBootstrap implements DocumentTemplateBootstra
             }
             return;
         }
-        DocumentTemplate t = DocumentTemplate.builder()
-                .tenantId(tenantId)
-                .code(code)
-                .name(name)
-                .entityType(entityType)
-                .format("pdf")
-                .templateBody(body)
-                .isSystem(true)
-                .isDefault(true)
-                .isActive(true)
-                .paperSize("A4")
-                .orientation(orientation)
-                .marginsCss("15mm 12mm 15mm 12mm")
-                .build();
+        DocumentTemplate t = new DocumentTemplate();
+        t.setTenantId(tenantId);
+        t.setCode(code);
+        t.setName(name);
+        t.setEntityType(entityType);
+        t.setFormat("pdf");
+        t.setTemplateBody(body);
+        t.setIsSystem(true);
+        t.setIsDefault(true);
+        t.setIsActive(true);
+        t.setPaperSize("A4");
+        t.setOrientation(orientation);
+        t.setMarginsCss("15mm 12mm 15mm 12mm");
         repository.save(t);
         log.info("Seeded system print template {} for tenant {}", code, tenantId);
     }

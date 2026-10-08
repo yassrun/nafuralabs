@@ -14,11 +14,14 @@
 Un BC peut coder un écran trop spécifique pour un archétype (ex. arbre du bordereau d’une étude), aux quatre conditions suivantes :
 
 1. **Manque réel** : aucun archétype ne le couvre, même avec une option ajoutée, et ce BC est le seul à en avoir besoin. Dès qu’un second BC en a besoin, il remonte dans la plateforme.
-2. **Dans le cadre** : l’écran n’occupe que le contenu de la page. La route est `{ component: ScreenPageComponent, data: { screen } }` : en-tête, fil d’Ariane, chargement et erreur viennent de la plateforme. Le composant du BC est projeté dans le corps et peut injecter `ScreenState`.
+2. **Dans le cadre** : trois placements (`spec.screens[].placement`, défaut `["page"]`) :
+   - **`page`** — page entière : route `{ component: ScreenPageComponent, data: { screen } }` ; en-tête, fil d’Ariane, chargement et erreur ; le composant injecte `ScreenState`.
+   - **`section`** — corps d’une section de fiche : `RecordSection.kind: 'screen'` + `loadScreen` (chunk à la demande). Cadre (titre, carte) par `nf-record-page`. Le composant injecte `RECORD_SECTION` (`record`, `saved`, `editable`, `patch`, `reload`). `patch` passe par le brouillon de la fiche (pas de PUT direct).
+   - **`listing-header`** — entre la barre d’outils et les lignes d’une liste : `ListingPageConfig.loadHeader`. Le composant injecte `LISTING_HEADER` (`filter`, `q`, `aggregate`).
 3. **Avec les briques** : le composant importe `@platform/platform/screen-kit` (atomes, `nf-empty-state`, `nf-loading-state`, `nf-chart`, `nf-kpi-strip`, `nf-stat-card`, `PermissionService`, `ApiConfigService`), jamais `lib/anatomy`. Aucun SCSS, aucune couleur hexadécimale.
-4. **Déclaré** : `bc.manifest.json` → `spec.screens: [{ id, label, reason }]`. Le composant vit dans `bcs/<bc>/web/screens/<id>/`. `architecture:check` refuse un composant hors de ces dossiers, un id sans dossier, un import d’anatomie, un style ou une couleur propre, et affiche le nombre d’écrans.
+4. **Déclaré** : `bc.manifest.json` → `spec.screens: [{ id, label, reason, placement? }]`. Le composant vit dans `bcs/<bc>/web/screens/<id>/`. `architecture:check` refuse un composant hors de ces dossiers, un id sans dossier, un import d’anatomie, un style ou une couleur propre, un usage sans le `placement` correspondant, et affiche le nombre d’écrans, de sections et d’en-têtes.
 
-Exemple : synthèse fournisseur du BC démo (`supplier-overview`), ouverte depuis la fiche.
+Exemples (BC démo) : synthèse fournisseur (`supplier-overview`, `page` + `section`) ; indicateurs des demandes (`purchase-requests-header`, `listing-header`).
 
 ## Choisir l’archétype
 
@@ -38,10 +41,12 @@ Exemple : synthèse fournisseur du BC démo (`supplier-overview`), ouverte depui
 | Création guidée | idem | `createLayout: { kind: 'steps', … }` (assistant) |
 | Parcours à statuts | idem | `lifecycle: true` + `layout.kind: 'steps'` avec `states` par étape |
 | Sous-liste d’une fiche (1-N) | section de fiche | `sections[].listing: (record) => ListingPageConfig` |
+| Bloc propre dans une fiche | section d’écran | `sections[].kind: 'screen'` + `loadScreen` ; écran déclaré avec `placement: "section"` |
+| Indicateurs au-dessus d’une liste | en-tête de liste | `ListingPageConfig.loadHeader` ; écran déclaré avec `placement: "listing-header"` |
 | Liste de choix d’une relation | champ `select` | `lookupKey` + `lookups: { clé: '/api/v1/…/options' }` |
 | Page publique | contrôleur `@PublicEndpoint` | `spec.public` du BC (`routes`, `endpoints`, `submissions`). Champs renvoyés = `@PublicField` seulement. La coquille web `/catalogue` et `/p/{slug}` n’est pas encore un archétype. |
 | Plusieurs organisations | menu d’organisation existant | Un seul sélecteur. Il affiche l’audience quand elle n’est pas `members`. Le changement recharge les permissions. |
-| Approbation | rien à faire | `approval` dans le cycle de vie JSON ; la boîte `/approvals` et la fiche le gèrent ; les membres du rôle sont notifiés |
+| Approbation | rien à faire | `approval` dans le cycle de vie JSON (`permission`) ; la boîte `/approvals` et la fiche le gèrent ; les détenteurs de la permission sont notifiés |
 | Notifications (inbox) | écran plateforme `/notifications` | Vues Non lues / Toutes / Lues, filtre événement, lignes avec libellé + temps relatif ; clic → `actionUrl` ou fiche via `spec.records` du manifeste du BC ; cloche live via SSE (`platform/notifications`) |
 | Préférences de notification | Mes paramètres → Notifications ; Paramètres organisation → Notifications | Matrice événement × canal (`in_app`, `email`) ; fréquence digest e-mail (`none`/`daily`/`weekly`) au-dessus de la matrice (user) ; org : permission `administration.notifications.configure` |
 | Navigation | rien à faire | `navigation` du `bc.manifest.json` (filtrée par permission) |
@@ -50,10 +55,11 @@ Ce que l’archétype fait déjà, ne pas le refaire : en-tête et fil d’Arian
 
 ## Champs, colonnes, filtres
 
-- Champs (`FormFieldConfig.type`) : `text`, `textarea`, `richtext`, `number`, `email`, `password`, `date`, `datetime`, `select`, `multiselect`, `checkbox`, `radio`, `file`, `autocomplete`. Options : `required`, `validation`, `options`, `lookupKey`, `wide`, `placeholder`, `toolbar` (`richtext`).
+- Champs (`FormFieldConfig.type`, rendus par `nf-form`) : `text`, `textarea`, `richtext`, `number`, `email`, `password`, `date`, `datetime`, `select`, `multiselect`, `checkbox`, `radio`, `file`, `autocomplete`, `money`, `ice`, `rib`, `phone-ma`, `city-ma`, `computed`. Options : `required`, `validation`, `options`, `lookupKey`, `currency` (`money`), `wide`, `placeholder`, `toolbar` (`richtext`), `compute` / `format` (`computed` : `money` | `number` | `date` | `percent`). Sur une fiche, un champ sans `type` prend celui de la propriété (`GET /properties`) : `money` → `money`, `date` → `date`, `select` / `status` / `relation` / `person` → `select` (options ou `/options` de la cible), `boolean` → `checkbox`. Devise d’un `money` : `currency` du champ, sinon celle de la propriété, sinon `MAD`. Valeurs : `ice` = 15 chiffres, `rib` = 24 chiffres (clé), `phone-ma` = E.164, `city-ma` = nom canonique de ville (`nf-ville-ma-select`). Pas de type `custom` : un bloc libre est une section d’écran ([spec 07](../specs/revue-plateforme/07-section-ecran.md)).
+- Conditions sur une fiche (`RecordField` / `RecordSection`, même idiome que `PageAction.when`) : `visible`, `locked`, `requiredWhen` (champs) ; `visible` (sections). Fonctions pures du brouillon, évaluées dans un `computed` (pas de méthode qui crée un objet dans le template). Un champ masqué garde sa valeur dans le brouillon et l’envoie. `requiredWhen` et `locked` sont un confort de saisie : **le serveur fait foi** (`validate`, `editableFields` du cycle de vie). Type `computed` : affichage seulement (`compute` + `format`), jamais envoyé ; pour stocker ou filtrer, passer par le serveur (`@Formula`, `beforeSave`).
 - Colonnes d’une liste : `show` d’une vue ; le format suit le type de la propriété (`money` avec sa devise, `status` en badge avec le ton du cycle de vie, `relation` par son `display`).
 - Filtres d’une liste : déduits des propriétés filtrables ; `FilterFieldConfig.operators` restreint le constructeur aux opérateurs de la grammaire.
-- Temporaire : l’écran des séquences de numérotation (contrôleur qui n’est pas un record) reste sur `LegacyListingPageComponent` (`columns`, `segments`), seul toléré par le garde-fou, jusqu’à son chantier ([spec 01](../specs/revue-plateforme/01-liste-unique.md)). Clés d’API et webhooks sont des records (`/api/v1/platform/admin/…`, permissions `administration.integrations.{api-keys,webhooks}.*`).
+- Listes plateforme déjà sur `nf-listing-page` : clés d’API, webhooks, séquences, modèles d’impression, modèles d’e-mail, workflows, membres, rôles, journal d’audit, tâches planifiées (`platform/listing/legacy/` et `ConfigDrivenListingPage` hors Sektor — [spec 01](../specs/revue-plateforme/01-liste-unique.md)).
 - Icônes : noms Lucide (`building-2`, `package`, …) enregistrés dans `core/icons/app-lucide-icons.ts` ; une icône absente s’y ajoute (garde-fou).
 - Permissions : chaque `permission` d’une configuration existe dans le manifeste du BC (garde-fou).
 
@@ -78,6 +84,7 @@ Vitrine visuelle : `sandbox/` (voir son README).
 | Erreur Sektor | Règle |
 |---|---|
 | Composants de liste et de fiche écrits dans le produit, un par écran | Une configuration d’archétype |
+| Classes de pages `lib/anatomy/pages` (`Feature*Page`, `ConfigDriven*Page`) | Archétypes du host (`nf-listing-page`, `nf-record-page`, …) |
 | `nf-entity-listing` à côté de `nf-listing-flat`, deux sidebars, deux formats de manifeste | Un seul artefact par besoin ; on enrichit l’existant |
 | Barres d’actions, chips de filtres, boutons retour faits main par écran | Actions, segments, filtres et fil d’Ariane de l’archétype |
 | `socle` : une plateforme-bis dans le produit (approbations, admin, invitations, chrome) | Le générique est dans la plateforme, une fois |

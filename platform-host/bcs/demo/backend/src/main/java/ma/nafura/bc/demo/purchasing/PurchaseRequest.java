@@ -23,7 +23,7 @@ import org.hibernate.annotations.Formula;
 @Table(name = "demo_purchase_request")
 @Auditable(
         entityType = "demo.purchase-request",
-        trackedFields = {"subject", "supplierId", "amount", "neededBy", "status", "justification"})
+        trackedFields = {"subject", "supplierId", "amount", "neededBy", "status", "justification", "comment", "rejectionReason"})
 @Getter
 @Setter
 public class PurchaseRequest extends TenantEntity implements HasStatus {
@@ -47,6 +47,14 @@ public class PurchaseRequest extends TenantEntity implements HasStatus {
 
     @Size(max = 2000)
     private String justification;
+
+    /** Editable while the request is in approval ({@code editableFields.SUBMITTED}). */
+    @Size(max = 2000)
+    private String comment;
+
+    @Column(name = "rejection_reason")
+    @Size(max = 2000)
+    private String rejectionReason;
 
     private String status;
 }

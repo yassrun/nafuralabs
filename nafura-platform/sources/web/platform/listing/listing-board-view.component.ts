@@ -215,12 +215,20 @@ export class ListingBoardViewComponent {
   private async askRequired(fields: string[]): Promise<Record<string, unknown> | null> {
     const form: FormFieldConfig[] = fields.map((field) => {
       const property = this.page.properties()[field];
-      const numeric = property?.type === 'number' || property?.type === 'money';
+      const type =
+        property?.type === 'money'
+          ? 'money'
+          : property?.type === 'number'
+            ? 'number'
+            : property?.type === 'date'
+              ? 'date'
+              : 'text';
       return {
         key: field,
         field,
         label: property?.label ?? field,
-        type: numeric ? 'number' : property?.type === 'date' ? 'date' : 'text',
+        type,
+        ...(type === 'money' ? { currency: property?.currency ?? 'MAD' } : {}),
         required: true,
       } as FormFieldConfig;
     });

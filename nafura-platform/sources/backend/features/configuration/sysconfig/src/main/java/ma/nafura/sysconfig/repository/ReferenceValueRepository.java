@@ -1,17 +1,15 @@
 package ma.nafura.platform.configuration.sysconfig.repository;
 
+import java.util.UUID;
 import ma.nafura.platform.configuration.sysconfig.domain.model.ReferenceValue;
-import ma.nafura.platform.framework.repository.TenantScopedRepository;
+import ma.nafura.platform.framework.record.RecordRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.UUID;
-
-/**
- * Repository for ReferenceValue entity.
- * Generated once — add custom queries here.
- */
 @Repository
-public interface ReferenceValueRepository extends TenantScopedRepository<ReferenceValue, UUID> {
+public interface ReferenceValueRepository extends RecordRepository<ReferenceValue> {
+
+    boolean existsByTenantIdAndCodeListIdAndCodeIgnoreCase(UUID tenantId, UUID codeListId, String code);
+
+    boolean existsByTenantIdAndCodeListIdAndCodeIgnoreCaseAndIdNot(
+        UUID tenantId, UUID codeListId, String code, UUID id);
 }
-
-
