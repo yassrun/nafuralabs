@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS probe_group (
     created_by  UUID,
     updated_by  UUID,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS probe_record (
@@ -21,5 +22,6 @@ CREATE TABLE IF NOT EXISTS probe_record (
     created_by  UUID,
     updated_by  UUID,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );

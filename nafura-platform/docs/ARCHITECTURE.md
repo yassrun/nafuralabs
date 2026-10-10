@@ -92,6 +92,7 @@ Lancement : [ops/README.md](../ops/README.md).
 | Host, manifestes, capabilities, BC démo, rôles, connexion, seeding | livrés (`platform-host`) |
 | Contrat entre BCs : `provides` / `requires` (version, records, événements), refus d’une dépendance de code | livré |
 | Périmètre : rôle limité à un nœud de record et à ses descendants | livré |
+| Verrouillage optimiste : `@Version` sur `PlatformEntity`, `PUT` avec version périmée → 409 `OPTIMISTIC_LOCK` | livré |
 | Notifications : événements déclarés (BC et plateforme), routeur unique, préférences organisation / utilisateur (API), canaux in-app et e-mail | livré (backend) |
 | Notifications : écrans de préférences, canal SMS, modèles de message par canal | à faire |
 | Tenancy `multi` : organisations, opérateur, sélecteur, isolation (démo) | livré (API et sélecteur) ; console opérateur (écrans) à faire |

@@ -34,7 +34,7 @@ class SeedHostTest {
         UUID tenant = scopes.resolveDefaultScopeId();
 
         assertThat(jdbc.queryForList("SELECT code FROM probe_group WHERE tenant_id = ? ORDER BY code", String.class, tenant))
-                .containsExactly("G1", "G2");
+                .containsExactly("CHILD", "G1", "G2");
         List<Map<String, Object>> records = jdbc.queryForList("""
                 SELECT r.code, r.status, g.code AS group_code FROM probe_record r JOIN probe_group g ON g.id = r.group_id
                 WHERE r.tenant_id = ? ORDER BY r.code
@@ -59,6 +59,9 @@ class SeedHostTest {
         // A changed data set is applied again: only the missing keys are created.
         jdbc.update("UPDATE nafura_seed SET checksum = 'changed' WHERE tenant_id = ? AND dataset_id = 'probe.records'", tenant);
         assertThat(seeder.seed(tenant)).containsExactly(new TenantSeeder.Applied("probe.records", 1));
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM probe_record WHERE tenant_id = ?", Integer.class, tenant)).isEqualTo(2);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM probe_record WHERE tenant_id = ? AND code = 'R-1'", Integer.class, tenant))
+                .isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM probe_record WHERE tenant_id = ? AND code = 'R-2'", Integer.class, tenant))
+                .isEqualTo(1);
     }
 }

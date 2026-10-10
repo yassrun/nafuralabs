@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS listing_saved_views (
     resource_key VARCHAR(120) NOT NULL,
     name VARCHAR(200) NOT NULL,
     is_default BOOLEAN NOT NULL DEFAULT FALSE,
-    query_json TEXT NOT NULL
+    query_json TEXT NOT NULL,
+    version      BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_listing_saved_views_tenant_owner_resource

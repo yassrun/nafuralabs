@@ -34,7 +34,7 @@ import type { BadgeVariant, FormFieldConfig, LookupContext } from '../../lib/ana
 import { AuditTimelineComponent } from '../../features/collaboration/audit';
 import { ListingPageComponent } from '../listing/listing-page.component';
 import { HOST_CAPABILITIES } from '../host/host-capabilities';
-import { ruleRefusal } from '../page-action';
+import { isOptimisticLock, ruleRefusal } from '../page-action';
 import { RecordCollaborationComponent } from './record-collaboration.component';
 import type { ListingPageConfig, Row } from '../listing/listing-page.types';
 import type { RecordProperties } from '../listing/listing-properties';
@@ -554,7 +554,7 @@ export class RecordPageComponent {
         this.auditRefresh.update((n) => n + 1);
       }
     } catch (error) {
-      this.toast.error(this.errorMessage(error));
+      this.onSaveError(error);
     } finally {
       this.busy.set(false);
     }
@@ -979,6 +979,24 @@ export class RecordPageComponent {
     const first = (error.error as { message?: string } | null)?.message?.match(/^Required fields: ([^,]+)/)?.[1];
     const panel = first && this.panels().find((candidate) => candidate.sections.some((section) => section.fields.some((field) => field.key === first)));
     if (panel) this.activePanel.set(panel.id);
+  }
+
+  /** Stale version: show the server message and offer to reload the record. */
+  private onSaveError(error: unknown): void {
+    const message = this.errorMessage(error);
+    if (isOptimisticLock(error)) {
+      this.toast.show({
+        message,
+        variant: 'danger',
+        duration: 8000,
+        action: {
+          label: this.translate.instant('record.reload'),
+          callback: () => void this.load(),
+        },
+      });
+      return;
+    }
+    this.toast.error(message);
   }
 
   /** Server error in words: field errors with their labels, or the message (required fields of a transition). */

@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Version;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.Getter;
@@ -14,6 +15,7 @@ import lombok.Setter;
 
 /**
  * Common platform fields for persisted entities.
+ * {@code version} is the optimistic-lock token: exposed in JSON, required on update.
  */
 @MappedSuperclass
 @Getter
@@ -23,6 +25,11 @@ public abstract class PlatformEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    /** Optimistic lock; clients must echo the value they last read on {@code PUT}. */
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;

@@ -35,6 +35,7 @@ class RecordRulesHostTest {
 
     private static final Pattern ACCESS_TOKEN = Pattern.compile("\"accessToken\"\\s*:\\s*\"([^\"]+)\"");
     private static final Pattern ID = Pattern.compile("\"id\"\\s*:\\s*\"([0-9a-f-]{36})\"");
+    private static final Pattern VERSION = Pattern.compile("\"version\"\\s*:\\s*(\\d+)");
     private static final String RECORDS = "/api/v1/probe/records";
 
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
@@ -66,13 +67,17 @@ class RecordRulesHostTest {
     @Test
     void updateComparesWithTheStoredRecordAndKeepsReadOnlyFields() throws Exception {
         String admin = admin();
-        String id = id(send(admin, "POST", RECORDS, "{\"code\":\"r-11\",\"amount\":10}"));
+        Response created = send(admin, "POST", RECORDS, "{\"code\":\"r-11\",\"amount\":10}");
+        String id = id(created);
+        long version = version(created);
 
-        Response lowered = send(admin, "PUT", RECORDS + "/" + id, "{\"code\":\"R-11\",\"amount\":5}");
+        Response lowered = send(admin, "PUT", RECORDS + "/" + id,
+                "{\"code\":\"R-11\",\"amount\":5,\"version\":" + version + "}");
         assertThat(lowered.status()).isEqualTo(422);
         assertThat(lowered.body()).contains("\"field\":\"amount\"", "Ne peut pas baisser");
 
-        Response raised = send(admin, "PUT", RECORDS + "/" + id, "{\"code\":\"R-11\",\"amount\":20,\"reference\":\"HACK\"}");
+        Response raised = send(admin, "PUT", RECORDS + "/" + id,
+                "{\"code\":\"R-11\",\"amount\":20,\"reference\":\"HACK\",\"version\":" + version + "}");
         assertThat(raised.status()).as(raised.body()).isEqualTo(200);
         assertThat(raised.body()).containsPattern("\"amount\":20(\\.0+)?[,}]").contains("\"reference\":\"REF-R-11\"");
     }
@@ -108,11 +113,11 @@ class RecordRulesHostTest {
 
     @Test
     void redefiningAnEndpointFailsStartup() throws Exception {
-        Method register = RecordController.class.getDeclaredMethod("registerRecord");
-        register.setAccessible(true);
+        Method refuse = RecordController.class.getDeclaredMethod("refuseRedefinedWriteEndpoints");
+        refuse.setAccessible(true);
         assertThatThrownBy(() -> {
             try {
-                register.invoke(new RedefinesCreate());
+                refuse.invoke(new RedefinesCreate());
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
@@ -143,6 +148,12 @@ class RecordRulesHostTest {
         Matcher matcher = ID.matcher(response.body());
         assertThat(matcher.find()).as(response.body()).isTrue();
         return matcher.group(1);
+    }
+
+    private static long version(Response response) {
+        Matcher matcher = VERSION.matcher(response.body());
+        assertThat(matcher.find()).as(response.body()).isTrue();
+        return Long.parseLong(matcher.group(1));
     }
 
     private Response send(String token, String method, String path, String body) throws Exception {

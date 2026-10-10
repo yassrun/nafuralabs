@@ -22,13 +22,13 @@
 
 ## Manques structurants
 
-> Exercice Sektor → core banking → CMS (2026-10-08). Concepts qu’une banque ou un CMS demanderont aussi. Chacun devient une spec (`specs/`) quand il est affecté. **1 et 2 sont livrés** ([ARCHITECTURE.md](docs/ARCHITECTURE.md)).
+> Exercice Sektor → core banking → CMS (2026-10-08). Concepts qu’une banque ou un CMS demanderont aussi. Chacun devient une spec (`specs/`) quand il est affecté. **1, 2 et 3 sont livrés** ([ARCHITECTURE.md](docs/ARCHITECTURE.md)).
 
 | # | Concept | Ordre |
 |---|---|---|
 | 1 | Contrat entre BCs (`provides` / `requires`, jamais le code) | livré |
 | 2 | Périmètre de données (rôle limité à un nœud) | livré |
-| 3 | Verrouillage optimiste (`@Version`, 409) | tout de suite après 1 et 2 — **S** |
+| 3 | Verrouillage optimiste (`@Version`, 409) | livré |
 | 7 | Document à lignes et arbre avec agrégats | ensuite — **L** |
 | 8 | Lien externe à jeton (objet, hash, expiration, usage unique, révocation) | **S** |
 | 5 | Versions figées et éditions publiées | **M** |

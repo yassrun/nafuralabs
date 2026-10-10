@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS scope_grants (
     updated_by  UUID,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT uq_scope_grants UNIQUE (tenant_id, user_id, role_code, entity, record_id)
+    CONSTRAINT uq_scope_grants UNIQUE (tenant_id, user_id, role_code, entity, record_id),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_scope_grants_tenant_user ON scope_grants (tenant_id, user_id);
