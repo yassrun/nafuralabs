@@ -69,7 +69,7 @@ Demande d'achat : motif de rejet visible si `REJECTED` ; total TTC calculé ; `e
 
 ## Règles
 
-- Un champ masqué garde sa valeur dans le brouillon et l'envoie (pas de perte silencieuse). Décision ouverte ci-dessous.
+- Un champ masqué garde sa valeur dans le brouillon et l'envoie (pas de perte silencieuse).
 - Les fonctions ne font aucun appel HTTP : ce sont des fonctions pures du record.
 
 ## Vérification
@@ -80,17 +80,17 @@ Demande d'achat : motif de rejet visible si `REJECTED` ; total TTC calculé ; `e
 
 ## Critères d'acceptation
 
-- [ ] `visible`, `locked`, `requiredWhen` sur les champs ; `visible` sur les sections.
-- [ ] Type `computed` avec `compute` et `format`.
-- [ ] `editableFields` dans le cycle de vie, appliqué par `update`, exposé par `/lifecycle` et appliqué par la fiche.
-- [ ] Démo à jour.
+- [x] `visible`, `locked`, `requiredWhen` sur les champs ; `visible` sur les sections.
+- [x] Type `computed` avec `compute` et `format`.
+- [ ] `editableFields` dans le cycle de vie, appliqué par `update`, exposé par `/lifecycle` et appliqué par la fiche. *(lot 3 — hors périmètre de cette livraison ; déjà documenté dans PLATFORM.md et consommé par la fiche si `/lifecycle` l’expose)*
+- [x] Démo à jour *(lots 1–2 / front : motif de rejet, TTC calculé, section International ; `editableFields` SUBMITTED reste lot 3)*.
 
 ## Documentation
 
 - `docs/UI.md` § Champs : conditions et type `computed`, avec la règle « le serveur fait foi ».
 - `docs/PLATFORM.md` § Cycle de vie : `editableFields`.
 
-## Décisions ouvertes
+## Décisions
 
-1. Un champ masqué : envoyé avec sa valeur (recommandé, pas de perte), ou remis à `null` ?
-2. Champ hors `editableFields` dans un `PUT` : ignoré en silence (comme les champs gérés aujourd'hui), ou 422 ? Recommandation : ignoré, par cohérence avec `MANAGED`.
+1. **Tranché** — Un champ masqué garde sa valeur dans le brouillon et l’envoie (pas de perte silencieuse). Documenté dans `docs/UI.md` et `RecordField`.
+2. Champ hors `editableFields` dans un `PUT` : ignoré en silence (comme les champs gérés aujourd'hui), ou 422 ? Recommandation : ignoré, par cohérence avec `MANAGED`. *(lot 3)*
