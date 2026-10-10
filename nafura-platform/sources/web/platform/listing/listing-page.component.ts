@@ -128,7 +128,6 @@ interface Aggregates {
             (retry)="reload()"
             (actionClick)="run($event)"
             (selectionChange)="selection.set($event)"
-            (rowClick)="config().open ? open($event) : null"
             (rowDblClick)="open($event)">
             @if (!bar() && hasCustomHeader()) {
               <nf-listing-header-host nfListingHeader class="nf-listing-page__custom-header" [header]="config().header" [loadHeader]="config().loadHeader" />

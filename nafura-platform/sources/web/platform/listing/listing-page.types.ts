@@ -87,7 +87,7 @@ export interface ListingPageConfig<T = Row> {
   features?: Partial<ListingFlatFeatures>;
   /** Toolbar actions, and row actions (`row: true`) offered on the selected row. */
   actions?: ListingAction<T>[];
-  /** Route opened by a click on a row (its checkbox selects it). */
+  /** Route opened by a double-click on a row (checkbox selects it). */
   open?: (item: T) => string;
   /**
    * Declared screen (`placement: "listing-header"`) between the toolbar and the rows.

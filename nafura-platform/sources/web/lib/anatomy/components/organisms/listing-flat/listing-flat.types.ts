@@ -38,7 +38,7 @@ export interface ListingFlatFeatures {
   /** When the selection toggle is shown, whether it starts in multi-select mode. */
   selectionToggleDefaultActive?: boolean;
   pagination: boolean;
-  /** Row click: `select` toggles the row (default), `open` only emits `rowClick` (master–detail). */
+  /** Row click: `select` toggles the row (default), `open` only emits `rowClick` (activation is via `rowDblClick`). */
   rowClick?: 'select' | 'open';
 }
 
