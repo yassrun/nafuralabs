@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import ma.nafura.platform.framework.record.RecordRuleException;
 import ma.nafura.platform.framework.service.crud.CrudNotFoundException;
 import ma.nafura.platform.framework.service.crud.CrudOperationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -65,6 +67,20 @@ public class GlobalExceptionHandler {
                 fields,
                 correlationId(request));
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(error);
+    }
+
+    /**
+     * Stale {@code @Version} on a record update (client echo or concurrent flush). Stable code for the UI.
+     */
+    @ExceptionHandler({OptimisticLockingFailureException.class, ObjectOptimisticLockingFailureException.class})
+    public ResponseEntity<ApiError> handleOptimisticLock(
+            OptimisticLockingFailureException ex,
+            HttpServletRequest request) {
+        String message = ex.getMessage() != null && !ex.getMessage().isBlank()
+                ? ex.getMessage()
+                : "The record was modified by someone else. Reload before saving again.";
+        ApiError error = ApiError.simple("OPTIMISTIC_LOCK", "record.optimisticLock", message, correlationId(request));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

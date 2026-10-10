@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS email_templates (
     entity_type VARCHAR(80),
     is_system   BOOLEAN NOT NULL DEFAULT false,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_email_templates_tenant_code ON email_templates(COALESCE(tenant_id, '00000000-0000-0000-0000-000000000000'::uuid), code);
 CREATE INDEX IF NOT EXISTS idx_email_templates_system ON email_templates(is_system, code);

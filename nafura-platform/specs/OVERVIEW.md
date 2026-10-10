@@ -1,12 +1,11 @@
-# Vue d’ensemble — specs planifiées non livrées (2026-10-08)
+| 3 || 4 || 5 || 6 || 7 || 8 || 9 || 10 || 11 || 12 || 13 || 14 || 15 || 16 || 17 || 18 || 19 || 20 || 21 || 22 || 23 |# Vue d’ensemble — specs planifiées non livrées (2026-10-08)
 
 > Brouillon à revoir. Ordre tiré de [ROADMAP.md](../ROADMAP.md) et, pour la revue de plateforme, de l’ordre conseillé dans [revue-plateforme/00-AUDIT.md](revue-plateforme/00-AUDIT.md) (04 → 03 → 06 → 05 → 01 → 07 → 02 → 08 → 10 → 11 → 09). Seul ce qui n’est pas livré, ou ne l’est qu’en partie, est listé.
 
 | # | Spec / chantier | Ce qui reste | Taille | Source |
 |---|---|---|---|---|
 | 1 | Outillage et build sans machine ni admin | Outillage hors dépôt, `bootstrap`, `toolchain`, `doctor`, daemon et caches Gradle, base du lab hors dépôt, `@angular/build` | — | [ROADMAP.md](../ROADMAP.md) § Prochains 00 |
-| 2 | Verrouillage optimiste (manque n° 3) | `@Version`, réponse 409. La roadmap le place « tout de suite après 1 et 2 » | S | [ROADMAP.md](../ROADMAP.md) § Manques structurants |
-| 3 | 04 — Isoler l’héritage Sektor | Rien n’est fait : marquage `@deprecated` et garde-fou contre les nouveaux imports | S | [04-heritage-sektor.md](revue-plateforme/04-heritage-sektor.md) |
+| 2 | 04 — Isoler l’héritage Sektor | Rien n’est fait : marquage `@deprecated` et garde-fou contre les nouveaux imports | S | [04-heritage-sektor.md](revue-plateforme/04-heritage-sektor.md) |
 | 4 | 06 — Points d’accroche du record | Lots 2 (`guard`, `blocked`), 3 (`afterTransition`) et partie transitions du lot 4 | M | [06-points-accroche-record.md](revue-plateforme/06-points-accroche-record.md) |
 | 5 | 01 — Liste unique (reliquat) | Détail d’un webhook encore sur `nf-listing-flat` ; `AgentPermissionChecker` vérifie encore `administration.api-keys.write` ; critères d’acceptation non cochés | S | [01-liste-unique.md](revue-plateforme/01-liste-unique.md) |
 | 6 | 08 — Champs conditionnels et calculés | Tout : `visible`, `locked`, `requiredWhen`, type `computed`, `editableFields` | S | [08-champs-conditionnels.md](revue-plateforme/08-champs-conditionnels.md) |

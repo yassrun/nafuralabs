@@ -48,15 +48,24 @@ export interface PageRequest {
 }
 
 /**
- * What a business rule of the record answered, to show as is: the reason of a refusal (409 `RECORD_REFUSED`) or the
- * field errors (422, Bean Validation) with their labels. `null` for any other error.
+ * What a business rule of the record answered, to show as is: the reason of a refusal (409 `RECORD_REFUSED`),
+ * a stale optimistic lock (409 `OPTIMISTIC_LOCK`), or the field errors (422, Bean Validation) with their labels.
+ * `null` for any other error.
  */
 export function ruleRefusal(error: unknown, label: (field: string) => string = (field) => field): string | null {
   // An HttpErrorResponse, recognised by its shape: this file stays free of Angular (node tests import it).
   const body = (error as { error?: unknown } | null)?.error as { code?: string; message?: string; fieldErrors?: { field: string; message: string }[] } | null | undefined;
   if (body?.code === 'RECORD_REFUSED' && body.message) return body.message;
+  if (body?.code === 'OPTIMISTIC_LOCK' && body.message) return body.message;
   if (body?.fieldErrors?.length) return body.fieldErrors.map((fieldError) => `${label(fieldError.field)} : ${fieldError.message}`).join(' · ');
   return null;
+}
+
+/** True when the API refused a write because the client's {@code version} is stale or missing. */
+export function isOptimisticLock(error: unknown): boolean {
+  const body = (error as { error?: unknown; status?: number } | null)?.error as { code?: string } | null | undefined;
+  const status = (error as { status?: number } | null)?.status;
+  return status === 409 && body?.code === 'OPTIMISTIC_LOCK';
 }
 
 /** A tree view loads every row. Otherwise the server pages, unless `paging: 'client'`. */

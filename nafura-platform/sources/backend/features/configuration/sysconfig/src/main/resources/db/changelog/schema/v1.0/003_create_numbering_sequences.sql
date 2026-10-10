@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS numbering_sequences (
     created_by     UUID,
     updated_by     UUID,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_numbering_sequences_tenant ON numbering_sequences(tenant_id);

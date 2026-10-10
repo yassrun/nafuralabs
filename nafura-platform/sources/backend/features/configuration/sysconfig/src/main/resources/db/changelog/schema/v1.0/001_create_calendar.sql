@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS calendar (
     created_by     UUID,
     updated_by     UUID,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_calendar_tenant ON calendar(tenant_id);

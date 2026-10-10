@@ -50,7 +50,7 @@ class MultiTenancyHostTest {
 
         assertThat(seeder.seed(other)).isNotEmpty();
         assertThat(jdbc.queryForList("SELECT code FROM probe_group WHERE tenant_id = ? ORDER BY code", String.class, other))
-                .containsExactly("G1", "G2");
+                .containsExactly("CHILD", "G1", "G2");
 
         jdbc.update("UPDATE probe_group SET code = 'ONLY-OTHER' WHERE tenant_id = ? AND code = 'G1'", other);
         assertThat(jdbc.queryForObject(

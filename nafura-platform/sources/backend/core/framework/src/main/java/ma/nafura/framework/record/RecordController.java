@@ -30,6 +30,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.dao.OptimisticLockingFailureException;
+
 import ma.nafura.platform.authorization.security.authorization.RequirePermission;
 import ma.nafura.platform.authorization.security.authorization.SecuredResource;
 import ma.nafura.platform.framework.context.TenantContext;
@@ -47,7 +49,8 @@ import ma.nafura.platform.framework.service.crud.CrudAuditHook;
 public abstract class RecordController<E extends TenantEntity> extends ReadOnlyRecordController<E> {
 
     private static final Logger log = LoggerFactory.getLogger(RecordController.class);
-    private static final Set<String> MANAGED = Set.of("id", "tenantId", "createdAt", "updatedAt", "createdBy", "updatedBy", "status");
+    private static final Set<String> MANAGED = Set.of(
+            "id", "tenantId", "version", "createdAt", "updatedAt", "createdBy", "updatedBy", "status");
     private static final Set<String> ENDPOINTS = Set.of(
             "create", "update", "delete", "lifecycle", "transitions", "fire");
 
@@ -231,6 +234,7 @@ public abstract class RecordController<E extends TenantEntity> extends ReadOnlyR
     @Transactional
     public ResponseEntity<E> create(@Valid @RequestBody E body) {
         body.setId(null);
+        body.setVersion(null);
         body.setTenantId(TenantContext.getTenantId());
         if (body instanceof HasStatus record) {
             record.setStatus(lifecycle != null ? lifecycle.initial() : record.getStatus());
@@ -245,12 +249,17 @@ public abstract class RecordController<E extends TenantEntity> extends ReadOnlyR
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    /** Replaces the editable fields; id, tenant, audit fields, status and {@link #readOnlyFields} stay. */
+    /**
+     * Replaces the editable fields; id, tenant, version, audit fields, status and {@link #readOnlyFields} stay.
+     * The body must echo the {@code version} last read; a stale or missing version yields HTTP 409
+     * {@code OPTIMISTIC_LOCK}.
+     */
     @PutMapping("/{id}")
     @Transactional
     public E update(@PathVariable UUID id, @Valid @RequestBody E body) {
         E record = require(id, permission("update"));
         requireEditable(record);
+        requireCurrentVersion(record, body);
         E previous = copy(record);
         CrudAuditHook hook = auditHook.getIfAvailable();
         Map<String, Object> before = hook != null ? hook.beforeUpdate(record) : Map.of();
@@ -264,6 +273,16 @@ public abstract class RecordController<E extends TenantEntity> extends ReadOnlyR
         }
         afterSave(saved, previous);
         return saved;
+    }
+
+    /** Client must send the version from its last GET; mismatch or absence → 409 before any write. */
+    private void requireCurrentVersion(E record, E body) {
+        Long expected = body.getVersion();
+        Long current = record.getVersion();
+        if (expected == null || current == null || !expected.equals(current)) {
+            throw new OptimisticLockingFailureException(
+                    "The record was modified by someone else. Reload before saving again.");
+        }
     }
 
     @DeleteMapping("/{id}")

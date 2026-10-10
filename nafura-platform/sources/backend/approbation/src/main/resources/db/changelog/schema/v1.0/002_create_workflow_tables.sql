@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS workflow_templates (
     description TEXT,
     is_active   BOOLEAN,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_workflow_templates_tenant ON workflow_templates(tenant_id);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_workflow_templates_tenant_code ON workflow_templates(tenant_id, code);

@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS demo_category (
     created_by   UUID,
     updated_by   UUID,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_demo_category_tenant ON demo_category(tenant_id);
 
@@ -36,7 +37,8 @@ CREATE TABLE IF NOT EXISTS demo_supplier (
     created_by     UUID,
     updated_by     UUID,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_demo_supplier_tenant ON demo_supplier(tenant_id);
 
@@ -52,7 +54,8 @@ CREATE TABLE IF NOT EXISTS demo_supplier_contact (
     created_by   UUID,
     updated_by   UUID,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_demo_supplier_contact_supplier ON demo_supplier_contact(supplier_id);
 
@@ -69,7 +72,8 @@ CREATE TABLE IF NOT EXISTS demo_item (
     created_by   UUID,
     updated_by   UUID,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_demo_item_tenant ON demo_item(tenant_id);
 
@@ -87,7 +91,8 @@ CREATE TABLE IF NOT EXISTS demo_purchase_request (
     created_by         UUID,
     updated_by         UUID,
     created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_demo_purchase_request_tenant ON demo_purchase_request(tenant_id);
 
@@ -109,6 +114,7 @@ CREATE TABLE IF NOT EXISTS demo_project (
     created_by      UUID,
     updated_by      UUID,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_demo_project_tenant ON demo_project(tenant_id);

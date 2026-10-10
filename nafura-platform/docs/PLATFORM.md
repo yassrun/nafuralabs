@@ -23,7 +23,7 @@ Les deux sont validés au build (web) et lus au démarrage (backend). Pas de sec
 
 ## Données et API : le record
 
-Une entité métier = `extends TenantEntity` (id, organisation, audit) + Bean Validation. Son API REST :
+Une entité métier = `extends TenantEntity` (id, organisation, audit, **`version`**) + Bean Validation. Son API REST :
 
 ```java
 @RestController
@@ -33,6 +33,17 @@ class SupplierController extends RecordController<Supplier> { … }
 ```
 
 `RecordController` donne : liste paginée (`page` à partir de 0, `size` plafonné à 500 et renvoyé tel qu’appliqué), triée (`sort=champ:asc` répétable : `sort=neededBy:asc&sort=amount:desc` — deux-points, pas de virgule : Spring découperait `champ,asc` en deux valeurs ; propriété `sortable`), recherchée (`q`) et filtrée (`filter`, grammaire ci-dessous), `/options` pour les listes de choix, `/properties`, `/aggregate`, lecture, création, modification, suppression. Permissions : `<domain>.<feature>.<resource>.{read,create,update,delete}` selon la méthode HTTP. Champs dérivés en lecture : `@Formula`.
+
+### Verrouillage optimiste
+
+`PlatformEntity` porte un `@Version Long version` (colonne `version`). Le JSON d’un record l’expose en lecture ; le client **doit** le renvoyer tel quel sur `PUT /{id}`.
+
+| Cas | Réponse |
+|---|---|
+| `version` absente ou différente de celle en base | **409** `OPTIMISTIC_LOCK` (message clair ; pas un 500 Hibernate) |
+| `version` à jour | **200**, `version` incrémentée |
+
+Champs gérés (jamais écrasés par le corps) : `id`, `tenantId`, `version`, `createdAt`, `updatedAt`, `createdBy`, `updatedBy`, `status`. La fiche (`nf-record-page`) renvoie `version` avec le reste du record ; en 409 `OPTIMISTIC_LOCK` elle affiche le message et propose de recharger. Preuve : host-test `OptimisticLockHostTest`.
 
 Liste en lecture seule (journal d’audit, tâches planifiées — [spec 01](../specs/revue-plateforme/01-liste-unique.md) lot 0) : `ReadOnlyRecordController<E extends TenantEntity>` dans `core/framework/record` expose la liste, `/options`, `/properties` et `/aggregate` (et `GET /{id}`) à partir d’un `RecordRepository`, sans create/update/delete. Le descripteur `records/<record>.json` reste le même. `RecordController` en hérite et ajoute l’écriture et le cycle de vie.
 

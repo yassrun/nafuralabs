@@ -129,8 +129,11 @@ class PermissionEnforcementHostTest {
 
         assertThat(created).doesNotContain("s3cret");
         assertThat(sendForBody(admin, "POST", path + "/test", null)).contains("\"success\":false");
+        Matcher version = Pattern.compile("\"version\"\\s*:\\s*(\\d+)").matcher(created);
+        assertThat(version.find()).as(created).isTrue();
         assertThat(send(admin, "PUT", path,
-                "{\"name\":\"probe\",\"url\":\"http://127.0.0.1:9/hook\",\"secret\":\"\",\"events\":[\"ENTITY_UPDATED\"],\"active\":false}"))
+                "{\"name\":\"probe\",\"url\":\"http://127.0.0.1:9/hook\",\"secret\":\"\",\"events\":[\"ENTITY_UPDATED\"],\"active\":false,\"version\":"
+                        + version.group(1) + "}"))
                 .as("a blank secret on update keeps the current one").isEqualTo(200);
         assertThat(send(admin, "DELETE", path, null)).isEqualTo(204);
     }

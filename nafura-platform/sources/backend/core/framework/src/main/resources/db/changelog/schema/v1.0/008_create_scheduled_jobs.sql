@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS scheduled_jobs (
     updated_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
     created_by        UUID,
     updated_by        UUID,
-    CONSTRAINT uq_scheduled_jobs_key UNIQUE (job_key)
+    CONSTRAINT uq_scheduled_jobs_key UNIQUE (job_key),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_scheduled_jobs_tenant ON scheduled_jobs(tenant_id);

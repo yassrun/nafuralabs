@@ -1879,6 +1879,8 @@
     "leave": "Quitter",
     "requiredFields": "À compléter d’abord : {fields}.",
     "conflict": "Action impossible dans le statut actuel.",
+    "optimisticLock": "L’enregistrement a été modifié ailleurs. Rechargez avant d’enregistrer.",
+    "reload": "Recharger",
     "extracted": "Valeur lue dans le document.",
     "checkExtracted": "À vérifier (lecture peu sûre).",
     "extractedDone": "Champs proposés à partir du document.",

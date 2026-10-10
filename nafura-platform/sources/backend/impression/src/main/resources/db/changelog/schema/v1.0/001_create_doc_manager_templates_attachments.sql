@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS document_templates (
     margins_css   VARCHAR(80),
     metadata      TEXT,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_document_templates_tenant ON document_templates(tenant_id);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_document_templates_tenant_code ON document_templates(tenant_id, code);

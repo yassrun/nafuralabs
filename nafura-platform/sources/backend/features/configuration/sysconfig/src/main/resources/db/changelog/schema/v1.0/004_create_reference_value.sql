@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS reference_value (
     created_by     UUID,
     updated_by     UUID,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_reference_value_tenant ON reference_value(tenant_id);

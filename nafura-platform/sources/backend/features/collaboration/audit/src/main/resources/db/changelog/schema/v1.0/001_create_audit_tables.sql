@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS audit_events (
     details     TEXT,
     payload     JSONB,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    version      BIGINT NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_audit_events_tenant_entity ON audit_events(tenant_id, entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_audit_events_event_at ON audit_events(event_at);
