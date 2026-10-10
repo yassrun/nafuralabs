@@ -59,9 +59,11 @@ Suppression des classes marquées, de `ErpDomainNotificationListener` et des exc
 
 ## Critères d'acceptation
 
-- [ ] Toutes les classes du tableau portent `@deprecated` avec leur remplaçant.
-- [ ] Le garde-fou refuse un nouvel import, avec un message explicite.
-- [ ] Sektor compile sans changement.
+- [x] Toutes les classes du tableau portent `@deprecated` avec leur remplaçant. *(lots 1–2)*
+- [x] Le garde-fou refuse un nouvel import, avec un message explicite. *(lots 1–2 : `sektor-heritage.test.mjs` + `SektorHeritageHostTest`)*
+- [x] Sektor compile sans changement. *(hors périmètre du garde-fou plateforme ; pas de modification Sektor)*
+
+Lot 3 (suppression) : non livré — après ROADMAP 7.
 
 ## Documentation
 
