@@ -12,6 +12,9 @@
   "scope": { "of": "probe.group", "field": "groupId" },
   "initial": "DRAFT",
   "editable": ["DRAFT"],
+  "editableFields": {
+    "SUBMITTED": ["amount"]
+  },
   "states": [
     { "id": "DRAFT", "label": "Draft" },
     { "id": "SUBMITTED", "label": "Submitted" },
