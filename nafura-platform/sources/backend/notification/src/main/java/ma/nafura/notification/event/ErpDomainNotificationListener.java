@@ -15,6 +15,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
+/**
+ * Écoute {@link ErpEntityTransitionEvent} (adressage par rôle).
+ *
+ * @deprecated Héritage Sektor — supprimé avec sektor-sur-host. Utiliser {@code notify} du cycle de vie JSON.
+ */
+@Deprecated(forRemoval = true)
 @Component
 @RequiredArgsConstructor
 public class ErpDomainNotificationListener {

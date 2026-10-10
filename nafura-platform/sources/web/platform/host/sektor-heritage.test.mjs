@@ -15,11 +15,19 @@ const repo = fileURLToPath(new URL('../../../../../', import.meta.url));
 const web = join(repo, 'nafura-platform/sources/web');
 const SKIP = new Set(['node_modules', 'dist', 'build', '.angular', '.gradle']);
 
-/** Écrans encore sur ConfigDrivenListingPage — retirés au fur et à mesure (specs 01). Audit / jobs = lot 6. */
-const LISTING_ALLOW = new Set([]);
+/**
+ * Allowlist explicite (chemins relatifs à `sources/web`, ou `product/bcs/...` pour un BC).
+ * Même mécanisme que l’ancienne tolérance `LegacyListingPageComponent` : retirer une entrée
+ * dès que l’écran est migré (specs 01 / 02). Vide = plus d’exception plateforme.
+ */
+const LISTING_ALLOW = new Set([
+  // ex. 'platform/administration/members/members-listing.page.ts'
+]);
 
-/** Écrans encore sur ConfigDrivenDetailPage — retirés au fur et à mesure (spec 02). */
-const DETAIL_ALLOW = new Set([]);
+/** Idem pour ConfigDrivenDetailPage (spec 02). */
+const DETAIL_ALLOW = new Set([
+  // ex. 'platform/…/xxx-detail.page.ts'
+]);
 
 const RULES = [
   {
